@@ -40,6 +40,13 @@ describe('LessonMeta', () => {
 	});
 });
 
+describe('LessonMeta.say', () => {
+	it('accepts an optional pronunciation map', () =>
+		expect(LessonMeta.safeParse({ ...validLesson, say: { HTML: 'эйч-ти-эм-эль' } }).success).toBe(true));
+	it('refuses an empty pronunciation', () =>
+		expect(LessonMeta.safeParse({ ...validLesson, say: { HTML: '' } }).success).toBe(false));
+});
+
 describe('Curriculum', () => {
 	it('accepts parts and concepts', () =>
 		expect(

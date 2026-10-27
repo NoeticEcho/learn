@@ -138,7 +138,9 @@ export const LessonMeta = z
 		cards: z.array(Card).min(3).max(6),
 		sources: z.array(Source).min(2),
 		videos: z.array(Source.extend({ kind: z.literal('video') })),
-		guide: GuideLines
+		guide: GuideLines,
+		/** A pronunciation map for later narration (spec §4.9): written form → how to say it. */
+		say: z.record(z.string().min(1), text).optional()
 	})
 	.superRefine((l, ctx) => {
 		const ids = l.cards.map((c) => c.id);
