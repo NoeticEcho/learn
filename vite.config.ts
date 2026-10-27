@@ -16,7 +16,9 @@ export default defineConfig({
 			preprocess: [mdsvex({ extensions: ['.svx'] })],
 			adapter: adapter({ pages: 'build', assets: 'build', fallback: '404.html', strict: true }),
 			paths: { base: (process.env.BASE_PATH ?? '/learn') as '' | `/${string}` },
-			prerender: { handleHttpError: 'fail' }
+			prerender: { handleHttpError: 'fail' },
+			// The CSS goes into the page: one round trip less before first paint on a slow phone.
+			inlineStyleThreshold: 100_000
 		}),
 		svelteTesting()
 	],

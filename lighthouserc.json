@@ -1,0 +1,47 @@
+{
+	"ci": {
+		"collect": {
+			"startServerCommand": "npx vite preview --port 4174 --strictPort",
+			"startServerReadyPattern": "4174",
+			"url": [
+				"http://localhost:4174/learn/",
+				"http://localhost:4174/learn/map/",
+				"http://localhost:4174/learn/lesson/02-html/01-first-page/"
+			],
+			"numberOfRuns": 1,
+			"settings": {
+				"onlyCategories": [
+					"performance",
+					"accessibility"
+				],
+				"chromeFlags": "--no-sandbox --headless=new"
+			}
+		},
+		"assert": {
+			"assertions": {
+				"largest-contentful-paint": [
+					"warn",
+					{
+						"maxNumericValue": 2500
+					}
+				],
+				"categories:accessibility": [
+					"error",
+					{
+						"minScore": 0.95
+					}
+				],
+				"categories:performance": [
+					"error",
+					{
+						"minScore": 0.9
+					}
+				]
+			}
+		},
+		"upload": {
+			"target": "filesystem",
+			"outputDir": ".lighthouseci"
+		}
+	}
+}

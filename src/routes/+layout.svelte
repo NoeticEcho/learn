@@ -5,6 +5,13 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '../../design/mascot/echo-mark.svg';
+	// The two faces the first screen sets, fetched alongside the page rather than after the CSS:
+	// Russian text needs both subsets (Cyrillic letters; Latin digits, spaces and punctuation).
+	import serifCyr from '../../design/fonts/literata-400-cyrillic.woff2';
+	import serifLat from '../../design/fonts/literata-400-latin.woff2';
+	import sansCyr from '../../design/fonts/ibm-plex-sans-400-cyrillic.woff2';
+	import sansLat from '../../design/fonts/ibm-plex-sans-400-latin.woff2';
+	const preload = [serifCyr, serifLat, sansCyr, sansLat];
 	import { page } from '$app/state';
 	import { t } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
@@ -24,6 +31,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} type="image/svg+xml" />
+	{#each preload as href (href)}<link rel="preload" {href} as="font" type="font/woff2" crossorigin="anonymous" />{/each}
 </svelte:head>
 
 <a class="skip" href="#main">{t('nav.skip')}</a>

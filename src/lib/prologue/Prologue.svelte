@@ -13,14 +13,6 @@
 	import { t } from '#lib/i18n/index.ts';
 	import { SEQUENCE, RING_ERA, type EraId } from './sequence.ts';
 	import type { FrameBrief, FrameProps } from './types.ts';
-	import Era1991 from './eras/1991.svelte';
-	import Era1996 from './eras/1996.svelte';
-	import Era2000 from './eras/2000.svelte';
-	import Era2005 from './eras/2005.svelte';
-	import Era2014 from './eras/2014.svelte';
-	import Era2025 from './eras/2025.svelte';
-	import EraIskin from './eras/iskin.svelte';
-	import Echo from '#lib/guide/Echo.svelte';
 
 	export type Answers = { who: string; forWhom: string; action: string };
 	type Props = {
@@ -35,15 +27,8 @@
 	};
 	let { example, initial = {}, onsave, startHref, skipHref, onskip }: Props = $props();
 
-	const FRAMES: Record<EraId, Component<FrameProps>> = {
-		'1991': Era1991,
-		'1996': Era1996,
-		'2000': Era2000,
-		'2005': Era2005,
-		'2014': Era2014,
-		'2025': Era2025,
-		iskin: EraIskin
-	};
+	// Loaded on «Собрать мой сайт» (frames.ts), so the question screen ships without them.
+	let frames = $state.raw<typeof import('./frames.ts') | null>(null);
 
 	const uid = $props.id();
 	let phase = $state<'ask' | 'play' | 'end'>('ask');
@@ -58,7 +43,7 @@
 
 	let brief = $state<FrameBrief>({ title: '', forWhom: '', action: '' });
 	const era = $derived(SEQUENCE[index]?.era ?? 'iskin');
-	const Frame = $derived(FRAMES[era]);
+	const Frame = $derived<Component<FrameProps> | null>(frames ? frames.FRAMES[era as EraId] : null);
 
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let startedAt = 0;
@@ -79,7 +64,7 @@
 			action: action.trim() || example.action
 		};
 		brief = { title: a.who, forWhom: a.forWhom, action: a.action };
-		await onsave?.(a);
+		[frames] = await Promise.all([import('./frames.ts'), onsave?.(a)]);
 		still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 		index = 0;
 		phase = 'play';
@@ -205,7 +190,7 @@
 				onfocusout={() => hold(false)}
 			>
 				{#key era}
-					<div class="frame"><Frame {brief} {still} /></div>
+					<div class="frame">{#if Frame}<Frame {brief} {still} />{/if}</div>
 				{/key}
 				<figcaption class="visually-hidden">{t(`era.${era}.caption`)}</figcaption>
 			</figure>
@@ -224,7 +209,7 @@
 			</div>
 		{:else}
 			<div class="end">
-				<Echo mood="cheer" era={RING_ERA.iskin} size={96} />
+				{#if frames}<frames.Echo mood="cheer" era={RING_ERA.iskin} size={96} />{/if}
 				<h2>{t('prologue.end')}</h2>
 				<p class="lede">{t('prologue.end.lede')}</p>
 				<div class="actions">
