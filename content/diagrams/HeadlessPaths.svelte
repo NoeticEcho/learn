@@ -1,5 +1,5 @@
 <!--
-	«Где живёт headless-CMS» (part 8, lesson 6). Three columns: content as files in Git (Decap),
+	«Где живёт headless CMS» (part 8, lesson 6). Three columns: content as files in Git (Decap),
 	a database on your own server (Strapi, Directus), a cloud service (Sanity, Contentful). The
 	person picks one and presses «Редактор сохраняет правку»; the path of the change (editor, store,
 	API or build, site) lights up step by step, with what each choice means for the data and the
