@@ -55,3 +55,36 @@ gates step aside.
   provenance. A fix that belongs there (the rule's contrast as a field edge) was made as an app
   token beside them, not as an edit to the copy.
 - **Paper's Эхо** reads lighter than Ink's. The mascot is approved as drawn.
+
+## Fonts (27.10.2026)
+
+Martin: «шрифты лучше интегрируй в движок, а не скачивай с гугл шрифтов». They already were: the
+three families are upstream's woff2 files in `design/fonts/`, imported through `design/tokens.css`,
+emitted by Vite into `_app/immutable/` under content hashes and precached by the service worker,
+and the live site was checked to make no request to Google. What changed is what was shipped
+beyond what the course uses.
+
+- **Families and faces.** Literata 400, 500 and 400 italic (titles, quotes, `<em>`), IBM Plex Sans
+  400, 500, 600 (UI, body), JetBrains Mono 400, 500 (code). A crawl of all 70 pages at 1280 and
+  375 found every one of them in use. The files are variable fonts, so 400 and 500 (and 600) are
+  byte-identical and Vite emits one file for them: weights cost nothing to keep.
+- **Subsets.** Latin (digits, « » — … ), Cyrillic (ё, №) and Latin Extended (₽, ō) are used; Greek,
+  Greek Extended, Vietnamese and Cyrillic Extended are not, and are no longer copied
+  (`scripts/sync-tokens.sh`, `SUBSETS`). `unicode-range` already kept a page from fetching them,
+  but the build emitted 24 font files and the service worker precached all of them: 430 KB, now 12
+  files and 301 KB. `tests/unit/fonts.test.ts` fails when content uses a letter outside the kept
+  subsets.
+- **No data: fonts.** Vite inlined the three smallest faces (under 4 KB) as base64 into the CSS,
+  and the CSS is inlined into every page: 17 KB of every HTML file, 7 KB gzipped, paid on every
+  page instead of cached once. `build.assetsInlineLimit` now never inlines a `.woff2`.
+- **CSP.** `font-src 'self'` (was `'self' data:`); `style-src` and `connect-src` never named Google.
+  A practice preview inherits the policy, so a person's `@font-face` there now falls back to the
+  system faces, data: ones included; the preview's own policy (`sandbox.ts`) is unchanged.
+- **Preload.** Unchanged: the four faces of the first screen (Literata and Plex Sans 400,
+  Cyrillic and Latin), `font-display: swap` everywhere.
+- **Measured** (Lighthouse, 3 runs each, the same static server on a private port for both
+  builds): home LCP 2552 → 2403 ms, HTML 18.9 → 11.6 KB transferred; the lesson 02-html/01 LCP
+  3001 → 2854 ms (median; its runs land on 2854 or 3002 either way), HTML 41.8 → 34.4 KB. Font bytes a visit transfers are unchanged (136 KB home, 177 KB that
+  lesson). Screenshots of home and two lessons at 1280 and 375 are pixel-identical before and
+  after. `tests/e2e/fonts.spec.ts` checks the build names no Google host and inlines no font, and
+  that the faces are same-origin and come back offline.

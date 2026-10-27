@@ -22,6 +22,12 @@ export default defineConfig({
 		}),
 		svelteTesting()
 	],
+	build: {
+		// A font is always a file of its own, never a data: URI inside the CSS: the CSS is inlined
+		// into every page, so an inlined face would be paid for on every page instead of cached
+		// once, and the CSP allows fonts from 'self' only (docs/design-notes.md, Fonts).
+		assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined)
+	},
 	test: {
 		include: ['tests/unit/**/*.test.ts'],
 		environment: 'node',

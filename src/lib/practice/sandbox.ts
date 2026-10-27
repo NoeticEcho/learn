@@ -6,7 +6,9 @@
  * runs in an opaque origin: it cannot read the app, its storage or the person's key. The CSP
  * comes first in <head>, before anything the person wrote, so even an <img> they put at the top
  * cannot reach the network. The app's own CSP (app.html) also applies here, because a srcdoc
- * document inherits it; its frame-src keeps the frame from navigating away to another site.
+ * document inherits it; its frame-src keeps the frame from navigating away to another site, and
+ * its font-src 'self' means the preview sets no web font at all, a data: one included: a
+ * person's @font-face falls back to the system's faces, as an offline page would.
  *
  * Every element this file adds (the CSP, the error reporter, the person's styles.css and
  * script.js, the check runner) carries `data-learn-sandbox`, and the checks skip such elements:
