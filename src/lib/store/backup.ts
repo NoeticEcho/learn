@@ -5,7 +5,7 @@
  * and an import that carries none keeps the key this browser already has.
  */
 import { z } from 'zod';
-import { SCHEMA_VERSION, STORES, type Db, type StoreName } from './db.ts';
+import { SCHEMA_VERSION, STORES, upgradePracticeKey, type Db, type StoreName } from './db.ts';
 
 export const OWN_KEY = 'ownKey';
 
@@ -54,6 +54,9 @@ function parse(data: unknown): Backup {
 		throw new Error('import: this file is not a backup of this textbook');
 	const r = Backup.safeParse(data);
 	if (!r.success) throw new Error(`import: the backup is damaged (${r.error.issues[0]?.message ?? 'invalid'})`);
+	// An older file is brought up to this schema as the database itself was (db.ts MIGRATIONS).
+	if (r.data.schema < 2 && r.data.stores.practice)
+		r.data.stores.practice = r.data.stores.practice.map(([k, v]) => [upgradePracticeKey(String(k)), v]);
 	return r.data;
 }
 

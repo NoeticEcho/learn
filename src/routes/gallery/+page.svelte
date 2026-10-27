@@ -6,6 +6,9 @@
 	import { onMount } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
 	import { buildSrcdoc } from '#lib/practice/sandbox.ts';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
 
 	const ERAS = [1, 2, 3, 4, 5, 6, 7, 8];
 	let sites = $state<Record<number, Record<string, string>>>({});
@@ -13,7 +16,7 @@
 
 	onMount(async () => {
 		const { db, progress, persona } = await import('#lib/learner.ts');
-		sites = await progress.sites(await db());
+		sites = await progress.eraSites(await db(), data.steps);
 		title = (await persona()).name;
 	});
 

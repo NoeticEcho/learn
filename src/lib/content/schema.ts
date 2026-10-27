@@ -106,7 +106,12 @@ export const PracticeStep = z.object({
 	files: PracticeFiles,
 	solution: PracticeFiles,
 	checks: z.array(Check).min(1),
-	era: Era
+	era: Era,
+	/**
+	 * The id of an earlier step of the same era whose saved work this step starts from, while it
+	 * has none of its own. Without it a step starts from its own starter. Checked by the loader.
+	 */
+	continues: z.string().regex(/^[a-z0-9-]+$/).optional()
 });
 export type PracticeStep = z.infer<typeof PracticeStep>;
 

@@ -18,12 +18,13 @@ const step = {
 	checks: [{ id: 'h1', kind: 'exists', selector: 'h1' }]
 };
 
-function memoryStore() {
+function memoryStore(legacy: Record<string, string> = {}) {
 	const saved = new Map<string, string>();
 	return {
 		saved,
-		load: vi.fn(async (era: number, file: string) => saved.get(`${era}:${file}`)),
-		save: vi.fn(async (era: number, file: string, text: string) => void saved.set(`${era}:${file}`, text))
+		load: vi.fn(async (stepId: string, file: string) => saved.get(`${stepId}:${file}`)),
+		save: vi.fn(async (stepId: string, file: string, text: string) => void saved.set(`${stepId}:${file}`, text)),
+		legacy: vi.fn(async (_era: number) => (Object.keys(legacy).length ? legacy : undefined))
 	};
 }
 
@@ -44,8 +45,7 @@ vi.mock('../../src/lib/practice/codemirror.ts', () => ({
 beforeEach(() => vi.useFakeTimers({ shouldAdvanceTime: true }));
 afterEach(() => vi.useRealTimers());
 
-async function mounted() {
-	const store = memoryStore();
+async function mounted(store = memoryStore()) {
 	const r = render(Practice, { step: step as never, store });
 	await vi.waitFor(() => expect(store.load).toHaveBeenCalledTimes(2));
 	await vi.waitFor(() => expect((screen.getByRole('textbox') as HTMLTextAreaElement).value).toBe('<p>a</p>'));
@@ -57,7 +57,7 @@ it('an edit made just before leaving the lesson is saved', async () => {
 	await fireEvent.input(screen.getByRole('textbox'), { target: { value: '<h1>a</h1>' } });
 	unmount();
 	await vi.runAllTimersAsync();
-	expect(store.saved.get('1:index.html')).toBe('<h1>a</h1>');
+	expect(store.saved.get('two-files:index.html')).toBe('<h1>a</h1>');
 });
 
 it('editing a second file does not drop the first file’s pending save', async () => {
@@ -66,8 +66,8 @@ it('editing a second file does not drop the first file’s pending save', async 
 	await fireEvent.click(screen.getByRole('tab', { name: 'styles.css' }));
 	await fireEvent.input(screen.getByRole('textbox'), { target: { value: 'h1 { color: red }' } });
 	await vi.runAllTimersAsync();
-	expect(store.saved.get('1:index.html')).toBe('<h1>a</h1>');
-	expect(store.saved.get('1:styles.css')).toBe('h1 { color: red }');
+	expect(store.saved.get('two-files:index.html')).toBe('<h1>a</h1>');
+	expect(store.saved.get('two-files:styles.css')).toBe('h1 { color: red }');
 });
 
 it('«Сбросить» is not undone by a save still pending from before it', async () => {
@@ -76,16 +76,63 @@ it('«Сбросить» is not undone by a save still pending from before it', 
 	await fireEvent.click(screen.getByRole('button', { name: 'Сбросить' }));
 	await fireEvent.click(screen.getByRole('button', { name: 'Да, сбросить' }));
 	await vi.runAllTimersAsync();
-	expect(store.saved.get('1:index.html')).toBe('<p>a</p>');
+	expect(store.saved.get('two-files:index.html')).toBe('<p>a</p>');
 });
 
-it('«Сбросить» asks first, because the era’s site is the person’s work across lessons', async () => {
+it('«Сбросить» asks first, because it erases the person’s work on this step', async () => {
 	const { store } = await mounted();
 	await fireEvent.input(screen.getByRole('textbox'), { target: { value: '<h1>mine</h1>' } });
 	await vi.runAllTimersAsync();
 	await fireEvent.click(screen.getByRole('button', { name: 'Сбросить' }));
 	await fireEvent.click(screen.getByRole('button', { name: 'Отмена' }));
 	await vi.runAllTimersAsync();
-	expect(store.saved.get('1:index.html')).toBe('<h1>mine</h1>');
+	expect(store.saved.get('two-files:index.html')).toBe('<h1>mine</h1>');
 	expect((screen.getByRole('textbox') as HTMLTextAreaElement).value).toBe('<h1>mine</h1>');
+});
+
+const textbox = () => screen.getByRole('textbox') as HTMLTextAreaElement;
+
+it('a step starts from its own starter, not from another step of the same era', async () => {
+	const store = memoryStore();
+	store.saved.set('earlier-step:index.html', '<h1>другой урок</h1>');
+	await mounted(store);
+	expect(textbox().value).toBe('<p>a</p>');
+	expect(store.load).toHaveBeenCalledWith('two-files', 'index.html');
+});
+
+it('continues: a step with no work of its own starts from the step it continues', async () => {
+	const store = memoryStore();
+	store.saved.set('earlier:index.html', '<h1>моя страница</h1>');
+	render(Practice, { step: { ...step, continues: 'earlier' } as never, store });
+	await vi.waitFor(() => expect(textbox().value).toBe('<h1>моя страница</h1>'));
+	// the earlier step's other file is not there, so this step's own starter fills it
+	await fireEvent.click(screen.getByRole('tab', { name: 'styles.css' }));
+	expect(textbox().value).toBe('p {}');
+});
+
+it('continues: the step’s own work, once there, wins over the step it continues', async () => {
+	const store = memoryStore();
+	store.saved.set('earlier:index.html', '<h1>моя страница</h1>');
+	store.saved.set('two-files:index.html', '<h1>правка</h1>');
+	render(Practice, { step: { ...step, continues: 'earlier' } as never, store });
+	await vi.waitFor(() => expect(textbox().value).toBe('<h1>правка</h1>'));
+});
+
+it('the era’s page from the previous version is offered, not imposed, and kept', async () => {
+	const store = memoryStore({ 'index.html': '<h1>старая страница</h1>' });
+	await mounted(store);
+	expect(textbox().value).toBe('<p>a</p>');
+	await fireEvent.click(screen.getByRole('button', { name: /прошлой версии/ }));
+	await vi.waitFor(() => expect(textbox().value).toBe('<h1>старая страница</h1>'));
+	await vi.runAllTimersAsync();
+	expect(store.saved.get('two-files:index.html')).toBe('<h1>старая страница</h1>');
+	expect(screen.queryByRole('button', { name: /прошлой версии/ })).toBeNull();
+});
+
+it('a step with work of its own does not offer the old page', async () => {
+	const store = memoryStore({ 'index.html': '<h1>старая</h1>' });
+	store.saved.set('two-files:index.html', '<h1>моя</h1>');
+	render(Practice, { step: step as never, store });
+	await vi.waitFor(() => expect(textbox().value).toBe('<h1>моя</h1>'));
+	expect(screen.queryByRole('button', { name: /прошлой версии/ })).toBeNull();
 });

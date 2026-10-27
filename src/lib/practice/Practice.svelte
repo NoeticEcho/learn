@@ -14,9 +14,15 @@
 	import Editor from './Editor.svelte';
 
 	type Files = Partial<PracticeFiles> & { 'index.html': string };
+	/**
+	 * The person's files, keyed by the step's id: each step keeps its own page, so a lesson never
+	 * replaces another lesson's starter. `legacy` is the era's page from before step keys (schema 1),
+	 * which a step with no work of its own offers and never imposes.
+	 */
 	type Store = {
-		load: (era: number, file: FileName) => Promise<string | undefined>;
-		save: (era: number, file: FileName, text: string) => Promise<void>;
+		load: (stepId: string, file: FileName) => Promise<string | undefined>;
+		save: (stepId: string, file: FileName, text: string) => Promise<void>;
+		legacy?: (era: number) => Promise<Partial<Record<FileName, string>> | undefined>;
 	};
 	type Props = {
 		step: PracticeStep;
@@ -44,8 +50,10 @@
 	let results = $state<CheckResult[] | null>(null);
 	let error = $state('');
 	let asking = $state(false);
-	/** «Сбросить» asks first: the era's files are the person's site across all its lessons. */
+	/** «Сбросить» asks first: it replaces the person's work on this step with the starter. */
 	let resetting = $state(false);
+	/** The era's page from the previous version, while this step has no work of its own. */
+	let older = $state.raw<Partial<Record<FileName, string>> | null>(null);
 	let showing = $state(false);
 	let frame: HTMLIFrameElement;
 
@@ -57,7 +65,7 @@
 	function flush() {
 		for (const [file, { timer, text }] of pending) {
 			clearTimeout(timer);
-			store?.save(step.era, file, text);
+			store?.save(step.id, file, text);
 		}
 		pending.clear();
 	}
@@ -75,22 +83,36 @@
 
 	function edit(file: FileName, text: string) {
 		files[file] = text;
+		older = null;
 		render();
 		clearTimeout(pending.get(file)?.timer);
 		const timer = setTimeout(() => {
 			pending.delete(file);
-			store?.save(step.era, file, text);
+			store?.save(step.id, file, text);
 		}, 400);
 		pending.set(file, { timer, text });
 	}
 
-	function reset() {
-		resetting = false;
+	/** Replaces every file at once and saves it now: «Сбросить», or the era's older page. */
+	function replaceAll(next: Files) {
 		for (const { timer } of pending.values()) clearTimeout(timer);
 		pending.clear();
-		files = starter();
-		for (const f of names) store?.save(step.era, f, files[f] ?? '');
+		files = next;
+		for (const f of names) store?.save(step.id, f, files[f] ?? '');
 		render(true);
+	}
+
+	function reset() {
+		resetting = false;
+		replaceAll(starter());
+	}
+
+	function useOlder() {
+		if (!older) return;
+		const next = { ...$state.snapshot(files) };
+		for (const f of names) if (older[f] !== undefined) next[f] = older[f]!;
+		older = null;
+		replaceAll(next);
 	}
 
 	onMount(() => {
@@ -106,13 +128,21 @@
 		addEventListener('pagehide', flush);
 		(async () => {
 			const loaded = starter();
+			let own = false;
 			if (store)
 				for (const f of names) {
-					const saved = await store.load(step.era, f);
-					if (saved !== undefined) loaded[f] = saved;
+					const saved = await store.load(step.id, f);
+					// a step that continues an earlier one starts from the person's work there
+					const carried = saved === undefined && step.continues ? await store.load(step.continues, f) : undefined;
+					if (saved !== undefined) own = true;
+					if ((saved ?? carried) !== undefined) loaded[f] = (saved ?? carried)!;
 				}
 			files = loaded;
 			render(true);
+			if (!own && store?.legacy) {
+				const old = await store.legacy(step.era);
+				if (old && names.some((f) => old[f] !== undefined)) older = old;
+			}
 		})();
 		return () => {
 			removeEventListener('message', onMessage);
@@ -172,6 +202,9 @@
 					</span>
 				{:else}
 					<button type="button" class="secondary" onclick={() => ((resetting = true), (asking = false))}>{t('practice.reset')}</button>
+				{/if}
+				{#if older}
+					<button type="button" class="quiet" onclick={useOlder}>{t('practice.older')}</button>
 				{/if}
 				{#if showing}
 					<button type="button" class="quiet" onclick={() => (showing = false)}>{t('practice.solution.hide')}</button>

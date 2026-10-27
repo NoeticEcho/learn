@@ -112,3 +112,20 @@ test('a video loads nothing before the click', async ({ page }) => {
 	expect(video).toEqual([]);
 	await expect(page.locator('iframe[src*="youtube"]')).toHaveCount(0);
 });
+
+test('two lessons of one era keep their own pages, and the gallery shows the furthest', async ({ page }) => {
+	await page.goto('./lesson/00-start/03-workbench/');
+	await writeEditor(page, '<h1>Верстак: моя правка</h1>');
+	await page.waitForTimeout(600); // past the save debounce
+	await page.goto('./lesson/00-start/04-brief/');
+	const editor = page.locator('.cm-content').first();
+	await expect(editor).toContainText('brief-card');
+	await expect(editor).not.toContainText('Верстак: моя правка');
+	await writeEditor(page, '<h1>Бриф: моя правка</h1>');
+	await page.waitForTimeout(600);
+	await page.goto('./lesson/00-start/03-workbench/');
+	await expect(page.locator('.cm-content').first()).toContainText('Верстак: моя правка');
+	await page.goto('./gallery/');
+	const thumb = page.frameLocator('iframe').first();
+	await expect(thumb.locator('h1')).toHaveText('Бриф: моя правка');
+});

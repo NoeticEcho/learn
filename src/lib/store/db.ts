@@ -5,7 +5,7 @@
  * Versioned by MIGRATIONS: version N's step runs once, when a database older than N opens. A new
  * version appends a step and never rewrites an old one, so a person's data survives every release.
  */
-import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { openDB, type DBSchema, type IDBPDatabase, type IDBPTransaction, type StoreNames } from 'idb';
 
 export type LessonRecord = { status: 'started' | 'done'; at: number; xp: number };
 export type AnswerRecord = { correct: boolean; tries: number };
@@ -25,15 +25,38 @@ export type Db = IDBPDatabase<LearnDB>;
 export type StoreName = 'lessons' | 'answers' | 'practice' | 'cards' | 'persona' | 'settings' | 'log';
 export const STORES: StoreName[] = ['lessons', 'answers', 'practice', 'cards', 'persona', 'settings', 'log'];
 
-export const SCHEMA_VERSION = 1;
+/**
+ * A practice file's key (schema 2). `step:<step id>:<file>` is the person's work on one practice
+ * step. `era:<n>:<file>` is what schema 1 kept: one page per era, shared by every step of it, so
+ * one lesson's work replaced the next lesson's starter. Schema 2 moves those pages to `era:` keys
+ * untouched; they are the era's site until a step of that era is saved, and a step offers them.
+ */
+export const stepKey = (stepId: string, file: string) => `step:${stepId}:${file}`;
+export const legacyKey = (era: number, file: string) => `era:${era}:${file}`;
+/** A schema-1 practice key (`1:index.html`) in schema 2, or the key as it is. */
+export const upgradePracticeKey = (key: string) => key.replace(/^(\d+):/, 'era:$1:');
 
-const MIGRATIONS: ((db: IDBPDatabase<LearnDB>) => void)[] = [
+type UpgradeTx = IDBPTransaction<LearnDB, StoreNames<LearnDB>[], 'versionchange'>;
+
+const MIGRATIONS: ((db: IDBPDatabase<LearnDB>, tx: UpgradeTx) => void | Promise<void>)[] = [
 	// 1: the first schema
 	(db) => {
 		for (const s of STORES.filter((s) => s !== 'log')) db.createObjectStore(s);
 		db.createObjectStore('log', { autoIncrement: true });
+	},
+	// 2: practice files keyed by step; schema 1's era pages are kept under era: keys
+	async (_db, tx) => {
+		const store = tx.objectStore('practice');
+		for (const key of await store.getAllKeys()) {
+			const next = upgradePracticeKey(key);
+			if (next === key) continue;
+			await store.put((await store.get(key))!, next);
+			await store.delete(key);
+		}
 	}
 ];
+
+export const SCHEMA_VERSION = MIGRATIONS.length;
 
 /**
  * `onBlocking` runs when a newer release, open in another tab, wants to upgrade the schema. This
@@ -43,8 +66,10 @@ const MIGRATIONS: ((db: IDBPDatabase<LearnDB>) => void)[] = [
  */
 export function openDb(name = 'learn', opts: { onBlocking?: () => void } = {}): Promise<Db> {
 	const opening = openDB<LearnDB>(name, MIGRATIONS.length, {
-		upgrade(db, old) {
-			for (let v = old; v < MIGRATIONS.length; v++) MIGRATIONS[v](db);
+		// The steps run in order inside the one upgrade transaction; it stays open while each
+		// step's requests are pending, and a step that throws aborts it, leaving the old version.
+		async upgrade(db, old, _new, tx) {
+			for (let v = old; v < MIGRATIONS.length; v++) await MIGRATIONS[v](db, tx);
 		},
 		blocking() {
 			opening.then((db) => db.close());

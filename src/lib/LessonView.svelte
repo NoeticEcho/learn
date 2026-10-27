@@ -65,14 +65,18 @@
 	});
 
 	const store = {
-		load: async (era: number, file: string) => {
+		load: async (stepId: string, file: string) => {
 			const { db, progress } = await import('#lib/learner.ts');
-			return progress.getFile(await db(), era, file);
+			return progress.getFile(await db(), stepId, file);
 		},
-		save: async (era: number, file: string, text: string) => {
+		save: async (stepId: string, file: string, text: string) => {
 			const { db, progress } = await import('#lib/learner.ts');
 			if (file === 'index.html') code = text;
-			await progress.saveFile(await db(), era, file, text);
+			await progress.saveFile(await db(), stepId, file, text);
+		},
+		legacy: async (era: number) => {
+			const { db, progress } = await import('#lib/learner.ts');
+			return progress.legacyFiles(await db(), era);
 		}
 	};
 

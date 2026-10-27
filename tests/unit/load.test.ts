@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { validate, ContentError } from '#lib/content/load.ts';
+import { validate, ContentError, practiceProblems } from '#lib/content/load.ts';
+import type { LessonMeta } from '#lib/content/schema.ts';
 import { validLesson } from '../fixtures/lesson.valid';
 
 const yaml = `
@@ -30,6 +31,18 @@ describe('validate', () => {
 	});
 	it('refuses an id that does not match the path', () =>
 		expect(() => validate({ '/content/ru/02-html/09-other.svx': { metadata: validLesson } }, yaml)).toThrow(/does not match/));
+});
+
+describe('practice steps across lessons', () => {
+	const lesson = (order: number, id: string, era: number, continues?: string) =>
+		({ ...validLesson, id: `02-html/0${order}-x`, order, practice: { ...validLesson.practice!, id, era, continues } }) as LessonMeta;
+	it('a step id is unique across the course, since practice is saved by it', () =>
+		expect(practiceProblems([lesson(1, 'page', 1), lesson(2, 'page', 1)]).join()).toMatch(/page is already used/));
+	it('continues names an earlier step of the same era', () => {
+		expect(practiceProblems([lesson(1, 'a', 1), lesson(2, 'b', 1, 'a')])).toEqual([]);
+		expect(practiceProblems([lesson(1, 'a', 1), lesson(2, 'b', 2, 'a')]).join()).toMatch(/not era 2/);
+		expect(practiceProblems([lesson(1, 'b', 1, 'a'), lesson(2, 'a', 1)]).join()).toMatch(/no earlier step/);
+	});
 });
 
 describe('loadContent', () => {

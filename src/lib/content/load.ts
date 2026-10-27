@@ -48,12 +48,37 @@ export function validate(modules: Record<string, Module>, yamlSource: string): C
 		lessons.push(r.data);
 	}
 
+	problems.push(...practiceProblems(lessons));
+
 	const curriculum = cur.success ? cur.data : { parts: [], concepts: [] };
 	const graph = buildGraph(lessons, curriculum);
 	problems.push(...graph.errors);
 
 	if (problems.length) throw new ContentError(problems);
 	return { curriculum, lessons, graph };
+}
+
+/**
+ * Practice is saved by step id, so an id is unique across the course; and a step that
+ * `continues` another names an earlier step (in curriculum order) of the same era.
+ */
+export function practiceProblems(lessons: LessonMeta[]): string[] {
+	const problems: string[] = [];
+	const ordered = [...lessons].sort((a, b) => a.part - b.part || a.order - b.order);
+	const seen = new Map<string, { lesson: string; era: number }>();
+	for (const l of ordered) {
+		const p = l.practice;
+		if (!p) continue;
+		const prior = seen.get(p.id);
+		if (prior) problems.push(`${l.id}: practice id ${p.id} is already used by ${prior.lesson}`);
+		if (p.continues) {
+			const from = seen.get(p.continues);
+			if (!from) problems.push(`${l.id}: practice continues ${p.continues}, which is no earlier step`);
+			else if (from.era !== p.era) problems.push(`${l.id}: practice continues ${p.continues} of era ${from.era}, not era ${p.era}`);
+		}
+		if (!prior) seen.set(p.id, { lesson: l.id, era: p.era });
+	}
+	return problems;
 }
 
 let cached: Content | undefined;
