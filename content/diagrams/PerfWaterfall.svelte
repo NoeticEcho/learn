@@ -24,7 +24,7 @@
 	]);
 	const on = (id: string) => fixes.find((f) => f.id === id)!.on;
 
-	let budgetKb = $state(500);
+	let budgetKb = $state(800);
 	let budgetReq = $state(15);
 
 	const hero = $derived(on('img') ? 110 : 900);

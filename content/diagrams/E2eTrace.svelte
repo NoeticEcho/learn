@@ -74,7 +74,7 @@
 			{@const stopAt = fail ? fail.step : 99}
 			<li class:bad={ran && fail && i + 1 === stopAt} class:skip={ran && fail && i + 1 > stopAt}>
 				<span class="mk" aria-hidden="true">{ran ? (fail ? (i + 1 < stopAt ? '✓' : i + 1 === stopAt ? '✕' : '–') : '✓') : '·'}</span>
-				<span>{s}{#if ran && fail && i + 1 === stopAt}<br /><strong>Ошибка:</strong> {fail.msg}{/if}{#if ran && fail && i + 1 > stopAt} (пропущен){/if}</span>
+				<span>{s}{#if ran && fail && i + 1 === stopAt}<br /><strong>Ошибка:</strong> {fail.msg}{/if}{#if ran && fail && i + 1 > stopAt}&nbsp;(пропущен){/if}</span>
 			</li>
 		{/each}
 	</ol>
