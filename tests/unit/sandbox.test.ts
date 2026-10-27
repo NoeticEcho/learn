@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { it, expect } from 'vitest';
 import { buildSrcdoc, SANDBOX_CSP } from '#lib/practice/sandbox.ts';
+import type { Check } from '#lib/practice/checks.ts';
 
 const parse = (html: string) => new DOMParser().parseFromString(html, 'text/html');
 
@@ -46,16 +47,16 @@ it('the person cannot close our tags from inside their CSS or script', () => {
 });
 
 it('checks see the person’s document, not what the sandbox adds to it', async () => {
-	const { evaluate } = await import('#lib/practice/checks.ts');
-	const checks = [
+	const { evaluate, facts } = await import('#lib/practice/checks.ts');
+	const checks: Check[] = [
 		{ id: 'no-script', kind: 'noTag', tags: ['script'] },
 		{ id: 'no-style', kind: 'noTag', tags: ['style'] },
 		{ id: 'no-meta', kind: 'count', selector: 'meta', max: 0 },
 		{ id: 'one-script', kind: 'count', selector: 'script', max: 0 }
-	] as const;
+	];
 	const page = { 'index.html': '<h1>Привет</h1>', 'styles.css': 'h1{color:red}', 'script.js': 'window.x=1' };
-	const clean = parse(buildSrcdoc(page, [...checks], {}));
-	expect(evaluate(clean, window, [...checks], {}).map((r) => r.ok)).toEqual([true, true, true, true]);
-	const own = parse(buildSrcdoc({ 'index.html': '<style>h1{}</style><h1>x</h1><script>1</script>' }, [...checks], {}));
-	expect(evaluate(own, window, [...checks], {}).map((r) => r.ok)).toEqual([false, false, true, false]);
+	const clean = parse(buildSrcdoc(page, checks, {}));
+	expect(evaluate(clean, window, checks, facts(checks, {})).map((r) => r.ok)).toEqual([true, true, true, true]);
+	const own = parse(buildSrcdoc({ 'index.html': '<style>h1{}</style><h1>x</h1><script>1</script>' }, checks, {}));
+	expect(evaluate(own, window, checks, facts(checks, {})).map((r) => r.ok)).toEqual([false, false, true, false]);
 });

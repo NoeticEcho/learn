@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { it, expect, describe } from 'vitest';
-import { evaluate, describeCheck } from '#lib/practice/checks.ts';
+import { evaluate, describeCheck, facts } from '#lib/practice/checks.ts';
 
 const run = (html: string, checks: unknown[], persona = {}) => {
 	document.documentElement.innerHTML = html;
-	return evaluate(document, window, checks as never, persona);
+	return evaluate(document, window, checks as never, facts(checks as never, persona));
 };
 
 it('exists', () => expect(run('<body><h1>x</h1></body>', [{ id: 'h', kind: 'exists', selector: 'h1' }])[0].ok).toBe(true));
@@ -52,9 +52,9 @@ describe('more of the DSL', () => {
 		).toBe(true));
 	it('lang reads the root element', () => {
 		document.documentElement.lang = 'ru';
-		expect(evaluate(document, window, [{ id: 'l', kind: 'lang', equals: 'ru' }], {})[0].ok).toBe(true);
+		expect(evaluate(document, window, [{ id: 'l', kind: 'lang', equals: 'ru' }], facts([], {}))[0].ok).toBe(true);
 		document.documentElement.lang = 'en';
-		expect(evaluate(document, window, [{ id: 'l', kind: 'lang', equals: 'ru' }], {})[0]).toEqual({ id: 'l', ok: false, detail: 'lang:en' });
+		expect(evaluate(document, window, [{ id: 'l', kind: 'lang', equals: 'ru' }], facts([], {}))[0]).toEqual({ id: 'l', ok: false, detail: 'lang:en' });
 	});
 	it('label accepts a wrapping label and aria-label, and ignores hidden and submit inputs', () =>
 		expect(
@@ -73,5 +73,5 @@ describe('more of the DSL', () => {
 it('evaluate is self-contained: it runs after a round trip through toString', () => {
 	const rebuilt = new Function(`return (${evaluate.toString()})`)() as typeof evaluate;
 	document.documentElement.innerHTML = '<body><h1>x</h1><font>y</font></body>';
-	expect(rebuilt(document, window, [{ id: 'h', kind: 'exists', selector: 'h1' }, { id: 'n', kind: 'noTag', tags: ['font'] }], {}).map((r: { ok: boolean }) => r.ok)).toEqual([true, false]);
+	expect(rebuilt(document, window, [{ id: 'h', kind: 'exists', selector: 'h1' }, { id: 'n', kind: 'noTag', tags: ['font'] }], facts([], {})).map((r: { ok: boolean }) => r.ok)).toEqual([true, false]);
 });

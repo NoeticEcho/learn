@@ -13,7 +13,7 @@
  * a check sees the page the person wrote in index.html, so `noTag` with `script` or `style`, or
  * a count of `meta`, is not failed by the sandbox's own parts.
  */
-import { evaluate, type Check } from './checks.ts';
+import { evaluate, facts, type Check } from './checks.ts';
 import type { PracticeFiles } from '#lib/content/schema.ts';
 
 /** The marker on what the sandbox adds; `checks.ts` spells the same literal, since it cannot import. */
@@ -49,8 +49,8 @@ export function buildSrcdoc(
 		css ? `<style ${SANDBOX_MARK}>${raw(css, 'style')}</style>` : '',
 		html,
 		js ? `<script ${SANDBOX_MARK}>try{${raw(js, 'script')}\n}catch(e){(${report})(e&&e.message||e)}</script>` : '',
-		`<script ${SANDBOX_MARK}>(function(){var evaluate=(${evaluate.toString()});var checks=${json(checks)};var persona=${json(persona)};` +
-			`function run(){var results;try{results=evaluate(document,window,checks,persona)}catch(e){(${report})(e&&e.message||e);return}` +
+		`<script ${SANDBOX_MARK}>(function(){var evaluate=(${evaluate.toString()});var checks=${json(checks)};var facts=${json(facts(checks, persona))};` +
+			`function run(){var results;try{results=evaluate(document,window,checks,facts)}catch(e){(${report})(e&&e.message||e);return}` +
 			`parent.postMessage({type:'learn:checks',results:results},'*')}` +
 			`if(document.readyState==='complete')run();else addEventListener('load',run)})();</script>`
 	].join('\n');

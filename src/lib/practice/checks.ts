@@ -9,17 +9,27 @@
  * Results carry short machine details (`count:3`, `invalid-regex`), not prose: the sandbox has
  * no i18n, and the app turns a result into words.
  */
-import type { Check, CheckResult } from './checks.schema.ts';
-import { t } from '#lib/i18n/index.ts';
+import type { Check, CheckResult, Facts } from './checks.schema.ts';
+import { t, has } from '#lib/i18n/index.ts';
+import { briefValues, briefCount, segments } from './brief-path.ts';
 
-export type { Check, CheckResult };
+export type { Check, CheckResult, Facts };
+export { briefValues, briefCount };
 
-export function evaluate(
-	doc: Document,
-	win: Window,
-	checks: Check[],
-	persona: Record<string, unknown>
-): CheckResult[] {
+/** The brief's values at every path the checks name, and the lengths their counts need. */
+export function facts(checks: Check[], brief: Record<string, unknown>): Facts {
+	const out: Facts = { values: {}, counts: {} };
+	for (const c of checks) {
+		if (c.when) out.values[c.when.brief] = briefValues(brief, c.when.brief);
+		if (c.kind === 'field') out.values[c.field] = briefValues(brief, c.field);
+		if (c.kind === 'count')
+			for (const b of [c.min, c.max]) if (b && typeof b === 'object') out.counts[b.brief] = briefCount(brief, b.brief);
+	}
+	return out;
+}
+
+export function evaluate(doc: Document, win: Window, checks: Check[], facts: Facts): CheckResult[] {
+	const values = (path: string): string[] => facts?.values?.[path] ?? [];
 	// What the sandbox adds to the page carries this mark (sandbox.ts SANDBOX_MARK); the checks
 	// look only at what the person wrote.
 	const mine = (els: ArrayLike<Element>): Element[] => Array.from(els).filter((e) => !e.hasAttribute('data-learn-sandbox'));
@@ -82,8 +92,20 @@ export function evaluate(
 		return false;
 	};
 
+	/** A `when` that does not hold: the check does not apply to this brief. */
+	const skipped = (c: Check): boolean => {
+		if (!c.when) return false;
+		const got = values(c.when.brief).map(norm);
+		if (c.when.contains !== undefined) return !got.includes(norm(c.when.contains));
+		if (c.when.equals !== undefined) return !(got.length === 1 && got[0] === norm(c.when.equals));
+		return got.length === 0;
+	};
+	const limit = (b: number | { brief: string } | undefined): number | undefined =>
+		b === undefined ? undefined : typeof b === 'number' ? b : (facts?.counts?.[b.brief] ?? 0);
+
 	const one = (c: Check): CheckResult => {
 		const ok = (v: boolean, detail?: string): CheckResult => (v || !detail ? { id: c.id, ok: v } : { id: c.id, ok: v, detail });
+		if (skipped(c)) return { id: c.id, ok: true, detail: 'skipped' };
 		switch (c.kind) {
 			case 'exists': {
 				const els = all(c.selector);
@@ -94,7 +116,8 @@ export function evaluate(
 				const els = all(c.selector);
 				if (!els) return ok(false, 'invalid-selector');
 				const n = els.length;
-				return ok((c.min === undefined || n >= c.min) && (c.max === undefined || n <= c.max), `count:${n}`);
+				const [min, max] = [limit(c.min), limit(c.max)];
+				return ok((min === undefined || n >= min) && (max === undefined || n <= max), `count:${n}`);
 			}
 			case 'text': {
 				const els = all(c.selector);
@@ -156,13 +179,15 @@ export function evaluate(
 				return ok(found.length === 0, `found:${found.join(',')}`);
 			}
 			case 'field': {
-				const value = persona[c.field];
-				const want = typeof value === 'string' || typeof value === 'number' ? norm(String(value)) : '';
-				if (!want) return ok(false, 'empty-field');
+				const want = values(c.field).map(norm).filter(Boolean);
+				if (!want.length) return ok(false, 'empty-field');
 				const els = all(c.selector);
 				if (!els) return ok(false, 'invalid-selector');
 				if (!els.length) return ok(false, 'none');
-				return ok(els.some((e) => norm(e.textContent ?? '').includes(want)), 'no-match');
+				const texts = els.map((e) => norm(e.textContent ?? ''));
+				const found = want.filter((w) => texts.some((x) => x.includes(w))).length;
+				if (want.length === 1 && c.min === undefined) return ok(found === 1, 'no-match');
+				return ok(found >= Math.min(c.min ?? want.length, want.length), `found:${found}/${want.length}`);
 			}
 			default:
 				return { id: (c as { id: string }).id, ok: false, detail: 'unknown-check' };
@@ -183,12 +208,19 @@ export function describeCheck(c: Check): string {
 	switch (c.kind) {
 		case 'exists':
 			return t('check.exists', { selector: c.selector });
-		case 'count':
+		case 'count': {
+			const fromBrief = [c.min, c.max].find((b) => typeof b === 'object');
+			if (fromBrief && typeof fromBrief === 'object') {
+				const field = fieldLabel(fromBrief.brief);
+				if (c.min !== undefined && c.max !== undefined) return t('check.count.brief.equal', { selector: c.selector, field });
+				return t(c.min !== undefined ? 'check.count.brief.min' : 'check.count.brief.max', { selector: c.selector, field });
+			}
 			return c.max === undefined
-				? t('check.count.min', { selector: c.selector, min: c.min ?? 0 })
+				? t('check.count.min', { selector: c.selector, min: Number(c.min ?? 0) })
 				: c.min === undefined
-					? t('check.count.max', { selector: c.selector, max: c.max })
-					: t('check.count.range', { selector: c.selector, min: c.min, max: c.max });
+					? t('check.count.max', { selector: c.selector, max: Number(c.max) })
+					: t('check.count.range', { selector: c.selector, min: Number(c.min), max: Number(c.max) });
+		}
 		case 'text':
 			return t('check.text', { selector: c.selector });
 		case 'attr':
@@ -205,7 +237,23 @@ export function describeCheck(c: Check): string {
 			return t('check.lang', { lang: c.equals });
 		case 'noTag':
 			return t('check.noTag', { tags: c.tags.map((x) => `<${x}>`).join(', ') });
-		case 'field':
-			return t('check.field', { selector: c.selector, field: t(`field.${c.field}`) });
+		case 'field': {
+			const field = fieldLabel(c.field);
+			const list = !segments(c.field).some((s) => /^\d+$/.test(s)) && (c.field.includes('[]') || LISTS.has(segments(c.field).join('.')));
+			if (c.min !== undefined) return t('check.field.some', { selector: c.selector, field, min: c.min });
+			return t(list ? 'check.field.all' : 'check.field', { selector: c.selector, field });
+		}
 	}
+}
+
+/** The brief's lists of values, which a `field` check reads item by item. */
+const LISTS = new Set(['sections', 'languages', 'services']);
+
+/** A brief path in words: `items[1].title` → «названия услуг, №2». Unknown paths are shown as written. */
+export function fieldLabel(path: string): string {
+	const segs = segments(path);
+	const key = `field.${segs.filter((s) => s !== '*' && !/^\d+$/.test(s)).join('.')}`;
+	const label = has(key) ? t(key) : path;
+	const index = segs.find((s) => /^\d+$/.test(s));
+	return index === undefined ? label : t('field.nth', { field: label, n: Number(index) + 1 });
 }

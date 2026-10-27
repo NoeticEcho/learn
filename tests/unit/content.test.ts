@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { loadContent } from '#lib/content/load.ts';
 import { buildSrcdoc } from '#lib/practice/sandbox.ts';
-import { evaluate } from '#lib/practice/checks.ts';
+import { evaluate, facts } from '#lib/practice/checks.ts';
 import { render, TEMPLATES } from '#lib/persona/render.ts';
 import type { PracticeFiles } from '#lib/content/schema.ts';
 
@@ -14,7 +14,7 @@ const content = loadContent();
 function run(files: PracticeFiles, checks: Parameters<typeof evaluate>[2], persona: Record<string, unknown>) {
 	const rendered = Object.fromEntries(Object.entries(files).map(([k, v]) => [k, render(v ?? '', persona)])) as PracticeFiles;
 	const dom = new JSDOM(buildSrcdoc(rendered, checks, persona));
-	return evaluate(dom.window.document, dom.window as unknown as Window, checks, persona);
+	return evaluate(dom.window.document, dom.window as unknown as Window, checks, facts(checks, persona));
 }
 
 describe('content', () => {
