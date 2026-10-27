@@ -42,19 +42,29 @@ const lessons = await withApp(async (load) => {
 const urls = new Map<string, string[]>();
 for (const l of lessons) for (const s of [...l.sources, ...l.videos]) urls.set(s.url, [...(urls.get(s.url) ?? []), l.id]);
 
+// A few at a time. All ~560 at once from one runner came back as «no answer» for half of them
+// (296 on 27.10, Wikipedia and postgresql.org among them): the probe, not the links, was failing.
+// A link that does not answer is asked once more, after the rest.
+const POOL = 12;
 let dead = 0;
 const now = Date.now();
+const queue = [...urls.keys()];
+async function check(url: string) {
+	let r = cache[url];
+	if (!r || now - r.at > DAY || !r.ok) {
+		let p = await probe(url);
+		if (p.status === 0) p = await probe(url);
+		r = { at: now, ...p };
+		cache[url] = r;
+	}
+	if (!r.ok) {
+		dead++;
+		console.error(`dead (${r.status || 'no answer'}): ${url}\n  in ${urls.get(url)!.join(', ')}`);
+	}
+}
 await Promise.all(
-	[...urls.keys()].map(async (url) => {
-		let r = cache[url];
-		if (!r || now - r.at > DAY || !r.ok) {
-			r = { at: now, ...(await probe(url)) };
-			cache[url] = r;
-		}
-		if (!r.ok) {
-			dead++;
-			console.error(`dead (${r.status || 'no answer'}): ${url}\n  in ${urls.get(url)!.join(', ')}`);
-		}
+	Array.from({ length: POOL }, async () => {
+		for (let url = queue.shift(); url; url = queue.shift()) await check(url);
 	})
 );
 
