@@ -27,10 +27,14 @@
 		const box = host.getBoundingClientRect();
 		size = { w: box.width, h: box.height };
 		const out: { d: string; key: string }[] = [];
+		// One edge per pair of lessons: a lesson may require two concepts the same lesson teaches,
+		// and a repeated key in the keyed {#each} below throws (each_key_duplicate) and breaks the map.
+		const seen = new Set<string>();
 		for (const l of cat.lessons)
 			for (const c of l.requires) {
 				const from = graph.teaches.get(c);
-				if (!from) continue;
+				if (!from || seen.has(`${from}->${l.id}`)) continue;
+				seen.add(`${from}->${l.id}`);
 				const a = host.querySelector<HTMLElement>(`[data-node="${CSS.escape(from)}"]`);
 				const b = host.querySelector<HTMLElement>(`[data-node="${CSS.escape(l.id)}"]`);
 				if (!a || !b) continue;
