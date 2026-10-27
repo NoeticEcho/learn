@@ -79,7 +79,7 @@
 
 	{#each blocks as b (b.id)}
 		<section class="blk {colour(b)}">
-			<h4>{b.name} <span class="col">{word[colour(b)]}</span></h4>
+			<div class="dh">{b.name} <span class="col">{word[colour(b)]}</span></div>
 			<ul>
 				{#each b.checks as c (c.id)}
 					<li>
@@ -115,7 +115,7 @@
 		border-style: dotted;
 		border-width: 2px;
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		font-weight: var(--weight-regular);

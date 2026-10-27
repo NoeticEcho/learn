@@ -40,7 +40,7 @@
 
 <figure class="dg">
 	<figcaption>Инспектор cookie</figcaption>
-	<h4 class="h">1. Разберите cookie сайта</h4>
+	<div class="dh h">1. Разберите cookie сайта</div>
 	<p class="dg-out">Для каждой записи выберите категорию, затем нажмите «Проверить».</p>
 	<ul class="items">
 		{#each items as i (i.name)}
@@ -58,7 +58,7 @@
 	</ul>
 	<div class="dg-ctl"><button type="button" onclick={() => (checked = true)}>Проверить</button>{#if checked}<span aria-live="polite">Верно: {right} из {items.length}.</span>{/if}</div>
 
-	<h4 class="h">2. Соберите баннер и посмотрите на подталкивание</h4>
+	<div class="dh h">2. Соберите баннер и посмотрите на подталкивание</div>
 	<div class="opts">
 		<label><input type="checkbox" bind:checked={acceptBig} /> Кнопка «Принять всё» крупная и яркая, «Отклонить» бледнее</label>
 		<label><input type="checkbox" bind:checked={rejectBuried} /> Отказ спрятан в «Настройки» или мелкую ссылку</label>
