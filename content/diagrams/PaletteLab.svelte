@@ -122,7 +122,7 @@
 	</div>
 
 	<table class="tbl">
-		<caption class="dg-out" style="text-align:left;margin:var(--space-4) 0 var(--space-2)">Контраст пар по формуле WCAG (нужно не меньше 4.5 к 1 для обычного текста)</caption>
+		<caption class="dg-out" style="text-align:left;margin:var(--space-4) 0 var(--space-2)">Контраст пар по формуле WCAG (нужно не меньше 4,5 к 1 для обычного текста)</caption>
 		<thead><tr><th>Пара</th><th>Цвета</th><th>Контраст</th><th>Итог</th></tr></thead>
 		<tbody>
 			{#each rows as p (p.name)}

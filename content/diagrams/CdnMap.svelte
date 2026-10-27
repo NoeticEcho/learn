@@ -55,7 +55,7 @@
 		{ id: 'html-long', label: 'HTML на сутки', header: 'Cache-Control: public, max-age=86400', ttl: 1440, note: 'быстро, но правку увидят только завтра' },
 		{ id: 'html-short', label: 'HTML на 5 минут', header: 'Cache-Control: public, max-age=300', ttl: 5, note: 'правка видна в пределах пяти минут' },
 		{ id: 'html-reval', label: 'HTML с перепроверкой', header: 'Cache-Control: no-cache', ttl: 0, note: 'копия хранится, но перед каждым показом спрашивают «изменилось ли?» (ответ 304 без тела)' },
-		{ id: 'asset', label: 'CSS с хэшем в имени, на год', header: 'Cache-Control: public, max-age=31536000, immutable', ttl: Infinity, note: 'имя файла меняется вместе с содержимым, поэтому старая копия никому не мешает' },
+		{ id: 'asset', label: 'CSS с хешем в имени, на год', header: 'Cache-Control: public, max-age=31536000, immutable', ttl: Infinity, note: 'имя файла меняется вместе с содержимым, поэтому старая копия никому не мешает' },
 		{ id: 'private', label: 'Страница с личными данными', header: 'Cache-Control: private, no-store', ttl: 0, note: 'общий кэш и CDN её не хранят' }
 	];
 	let pol = $state('html-long');
