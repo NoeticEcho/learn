@@ -1,0 +1,415 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '13-growth/06-technical-seo',
+		part: 13,
+		order: 6,
+		title: 'Техническое SEO и разметка JSON-LD',
+		summary:
+			'Вы сделаете сайт удобным для робота: robots.txt, карта сайта, канонические адреса, noindex для служебных страниц, и расскажете поисковику, о чём страница, разметкой schema.org в формате JSON-LD. После урока у вас готовы файлы robots.txt и sitemap.xml, список страниц, закрытых от индекса, и блок JSON-LD с данными вашего проекта.',
+		minutes: 30,
+		teaches: ['growth-technical-seo', 'growth-structured-data'],
+		requires: ['growth-seo-crawl-index-rank', 'html-lang-i18n'],
+		practice: {
+			id: 'robots-sitemap-jsonld',
+			title: 'robots.txt, sitemap.xml, noindex и JSON-LD',
+			task: 'Подготовьте технические части сайта. 1) robots.txt в блоке «Файлы для робота»: строка User-agent, закрыты только служебные разделы (не весь сайт: Disallow: / запрещено) и строка Sitemap с полным адресом на https://. 2) Адреса для sitemap.xml: по одному полному адресу на каждый раздел из брифа, и сам файл sitemap.xml с тегами urlset и loc. 3) Что закрыть от индекса: не меньше двух служебных страниц (например «Спасибо» и личный кабинет) с адресом и способом; хотя бы одна закрыта через noindex. 4) В head страницы блок JSON-LD с @context schema.org, @type, названием и адресом проекта и контактом (телефон или почта из брифа). Все «…» нужно заменить.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: сайт проекта</title>
+    <meta name="description" content="{{who}}. Для кого: {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <script type="application/ld+json">…<\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <ul>
+        {{#each sections}}<li>{{.}}</li>
+        {{/each}}
+      </ul>
+    </main>
+
+    <aside class="note" data-scaffold id="tech">
+      <h2>Файлы для робота</h2>
+      <pre id="robots">…</pre>
+
+      <h3>Адреса для sitemap.xml</h3>
+      <ol id="urls">
+        {{#each sections}}<li class="loc">…</li>
+        {{/each}}
+      </ol>
+      <pre id="sitemap">…</pre>
+
+      <h3>Что закрыть от индекса</h3>
+      <ul id="closed">
+        <li class="closed"><span class="c-path">…</span>: <span class="c-how">…</span></li>
+        <li class="closed"><span class="c-path">…</span>: <span class="c-how">…</span></li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: сайт проекта</title>
+    <meta name="description" content="{{who}}. Для кого: {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "{{name}}",
+      "url": "https://zarechye.example/",
+      "description": "{{who}}",
+      "email": "{{email}}",
+      "telephone": "{{phone}}"
+    }
+    <\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <ul>
+        {{#each sections}}<li>{{.}}</li>
+        {{/each}}
+      </ul>
+    </main>
+
+    <aside class="note" data-scaffold id="tech">
+      <h2>Файлы для робота</h2>
+      <pre id="robots">User-agent: *
+Disallow: /kabinet/
+Sitemap: https://zarechye.example/sitemap.xml</pre>
+
+      <h3>Адреса для sitemap.xml</h3>
+      <ol id="urls">
+        {{#each sections}}<li class="loc">https://zarechye.example/razdel/</li>
+        {{/each}}
+      </ol>
+      <pre id="sitemap">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;&lt;loc&gt;https://zarechye.example/&lt;/loc&gt;&lt;lastmod&gt;2026-10-27&lt;/lastmod&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://zarechye.example/razdel/&lt;/loc&gt;&lt;lastmod&gt;2026-10-27&lt;/lastmod&gt;&lt;/url&gt;
+&lt;/urlset&gt;</pre>
+
+      <h3>Что закрыть от индекса</h3>
+      <ul id="closed">
+        <li class="closed"><span class="c-path">/spasibo/</span>: <span class="c-how">noindex в мета-теге, страница открыта для робота</span></li>
+        <li class="closed"><span class="c-path">/kabinet/</span>: <span class="c-how">вход по паролю и Disallow в robots.txt</span></li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#tech', matches: '^[^…]*$' },
+				{ id: 'ld-context', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"@context"\\s*:\\s*"https?://schema\\.org/?"' },
+				{ id: 'ld-type', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"@type"\\s*:\\s*"[A-Z][A-Za-z]+"' },
+				{ id: 'ld-name', kind: 'field', selector: 'script[type="application/ld+json"]', field: 'name' },
+				{ id: 'ld-url', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"url"\\s*:\\s*"https://\\S+"' },
+				{ id: 'ld-contact', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"(?:telephone|email)"\\s*:\\s*"\\S[^"]+"' },
+				{ id: 'robots-agent', kind: 'text', selector: '#robots', matches: 'User-agent:\\s*\\S+' },
+				{ id: 'robots-open', kind: 'text', selector: '#robots', matches: '^(?![\\s\\S]*Disallow:\\s*/\\s*(?:\\n|$))[\\s\\S]*\\S' },
+				{ id: 'robots-sitemap', kind: 'text', selector: '#robots', matches: 'Sitemap:\\s*https://\\S+' },
+				{ id: 'urls', kind: 'count', selector: '#urls li.loc', min: { brief: 'sections' } },
+				{ id: 'url-form', kind: 'text', selector: '#urls li.loc', matches: '^\\s*https://\\S+\\s*$' },
+				{ id: 'sitemap-xml', kind: 'text', selector: '#sitemap', matches: '<urlset[\\s\\S]*<loc>https://\\S+</loc>[\\s\\S]*</urlset>' },
+				{ id: 'closed', kind: 'count', selector: '#closed li.closed', min: 2 },
+				{ id: 'closed-path', kind: 'text', selector: '#closed .c-path', matches: '^\\s*/[a-z0-9/_-]*\\s*$' },
+				{ id: 'noindex', kind: 'text', selector: '#closed .c-how', matches: 'noindex' },
+				{ id: 'canonical', kind: 'attr', selector: 'link[rel="canonical"]', name: 'href', matches: '^https://\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Соедините инструмент с задачей',
+				pairs: [
+					['robots.txt', 'Сказать роботу, куда ему можно ходить, а куда не нужно'],
+					['sitemap.xml', 'Дать роботу список адресов, которые вы хотите показать'],
+					['rel="canonical"', 'Указать, какой из похожих адресов считать основным'],
+					['noindex', 'Попросить не записывать страницу в индекс']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Вы закрыли страницу «Спасибо» и в robots.txt (Disallow), и тегом noindex. Что получится?',
+				options: [
+					'Робот не откроет страницу и не увидит noindex; адрес всё равно может появиться в выдаче, если на него ссылаются',
+					'Страница надёжно исчезнет из поиска',
+					'Ничего не изменится: оба правила игнорируются'
+				],
+				answer: 0,
+				why: [
+					'Да. Чтобы увидеть noindex, роботу нужно открыть страницу. Поэтому для страниц, которые не должны попасть в поиск, оставьте доступ в robots.txt и поставьте noindex. А robots.txt управляет доступом, а не показом.',
+					'Именно этого не произойдёт: robots.txt и noindex мешают друг другу.',
+					'Правила учитываются, но по-разному, и вместе они не усиливают, а мешают.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что можно сказать о robots.txt?',
+				options: [
+					'Его читают честные роботы поисковиков, но злоумышленник может его проигнорировать',
+					'Он лежит по адресу /robots.txt в корне сайта',
+					'Файл публичен: его может прочитать любой, поэтому там нельзя прятать секретные адреса',
+					'Он надёжно защищает закрытую информацию от всех'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: это просьба, а не защита (RFC 9309 так и говорит).',
+					'Да: адрес файла один и всегда один.',
+					'Да: перечисляя в нём секретные разделы, вы сообщаете о них всем. Закрывать нужно паролем.',
+					'Нет: для защиты нужен пароль и права доступа на сервере.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'У вас одна и та же страница доступна по http://, https://, с www и без. Что сделать?',
+				options: [
+					'Выбрать одну основную версию, на остальные поставить редирект 301 и указать canonical на основную',
+					'Оставить все четыре: чем больше адресов, тем лучше',
+					'Закрыть три версии в robots.txt'
+				],
+				answer: 0,
+				why: [
+					'Да. Один адрес у одной страницы. Редирект переводит людей и робота, canonical подсказывает поисковику главную версию.',
+					'Это дубли: силы делятся между ними, и поисковик сам выбирает, какую показывать.',
+					'Робот не увидит, что это те же страницы, и не склеит их; редирект надёжнее.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что можно разметить с помощью JSON-LD и schema.org?',
+				options: [
+					'То, что реально есть на странице и видно человеку: организацию, адрес, часы работы, событие, товар',
+					'Любое утверждение, даже если на странице о нём ничего нет',
+					'Только картинки'
+				],
+				answer: 0,
+				why: [
+					'Да. Разметка пересказывает видимое содержание на языке, понятном машине. Google прямо требует, чтобы она соответствовала странице.',
+					'Нет: разметка того, чего на странице нет, нарушает правила и может привести к санкциям.',
+					'Нет: размечают людей, организации, события, товары, статьи и многое другое.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте проверки нового сайта по порядку',
+				items: [
+					'Открыть /robots.txt и убедиться, что нужное не закрыто',
+					'Открыть /sitemap.xml и убедиться, что все нужные адреса там есть',
+					'Проверить, что у служебных страниц стоит noindex, а у основных нет',
+					'Проверить разметку JSON-LD в проверке расширенных результатов',
+					'Отправить sitemap в Яндекс Вебмастер и Google Search Console'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-robots-txt',
+				front: 'Что делает robots.txt и чего не делает?',
+				back: 'Лежит в корне сайта и просит робота не ходить в указанные разделы. Не защищает информацию (его читают честные роботы) и не гарантирует, что адрес не покажут.'
+			},
+			{
+				id: 'growth-sitemap',
+				front: 'Что такое sitemap.xml?',
+				back: 'Список адресов сайта в формате XML (теги urlset, url, loc). Это подсказка роботу, а не команда; в одном файле до 50 000 адресов.'
+			},
+			{
+				id: 'growth-canonical',
+				front: 'Зачем rel="canonical"?',
+				back: 'Чтобы из нескольких адресов одной страницы (http/https, с www, с параметрами) поисковик знал основной. Дополняется редиректом 301.'
+			},
+			{
+				id: 'growth-noindex',
+				front: 'Как не пустить страницу в поиск?',
+				back: 'Оставить её открытой для робота и поставить мета-тег robots со значением noindex. Закрывать в robots.txt для этого не нужно, иначе робот не увидит метку.'
+			},
+			{
+				id: 'growth-jsonld',
+				front: 'Что такое JSON-LD и schema.org?',
+				back: 'schema.org словарь типов (Organization, Event, Product), JSON-LD способ записать данные в виде JSON внутри script в head. Разметка должна пересказывать то, что видно на странице.'
+			}
+		],
+		sources: [
+			{ title: 'Google Search Central: Introduction to robots.txt', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Block Search indexing with noindex', url: 'https://developers.google.com/search/docs/crawling-indexing/block-indexing', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: What is a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Consolidate duplicate URLs', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Intro to structured data markup', url: 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'RFC 9309: Robots Exclusion Protocol', url: 'https://www.rfc-editor.org/rfc/rfc9309', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Яндекс Вебмастер: использование файла robots.txt', url: 'https://yandex.ru/support/webmaster/en/controlling-robot/robots-txt', licence: 'proprietary-link', kind: 'docs', lang: 'ru' },
+			{ title: 'Getting Started with schema.org using Microdata (schema.org)', url: 'https://schema.org/docs/gs.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Робот не читает мыслей: ему нужно сказать, куда идти, куда не ходить и что на странице. Это три маленьких файла и один блок разметки.',
+			hints: [
+				'robots.txt начинается со строки «User-agent: *», затем «Disallow:» только для служебных разделов, затем «Sitemap:» с полным адресом. Строки «Disallow: /» без продолжения не должно быть: это закрывает весь сайт.',
+				'В sitemap.xml каждый адрес идёт в тегах url и loc, внутри urlset. В pre вместо знаков меньше и больше пишите &lt; и &gt;.',
+				'Для страницы «Спасибо» напишите «noindex». Про кабинет можно написать про пароль и robots.txt.',
+				'JSON-LD записывается как объект в фигурных скобках: «@context», «@type», «name», «url», «telephone» или «email», каждое значение в двойных кавычках.'
+			],
+			mistakes: {
+				'no-blanks': 'Где-то осталось многоточие «…». Заполните robots.txt, адреса, sitemap и список закрытых страниц.',
+				'ld-context': 'В JSON-LD нужен "@context": "https://schema.org".',
+				'ld-type': 'В JSON-LD нужен "@type" с названием типа с большой буквы: например "Organization".',
+				'ld-name': 'В JSON-LD "name" должно совпадать с названием проекта из брифа.',
+				'ld-url': 'В JSON-LD нужен "url" с полным адресом сайта на https://.',
+				'ld-contact': 'В JSON-LD нужен "telephone" или "email" со значением в кавычках.',
+				'robots-agent': 'В robots.txt нужна строка User-agent: например «User-agent: *».',
+				'robots-open': 'В robots.txt есть «Disallow: /»: это закрывает весь сайт. Закройте только служебные разделы.',
+				'robots-sitemap': 'В robots.txt нужна строка «Sitemap:» с полным адресом, начинающимся с https://.',
+				urls: 'Адресов должно быть не меньше, чем разделов в брифе.',
+				'url-form': 'Адрес должен быть полным: начинаться с https:// и не содержать пробелов.',
+				'sitemap-xml': 'В sitemap.xml нужны теги urlset и loc с полным адресом. В pre пишите &lt; и &gt; вместо знаков меньше и больше.',
+				closed: 'В списке закрытых страниц должно быть не меньше двух.',
+				'closed-path': 'Адрес закрытой страницы пишется латиницей и начинается с /.',
+				noindex: 'Хотя бы одна служебная страница должна быть закрыта через noindex.',
+				canonical: 'В head нужен link rel="canonical" с полным адресом на https://.'
+			},
+			outro: 'Теперь у сайта есть файлы для робота и разметка, которая рассказывает, чей он. Дальше разберём, как ваш сайт попадает в ответы нейросетей.'
+		},
+		say: { robots: 'роботс', sitemap: 'сайтмэп', noindex: 'ноуиндекс', canonical: 'каноникал', 'JSON-LD': 'джейсон-эл-ди', 'schema.org': 'схема орг', XML: 'экс-эм-эль', URL: 'ю-эр-эл', RFC: 'эр-эф-си' }
+	};
+</script>
+
+<script>
+	import SpiderGame from '../../diagrams/SpiderGame.svelte';
+</script>
+
+## Сначала войти в дом
+
+В прошлом уроке вы разобрали, что поисковик проходит три шага: сканирование, индексацию и ранжирование. Это урок о двух первых. Он технический, но не сложный: всё сводится к трём маленьким файлам, одному мета-тегу и одному блоку разметки. Если с ними ошибиться, лучшие тексты в мире никто не увидит. Недаром один из частых «сюрпризов» нового сайта: при разработке доступ роботам закрыли, чтобы не показывать сырую версию, а после запуска забыли открыть.
+
+## robots.txt: что роботу можно, а что не нужно
+
+**Что это.** Текстовый файл, который лежит строго по адресу `/robots.txt` в корне сайта (`https://zarechye.example/robots.txt`). Честные роботы поисковиков сначала читают его, и только потом ходят по сайту. Правила записаны группами: для какого робота (`User-agent`) что запрещено (`Disallow`) или разрешено (`Allow`).
+
+```text
+User-agent: *
+Disallow: /kabinet/
+Sitemap: https://zarechye.example/sitemap.xml
+```
+
+Здесь написано: всем роботам нельзя ходить в раздел личного кабинета, а карта сайта лежит там-то. Звёздочка означает «все». Для отдельных роботов можно написать отдельные группы (`User-agent: Googlebot`, `User-agent: YandexBot`).
+
+**Откуда это.** Файл придумал в 1994 году Мартейн Костер (Martijn Koster) для ранних поисковиков, чтобы владельцы сайтов могли сказать роботам, куда не ходить. Тридцать лет это было негласное соглашение. Только в 2022 году его оформили как стандарт: RFC 9309, он лежит в источниках. Яндекс и Google его поддерживают, у каждого есть свои дополнения (например, у Яндекса `Clean-param` для адресов с параметрами).
+
+**Чего robots.txt не делает.** Это важно, потому что на этом ошибаются чаще всего:
+
+- **Он не защищает.** Это просьба, а не замок. Честные роботы послушаются, злоумышленник нет. Закрывать секретное нужно паролем и правами на сервере.
+- **Он публичен.** Любой может открыть `/robots.txt`. Если вы перечислите в нём секретные разделы, вы расскажете о них всем.
+- **Он управляет доступом, а не показом.** Если страница закрыта в robots.txt, но на неё ссылаются другие сайты, поисковик может показать **голый адрес без описания**. Чтобы страницу не показывали, нужен другой инструмент: noindex.
+- **Одна ошибка закрывает всё.** Строка `Disallow: /` запрещает весь сайт. Проверяйте файл после каждой правки.
+
+## sitemap.xml: список для робота
+
+**Что это.** Файл (чаще всего `/sitemap.xml`) со списком адресов, которые вы хотите показать поисковику. Формат XML простой:
+
+```text
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://zarechye.example/</loc><lastmod>2026-10-27</lastmod></url>
+  <url><loc>https://zarechye.example/uslugi/</loc><lastmod>2026-10-20</lastmod></url>
+</urlset>
+```
+
+Только `loc` обязателен. `lastmod` (дата последнего изменения) полезен, если вы указываете её честно. Другие теги (`priority`, `changefreq`) Google игнорирует. В одном файле до 50 000 адресов и 50 мегабайт.
+
+**Что важно понимать.** Карта сайта **подсказка, а не команда**: она помогает роботу найти страницы (особенно те, на которые нет ссылок), но не заставляет проиндексировать. Укажите её в robots.txt строкой `Sitemap:` и отправьте в Вебмастер и Search Console. Включайте только нужные страницы: те, что закрыты noindex или перенаправлены, из карты убирайте.
+
+## Каноническая страница и дубли
+
+Одна и та же страница бывает доступна по нескольким адресам: `http://` и `https://`, с `www` и без, со слэшем на конце и без, с параметрами (`?utm_source=...`, о метках вы знаете из урока про соцсети). Для поисковика это разные страницы, у которых одно содержание: **дубли**. Они делят между собой силу ссылок и путают поисковик.
+
+Что делать:
+
+1. **Одна основная версия.** Выберите: https, с www или без. Остальные версии отправляйте на основную **редиректом 301** (вы разбирали коды ответов в части про HTTP: 301 это «переехала навсегда»).
+2. **`rel="canonical"`.** В head каждой страницы пропишите `<link rel="canonical" href="https://zarechye.example/uslugi/">`, и пусть адрес будет полным. Это подсказка: «основная версия этой страницы вот эта». Страница может указывать и на саму себя.
+3. **Единый вид адресов.** Решите про слэш на конце и строчные буквы и придерживайтесь.
+
+## noindex: как не пустить страницу в поиск
+
+Не все страницы сайта нужны поиску: «Спасибо» после заявки, личный кабинет, результаты внутреннего поиска, корзина. Чтобы поисковик не хранил их, в head ставят мета-тег:
+
+```text
+<meta name="robots" content="noindex">
+```
+
+Или то же самое в заголовке ответа сервера (`X-Robots-Tag: noindex`), если это не HTML, например PDF.
+
+Главная ловушка, которую показывает схема ниже: **для noindex роботу нужно открыть страницу**. Если вы закрыли её в robots.txt, он не откроет её и не увидит метку. Поэтому правило такое: страницы, которые не должны быть в поиске, **оставляйте доступными для робота и ставьте noindex**. А robots.txt оставьте для разделов, куда роботу ходить просто не нужно (огромные служебные каталоги), и для защиты не рассчитывайте.
+
+А для личного кабинета нужен вход по паролю: это защита, а noindex только просьба не показывать.
+
+## Игра «паук»
+
+Откройте схему. Это выдуманный сайт из семи страниц и связи между ними. Робот начинает с главной и идёт по ссылкам. Закрывайте страницы в robots.txt, ставьте noindex, включайте sitemap и смотрите, что робот находит, читает и запоминает. Цель: нужные страницы доступны и в индексе, служебные не попадут в индекс, и ни одно правило не мешает другому.
+
+<SpiderGame />
+
+<details>
+<summary>Проверьте себя: как правильно закрыть от поиска страницу «Спасибо»?</summary>
+
+Оставить её открытой для робота и поставить в head мета-тег noindex. Если закрыть её ещё и в robots.txt, робот не увидит метку, а адрес всё равно может показаться в выдаче.
+
+</details>
+
+## Языки: hreflang
+
+Для сайта на нескольких языках (в брифе поле «языки») в head каждой версии указывают её «родственников» тегами `<link rel="alternate" hreflang="en" href="...">` (вы разбирали это в части про HTML и языки страницы). Правила три: у каждой версии ссылки на **все** версии, включая себя; адреса **полные**; страницы **взаимно** ссылаются друг на друга. Тогда Яндекс и Google показывают человеку страницу на его языке, а не наугад.
+
+## Разметка: рассказываем поисковику, что за страница
+
+Поисковик читает текст страницы и догадывается, что в нём что. Догадки не всегда верны: цифра «2026» год или цена? Разметка снимает вопрос.
+
+**schema.org** это общий словарь типов и свойств: `Organization` (организация), `Person` (человек), `Event` (событие), `Product` (товар), `Article` (статья) и сотни других. Его создали в 2011 году крупнейшие поисковики (Google, Microsoft, Yahoo, к ним присоединился Яндекс). **JSON-LD** это способ записать эти данные: как обычный JSON внутри тега `script` с типом `application/ld+json`. Стандарт JSON-LD принят консорциумом W3C. Google рекомендует именно его, Яндекс тоже понимает schema.org.
+
+```text
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Название проекта",
+  "url": "https://zarechye.example/",
+  "email": "hello@zarechye.example",
+  "telephone": "+7 000 000-00-00"
+}
+</script>
+```
+
+Что она даёт: поисковику яснее, о чём страница и кто за ней стоит; а для части типов ваша страница может получить в выдаче **расширенное** оформление (рейтинг, цена, дата события). Чего не даёт: гарантий. Google сам решает, показывать ли расширенный результат, и со временем меняет, какие виды поддерживает: смотрите актуальный список в документации.
+
+**Правила честной разметки.**
+
+1. **Размечайте то, что видно на странице.** Часы работы, которых на странице нет, указывать нельзя. Фальшивая разметка нарушает правила Google и может привести к санкциям.
+2. **Выбирайте тип по сути.** Эксперт `Person` или `ProfessionalService`, компания `Organization`, место `LocalBusiness` (следующие уроки), магазин `Store` с товарами `Product`, фестиваль `Event`, сервис `SoftwareApplication`.
+3. **Проверяйте.** Проверку расширенных результатов (Google) и валидатор разметки (schema.org) можно найти по их названиям; они покажут синтаксические ошибки.
+4. **Не размножайте.** Одна основная сущность на страницу, остальные связываются с ней.
+
+## Практика
+
+Подготовьте технические части сайта.
+
+1. **robots.txt**: строка User-agent, закрыты только служебные разделы, строка Sitemap с полным адресом.
+2. **Адреса и sitemap.xml**: по полному адресу для каждого раздела из брифа и сам файл.
+3. **Закрытые от индекса** страницы: не меньше двух, хотя бы одна через noindex.
+4. **JSON-LD** в head: `@context`, `@type`, название проекта, адрес и контакт из брифа.
+
+Проверка смотрит на форму файлов и на блок разметки. Подходит ли тип вашему проекту, решаете вы: откройте schema.org и найдите тип, который описывает вас точнее, чем Organization.
