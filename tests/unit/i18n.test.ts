@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { t, plural } from '#lib/i18n/index.ts';
 
 describe('i18n', () => {
-	it('reads a key', () => expect(t('app.title')).toBe('Сеть насквозь'));
+	it('reads a key', () => expect(t('app.title')).toBe('Сквозь время'));
 	it('fills vars', () => expect(t('game.xp', { n: 5 })).toBe('5 XP'));
 	it('throws on a missing key in dev', () => expect(() => t('nope')).toThrow(/nope/));
 	it('plural ru', () => {
