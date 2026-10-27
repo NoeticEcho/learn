@@ -14,6 +14,7 @@
 	import Quiz from '#lib/quiz/Quiz.svelte';
 	import Guide from '#lib/guide/Guide.svelte';
 	import VideoFacade from '#lib/VideoFacade.svelte';
+	import Comic from '#lib/comic/Comic.svelte';
 	import type { GuideEvent } from '#lib/guide/script.ts';
 	import type { ModelConfig } from '#lib/guide/model.ts';
 	import type { CheckResult } from '#lib/practice/checks.ts';
@@ -164,7 +165,8 @@
 		<p class="minutes">{t('lesson.minutes', { n: lesson.minutes, minutes: pl(lesson.minutes, 'minute.forms') })}</p>
 	</header>
 
-	<div class="container theory">
+	<div class={['container theory', lesson.comic && 'has-comic']}>
+		{#if lesson.comic}<Comic comic={lesson.comic} {era} />{/if}
 		<div class="prose">
 			{#if Body}<Body />{/if}
 		</div>
@@ -278,6 +280,26 @@
 		margin: 0;
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);
+	}
+	/* The comic: a strip under the header on narrow screens, the rail beside the theory on wide
+	   ones. The text column keeps its measure; the rail sits a gutter after it, not at the edge. */
+	.has-comic {
+		display: grid;
+		gap: var(--space-6);
+	}
+	@media (min-width: 1100px) {
+		.has-comic {
+			grid-template-columns: minmax(0, auto) minmax(16rem, 21rem);
+			justify-content: start;
+			align-items: start;
+			column-gap: clamp(var(--space-7), 5vw, var(--space-9));
+		}
+		.has-comic > .prose {
+			grid-area: 1 / 1;
+		}
+		.has-comic > :global(.comic) {
+			grid-area: 1 / 2;
+		}
 	}
 	.block {
 		margin-top: var(--space-9);

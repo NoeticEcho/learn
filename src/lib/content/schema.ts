@@ -8,6 +8,7 @@
  */
 import { z } from 'zod';
 import { Check } from '#lib/practice/checks.schema.ts';
+import { LIMITS, MOODS, PROPS, lines } from '#lib/comic/kit.ts';
 
 export { Check };
 
@@ -125,6 +126,50 @@ export const GuideLines = z.object({
 });
 export type GuideLines = z.infer<typeof GuideLines>;
 
+/**
+ * The lesson's comic (docs/content-plan/README.md, «Комикс»): two to four panels in the rail
+ * beside the theory. Each panel is Эхо (a mood, a side), at most one prop from the kit, a
+ * caption, and one or two lines. A line with `who` is the prop speaking and needs a prop.
+ */
+const ComicLine = z.object({
+	text: text.max(LIMITS.line),
+	who: text.max(LIMITS.caption).optional()
+});
+
+export const ComicPanel = z
+	.object({
+		mood: z.enum(MOODS).default('explain'),
+		side: z.enum(['left', 'right']).default('left'),
+		/** This panel's era on Эхо's ring, when it differs from the comic's. */
+		era: Era.optional(),
+		prop: z.enum(PROPS).optional(),
+		label: text.max(LIMITS.label).optional(),
+		caption: text.max(LIMITS.caption).optional(),
+		say: z.union([text.max(LIMITS.line), z.array(ComicLine).min(1).max(2)])
+	})
+	.strict()
+	.superRefine((p, ctx) => {
+		const ls = lines(p);
+		if (p.label && !p.prop) ctx.addIssue({ code: 'custom', path: ['label'], message: 'a label is drawn on a prop; this panel has none' });
+		if (ls.some((l) => l.who) && !p.prop)
+			ctx.addIssue({ code: 'custom', path: ['say'], message: 'a line with who is the prop speaking; this panel has no prop' });
+		if (ls.filter((l) => !l.who).length > 1 || ls.filter((l) => l.who).length > 1)
+			ctx.addIssue({ code: 'custom', path: ['say'], message: 'one line for Эхо and one for the prop at most' });
+		const total = ls.reduce((n, l) => n + l.text.length, 0);
+		if (total > LIMITS.panel)
+			ctx.addIssue({ code: 'custom', path: ['say'], message: `${total} characters; a panel holds ${LIMITS.panel}` });
+	});
+export type ComicPanel = z.infer<typeof ComicPanel>;
+
+export const Comic = z
+	.object({
+		/** Эхо's era for every panel; the lesson's practice era, then its part's, when absent. */
+		era: Era.optional(),
+		panels: z.array(ComicPanel).min(2).max(4)
+	})
+	.strict();
+export type Comic = z.infer<typeof Comic>;
+
 export const ConceptId = z.string().regex(/^[a-z0-9-]+$/);
 
 export const LessonMeta = z
@@ -144,6 +189,7 @@ export const LessonMeta = z
 		sources: z.array(Source).min(2),
 		videos: z.array(Source.extend({ kind: z.literal('video') })),
 		guide: GuideLines,
+		comic: Comic.optional(),
 		/** A pronunciation map for later narration (spec §4.9): written form → how to say it. */
 		say: z.record(z.string().min(1), text).optional()
 	})

@@ -30,3 +30,30 @@ One YAML file per part, as the shape in spec §3.3–3.4 needs it. Each file has
 - **Scaffolding that is code.** A step that needs a fake server puts it in a `data-scaffold` module script and says so (part 5, lesson 4 replaces `window.fetch`; the sandbox's CSP allows no network). A step that continues an earlier one cannot assume the learner's page has the new scaffold: either the lesson shows the block to paste (lesson 4), or the step does not `continue` and starts from its own complete page (lessons 5 to 8). Code that is only text (modules, components, a config) is written into `pre` (no `<`) or `textarea` (any code) blocks in a scaffold and checked by regex.
 - **mdsvex gotcha.** In a lesson's metadata, a `</pre>`, `</style>` or `</textarea>` inside a template literal ends the markdown HTML block that begins at `<script module>`; the rest of the metadata is then read as markdown and smartypants turns `...` into `…`. Write `<\/pre>` (the same as for `</script>`). Use ```html, not ```svelte, for Svelte code: the svelte grammar logs «failed to load language css».
 - **Diagrams** key an `{#each}` by index when the items come from the person's brief: two items with the same title make a duplicate key and break the page.
+
+## Комикс (the comic rail, 27.10.2026)
+
+Every lesson carries a short comic: two to four panels in which Эхо carries the lesson's one idea, a joke or a picture that makes it stick. On a screen 1100 px and wider it is the rail beside the theory, sticky while the theory scrolls; narrower, it is a strip under the lesson's header that scrolls sideways. It is written in the lesson's metadata, beside `summary`, and validated by `content:check` (`Comic` in `src/lib/content/schema.ts`; the kit is `src/lib/comic/kit.ts`).
+
+```js
+comic: {
+	era: 3, // optional: the dot lit on Эхо's ring; else the practice's era, else the part's
+	panels: [
+		{ mood: 'hmm', prop: 'server', label: 'корневой сервер', caption: 'Эхо работает резолвером',
+		  say: [{ text: 'Где живёт example.ru?' }, { who: 'Корневой сервер', text: 'Не знаю. Спросите серверы зоны .ru.' }] },
+		{ mood: 'cheer', side: 'right', prop: 'server', label: '203.0.113.10', say: 'Запомню на TTL секунд.' }
+	]
+},
+```
+
+- **A panel** is Эхо, at most one prop, and one or two lines.
+  - `mood`: `idle`, `explain` (the default), `hint`, `cheer` or `hmm`, the mascot's own states (`design/mascot/README.md`).
+  - `side`: where Эхо stands, `left` (the default) or `right`; the prop takes the other half. Without a prop Эхо stands in the middle.
+  - `era`: this panel's era on the ring, when it differs from the comic's (a panel per era, as in 00-start/02).
+  - `prop`: one of `crt`, `browser-1996`, `browser`, `editor`, `phone`, `server`, `network`, `flowchart`, `packets`, `envelope`, `postcard`, `lock`, `certificate`, `cards`, `sheet`. A `flowchart`'s label is its boxes, split by `|` (`'DOM|CSSOM|раскладка|пиксели'`, read left, right, down, left); a `packets` label is its numbers, split by spaces (`'3 1'` draws two).
+  - `label`: up to 28 characters drawn on the prop (a screen, an address, a tag). A long one is squeezed to fit.
+  - `caption`: up to 32 characters in the panel's corner: a year, a place, «Ответ».
+  - `say`: a string is Эхо's one line. A list holds at most one line by Эхо and one by the prop (`who` names the prop: «Сервер»), in the order they are said. Up to 120 characters a line and 170 a panel.
+- **The drawing is `aria-hidden`; the words are text.** A screen reader hears the caption and each line with its speaker («Эхо: …», «Сервер: …»), so nothing may live only in the drawing: a label is decoration, and what it says, a line says too.
+- **Write the comic last**, from the lesson's own metaphors (the postcard, the envelope, the phone book), so the strip and the text tell one story. It must be accurate as the lesson is: a joke that teaches a wrong fact is worse than none. One idea per comic, the panels as beats: the problem, the turn, the rule.
+- **A new prop** is a drawing in `src/lib/comic/Prop.svelte` (a 150 × 130 box, tokens only, `vector-effect: non-scaling-stroke`) and a name in `kit.ts`; never an image file.
