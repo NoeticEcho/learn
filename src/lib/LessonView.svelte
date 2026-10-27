@@ -7,8 +7,7 @@
 <script lang="ts">
 	import { onMount, type Component } from 'svelte';
 	import type { LessonMeta, Part, Question } from '#lib/content/schema.ts';
-	import type { Catalogue } from '#lib/content/catalogue.ts';
-	import { buildGraph, nextLessons } from '#lib/content/graph.ts';
+	import type { HomeLesson } from '#lib/content/catalogue.ts';
 	import { t, pl, midSentence } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Quiz from '#lib/quiz/Quiz.svelte';
@@ -20,8 +19,8 @@
 	import type { CheckResult } from '#lib/practice/checks.ts';
 	import type { Persona } from '#lib/persona/fields.ts';
 
-	type Props = { lesson: LessonMeta; part: Part; catalogue: Catalogue; body: Component | null };
-	let { lesson, part, catalogue, body: Body }: Props = $props();
+	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null };
+	let { lesson, part, concepts: taught, index, body: Body }: Props = $props();
 
 	let Practice = $state<Component<any> | null>(null);
 	let persona = $state<Persona | null>(null);
@@ -35,16 +34,22 @@
 	let code = '';
 
 	const era = $derived(lesson.practice?.era ?? part.era ?? null);
-	const graph = $derived(buildGraph(catalogue.lessons, catalogue));
+	// The course's lessons and what each waits for, from the home's hashed list (loaded on mount).
+	let course = $state<HomeLesson[]>([]);
+	const open = (done: Set<string>) => course.filter((l) => !done.has(l.id) && l.after.every((id) => done.has(id)));
 	const opened = $derived.by(() => {
 		const before = new Set([...doneSet].filter((id) => id !== lesson.id));
-		const after = new Set([...before, lesson.id]);
-		const was = new Set(nextLessons(graph, before));
-		return nextLessons(graph, after)
-			.filter((id) => !was.has(id) && id !== lesson.id)
-			.map((id) => graph.lessons.get(id)!);
+		const was = new Set(open(before).map((l) => l.id));
+		return open(new Set([...before, lesson.id])).filter((l) => !was.has(l.id) && l.id !== lesson.id);
 	});
-	const concepts = $derived(lesson.teaches.map((c) => midSentence(catalogue.concepts.find((x) => x.id === c)?.title ?? c)));
+	const concepts = $derived(taught.map(midSentence));
+
+	onMount(() => {
+		fetch(links.homeIndex(index))
+			.then((r) => (r.ok ? (r.json() as Promise<HomeLesson[]>) : []))
+			.then((l) => (course = l))
+			.catch(() => {}); // offline and never cached: «Дальше» offers the map instead
+	});
 
 	onMount(async () => {
 		const learner = await import('#lib/learner.ts');
@@ -237,7 +242,7 @@
 					{#each opened as l (l.id)}<li><a href={links.lesson(l.id)}>{l.title}</a></li>{/each}
 				</ul>
 			{:else}
-				<p class="note">{t('lesson.next.none')}</p>
+				{#if course.length}<p class="note">{t('lesson.next.none')}</p>{/if}
 				<a class="secondary" href={links.map()}>{t('home.map')}</a>
 			{/if}
 		{:else}

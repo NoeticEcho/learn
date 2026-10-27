@@ -65,6 +65,8 @@ test('below 1100 px it is a strip under the header that scrolls sideways, not th
 	await page.goto(lesson);
 	const strip = page.locator('.comic ol');
 	await expect(strip).toBeVisible();
+	// The tab stop is given after hydration, once the strip has measured itself.
+	await expect(strip).toHaveAttribute('tabindex', '0');
 	const m = await page.evaluate(() => {
 		const s = document.querySelector('.comic ol')!;
 		const h1 = document.querySelector('h1')!.getBoundingClientRect();

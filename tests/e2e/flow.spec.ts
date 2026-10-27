@@ -131,3 +131,13 @@ test('two lessons of one era keep their own pages, and the gallery shows the fur
 	// the lesson's scaffolding is not part of the person's site
 	await expect(thumb.locator('body')).not.toContainText('Заметка урока');
 });
+
+test('finishing a lesson names the lessons it opens, from the course list fetched after load', async ({ page }) => {
+	await page.goto('./lesson/00-start/01-how-to-learn/');
+	await page.getByRole('button', { name: 'Завершить урок' }).click();
+	await expect(page.getByText('Это открывает:')).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Машина времени: восемь эпох одного сайта' })).toBeVisible();
+	// The lesson itself no longer carries the course: its inline data names the concepts it teaches.
+	const html = await (await page.request.get('./lesson/00-start/01-how-to-learn/')).text();
+	expect(html).not.toContain('"concepts":[{');
+});

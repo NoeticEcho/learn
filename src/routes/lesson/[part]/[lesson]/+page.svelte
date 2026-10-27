@@ -12,5 +12,5 @@
 </svelte:head>
 
 {#key data.lesson.id}
-	<LessonView lesson={data.lesson} part={data.part} catalogue={data.catalogue} body={data.body} />
+	<LessonView lesson={data.lesson} part={data.part} concepts={data.concepts} index={data.index} body={data.body} />
 {/key}

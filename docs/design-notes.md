@@ -187,7 +187,23 @@ the brief editor, the prologue's seven frames, the error page, and the empty sta
 | Error page | A heading and two buttons in an empty screen | judged | Эхо in «hmm» above the heading. |
 | Prologue, phone | Stepping the filmstrip at 360 left the next era's year and the top of its frame above the screen | judged | After a step, a frame whose top is above the screen is scrolled to its start (instantly). |
 
+**Performance.** Lighthouse (mobile, 3 runs, the same private static server for both builds):
+the lesson 02-html/01 had gone from 2853 to 3152 ms LCP between the build before this work and
+after it, though it has no comic. The cause was not the comic: every lesson inlined the whole
+catalogue (all lessons' summaries and concepts) for «Дальше», 29 KB gzipped and growing with each
+lesson the other parts add, and the HTML crossed a TCP slow-start window (one more round trip).
+A lesson now carries the titles of the concepts it teaches and reads which lessons it opens from
+the home's hashed list after mount, cached by the service worker. The lesson's HTML went from
+47.4 to 18.8 KB gzipped; LCP 2857 ms median again (02-html/01), 3002 ms for 01-internet/05 with
+its comic (3004 before the comic); performance 0.93 to 0.95, accessibility 1.00 and 0.99. First-route
+JS 55.2 KB of 150. The LCP element is the «Зачем» lede, a text paint waiting on the serif face.
+
 **Checked and not changed.**
+
+- **Heading order in diagrams.** Lighthouse's 0.99 on 01-internet/05 is `heading-order`: the DNS
+  diagram's `<h4>` follows the lesson's `<h2>`. 97 `<h4>`s across `content/diagrams/` are the
+  authors' convention for a diagram's inner heads; it is theirs to change (an `<h3>`, or a
+  `<p>` styled as a head), and was left to them.
 
 - **The editor's gutter** looked misaligned with its lines in full-page screenshots; measured live,
   the gutter's numbers and the lines share their tops to the pixel. It was the screenshot
