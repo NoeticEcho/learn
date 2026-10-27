@@ -11,7 +11,7 @@
 	import { onMount } from 'svelte';
 
 	type Rule = { id: number; selector: string; value: string; important: boolean };
-	const colours: Record<string, string> = { красный: '#c0392b', синий: '#1f5fae', зелёный: '#2f7d4f', оранжевый: '#b9660b' };
+	const colours: Record<string, string> = { красный: '#b83226', синий: '#1f5fae', зелёный: '#2a7448', оранжевый: '#9c5508' };
 	let uid = 10;
 	const mk = (selector: string, value: string, important = false): Rule => ({ id: uid++, selector, value, important });
 	const presets: { name: string; rules: () => Rule[] }[] = [

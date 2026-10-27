@@ -27,7 +27,7 @@
 		{ sel: '.button', spec: 10, colour: 'синий', layer: 'utilities' },
 		{ sel: 'a', spec: 1, colour: 'зелёный', layer: 'none' }
 	]);
-	const hex: Record<string, string> = { красный: '#c0392b', синий: '#1f5fae', зелёный: '#2f7d4f' };
+	const hex: Record<string, string> = { красный: '#b83226', синий: '#1f5fae', зелёный: '#2a7448' };
 	const rank = (l: L) => (l === 'none' ? 99 : order.indexOf(l));
 	const win = $derived(rules.reduce((w, r) => (rank(r.layer) > rank(w.layer) || (rank(r.layer) === rank(w.layer) && r.spec > w.spec) ? r : w)));
 </script>

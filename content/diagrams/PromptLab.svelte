@@ -167,6 +167,6 @@
 	}
 	.res li.tell {
 		border-left-color: var(--text-primary);
-		opacity: 0.8;
+		font-style: italic;
 	}
 </style>
