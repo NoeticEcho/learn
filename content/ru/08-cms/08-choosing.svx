@@ -1,0 +1,794 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/08-choosing',
+		part: 8,
+		order: 8,
+		title: 'Как выбрать: дерево решений для вашего проекта',
+		definition: 'Выбор CMS или генератора сайта начинается с пяти вопросов: кто правит, как часто, что нужно кроме страниц, бюджет и языки. Свою CMS пишут последней.',
+		summary: 'Вы получите рабочий метод выбора между конструктором, WordPress, «Битрикс», генератором и headless по пяти вопросам про ваш бриф, и защитите выбор перед заказчиком или самим собой. После урока у вас есть карточка решения: выбор, два отвергнутых варианта с причинами и условие пересмотра. Заодно вы узнаете, когда не надо делать свою CMS.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'cards',
+					label: 'WP? Tilda? Hugo?',
+					caption: 'С чего начать',
+					say: 'Не «что модно», а пять вопросов: кто правит, как часто, что ещё нужно, бюджет, языки.'
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'своя CMS',
+					caption: 'Соблазн',
+					say: [
+						{ text: 'Напишу свою CMS, мне же проще.' },
+						{ who: 'Опыт', text: 'Роли, версии, копии, защита… Это годы, а не выходные.' }
+					]
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'пересмотр: когда…',
+					caption: 'Карточка',
+					say: 'Выбор записан с причинами. И рядом: при каком условии мы его пересмотрим.'
+				}
+			]
+		},
+		minutes: 15,
+		teaches: ['cms-choosing-stack'],
+		requires: ['cms-wordpress-maintenance', 'cms-tilda', 'cms-bitrix', 'cms-ssg-landscape', 'cms-jamstack'],
+		practice: {
+			id: 'cms-decision-card',
+			title: 'Карточка решения для вашего проекта',
+			task: 'Заполните карточку решения. 1) Кто правит содержание и как часто. 2) Что обслуживает главное действие проекта (форма, оплата, запись): сервис, плагин или своя функция. 3) Как хранятся тексты на языках проекта (поле на каждый язык, перевод записи, копии страниц). 4) Бюджет. 5) Выберите стек и объясните, как выбор связан с ответами выше. 6) Назовите два отвергнутых варианта и для каждого свою причину: причины не должны повторять друг друга. 7) Напишите, при каком условии вы пересмотрите решение. Все «…» нужно заменить.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="card">
+      <h2>Карточка решения: чем строить сайт проекта<\/h2>
+      <dl>
+        <dt>Проект<\/dt><dd>{{name}}: {{who}}<\/dd>
+        <dt>Кто правит содержание<\/dt><dd id="editor">…<\/dd>
+        <dt>Как часто<\/dt><dd id="freq">…<\/dd>
+        <dt>Главное действие «{{mainAction.label}}»: что его обслуживает<\/dt><dd id="action-by">…<\/dd>
+        <dt>Языки ({{languages}}) и как хранятся тексты<\/dt><dd id="langs">…<\/dd>
+        <dt>Бюджет<\/dt><dd id="budget">…<\/dd>
+        <dt>Выбранный стек<\/dt><dd id="stack">…<\/dd>
+        <dt>Почему он подходит<\/dt><dd id="why">…<\/dd>
+      <\/dl>
+      <table id="rejected">
+        <tr><th>Отвергнутый вариант<\/th><th>Почему отвергнут<\/th><\/tr>
+        <tr class="rejected"><td class="option">…<\/td><td class="reason">…<\/td><\/tr>
+        <tr class="rejected"><td class="option">…<\/td><td class="reason">…<\/td><\/tr>
+      <\/table>
+      <p>Когда я пересмотрю решение: <span id="revisit">…<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="card">
+      <h2>Карточка решения: чем строить сайт проекта<\/h2>
+      <dl>
+        <dt>Проект<\/dt><dd>{{name}}: {{who}}<\/dd>
+        <dt>Кто правит содержание<\/dt><dd id="editor">владелец сам, без технических знаний<\/dd>
+        <dt>Как часто<\/dt><dd id="freq">раз в месяц<\/dd>
+        <dt>Главное действие «{{mainAction.label}}»: что его обслуживает<\/dt><dd id="action-by">форма заявки конструктора: заявки приходят на почту, своего серверного кода нет<\/dd>
+        <dt>Языки ({{languages}}) и как хранятся тексты<\/dt><dd id="langs">поле на каждый язык (title_ru, title_en), а в конструкторе страницы на втором языке заводятся копиями с общей схемой<\/dd>
+        <dt>Бюджет<\/dt><dd id="budget">небольшой: подписка и домен, без отдельного разработчика<\/dd>
+        <dt>Выбранный стек<\/dt><dd id="stack">конструктор (Tilda)<\/dd>
+        <dt>Почему он подходит<\/dt><dd id="why">правит сам владелец раз в месяц, главное действие это простая форма, а бюджет небольшой: конструктор быстрее и дешевле всего, и обслуживать нечего<\/dd>
+      <\/dl>
+      <table id="rejected">
+        <tr><th>Отвергнутый вариант<\/th><th>Почему отвергнут<\/th><\/tr>
+        <tr class="rejected"><td class="option">WordPress<\/td><td class="reason">обновления, копии и защита легли бы на владельца, а выгоды от плагинов проекту не нужны<\/td><\/tr>
+        <tr class="rejected"><td class="option">генератор статики и Markdown<\/td><td class="reason">владельцу без Git неудобно править файлы, а разработчика в проекте нет<\/td><\/tr>
+      <\/table>
+      <p>Когда я пересмотрю решение: <span id="revisit">если понадобится личный кабинет или своя логика, или если цена подписки станет выше, чем хостинг и работа специалиста<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'card-exists', kind: 'exists', selector: '#card' },
+				{ id: 'no-blanks', kind: 'text', selector: '#card', matches: '^[^…]*$' },
+				{ id: 'editor', kind: 'text', selector: '#editor', matches: 'владел|редактор|разработчик|команд|я сам|мы' },
+				{ id: 'frequency', kind: 'text', selector: '#freq', matches: 'раз|недел|месяц|ежед|год|квартал|редк|част' },
+				{ id: 'action-by', kind: 'text', selector: '#action-by', matches: '\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'languages-storage', kind: 'text', selector: '#langs', matches: 'поле|перевод|_en|копи|страниц|язык|один' },
+				{
+					id: 'languages-bilingual',
+					kind: 'text',
+					selector: '#langs',
+					matches: 'поле|перевод|_en|копи|страниц',
+					when: { brief: 'languages', contains: 'en' }
+				},
+				{
+					id: 'stack-named',
+					kind: 'text',
+					selector: '#stack',
+					matches: 'Tilda|конструктор|WordPress|Битрикс|генератор|Hugo|Jekyll|Eleventy|Astro|SvelteKit|headless|Strapi|Directus|Sanity|Decap|приложени'
+				},
+				{
+					id: 'stack-why',
+					kind: 'text',
+					selector: '#why',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:правит|редактор|владел|част|раз в|недел|месяц|бюджет|данн|форм))'
+				},
+				{ id: 'rejected-two', kind: 'count', selector: '#rejected tr.rejected', min: 2 },
+				{ id: 'rejected-reasons', kind: 'text', selector: '#rejected td.reason', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'revisit', kind: 'text', selector: '#revisit', matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:если|когда|при |как только))' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'С каких вопросов начинают выбор CMS или генератора?',
+				options: [
+					'Кто правит содержание, как часто, что нужно кроме страниц, какой бюджет и сколько языков',
+					'Какая система популярнее всех',
+					'Какая из них красивее выглядит в каталоге тем'
+				],
+				answer: 0,
+				why: [
+					'Да. От ответов зависит всё: удобная админка нужна тем, кто правит часто и не владеет кодом, а редким правкам хватит файлов.',
+					'Нет: популярность говорит о том, что нужно многим, а не вам.',
+					'Нет: внешний вид можно менять, а вот устройство содержания и обслуживания трудно.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Лендинг с одной формой, правит владелец раз в месяц, бюджет небольшой. Что вероятнее всего подойдёт?',
+				options: ['Конструктор вроде Tilda', 'Headless-CMS и генератор', 'Своя CMS на заказ'],
+				answer: 0,
+				why: [
+					'Да. Задача простая, правит сам владелец, обслуживать нечего. Ограничения конструктора проекту не мешают.',
+					'Нет: две системы и сборка ради лендинга это лишняя работа.',
+					'Нет: самое дорогое решение для самой простой задачи.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Документация для разработчиков: страниц много, правят её разработчики, раз в месяц. Что разумно?',
+				options: [
+					'Генератор статики и Markdown в Git: быстро, безопасно, правки через Git привычны',
+					'WordPress с десятком плагинов',
+					'Магазин на Битриксе'
+				],
+				answer: 0,
+				why: [
+					'Да. У команды уже есть Git, содержание меняется редко, а обслуживать почти нечего.',
+					'Нет: обслуживание WordPress в этом проекте ничем не окупится.',
+					'Нет: магазин тут вообще не нужен.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Почему не стоит писать свою CMS?',
+				options: [
+					'В CMS много скучной, но обязательной работы: пользователи и роли, версии и черновики, медиатека, копии, защита, обновления',
+					'Тот, кто её написал, становится единственным, кто её понимает, и когда он уходит, система остаётся без хозяина',
+					'Готовые системы уже прошли годы проверки и закрывают уязвимости быстрее',
+					'Закон запрещает собственные CMS'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: самая видимая часть (форма правки) это малая доля работы.',
+					'Да: «домашняя» CMS агентства часто оказывается ловушкой и для самого агентства, и для заказчика.',
+					'Да: безопасность требует постоянных усилий, и общие проекты распределяют их на сообщество.',
+					'Нет: такого закона нет, это вопрос цены и риска.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте по порядку, что пробовать раньше, когда нужна новая возможность на сайте',
+				items: [
+					'Настроить то, что уже есть (параметры, готовый блок)',
+					'Взять готовый плагин или сервис',
+					'Собрать из готовых частей',
+					'Написать своё, и только после замера, что иначе не выйдет'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Зачем в карточке решения строка «когда я пересмотрю решение»?',
+				options: [
+					'Выбор верен для сегодняшнего проекта, а проекты растут: заранее названное условие позволяет вовремя сменить путь, а не терпеть',
+					'Чтобы не принимать решение сейчас',
+					'Чтобы заказчик мог отказаться от работы'
+				],
+				answer: 0,
+				why: [
+					'Да. Условие вроде «появится личный кабинет» или «правки прекратятся» превращает решение в осознанное, а не в догму.',
+					'Нет: решение принято, строка лишь называет, при каком изменении оно перестанет подходить.',
+					'Нет: она про смену стека, а не про отмену работы.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-choose-questions',
+				front: 'Какие пять вопросов определяют выбор стека?',
+				back: 'Кто правит содержание, как часто, что нужно кроме страниц (форма, магазин, кабинет), какой бюджет и сколько языков. Остальное следует из них.'
+			},
+			{
+				id: 'cms-choose-map',
+				front: 'Что для какого проекта?',
+				back: 'Конструктор: простой сайт, правит владелец. WordPress: редактору нужна админка и плагины. Битрикс: большой каталог и 1С. Генератор: редкие правки, разработчик. Headless: часто правят разные люди. Приложение: личные кабинеты.'
+			},
+			{
+				id: 'cms-choose-own',
+				front: 'Почему не писать свою CMS?',
+				back: 'Роли, версии, медиатека, копии, защита и обновления это годы работы, которую уже сделали и проверили сообщества. Своя CMS становится ловушкой, когда её автор уходит.'
+			},
+			{
+				id: 'cms-choose-order',
+				front: 'В каком порядке решают задачу, прежде чем писать своё?',
+				back: 'Настроить то, что есть, потом взять готовый плагин или сервис, потом собрать из готовых частей, и только после замера написать своё.'
+			},
+			{
+				id: 'cms-choose-revisit',
+				front: 'Зачем нужна строка «когда пересмотрю»?',
+				back: 'Решение верно для сегодняшнего проекта. Заранее названное условие (появился кабинет, правки прекратились, подписка подорожала) позволяет вовремя сменить путь.'
+			}
+		],
+		sources: [
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Jamstack.org: что такое Jamstack', url: 'https://jamstack.org/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Tilda: справочный центр', url: 'https://help-ru.tilda.cc/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' },
+			{ title: 'WordPress.org Documentation', url: 'https://wordpress.org/documentation/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'Joel Spolsky: Things You Should Never Do, Part I',
+				url: 'https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Последний шаг части: собрать всё в один осознанный выбор. Пять ответов о вашем проекте, один стек, два отвергнутых и условие, при котором вы передумаете.',
+			hints: [
+				'Сначала ответьте на вопросы про проект (кто правит, как часто, что обслуживает главное действие, языки, бюджет). Выбор следует из ответов, а не наоборот.',
+				'В объяснении выбора назовите хотя бы два ответа выше: например, «правит владелец раз в месяц, бюджет небольшой».',
+				'Для двух отвергнутых вариантов придумайте разные причины: у одного, скажем, высокая цена, у другого неудобство для редактора.'
+			],
+			mistakes: {
+				'card-exists': 'Карточка исчезла. Она была в странице, верните её.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				editor: 'Скажите, кто правит содержание: владелец, редактор, разработчик или команда.',
+				frequency: 'Напишите, как часто правят содержание: например, «раз в месяц».',
+				'action-by': 'Скажите, что обслуживает главное действие: сервис, плагин или функцию, хотя бы тремя словами.',
+				'languages-storage': 'Скажите, как хранятся тексты на языках проекта: полем на каждый язык, переводом записи или копиями страниц.',
+				'languages-bilingual': 'У проекта два языка: напишите, как хранятся тексты на них (поле на каждый язык или перевод записи).',
+				'stack-named': 'Назовите выбранный стек: конструктор, WordPress, Битрикс, генератор, headless или приложение.',
+				'stack-why': 'Объясните выбор развёрнуто, через ответы выше: кто правит, как часто, бюджет.',
+				'rejected-two': 'Нужны два отвергнутых варианта. Не удаляйте строки таблицы.',
+				'rejected-reasons': 'У каждого отвергнутого варианта нужна своя причина, хотя бы в несколько слов.',
+				revisit: 'Назовите условие пересмотра: «если…» или «когда…».'
+			},
+			outro: 'Карточка готова: выбор записан вместе с причинами и условием, при котором его стоит пересмотреть. На этом часть про CMS закончена. Дальше у сайта будет инфраструктура: хостинг, домены и сертификаты.'
+		},
+		say: {
+			CMS: 'си-эм-эс',
+			Tilda: 'тильда',
+			WordPress: 'вордпресс',
+			Markdown: 'маркдаун',
+			Git: 'гит',
+			headless: 'хедлесс',
+			Jamstack: 'джем-стек',
+			'Битрикс': 'битрикс'
+		}
+	};
+</script>
+
+<script>
+	import StackTree from '../../diagrams/StackTree.svelte';
+</script>
+
+## Метод вместо вкуса
+
+Мы разобрали пять путей: WordPress, конструктор, «Битрикс», генератор статики и headless-CMS. Остался вопрос, как выбрать. Ответ не про вкус и не про моду. Выбор следует из **пяти вопросов о вашем проекте**, и вы уже знаете, как каждый из них действует:
+
+1. **Кто правит содержание?** Владелец без технических знаний, редактор в команде или разработчик? (Урок 1.)
+2. **Как часто?** Каждый день, раз в неделю, раз в месяц, раз в полгода? От этого зависит, нужна ли удобная админка. (Урок 1.)
+3. **Что нужно кроме страниц?** Форма заявки, магазин, личный кабинет? Каждое из них либо входит в платформу, либо подключается сервисом, либо означает своё приложение. (Уроки 4 и 7.)
+4. **Какой бюджет?** Деньги на старте, подписка каждый год, время на обслуживание. (Уроки 3 и 4.)
+5. **Сколько языков?** Один язык проще всего. Для двух нужны поля на каждый язык или переводы записей. (Урок 1.)
+
+Нажмите на готовые проекты в схеме и меняйте ответы: вы увидите, как решение смещается. Это не истина, а способ увидеть логику.
+
+<StackTree />
+
+## Сводка по путям
+
+| Путь | Правит | Цена владения | Контроль | Где ломается |
+|---|---|---|---|---|
+| Конструктор | владелец | подписка | низкий | выход с платформы, своя логика |
+| WordPress | редактор | время на обслуживание | высокий | обновления, плагины, защита |
+| «Битрикс» | команда с разработчиком | лицензия и разработчик | высокий | цена, нужны специалисты |
+| Генератор статики | разработчик | почти бесплатно | полный | неудобно редактору без Git |
+| Headless и генератор | редакторы и разработчик | две системы | полный | сложность, предпросмотр |
+| Своё приложение | команда | самая высокая | полный | долго и дорого |
+
+## Когда не стоит делать свою CMS
+
+Самый соблазнительный вариант для разработчика: «я напишу свою, мне же проще». Это почти всегда ошибка, и вот почему.
+
+**CMS это в основном скучная работа.** Форма правки это небольшая часть. Остальное: пользователи и роли, пароли и восстановление доступа, черновики и версии, медиатека с обрезкой и сжатием картинок, поля для SEO, многоязычие, предпросмотр, резервные копии, защита от взломов, обновления зависимостей, журнал изменений. Каждое из этого есть в готовых системах и прошло через тысячи проектов, а у вас это будет не менее года работы и бесконечная поддержка.
+
+**«Домашняя» CMS становится ловушкой.** В 2000-х многие студии писали свои системы для клиентов. Пока автор в студии, всё хорошо. Когда он уходит, система остаётся без хозяина, её никто не обновляет, в ней находят дыры, а клиенту некуда переехать. Заказчик попадает в заложники.
+
+**Есть порядок, в котором стоит искать решение.** Сначала **настроить** то, что есть. Потом **взять готовое**: плагин, сервис, блок. Потом **собрать из готовых частей** (например, генератор плюс headless-CMS). И **писать своё** только после того, как вы измерили, что иначе не выйдет. Этот порядок годится не только для CMS: свою **аутентификацию**, **оплату**, **поиск** и **отправку почты** тоже не пишут (об аутентификации в части 6 сказано то же самое).
+
+Исключения есть: когда CMS и есть ваш продукт, когда у проекта уникальная модель данных и команда, которая её сопровождает, и когда вы учитесь. А самая дешёвая «своя CMS» это Markdown-файлы в Git: тексты лежат файлами, правки это коммиты. Её не нужно писать, она уже сделана.
+
+<details>
+<summary>Проверьте себя: что вы попробуете раньше, чем писать своё?</summary>
+
+Настроить имеющееся, затем взять готовый плагин или сервис, затем собрать из готовых частей. Своё пишут последним и только если замерили, что иначе не получится.
+
+</details>
+
+## Не запереть себя
+
+Хороший выбор можно передумать. Для этого три привычки. **Держите содержание в переносимом виде**: Markdown, JSON, выгрузка SQL, а не только в закрытом редакторе платформы. **Не меняйте адреса страниц без нужды**: адреса это память поисковиков и ссылок. И **проверьте выход заранее**: раз в год выгрузите сайт и проверьте, что можно было бы унести.
+
+## Практика
+
+Вы в эпохе 2022 года, но смотрите на всё сразу. Соберите в карточку решения всё, что вы узнали в этой части: кто правит и как часто, что обслуживает главное действие, как хранятся языки, бюджет, выбранный стек и два отвергнутых с разными причинами. Закончите условием, при котором вы пересмотрите решение.
+
+## Что было не так
+
+Выбор «по знакомству» и «по студии» губил проекты, потому что изменения платформы никто не предсказывал. Эти три привычки (причины, отвергнутые варианты, условие пересмотра) превращают выбор из ставки в решение, которое можно проверить и поправить.
