@@ -10,7 +10,9 @@ import { EDITABLE } from '#lib/persona/fields.ts';
 const [first, second] = EDITABLE.filter((f) => !f.multiline);
 
 async function mounted() {
-	render(Settings);
+	const { container } = render(Settings);
+	// the project's fields are disabled until the editor has read the store
+	await vi.waitFor(() => expect(container.querySelector('[data-loaded="true"]')).toBeTruthy());
 	const a = screen.getByLabelText(new RegExp(`^${await label(first.key)}$`)) as HTMLInputElement;
 	const b = screen.getByLabelText(new RegExp(`^${await label(second.key)}$`)) as HTMLInputElement;
 	// onMount has read the store once the fields carry what it holds

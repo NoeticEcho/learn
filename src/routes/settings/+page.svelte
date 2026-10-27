@@ -8,16 +8,13 @@
 	import { onMount } from 'svelte';
 	import { t, pl } from '#lib/i18n/index.ts';
 	import { getTheme, setTheme, THEME_KEY, type Theme } from '#lib/theme.ts';
-	import { EDITABLE, KINDS, TEMPLATES, type Kind } from '#lib/persona/fields.ts';
+	import BriefEditor from '#lib/persona/BriefEditor.svelte';
 	import type { Provider } from '#lib/guide/model.ts';
 
 	const PROVIDERS: Provider[] = ['anthropic', 'openai', 'openrouter'];
 	const ANTHROPIC_MODELS = ['claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-opus-5-5'];
 
 	let theme = $state<Theme | 'system'>('system');
-	let kind = $state<Kind>('expert');
-	let own = $state<Record<string, string>>({});
-	let projectNote = $state('');
 
 	let provider = $state<Provider>('anthropic');
 	let model = $state(ANTHROPIC_MODELS[0]);
@@ -31,8 +28,6 @@
 	let previewText = $state('');
 	let importNote = $state('');
 
-	const template = $derived(TEMPLATES[kind]);
-
 	onMount(async () => {
 		try {
 			const stored = localStorage.getItem(THEME_KEY);
@@ -42,9 +37,6 @@
 		}
 		const { db, progress } = await import('#lib/learner.ts');
 		const d = await db();
-		const p = await progress.persona(d);
-		kind = (p.kind as Kind) ?? 'expert';
-		own = Object.fromEntries(EDITABLE.map(({ key }) => [key, typeof p[key] === 'string' ? (p[key] as string) : '']));
 		const k = await progress.getSetting<{ provider: Provider; key: string; model: string }>(d, 'ownKey');
 		if (k?.key) {
 			provider = k.provider;
@@ -63,44 +55,6 @@
 			}
 			document.documentElement.dataset.theme = getTheme();
 		} else setTheme(v);
-	}
-
-	// One timer per field: a single shared one dropped a field's last edit when the person moved on
-	// to the next field within the debounce.
-	const saveTimers = new Map<string, ReturnType<typeof setTimeout>>();
-	function saveField(field: string, value: string) {
-		own[field] = value;
-		clearTimeout(saveTimers.get(field));
-		saveTimers.set(
-			field,
-			setTimeout(async () => {
-				saveTimers.delete(field);
-				const { db, progress } = await import('#lib/learner.ts');
-				await progress.setPersona(await db(), field, value.trim());
-				projectNote = t('settings.saved');
-			}, 400)
-		);
-	}
-
-	async function saveKind(k: Kind) {
-		kind = k;
-		const { db, progress } = await import('#lib/learner.ts');
-		await progress.setPersona(await db(), 'kind', k);
-		projectNote = t('settings.saved');
-	}
-
-	/** «Вернуть пример» erases what the person typed, so it asks first. */
-	let resetting = $state(false);
-	async function resetProject() {
-		resetting = false;
-		for (const timer of saveTimers.values()) clearTimeout(timer);
-		saveTimers.clear();
-		const { db } = await import('#lib/learner.ts');
-		const d = await db();
-		await d.clear('persona');
-		own = Object.fromEntries(EDITABLE.map(({ key }) => [key, '']));
-		kind = 'expert';
-		projectNote = t('settings.saved');
 	}
 
 	async function saveKey(e: SubmitEvent) {
@@ -213,36 +167,7 @@
 	<section aria-labelledby="s-project">
 		<h2 id="s-project">{t('settings.project')}</h2>
 		<p class="note">{t('settings.project.lede')}</p>
-		<div class="field kind">
-			<label for="kind">{t('settings.kind')}</label>
-			<select id="kind" value={kind} onchange={(e) => saveKind(e.currentTarget.value as Kind)}>
-				{#each KINDS as k (k)}<option value={k}>{t(`settings.kind.${k}`)}</option>{/each}
-			</select>
-		</div>
-		<div class="fields">
-			{#each EDITABLE as f (f.key)}
-				<div class="field" class:wide={f.multiline}>
-					<label for="f-{f.key}">{t(`settings.field.${f.key}`)}</label>
-					{#if f.multiline}
-						<textarea id="f-{f.key}" rows="3" placeholder={String(template[f.key] ?? '')} value={own[f.key] ?? ''} oninput={(e) => saveField(f.key, e.currentTarget.value)}></textarea>
-					{:else}
-						<input id="f-{f.key}" placeholder={String(template[f.key] ?? '')} value={own[f.key] ?? ''} oninput={(e) => saveField(f.key, e.currentTarget.value)} />
-					{/if}
-				</div>
-			{/each}
-		</div>
-		<div class="row">
-			{#if resetting}
-				<span class="ask" role="alert">
-					{t('settings.project.reset.confirm')}
-					<button type="button" class="secondary" onclick={resetProject}>{t('settings.project.reset.yes')}</button>
-					<button type="button" class="quiet" onclick={() => (resetting = false)}>{t('practice.cancel')}</button>
-				</span>
-			{:else}
-				<button type="button" class="quiet" onclick={() => (resetting = true)}>{t('settings.project.reset')}</button>
-			{/if}
-			{#if projectNote}<span class="status" role="status">{projectNote}</span>{/if}
-		</div>
+		<BriefEditor resettable />
 	</section>
 
 	<section aria-labelledby="s-key">
@@ -357,24 +282,19 @@
 		color: var(--text-body);
 	}
 	input:not([type='checkbox'], [type='radio'], [type='file']),
-	select,
-	textarea {
+	select {
 		min-height: var(--hit-min);
 		padding: var(--space-2) var(--space-3);
 		border: var(--line) solid var(--field-edge);
 		border-radius: 0;
 		background: var(--surface-body);
 	}
-	input::placeholder,
-	textarea::placeholder {
+	input::placeholder {
 		color: var(--text-muted);
 	}
 	input[type='checkbox'],
 	input[type='radio'] {
 		accent-color: var(--brass-500);
-	}
-	.kind {
-		margin-bottom: var(--space-4);
 	}
 	.file {
 		display: grid;
@@ -403,14 +323,6 @@
 	}
 	.file input {
 		color: var(--text-secondary);
-		font-size: var(--text-body-sm);
-	}
-	.ask {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-2) var(--space-3);
-		color: var(--text-body);
 		font-size: var(--text-body-sm);
 	}
 	.preview {

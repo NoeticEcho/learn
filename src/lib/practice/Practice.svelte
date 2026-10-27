@@ -5,7 +5,7 @@
 	frame's origin is "null" and says nothing.
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { PracticeStep, PracticeFiles, FileName } from '#lib/content/schema.ts';
 	import { t } from '#lib/i18n/index.ts';
 	import { buildSrcdoc, type SandboxMessage } from './sandbox.ts';
@@ -150,6 +150,15 @@
 			clearTimeout(renderTimer);
 			flush();
 		};
+	});
+
+	// The brief can change on the same page (the brief lesson's inline editor): the checks then
+	// read the new values at once. The person's files are theirs and are not re-rendered.
+	let seenPersona = untrack(() => persona);
+	$effect(() => {
+		if (persona === seenPersona) return;
+		seenPersona = persona;
+		if (untrack(() => srcdoc)) render(true);
 	});
 
 	const lang = (f: FileName) => (f === 'styles.css' ? 'css' : f === 'script.js' ? 'js' : 'html');

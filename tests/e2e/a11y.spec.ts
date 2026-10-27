@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const routes = ['./', './map/', './lesson/02-html/01-first-page/', './lesson/00-start/01-how-to-learn/', './review/', './gallery/', './settings/'];
+const routes = ['./', './map/', './lesson/02-html/01-first-page/', './lesson/00-start/01-how-to-learn/', './lesson/00-start/04-brief/', './review/', './gallery/', './settings/'];
 
 for (const scheme of ['dark', 'light'] as const)
 	for (const route of routes)

@@ -136,3 +136,13 @@ it('a step with work of its own does not offer the old page', async () => {
 	await vi.waitFor(() => expect(textbox().value).toBe('<h1>моя</h1>'));
 	expect(screen.queryByRole('button', { name: /прошлой версии/ })).toBeNull();
 });
+
+it('a brief edited on the same page reaches the checks without a reload', async () => {
+	const named = { ...step, checks: [{ id: 'n', kind: 'field', selector: 'h1', field: 'name' }] };
+	const store = memoryStore();
+	const r = render(Practice, { step: named as never, store, persona: { name: 'Анна' } });
+	const frame = () => r.container.querySelector('iframe')!.getAttribute('srcdoc') ?? '';
+	await vi.waitFor(() => expect(frame()).toContain('Анна'));
+	await r.rerender({ step: named as never, store, persona: { name: 'Мария' } });
+	await vi.waitFor(() => expect(frame()).toContain('Мария'));
+});

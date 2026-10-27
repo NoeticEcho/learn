@@ -64,6 +64,19 @@
 		}
 	});
 
+	// The brief lesson edits the brief on this page (BriefEditor); its practice reads the new one.
+	onMount(() => {
+		if (!lesson.practice) return;
+		const reread = async () => {
+			const [learner, { render }] = await Promise.all([import('#lib/learner.ts'), import('#lib/persona/render.ts')]);
+			const next = await learner.persona();
+			persona = next;
+			prepare = (s: string) => render(s, next);
+		};
+		addEventListener('learn:brief', reread);
+		return () => removeEventListener('learn:brief', reread);
+	});
+
 	const store = {
 		load: async (stepId: string, file: string) => {
 			const { db, progress } = await import('#lib/learner.ts');
