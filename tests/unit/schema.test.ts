@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LessonMeta, Curriculum } from '#lib/content/schema';
+import { LessonMeta, Curriculum } from '#lib/content/schema.ts';
 import { validLesson } from '../fixtures/lesson.valid';
 
 describe('LessonMeta', () => {

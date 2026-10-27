@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { t, plural } from '#lib/i18n';
+import { t, plural } from '#lib/i18n/index.ts';
 
 describe('i18n', () => {
 	it('reads a key', () => expect(t('app.title')).toBe('Сеть насквозь'));

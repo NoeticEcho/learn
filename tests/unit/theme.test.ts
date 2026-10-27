@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveTheme } from '#lib/theme';
+import { resolveTheme } from '#lib/theme.ts';
 
 describe('resolveTheme', () => {
 	it('uses the stored choice first', () => expect(resolveTheme('paper', false)).toBe('paper'));

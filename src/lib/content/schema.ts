@@ -7,7 +7,7 @@
  * These schemas run at build time (server loads, the CLI, tests), never in the browser bundle.
  */
 import { z } from 'zod';
-import { Check } from '#lib/practice/checks.schema';
+import { Check } from '#lib/practice/checks.schema.ts';
 
 export { Check };
 
