@@ -1,471 +1,1098 @@
+# Plan of part 4, regenerated from the written lessons (like parts 0 and 1): it describes what exists.
+# Changes against the first plan: 8 lessons became 15, because the owner asked for design systems in depth.
+# - the history lesson and the "what dates a site" lesson were separated, and the old-or-modern quiz became a game in the second;
+# - hierarchy and grid, the type scale, and colour with contrast became three lessons;
+# - the design-systems tour became five: what a system is (nine layers), and how to read Material, Apple HIG and Fluent; GOV.UK, Carbon and Atlassian;
+#   Polaris, Primer, Radix, shadcn/ui and Tailwind; and the Russian open systems Gravity UI, VKUI, Taiga UI and Plasma, with Russian details of an interface;
+# - tokens (DTCG 2025.10), atomic design with component states, documentation with governance, design to code, and the AI tells with the learner's own small system are one lesson each.
+# Engine notes that shaped the checks: jsdom (the content test) does not resolve var(), so colour and size checks read literal values; a padding shorthand written with var() reads as 0 there (lesson 9 accepts it);
+# the contrast check parses only rgb/hex/named colours; computed lengths become px in a real browser, so checks accept both forms.
 part: 4
 slug: design
 title: Дизайн и дизайн-системы
 era: null
-summary: Как выглядел веб с 1991 года, что устарело и почему, как читать и строить дизайн-систему (токены, атомы, компоненты),
-  как передавать дизайн в код и как не делать страницу, которая выглядит как сгенерированная ИИ.
+summary: Как выглядел веб с 1991 года и что в нём устарело, иерархия, цвет и шрифты, дизайн-системы в глубину (что это,
+  как читать Material, Apple, Fluent, GOV.UK, Carbon, Atlassian, Polaris, Primer, Radix, shadcn, Tailwind и российские
+  Gravity UI, VKUI, Taiga UI, Plasma), токены в формате DTCG, компоненты и их состояния, документация и управление,
+  передача макета в код и приметы шаблонной страницы.
 concepts:
-- id: design.history-of-web-design
-  title: История веб-дизайна
-- id: design.outdated-vs-modern
-  title: Устаревшее и современное
-- id: design.visual-hierarchy
-  title: Визуальная иерархия
-- id: design.grid-and-whitespace
-  title: Сетка и пустое место
-- id: design.type-scale
-  title: Типографская шкала
-- id: design.colour-system
-  title: Цветовая система
-- id: design.contrast
-  title: Контраст и читаемость цвета
-- id: design.design-system
-  title: Дизайн-система
-- id: design.reading-a-design-system
-  title: Как читать чужую дизайн-систему
-- id: design.tokens
-  title: Дизайн-токены
-- id: design.dtcg-format
-  title: Формат токенов W3C DTCG
-- id: design.atomic-design
-  title: Атомарный дизайн
-- id: design.component
-  title: Компонент и его состояния
-- id: design.design-to-code
-  title: От макета к коду
-- id: design.handoff
-  title: Передача макета разработчику
-- id: design.ai-tells
-  title: Приметы страницы, сделанной ИИ
-- id: design.own-system
-  title: Своя маленькая дизайн-система
+  - id: design.history-of-web-design
+    title: "История веб-дизайна: от серого фона до стекла"
+  - id: design.outdated-vs-modern
+    title: "Что старит сайт: устаревшее и современное"
+  - id: design.visual-hierarchy
+    title: Визуальная иерархия
+  - id: design.grid-and-whitespace
+    title: Сетка и пустое место
+  - id: design.type-scale
+    title: Типографская шкала
+  - id: design.colour-system
+    title: Цветовая система
+  - id: design.contrast
+    title: Контраст и читаемость цвета
+  - id: design.design-system
+    title: "Дизайн-система: из чего она состоит"
+  - id: design.reading-a-design-system
+    title: "Как читать чужую дизайн-систему: Material, Apple HIG, Fluent"
+  - id: design.ds-public-and-enterprise
+    title: "Системы государства и больших компаний: GOV.UK, Carbon, Atlassian"
+  - id: design.ds-product-and-headless
+    title: "Продуктовые и «безголовые» системы: Polaris, Primer, Radix, shadcn/ui, Tailwind"
+  - id: design.ds-russian
+    title: "Российские открытые системы: Gravity UI, VKUI, Taiga UI, Plasma"
+  - id: design.tokens
+    title: Дизайн-токены
+  - id: design.dtcg-format
+    title: Формат токенов W3C DTCG
+  - id: design.atomic-design
+    title: Атомарный дизайн
+  - id: design.component
+    title: Компонент и его состояния
+  - id: design.ds-docs
+    title: Документация дизайн-системы
+  - id: design.ds-governance
+    title: "Управление системой: версии, вклад, устаревание"
+  - id: design.design-to-code
+    title: От макета к коду
+  - id: design.handoff
+    title: Передача макета разработчику
+  - id: design.ai-tells
+    title: Приметы страницы
+  - id: design.own-system
+    title: Своя маленькая дизайн-система
 lessons:
-- id: 04-design/01-history
-  order: 1
-  title: 'Тридцать лет веб-дизайна: от серого фона до стекла'
-  summary: 'Зачем: вы узнаёте эпохи веб-дизайна по виду страницы (таблицы и распорки, Flash и заставки, скевоморфизм, плоский
-    дизайн, Material, «стекло», неоморфизм, брутализм) и понимаете, какая причина — технология, мода или экран — породила
-    каждую. После урока вы сможете по скриншоту назвать эпоху и объяснить, что в ней устарело, а что осталось верным.'
-  minutes: 20
-  teaches:
-  - design.history-of-web-design
-  requires:
-  - css.box-model
-  - net.internet-history
-  diagram: 'Слайдер «сравни эпохи»: одна и та же карточка из брифа человека (название, главное действие, три пункта) перерисовывается
-    в 1996, 2000, 2008, 2013, 2018, 2022 и 2025; рядом подпись, какая технология или экран это сделали возможным.'
-  practice: 'Эпоха 1 (1996, таблицы) и эпоха 2 (2005): взять поля брифа title, mainAction и items и оформить первый экран
-    двумя способами — табличной вёрсткой с цветным фоном и затем CSS с шапкой и колонкой; записать в одну строку, что стало
-    лучше и что потерялось.'
-  checks:
-  - На первом экране есть название проекта (title) и главное действие (mainAction), оформленное как заметная ссылка или кнопка.
-  - В версии 1996 года вёрстка сделана таблицей, в версии 2005 года таблиц для макета нет, стили вынесены в отдельный CSS.
-  - Каждый пункт из items показан в обеих версиях.
-  - Рядом с каждой версией есть подпись с эпохой и одним устаревшим и одним уцелевшим приёмом.
-  sources:
-  - title: 'Web Design Museum: история веб-дизайна по годам'
-    url: https://www.webdesignmuseum.org/
-    licence: link-only
-    kind: article
-    lang: en
-  - title: 'Википедия: Веб-дизайн'
-    url: https://ru.wikipedia.org/wiki/Веб-дизайн
-    licence: CC-BY-SA
-    kind: article
-    lang: ru
-  - title: 'Википедия: Skeuomorph'
-    url: https://en.wikipedia.org/wiki/Skeuomorph
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  - title: 'Nielsen Norman Group: Flat design — an excellent idea or a bad trend?'
-    url: https://www.nngroup.com/articles/flat-design/
-    licence: proprietary-link
-    kind: article
-    lang: en
-  - title: 'Brutalist Websites: галерея брутализма в вебе'
-    url: https://brutalistwebsites.com/
-    licence: link-only
-    kind: article
-    lang: en
-  - title: 'Википедия: Neumorphism'
-    url: https://en.wikipedia.org/wiki/Neumorphism
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  videos:
-  - title: История веб-дизайна
-    url: https://www.youtube.com/watch?v=cQdlS_3e8PE
-    lang: ru
-- id: 04-design/02-hierarchy-grid-type
-  order: 2
-  title: Иерархия, сетка, пустое место и шкала шрифтов
-  summary: 'Зачем: вы можете сделать так, чтобы глаз посетителя шёл туда, куда нужно вам: к главному действию. Вы поймёте,
-    чем размер, вес, цвет и отступ управляют вниманием, как сетка выравнивает страницу и как выбрать шкалу размеров шрифта,
-    а не гадать каждый раз.'
-  minutes: 20
-  teaches:
-  - design.visual-hierarchy
-  - design.grid-and-whitespace
-  - design.type-scale
-  requires:
-  - css.typography
-  - css.grid
-  - css.custom-properties
-  diagram: 'Страница-макет с ползунками: размер заголовка, интерлиньяж, отступ между секциями, колонки сетки; рядом тепловая
-    карта «куда сначала смотрит глаз» и подсветка текущей ступени типографской шкалы (коэффициент 1.2 / 1.25 / 1.333).'
-  practice: 'Эпоха 4 (2014, адаптивная): взять sections и mainAction из брифа и построить страницу с тремя уровнями иерархии,
-    сеткой в 12 колонок (или 4 на телефоне) и шкалой шрифтов на CSS-переменных; главное действие должно быть самым заметным
-    элементом первого экрана.'
-  checks:
-  - Размеры шрифта заданы через переменные шкалы, а не разрозненными числами, и их не меньше пяти ступеней.
-  - У каждой секции из sections есть заголовок на одном и том же уровне, а заголовок страницы крупнее заголовков секций.
-  - Главное действие (mainAction) визуально выделено сильнее остальных ссылок и кнопок.
-  - Ширина строки основного текста не превышает примерно 75 знаков.
-  - Отступы между секциями кратны одному базовому шагу.
-  sources:
-  - title: 'NN/g: Visual Hierarchy in UX'
-    url: https://www.nngroup.com/articles/visual-hierarchy-ux-definition/
-    licence: proprietary-link
-    kind: article
-    lang: en
-  - title: web.dev Learn Design
-    url: https://web.dev/learn/design/
-    licence: CC-BY
-    kind: course
-    lang: en
-  - title: 'web.dev Learn CSS: Spacing'
-    url: https://web.dev/learn/css/spacing
-    licence: CC-BY
-    kind: course
-    lang: en
-  - title: Practical Typography (Мэтью Баттерик)
-    url: https://practicaltypography.com/
-    licence: link-only
-    kind: book
-    lang: en
-  - title: 'Modular Scale: калькулятор типографской шкалы'
-    url: https://www.modularscale.com/
-    licence: link-only
-    kind: article
-    lang: en
-  - title: 'MDN: Макеты на основе сетки (CSS Grid)'
-    url: https://developer.mozilla.org/ru/docs/Web/CSS/CSS_grid_layout
-    licence: CC-BY-SA
-    kind: docs
-    lang: ru
-  videos: []
-- id: 04-design/03-colour-contrast
-  order: 3
-  title: Цветовая система и контраст
-  summary: 'Зачем: вы соберёте палитру, которая выглядит цельно и читается людьми со слабым зрением, и проверите контраст
-    по числам, а не на глаз. Вы узнаете, чем OKLCH удобнее HEX, как строятся ступени серого и акцента и почему светлая и тёмная
-    темы — не просто инверсия.'
-  minutes: 20
-  teaches:
-  - design.colour-system
-  - design.contrast
-  requires:
-  - css.color
-  - css.custom-properties
-  diagram: 'Палитра-конструктор: один акцентный оттенок превращается в ряд из 10 ступеней в OKLCH; для каждой пары «текст
-    на фоне» показано число контраста WCAG и значок «AA / AAA / не проходит»; переключатель светлой и тёмной тем.'
-  practice: 'Эпоха 4 (2014): выбрать цвет по tone из брифа (серьёзный, тёплый, технический), построить акцент и нейтральные
-    ступени переменными, сделать светлую и тёмную тему; проверить, что основной текст и текст кнопки главного действия проходят
-    AA.'
-  checks:
-  - Цвета заданы переменными на :root, а не разбросаны по правилам.
-  - Основной текст имеет контраст не ниже 4.5:1 с фоном, крупный текст и значки — не ниже 3:1.
-  - Кнопка главного действия (mainAction) проходит проверку контраста в обеих темах.
-  - Есть тёмная тема через prefers-color-scheme, и у body задан явный фон.
-  - 'Смысл не передан одним только цветом: у ошибок и ссылок есть ещё и текстовый или графический признак.'
-  sources:
-  - title: 'W3C: Understanding Contrast (Minimum), WCAG 2.2'
-    url: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
-    licence: proprietary-link
-    kind: spec
-    lang: en
-  - title: 'MDN: Color contrast'
-    url: https://developer.mozilla.org/en-US/docs/Web/Accessibility/Guides/Understanding_WCAG/Perceivable/Color_contrast
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'web.dev Learn CSS: Color'
-    url: https://web.dev/learn/css/color
-    licence: CC-BY
-    kind: course
-    lang: en
-  - title: 'Evil Martians: OKLCH in CSS — why quit RGB/HSL'
-    url: https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
-    licence: link-only
-    kind: article
-    lang: en
-  - title: 'MDN: oklch()'
-    url: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  videos: []
-- id: 04-design/04-design-systems-tour
-  order: 4
-  title: Что такое дизайн-система и как читать чужие
-  summary: 'Зачем: вы понимаете, из чего состоит дизайн-система (принципы, токены, компоненты, правила, код) и можете за двадцать
-    минут разобраться в любой: Material 3, Apple HIG, Fluent, IBM Carbon, Atlassian, Shopify Polaris, GOV.UK, GitHub Primer,
-    Radix и shadcn/ui, Tailwind, Gravity UI. После урока вы выберете, у кого что заимствовать для своего проекта.'
-  minutes: 25
-  teaches:
-  - design.design-system
-  - design.reading-a-design-system
-  requires:
-  - design.visual-hierarchy
-  - design.colour-system
-  - css.custom-properties
-  diagram: 'Таблица-сравнитель: в строках десять систем, в столбцах «философия», «токены», «компоненты», «доступность», «лицензия»;
-    клик по системе открывает мини-карточку с её кнопкой, полем ввода и палитрой, нарисованными одним и тем же компонентом.'
-  practice: 'Эпоха 4 (2014): по tone и kind проекта из брифа выбрать две системы-образца, выписать из каждой три решения (радиус
-    скругления, шаг отступов, состояние фокуса) и применить их к форме или кнопке главного действия на своей странице.'
-  checks:
-  - В заметке названы две выбранные системы и объяснено, чем выбор связан с tone и аудиторией (forWhom) проекта.
-  - Для каждой системы выписаны три конкретных решения с числами или названиями токенов.
-  - На странице главное действие (mainAction) оформлено по правилам хотя бы одной из выбранных систем и имеет видимое состояние
-    фокуса.
-  - Указано, чем система годится или не годится для языка и аудитории проекта (languages).
-  sources:
-  - title: 'NN/g: Design Systems 101'
-    url: https://www.nngroup.com/articles/design-systems-101/
-    licence: proprietary-link
-    kind: article
-    lang: en
-  - title: Material Design 3
-    url: https://m3.material.io/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: Apple Human Interface Guidelines
-    url: https://developer.apple.com/design/human-interface-guidelines/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: GOV.UK Design System
-    url: https://design-system.service.gov.uk/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: IBM Carbon Design System
-    url: https://carbondesignsystem.com/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: Gravity UI (дизайн-система Яндекса, открытая)
-    url: https://gravity-ui.com/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  videos:
-  - title: Что такое дизайн-система? Зачем нужна и из чего состоит?
-    url: https://www.youtube.com/watch?v=IU32UI_phrc
-    lang: ru
-- id: 04-design/05-tokens
-  order: 5
-  title: 'Дизайн-токены: имена вместо чисел'
-  summary: 'Зачем: вы научитесь хранить цвета, отступы, радиусы и тени как именованные значения, из которых собирается и CSS,
-    и макет, и приложение. После урока вы напишете файл токенов в формате W3C DTCG, разделите токены на базовые, смысловые
-    и компонентные и подключите их к странице через CSS-переменные.'
-  minutes: 20
-  teaches:
-  - design.tokens
-  - design.dtcg-format
-  requires:
-  - css.custom-properties
-  - design.colour-system
-  - design.type-scale
-  diagram: 'Редактор токенов: слева JSON в формате DTCG, справа живая страница; изменение базового токена (color.blue.600)
-    каскадом меняет смысловой (color.action) и компонентный (button.bg); переключатель темы подменяет слой смысловых токенов.'
-  practice: 'Эпоха 4 (2014): выделить из своей страницы цвета, шкалу шрифтов и отступы в файл tokens.json по DTCG, сгенерировать
-    из него :root с переменными в трёх слоях (базовые, смысловые, компонентные).'
-  checks:
-  - В tokens.json у каждого токена есть $value и $type, а ссылки на другие токены записаны через фигурные скобки.
-  - 'Есть три слоя: базовые значения, смысловые имена (например, action, surface, text) и хотя бы один компонентный токен.'
-  - В CSS нет «сырых» цветов вне блока переменных.
-  - Смена одного базового токена меняет вид всех мест, где он используется, включая кнопку главного действия (mainAction).
-  sources:
-  - title: Design Tokens Community Group (W3C Community Group)
-    url: https://www.designtokens.org/
-    licence: proprietary-link
-    kind: spec
-    lang: en
-  - title: Design Tokens Format Module (DTCG)
-    url: https://www.designtokens.org/tr/drafts/format/
-    licence: proprietary-link
-    kind: spec
-    lang: en
-  - title: 'Style Dictionary: документация'
-    url: https://styledictionary.com/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'MDN: Using CSS custom properties'
-    url: https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'Tailwind CSS: Theme variables'
-    url: https://tailwindcss.com/docs/theme
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  videos:
-  - title: Что такое дизайн-токены? Зачем их использовать в интерфейсах?
-    url: https://www.youtube.com/watch?v=XvVHVdhdRP8
-    lang: ru
-- id: 04-design/06-atomic-components
-  order: 6
-  title: 'Атомарный дизайн: атомы, молекулы, компоненты'
-  summary: 'Зачем: вы раскладываете любую страницу на повторяемые части и называете их, а затем описываете каждый компонент
-    вместе с состояниями (обычное, наведение, фокус, нажатие, ошибка, недоступно, загрузка). После урока вы сможете собрать
-    из своих частей страницу, а не рисовать каждую заново.'
-  minutes: 20
-  teaches:
-  - design.atomic-design
-  - design.component
-  requires:
-  - design.tokens
-  - html.semantic-elements
-  diagram: 'Разбор страницы на уровни Брэда Фроста: нажимаешь на кнопку, она разбирается на атом (кнопка) → молекулу (поле
-    + кнопка) → организм (шапка) → шаблон → страницу; у каждого компонента переключатель состояний.'
-  practice: 'Эпоха 4 (2014): из sections и items брифа выделить атомы (кнопка, ссылка, метка), молекулу (карточка пункта из
-    items) и организм (секция); оформить карточку как один компонент с четырьмя состояниями.'
-  checks:
-  - 'Карточка для пунктов items — это один повторяемый компонент: изменение его стиля в одном месте меняет все карточки.'
-  - 'У кнопки главного действия (mainAction) есть различимые состояния: обычное, наведение, фокус и недоступно.'
-  - В списке компонентов есть хотя бы по одному атому, молекуле и организму с названиями.
-  - Компоненты используют токены, а не собственные числа.
-  sources:
-  - title: 'Brad Frost: Atomic Design (книга онлайн)'
-    url: https://atomicdesign.bradfrost.com/
-    licence: link-only
-    kind: book
-    lang: en
-  - title: 'Storybook: документация'
-    url: https://storybook.js.org/docs
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'NN/g: Design Systems 101 (компоненты и паттерны)'
-    url: https://www.nngroup.com/articles/design-systems-101/
-    licence: proprietary-link
-    kind: article
-    lang: en
-  - title: 'shadcn/ui: компоненты как открытый код'
-    url: https://ui.shadcn.com/docs
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'Radix Primitives: доступные безстилевые компоненты'
-    url: https://www.radix-ui.com/primitives
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  videos:
-  - title: Атомарный дизайн за 5 минут
-    url: https://www.youtube.com/watch?v=2T0-wLAT4m4
-    lang: ru
-- id: 04-design/07-design-to-code
-  order: 7
-  title: 'От макета к коду: Figma, передача и Claude Design'
-  summary: 'Зачем: вы понимаете, как дизайнер работает в Figma (фреймы, автолейаут, компоненты, переменные) и что именно нужно
-    разработчику при передаче. После урока вы подготовите макет так, чтобы его можно было сверстать без вопросов, и сможете
-    сравнить ручную вёрстку с вёрсткой по макету, сгенерированной ИИ-инструментом.'
-  minutes: 20
-  teaches:
-  - design.design-to-code
-  - design.handoff
-  requires:
-  - design.tokens
-  - design.component
-  diagram: 'Макет и код рядом: клик по элементу макета подсвечивает свойства (отступы, токены, размеры) и соответствующую
-    строку CSS; переключатель показывает, чем автолейаут похож на flex, а переменные Figma — на CSS-переменные.'
-  practice: 'Эпоха 7 (2025, ИИ-конструктор): собрать на бумаге или в Figma один экран из sections и mainAction брифа с названными
-    слоями и переменными, затем дать его ИИ-инструменту как задание на вёрстку и отметить расхождения с токенами.'
-  checks:
-  - Макет экрана содержит все sections брифа, главное действие (mainAction) и использует названные цвета и размеры, а не случайные.
-  - В списке расхождений указано не меньше трёх мест, где сгенерированный код не совпал с токенами или состояниями.
-  - Для картинок и значков указано, что отдаётся векторами, а что растром, и в каких размерах.
-  - Описано, как макет ведёт себя на узком экране.
-  sources:
-  - title: Figma Help Center
-    url: https://help.figma.com/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'Figma: Variables guide'
-    url: https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'Figma: Dev Mode'
-    url: https://www.figma.com/dev-mode/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'MDN: Flexbox'
-    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'Penpot: открытый аналог Figma'
-    url: https://penpot.app/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  videos: []
-- id: 04-design/08-ai-tells-and-quiz
-  order: 8
-  title: Приметы страницы, сделанной ИИ, и квиз «старое или современное»
-  summary: 'Зачем: вы видите, какие приёмы выдают шаблонную страницу, сделанную нейросетью (фиолетовый градиент, одинаковые
-    карточки с иконками, пустые лозунги, шрифт по умолчанию), и умеете их избегать. В конце вы оцениваете пары «устаревшее
-    и современное» сами и собираете мини-систему для своего проекта.'
-  minutes: 25
-  teaches:
-  - design.ai-tells
-  - design.outdated-vs-modern
-  - design.own-system
-  requires:
-  - design.design-system
-  - design.tokens
-  - design.component
-  - design.history-of-web-design
-  diagram: 'Квиз-оценщик: две версии одного блока рядом, человек ставит «современнее» и «устарело», затем видит разбор по
-    критериям (иерархия, контраст, плотность, движение); во второй части — чек-лист примет ИИ-страницы, по которому оценивается
-    страница из эпохи 7.'
-  practice: 'Эпоха 7 (2025, ИИ-конструктор): сгенерировать главную страницу по брифу ИИ-конструктором, отметить минимум пять
-    примет шаблонности и переписать их: конкретные слова из proofs и people вместо лозунгов, свои токены вместо градиента
-    по умолчанию.'
-  checks:
-  - В отчёте не меньше пяти отмеченных примет шаблонности с указанием места на странице.
-  - Заголовок и подзаголовок главного экрана говорят о конкретном проекте (title, forWhom), а не о «инновационных решениях».
-  - В исправленной версии использованы реальные пункты из proofs или people, а не придуманные цифры.
-  - Палитра и шрифты взяты из токенов проекта и не совпадают с настройками по умолчанию конструктора.
-  - Результат проходит проверку контраста и имеет видимый фокус.
-  sources:
-  - title: 'Anthropic: Improving frontend design through Skills'
-    url: https://claude.com/blog/improving-frontend-design-through-skills
-    licence: proprietary-link
-    kind: article
-    lang: en
-  - title: 'NN/g: Dark Patterns / обманные интерфейсы'
-    url: https://www.nngroup.com/articles/deceptive-patterns/
-    licence: proprietary-link
-    kind: article
-    lang: en
-  - title: 'Awwwards: что считается хорошим дизайном (оценка сайтов)'
-    url: https://www.awwwards.com/about-evaluation/
-    licence: link-only
-    kind: article
-    lang: en
-  - title: 'web.dev Learn Design: Visual design'
-    url: https://web.dev/learn/design/
-    licence: CC-BY
-    kind: course
-    lang: en
-  videos: []
+  - id: 04-design/01-history
+    order: 1
+    title: "Тридцать лет веб-дизайна: от серого фона до стекла"
+    summary: "Вы научитесь узнавать эпоху веб-дизайна по виду страницы и понимать, что её породило: технология, экран или
+      мода. После урока вы по скриншоту назовёте время, объясните, что в нём устарело, а что осталось верным."
+    minutes: 25
+    teaches:
+      - design-history-of-web-design
+    requires:
+      - net-internet-history
+      - net-dotcom-web2
+      - css-separate-stylesheets
+      - css-floats-legacy
+    diagram: DesignEras (content/diagrams)
+    practice: "Первый экран двумя способами. Соберите первый экран своего проекта в манере двух эпох. В блоке «1996»
+      раскладка делается таблицей: название, пункты из вашего содержимого и главное действие внутри table, а действие
+      оформлено ссылкой. В блоке «2005» таблиц нет: шапка с цветным фоном, левая колонка с пунктами (класс side,
+      плавающая влево) и основная колонка с тем же главным действием-ссылкой. Правила для колонок и шапки пишите в
+      styles.css. В конце заполните заметку: что потерялось и что стало лучше. Эпоха: 2. Шаг: design-two-layouts."
+    checks:
+      - В head нет подключения стилей. Добавьте строку link rel="stylesheet" href="styles.css".
+      - В блоке 1996 года название проекта должно стоять внутри таблицы.
+      - Пункты вашего содержимого должны быть внутри таблицы в блоке 1996 года.
+      - Главное действие в блоке 1996 года должно быть ссылкой (тег a) с вашим текстом действия.
+      - "В блоке 2005 года таблиц быть не должно: раскладку делает CSS."
+      - Пункты содержимого в блоке 2005 года положите в элемент с классом side.
+      - Главное действие в блоке 2005 года должно быть ссылкой внутри элемента с классом main.
+      - "У шапки блока 2005 года (элемент header) в styles.css должен быть цвет фона, например background-color:
+        #cfe0f3."
+      - "Колонке .side в styles.css нужно правило float: left. Файл стилей находится на соседней вкладке."
+      - В заметке осталось многоточие «…». Замените его своими словами.
+      - Напишите, что потерялось с переходом на отдельный CSS.
+      - Напишите, что стало лучше.
+    sources:
+      - title: "Web Design Museum: история веб-дизайна по годам"
+        url: https://www.webdesignmuseum.org/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: Веб-дизайн (Википедия)
+        url: https://ru.wikipedia.org/wiki/Веб-дизайн
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: Skeuomorph (Wikipedia)
+        url: https://en.wikipedia.org/wiki/Skeuomorph
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+      - title: "Flat Design: Its Origins, Its Problems, and Why Flat 2.0 Is Better for Users (Nielsen Norman Group)"
+        url: https://www.nngroup.com/articles/flat-design/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: Neumorphism (Wikipedia)
+        url: https://en.wikipedia.org/wiki/Neumorphism
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+      - title: "Brutalist Websites: галерея"
+        url: https://brutalistwebsites.com/
+        licence: link-only
+        kind: article
+        lang: en
+    videos:
+      - title: История веб-дизайна (Bonnie & Slide)
+        url: https://www.youtube.com/watch?v=cQdlS_3e8PE
+        licence: proprietary-link
+        kind: video
+        lang: ru
+  - id: 04-design/02-what-dates-a-site
+    order: 2
+    title: "Что старит сайт: устаревшее и современное"
+    summary: Вы научитесь отличать приём, который устарел, от приёма, который просто немодный, и от нового, но вредного.
+      После урока вы найдёте в чужой или своей странице признаки устаревания и исправите их.
+    minutes: 25
+    teaches:
+      - design-outdated-vs-modern
+    requires:
+      - design-history-of-web-design
+      - css-contrast
+      - html-head-meta
+    diagram: DatedOrNot (content/diagrams)
+    practice: "Омоложение страницы. Эта страница датирована серединой девяностых. Исправьте её, не меняя смысла. 1) Уберите
+      теги font, center и marquee. 2) Замените приветствие «Добро пожаловать» в заголовке h1 названием вашего проекта.
+      3) Удалите «значок» с номером посетителя и плашку про Netscape. 4) В styles.css сделайте текст не мельче 16
+      пикселей (можно 1rem) и достаточно тёмным: контраст с фоном не ниже 4.5. 5) Сократите меню: оставьте не больше
+      шести пунктов, и не меньше трёх разделов из вашего проекта. 6) Сделайте кнопку главного действия сплошной: цветом
+      фона, а не градиентом, и с контрастным текстом. 7) Добавьте в head метатег viewport и уберите из styles.css
+      жёсткую ширину в 960 пикселей. Эпоха: 4. Шаг: design-fix-dated."
+    checks:
+      - "В разметке остались теги font, center, marquee или blink. Удалите их: оформление делает CSS."
+      - В заголовке h1 всё ещё «Добро пожаловать». Замените его названием проекта.
+      - В h1 должно быть название вашего проекта.
+      - На странице остался значок про номер посетителя или плашка про Netscape. Удалите абзац целиком.
+      - "Текст абзацев мелковат. В styles.css для p задайте font-size: 1rem (это 16 пикселей) или больше."
+      - "Цвет текста слишком светлый для фона. Сделайте его тёмным, например #1c1b19."
+      - В меню должно быть от трёх до шести ссылок. Сейчас больше или меньше.
+      - В меню должны быть минимум три раздела вашего проекта, по названиям из брифа.
+      - У кнопки главного действия остался градиент. Удалите background-image и задайте background-color.
+      - "Текст кнопки плохо виден на её фоне. Возьмите тёмный фон, например #0b5cad, и белый текст."
+      - 'В head нет метатега viewport. Добавьте: meta name="viewport" content="width=device-width, initial-scale=1".'
+    sources:
+      - title: Auto-Forwarding Carousels and Accordions Annoy Users and Reduce Visibility (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/auto-forwarding/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: Photos as Web Content (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/photos-as-web-content/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: "Understanding: Pause, Stop, Hide, WCAG 2.2 (W3C)"
+        url: https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html
+        licence: proprietary-link
+        kind: spec
+        lang: en
+      - title: Responsive design basics (web.dev)
+        url: https://web.dev/articles/responsive-web-design-basics
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: prefers-reduced-motion (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/03-hierarchy-grid-space
+    order: 3
+    title: Иерархия, сетка и пустое место
+    summary: "Вы научитесь вести взгляд посетителя к главному действию: размером, весом, цветом и отступами, а не словами.
+      После урока вы построите страницу с тремя уровнями заголовков, сеткой и единым шагом отступов, и проверите её
+      «прищуриванием»."
+    minutes: 25
+    teaches:
+      - design-visual-hierarchy
+      - design-grid-and-whitespace
+    requires:
+      - design-outdated-vs-modern
+      - css-grid
+      - css-typography
+      - css-custom-properties
+    diagram: HierarchyLab (content/diagrams)
+    practice: "Страница с иерархией, сеткой и шагом отступов. Постройте страницу так, чтобы глаз шёл к главному действию. 1)
+      Название проекта сделайте заголовком h1, а каждый раздел из вашего проекта карточкой с заголовком h2. 2) Главное
+      действие оформите ссылкой с классом cta: ровно одна такая на странице, сплошного цвета и с жирным начертанием.
+      Остальные ссылки остаются обычными. 3) В styles.css опишите на :root два значения: --space (базовый шаг отступов,
+      например 8px) и --measure (ширина строки, например 65ch). 4) Карточки разложите сеткой: .grid с display: grid и
+      колонками repeat(12, 1fr) (или repeat(4, 1fr) для телефона). Прищурьтесь на предпросмотр: главным должно остаться
+      действие. Эпоха: 4. Шаг: design-hierarchy-grid."
+    checks:
+      - "На странице должен быть ровно один заголовок h1: название проекта."
+      - В h1 должно быть название вашего проекта.
+      - В заголовках h2 должны стоять названия разделов вашего проекта.
+      - На каждый раздел нужен свой заголовок h2.
+      - "Нужна ровно одна ссылка с классом cta: главное действие. Остальные ссылки обычные."
+      - Ссылка cta должна называть главное действие вашего проекта.
+      - "У .cta в styles.css нужен сплошной фон: background-color."
+      - "Сделайте текст .cta жирным: font-weight: 700."
+      - "В styles.css на :root нужна переменная --space с числом в px или rem, например --space: 8px."
+      - "В styles.css на :root нужна переменная --measure в единицах ch, например --measure: 65ch."
+      - "У .grid в styles.css должно быть display: grid."
+      - "У .grid нужны колонки: grid-template-columns: repeat(12, 1fr) (или repeat(4, 1fr))."
+    sources:
+      - title: Visual Hierarchy in UX (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/visual-hierarchy-ux-definition/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: "Gestalt Principles: Proximity (Nielsen Norman Group)"
+        url: https://www.nngroup.com/articles/gestalt-proximity/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: Learn Design (web.dev)
+        url: https://web.dev/learn/design/
+        licence: CC-BY
+        kind: course
+        lang: en
+      - title: Spacing (web.dev, Learn CSS)
+        url: https://web.dev/learn/css/spacing
+        licence: CC-BY
+        kind: course
+        lang: en
+      - title: Макеты на основе сетки, CSS Grid (MDN)
+        url: https://developer.mozilla.org/ru/docs/Web/CSS/CSS_grid_layout
+        licence: CC-BY-SA
+        kind: docs
+        lang: ru
+      - title: Line length (Practical Typography, Мэтью Баттерик)
+        url: https://practicaltypography.com/line-length.html
+        licence: link-only
+        kind: book
+        lang: en
+    videos: []
+  - id: 04-design/04-type-scale
+    order: 4
+    title: "Типографская шкала: размеры по лестнице, а не наугад"
+    summary: "Вы научитесь выбирать размеры шрифта не «на глаз», а по шкале: одно базовое число и один коэффициент дают весь
+      набор. После урока у вашей страницы будет лестница размеров на CSS-переменных и понятные роли у текста."
+    minutes: 20
+    teaches:
+      - design-type-scale
+    requires:
+      - design-visual-hierarchy
+      - css-typography
+      - css-units
+    diagram: TypeScaleLab (content/diagrams)
+    practice: "Шкала размеров для вашей страницы. Сейчас размеры шрифта на странице набраны разрозненными числами (29, 21,
+      15 пикселей). Замените их шкалой. 1) В styles.css на :root опишите коэффициент --ratio (например, 1.25) и шесть
+      ступеней --fs-sm, --fs-base, --fs-lg, --fs-xl, --fs-2xl, --fs-3xl в единицах rem (можно считать через calc). 2)
+      Назначьте ступени ролям: h1 получает --fs-3xl, h2 --fs-xl, абзацы разделов --fs-base, подпись small --fs-sm. 3) У
+      абзацев разделов межстрочный интервал от 1.4 до 1.7. Эпоха: 4. Шаг: design-type-scale."
+    checks:
+      - На :root нужна переменная --ratio с числом вроде 1.25.
+      - "Не хватает --fs-sm: самой мелкой ступени, например 0.8rem."
+      - "Не хватает --fs-base: размера основного текста, обычно 1rem."
+      - "Не хватает --fs-lg: ступени выше основного текста, например 1.25rem."
+      - Не хватает --fs-xl, например 1.563rem.
+      - Не хватает --fs-2xl, например 1.953rem.
+      - Не хватает --fs-3xl, самой крупной ступени, например 2.441rem.
+      - "Заголовок h1 должен брать размер из крупной ступени: font-size: var(--fs-3xl)."
+      - Заголовок h2 должен брать размер из средней ступени, например var(--fs-xl).
+      - "Абзацы разделов (section p) должны брать размер основного текста: var(--fs-base)."
+      - "Подпись small должна брать самую мелкую ступень: var(--fs-sm)."
+      - "У абзацев разделов межстрочный интервал должен быть от 1.4 до 1.7, например line-height: 1.55."
+    sources:
+      - title: Typography (web.dev, Learn CSS)
+        url: https://web.dev/learn/css/typography
+        licence: CC-BY
+        kind: course
+        lang: en
+      - title: "Modular Scale: калькулятор шкалы"
+        url: https://www.modularscale.com/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: "Utopia: текучие размеры шрифта и отступов"
+        url: https://utopia.fyi/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: clamp() (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/CSS/clamp
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Line spacing (Practical Typography, Мэтью Баттерик)
+        url: https://practicaltypography.com/line-spacing.html
+        licence: link-only
+        kind: book
+        lang: en
+      - title: "Understanding: Resize Text, WCAG 2.2 (W3C)"
+        url: https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html
+        licence: proprietary-link
+        kind: spec
+        lang: en
+    videos: []
+  - id: 04-design/05-colour-contrast
+    order: 5
+    title: "Цветовая система и контраст: палитра, которую можно прочитать"
+    summary: Вы соберёте палитру, которая выглядит цельно и читается людьми со слабым зрением, и проверите контраст числами,
+      а не на глаз. После урока вы знаете роли цветов, умеете строить ступени из одного оттенка и сделаете светлую и
+      тёмную темы.
+    minutes: 25
+    teaches:
+      - design-colour-system
+      - design-contrast
+    requires:
+      - design-visual-hierarchy
+      - css-color
+      - css-contrast
+      - css-custom-properties
+    diagram: PaletteLab (content/diagrams)
+    practice: 'Палитра с проверенным контрастом, светлая и тёмная. Сейчас на странице серое по белому и бледно-голубое:
+      читать трудно. Соберите палитру и проверьте её. 1) В styles.css на :root опишите ступени: --neutral-50,
+      --neutral-900, --accent-100, --accent-500, --accent-700 (цвета в hex). 2) Перекрасьте страницу этими цветами, но
+      пока записывайте цвета прямо в правила (в уроке про токены вы замените их переменными): основной текст, вторичный
+      текст .lead и ссылка в абзаце должны иметь контраст не ниже 4.5; кнопка .cta тоже, и ссылка в абзаце подчёркнута.
+      3) Блок [data-theme="dark"] это тёмная тема: дайте ему тёмный фон и светлый текст, светлую ссылку и светлую кнопку
+      с тёмным текстом: тоже не ниже 4.5. 4) Добавьте в head метатег color-scheme со значением «light dark». 5)
+      Сообщение об ошибке не должно держаться на цвете: начните его со слова «Ошибка». Эпоха: 4. Шаг: design-palette.'
+    checks:
+      - "На :root нужна переменная --neutral-50: самый светлый нейтральный, в hex, например #faf9f7."
+      - "На :root нужна переменная --neutral-900: самый тёмный нейтральный, например #1c1b19."
+      - "На :root нужна --accent-100: светлая ступень акцента в hex."
+      - "На :root нужна --accent-500: средняя ступень акцента в hex."
+      - "На :root нужна --accent-700: тёмная ступень акцента в hex."
+      - "Основной текст слишком светлый для фона: нужен контраст не ниже 4.5. Сделайте его почти чёрным."
+      - "Вторичный текст .lead слишком светлый. Контраст должен быть не ниже 4.5, например #4a4742 на светлом фоне."
+      - "Ссылка в абзаце плохо видна на фоне. Возьмите тёмно-синий, например #0b4a8b."
+      - "Ссылка в абзаце должна быть подчёркнута: text-decoration: underline. Иначе её отличает только цвет."
+      - Текст кнопки .cta плохо виден на её фоне. Возьмите тёмный фон (#0b5cad) и белый текст.
+      - "В тёмном блоке текст слишком тёмный на тёмном фоне. Сделайте текст светлым, например #f2efe9."
+      - "В тёмном блоке ссылка плохо видна. Возьмите светлый голубой, например #9cc4f0."
+      - "Кнопка в тёмном блоке должна иметь контраст не ниже 4.5: светлый фон и тёмный текст."
+      - 'В head нужен метатег: meta name="color-scheme" content="light dark".'
+      - "Сообщение об ошибке должно начинаться со слова «Ошибка»: цвета для смысла мало."
+    sources:
+      - title: Understanding Contrast (Minimum), WCAG 2.2 (W3C)
+        url: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+        licence: proprietary-link
+        kind: spec
+        lang: en
+      - title: Understanding Use of Color, WCAG 2.2 (W3C)
+        url: https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html
+        licence: proprietary-link
+        kind: spec
+        lang: en
+      - title: Color contrast (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/Accessibility/Guides/Understanding_WCAG/Perceivable/Color_contrast
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "OKLCH in CSS: why we moved from RGB and HSL (Evil Martians)"
+        url: https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
+        licence: link-only
+        kind: article
+        lang: en
+      - title: prefers-color-scheme (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Color roles (Material Design 3)
+        url: https://m3.material.io/styles/color/roles
+        licence: proprietary-link
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/06-what-is-a-design-system
+    order: 6
+    title: Что такое дизайн-система и из чего она состоит
+    summary: Вы поймёте, чем дизайн-система отличается от набора картинок и от гайдлайна, из каких девяти слоёв она
+      складывается и какие из них нужны вашему проекту. После урока у вас есть паспорт собственной системы.
+    minutes: 25
+    teaches:
+      - design-design-system
+    requires:
+      - design-visual-hierarchy
+      - design-colour-system
+      - design-type-scale
+    diagram: DsAnatomy (content/diagrams)
+    practice: "Паспорт дизайн-системы вашего проекта. Заполните паспорт: что у вашего проекта есть на каждом слое системы.
+      1) Три принципа: короткие правила, по которым вы будете решать спорные вопросы (каждое из трёх слов и больше). 2)
+      Для шести слоёв (основы, токены, компоненты, слова, документация, управление) напишите, что у вас на этом слое
+      есть или будет. 3) Кто решает об изменениях. 4) Чего в системе пока нет и не будет: умение отказаться от лишнего
+      это часть дизайна. Все «…» нужно заменить. Эпоха: 4. Шаг: design-ds-passport."
+    checks:
+      - Нужно три принципа, каждый в своём пункте с классом principle.
+      - Принцип слишком короткий. Напишите его минимум тремя словами.
+      - В таблице должно остаться шесть слоёв.
+      - В колонке «Что у нас» нужно написать слова, а не оставить пусто.
+      - Где-то осталось многоточие «…». Замените его своими словами.
+      - Напишите, кто решает об изменениях в системе.
+      - "Напишите, чего в системе не будет: умение отказаться тоже решение."
+    sources:
+      - title: Design Systems 101 (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/design-systems-101/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: Design system (Wikipedia)
+        url: https://en.wikipedia.org/wiki/Design_system
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+      - title: Дизайн-система (Википедия)
+        url: https://ru.wikipedia.org/wiki/Дизайн-система
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: "GOV.UK Design System: стили, компоненты и паттерны"
+        url: https://design-system.service.gov.uk/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Carbon Design System (IBM)
+        url: https://carbondesignsystem.com/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Atlassian Design System
+        url: https://atlassian.design/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+    videos:
+      - title: Что такое дизайн-система? Зачем нужна и из чего состоит? (Valeriya Desire)
+        url: https://www.youtube.com/watch?v=IU32UI_phrc
+        licence: proprietary-link
+        kind: video
+        lang: ru
+  - id: 04-design/07-reading-material-hig-fluent
+    order: 7
+    title: "Как читать чужую дизайн-систему: Material, Apple, Fluent"
+    summary: "Вы получите способ разобраться в любой дизайн-системе за двадцать минут и применяете его к трём системам
+      крупнейших платформ: Material Design 3, Human Interface Guidelines Apple и Fluent 2 Microsoft. После урока вы
+      берёте у них решения, а не оформление."
+    minutes: 30
+    teaches:
+      - design-reading-a-design-system
+    requires:
+      - design-design-system
+      - design-contrast
+    diagram: SystemExplorer (content/diagrams)
+    practice: "Прочитайте две системы и примените три решения. Выберите две системы из тех, что смотрели (Material, Apple
+      HIG, Fluent или другие) и заполните записку. 1) Для каждой впишите название и три решения: радиус скругления, шаг
+      отступов, состояние фокуса (с числами или названиями токенов). 2) Объясните, чем выбор связан с тоном и аудиторией
+      вашего проекта, и годятся ли системы для его языка и аудитории. 3) Примените решения: в styles.css опишите на
+      :root переменные --radius и --space и оформите кнопку главного действия .cta: блочной (inline-flex), с высотой не
+      меньше 44 пикселей (так требуют Apple и Material в своих правилах). Все «…» нужно заменить. Эпоха: 4. Шаг:
+      design-read-systems."
+    checks:
+      - "Нужны две системы: названия в элементах strong с классом sys-name."
+      - "В названии должна быть настоящая система из списка в уроке: Material, Apple HIG, Fluent, GOV.UK, Carbon и
+        другие."
+      - У каждой системы нужно по три решения, всего шесть строк.
+      - Где-то осталось многоточие «…». Замените его своими словами.
+      - Объясните, чем выбор связан с тоном и аудиторией проекта.
+      - Напишите, годятся ли системы для языка и аудитории проекта.
+      - На :root нужна переменная --radius, например 8px.
+      - На :root нужна переменная --space, например 8px.
+      - "Кнопке .cta нужен display: inline-flex, иначе высота ей не подчинится."
+      - "У .cta высота не меньше 44 пикселей: min-height: 44px (или 2.75rem)."
+    sources:
+      - title: Material Design 3
+        url: https://m3.material.io/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Human Interface Guidelines (Apple)
+        url: https://developer.apple.com/design/human-interface-guidelines/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Fluent 2 Design System (Microsoft)
+        url: https://fluent2.microsoft.design/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Material Design (Википедия)
+        url: https://ru.wikipedia.org/wiki/Material_Design
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: Design Systems 101 (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/design-systems-101/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: "Understanding: Target Size (Minimum), WCAG 2.2 (W3C)"
+        url: https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html
+        licence: proprietary-link
+        kind: spec
+        lang: en
+    videos: []
+  - id: 04-design/08-gov-carbon-atlassian
+    order: 8
+    title: "Системы государства и больших компаний: GOV.UK, Carbon, Atlassian"
+    summary: "Вы разберёте три системы, у которых есть чему поучиться именно новичку: GOV.UK (понятные формы и доступность),
+      Carbon от IBM (сетка и данные) и Atlassian (говорящие токены). После урока у вас есть контактная форма,
+      построенная по правилам GOV.UK."
+    minutes: 30
+    teaches:
+      - design-ds-public-and-enterprise
+    requires:
+      - design-reading-a-design-system
+      - html-forms
+      - html-a11y-basics
+    diagram: SystemExplorer, FormPattern (content/diagrams)
+    practice: 'Контактная форма по правилам GOV.UK. Сделайте форму обратной связи так, как это описано в GOV.UK Design
+      System. 1) У каждого поля есть видимая подпись над ним (label), а не только placeholder. 2) Не меньше двух полей
+      имеют атрибут autocomplete (например, name и email). 3) У поля есть подсказка (элемент с классом hint), связанная
+      с ним через aria-describedby. 4) Добавьте пример состояния ошибки: сводку (элемент с классом error-summary и
+      role="alert") со ссылками на поля, и сообщение рядом с полем (класс field-error), которое начинается со слова
+      «Ошибка:». Эти два блока служат образцом и помечены data-scaffold: на готовом сайте их не будет. 5) Кнопка
+      отправки: button с type="submit" и подписью-глаголом. Эпоха: 4. Шаг: design-gov-form.'
+    checks:
+      - У какого-то поля нет подписи. Каждому нужен label, связанный через for и id.
+      - "Нужны три подписи label с атрибутом for: имя, почта, сообщение."
+      - "Добавьте autocomplete минимум двум полям: name и email."
+      - "Нужна подсказка: элемент с классом hint."
+      - Поле должно ссылаться на подсказку через aria-describedby с id подсказки.
+      - У сводки ошибок должен быть role="alert", чтобы диктор её озвучил.
+      - 'В сводке ошибок нужны минимум две ссылки на поля: href="#name" и href="#email".'
+      - Сообщение рядом с полем должно начинаться со слов «Ошибка:».
+      - Кнопка отправки должна быть button с type="submit" и подписью-глаголом, например «Отправить».
+    sources:
+      - title: GOV.UK Design System
+        url: https://design-system.service.gov.uk/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "GOV.UK: Error summary"
+        url: https://design-system.service.gov.uk/components/error-summary/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "GOV.UK: Text input"
+        url: https://design-system.service.gov.uk/components/text-input/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Government design principles (GOV.UK)
+        url: https://www.gov.uk/guidance/government-design-principles
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Carbon Design System (IBM)
+        url: https://carbondesignsystem.com/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Atlassian Design System: Spacing"
+        url: https://atlassian.design/foundations/spacing/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: autocomplete (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/09-product-headless-utility
+    order: 9
+    title: "Продуктовые и «безголовые» системы: Polaris, Primer, Radix, shadcn/ui, Tailwind"
+    summary: Вы поймёте, что у детали интерфейса четыре слоя (структура, поведение, доступность, вид) и что разные системы
+      берут на себя разное их число. После урока вы объясните, чем Radix отличается от Polaris, и соберёте утилитные
+      классы из своих токенов, как в Tailwind.
+    minutes: 30
+    teaches:
+      - design-ds-product-and-headless
+    requires:
+      - design-reading-a-design-system
+      - css-custom-properties
+    diagram: LayerMatrix, SystemExplorer (content/diagrams)
+    practice: "Утилитные классы из ваших токенов. В styles.css уже есть токены (отступы, радиус, размеры шрифта, цвета
+      акцента). Сделайте из них словарь утилит, как в Tailwind, и перепишите страницу. 1) Опишите восемь классов: .flex,
+      .gap-4, .p-4, .rounded, .text-lg, .text-sm, .bg-accent и .text-on-accent, каждый через токены из :root. 2)
+      Перепишите карточки из разделов вашего проекта, используя только эти классы (класс .card уберите): .p-4, .rounded,
+      .bg-accent, .text-on-accent на каждой карточке, .text-lg на её заголовке. 3) Контейнер карточек получает .flex и
+      .gap-4. Атрибут style в разметке использовать нельзя. Эпоха: 4. Шаг: design-utilities."
+    checks:
+      - "Нужен класс .flex с display: flex, и он должен быть использован в разметке."
+      - "У .gap-4 должен быть gap: var(--space-4). Класс нужно применить к контейнеру."
+      - "У .p-4 должен быть padding: var(--space-4). Примените его к карточкам."
+      - "У .rounded должен быть border-radius: var(--radius)."
+      - "У .text-lg должен быть font-size: var(--fs-lg). Примените его к заголовкам карточек."
+      - "У .text-sm должен быть font-size: var(--fs-sm). Примените его к тексту карточки."
+      - "У .bg-accent должен быть background-color: var(--accent)."
+      - "У .text-on-accent должен быть color: var(--on-accent)."
+      - "Каждая карточка должна иметь сразу четыре класса: p-4, rounded, bg-accent, text-on-accent."
+      - "Класс card должен исчезнуть из разметки: теперь карточки собираются из утилит."
+      - В разметке остался атрибут style. Перенесите его в утилитные классы.
+    sources:
+      - title: Shopify Polaris
+        url: https://shopify.dev/docs/api/polaris
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Primer (GitHub)
+        url: https://primer.style/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Radix Primitives
+        url: https://www.radix-ui.com/primitives
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "shadcn/ui: документация"
+        url: https://ui.shadcn.com/docs
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Tailwind CSS: Theme variables"
+        url: https://tailwindcss.com/docs/theme
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: <dialog> (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/10-russian-systems
+    order: 10
+    title: Российские открытые системы и русский язык в интерфейсе
+    summary: "Вы познакомитесь с четырьмя открытыми дизайн-системами российских компаний: Gravity UI, VKUI, Taiga UI и
+      Plasma, и узнаете, что нужно учесть, чтобы любая система работала по-русски: формы слов после числа, цены, даты,
+      кавычки и длинные подписи. После урока вы исправите эти мелочи на своей странице."
+    minutes: 30
+    teaches:
+      - design-ds-russian
+    requires:
+      - design-ds-product-and-headless
+      - html-lang-i18n
+    diagram: SystemExplorer, RuDetails (content/diagrams)
+    practice: "Русские мелочи в интерфейсе. Исправьте на странице то, на чём ломаются «английские» компоненты. 1) Счётчики:
+      «1 услуга», «2 услуги», «5 услуг» (сейчас везде «услуг»). 2) Цена: «12 500 ₽» с неразрывными пробелами (&nbsp;)
+      между тысячами и перед знаком рубля. 3) Дата: оберните в элемент time с атрибутом datetime в формате 2026-10-27 и
+      напишите её словами: «27 октября 2026». 4) Цитата в кавычках-«ёлочках». 5) В styles.css кнопка .cta должна расти
+      по подписи: вместо жёсткой ширины задайте min-width (например 9rem) и уберите white-space: nowrap. 6) В записке
+      выберите одну из российских систем (Gravity UI, VKUI, Taiga UI или Plasma), напишите одну идею, которую вы бы
+      взяли, и одну причину не брать её целиком. Все «…» нужно заменить. Эпоха: 4. Шаг: design-russian-details."
+    checks:
+      - Для единицы нужна форма «1 услуга».
+      - Для двух нужна форма «2 услуги».
+      - Для пяти нужна форма «5 услуг».
+      - "Цена должна быть записана как 12 500 ₽ с неразрывными пробелами: 12&nbsp;500&nbsp;₽."
+      - Дата должна быть в элементе time с атрибутом datetime в виде 2026-10-27.
+      - "Внутри time напишите дату словами: «27 октября 2026»."
+      - "Цитата должна стоять в «ёлочках»: «Работа сделана вовремя»."
+      - У .cta должен быть min-width, например 9rem, вместо жёсткой ширины.
+      - "У .cta не должно быть white-space: nowrap: пусть подпись переносится."
+      - "В записке назовите одну из систем: Gravity UI, VKUI, Taiga UI или Plasma."
+      - Напишите идею, которую берёте у этой системы.
+      - Напишите, почему не берёте систему целиком.
+      - Где-то осталось многоточие «…». Замените его своими словами.
+    sources:
+      - title: Gravity UI
+        url: https://gravity-ui.com/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: VKUI (документация)
+        url: https://vkcom.github.io/VKUI/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: Taiga UI
+        url: https://taiga-ui.dev/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: Plasma (salute-developers, GitHub)
+        url: https://github.com/salute-developers/plasma
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: Intl.PluralRules (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "Ководство (Артемий Лебедев): правила русской типографики"
+        url: https://www.artlebedev.ru/kovodstvo/sections/
+        licence: link-only
+        kind: book
+        lang: ru
+      - title: hyphens (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/CSS/hyphens
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/11-tokens-dtcg
+    order: 11
+    title: "Дизайн-токены: имена вместо чисел"
+    summary: Вы научитесь хранить цвета, отступы и радиусы как именованные решения в три слоя (базовые, смысловые,
+      компонентные) и записывать их в формате W3C DTCG. После урока у вашей страницы есть файл токенов и те же токены в
+      CSS-переменных, и одна смена базового цвета меняет всю страницу.
+    minutes: 30
+    teaches:
+      - design-tokens
+      - design-dtcg-format
+    requires:
+      - design-ds-product-and-headless
+      - design-colour-system
+      - design-type-scale
+      - css-custom-properties
+    diagram: TokenEditor (content/diagrams)
+    practice: 'Ваши токены: файл DTCG и CSS-переменные в три слоя. Соберите набор токенов своего проекта. 1) Допишите файл
+      токенов (блок script с id tokens, это JSON по формату DTCG): у него три слоя. Базовые: color.accent.600 (уже
+      есть), color.neutral.50 и color.neutral.900, space.2 и space.4, radius.md. Смысловые: semantic.action,
+      semantic.surface и semantic.text ссылаются на базовые через фигурные скобки. Компонентные: component.button.bg и
+      component.button.fg ссылаются на смысловые. У значений есть $value, у групп или значений $type. 2) В styles.css
+      повторите те же токены переменными на :root в тех же трёх слоях: --color-accent-600, --color-neutral-50,
+      --color-neutral-900, --space-2, --space-4, --radius-md, затем --action, --surface, --text, затем --button-bg и
+      --button-fg. 3) Тёмная тема это блок с data-theme="dark" и только переопределённый смысловой слой: --surface и
+      --text. Эпоха: 4. Шаг: design-tokens.'
+    checks:
+      - 'Блок с токенами должен остаться: script type="application/json" id="tokens".'
+      - У токенов должен быть $value. Это обязательная часть формата.
+      - 'Нужен $type: например "$type": "color" на группе.'
+      - "В файле должны быть три слоя: color (базовые), semantic (смысловые) и component (компонентные)."
+      - Среди базовых токенов должны быть нейтральные цвета (neutral), space и radius.
+      - Смысловые токены должны ссылаться на базовые, например "{color.accent.600}".
+      - Компонентные токены должны ссылаться на смысловые, например "{semantic.action}".
+      - На :root нужна --color-accent-600 цветом в hex.
+      - На :root нужна --color-neutral-50 цветом в hex.
+      - На :root нужна --color-neutral-900 цветом в hex.
+      - На :root нужна --space-2 в px или rem.
+      - На :root нужна --space-4 в px или rem.
+      - На :root нужна --radius-md в px или rem.
+      - "Смысловой токен --action должен ссылаться на базовый: var(--color-accent-600)."
+      - Смысловой токен --surface должен ссылаться на var(--color-neutral-50).
+      - Смысловой токен --text должен ссылаться на var(--color-neutral-900).
+      - "Компонентный токен --button-bg должен ссылаться на смысловой: var(--action)."
+      - "Компонентный токен --button-fg должен ссылаться на смысловой: var(--surface)."
+      - В блоке [data-theme="dark"] переопределите --surface на var(--color-neutral-900).
+      - В блоке [data-theme="dark"] переопределите --text на var(--color-neutral-50).
+    sources:
+      - title: Design Tokens Community Group (W3C Community Group)
+        url: https://www.designtokens.org/
+        licence: proprietary-link
+        kind: spec
+        lang: en
+      - title: Design Tokens Format Module (DTCG)
+        url: https://www.designtokens.org/tr/drafts/format/
+        licence: proprietary-link
+        kind: spec
+        lang: en
+      - title: "Style Dictionary: документация"
+        url: https://styledictionary.com/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Using CSS custom properties (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "Tailwind CSS: Theme variables"
+        url: https://tailwindcss.com/docs/theme
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Atlassian Design System: Design tokens"
+        url: https://atlassian.design/foundations/tokens/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: tokens.css этого учебника (репозиторий)
+        url: https://github.com/NoeticEcho/learn/blob/main/design/tokens.css
+        licence: link-only
+        kind: docs
+        lang: en
+    videos:
+      - title: Что такое дизайн-токены? Зачем их использовать в интерфейсах? (Nexfield Academy)
+        url: https://www.youtube.com/watch?v=XvVHVdhdRP8
+        licence: proprietary-link
+        kind: video
+        lang: ru
+  - id: 04-design/12-atomic-components
+    order: 12
+    title: "Атомарный дизайн: атомы, молекулы, компоненты и их состояния"
+    summary: Вы научитесь раскладывать любую страницу на повторяемые части и называть их, а затем описывать каждый компонент
+      вместе с состояниями (обычное, наведение, фокус, нажатие, недоступно, загрузка, ошибка). После урока вы собираете
+      страницу из своих деталей, а не рисуете каждую заново.
+    minutes: 30
+    teaches:
+      - design-atomic-design
+      - design-component
+    requires:
+      - design-tokens
+      - html-semantic-elements
+    diagram: AtomicBreakdown (content/diagrams)
+    practice: 'Карточка и кнопка как компоненты с состояниями. Оформите две детали как компоненты. 1) Карточка .card: одна и
+      та же деталь для каждого пункта вашего проекта (и один образец-карточка уже на странице): в styles.css видимая
+      рамка (не тоньше 1 пикселя), скругление и внутренние отступы. 2) Кнопка .btn в трёх состояниях, показанных рядом:
+      обычная; недоступная (атрибут disabled) с прозрачностью от 0.2 до 0.7 и курсором not-allowed; в загрузке
+      (aria-busy="true") с курсором progress. 3) Кроме того, опишите правилами :hover, :focus-visible и :active
+      (проверка не умеет их увидеть: нажмите Tab и проверьте глазами). 4) В записке назовите по одному атому, молекуле и
+      организму вашей страницы. Все «…» нужно заменить. Эпоха: 4. Шаг: design-card-component.'
+    checks:
+      - Карточек article.card должно быть не меньше, чем пунктов в вашем проекте.
+      - Должна быть хотя бы одна карточка article.card.
+      - "У карточки нужна видимая рамка: border: 1px solid #d9d5ce."
+      - "У карточки нужно скругление: border-radius, например var(--radius)."
+      - "В блоке состояний нужны три кнопки .btn: обычная, недоступная и в загрузке."
+      - "Недоступная кнопка должна быть бледнее: opacity от 0.2 до 0.7."
+      - У недоступной кнопки курсор должен быть not-allowed.
+      - У кнопки в загрузке (aria-busy="true") курсор должен быть progress.
+      - Назовите один атом вашей страницы, например «кнопка».
+      - Назовите одну молекулу вашей страницы, например «карточка пункта».
+      - Назовите один организм вашей страницы, например «секция с карточками».
+      - Где-то осталось многоточие «…». Замените его своими словами.
+    sources:
+      - title: Atomic Design (Brad Frost), книга онлайн
+        url: https://atomicdesign.bradfrost.com/
+        licence: link-only
+        kind: book
+        lang: en
+      - title: "Storybook: документация"
+        url: https://storybook.js.org/docs
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Understanding: Focus Visible, WCAG 2.2 (W3C)"
+        url: https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html
+        licence: proprietary-link
+        kind: spec
+        lang: en
+      - title: :focus-visible (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: БЭМ (Википедия)
+        url: https://ru.wikipedia.org/wiki/БЭМ
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: "Design Systems 101: компоненты и паттерны (Nielsen Norman Group)"
+        url: https://www.nngroup.com/articles/design-systems-101/
+        licence: proprietary-link
+        kind: article
+        lang: en
+    videos:
+      - title: Атомарный дизайн за 5 минут (Kris Anfalova)
+        url: https://www.youtube.com/watch?v=2T0-wLAT4m4
+        licence: proprietary-link
+        kind: video
+        lang: ru
+  - id: 04-design/13-docs-governance
+    order: 13
+    title: "Документация и управление системой: страница компонента, версии, вклад"
+    summary: "Вы научитесь описывать компонент так, чтобы им могли пользоваться без вопросов, и управлять системой после
+      запуска: статусы, версии, вклад, устаревание. После урока у вас есть страница-справочник для кнопки вашего
+      проекта."
+    minutes: 30
+    teaches:
+      - design-ds-docs
+      - design-ds-governance
+    requires:
+      - design-atomic-design
+      - design-component
+    diagram: SemverLab (content/diagrams)
+    practice: "Страница-справочник кнопки вашего проекта. Напишите страницу компонента по образцу, который вы видели в
+      GOV.UK. Заполните все разделы для кнопки главного действия. 1) «Когда использовать» и «Когда не использовать» по
+      одной фразе. 2) Варианты (не меньше двух) и состояния (не меньше четырёх), списками. 3) «Слова»: правило для
+      подписи и подпись вашей кнопки из проекта (она должна быть в тексте). 4) «Доступность». 5) Блок «Код»: пример
+      разметки в pre и code, и живой пример кнопки рядом. 6) Статус (экспериментальный, стабильный или устаревший),
+      версия вида 1.0.0, список изменений не меньше чем из двух записей с датами и правило устаревания: что и как вы
+      сообщите людям, прежде чем что-то удалить. Все «…» нужно заменить. Эпоха: 4. Шаг: design-ds-reference."
+    checks:
+      - "Рядом должен быть живой пример: кнопка a.btn с подписью вашего проекта."
+      - "Статус должен быть одним из трёх слов: экспериментальный, стабильный или устаревший."
+      - "Версия должна быть в виде 1.0.0: три числа через точку."
+      - "Опишите, когда использовать кнопку: хотя бы фраза из двух слов."
+      - Опишите, когда кнопку не использовать.
+      - Нужны минимум два варианта, каждый в своём li.
+      - Нужны минимум четыре состояния, каждое в своём li.
+      - В разделе «Слова» должна быть подпись вашей кнопки главного действия.
+      - "Напишите хотя бы фразу о доступности: размер цели, контраст, фокус."
+      - 'В блоке «Код» нужен пример разметки: pre и code с class="btn".'
+      - В списке изменений нужно минимум две записи.
+      - Каждая запись списка изменений должна содержать дату, например 2026-10-27.
+      - "Напишите правило устаревания: что вы сообщите людям, прежде чем что-то удалить."
+      - Где-то осталось многоточие «…». Замените его своими словами.
+    sources:
+      - title: "GOV.UK Design System: Button (образец страницы компонента)"
+        url: https://design-system.service.gov.uk/components/button/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "GOV.UK Design System: Contribution criteria"
+        url: https://design-system.service.gov.uk/community/contribution-criteria/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Carbon: как внести вклад"
+        url: https://carbondesignsystem.com/contributing/get-started/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Семантическое версионирование 2.0.0
+        url: https://semver.org/lang/ru/
+        licence: CC-BY
+        kind: spec
+        lang: ru
+      - title: "Keep a Changelog: как вести список изменений"
+        url: https://keepachangelog.com/ru/1.1.0/
+        licence: CC-BY
+        kind: article
+        lang: ru
+      - title: "Storybook: документация"
+        url: https://storybook.js.org/docs
+        licence: proprietary-link
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/14-design-to-code
+    order: 14
+    title: "От макета к коду: Figma, передача и работа с ИИ"
+    summary: Вы поймёте, как дизайнер работает в Figma (кадры, автолейаут, компоненты, переменные) и что именно нужно
+      разработчику при передаче макета. После урока вы напишете спецификацию передачи для первого экрана своего проекта,
+      по которой его можно сверстать без вопросов, в том числе поручить ИИ.
+    minutes: 30
+    teaches:
+      - design-design-to-code
+      - design-handoff
+    requires:
+      - design-tokens
+      - design-component
+    diagram: HandoffInspector (content/diagrams)
+    practice: "Спецификация передачи первого экрана. Опишите первый экран своего проекта так, чтобы его можно было сверстать
+      без вопросов. 1) Кадры: ширина для телефона, планшета и компьютера (числа). 2) Слои: не меньше пяти названий в
+      виде «Блок/Часть» (например Hero/Title). 3) Токены: не меньше четырёх, названиями переменных CSS (--space-4 и так
+      далее). 4) Состояния главного действия: не меньше четырёх. 5) Ресурсы: две строки таблицы: что отдаётся векторами,
+      что растром, и размеры. 6) Что происходит на узком экране. 7) После того как по спецификации сделали вёрстку
+      (вручную или ИИ-инструментом), впишите не меньше трёх расхождений с токенами или состояниями. В описании экрана
+      должны быть все разделы вашего проекта и главное действие. Все «…» нужно заменить. Эпоха: 7. Шаг:
+      design-handoff-spec."
+    checks:
+      - "Нужны три кадра: телефон, планшет и компьютер."
+      - У каждого кадра должна быть ширина числом, например 375.
+      - Нужно минимум пять слоёв, каждый в своём li с классом layer.
+      - Слои называются «Блок/Часть», например Hero/Title.
+      - Нужно минимум четыре токена.
+      - "Токены записывайте именами переменных CSS: --space-4, --fs-3xl."
+      - Нужны минимум четыре состояния главного действия.
+      - В таблице ресурсов нужны две строки.
+      - В колонке «Как отдаётся» напишите «вектор»/«SVG» или «растр»/«WebP».
+      - "Опишите, что происходит на узком экране: например, «до 600 пикселей карточки идут в одну колонку»."
+      - Нужно минимум три расхождения после вёрстки.
+      - "В описании экрана должны быть все разделы проекта: они подставлены из вашего брифа."
+      - В спецификации должно быть главное действие вашего проекта.
+      - Где-то осталось многоточие «…». Замените его своими словами.
+    sources:
+      - title: "Figma: свойства автолейаута"
+        url: https://help.figma.com/hc/en-us/articles/360040451373-Explore-auto-layout-properties
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Figma: переменные (Guide to variables)"
+        url: https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Figma: Dev Mode"
+        url: https://www.figma.com/dev-mode/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: "Penpot: гибкие раскладки"
+        url: https://help.penpot.app/user-guide/designing/flexible-layouts/
+        licence: proprietary-link
+        kind: docs
+        lang: en
+      - title: Flexbox (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Learn Images (web.dev)
+        url: https://web.dev/learn/images
+        licence: CC-BY
+        kind: course
+        lang: en
+      - title: "Provenance of design/ в репозитории учебника: откуда взяты токены"
+        url: https://github.com/NoeticEcho/learn/blob/main/design/PROVENANCE.md
+        licence: link-only
+        kind: docs
+        lang: en
+    videos: []
+  - id: 04-design/15-ai-tells-own-system
+    order: 15
+    title: Приметы шаблонной страницы и своя маленькая дизайн-система
+    summary: Вы увидите, какие приёмы выдают шаблонную страницу (фиолетовый градиент, одинаковые карточки с эмодзи, лозунги,
+      выдуманные цифры) и научитесь их заменять своим. После урока вы собираете из токенов, шкалы, компонентов и
+      справочника свою маленькую систему и проверяете, что страница выглядит как ваша.
+    minutes: 35
+    teaches:
+      - design-ai-tells
+      - design-own-system
+    requires:
+      - design-handoff
+      - design-ds-governance
+      - design-outdated-vs-modern
+      - design-design-system
+    diagram: AiTells (content/diagrams)
+    practice: "Сделайте шаблонную страницу своей. Эта главная страница собрана из шаблонных решений, как её сделал бы
+      конструктор «по умолчанию». Перепишите её. 1) В заметке отметьте не меньше пяти примет шаблонности с указанием
+      места на странице. 2) Заголовок h1 это название вашего проекта, а подзаголовок говорит, для кого он (никаких
+      «инновационных решений» и «новых высот»). 3) Кнопка главного действия .cta подписана действием из вашего проекта.
+      4) Карточки в блоке features это пункты вашего проекта, без эмодзи; вводный абзац p под заголовком блока тоже
+      конкретный. 5) В блоке proof подтверждения из вашего проекта (документы, работы, люди), без выдуманных цифр вроде
+      «10k+» и «99.9 %». 6) В styles.css на :root опишите токены --accent, --surface, --text, --font-body и --space-4;
+      уберите градиент с .hero и шрифт Inter; основной текст и кнопка должны иметь контраст не ниже 4.5. Все «…» нужно
+      заменить. Эпоха: 7. Шаг: design-own-system."
+    checks:
+      - В заметке нужно минимум пять примет шаблонности.
+      - Каждую примету опишите словами с указанием места на странице.
+      - Где-то осталось многоточие «…». Замените его своими словами.
+      - Заголовок h1 должен быть названием вашего проекта.
+      - В первом экране должно быть сказано, для кого проект.
+      - В первом экране остались шаблонные лозунги («инновационные решения», «новых высот»). Напишите конкретно.
+      - Кнопка главного действия должна называть действие из вашего проекта.
+      - Карточки должны быть вашими пунктами проекта.
+      - В блоке карточек остались эмодзи. Уберите их.
+      - В блоке подтверждений должны быть ваши настоящие подтверждения из проекта.
+      - Выдуманные цифры («10k+», «99.9 %») нужно убрать.
+      - На :root нужна переменная --accent.
+      - На :root нужна переменная --surface.
+      - На :root нужна переменная --text.
+      - На :root нужна переменная --font-body.
+      - На :root нужна переменная --space-4 в px или rem.
+      - "С шапки .hero нужно убрать градиент: background-image."
+      - Шрифт Inter остался по умолчанию. Задайте свой шрифт через --font-body.
+      - "Текст в карточках слишком светлый для фона: контраст не ниже 4.5."
+      - "Подпись кнопки плохо видна на её фоне: нужен контраст не ниже 4.5."
+    sources:
+      - title: Improving frontend design through Skills (Anthropic)
+        url: https://claude.com/blog/improving-frontend-design-through-skills
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: Deceptive Patterns (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/deceptive-patterns/
+        licence: proprietary-link
+        kind: article
+        lang: en
+      - title: "Awwwards: как оценивают сайты"
+        url: https://www.awwwards.com/about-evaluation/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: Learn Design (web.dev)
+        url: https://web.dev/learn/design/
+        licence: CC-BY
+        kind: course
+        lang: en
+      - title: Photos as Web Content (Nielsen Norman Group)
+        url: https://www.nngroup.com/articles/photos-as-web-content/
+        licence: proprietary-link
+        kind: article
+        lang: en
+    videos: []
