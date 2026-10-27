@@ -29,6 +29,23 @@ test('the preview cannot read the app', async ({ page }) => {
 	expect(sandbox).toBe('allow-scripts');
 });
 
+test('the preview cannot reach the app’s storage', async ({ page }) => {
+	await page.goto('./_dev/practice/');
+	await page.evaluate(() => localStorage.setItem('learn.theme', 'paper'));
+	await page.getByRole('tab', { name: 'script.js' }).click();
+	// an opaque origin has no storage: each probe throws, so none is listed as reached
+	await write(
+		page,
+		"var r = []; try { localStorage.length; r.push('localStorage') } catch (e) {}" +
+			" try { indexedDB.open('learn'); r.push('indexedDB') } catch (e) {}" +
+			" try { document.cookie; r.push('cookie') } catch (e) {}" +
+			" try { caches.keys(); r.push('caches') } catch (e) {}" +
+			" throw new Error('reached:' + r.join(','));"
+	);
+	await expect(page.getByRole('alert')).toContainText(/reached:\s*$/);
+	expect(await page.locator('iframe').evaluate((f: HTMLIFrameElement) => f.contentDocument)).toBeNull();
+});
+
 test('the preview reaches no network: fetch, images and navigation are blocked', async ({ page, context }) => {
 	// Chromium reports a request the CSP blocked as a `request` event that then fails with «csp»;
 	// it never reaches the network. So the test counts what reaches the network (the route) and
