@@ -15,14 +15,26 @@
 		loaded = true;
 	});
 
+	/**
+	 * One grade per card per showing. The card is taken when the click lands, and a click while a
+	 * grade is still being written is ignored: a fast double click used to grade the card twice,
+	 * award two reviews, and then grade the next card, unseen, with the second click.
+	 */
+	let grading = $state(false);
 	async function rate(r: RatingName) {
-		if (!card) return;
-		const [{ db }, srs, { award }] = await Promise.all([import('#lib/learner.ts'), import('#lib/srs/index.ts'), import('#lib/game/index.ts')]);
-		const d = await db();
-		await srs.grade(d, card.id, r);
-		await award(d, 'review');
-		queue = queue.slice(1);
-		shown = false;
+		const current = card;
+		if (!current || grading) return;
+		grading = true;
+		try {
+			const [{ db }, srs, { award }] = await Promise.all([import('#lib/learner.ts'), import('#lib/srs/index.ts'), import('#lib/game/index.ts')]);
+			const d = await db();
+			await srs.grade(d, current.id, r);
+			await award(d, 'review');
+			queue = queue.filter((c) => c !== current);
+			shown = false;
+		} finally {
+			grading = false;
+		}
 	}
 
 	const ratings: RatingName[] = ['again', 'hard', 'good', 'easy'];
@@ -47,7 +59,7 @@
 						<legend>{t('review.rate')}</legend>
 						<div class="rates">
 							{#each ratings as r (r)}
-								<button type="button" class={r === 'good' ? 'primary' : 'secondary'} onclick={() => rate(r)}>{t(`review.${r}`)}</button>
+								<button type="button" class={r === 'good' ? 'primary' : 'secondary'} disabled={grading} onclick={() => rate(r)}>{t(`review.${r}`)}</button>
 							{/each}
 						</div>
 					</fieldset>
