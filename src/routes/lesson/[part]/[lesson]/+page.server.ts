@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { loadContent } from '#lib/content/load.ts';
 import { homeIndex } from '#lib/content/catalogue.server.ts';
+import { lastmod, lessonCard, og } from '#lib/seo/pages.server.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
 export const entries: EntryGenerator = () =>
@@ -20,5 +21,6 @@ export const load: PageServerLoad = ({ params }) => {
 	// the concepts it teaches, and «Дальше» reads which lessons it opens from the home's hashed
 	// lesson list, fetched after mount and cached by the service worker.
 	const concepts = lesson.teaches.map((c) => curriculum.concepts.find((x) => x.id === c)?.title ?? c);
-	return { lesson, part, concepts, index: homeIndex().hash };
+	// The head's: the Open Graph card and the date the lesson last changed (lib/seo).
+	return { lesson, part, concepts, index: homeIndex().hash, og: og(lessonCard(lesson, part)), lastmod: lastmod(id) };
 };

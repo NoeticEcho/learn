@@ -25,10 +25,16 @@ const scope = () => self.registration.scope;
 const url = (path: string) => new URL(path.replace(/^\//, ''), scope()).href;
 
 const isLesson = (p: string) => /(^|\/)lesson\//.test(p);
+// What the build writes for crawlers, answer engines and link previews, never for the reader:
+// the Open Graph cards (a hundred-odd PNGs), the sitemap, robots.txt and llms(-full).txt.
+const forMachines = (p: string) => /(^|\/)(og\/|sitemap\.xml$|robots\.txt$|llms(-full)?\.txt$)/.test(p);
+const pages = () => prerendered.filter((p) => !forMachines(p.path));
 const shell = () => [
 	...immutable.map((f) => url(f.path)),
 	...assets.map((f) => url(f.path)),
-	...prerendered.filter((p) => !isLesson(p.path)).map((p) => url(p.path))
+	...pages()
+		.filter((p) => !isLesson(p.path))
+		.map((p) => url(p.path))
 ];
 
 self.addEventListener('install', (event) => {
@@ -87,7 +93,7 @@ self.addEventListener('message', (event) => {
 	event.waitUntil(
 		(async () => {
 			const cache = await caches.open(CACHE);
-			const all = [...shell(), ...prerendered.map((p) => url(p.path))];
+			const all = [...shell(), ...pages().map((p) => url(p.path))];
 			const todo = [...new Set(all)];
 			let done = 0;
 			let failed = 0;

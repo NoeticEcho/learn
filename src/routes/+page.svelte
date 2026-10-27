@@ -12,6 +12,9 @@
 	import Project from '#lib/home/Project.svelte';
 	import persona from '#lib/persona/default.ru.json';
 	import type { HomeLesson } from '#lib/content/catalogue.ts';
+	import Seo from '#lib/seo/Seo.svelte';
+	import { course, website } from '#lib/seo/jsonld.ts';
+	import { at } from '#lib/seo/site.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -83,10 +86,16 @@
 	const total = $derived(data.home.total);
 </script>
 
-<svelte:head>
-	<title>{t('app.title')}</title>
-	<meta name="description" content={t('prologue.lede')} />
-</svelte:head>
+<Seo
+	title={t('app.title')}
+	full={t('seo.home.title')}
+	description={t('seo.home.description')}
+	image={{ file: data.seo.og, alt: t('seo.home.alt') }}
+	jsonld={[
+		course({ homeUrl: at.home(), description: t('seo.home.description'), image: at.file(data.seo.og), minutes: data.seo.minutes }),
+		website(at.home(), t('seo.home.description'))
+	]}
+/>
 
 <div class="container">
 	{#if mode === 'prologue'}

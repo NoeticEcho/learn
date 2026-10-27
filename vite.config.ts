@@ -4,8 +4,13 @@ import { defineConfig } from 'vitest/config';
 import { mdsvex } from 'mdsvex';
 import { svelteTesting } from '@testing-library/svelte/vite';
 
+// The site's path on its host. `$app/paths` makes links relative while prerendering, so code
+// that needs an absolute address (canonical, Open Graph, the sitemap) reads this instead.
+const base = (process.env.BASE_PATH ?? '/learn') as '' | `/${string}`;
+
 // SvelteKit 3 takes its configuration here, in the Vite plugin; there is no svelte.config.js.
 export default defineConfig({
+	define: { __BASE_PATH__: JSON.stringify(base) },
 	plugins: [
 		sveltekit({
 			compilerOptions: {
@@ -15,7 +20,7 @@ export default defineConfig({
 			extensions: ['.svelte', '.svx'],
 			preprocess: [mdsvex({ extensions: ['.svx'] })],
 			adapter: adapter({ pages: 'build', assets: 'build', fallback: '404.html', strict: true }),
-			paths: { base: (process.env.BASE_PATH ?? '/learn') as '' | `/${string}` },
+			paths: { base },
 			prerender: { handleHttpError: 'fail' },
 			// The CSS goes into the page: one round trip less before first paint on a slow phone.
 			inlineStyleThreshold: 100_000

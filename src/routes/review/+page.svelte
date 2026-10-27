@@ -1,5 +1,6 @@
 <!-- Spaced repetition (spec §3.4 «Карточки», §4.6): the cards due now, one at a time. -->
 <script lang="ts">
+	import Seo from '#lib/seo/Seo.svelte';
 	import { onMount } from 'svelte';
 	import { t, pl } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
@@ -42,7 +43,7 @@
 	const ratings: RatingName[] = ['again', 'hard', 'good', 'easy'];
 </script>
 
-<svelte:head><title>{t('review.title')}: {t('app.title')}</title></svelte:head>
+<Seo title={t('review.title')} description={t('seo.private')} noindex />
 
 <div class="container">
 	<header class="head">

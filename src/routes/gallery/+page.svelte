@@ -5,6 +5,7 @@
 	scaffolding (`data-scaffold`, scaffold.ts) is left out of the thumbnail and the zip.
 -->
 <script lang="ts">
+	import Seo from '#lib/seo/Seo.svelte';
 	import { onMount } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
@@ -36,7 +37,7 @@
 	}
 </script>
 
-<svelte:head><title>{t('gallery.title')}: {t('app.title')}</title></svelte:head>
+<Seo title={t('gallery.title')} description={t('seo.private')} noindex />
 
 <div class="container">
 	<header class="head">

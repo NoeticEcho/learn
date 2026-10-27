@@ -5,6 +5,7 @@
 	file when the person ticks that box.
 -->
 <script lang="ts">
+	import Seo from '#lib/seo/Seo.svelte';
 	import { onMount } from 'svelte';
 	import { t, pl } from '#lib/i18n/index.ts';
 	import { getTheme, setTheme, THEME_KEY, type Theme } from '#lib/theme.ts';
@@ -135,7 +136,7 @@
 	}
 </script>
 
-<svelte:head><title>{t('settings.title')}: {t('app.title')}</title></svelte:head>
+<Seo title={t('settings.title')} description={t('seo.private')} noindex />
 
 <div class="container">
 	<header class="head">

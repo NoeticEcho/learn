@@ -9,6 +9,9 @@
 	import { t, pl, midSentence } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import { buildGraph, status, unmet, type LessonStatus } from '#lib/content/graph.ts';
+	import Seo from '#lib/seo/Seo.svelte';
+	import { breadcrumbs } from '#lib/seo/jsonld.ts';
+	import { at } from '#lib/seo/site.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -76,7 +79,20 @@
 	});
 </script>
 
-<svelte:head><title>{t('map.title')}: {t('app.title')}</title></svelte:head>
+<Seo
+	title={t('map.title')}
+	description={t('seo.map.description')}
+	image={data.og}
+	jsonld={[
+		breadcrumbs([{ name: t('app.title'), url: at.home() }, { name: t('map.title') }]),
+		{
+			'@context': 'https://schema.org',
+			'@type': 'ItemList',
+			name: t('map.title'),
+			itemListElement: cat.lessons.map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.title, url: at.lesson(l.id) }))
+		}
+	]}
+/>
 
 <div class="container">
 	<header class="head">

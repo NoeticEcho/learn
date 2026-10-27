@@ -3,9 +3,10 @@
 	import { t } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Echo from '#lib/guide/Echo.svelte';
+	import Seo from '#lib/seo/Seo.svelte';
 </script>
 
-<svelte:head><title>{page.status === 404 ? t('error.404') : t('error.other')}: {t('app.title')}</title></svelte:head>
+<Seo title={page.status === 404 ? t('error.404') : t('error.other')} description={t('seo.home.description')} noindex />
 
 <div class="container err">
 	<span class="echo" aria-hidden="true"><Echo mood="hmm" size={120} /></span>
