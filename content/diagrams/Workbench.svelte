@@ -121,6 +121,9 @@
 	.code button,
 	.tree button {
 		all: unset;
+		display: block;
+		min-height: 1.6rem;
+		min-width: 1.6rem;
 		cursor: pointer;
 		white-space: pre;
 	}
@@ -139,6 +142,7 @@
 		display: block;
 		cursor: pointer;
 		width: 100%;
+		min-height: 1.75rem;
 		box-sizing: border-box;
 	}
 	.h1 {
