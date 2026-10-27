@@ -115,31 +115,31 @@ requests(id, name, phone, item_id)  -- заявки: на услугу ссыл�
 notifications(id, request_id, text) -- уведомления: на заявку ссылается request_id<\/pre>
 
       <h3>1. Спросите план запроса до индекса<\/h3>
-      <textarea class="sql" id="q-before" rows="3">-- EXPLAIN SELECT: все пункты категории 7, новые сначала, первые десять
+      <textarea aria-label="1. Спросите план запроса до индекса" class="sql" id="q-before" rows="3">-- EXPLAIN SELECT: все пункты категории 7, новые сначала, первые десять
 EXPLAIN …<\/textarea>
       <div class="out" id="q-before-out"><\/div>
 
       <h3>2. Создайте индекс и спросите план ещё раз<\/h3>
-      <textarea class="sql" id="q-index" rows="4">-- CREATE INDEX имя ON items (столбец из WHERE);
+      <textarea aria-label="2. Создайте индекс и спросите план ещё раз" class="sql" id="q-index" rows="4">-- CREATE INDEX имя ON items (столбец из WHERE);
 -- затем тот же EXPLAIN ещё раз
 …<\/textarea>
       <div class="out" id="q-index-out"><\/div>
       <p>Строк просмотрено до индекса: <span id="rows-before">…<\/span>, после: <span id="rows-after">…<\/span><\/p>
 
       <h3>3. Заявка и уведомление одной транзакцией<\/h3>
-      <textarea class="sql" id="q-tx-ok" rows="7">BEGIN;
+      <textarea aria-label="3. Заявка и уведомление одной транзакцией" class="sql" id="q-tx-ok" rows="7">BEGIN;
 INSERT INTO requests …
 INSERT INTO notifications …
 …<\/textarea>
       <div class="out" id="q-tx-ok-out"><\/div>
 
       <h3>4. Сбой посреди транзакции: второй шаг с ошибкой, COMMIT не пишем<\/h3>
-      <textarea class="sql" id="q-tx-fail" rows="6">BEGIN;
+      <textarea aria-label="4. Сбой посреди транзакции: второй шаг с ошибкой, COMMIT не пишем" class="sql" id="q-tx-fail" rows="6">BEGIN;
 …<\/textarea>
       <div class="out" id="q-tx-fail-out"><\/div>
 
       <h3>5. Откат и проверка, что от сбойной заявки ничего не осталось<\/h3>
-      <textarea class="sql" id="q-tx-after" rows="3">…<\/textarea>
+      <textarea aria-label="5. Откат и проверка, что от сбойной заявки ничего не осталось" class="sql" id="q-tx-after" rows="3">…<\/textarea>
       <div class="out" id="q-tx-after-out"><\/div>
 
       <p>Какую цену платит запись за каждый лишний индекс: <span id="index-cost">…<\/span><\/p>
@@ -1150,7 +1150,8 @@ input {
 [data-scaffold] pre {
   margin: 0.25rem 0 0.5rem;
   padding: 0.5rem;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   background-color: #eef1f5;
   font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
 }
@@ -1242,17 +1243,17 @@ requests(id, name, phone, item_id)  -- заявки: на услугу ссыл�
 notifications(id, request_id, text) -- уведомления: на заявку ссылается request_id<\/pre>
 
       <h3>1. Спросите план запроса до индекса<\/h3>
-      <textarea class="sql" id="q-before" rows="3">EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/textarea>
+      <textarea aria-label="1. Спросите план запроса до индекса" class="sql" id="q-before" rows="3">EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/textarea>
       <div class="out" id="q-before-out"><\/div>
 
       <h3>2. Создайте индекс и спросите план ещё раз<\/h3>
-      <textarea class="sql" id="q-index" rows="4">CREATE INDEX items_category_idx ON items (category_id);
+      <textarea aria-label="2. Создайте индекс и спросите план ещё раз" class="sql" id="q-index" rows="4">CREATE INDEX items_category_idx ON items (category_id);
 EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/textarea>
       <div class="out" id="q-index-out"><\/div>
       <p>Строк просмотрено до индекса: <span id="rows-before">2000<\/span>, после: <span id="rows-after">100<\/span><\/p>
 
       <h3>3. Заявка и уведомление одной транзакцией<\/h3>
-      <textarea class="sql" id="q-tx-ok" rows="7">BEGIN;
+      <textarea aria-label="3. Заявка и уведомление одной транзакцией" class="sql" id="q-tx-ok" rows="7">BEGIN;
 INSERT INTO requests (name, phone, item_id) VALUES ('Тестовый посетитель', '+7 000 000-00-00', 1);
 INSERT INTO notifications (request_id, text) VALUES (1, 'Новая заявка');
 COMMIT;
@@ -1260,13 +1261,13 @@ SELECT COUNT(*) FROM requests;<\/textarea>
       <div class="out" id="q-tx-ok-out"><\/div>
 
       <h3>4. Сбой посреди транзакции: второй шаг с ошибкой, COMMIT не пишем<\/h3>
-      <textarea class="sql" id="q-tx-fail" rows="6">BEGIN;
+      <textarea aria-label="4. Сбой посреди транзакции: второй шаг с ошибкой, COMMIT не пишем" class="sql" id="q-tx-fail" rows="6">BEGIN;
 INSERT INTO requests (name, phone, item_id) VALUES ('Второй посетитель', '+7 000 000-00-01', 1);
 INSERT INTO notifications (request_id, text) VALUES (2, NULL);<\/textarea>
       <div class="out" id="q-tx-fail-out"><\/div>
 
       <h3>5. Откат и проверка, что от сбойной заявки ничего не осталось<\/h3>
-      <textarea class="sql" id="q-tx-after" rows="3">ROLLBACK;
+      <textarea aria-label="5. Откат и проверка, что от сбойной заявки ничего не осталось" class="sql" id="q-tx-after" rows="3">ROLLBACK;
 SELECT COUNT(*) FROM requests;<\/textarea>
       <div class="out" id="q-tx-after-out"><\/div>
 
@@ -2278,7 +2279,8 @@ input {
 [data-scaffold] pre {
   margin: 0.25rem 0 0.5rem;
   padding: 0.5rem;
-  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   background-color: #eef1f5;
   font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
 }

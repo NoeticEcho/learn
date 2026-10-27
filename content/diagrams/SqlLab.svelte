@@ -90,7 +90,7 @@
 	<div class="grid">
 		<div>
 			<h4>Таблица items</h4>
-			<div class="scroll">
+			<div class="scroll" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали">
 				<table class="t" aria-label="Таблица items">
 					<thead><tr><th>id</th><th>title</th><th>price</th><th>category</th></tr></thead>
 					<tbody>
@@ -113,7 +113,7 @@
 	<div aria-live="polite">
 		{#if out}
 			{#if sel}
-				<div class="scroll">
+				<div class="scroll" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали">
 					<table class="t" aria-label="Результат запроса">
 						<thead><tr>{#each sel.columns as c, i (i)}<th>{c}</th>{/each}</tr></thead>
 						<tbody>

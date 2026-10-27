@@ -151,7 +151,7 @@
 			<button type="button" aria-pressed={ev === 'cancel'} onclick={() => (ev = 'cancel')}>Отмена единственного заказа</button>
 		</div>
 		{#if form === 'before'}
-			<div class="scroll">
+			<div class="scroll" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали">
 				<table class="t" aria-label="Одна таблица заказов">
 					<thead><tr><th>заказ</th><th>клиент</th><th>телефон</th><th>услуга</th><th>цена</th><th>категория</th></tr></thead>
 					<tbody>
