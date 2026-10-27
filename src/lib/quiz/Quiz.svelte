@@ -193,8 +193,8 @@
 		padding-top: var(--space-5);
 	}
 	.progress {
-		font-family: var(--font-mono);
 		font-size: var(--text-caption);
+		font-variant-numeric: tabular-nums;
 		color: var(--text-secondary);
 		margin: 0 0 var(--space-3);
 	}
@@ -267,7 +267,7 @@
 	}
 	.order li::before {
 		content: counter(step);
-		font-family: var(--font-mono);
+		font-variant-numeric: tabular-nums;
 		font-size: var(--text-caption);
 		color: var(--text-secondary);
 		min-width: 2ch;
@@ -292,7 +292,7 @@
 	select,
 	textarea {
 		background: var(--surface-body);
-		border: var(--line) solid var(--border-hairline);
+		border: var(--line) solid var(--field-edge);
 		border-radius: 0;
 		min-height: var(--hit-min);
 		padding: var(--space-2) var(--space-3);

@@ -68,7 +68,7 @@
 	.editor {
 		height: 100%;
 		min-height: 16rem;
-		border: var(--line) solid var(--border-hairline);
+		border: var(--line) solid var(--field-edge);
 		background: var(--surface-body);
 		overflow: auto;
 	}

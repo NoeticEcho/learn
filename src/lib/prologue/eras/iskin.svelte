@@ -20,6 +20,7 @@
 		height: 100%;
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: var(--space-6);
 		padding: var(--space-7);
 		background: var(--surface-canvas);

@@ -140,7 +140,7 @@
 	textarea {
 		min-height: var(--hit-min);
 		padding: var(--space-2) var(--space-3);
-		border: var(--line) solid var(--border-rule);
+		border: var(--line) solid var(--field-edge);
 		border-radius: 0;
 		background: var(--surface-body);
 		resize: vertical;

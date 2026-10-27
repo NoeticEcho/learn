@@ -213,7 +213,7 @@
 	<section aria-labelledby="s-project">
 		<h2 id="s-project">{t('settings.project')}</h2>
 		<p class="note">{t('settings.project.lede')}</p>
-		<div class="field">
+		<div class="field kind">
 			<label for="kind">{t('settings.kind')}</label>
 			<select id="kind" value={kind} onchange={(e) => saveKind(e.currentTarget.value as Kind)}>
 				{#each KINDS as k (k)}<option value={k}>{t(`settings.kind.${k}`)}</option>{/each}
@@ -361,7 +361,7 @@
 	textarea {
 		min-height: var(--hit-min);
 		padding: var(--space-2) var(--space-3);
-		border: var(--line) solid var(--border-rule);
+		border: var(--line) solid var(--field-edge);
 		border-radius: 0;
 		background: var(--surface-body);
 	}
@@ -373,9 +373,37 @@
 	input[type='radio'] {
 		accent-color: var(--brass-500);
 	}
+	.kind {
+		margin-bottom: var(--space-4);
+	}
 	.file {
 		display: grid;
 		gap: var(--space-2);
+	}
+	/* The native picker's button, in the system's secondary recipe rather than the browser's grey. */
+	.file input::file-selector-button {
+		min-height: var(--hit-min);
+		margin-right: var(--space-3);
+		padding: 0 var(--space-5);
+		border: var(--line) solid var(--field-edge);
+		border-radius: var(--radius-none);
+		background: transparent;
+		color: var(--text-primary);
+		font: inherit;
+		font-size: var(--text-body-sm);
+		font-weight: var(--weight-medium);
+		cursor: pointer;
+		transition: border-color var(--dur-micro) var(--ease-stop);
+	}
+	.file input:hover::file-selector-button {
+		border-color: var(--border-brass);
+	}
+	.file input:active::file-selector-button {
+		background: var(--surface-inset);
+	}
+	.file input {
+		color: var(--text-secondary);
+		font-size: var(--text-body-sm);
 	}
 	.ask {
 		display: flex;
