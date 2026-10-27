@@ -170,6 +170,22 @@ export const Comic = z
 	.strict();
 export type Comic = z.infer<typeof Comic>;
 
+/**
+ * The lesson's definition (docs/content-plan/README.md, «Определение»): the quotable one- or
+ * two-sentence answer to «что такое <тема>?». It opens the lesson, and it is the page's meta
+ * description, its structured data's description and its line in llms.txt, so it is held to
+ * what a snippet can carry: 50 to 160 characters, a whole sentence, and no «вы», because it is
+ * read quoted alone, by a search engine or an answer engine, not as part of the lesson.
+ */
+export const Definition = z
+	.string({ error: 'every lesson opens with a definition of its topic (docs/content-plan/README.md, «Определение»)' })
+	.trim()
+	.min(50, 'a definition is one or two sentences, at least 50 characters')
+	.max(160, 'a definition fits a search snippet: 160 characters at most')
+	.refine((d) => /[.!?…]$/.test(d), 'a definition ends as a sentence does')
+	.refine((d) => !/(^|[^а-яё])(вы|вас|вам|вами|ваш[а-яё]*)(?=[^а-яё]|$)/i.test(d), 'a definition is read quoted alone: no «вы»')
+	.refine((d) => !/^(в этом уроке|этот урок|урок )/i.test(d), 'a definition defines the topic, not the lesson');
+
 export const ConceptId = z.string().regex(/^[a-z0-9-]+$/);
 
 export const LessonMeta = z
@@ -178,6 +194,8 @@ export const LessonMeta = z
 		part: z.number().int().min(0).max(16),
 		order: z.number().int().min(1),
 		title: text,
+		/** The topic's definition, quotable alone (Definition above). */
+		definition: Definition,
 		/** «Зачем»: what the person can do after the lesson. */
 		summary: text,
 		minutes: z.number().int().min(1).max(120),

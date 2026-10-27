@@ -4,6 +4,7 @@ export const validLesson = {
 	part: 2,
 	order: 1,
 	title: 'Первая страница',
+	definition: 'HTML — язык разметки: теги говорят браузеру, где в тексте заголовок, абзац и ссылка.',
 	summary: 'Вы соберёте первую страницу из трёх тегов.',
 	minutes: 20,
 	teaches: ['html-tag'],
