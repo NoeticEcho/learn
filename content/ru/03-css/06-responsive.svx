@@ -1,0 +1,847 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/06-responsive',
+		part: 3,
+		order: 6,
+		title: 'Адаптивность: медиазапросы и контейнерные запросы',
+		summary:
+			'Сайт открывают на телефоне, ноутбуке и большом мониторе, причём чаще всего на телефоне. После урока вы делаете mobile first, ставите точки перелома по содержимому и используете контейнерные запросы, чтобы компонент подстраивался под своё место.',
+		minutes: 30,
+		teaches: ['css-responsive', 'css-media-queries', 'css-container-queries'],
+		requires: ['css-grid', 'html-head-meta'],
+		practice: {
+			id: 'responsive-page',
+			title: 'Адаптивный сайт 2014 года: mobile first',
+			task: 'Сделайте страницу адаптивной. 1) Убедитесь, что в head есть viewport (width=device-width). 2) Перепишите раскладку mobile first: базовые правила .layout это один столбец (две области, "main" и "aside" друг под другом), а в медиазапросе @media (min-width: 48rem) добавляются два столбца. 3) Картинки не должны вылезать за экран: img { max-width: 100%; height: auto }. 4) Кнопка главного действия .button удобна для пальца: min-height не меньше 2.75rem (44 пикселей). 5) Блоку карточек .cards дайте container-type: inline-size и напишите @container (min-width: 40rem) { .card { … } }: широкая карточка раскладывается в две колонки, узкая остаётся вертикальной.',
+			era: 4,
+			continues: 'grid-layout',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: база сайта 2014 года (сброс и типографика). Раскладку вы пишете сами. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Раскладка: ваша работа начинается здесь ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+  grid-template-areas: "main aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: база сайта 2014 года (сброс и типографика). Раскладку вы пишете сами. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Раскладка: ваша работа начинается здесь ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Широкий экран: добавляем, а не отнимаем (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* Карточка смотрит на ширину своего места, а не окна. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			checks: [
+				{ id: 'viewport', kind: 'attr', selector: 'meta[name="viewport"]', name: 'content', matches: 'width=device-width' },
+				{ id: 'layout-grid', kind: 'style', selector: '.layout', prop: 'display', equals: 'grid' },
+				{ id: 'image-fluid', kind: 'style', selector: 'img', prop: 'max-width', equals: '100%' },
+				{ id: 'touch-target', kind: 'style', selector: 'a.button', prop: 'min-height', matches: '^(4[4-9]|[5-9]\\d|\\d{3,})(\\.\\d+)?px$' },
+				{ id: 'container', kind: 'style', selector: '.cards', prop: 'container-type', matches: '^(inline-size|size)$', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'Из чего состоит адаптивная вёрстка в определении Итана Маркотта (2010)?',
+				options: [
+					'Резиновая сетка: ширины в долях, а не в пикселях',
+					'Гибкие изображения, которые сжимаются вместе с колонкой',
+					'Медиазапросы, которые меняют правила на разных экранах',
+					'Отдельный сайт для телефона на другом адресе'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: колонки растягиваются и сжимаются.',
+					'Да: img { max-width: 100% } до сих пор нужен каждому сайту.',
+					'Да: медиазапросы перестраивают макет, когда обычной сжимаемости не хватает.',
+					'Нет: отдельный «мобильный» сайт m.example.ru как раз то, что адаптивность заменила: один адрес и один HTML для всех экранов.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что значит «mobile first» в CSS?',
+				options: [
+					'Основные правила пишут для узкого экрана, а для широкого добавляют через @media (min-width: …)',
+					'Сначала делают мобильное приложение, а потом сайт',
+					'Сайт показывают только на телефонах'
+				],
+				answer: 0,
+				why: [
+					'Да. Так мобильному браузеру достаётся простой и лёгкий код, а усложнение приходит тем, кому оно по плечу. Телефон не разбирает лишние правила и не отменяет их.',
+					'Нет: речь про порядок написания стилей, а не про приложения.',
+					'Нет: широкий экран тоже поддерживается, просто в порядке добавления.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Как выбирать точки перелома (ширины, на которых макет перестраивается)?',
+				options: [
+					'По содержимому: туда, где макет начинает ломаться',
+					'По размерам популярных телефонов и планшетов',
+					'Одна точка на 1024 пикселя'
+				],
+				answer: 0,
+				why: [
+					'Да. Потяните окно вширь, и там, где строка становится слишком длинной или карточки слишком растягиваются, добавьте точку. Устройств слишком много.',
+					'Нет: размеры устройств меняются каждый год, а контент остаётся.',
+					'Нет: у одной точки нет оснований, и она устареет с первым новым экраном.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Чем контейнерный запрос @container отличается от медиазапроса @media?',
+				options: [
+					'Он смотрит на ширину родительского контейнера, а не окна, поэтому компонент подстраивается под своё место',
+					'Он работает только на телефонах',
+					'Это то же самое, только с другим названием'
+				],
+				answer: 0,
+				why: [
+					'Да. Одна и та же карточка в широкой колонке и в узкой боковой ведёт себя по-разному в одном и том же окне.',
+					'Нет: к устройству он отношения не имеет.',
+					'Нет: разница принципиальна, и она в том, на что смотрит условие.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Для чего нужна строка <meta name="viewport" content="width=device-width, initial-scale=1">?',
+				options: [
+					'Чтобы телефон показывал страницу в её настоящую ширину, а не уменьшал, как «широкий» экран, и медиазапросы работали',
+					'Чтобы запретить увеличивать страницу',
+					'Для поисковиков'
+				],
+				answer: 0,
+				why: [
+					'Да. Без неё телефон считает, что экран шириной около 980 пикселей, и все ваши медиазапросы не срабатывают.',
+					'Нет: запрещать увеличение вредно для людей с плохим зрением, и этого делать не нужно.',
+					'Нет: поисковики её читают как один из признаков мобильной страницы, но нужна она в первую очередь браузеру.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите блок с классом wrap, который объявлен контейнером по ширине (container-type: inline-size), и внутри него абзац «Привет».',
+				starter: '',
+				checks: [
+					{ id: 'wrap', kind: 'exists', selector: '.wrap p' },
+					{ id: 'container', kind: 'style', selector: '.wrap', prop: 'container-type', matches: '^(inline-size|size)$' },
+					{ id: 'text', kind: 'text', selector: '.wrap p', matches: 'Привет' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-responsive-parts',
+				front: 'Три составляющие адаптивной вёрстки?',
+				back: 'Резиновая сетка (доли, а не пиксели), гибкие изображения (max-width: 100%) и медиазапросы. Термин ввёл Итан Маркотт в 2010 году.'
+			},
+			{
+				id: 'css-mobile-first',
+				front: 'Что такое mobile first?',
+				back: 'Базовые стили пишут для узкого экрана, а для широкого добавляют @media (min-width: …). Телефону достаётся простой код, и ничего не надо отменять.'
+			},
+			{
+				id: 'css-breakpoints',
+				front: 'Как ставить точки перелома?',
+				back: 'По содержимому: где макет начинает ломаться, там и точка. Не по моделям телефонов. Пишите в rem, чтобы они уважали размер шрифта читателя.'
+			},
+			{
+				id: 'css-container-queries',
+				front: 'Что такое контейнерный запрос?',
+				back: 'container-type: inline-size у родителя и @container (min-width: …) у потомка: компонент подстраивается под ширину своего места, а не окна.'
+			},
+			{
+				id: 'css-touch-target',
+				front: 'Какой размер у кнопки для пальца?',
+				back: 'Около 44 × 44 пикселей (2.75rem): так рекомендуют Apple и WCAG 2.5.5. Минимум по WCAG 2.2 уровня AA 24 пикселя.'
+			}
+		],
+		sources: [
+			{
+				title: 'Responsive design (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_design',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'CSS container queries (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Container queries (web.dev)', url: 'https://web.dev/learn/css/container-queries', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Mobile first и desktop first — Дока', url: 'https://doka.guide/css/mobile-first-vs-desktop-first/', licence: 'link-only', kind: 'docs', lang: 'ru' },
+			{ title: 'Responsive web design (Википедия)', url: 'https://en.wikipedia.org/wiki/Responsive_web_design', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Сейчас страница хороша на ноутбуке. Но ваши посетители чаще всего зайдут с телефона. Сделаем так, чтобы ей было удобно везде.',
+			hints: [
+				'В head нужна строка <meta name="viewport" content="width=device-width, initial-scale=1">. Она уже есть с прошлых уроков: проверьте, что не потерялась.',
+				'Mobile first: у .layout сначала один столбец, grid-template-areas: "main" "aside". Двухколоночный вид пишется внутри @media (min-width: 48rem) { … }.',
+				'Контейнерный запрос: у .cards поставьте container-type: inline-size, а потом @container (min-width: 40rem) { .card { display: grid; grid-template-columns: 1fr auto; } }.'
+			],
+			mistakes: {
+				viewport: 'В head нужен тег viewport: <meta name="viewport" content="width=device-width, initial-scale=1">.',
+				'layout-grid': 'Макет .layout должен остаться сеткой: display: grid.',
+				'image-fluid': 'Картинки должны сжиматься вместе с колонкой: img { max-width: 100%; height: auto; }.',
+				'touch-target': 'У кнопки .button маленькая высота. Для пальца нужно не меньше 44 пикселей: min-height: 2.75rem.',
+				container: 'У блока карточек нужен container-type: inline-size, иначе контейнерный запрос не знает, чью ширину смотреть.'
+			},
+			outro: 'Страница подстраивается и под экран, и под своё место. Проверьте себя вживую: откройте её в браузере и потяните окно. Хорошая вёрстка не ломается нигде.'
+		},
+		say: { CSS: 'си-эс-эс', viewport: 'вьюпорт', 'mobile first': 'мобайл фёрст', media: 'медиа', 'min-width': 'мин-уидс', container: 'контейнер', 'container-type': 'контейнер-тайп', 'max-width': 'макс-уидс', rem: 'рем', px: 'пикселей' }
+	};
+</script>
+
+<script>
+	import ResponsiveFrame from '../../diagrams/ResponsiveFrame.svelte';
+</script>
+
+## Один сайт для всех экранов
+
+В 2007 году вышел iPhone, и сайты, которые прекрасно выглядели на ноутбуке, вдруг оказались на экране в несколько раз меньше. Сначала делали отдельный мобильный сайт на другом адресе: `m.example.ru`, и вели две копии. Это было дорого и путало. В 2010 году американский дизайнер Итан Маркотт описал другой путь и назвал его **адаптивным веб-дизайном**: один сайт, один HTML, а вид подстраивается под экран. Он состоит из трёх вещей:
+
+1. **резиновая сетка** — ширины колонок в долях, а не в пикселях;
+2. **гибкие изображения** — картинки сжимаются вместе с колонкой: `img { max-width: 100%; height: auto; }`;
+3. **медиазапросы** — правила, которые включаются на определённой ширине.
+
+К этому добавились два соглашения. **Viewport**: строка `<meta name="viewport" content="width=device-width, initial-scale=1">`, о которой вы знаете из урока про head. Без неё телефон уменьшает страницу, как «широкий экран», и медиазапросы не срабатывают. И **mobile first**: идея Люка Вроблевски (2009–2011): начинайте не с настольного вида, а с мобильного.
+
+## Mobile first и медиазапросы
+
+Mobile first на практике: основные правила пишутся для **узкого экрана**, и для широкого к ним **добавляют**:
+
+```css
+/* для всех: один столбец */
+.layout {
+  display: grid;
+  grid-template-areas: "main" "aside";
+  gap: 2rem;
+}
+
+/* от 48rem (768px) и шире: добавляем два столбца */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+```
+
+Почему так, а не наоборот? Телефону достаётся простой код, и ему не надо ничего отменять, а усложнение приходит только на экраны, которым оно по силам. Условие `min-width` читается «шире или равно».
+
+Другие правила: **точки перелома выбирают по содержимому, а не по устройствам.** Потяните окно вширь и там, где строка становится слишком длинной, а карточки слишком растянутыми, поставьте точку. Моделей телефонов тысячи и они меняются, а ваш контент остаётся. **Размеры пишите в `rem`:** тогда точки уважают настройку шрифта читателя. И не забывайте, что адаптивность это не только ширина: есть высота, ориентация, а ещё настройки человека (`prefers-color-scheme`, `prefers-reduced-motion`), о которых в следующих уроках.
+
+Попробуйте сами: двигайте ширину и смотрите, что происходит в этой странице. Внутри рамки настоящие медиазапросы.
+
+<ResponsiveFrame />
+
+<details>
+<summary>Проверьте себя: почему в mobile first пишут min-width, а не max-width?</summary>
+
+Основные правила для узкого экрана, а min-width добавляет усложнение там, где места больше. Телефону ничего не приходится отменять.
+
+</details>
+
+## Контейнерные запросы: подстраиваемся под своё место
+
+Медиазапрос смотрит на **окно**. Но компонент не знает, где его поставят: одна и та же карточка может оказаться в широкой основной колонке и в узкой боковой, и окно у них общее. До недавних пор решения не было, и приходилось писать разные классы на каждое место.
+
+В 2022–2023 годах во всех браузерах появились **контейнерные запросы**: компонент смотрит на ширину своего родителя.
+
+```css
+.cards {
+  container-type: inline-size;
+}
+
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+}
+```
+
+Родителю объявляют, что он «контейнер» (`container-type: inline-size` — по ширине), а потомок спрашивает: «а контейнер шире 40rem?». Если да, карточка раскладывается в две колонки, если нет, остаётся вертикальной. Теперь карточку можно поставить куда угодно, и она сама выберет вид. Посмотрите на схему выше: там две одинаковые карточки в одном окне, и ведут они себя по-разному.
+
+Заметьте: контейнер не может быть тем же элементом, который меняется. Правила внутри `@container` действуют на потомков контейнера, а не на него самого.
+
+<details>
+<summary>Проверьте себя: чем контейнерный запрос лучше медиазапроса для карточки?</summary>
+
+Он смотрит на ширину своего места, а не окна, поэтому одна и та же карточка в широкой и узкой колонках одного окна выбирает свой вид.
+
+</details>
+
+## Пальцы и глаза
+
+Адаптивность это ещё и удобство на ощупь. Кнопка должна быть достаточно большой для пальца: около **44 на 44 пикселя** (`min-height: 2.75rem`): столько рекомендует Apple и стандарт WCAG уровня AAA; минимум в WCAG 2.2 для уровня AA это 24 пикселя. Между кнопками нужен зазор. Главное действие вашего проекта должно быть видно без прокрутки на экране телефона: для этого у вас есть кнопка вверху страницы.
+
+## Практика
+
+Сделайте страницу адаптивной. В предпросмотре есть ширина, и вы можете посмотреть, что получается, но надёжнее другой способ: откройте инструменты разработчика (F12) и включите режим устройств (значок телефона, Ctrl+Shift+M). Там можно выбрать телефон и потянуть ширину от 320 пикселей.
+
+Предупреждение: проверки в упражнении видят вашу страницу при одной ширине, поэтому они не смогут сказать, написали ли вы `@media` и в какую сторону. Они проверят то, что видно на любой ширине: viewport, гибкие изображения, размер кнопки и контейнер карточек. За медиазапросом следите сами, потянув окно.
+
+## Что было не так с 2014 годом
+
+В 2014-м «адаптивность» часто означала «ужать десктопный вид»: колонки столбиком, меню в «гамбургер», а лишнее прячем `display: none`. Текст всё равно оставался слишком мелким, а картинки грузились в полном размере. Привычка писать «десктоп сначала, а потом всё отменять» дала миру тысячи страниц, где телефон разбирает правила, которые тут же отменяются.

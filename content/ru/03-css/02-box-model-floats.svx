@@ -1,0 +1,614 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/02-box-model-floats',
+		part: 3,
+		order: 2,
+		title: 'Блочная модель, единицы и float-раскладка',
+		summary:
+			'У каждого элемента есть содержимое, внутренний отступ, рамка и внешний отступ, и половина «странностей» вёрстки возникает из-за них. После урока вы считаете размеры блока, выбираете между px, rem и процентами и можете прочитать старую раскладку на float.',
+		minutes: 30,
+		teaches: ['css-box-model', 'css-units', 'css-floats-legacy'],
+		requires: ['css-cascade'],
+		practice: {
+			id: 'float-columns',
+			title: 'Две колонки на float, как в 2005-м',
+			task: 'Поставьте основное содержимое и контакты рядом. 1) Задайте всем блокам box-sizing: border-box (у html и наследованием для остальных). 2) Ограничьте ширину .layout через max-width и центрируйте его автоматическими полями margin: 0 auto. 3) Сделайте main левой колонкой (float: left, ширина в процентах), а aside правой (float: right) с внутренним отступом. 4) Подвалу footer задайте clear: both, чтобы он не заехал под колонки. Размеры отступов и ширину пишите в относительных единицах: rem и проценты.',
+			era: 2,
+			continues: 'separate-css',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: вид сайта.
+   HTML говорит, что есть что, а CSS говорит, как оно выглядит.
+   Палитра здесь под спокойный тон проекта; у вас она будет своя. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: вид сайта.
+   HTML говорит, что есть что, а CSS говорит, как оно выглядит.
+   Палитра здесь под спокойный тон проекта; у вас она будет своя. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+
+/* Раскладка: две колонки на float, как делали в 2005-м. */
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.layout {
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main {
+  float: left;
+  width: 68%;
+}
+
+aside {
+  float: right;
+  width: 28%;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+footer {
+  clear: both;
+}
+`
+			},
+			checks: [
+				{ id: 'border-box', kind: 'style', selector: 'html', prop: 'box-sizing', equals: 'border-box' },
+				{ id: 'layout-width', kind: 'style', selector: '.layout', prop: 'max-width', matches: '^(?!none$).+' },
+				{ id: 'main-float', kind: 'style', selector: 'main', prop: 'float', matches: '^(left|right)$' },
+				{ id: 'aside-float', kind: 'style', selector: 'aside', prop: 'float', matches: '^(left|right)$' },
+				{ id: 'aside-padding', kind: 'style', selector: 'aside', prop: 'padding-top', matches: '^(?!0px$|0$).+' },
+				{ id: 'footer-clear', kind: 'style', selector: 'footer', prop: 'clear', matches: '^(both|left|right)$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'У блока width: 200px; padding: 20px; border: 5px solid, и действует box-sizing: content-box. Какова ширина блока на странице (без внешних отступов)?',
+				options: ['250px', '200px', '245px'],
+				answer: 0,
+				why: [
+					'Да: 200 для содержимого плюс по 20 с каждой стороны внутренний отступ (40) плюс по 5 рамки (10) = 250.',
+					'Нет: 200 это ширина только содержимого. Отступ и рамка добавляются сверху.',
+					'Нет: рамка 5 пикселей с каждой стороны, то есть 10, а не 5.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'У того же блока действует box-sizing: border-box. Какова теперь ширина блока на странице?',
+				options: ['200px', '250px', '160px'],
+				answer: 0,
+				why: [
+					'Да. При border-box указанная ширина это весь блок: рамка и внутренний отступ уже внутри, а содержимому достаётся 200 − 40 − 10 = 150.',
+					'Нет: 250 получилось бы при content-box.',
+					'Нет: 160 это если вычесть только отступ, забыв про рамку.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Блок с width: 100% и padding: 20px при box-sizing: content-box внутри контейнера шириной 600px. Что произойдёт?',
+				options: [
+					'Блок станет шире контейнера на 40px и вылезет за край',
+					'Блок ровно поместится',
+					'Браузер сам уменьшит отступ'
+				],
+				answer: 0,
+				why: [
+					'Да: 100% относится к содержимому, а 40 пикселей отступов добавляются сверху. Это старая беда, от которой лечит border-box.',
+					'Нет: с content-box отступы прибавляются к ширине.',
+					'Нет: браузер ничего не уменьшает сам, он делает ровно то, что написано.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините единицу с тем, от чего она считается',
+				pairs: [
+					['px', 'фиксированный пиксель, не зависит ни от чего'],
+					['rem', 'размер шрифта корневого элемента (обычно 16px)'],
+					['em', 'размер шрифта текущего элемента'],
+					['%', 'размер родителя'],
+					['vw', 'ширина окна браузера']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что верно про float сегодня?',
+				options: [
+					'Он остаётся для обтекания картинки текстом',
+					'Колонки страницы им делали, пока не появились flexbox и grid',
+					'Элемент с float остаётся в потоке и родитель сам охватывает его',
+					'Чтобы подвал не заехал под колонки, ему задают clear'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: для чего он и создавался.',
+					'Да: так делали раскладку до 2014 года.',
+					'Нет: float вынимает элемент из потока, и родитель схлопывается, если не использовать clear или clearfix.',
+					'Да: clear: both говорит «встань ниже всех плавающих блоков».'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите внутри <style> правило, которое ставит блок с классом box на 50% ширины и прижимает его влево через float, и добавьте сам блок.',
+				starter: '',
+				checks: [
+					{ id: 'box', kind: 'exists', selector: '.box' },
+					{ id: 'float', kind: 'style', selector: '.box', prop: 'float', equals: 'left' },
+					{ id: 'width', kind: 'style', selector: '.box', prop: 'width', matches: '^(50%|\\d+(\\.\\d+)?px)$' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-box',
+				front: 'Из чего состоит блок?',
+				back: 'Из содержимого, внутреннего отступа (padding), рамки (border) и внешнего отступа (margin). Они вложены друг в друга, как матрёшка.'
+			},
+			{
+				id: 'css-border-box',
+				front: 'Зачем box-sizing: border-box?',
+				back: 'Чтобы width означала весь блок вместе с отступом и рамкой, а не только содержимое. Тогда блок такой, как вы написали, и 100% не вылезает за край.'
+			},
+			{
+				id: 'css-units',
+				front: 'Какую единицу брать?',
+				back: 'Шрифты и отступы в rem (уважают настройки человека), ширину в % или ch, тонкие линии в px, высоту экрана в vh и аккуратно.'
+			},
+			{
+				id: 'css-float',
+				front: 'Что такое float и clear?',
+				back: 'float сдвигает блок влево или вправо, и остальное обтекает его. clear: both ставит блок ниже плавающих. Колонки на float: приём 2000-х, сегодня их делает flexbox или grid.'
+			}
+		],
+		sources: [
+			{
+				title: 'The box model (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Box_model',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Floats (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Floats',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Box Model (web.dev)', url: 'https://web.dev/learn/css/box-model', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Блочная модель — Дока', url: 'https://doka.guide/css/box-model/', licence: 'link-only', kind: 'docs', lang: 'ru' },
+			{ title: 'Holy grail (web design) (Википедия)', url: 'https://en.wikipedia.org/wiki/Holy_grail_(web_design)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Сейчас ваша страница вытянута в одну колонку на всю ширину экрана. Расставим основное содержимое и контакты рядом, как делали в 2005-м.',
+			hints: [
+				'Сначала фундамент: html { box-sizing: border-box; } и *, *::before, *::after { box-sizing: inherit; }. Тогда ширина означает весь блок.',
+				'Колонки: main { float: left; width: 68%; } и aside { float: right; width: 28%; }. Сумма меньше ста процентов: остаётся зазор.',
+				'Подвал заезжает под колонки, пока у него нет footer { clear: both; }. Ограничить ширину страницы и поставить по центру: .layout { max-width: 62.5rem; margin: 0 auto; }.'
+			],
+			mistakes: {
+				'border-box': 'У html должен быть box-sizing: border-box; остальные элементы наследуют его через *, *::before, *::after { box-sizing: inherit; }.',
+				'layout-width': 'У блока .layout нет ограничения ширины: задайте max-width, например 62.5rem (это 1000 пикселей).',
+				'main-float': 'main должен быть колонкой: float: left (или right).',
+				'aside-float': 'aside должен быть второй колонкой: float: right (или left).',
+				'aside-padding': 'У боковой колонки нет внутреннего отступа. Задайте padding.',
+				'footer-clear': 'Подвалу нужно clear: both, иначе он заедет под колонки.'
+			},
+			outro: 'Колонки стоят рядом, и подвал внизу. Вы только что сделали так, как сайты делали десять лет. Теперь понятно, почему flexbox был таким облегчением.'
+		},
+		say: { CSS: 'си-эс-эс', padding: 'паддинг', border: 'бордер', margin: 'марджин', 'box-sizing': 'бокс-сайзинг', 'border-box': 'бордер-бокс', 'content-box': 'контент-бокс', float: 'флоат', clear: 'клир', clearfix: 'клирфикс', rem: 'рем', em: 'эм', vw: 'ви-даблю', px: 'пикселей' }
+	};
+</script>
+
+<script>
+	import BoxModel from '../../diagrams/BoxModel.svelte';
+	import FloatDemo from '../../diagrams/FloatDemo.svelte';
+</script>
+
+## Каждый элемент это коробка
+
+Для браузера любой элемент на странице прямоугольная коробка. Коробка из четырёх слоёв, как матрёшка, считая изнутри:
+
+1. **содержимое** (текст, картинка);
+2. **padding**: внутренний отступ от содержимого до рамки;
+3. **border**: рамка;
+4. **margin**: внешний отступ, расстояние до соседей. Он прозрачный и ничего не закрашивает.
+
+Все странности, вроде «я задал ширину 200, а блок получился 250», вырастают отсюда. По умолчанию (это называется `box-sizing: content-box`) ширина, которую вы пишете, относится **только к содержимому**, а внутренний отступ и рамка добавляются сверху. Так считали с самого начала, но в 2000-х это так раздражало, что сначала Internet Explorer считал по-другому («по-человечески»), а потом и стандарт признал: можно выбрать `box-sizing: border-box`, и тогда ширина означает весь блок.
+
+Покрутите ползунки и переключите режим.
+
+<BoxModel />
+
+Поэтому почти любой стилевой файл начинается так:
+
+```css
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+```
+
+Звёздочка `*` означает «все элементы». Мы задаём `border-box` корню и просим всех наследовать, и тогда любой блок можно при необходимости вернуть к прежнему.
+
+<details>
+<summary>Проверьте себя: блок width: 300px, padding: 20px, border-box. Сколько ширины осталось содержимому?</summary>
+
+260 пикселей: 300 минус по 20 внутреннего отступа с каждой стороны. Рамки в примере нет.
+
+</details>
+
+## Единицы: что с чем сравнивается
+
+- **px**: пиксель. Фиксированный размер, который не зависит ни от чего. Для тонких линий (рамка в 1px) подходит.
+- **rem**: размер шрифта корневого элемента. По умолчанию 16px, но человек может увеличить шрифт в настройках браузера, и все `rem` вырастут вместе. Поэтому размеры текста и отступов пишут в `rem`. Так сайт слушается читателя.
+- **em**: размер шрифта текущего элемента. Полезен для отступов, которые должны расти вместе с текстом (например, внутри кнопки), но вложенные `em` перемножаются, и путаницы много. Начинайте с `rem`.
+- **%**: доля размера родителя. Для ширины колонок.
+- **vw и vh**: доля ширины и высоты окна. Берите осторожно: на телефоне высота окна меняется при прокрутке.
+- **ch**: ширина цифры «0» в текущем шрифте. Идеальна для ширины строки текста: `max-width: 65ch`.
+
+Одно из правил, которое стоит запомнить: **не задавайте размер шрифта в px у html или body**: так вы отменяете настройку читателя.
+
+## Float: как делали колонки
+
+Сначала ради картинки в тексте: свойство `float: left` сдвигает блок к левому краю, а текст обтекает его справа. В середине 2000-х, когда для раскладки были только таблицы, а они давно считались дурным тоном, авторы взяли float и сделали из него колонки: основному блоку `float: left`, боковому `float: right`.
+
+У приёма есть цена. Плавающий блок «вынут» из потока, и родитель, в котором лежат одни плавающие блоки, схлопывается до нуля высоты. А подвал, который идёт следом, пытается занять место рядом с колонками. Лечили свойством `clear: both` у подвала или хитрым «clearfix» у родителя. Попробуйте на схеме: снимите и поставьте галочки.
+
+<FloatDemo />
+
+Был и пик этой моды: в 2006 году статья «In Search of the Holy Grail» (журнал A List Apart) описала, как сделать три колонки: центральная резиновая, боковые фиксированные, а в исходном коде основное содержимое идёт первым. Для этого понадобился десяток хитрых правил, и вся «святость» была в том, что иначе не получалось. Через восемь лет та же задача сводилась к нескольким строкам flexbox. Во всяком старом сайте вы встретите float: теперь вы знаете, откуда он и почему он там.
+
+<details>
+<summary>Проверьте себя: почему подвал заезжает под плавающие колонки?</summary>
+
+Плавающий блок вынут из потока, и следующий элемент ведёт себя так, будто колонок нет. Чтобы подвал встал ниже, ему задают clear: both.
+
+</details>
+
+## Практика
+
+Вы в эпохе 2005 года. Ваша страница уже одета, и сейчас она вытянута в одну колонку. Сделайте две колонки на float: так же, как делали тогда. Не пугайтесь, если подвал сначала уедет не туда: исправить это нужно как раз свойством `clear`.
+
+Сумма ширин колонок в процентах должна быть меньше ста: между ними остаётся зазор. Проценты и rem в этом упражнении не случайны: они позволяют странице растягиваться и сжиматься. Фиксированные ширины в пикселях хуже: страница на телефоне вылезет за экран.
+
+## Что было не так с 2005 годом
+
+Колонки на float держались на соглашениях и «хаках»: стоило добавить внутрь колонки слишком широкую картинку, и вся раскладка падала. Фиксированная ширина в 960 пикселей (на экраны 1024 × 768) считалась стандартом, и на телефоне такие сайты приходилось увеличивать пальцами. Вы переделаете этот сайт в эпохе 2014 года, когда придут flexbox, grid и адаптивность.

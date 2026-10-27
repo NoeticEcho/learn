@@ -1,0 +1,708 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/03-typography-colour',
+		part: 3,
+		order: 3,
+		title: 'Типографика и цвет',
+		summary:
+			'Большая часть страницы это текст, и от шрифта, размера, межстрочного интервала и цвета зависит, будут ли его читать. После урока вы подбираете шрифт и ширину строки, задаёте цвета в современных форматах и проверяете контраст по WCAG.',
+		minutes: 30,
+		teaches: ['css-typography', 'css-web-fonts', 'css-color', 'css-contrast'],
+		requires: ['css-units', 'css-cascade'],
+		practice: {
+			id: 'type-and-colour',
+			title: 'Читаемый текст сайта 2005 года',
+			task: 'Доведите текст до читаемого. 1) У body: размер шрифта не меньше 16 пикселей (лучше 1.125rem), межстрочный интервал line-height от 1.4. 2) Заголовкам h1, h2, h3 дайте другой шрифт с запасным вариантом в конце списка и свой line-height. 3) Ширину строки в основном тексте ограничьте: для main p и main li поставьте max-width в знаках (ch), около 65. 4) Проверьте контраст: основной текст, кнопка и подвал должны давать не меньше 4.5 к 1 против своего фона.',
+			era: 2,
+			continues: 'float-columns',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: вид сайта.
+   HTML говорит, что есть что, а CSS говорит, как оно выглядит.
+   Палитра здесь под спокойный тон проекта; у вас она будет своя. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+
+/* Раскладка: две колонки на float, как делали в 2005-м. */
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.layout {
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main {
+  float: left;
+  width: 68%;
+}
+
+aside {
+  float: right;
+  width: 28%;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+footer {
+  clear: both;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: вид сайта.
+   HTML говорит, что есть что, а CSS говорит, как оно выглядит.
+   Палитра здесь под спокойный тон проекта; у вас она будет своя. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+
+/* Раскладка: две колонки на float, как делали в 2005-м. */
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.layout {
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main {
+  float: left;
+  width: 68%;
+}
+
+aside {
+  float: right;
+  width: 28%;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+footer {
+  clear: both;
+}
+
+/* Типографика: заголовки другим шрифтом, строка не длиннее 65 знаков. */
+
+h1,
+h2,
+h3 {
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.2;
+}
+
+main p,
+main li {
+  max-width: 65ch;
+}
+
+.price {
+  color: #4a5560;
+  font-size: 0.9375rem;
+}
+`
+			},
+			checks: [
+				{ id: 'body-size', kind: 'style', selector: 'body', prop: 'font-size', matches: '^(1[6-9]|[2-9]\\d)(\\.\\d+)?px$' },
+				{ id: 'line-height', kind: 'style', selector: 'body', prop: 'line-height', matches: '^(1\\.[4-9]\\d*|[2-9](\\.\\d+)?|(2[2-9]|[3-9]\\d)(\\.\\d+)?px)$' },
+				{ id: 'heading-font', kind: 'style', selector: 'h1', prop: 'font-family', matches: '(serif|sans-serif|monospace|system-ui)\\s*$' },
+				{ id: 'measure', kind: 'style', selector: 'main p', prop: 'max-width', matches: '^(?!none$).+' },
+				{ id: 'contrast-body', kind: 'contrast', selector: 'body', min: 4.5 },
+				{ id: 'contrast-button', kind: 'contrast', selector: 'a.button', min: 4.5 },
+				{ id: 'contrast-footer', kind: 'contrast', selector: 'footer', min: 4.5 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Какой размер основного текста считается разумным минимумом для чтения с экрана?',
+				options: ['16 пикселей (1rem) и больше', '12 пикселей', '10 пикселей'],
+				answer: 0,
+				why: [
+					'Да. 16px это размер, на который рассчитаны браузеры по умолчанию, и меньше него глаза устают. Многие берут 17 или 18.',
+					'Нет: 12px сегодня слишком мелко: читать на телефоне трудно, а увеличивать приходится руками.',
+					'Нет: 10px читаются только с напряжением, и так делали во времена маленьких экранов с высоким разрешением, а не для чтения.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что означает line-height: 1.5 без единиц?',
+				options: [
+					'Расстояние между строками в полтора размера шрифта',
+					'Полтора пикселя между строками',
+					'Полтора сантиметра между строками'
+				],
+				answer: 0,
+				why: [
+					'Да. Число без единиц умножается на размер шрифта элемента, поэтому интерлиньяж растёт вместе с текстом. Это лучший способ его задавать.',
+					'Нет: без единиц это не пиксели, а множитель.',
+					'Нет: на экране не бывает сантиметров, которые можно было бы взять как есть.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Какая ширина строки считается комфортной для чтения?',
+				options: ['Около 45–80 знаков', 'Около 120 знаков', 'Около 20 знаков'],
+				answer: 0,
+				why: [
+					'Да. Типографы называют это «мерой»: Роберт Брингхерст считал идеалом около 66 знаков. В CSS это max-width: 65ch.',
+					'Нет: в слишком длинной строке глаз теряет начало следующей.',
+					'Нет: в слишком короткой глаз прыгает со строки на строку слишком часто.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Какие пары цветов дают контраст не ниже 4,5 к 1?',
+				options: [
+					'#767676 на белом',
+					'#777777 на белом',
+					'#1f2a33 на #f6f4ee',
+					'#8a8f94 на белом'
+				],
+				answer: [0, 2],
+				why: [
+					'Да: 4,54 к 1, это самый светлый серый, который ещё проходит на белом.',
+					'Нет: 4,48 к 1, не хватает совсем чуть-чуть. Поэтому «на глаз» тут не работает, нужно считать.',
+					'Да: около 13 к 1.',
+					'Нет: около 3,3 к 1, годится только для крупного текста.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините запись с её смыслом',
+				pairs: [
+					['font-display: swap', 'сразу показать запасным шрифтом, потом заменить на загруженный'],
+					['unicode-range', 'загружать только нужные символы, например кириллицу'],
+					['WOFF2', 'сжатый формат шрифтового файла для сайта'],
+					['font-family: Georgia, serif', 'если Georgia нет, взять любой шрифт с засечками']
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите правило: текст абзаца 18 пикселей, тёмно-серый #333333 на белом фоне, и добавьте абзац «Привет».',
+				starter: '',
+				checks: [
+					{ id: 'text', kind: 'text', selector: 'p', matches: 'Привет' },
+					{ id: 'size', kind: 'style', selector: 'p', prop: 'font-size', equals: '18px' },
+					{ id: 'contrast', kind: 'contrast', selector: 'p', min: 4.5 }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-type-basics',
+				front: 'Какие цифры у читаемого текста?',
+				back: 'Размер от 16px (1rem), интерлиньяж 1,4–1,7 без единиц, ширина строки 45–80 знаков (max-width: 65ch), контраст не ниже 4,5 к 1.'
+			},
+			{
+				id: 'css-font-stack',
+				front: 'Как задавать шрифт?',
+				back: 'Списком с запасными: font-family: Georgia, "Times New Roman", serif. В конце общее семейство (serif, sans-serif, system-ui), чтобы текст не остался без шрифта.'
+			},
+			{
+				id: 'css-web-fonts',
+				front: 'Как подключить свой шрифт?',
+				back: '@font-face с файлом woff2 и font-display: swap; в файле должна быть кириллица. Лучше хранить шрифт у себя, а не брать с чужого сервера.'
+			},
+			{
+				id: 'css-color-formats',
+				front: 'Какие бывают форматы цвета?',
+				back: 'hex (#1d5c63), rgb(29 92 99), hsl(186 55% 25%) и современный oklch(45% 0.07 200). Все годятся; hsl и oklch удобнее для подбора оттенков.'
+			},
+			{
+				id: 'css-contrast',
+				front: 'Сколько контраста надо по WCAG AA?',
+				back: '4,5 к 1 для обычного текста и 3 к 1 для крупного (от 24px, или от 19px жирным) и для значков. Строже, уровень AAA: 7 к 1 и 4,5 к 1.'
+			}
+		],
+		sources: [
+			{
+				title: 'Fundamental text and font styling (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Fundamentals',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Web fonts (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Web_fonts',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Color (web.dev)', url: 'https://web.dev/learn/css/color', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{
+				title: 'Understanding SC 1.4.3: Contrast (Minimum)',
+				url: 'https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{ title: 'Ководство Артемия Лебедева', url: 'https://www.artlebedev.ru/kovodstvo/sections/', licence: 'link-only', kind: 'book', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Страница одета, но читать её пока неудобно. Займёмся текстом: размером, интервалом, шириной строки и контрастом.',
+			hints: [
+				'У body добавьте font-size: 1.125rem; и line-height: 1.6;. Единицы у интерлиньяжа не нужны.',
+				'Для строки: main p, main li { max-width: 65ch; }. Для заголовков: h1, h2, h3 { font-family: "Trebuchet MS", system-ui, sans-serif; }.',
+				'Контраст: тёмный текст на светлом или светлый на тёмном. Если сомневаетесь, прогоните пару через калькулятор на схеме выше.'
+			],
+			mistakes: {
+				'body-size': 'Размер текста у body меньше 16 пикселей. Поставьте не меньше 1rem, лучше 1.125rem.',
+				'line-height': 'У body нет подходящего межстрочного интервала: задайте line-height не меньше 1.4, лучше 1.6.',
+				'heading-font': 'У заголовков должен быть font-family с запасным семейством в конце, например sans-serif.',
+				measure: 'Строка не ограничена. Для main p, main li задайте max-width в знаках, например 65ch.',
+				'contrast-body': 'Основной текст плохо читается на своём фоне: контраст ниже 4,5 к 1. Затемните текст или осветлите фон.',
+				'contrast-button': 'Текст на кнопке плохо читается на её фоне: контраст ниже 4,5 к 1.',
+				'contrast-footer': 'Текст в подвале плохо читается на его фоне: контраст ниже 4,5 к 1.'
+			},
+			outro: 'Теперь страницу приятно читать. Шрифт, интервал, строка и контраст это незаметная работа, которую замечают, только когда её нет.'
+		},
+		say: { CSS: 'си-эс-эс', font: 'фонт', 'font-family': 'фонт-фэмили', 'font-face': 'фонт-фейс', 'font-display': 'фонт-дисплей', 'line-height': 'лайн-хайт', WOFF2: 'воф-два', WCAG: 'вэ-кэг', AA: 'а-а', AAA: 'а-а-а', hex: 'хекс', rgb: 'эр-джи-би', hsl: 'эйч-эс-эль', oklch: 'ок-эл-си-эйч', 'sans-serif': 'сэнс-сериф', serif: 'сериф', ch: 'це-аш', px: 'пикселей', rem: 'рем' }
+	};
+</script>
+
+<script>
+	import TypeLab from '../../diagrams/TypeLab.svelte';
+</script>
+
+## Текст это интерфейс
+
+Большая часть любого сайта это текст, и от того, как он набран, зависит, дочитают ли до конца. Типографика вовсе не про красоту: это правила, по которым текст перестаёт мешать читать. Несколько слов, которыми мы будем пользоваться:
+
+- **гарнитура** (typeface) — семейство шрифтов вроде Georgia; **шрифт** это её конкретное начертание (жирное, курсив);
+- **кегль** — размер букв;
+- **интерлиньяж** — расстояние между строками (в CSS `line-height`);
+- **мера** — длина строки в знаках;
+- **засечки** (serif) — маленькие «ножки» у букв в одних шрифтах; шрифты без них называют **гротесками** (sans-serif).
+
+## Размер, интерлиньяж и мера
+
+Три числа, которые делают текст читаемым:
+
+- **Размер основного текста от 16 пикселей** (`1rem` и больше). Меньше нельзя: на телефоне читатель будет увеличивать пальцами. Многие берут `1.125rem` (18px).
+- **Интерлиньяж 1,4–1,7** от размера букв, и задавайте его **числом без единиц**: `line-height: 1.6`. Тогда он растёт вместе с текстом. У заголовков он меньше, около 1,2: короткие строки не нуждаются в воздухе.
+- **Ширина строки 45–80 знаков.** Роберт Брингхерст в «Основах стиля в типографике» называет идеалом 66. Слишком длинная строка теряет читателя на возврате, слишком короткая рвёт фразу. В CSS это `max-width: 65ch` (единица `ch` ширина нуля в текущем шрифте, то есть приблизительно знак).
+
+Покрутите ползунки на схеме. Это ваш собственный текст.
+
+<TypeLab />
+
+<details>
+<summary>Проверьте себя: почему интерлиньяж задают числом без единиц?</summary>
+
+Число без единиц умножается на размер шрифта элемента, поэтому интерлиньяж растёт и сжимается вместе с текстом. Значение в пикселях осталось бы прежним.
+
+</details>
+
+## Шрифты
+
+Шрифт задаётся **списком**: `font-family: Georgia, "Times New Roman", serif;`. Браузер берёт первый, который есть у читателя, а если нет ни одного, обращается к последнему пункту, общему семейству (`serif`, `sans-serif`, `monospace` или `system-ui`, шрифт самой системы). Последнее нужно всегда: иначе текст останется без шрифта.
+
+В 1990-х на всех компьютерах было несколько одинаковых шрифтов (Arial, Times, Courier), и авторы пользовались только ими, поэтому их называли «безопасными». Georgia и Verdana нарисовал в 1996 году Мэттью Картер специально для экрана, и они оставались любимцами веба десять лет.
+
+Сегодня можно подключить любой шрифт через `@font-face`:
+
+```css
+@font-face {
+  font-family: "Литера";
+  src: url("litera.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+```
+
+Что здесь важно для русского сайта:
+
+- **кириллица**: в шрифте должны быть русские буквы, иначе вместо них подставится запасной шрифт, и текст станет «лоскутным». Проверяйте набор знаков до выбора;
+- **woff2** — сжатый формат, который понимают все современные браузеры;
+- **`font-display: swap`**: пока файл не загрузился, показывается запасной шрифт, а потом заменяется. Иначе до загрузки текста не видно (а вы помните про белый экран из первой части);
+- **`unicode-range`** позволяет загружать только нужные знаки, например кириллицу;
+- **свои файлы, а не чужой сервер**: подключение шрифтов с Google Fonts означает запрос к стороннему серверу при каждом посещении, что для российских сайтов связано и со скоростью, и с правом на обработку данных (подробнее в части 15). Файл рядом с сайтом работает быстрее и независимо.
+
+В нашем предпросмотре сети нет, поэтому шрифты в упражнении системные. Это не потеря: хороший системный набор (Georgia, `system-ui`) выглядит отлично и не весит ни байта.
+
+<details>
+<summary>Проверьте себя: зачем в конце font-family общее семейство вроде serif?</summary>
+
+Чтобы у текста всегда был шрифт: если нет ни одного из перечисленных, браузер возьмёт любой подходящего вида.
+
+</details>
+
+## Цвет
+
+Цвет в CSS можно записать несколькими способами, и все они означают одно и то же:
+
+- `#1d5c63` — **hex**, шестнадцатеричная запись, самая распространённая;
+- `rgb(29 92 99)` — доли красного, зелёного и синего;
+- `hsl(186 55% 25%)` — оттенок (угол на цветовом круге), насыщенность, светлота. Удобнее для подбора: чтобы получить оттенок темнее, меняют третье число;
+- `oklch(45% 0.07 200)` — современная запись, в которой светлота «честная»: одинаковые числа светлоты выглядят одинаково светлыми. Её понимают все современные браузеры; она хороша для палитр.
+
+Цветов в палитре много не нужно. Хватит четырёх ролей: **текст**, **фон**, **поверхность** (карточки, шапка) и **акцент** (кнопка, ссылка), плюс нейтральные. Три оттенка хорошо, пять много.
+
+## Контраст
+
+Контраст — отношение яркости текста к яркости фона. Он меряется числом от 1 (одинаково) до 21 (чёрное на белом), и стандарт WCAG требует для уровня AA:
+
+- **4,5 к 1** для обычного текста;
+- **3 к 1** для крупного (от 24px, или от 19px жирным) и для значков и рамок полей;
+- уровень AAA строже: 7 к 1 и 4,5 к 1.
+
+На глаз контраст оценить нельзя: пара #767676 на белом проходит (4,54), а #777777 нет (4,48), хотя вы их не различите. Поэтому считайте. Самая частая ошибка доступности в сети, по ежегодному исследованию WebAIM, это светло-серый текст на белом. Калькулятор на схеме выше поможет подобрать пару.
+
+И ещё: не передавайте смысл **одним цветом**. Примерно каждый двенадцатый мужчина по-другому различает красный и зелёный; «обязательные поля отмечены красным» для него не работает. Добавляйте звёздочку или подпись.
+
+<details>
+<summary>Проверьте себя: каков минимальный контраст обычного текста по WCAG AA?</summary>
+
+4,5 к 1. Для крупного текста достаточно 3 к 1.
+
+</details>
+
+## Практика
+
+Ваша страница 2005 года из прошлого урока: две колонки на float. Нужно сделать текст читаемым: размер, интерлиньяж, мера и контраст. Шрифт выбирайте по тону проекта: деловой — с засечками в заголовках, смелый — гротеск покрупнее. Главное: чтобы после ваших правок проверки по контрасту прошли.
+
+Цвета записывайте как удобно: hex, `rgb()` или `hsl()`. Если вы хотите попробовать `oklch()`, его тоже понимает браузер, но проверка контраста в упражнении умеет читать только привычные записи, и нестандартный формат вызовет сообщение об неизвестном цвете.
+
+## Что было не так с 2005 годом
+
+Текст набирали мелко: Verdana в 10–11px считалась нормой, потому что экраны были маленькие, и каждый пиксель берегли. Серый на сером выглядел утончённо. Заголовки и логотипы часто делали картинками, чтобы получить любимый шрифт, и тогда их не мог прочитать ни диктор, ни поисковик, а увеличить значило получить размытую картинку. Обо всём этом вам напомнят тесты на контраст.

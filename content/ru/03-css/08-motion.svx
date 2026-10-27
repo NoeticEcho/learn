@@ -1,0 +1,995 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/08-motion',
+		part: 3,
+		order: 8,
+		title: 'Анимация и движение с уважением к людям',
+		summary:
+			'Небольшое движение показывает, что произошло, а лишнее мешает и даже вредит людям с вестибулярными нарушениями. После урока вы делаете плавные переходы и анимацию появления и учитываете настройку «уменьшить движение».',
+		minutes: 20,
+		teaches: ['css-transitions-animations', 'css-reduced-motion'],
+		requires: ['css-custom-properties', 'html-a11y-basics'],
+		practice: {
+			id: 'motion',
+			title: 'Движение на вашем сайте: вишенка эпохи 2025',
+			task: 'Добавьте движение, которое помогает. 1) Кнопке .button дайте плавный переход: transition-property только из transform и цвета (не all и не размеры), transition-duration около 0.2s; на :hover пусть кнопка чуть приподнимается (transform). 2) Карточкам .card дайте анимацию появления: @keyframes rise (из прозрачного и чуть ниже в видимое), animation-name, animation-duration не дольше секунды. 3) Напишите блок @media (prefers-reduced-motion: reduce): уберите перемещение (hover без transform), а у карточек замените анимацию на плавное появление без сдвига. Проверьте блок в инструментах разработчика сами: проверки его не видят.',
+			era: 7,
+			continues: 'modern-css',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* Слои: порядок объявлен один раз, в начале. Поздний слой сильнее раннего,
+   а то, что вне слоёв, сильнее любого слоя. */
+@layer reset, base, components, utilities;
+
+/* Токены: все значения решений в одном месте. */
+:root {
+  --color-text: #1d2430;
+  --color-bg: #ffffff;
+  --color-surface: #f3f5f8;
+  --color-accent: #1a4d8f;
+  --color-on-accent: #ffffff;
+  --space: 1rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Тёмная тема: меняем только значения токенов. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e8ecf2;
+    --color-bg: #11161d;
+    --color-surface: #1b2330;
+    --color-accent: #8fb8f0;
+    --color-on-accent: #0b1a2e;
+  }
+}
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  body {
+    font: 1.0625rem/1.6 var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: var(--space);
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+
+    & a {
+      color: inherit;
+    }
+
+    & .brand {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    & nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-areas:
+      "main"
+      "aside";
+    gap: 2rem;
+    max-width: 62.5rem;
+    margin: 0 auto;
+    padding: 1.5rem var(--space);
+
+    @media (min-width: 48rem) {
+      grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+      grid-template-areas: "main aside";
+    }
+
+    & main {
+      grid-area: main;
+    }
+
+    & aside {
+      grid-area: aside;
+    }
+  }
+
+  .cards {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space);
+  }
+
+  .card {
+    padding: var(--space);
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+
+    & h3 {
+      margin-top: 0;
+    }
+
+    @container (min-width: 40rem) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: var(--space);
+    }
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+    border-radius: 0.25rem;
+    text-decoration: none;
+  }
+
+  .site-footer {
+    padding: var(--space);
+    background-color: var(--color-surface);
+  }
+}
+
+@layer utilities {
+  .skip {
+    position: absolute;
+    left: -999px;
+
+    &:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+    }
+  }
+}
+
+/* :has(): стиль по содержимому. Вне слоёв, поэтому выигрывает у любого слоя. */
+section:has(.cards) {
+  padding-top: calc(var(--space) * 1.5);
+  padding-bottom: calc(var(--space) * 1.5);
+}
+
+form:has(input:user-invalid) button[type="submit"] {
+  opacity: 0.7;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* Слои: порядок объявлен один раз, в начале. Поздний слой сильнее раннего,
+   а то, что вне слоёв, сильнее любого слоя. */
+@layer reset, base, components, utilities;
+
+/* Токены: все значения решений в одном месте. */
+:root {
+  --color-text: #1d2430;
+  --color-bg: #ffffff;
+  --color-surface: #f3f5f8;
+  --color-accent: #1a4d8f;
+  --color-on-accent: #ffffff;
+  --space: 1rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Тёмная тема: меняем только значения токенов. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e8ecf2;
+    --color-bg: #11161d;
+    --color-surface: #1b2330;
+    --color-accent: #8fb8f0;
+    --color-on-accent: #0b1a2e;
+  }
+}
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  body {
+    font: 1.0625rem/1.6 var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: var(--space);
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+
+    & a {
+      color: inherit;
+    }
+
+    & .brand {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    & nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-areas:
+      "main"
+      "aside";
+    gap: 2rem;
+    max-width: 62.5rem;
+    margin: 0 auto;
+    padding: 1.5rem var(--space);
+
+    @media (min-width: 48rem) {
+      grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+      grid-template-areas: "main aside";
+    }
+
+    & main {
+      grid-area: main;
+    }
+
+    & aside {
+      grid-area: aside;
+    }
+  }
+
+  .cards {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space);
+  }
+
+  .card {
+    padding: var(--space);
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+
+    & h3 {
+      margin-top: 0;
+    }
+
+    @container (min-width: 40rem) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: var(--space);
+    }
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+    border-radius: 0.25rem;
+    text-decoration: none;
+  }
+
+  .site-footer {
+    padding: var(--space);
+    background-color: var(--color-surface);
+  }
+}
+
+@layer utilities {
+  .skip {
+    position: absolute;
+    left: -999px;
+
+    &:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+    }
+  }
+}
+
+/* :has(): стиль по содержимому. Вне слоёв, поэтому выигрывает у любого слоя. */
+section:has(.cards) {
+  padding-top: calc(var(--space) * 1.5);
+  padding-bottom: calc(var(--space) * 1.5);
+}
+
+form:has(input:user-invalid) button[type="submit"] {
+  opacity: 0.7;
+}
+
+/* Движение: короткий отклик на кнопке и появление карточек. */
+.button {
+  transition-property: transform, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.card {
+  animation-name: rise;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+/* «Уменьшить движение»: убираем перемещение, оставляем плавное появление. */
+@media (prefers-reduced-motion: reduce) {
+  .button:hover {
+    transform: none;
+  }
+
+  .card {
+    animation-name: appear;
+  }
+}
+`
+			},
+			checks: [
+				{ id: 'button-transition', kind: 'style', selector: 'a.button', prop: 'transition-property', matches: '^(?!all$).+' },
+				{ id: 'button-cheap', kind: 'style', selector: 'a.button', prop: 'transition-property', matches: '^(?!.*(width|height|top|left|right|bottom|margin|padding)).+' },
+				{ id: 'button-duration', kind: 'style', selector: 'a.button', prop: 'transition-duration', matches: '^(?!0s$).+' },
+				{ id: 'card-animation', kind: 'style', selector: '.card', prop: 'animation-name', matches: '^(?!none$).+', when: { brief: 'items[].title' } },
+				{ id: 'card-short', kind: 'style', selector: '.card', prop: 'animation-duration', matches: '^(0?\\.\\d+|1)s$', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что такое prefers-reduced-motion: reduce?',
+				options: [
+					'Настройка человека в системе «уменьшить движение»: сайт может её прочитать и убрать лишнее движение',
+					'Режим экономии заряда, который включает сам браузер',
+					'Свойство, которое замедляет все анимации страницы'
+				],
+				answer: 0,
+				why: [
+					'Да. Её включают люди, у которых от перемещений, масштабирования и вращения кружится голова, а также просто те, кого движение отвлекает. Сайт обязан её уважать.',
+					'Нет: к заряду она отношения не имеет.',
+					'Нет: это не свойство, которое вы задаёте, а условие, которое вы проверяете, чтобы выбрать, какие стили применить.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Какие свойства дёшево анимировать (браузер не пересчитывает раскладку)?',
+				options: ['transform', 'opacity', 'width', 'top и left'],
+				answer: [0, 1],
+				why: [
+					'Да: transform обрабатывает видеокарта.',
+					'Да: прозрачность тоже.',
+					'Нет: изменение ширины заставляет браузер заново считать раскладку на каждом кадре, и анимация дёргается.',
+					'Нет: положение через top и left тоже пересчитывает раскладку. Для сдвига берите transform: translate.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Человек включил «уменьшить движение». Что правильно сделать на сайте?',
+				options: [
+					'Убрать перемещения, масштабирование и вращение, а плавные появления и смену цвета оставить',
+					'Выключить все анимации и переходы до нуля',
+					'Ничего: это настройка для телефона'
+				],
+				answer: 0,
+				why: [
+					'Да. «Меньше движения» не значит «никакой обратной связи»: смена цвета и появление не вредят, а помогают понять, что произошло.',
+					'Нет: без перехода кнопка меняется рывком, и человеку труднее понять, что произошло.',
+					'Нет: настройка есть и на компьютерах, и сайты читают её везде.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините кривую скорости с тем, где она подходит',
+				pairs: [
+					['ease-out', 'появление элемента: быстро в начале, медленно в конце'],
+					['ease-in', 'уход элемента: разгоняется к концу'],
+					['linear', 'равномерное: индикатор загрузки'],
+					['ease', 'универсальная кривая по умолчанию']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Бегущая строка на странице движется сама дольше пяти секунд. Что требует WCAG?',
+				options: [
+					'Дать человеку способ остановить, поставить на паузу или скрыть её',
+					'Ничего, это дело вкуса',
+					'Замедлить её вдвое'
+				],
+				answer: 0,
+				why: [
+					'Да. Критерий 2.2.2 требует управления для всего, что движется само дольше пяти секунд и стоит рядом с другим содержимым: внимание не должно быть заложником движения.',
+					'Нет: для людей с нарушениями внимания и когнитивными особенностями это серьёзная помеха.',
+					'Нет: скорость тут не решает дело, нужен выбор.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите кнопку с классом b и правило для неё: transition-property: transform; transition-duration: 0.2s.',
+				starter: '',
+				checks: [
+					{ id: 'b', kind: 'exists', selector: 'button.b' },
+					{ id: 'property', kind: 'style', selector: '.b', prop: 'transition-property', equals: 'transform' },
+					{ id: 'duration', kind: 'style', selector: '.b', prop: 'transition-duration', equals: '0.2s' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-motion-why',
+				front: 'Зачем сайту движение?',
+				back: 'Чтобы показать, что произошло (кнопка нажата, блок появился) и откуда что взялось. Лишнее движение отвлекает, а кому-то вредит.'
+			},
+			{
+				id: 'css-motion-cheap',
+				front: 'Что анимировать, а что нет?',
+				back: 'Анимируйте transform и opacity: это дёшево. Ширину, высоту, top и left не надо: они заставляют браузер пересчитывать раскладку на каждом кадре.'
+			},
+			{
+				id: 'css-motion-reduced',
+				front: 'Как уважать prefers-reduced-motion?',
+				back: '@media (prefers-reduced-motion: reduce): убрать перемещения, масштаб, вращение и параллакс, а плавное появление и смену цвета оставить.'
+			},
+			{
+				id: 'css-motion-wcag',
+				front: 'Что требует WCAG про движение?',
+				back: 'Движение дольше 5 секунд можно остановить (2.2.2), не мигать чаще трёх раз в секунду (2.3.1), движение от взаимодействия можно отключить (2.3.3).'
+			}
+		],
+		sources: [
+			{
+				title: 'Using CSS transitions (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions/Using_CSS_transitions',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'prefers-reduced-motion (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Animations (web.dev)', url: 'https://web.dev/learn/css/animations', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{
+				title: 'Understanding SC 2.3.3: Animation from Interactions',
+				url: 'https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{ title: 'transition — Дока', url: 'https://doka.guide/css/transition/', licence: 'link-only', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Теперь страница получит немного движения: отклик на кнопке и появление карточек. А потом мы позаботимся о тех, кому движение мешает.',
+			hints: [
+				'Переход: .button { transition-property: transform, background-color; transition-duration: 0.2s; } и .button:hover { transform: translateY(-2px); }.',
+				'Анимация: @keyframes rise { from { opacity: 0; transform: translateY(0.75rem); } to { opacity: 1; transform: none; } }, а у .card: animation-name: rise; animation-duration: 0.5s;.',
+				'Для людей с «уменьшить движение»: @media (prefers-reduced-motion: reduce) { .button:hover { transform: none; } } и другая анимация без сдвига, например @keyframes appear.'
+			],
+			mistakes: {
+				'button-transition': 'У кнопки нет конкретного перехода: transition-property не должен быть all. Перечислите свойства: transform, background-color.',
+				'button-cheap': 'В transition-property остались размеры или положение. Анимируйте transform и цвет, а не width, height, top, left.',
+				'button-duration': 'У перехода кнопки нет длительности: transition-duration, например 0.2s.',
+				'card-animation': 'У карточек нет анимации: задайте animation-name с @keyframes.',
+				'card-short': 'Анимация карточек слишком длинная или без длительности: animation-duration не дольше секунды, например 0.5s.'
+			},
+			outro: 'Движение теперь работает на смысл, а не на эффект. Блок для «уменьшить движение» проверьте сами в инструментах разработчика: это та часть, которую проверки не видят.'
+		},
+		say: { CSS: 'си-эс-эс', transition: 'транзишн', transform: 'трансформ', opacity: 'опасити', keyframes: 'кейфреймс', animation: 'анимейшн', 'prefers-reduced-motion': 'префер-ридьюсд-моушн', ease: 'из', WCAG: 'вэ-кэг', hover: 'ховер' }
+	};
+</script>
+
+<script>
+	import MotionLab from '../../diagrams/MotionLab.svelte';
+</script>
+
+## Зачем сайту движение
+
+Хорошее движение работает как жест: кнопка чуть приподнялась, значит на неё можно нажать; блок выехал сбоку, значит он пришёл оттуда. Оно показывает, что произошло и откуда что взялось, и объясняет интерфейс без слов. А плохое движение отвлекает, замедляет и для многих просто вредно: от перемещений, масштабирования, вращения и параллакса (когда фон и передний план движутся с разной скоростью) у людей с нарушениями вестибулярного аппарата кружится голова и тошнит. Поэтому правило этого урока такое: **добавляйте движение, которое что-то объясняет, и давайте возможность его уменьшить**.
+
+## Переходы
+
+**Переход** (transition) плавно меняет значение свойства, когда оно меняется:
+
+```css
+.button {
+  transition-property: transform, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  background-color: var(--color-accent);
+}
+```
+
+Теперь при наведении кнопка не перескакивает, а плавно поднимается. Три части: **что** меняется (`transition-property`), **как долго** (`duration`) и **как** (`timing-function`: кривая скорости). Для отклика интерфейса хватает 150–300 миллисекунд: короче неощутимо, длиннее заставляет ждать. Кривая `ease-out` (быстро в начале, медленно в конце) подходит для появления, `ease-in` для ухода, `linear` для равномерного (индикатор загрузки).
+
+**Не пишите `transition: all`**: переход начнёт плавно менять всё подряд, в том числе то, чего вы не ждали. Перечисляйте свойства.
+
+## Анимация
+
+Когда нужно не «из состояния в состояние», а своя последовательность кадров, используют **ключевые кадры**:
+
+```css
+@keyframes rise {
+  from { opacity: 0; transform: translateY(0.75rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+.card {
+  animation-name: rise;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+```
+
+`@keyframes` описывает, что с чем происходит, а `animation-*` подключает это к элементу. Повторяющиеся и бесконечные анимации (`animation-iteration-count: infinite`) используйте очень осторожно: они постоянно отвлекают.
+
+**Что анимировать.** Анимируйте `transform` (сдвиг, масштаб, поворот) и `opacity`: их обрабатывает видеокарта, и страница остаётся плавной. А `width`, `height`, `top`, `left`, `margin` заставляют браузер пересчитывать раскладку на каждом кадре, и анимация дёргается и тратит заряд. Подвигайте всё на схеме.
+
+<MotionLab />
+
+<details>
+<summary>Проверьте себя: почему для сдвига лучше transform: translate, а не left?</summary>
+
+transform обрабатывает видеокарта, не пересчитывая раскладку. left заставляет браузер заново считать раскладку на каждом кадре.
+
+</details>
+
+## Уважение: prefers-reduced-motion
+
+В настройках почти каждой системы есть переключатель «уменьшить движение» (Reduce motion). Его включают те, кому движение вредит или мешает. Браузер передаёт сайту эту настройку, и CSS может её прочитать:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .button:hover {
+    transform: none;
+  }
+
+  .card {
+    animation-name: appear; /* только плавное появление, без сдвига */
+  }
+}
+```
+
+Что именно убрать? «Уменьшить движение» это не «убрать всякую обратную связь». Уберите **перемещение, масштабирование, вращение, параллакс и автоматическое воспроизведение**. Оставьте **плавное появление и смену цвета**: они не вредят и по-прежнему помогают понять, что произошло. Не стоит выключать все переходы до нуля.
+
+Что говорит стандарт. WCAG требует, чтобы всё, что движется само дольше пяти секунд и стоит рядом с другим содержимым, можно было остановить, поставить на паузу или скрыть (критерий 2.2.2). Ничто на странице не должно мигать чаще трёх раз в секунду: это может вызвать приступ у людей с фоточувствительной эпилепсией (2.3.1). А движение, которое запускается взаимодействием, например параллакс при прокрутке, можно отключить (2.3.3, уровень AAA).
+
+<details>
+<summary>Проверьте себя: что оставить для человека с включённым «уменьшить движение»?</summary>
+
+Плавное появление и смену цвета. Убрать перемещение, масштаб, вращение и параллакс.
+
+</details>
+
+## Практика
+
+Добавьте движение вашей странице эпохи 2025 года. Кнопка получает отклик, карточки появляются. Потом, самое важное, вы напишете блок для «уменьшить движение».
+
+Предупреждение, как и в уроке про адаптивность: проверки видят вычисленные значения, а блока `prefers-reduced-motion` не видят. Проверьте его сами. В Chrome: инструменты разработчика, вкладка «Рендеринг» (Rendering; её открывает меню «⋮», «Дополнительные инструменты»), в ней пункт «Emulate CSS media feature prefers-reduced-motion» (эмуляция признака). Включите «reduce» и обновите страницу: карточки должны появляться без сдвига, а кнопка не должна подниматься при наведении.
+
+Страница эпохи 2025 сохраняется в галерее. Если у вас включено «уменьшить движение», вы увидите её в тихом варианте. Проверьте обе: с движением и без.
+
+## Что было не так раньше
+
+Движение на сайтах прошло через несколько эпох. Во времена Flash (2000-е) сайты начинались с заставок, которые нельзя было пропустить. Эффекты «бегущая строка» (`<marquee>`) и «мигание» (`<blink>`) были в самом HTML и давно объявлены устаревшими. С 2010-х сайты украшали параллаксом и огромными анимациями, и жалоб на тошноту стало столько, что в 2017 году Safari первым добавил `prefers-reduced-motion`, а за ним и другие браузеры. Главный урок этой истории: движение принадлежит читателю, а не автору.

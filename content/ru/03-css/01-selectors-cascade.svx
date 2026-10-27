@@ -1,0 +1,550 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/01-selectors-cascade',
+		part: 3,
+		order: 1,
+		title: 'Селекторы и каскад: оформление в отдельном файле',
+		summary:
+			'Вы отделите оформление от содержимого и поймёте, почему «моё правило не работает». После урока вы подключаете файл стилей, выбираете нужные элементы и предсказываете, какое из двух правил победит.',
+		minutes: 30,
+		teaches: ['css-selectors', 'css-cascade', 'css-specificity', 'css-separate-stylesheets'],
+		requires: ['html-semantic-elements', 'html-tags-attributes'],
+		practice: {
+			id: 'separate-css',
+			title: 'Первое оформление вашего сайта 2005 года',
+			task: 'Оденьте свою страницу. 1) В head подключите файл стилей: link rel="stylesheet" href="styles.css". 2) В styles.css задайте body шрифт с запасным вариантом (Georgia, serif или другой), цвет текста и цвет фона по тону вашего проекта. 3) Шапке .site-header дайте цвет фона и цвет текста с хорошим контрастом. 4) Ссылке-кнопке .button дайте фон и цвет текста. 5) Карточкам .card дайте отступ внутри padding и рамку. Не используйте атрибут style: всё оформление живёт в styles.css.',
+			era: 2,
+			continues: 'data-table',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: вид сайта.
+   HTML говорит, что есть что, а CSS говорит, как оно выглядит. */
+
+body {
+  margin: 0;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: вид сайта.
+   HTML говорит, что есть что, а CSS говорит, как оно выглядит.
+   Палитра здесь под спокойный тон проекта; у вас она будет своя. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+`
+			},
+			checks: [
+				{ id: 'link', kind: 'exists', selector: 'link[rel="stylesheet"][href="styles.css"]' },
+				{ id: 'no-inline', kind: 'count', selector: '[style]', max: 0 },
+				{ id: 'font-stack', kind: 'style', selector: 'body', prop: 'font-family', matches: '(serif|sans-serif|monospace|system-ui)\\s*$' },
+				{ id: 'text-contrast', kind: 'contrast', selector: 'body', min: 4.5 },
+				{ id: 'header-colour', kind: 'style', selector: '.site-header', prop: 'background-color', matches: '^(?!rgba\\(0, 0, 0, 0\\)$).+' },
+				{ id: 'header-contrast', kind: 'contrast', selector: '.site-header', min: 4.5 },
+				{ id: 'button-colour', kind: 'style', selector: 'a.button', prop: 'background-color', matches: '^(?!rgba\\(0, 0, 0, 0\\)$).+' },
+				{ id: 'button-contrast', kind: 'contrast', selector: 'a.button', min: 4.5 },
+				{ id: 'card-padding', kind: 'style', selector: '.card', prop: 'padding-top', matches: '^(?!0px$|0$).+', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Зачем выносить оформление в отдельный файл styles.css?',
+				options: [
+					'Один файл оформляет все страницы, и вид сайта меняется правкой в одном месте',
+					'Так страница работает быстрее на любом сайте',
+					'Иначе стили вообще не заработают'
+				],
+				answer: 0,
+				why: [
+					'Да. Это и была идея Хокона Ли в 1994 году: смысл в HTML, вид в стилях. Заодно браузер запоминает файл и не скачивает его заново на каждой странице.',
+					'Нет: скорость зависит от размеров. Сам по себе файл ничего не ускоряет, хотя кеш помогает.',
+					'Нет: стили можно писать и прямо в странице, но тогда их приходится копировать на каждую.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'У абзаца <p class="note" id="intro"> три правила: p { color: red }, .note { color: blue }, #intro { color: green }. Какого он цвета?',
+				options: ['Зелёного', 'Синего', 'Красного'],
+				answer: 0,
+				why: [
+					'Да. Селектор по id сильнее селектора по классу, а тот сильнее селектора по тегу. Порядок строк при этом не важен.',
+					'Нет: класс сильнее тега, но слабее id.',
+					'Нет: селектор по тегу самый слабый из трёх.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Два правила одной силы красят один элемент в разные цвета. Какое победит?',
+				options: [
+					'То, что в файле ниже',
+					'То, что в файле выше',
+					'Браузер выберет случайно'
+				],
+				answer: 0,
+				why: [
+					'Да. При равной специфичности решает порядок: последнее слово за тем, что написано позже.',
+					'Нет: порядок работает в другую сторону.',
+					'Нет: у каскада строгие правила, случайности в них нет.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Какие свойства наследуются от родителя по умолчанию?',
+				options: ['color (цвет текста)', 'font-family (шрифт)', 'margin (внешний отступ)', 'border (рамка)'],
+				answer: [0, 1],
+				why: [
+					'Да: цвет текста, заданный body, достаётся всем потомкам.',
+					'Да: шрифт тоже передаётся вниз по дереву.',
+					'Нет: отступ относится к самому блоку и потомкам не передаётся.',
+					'Нет: рамка принадлежит только самому элементу.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините селектор с тем, что он выбирает',
+				pairs: [
+					['.card', 'все элементы с class="card"'],
+					['#top', 'единственный элемент с id="top"'],
+					['nav a', 'ссылки внутри nav, на любой глубине'],
+					['h2, h3', 'и h2, и h3']
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите внутри <style> правило, которое красит все абзацы в синий цвет, и добавьте абзац «Привет».',
+				starter: '',
+				checks: [
+					{ id: 'p', kind: 'text', selector: 'p', matches: 'Привет' },
+					{ id: 'blue', kind: 'style', selector: 'p', prop: 'color', matches: '^(blue|rgb\\(0, 0, 255\\))$' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-idea',
+				front: 'В чём идея CSS?',
+				back: 'Отделить вид от смысла: HTML говорит, что есть что, а CSS в отдельном файле, как это выглядит. Предложил Хокон Ли в 1994 году.'
+			},
+			{
+				id: 'css-link',
+				front: 'Как подключить файл стилей?',
+				back: 'В head: <link rel="stylesheet" href="styles.css">. Не пишите стили в атрибуте style: их нельзя переиспользовать.'
+			},
+			{
+				id: 'css-rule',
+				front: 'Из чего состоит правило CSS?',
+				back: 'Селектор (кому), фигурные скобки, а в них пары «свойство: значение;». Например: .card { padding: 1rem; }.'
+			},
+			{
+				id: 'css-cascade-order',
+				front: 'Как каскад решает, какое правило победит?',
+				back: 'Сначала !important, потом специфичность (id сильнее класса, класс сильнее тега), а при равной силе то правило, что ниже по файлу.'
+			},
+			{
+				id: 'css-inherit',
+				front: 'Что такое наследование?',
+				back: 'Некоторые свойства (color, font-family) передаются потомкам. Отступы и рамки нет. Поэтому шрифт и цвет текста задают у body.'
+			}
+		],
+		sources: [
+			{
+				title: 'Getting started with CSS (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Getting_started',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Handling conflicts (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Handling_conflicts',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Specificity (web.dev)', url: 'https://web.dev/learn/css/specificity', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{
+				title: 'Cascading HTML Style Sheets: A Proposal (Хокон Вём Ли, 1994)',
+				url: 'https://www.w3.org/People/howcome/p/cascade.html',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'Специфичность — Дока', url: 'https://doka.guide/css/specificity/', licence: 'link-only', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'До сих пор страница была голой: только смысл. Сейчас вы дадите ей вид, и вся работа будет в новом файле.',
+			hints: [
+				'Подключение пишется в head: <link rel="stylesheet" href="styles.css">. Само оформление вы пишете во вкладке styles.css.',
+				'Правило: .site-header { background-color: #1d5c63; color: #ffffff; }. Точка в селекторе значит «элемент с таким классом».',
+				'Контраст текста и фона должен быть не ниже 4,5 к 1: тёмный текст на светлом или наоборот. Серый на сером не пройдёт.'
+			],
+			mistakes: {
+				link: 'Файл стилей не подключён. В head нужна строка <link rel="stylesheet" href="styles.css">.',
+				'no-inline': 'У какого-то элемента остался атрибут style. Перенесите его оформление в styles.css и удалите атрибут.',
+				'font-stack': 'У body нужен font-family с запасным вариантом в конце: например, Georgia, serif или system-ui, sans-serif.',
+				'text-contrast': 'Цвет текста и фон страницы слишком близки. Нужен контраст не ниже 4,5 к 1: задайте body color и background-color.',
+				'header-colour': 'У шапки (класс site-header) ещё нет цвета фона. Задайте background-color.',
+				'header-contrast': 'Текст в шапке плохо читается на её фоне. Подберите цвет текста с контрастом не ниже 4,5 к 1.',
+				'button-colour': 'У ссылки-кнопки (класс button) нет цвета фона. Задайте background-color.',
+				'button-contrast': 'Текст кнопки плохо читается на её фоне. Нужен контраст не ниже 4,5 к 1.',
+				'card-padding': 'У карточки (класс card) нет внутреннего отступа. Задайте padding.'
+			},
+			outro: 'Вот так страница получила лицо, и ни одной строки HTML для этого менять не пришлось. В этом и есть смысл отдельного файла стилей.'
+		},
+		say: { CSS: 'си-эс-эс', HTML: 'эйч-ти-эм-эль', link: 'линк', stylesheet: 'стайлшит', 'styles.css': 'стайлс точка си-эс-эс', id: 'ай-ди', class: 'класс', important: 'импортант', hover: 'ховер', 'Zen Garden': 'зен гарден', IE: 'ай-и' }
+	};
+</script>
+
+<script>
+	import Specificity from '../../diagrams/Specificity.svelte';
+</script>
+
+## Вид отдельно от смысла
+
+В первой части вы собрали страницу из смысловых элементов, и в браузере она выглядит, как лист из учебника: чёрное на белом, синие ссылки, Times New Roman. Это и есть «страница без оформления», такой её видят сегодня и поисковики, и программы чтения с экрана. Теперь дадим ей вид, и для этого есть отдельный язык: **CSS**, Cascading Style Sheets, «каскадные таблицы стилей».
+
+Идею отделить вид от смысла в октябре 1994 года, ещё до появления Netscape 2, предложил Хокон Виум Ли, инженер CERN, коллега Тима Бернерса-Ли. Он назвал стили «каскадными»: страницу оформляют сразу несколько источников (браузер, читатель, автор сайта), и надо решить, чьё слово главное. Эту «лесенку приоритетов» вы разберёте в этом уроке. В декабре 1996 года CSS 1 стал рекомендацией W3C, но браузеры годами понимали его по-разному, и работать с ним по-настоящему удалось только в середине 2000-х, когда в 2003 году появился сайт CSS Zen Garden: один и тот же HTML, сотни непохожих оформлений.
+
+## Три способа подключить стили
+
+1. **Отдельный файл**: в head строка `<link rel="stylesheet" href="styles.css">`. Все страницы сайта ссылаются на один файл, вид меняется в одном месте, а браузер сохраняет файл и не скачивает его снова. Так делают почти всегда.
+2. **Элемент `<style>`** в head: стили лежат в самой странице. Годится для маленького примера или для стилей одной страницы.
+3. **Атрибут `style="…"`** у элемента: оформление прямо на нём. Это худший способ: правило нельзя переиспользовать, оно сильнее почти всего остального и портит порядок. Пользуйтесь им редко (например, когда значение вычисляет скрипт).
+
+Помните из урока про рендеринг: CSS блокирует отрисовку, пока браузер его не получил. Поэтому файл стилей подключают в самом начале и держат небольшим.
+
+## Правило и селектор
+
+Правило CSS состоит из **селектора** (кому), а в фигурных скобках пар **«свойство: значение;»** (что сделать):
+
+```css
+.card {
+  padding: 1rem;
+  border: 1px solid #c9c4b6;
+}
+```
+
+Основные селекторы:
+
+- **по тегу**: `p`, `h2`, `a` — все такие элементы;
+- **по классу**: `.card` — все элементы с `class="card"`. Это главный инструмент: класс можно дать любому элементу и использовать сколько угодно раз;
+- **по id**: `#top` — единственный элемент с `id="top"`;
+- **потомок**: `nav a` — ссылки внутри `nav`, на любой глубине; **прямой потомок**: `ul > li`;
+- **список**: `h2, h3` — и те, и другие;
+- **по состоянию**: `a:hover` (под курсором), `a:focus-visible` (в фокусе при работе с клавиатуры), `li:first-child`;
+- **по атрибуту**: `a[href^="tel:"]` — ссылки, у которых адрес начинается с «tel:».
+
+<details>
+<summary>Проверьте себя: что выбирает селектор .card?</summary>
+
+Все элементы страницы с class="card": классом можно пользоваться много раз, в отличие от id.
+
+</details>
+
+## Наследование
+
+Некоторые свойства передаются от родителя к потомкам сами: **цвет текста**, **шрифт**, размер шрифта, межстрочный интервал. Поэтому шрифт и цвет страницы задают один раз у `body`, а не для каждого абзаца. Другие свойства не наследуются: отступы и рамки принадлежат самому блоку, и дети их не получают. Было бы странно, если бы рамка вокруг абзаца появлялась и вокруг каждого слова.
+
+## Каскад: кто победит
+
+Когда на один элемент действует несколько правил, браузер решает по лесенке:
+
+1. **Важность и источник.** Правило с `!important` сильнее обычных. Им лучше не пользоваться: оно ломает лесенку, и бороться с ним можно только таким же.
+2. **Специфичность.** Чем точнее селектор, тем он сильнее. Её считают тремя числами: (id, классы, теги). `#cta` это (1, 0, 0), `.button` это (0, 1, 0), `nav a` это (0, 0, 2). Сравнивают слева направо: один id сильнее любого числа классов, один класс сильнее любого числа тегов.
+3. **Порядок.** Если сила равна, побеждает то правило, что ниже по файлу.
+
+Именно так обычно «не работает правило»: вы написали `a { color: red }` для ссылки, а где-то выше `nav a { color: green }` (0, 0, 2) оказалось сильнее. Или вы написали правило выше, чем нужно. Попробуйте сами на схеме: правила красят одну и ту же ссылку, и схема считает, кто победит. Поменяйте селекторы и поставьте галочки `!important`.
+
+<Specificity />
+
+Практичные правила, которым следуют сегодня:
+
+- оформляйте **классами** и держите специфичность низкой: так правила легко перебить;
+- не оформляйте через `id`: он слишком сильный, и перебить его можно только другим id;
+- не вкладывайте селекторы глубже двух-трёх уровней;
+- `!important` оставьте для крайних случаев. В уроке про современный CSS вы увидите лучшее средство: слои, которые заменяют большую часть таких драк.
+
+<details>
+<summary>Проверьте себя: что сильнее, один id или десять классов?</summary>
+
+Один id: специфичность сравнивают слева направо, и один id (1, 0, 0) побеждает любое число классов (0, 10, 0).
+
+</details>
+
+## Палитра по тону
+
+В вашем брифе есть поле «тон». Оно подскажет, из чего собрать палитру: два-три цвета и нейтральный. Вот отправные точки; цифры можно менять, но проверьте контраст (в уроке про цвет вы научитесь это делать):
+
+| Тон | Что чувствуется | Идея палитры |
+|---|---|---|
+| деловой | собранность, доверие | тёмно-синий, серый, белый; шрифт с засечками в заголовках |
+| тёплый | забота, уют | терракота и кремовый фон, тёмно-коричневый текст |
+| смелый | энергия | почти чёрный фон или текст и один яркий акцент |
+| спокойный | ясность, воздух | приглушённый зелёный или бирюзовый на светлом тёплом фоне |
+
+## Практика
+
+Вы в 2005 году. Страницу собрали из смыслов, теперь надо её одеть. Файл стилей `styles.css` уже ждёт вас во второй вкладке. Подключите его в `head`, а потом по очереди оформите `body`, шапку, кнопку и карточки. Не поддавайтесь соблазну написать `style="…"` прямо на элементе: проверка это заметит, и вы потеряете смысл упражнения.
+
+В шапке нужно, чтобы текст читался на её фоне. Подберите цвета по вашему тону: контраст проверит программа.
+
+## Что было не так с 2005 годом
+
+Главная беда была не в CSS, а в браузерах. Internet Explorer 6, самый массовый, читал CSS по-своему, и авторы писали «хаки» (хитрые строки, которые понимал один браузер и игнорировали другие) и условные комментарии для разных версий. Модный стиль «веб 2.0» с глянцевыми градиентами, тенями и закруглёнными кнопками тоже ушёл: он был привязан к тому, как тогда рисовали картинки. Остаётся то, что работает до сих пор: HTML для смысла, CSS для вида, классы как язык между ними.

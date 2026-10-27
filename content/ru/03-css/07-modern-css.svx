@@ -1,0 +1,932 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/07-modern-css',
+		part: 3,
+		order: 7,
+		title: 'Современный CSS: переменные, вложенность, :has() и слои',
+		summary:
+			'Сегодняшний CSS умеет то, ради чего раньше брали препроцессоры и скрипты. После урока вы собираете значения в переменные, пишете вложенные правила, подсвечиваете блок по его содержимому через :has() и упорядочиваете стили слоями.',
+		minutes: 30,
+		teaches: ['css-custom-properties', 'css-nesting', 'css-has-selector', 'css-cascade-layers'],
+		requires: ['css-specificity', 'css-color', 'css-container-queries'],
+		practice: {
+			id: 'modern-css',
+			title: 'Ваш сайт, переписанный на современный CSS',
+			task: 'Это та же страница, что вы закончили в прошлый раз, но стили лежат с «зашитыми» значениями. Перепишите их по-современному. 1) На :root объявите переменные --color-text, --color-bg, --color-surface, --color-accent и --space и используйте их через var() вместо повторяющихся значений. 2) Тёмная тема: в @media (prefers-color-scheme: dark) поменяйте только значения переменных; в head добавьте <meta name="color-scheme" content="light dark">. 3) Объявите порядок слоёв в начале файла: @layer reset, base, components, utilities; и разложите правила по слоям. 4) Вложите правила .site-header и .card с помощью &. 5) Правило section:has(.cards) с внутренним отступом поставьте вне слоёв: так оно выигрывает у любого слоя.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: база сайта 2014 года (сброс и типографика). Раскладку вы пишете сами. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Раскладка: ваша работа начинается здесь ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Широкий экран: добавляем, а не отнимаем (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* Карточка смотрит на ширину своего места, а не окна. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* Слои: порядок объявлен один раз, в начале. Поздний слой сильнее раннего,
+   а то, что вне слоёв, сильнее любого слоя. */
+@layer reset, base, components, utilities;
+
+/* Токены: все значения решений в одном месте. */
+:root {
+  --color-text: #1d2430;
+  --color-bg: #ffffff;
+  --color-surface: #f3f5f8;
+  --color-accent: #1a4d8f;
+  --color-on-accent: #ffffff;
+  --space: 1rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Тёмная тема: меняем только значения токенов. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e8ecf2;
+    --color-bg: #11161d;
+    --color-surface: #1b2330;
+    --color-accent: #8fb8f0;
+    --color-on-accent: #0b1a2e;
+  }
+}
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  body {
+    font: 1.0625rem/1.6 var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: var(--space);
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+
+    & a {
+      color: inherit;
+    }
+
+    & .brand {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    & nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-areas:
+      "main"
+      "aside";
+    gap: 2rem;
+    max-width: 62.5rem;
+    margin: 0 auto;
+    padding: 1.5rem var(--space);
+
+    @media (min-width: 48rem) {
+      grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+      grid-template-areas: "main aside";
+    }
+
+    & main {
+      grid-area: main;
+    }
+
+    & aside {
+      grid-area: aside;
+    }
+  }
+
+  .cards {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space);
+  }
+
+  .card {
+    padding: var(--space);
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+
+    & h3 {
+      margin-top: 0;
+    }
+
+    @container (min-width: 40rem) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: var(--space);
+    }
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+    border-radius: 0.25rem;
+    text-decoration: none;
+  }
+
+  .site-footer {
+    padding: var(--space);
+    background-color: var(--color-surface);
+  }
+}
+
+@layer utilities {
+  .skip {
+    position: absolute;
+    left: -999px;
+
+    &:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+    }
+  }
+}
+
+/* :has(): стиль по содержимому. Вне слоёв, поэтому выигрывает у любого слоя. */
+section:has(.cards) {
+  padding-top: calc(var(--space) * 1.5);
+  padding-bottom: calc(var(--space) * 1.5);
+}
+
+form:has(input:user-invalid) button[type="submit"] {
+  opacity: 0.7;
+}
+`
+			},
+			checks: [
+				{ id: 'var-text', kind: 'style', selector: ':root', prop: '--color-text', matches: '\\S' },
+				{ id: 'var-bg', kind: 'style', selector: ':root', prop: '--color-bg', matches: '\\S' },
+				{ id: 'var-surface', kind: 'style', selector: ':root', prop: '--color-surface', matches: '\\S' },
+				{ id: 'var-accent', kind: 'style', selector: ':root', prop: '--color-accent', matches: '\\S' },
+				{ id: 'var-space', kind: 'style', selector: ':root', prop: '--space', matches: '\\S' },
+				{ id: 'color-scheme', kind: 'attr', selector: 'meta[name="color-scheme"]', name: 'content', matches: 'light dark' },
+				{ id: 'has', kind: 'style', selector: 'section:has(.cards)', prop: 'padding-top', matches: '^(?!0px$|0$).+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что делает запись color: var(--color-accent)?',
+				options: [
+					'Берёт значение переменной --color-accent: поменяйте переменную, и цвет изменится везде, где она использована',
+					'Копирует цвет один раз при загрузке страницы',
+					'Объявляет новую переменную'
+				],
+				answer: 0,
+				why: [
+					'Да. Переменные CSS живые: они вычисляются в браузере и наследуются, поэтому тему можно сменить подменой нескольких значений.',
+					'Нет: значение читается каждый раз, и ему можно давать разные значения в разных местах страницы.',
+					'Нет: объявляют так: --color-accent: #1a4d8f; (с двумя дефисами). var() только читает.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Правило вне слоёв и правило в слое @layer components красят один элемент в разные цвета. У правила в слое специфичность выше. Какое победит?',
+				options: [
+					'Правило вне слоёв',
+					'Правило в слое, потому что его селектор точнее',
+					'Определит порядок в файле'
+				],
+				answer: 0,
+				why: [
+					'Да. Правила вне слоёв сильнее любого слоя, и специфичность между слоем и «внеслойностью» не сравнивают. Поэтому неслоёные правила самые сильные.',
+					'Нет: между слоями и вне слоёв сначала смотрят на слой, а специфичность решает только внутри одного слоя.',
+					'Нет: порядок решает последним, при равенстве всего остального.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что умеют переменные CSS в отличие от переменных препроцессора?',
+				options: [
+					'Меняться в браузере: у разных блоков может быть своё значение',
+					'Читаться и меняться из JavaScript',
+					'Наследоваться вниз по дереву',
+					'Исчезать при сборке сайта: в браузер идут только готовые значения'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: достаточно переопределить переменную у нужного блока.',
+					'Да: это даёт, например, переключатель темы.',
+					'Да: они наследуются, как цвет шрифта.',
+					'Нет: это про переменные препроцессора вроде Sass. Переменные CSS остаются в браузере и живут.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте слои от самого слабого к самому сильному, если порядок объявлен как @layer reset, base, components, utilities;',
+				items: ['reset', 'base', 'components', 'utilities']
+			},
+			{
+				type: 'single',
+				prompt: 'Что выбирает селектор section:has(.cards)?',
+				options: [
+					'Раздел, внутри которого есть элемент с классом cards',
+					'Элемент .cards внутри раздела',
+					'Раздел, у которого class="cards"'
+				],
+				answer: 0,
+				why: [
+					'Да. :has() выбирает родителя по тому, что в нём лежит: то, чего CSS раньше не умел совсем.',
+					'Нет: это был бы селектор потомка section .cards.',
+					'Нет: это был бы section.cards.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Объявите на :root переменную --brand со значением #1a4d8f и покрасьте ею текст абзаца через var(--brand). Добавьте абзац «Привет».',
+				starter: '',
+				checks: [
+					{ id: 'p', kind: 'text', selector: 'p', matches: 'Привет' },
+					{ id: 'var', kind: 'style', selector: ':root', prop: '--brand', matches: '#1a4d8f' },
+					{ id: 'use', kind: 'style', selector: 'p', prop: 'color', matches: '^(var\\(--brand\\)|rgb\\(26, 77, 143\\))$' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-vars',
+				front: 'Как объявить и использовать переменную CSS?',
+				back: 'Объявить: --color-accent: #1a4d8f; (обычно на :root). Использовать: color: var(--color-accent). Живут в браузере и наследуются.'
+			},
+			{
+				id: 'css-dark-theme',
+				front: 'Как сделать тёмную тему?',
+				back: 'Все цвета через переменные, а в @media (prefers-color-scheme: dark) :root меняет только их значения. Плюс <meta name="color-scheme" content="light dark">.'
+			},
+			{
+				id: 'css-nesting',
+				front: 'Что такое вложенность в CSS?',
+				back: 'Правило внутри правила: .card { & h3 { … } &:hover { … } }. Знак & означает родительский селектор. Раньше для этого нужен был препроцессор.'
+			},
+			{
+				id: 'css-has',
+				front: 'Что делает :has()?',
+				back: 'Выбирает родителя по содержимому: section:has(.cards), form:has(:invalid). Родительского селектора раньше в CSS не было.'
+			},
+			{
+				id: 'css-layers',
+				front: 'Что такое @layer и как слои спорят?',
+				back: '@layer reset, base, components, utilities; порядок слоёв объявляют один раз. Поздний слой сильнее раннего независимо от специфичности, а правила вне слоёв сильнее всех.'
+			}
+		],
+		sources: [
+			{
+				title: 'Using CSS custom properties (variables) (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables/Using_CSS_custom_properties',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: ':has() CSS pseudo-class (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/:has', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: '@layer (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/@layer', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'CSS nesting (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Пользовательские свойства — Дока', url: 'https://doka.guide/css/custom-properties/', licence: 'link-only', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Теперь сделаем из стилей аккуратный современный файл. Сначала значения в переменные, потом тёмная тема, слои и ещё пара новых приёмов.',
+			hints: [
+				'Переменные объявляются у :root парами --имя: значение;. Использовать: color: var(--color-text). Имена с двумя дефисами.',
+				'Тёмная тема: @media (prefers-color-scheme: dark) { :root { --color-text: #e8ecf2; --color-bg: #11161d; } }. Правила карточек при этом не трогаете.',
+				':has(): section:has(.cards) { padding-top: 1.5rem; }. Поставьте его вне блоков @layer, и он выиграет у любого слоя.'
+			],
+			mistakes: {
+				'var-text': 'Нет переменной --color-text на :root. Объявите её: :root { --color-text: #1d2430; }.',
+				'var-bg': 'Нет переменной --color-bg на :root (цвет страницы).',
+				'var-surface': 'Нет переменной --color-surface на :root (цвет карточек и подвала).',
+				'var-accent': 'Нет переменной --color-accent на :root (цвет кнопок и ссылок).',
+				'var-space': 'Нет переменной --space на :root: базовый отступ.',
+				'color-scheme': 'В head нужен тег <meta name="color-scheme" content="light dark">: он подсказывает браузеру, что у сайта есть обе темы.',
+				has: 'Правило с :has() не сработало: проверьте, что есть section:has(.cards) { padding-top: … }, и что оно лежит вне @layer.'
+			},
+			outro: 'Файл стал короче, понятнее и умеет тёмную тему. Это современный CSS: переменные, слои и вложенность вместо уловок и препроцессоров.'
+		},
+		say: { CSS: 'си-эс-эс', ':root': 'рут', var: 'вар', 'prefers-color-scheme': 'префер-колор-ским', layer: 'лэйер', ':has()': 'хэз', nesting: 'нестинг', Sass: 'сасс', 'color-scheme': 'колор-ским', JavaScript: 'джаваскрипт' }
+	};
+</script>
+
+<script>
+	import ThemeSwitch from '../../diagrams/ThemeSwitch.svelte';
+</script>
+
+## Новая эпоха: CSS 2025
+
+До сих пор вы писали CSS так, как его писали в 2005 и 2014 годах. Но язык не стоит на месте, и за последние несколько лет браузеры научили его тому, ради чего раньше подключали препроцессоры (Sass, Less) и скрипты. Этот урок — про то, чем пишут сегодня. Он относится к нашей эпохе 2025 года: страница та же, но стили переписаны.
+
+Нас интересуют четыре новинки.
+
+## Переменные
+
+**Пользовательские свойства**, они же «переменные CSS», объявляются с двумя дефисами и читаются через `var()`:
+
+```css
+:root {
+  --color-text: #1d2430;
+  --color-accent: #1a4d8f;
+  --space: 1rem;
+}
+
+.button {
+  color: white;
+  background-color: var(--color-accent);
+  padding: var(--space);
+}
+```
+
+`:root` — это сам элемент `html`: переменные, объявленные там, видны во всей странице. Преимущества:
+
+- **значение в одном месте.** Хотите другой акцентный цвет? Поменяйте одну строку, а не тридцать;
+- **они живые.** В отличие от переменных препроцессора, переменные CSS остаются в браузере: их можно переопределить у любого блока (карточка в тёмном блоке получит другие цвета) и менять из JavaScript;
+- **они наследуются** вниз по дереву, как цвет шрифта.
+
+Хорошее правило: назвать переменные по **роли**, а не по значению: `--color-accent`, а не `--blue`. Тогда через год акцент может стать зелёным, а имя останется верным. Такие именованные значения называют **токенами дизайна**, и их разбор впереди, в части про дизайн-системы.
+
+**Тёмная тема** с переменными делается почти бесплатно: все цвета через переменные, а в `@media (prefers-color-scheme: dark)` меняются только их значения. Правила карточек и кнопок вообще не нужно трогать. Дополнительно в `head` пишут `<meta name="color-scheme" content="light dark">`: он подсказывает браузеру, что у сайта две темы, чтобы он не мигал белым при загрузке.
+
+Подвигайте ползунки на схеме: одна карточка, одни и те же правила, а вид меняется из-за значений. Внизу ещё про слои.
+
+<ThemeSwitch />
+
+<details>
+<summary>Проверьте себя: почему переменную лучше назвать --color-accent, а не --blue?</summary>
+
+Потому что роль устойчивее значения: акцент завтра может стать зелёным, а имя останется верным.
+
+</details>
+
+## Вложенность
+
+Раньше, чтобы написать правила для карточки и её внутренностей, приходилось повторять селектор: `.card { … }`, `.card h3 { … }`, `.card:hover { … }`. Теперь правила вкладывают друг в друга:
+
+```css
+.card {
+  padding: var(--space);
+
+  & h3 {
+    margin-top: 0;
+  }
+
+  &:hover {
+    background-color: var(--color-surface);
+  }
+}
+```
+
+Знак `&` означает «родительский селектор». Вложенность делает файл короче и группирует всё, что относится к карточке, в одном месте. Не вкладывайте глубже двух-трёх уровней: сложные цепочки бьют по читаемости и по специфичности.
+
+## :has() — родитель по ребёнку
+
+Селектор `:has()` выбирает элемент **по тому, что в нём лежит**. Родительского селектора в CSS не было совсем, и этот приём казался невозможным:
+
+```css
+section:has(.cards) { padding-block: 1.5rem; }          /* раздел, где есть карточки */
+form:has(input:invalid) button { opacity: 0.7; }        /* кнопка в форме, где есть неверное поле */
+label:has(input:checked) { font-weight: 600; }           /* подпись отмеченной галочки */
+```
+
+Во всех браузерах `:has()` работает с конца 2023 года. Это одна из самых полезных новинок: многое, что раньше делали скриптом, теперь делает CSS.
+
+<details>
+<summary>Проверьте себя: что выберет form:has(input:invalid)?</summary>
+
+Форму, внутри которой есть хотя бы одно неверное поле. Через неё можно оформить, например, кнопку.
+
+</details>
+
+## Слои
+
+Чем больше CSS, тем чаще правила дерутся: вспомните каскад из первого урока. Борьба кончалась `!important` и всё более длинными селекторами. **Слои** (`@layer`) дают порядок наперёд:
+
+```css
+@layer reset, base, components, utilities;
+```
+
+Одна строка в начале файла объявляет слои от слабого к сильному. Дальше каждое правило кладётся в свой слой:
+
+```css
+@layer base {
+  a { color: var(--color-accent); }
+}
+
+@layer components {
+  .button { color: var(--color-on-accent); }
+}
+```
+
+Правило простое. **Слой выше побеждает слой ниже, независимо от специфичности.** Специфичность решает только внутри одного слоя. А правила **вне слоёв сильнее любого слоя**: поэтому неслоёные стили держат для исключений, а основное кладут в слои. В схеме выше внизу это можно проверить руками.
+
+Эта схема спасает от «войны специфичности»: селектор `#cta` в слое `base` не сможет перебить простой `.button` из слоя `utilities`. Слои пришли в браузеры в 2022 году.
+
+<details>
+<summary>Проверьте себя: что сильнее: правило вне слоёв или правило из последнего слоя?</summary>
+
+Правило вне слоёв. Оно сильнее любого слоя, даже самого позднего.
+
+</details>
+
+## Практика
+
+Вы начинаете эпоху 2025 года. Страницу и стили мы вам дали: это тот результат, что вы закончили в прошлом уроке (если вы свои стили сохранили, можете вставить их). Вам нужно превратить стили в современные: переменные на `:root`, тёмная тема, слои, вложенность и `:has()`.
+
+Проверки здесь видят переменные, тег `color-scheme` и правило с `:has()`. Слои, вложенность и тёмную тему они увидеть не могут: браузер выдаёт им только вычисленные значения. Эти три вещи проверяйте глазами: откройте инструменты разработчика, найдите в «Стилях» свои слои, а тёмную тему включите в панели «Рендеринг» (Rendering, «Эмуляция prefers-color-scheme»).
+
+## Что было не так с 2014 годом
+
+Тогда большой CSS без Sass или Less писать было почти невозможно: нужны были переменные, вложенность, миксины. Препроцессор превращал ваш файл в обычный CSS на сервере, а браузер видел уже готовое. Сегодня половина этого умеет сам браузер. А вторая половина проблемы: специфичность и `!important`, пока их не заменили слоями.

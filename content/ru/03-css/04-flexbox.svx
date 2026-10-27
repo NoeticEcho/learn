@@ -1,0 +1,762 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '03-css/04-flexbox',
+		part: 3,
+		order: 4,
+		title: 'Flexbox: выстраиваем в ряд и в столбец',
+		summary:
+			'Большинство меню, рядов карточек и шапок сегодня строится на flex. После урока вы выравниваете элементы по двум осям, распределяете место и делаете меню, которое переносится на узком экране.',
+		minutes: 25,
+		teaches: ['css-flexbox'],
+		requires: ['css-box-model', 'css-floats-legacy'],
+		practice: {
+			id: 'flex-layout',
+			title: 'Раскладка вашего сайта 2014 года на flexbox',
+			task: 'Начинается эпоха 2014 года: плоский вид, а раскладка на flexbox вместо float. Страница ваша, а базовые стили уже лежат в styles.css (сброс и типографика). 1) Подключите styles.css к странице: link в head. 2) Шапка .site-header: display: flex, перенос строк, выравнивание по центру, gap. 3) Оба меню (header nav ul): flex с переносом и gap. 4) Страница .layout: flex с переносом и gap, основной блок получает flex: 2 1 28rem, боковой flex: 1 1 14rem. 5) Карточки .cards: flex с переносом и gap, у каждой .card flex: 1 1 14rem. Float нигде не нужен.',
+			era: 4,
+			continues: 'languages-hreflang',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: база сайта 2014 года (сброс и типографика). Раскладку вы пишете сами. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Раскладка: ваша работа начинается здесь ===== */
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: база сайта 2014 года (сброс и типографика). Раскладку вы пишете сами. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Раскладка: ваша работа начинается здесь ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  flex: 2 1 28rem;
+  min-width: 0;
+}
+
+.layout aside {
+  flex: 1 1 14rem;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card {
+  flex: 1 1 14rem;
+}
+`
+			},
+			checks: [
+				{ id: 'link', kind: 'exists', selector: 'link[rel="stylesheet"]' },
+				{ id: 'header-flex', kind: 'style', selector: '.site-header', prop: 'display', matches: '^(flex|inline-flex)$' },
+				{ id: 'menu-flex', kind: 'style', selector: 'header nav ul', prop: 'display', matches: '^(flex|inline-flex)$' },
+				{ id: 'menu-wrap', kind: 'style', selector: 'header nav ul', prop: 'flex-wrap', equals: 'wrap' },
+				{ id: 'layout-flex', kind: 'style', selector: '.layout', prop: 'display', matches: '^(flex|inline-flex)$' },
+				{ id: 'cards-flex', kind: 'style', selector: '.cards', prop: 'display', matches: '^(flex|inline-flex)$', when: { brief: 'items[].title' } },
+				{ id: 'cards-wrap', kind: 'style', selector: '.cards', prop: 'flex-wrap', equals: 'wrap', when: { brief: 'items[].title' } },
+				{ id: 'cards-gap', kind: 'style', selector: '.cards', prop: 'gap', matches: '^(?!normal$|0px$|0$).+', when: { brief: 'items[].title' } },
+				{ id: 'no-float', kind: 'style', selector: 'main', prop: 'float', matches: '^(none)?$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Вдоль какой оси работает justify-content?',
+				options: ['Вдоль главной оси (по умолчанию слева направо)', 'Вдоль поперечной оси', 'Всегда по горизонтали'],
+				answer: 0,
+				why: [
+					'Да. justify-content распределяет элементы по главной оси, а align-items по поперечной. Главная ось зависит от flex-direction.',
+					'Нет: по поперечной работает align-items.',
+					'Нет: при flex-direction: column главная ось вертикальна, и justify-content распределяет сверху вниз.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'У контейнера flex-direction: column. Какое свойство центрирует элементы по горизонтали?',
+				options: ['align-items: center', 'justify-content: center', 'text-align: center у каждого элемента'],
+				answer: 0,
+				why: [
+					'Да. В колонке главная ось вертикальна, а горизонталь стала поперечной, и ею управляет align-items.',
+					'Нет: justify-content теперь работает по вертикали.',
+					'Нет: text-align центрирует текст внутри блока, но не сам блок.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините свойство с тем, что оно делает',
+				pairs: [
+					['flex-wrap: wrap', 'элементы, которые не помещаются, переходят на следующую строку'],
+					['gap', 'расстояние между элементами, без внешних отступов у последнего'],
+					['flex: 1 1 14rem', 'может расти, может сжиматься, желаемая ширина 14rem'],
+					['justify-content: space-between', 'первый и последний у краёв, остальные ровно между ними']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Для каких задач flexbox подходит хорошо?',
+				options: [
+					'Меню, которое переносится на узком экране',
+					'Центрирование блока по обеим осям',
+					'Шапка: название слева, меню справа',
+					'Сложная сетка страницы, где строки и столбцы связаны друг с другом'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: flex-wrap и gap делают это в две строки.',
+					'Да: align-items и justify-content решили задачу, которая годами считалась сложной.',
+					'Да: justify-content: space-between.',
+					'Нет: это работа grid, который управляет строками и столбцами одновременно (следующий урок).'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Чем опасно свойство order, которое меняет порядок элементов внутри flex-контейнера?',
+				options: [
+					'Меняется только вид: порядок с клавиатуры и в программе чтения остаётся прежним, и они расходятся с глазами',
+					'Оно ломает страницу в старых браузерах',
+					'Оно замедляет страницу'
+				],
+				answer: 0,
+				why: [
+					'Да. Фокус идёт по порядку разметки, а глаза видят другой порядок, и человек теряется. Поэтому порядок нужно задавать в самом HTML.',
+					'Нет: order понимают все браузеры.',
+					'Нет: на скорость оно не влияет.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите контейнер с классом row, в котором три блока div, и стилем: display: flex и расстоянием между блоками gap: 1rem.',
+				starter: '',
+				checks: [
+					{ id: 'three', kind: 'count', selector: '.row > div', min: 3 },
+					{ id: 'flex', kind: 'style', selector: '.row', prop: 'display', equals: 'flex' },
+					{ id: 'gap', kind: 'style', selector: '.row', prop: 'gap', matches: '^(1rem|16px)' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-flex-axes',
+				front: 'Что такое главная и поперечная оси во flexbox?',
+				back: 'Главная ось идёт по flex-direction (по умолчанию слева направо), поперечная перпендикулярна ей. justify-content работает по главной, align-items по поперечной.'
+			},
+			{
+				id: 'css-flex-container',
+				front: 'Какие свойства у flex-контейнера?',
+				back: 'display: flex, flex-direction, flex-wrap, justify-content, align-items и gap. Они управляют тем, как выстраиваются дети.'
+			},
+			{
+				id: 'css-flex-item',
+				front: 'Что значит flex: 1 1 14rem?',
+				back: 'flex-grow 1 (может расти), flex-shrink 1 (может сжиматься), flex-basis 14rem (желаемая ширина). Из этого получаются карточки, которые переносятся сами.'
+			},
+			{
+				id: 'css-flex-when',
+				front: 'Когда flexbox, а когда grid?',
+				back: 'Flexbox для одного ряда или столбца (меню, шапка, ряд карточек), grid для строк и столбцов вместе (макет страницы, сетка).'
+			}
+		],
+		sources: [
+			{
+				title: 'Flexbox (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Flexbox (web.dev)', url: 'https://web.dev/learn/css/flexbox', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Руководство по flexbox — Дока', url: 'https://doka.guide/css/flexbox-guide/', licence: 'link-only', kind: 'docs', lang: 'ru' },
+			{ title: 'CSS Flexible Box Layout Module Level 1', url: 'https://www.w3.org/TR/css-flexbox-1/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Flexbox Froggy: игра', url: 'https://flexboxfroggy.com/', licence: 'link-only', kind: 'course', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'В 2014 году страницы разметили иначе: без float и таблиц. Попробуем сделать шапку, меню и карточки на flexbox.',
+			hints: [
+				'Сначала подключите styles.css в head: <link rel="stylesheet" href="styles.css">. Без этого ни одно правило не заработает.',
+				'Любой flex начинается с display: flex у родителя. Чтобы элементы переносились на узком экране: flex-wrap: wrap; а расстояние между ними: gap: 1rem.',
+				'Основной блок и боковой: .layout main { flex: 2 1 28rem; } и .layout aside { flex: 1 1 14rem; }. Главная колонка вдвое шире боковой и уходит на новую строку, когда места мало.'
+			],
+			mistakes: {
+				link: 'Файл стилей не подключён: в head нужна строка <link rel="stylesheet" href="styles.css">.',
+				'header-flex': 'У шапки .site-header нужен display: flex.',
+				'menu-flex': 'Оба меню (header nav ul) должны быть flex-контейнерами: display: flex.',
+				'menu-wrap': 'Меню должно переноситься на узком экране: flex-wrap: wrap.',
+				'layout-flex': 'У блока .layout нужен display: flex: основной и боковой стоят рядом.',
+				'cards-flex': 'У блока карточек .cards нужен display: flex.',
+				'cards-wrap': 'Карточки должны переходить на следующую строку: flex-wrap: wrap.',
+				'cards-gap': 'Между карточками нужен gap, например gap: 1rem.',
+				'no-float': 'У main остался float. Уберите его: раскладка теперь на flexbox.'
+			},
+			outro: 'Вот так выглядит раскладка эпохи 2014 года: никаких float и никаких таблиц. Оцените, как просто в сравнении с прошлым разом.'
+		},
+		say: { CSS: 'си-эс-эс', flexbox: 'флексбокс', flex: 'флекс', 'flex-wrap': 'флекс-рэп', 'flex-direction': 'флекс-дирекшн', 'justify-content': 'джастифай-контент', 'align-items': 'элайн-айтемс', gap: 'гэп', order: 'ордер', grid: 'грид' }
+	};
+</script>
+
+<script>
+	import FlexPlayground from '../../diagrams/FlexPlayground.svelte';
+</script>
+
+## Новая эпоха, новая раскладка
+
+Вы дошли до 2014 года. Большая часть сайтов открывается на телефонах, ширина экранов самая разная, а float как инструмент раскладки уже надоел всем. Тогда в браузерах появляется **flexbox** (Flexible Box Layout, «гибкие блоки»). Первые черновики спецификации относятся к 2009 году, а окончательный вид, с которым вы сейчас будете работать, закрепился около 2012–2014 годов, и массово им стали пользоваться, когда его поддержали все основные браузеры. Для нашей практики это значит: никаких таблиц и плавающих блоков, ряды и столбцы выстраивают сами.
+
+## Контейнер и элементы
+
+Flexbox работает так: вы объявляете родителя **flex-контейнером**, и его дети становятся **flex-элементами**, которые выстраиваются в ряд или в столбец.
+
+```css
+.menu {
+  display: flex;
+  gap: 1rem;
+}
+```
+
+Две строки, и пункты меню стоят в ряд с промежутком. Теперь два понятия, на которых держится всё остальное:
+
+- **главная ось** — направление, в котором идут элементы. По умолчанию слева направо (`flex-direction: row`). Если сказать `column`, то сверху вниз;
+- **поперечная ось** перпендикулярна главной.
+
+И два свойства для двух осей: `justify-content` распределяет элементы по **главной** оси, а `align-items` выравнивает по **поперечной**. Когда меняется направление, оси меняются местами, и вместе с ними меняют работу свойства. Это единственное, что здесь путают. Поиграйте на схеме: смените направление и посмотрите.
+
+<FlexPlayground />
+
+<details>
+<summary>Проверьте себя: что изменится, если flex-direction поменять с row на column?</summary>
+
+Главная ось станет вертикальной, и justify-content начнёт распределять элементы сверху вниз, а align-items выравнивать по горизонтали.
+
+</details>
+
+## Свойства контейнера
+
+- `display: flex` — включает flexbox;
+- `flex-direction: row | column` (и `-reverse`) — куда идут элементы;
+- `flex-wrap: wrap` — разрешает переносить элементы на следующую строку. Без него всё стоит в одну линию и, если места не хватает, сжимается или вылезает за край;
+- `justify-content: flex-start | center | flex-end | space-between | space-around` — распределение по главной оси;
+- `align-items: stretch | flex-start | center | flex-end` — выравнивание по поперечной оси; `stretch` (по умолчанию) растягивает элементы на всю высоту ряда, поэтому карточки одной строки одинаковой высоты;
+- `gap: 1rem` — расстояние между элементами. Раньше его делали внешними отступами и боролись с лишним отступом у последнего. Для flexbox `gap` работает во всех современных браузерах с 2021 года.
+
+## Свойства элементов
+
+Главное свойство элемента: `flex`, сокращение из трёх чисел:
+
+```css
+.card {
+  flex: 1 1 14rem;
+}
+```
+
+Это **flex-grow** (может ли расти и занимать свободное место), **flex-shrink** (может ли сжиматься) и **flex-basis** (желаемый размер до роста и сжатия). Запись `flex: 1 1 14rem` читается так: «я хочу ширину 14rem, но могу вырасти, чтобы заполнить ряд, и могу сжаться». Из этого получаются карточки, которые сами переносятся на следующую строку: четыре в ряд на широком экране, одна на телефоне. Без единой строки про экран.
+
+Есть ещё `align-self` (выровнять один элемент иначе) и `order` (поменять порядок). Со вторым осторожнее: меняется только вид, а порядок с клавиатуры и в программе чтения остаётся прежним. Глаза и диктор разойдутся. Лучше менять порядок самих элементов в HTML.
+
+Из готовых приёмов запомните три:
+
+- шапка: название слева, меню справа: `justify-content: space-between`;
+- центрирование блока по обеим осям (задача, которая раньше считалась дурацкой): `justify-content: center; align-items: center`;
+- «прижать» один элемент вправо: `margin-left: auto`.
+
+<details>
+<summary>Проверьте себя: что делает flex: 1 1 14rem?</summary>
+
+Желаемая ширина 14rem, но элемент может расти, чтобы заполнить свободное место, и сжиматься, если места мало.
+
+</details>
+
+## Практика
+
+Новая эпоха, новая страница: в 2014 году ваш сайт заново собран, но без оформления. Ваш `styles.css` уже содержит базу, как в 2014-м писали «reset»: размеры, шрифты, цвета. Ваша работа раскладка.
+
+Поскольку каждая эпоха собирается заново, файл стилей нужно подключить. Это та же строка, что в 2005-м. Потом вы выстраиваете шапку, меню, основное с боковым и карточки на flexbox. Попробуйте проверить результат сами: потяните границу окна браузера и убедитесь, что меню и карточки переносятся, а не вылезают за край.
+
+## Что было не так с 2014 годом
+
+Новая раскладка была хороша, но её по-прежнему писали «настольными» размерами: ширины в пикселях, картинки без запасного размера. В следующих уроках вы доведёте её до адаптивной. Был и другой подвох: у первого flexbox было два разных синтаксиса, а Internet Explorer 10 понимал третий, и авторы писали все варианты подряд. Эта мода ушла вместе с теми браузерами.
