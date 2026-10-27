@@ -67,10 +67,10 @@
 		<label><input type="checkbox" bind:checked={nag} /> Баннер возвращается после каждого отказа</label>
 	</div>
 	<div class="banner" role="group" aria-label="Образец баннера">
-		<p>Мы используем cookie. Необходимые работают всегда, остальные только с вашего выбора. <a href="#cookie-policy" onclick={(e) => e.preventDefault()}>Подробнее</a></p>
+		<p>Мы используем cookie. Необходимые работают всегда, остальные только с вашего выбора. <span class="link">Подробнее</span></p>
 		<div class="btns">
 			<button type="button" class={acceptBig ? 'big' : ''}>Принять всё</button>
-			{#if !rejectBuried}<button type="button">Отклонить всё</button>{:else}<a href="#cookie-settings" class="tiny" onclick={(e) => e.preventDefault()}>Настройки</a>{/if}
+			{#if !rejectBuried}<button type="button">Отклонить всё</button>{:else}<span class="tiny">Настройки</span>{/if}
 			{#if !rejectBuried}<button type="button" class="ghost">Настроить</button>{/if}
 		</div>
 		{#if preTicked}<p class="dim">☑ Аналитика ☑ Реклама (включены заранее)</p>{:else}<p class="dim">☐ Аналитика ☐ Реклама (выбирает человек)</p>{/if}
@@ -143,6 +143,9 @@
 	}
 	.btns button.ghost {
 		border-style: dashed;
+	}
+	.link {
+		text-decoration: underline;
 	}
 	.tiny {
 		font-size: 0.8em;
