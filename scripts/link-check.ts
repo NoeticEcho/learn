@@ -25,12 +25,15 @@ async function probe(url: string): Promise<{ ok: boolean; status: number }> {
 	const id = youtubeId(u);
 	const target = id ? `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}&format=json` : url;
 	const go = (method: string) => fetch(target, { method, redirect: 'follow', headers: { 'user-agent': UA }, signal: AbortSignal.timeout(20_000) });
+	// A HEAD some servers drop or refuse is asked again as a GET.
+	const get = () => go('GET').then((r) => ({ ok: r.ok, status: r.status }), () => ({ ok: false, status: 0 }));
+	if (id) return get();
 	try {
-		let res = id ? await go('GET') : await go('HEAD');
-		if (!id && (res.status === 405 || res.status === 403 || res.status >= 500)) res = await go('GET');
+		const res = await go('HEAD');
+		if (res.status === 405 || res.status === 403 || res.status === 404 || res.status >= 500) return get();
 		return { ok: res.ok, status: res.status };
 	} catch {
-		return { ok: false, status: 0 };
+		return get();
 	}
 }
 
