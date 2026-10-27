@@ -1,0 +1,2710 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '07-data/02-sql-basics',
+		part: 7,
+		order: 2,
+		title: 'SQL: читаем и пишем данные',
+		summary: 'Вы пишете запросы SELECT, INSERT, UPDATE и DELETE и понимаете, что делает каждое слово. После урока вы создаёте таблицу своих услуг, добавляете в неё строки и получаете нужные данные: отобранные, упорядоченные и посчитанные.',
+		minutes: 35,
+		teaches: ['data-sql-select', 'data-sql-write'],
+		requires: ['data-relational-model'],
+		practice: {
+			id: 'data-sql-items',
+			title: 'Таблица услуг и запросы к ней',
+			task: 'В странице шесть полей для запросов. 1) Создайте таблицу items: у каждого «…» впишите тип столбца (для id подойдёт serial с PRIMARY KEY, для названия text NOT NULL, для цены integer). 2) Добавьте не меньше пяти строк, каждую в скобках на отдельной строке; названия возьмите из своих услуг. 3) Напишите SELECT с WHERE, ORDER BY и LIMIT. 4) Напишите запрос с GROUP BY и COUNT, который считает пункты по категориям. 5) Измените цену одной записи через UPDATE и 6) удалите другую через DELETE, оба с WHERE. 7) В последней строке напишите, какой запрос без WHERE опасен. Проверки читают текст запросов; результаты выполнения вы видите под полями в предпросмотре. Все «…» нужно заменить.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="sql-work">
+      <h2>Мои запросы к таблице items<\/h2>
+      <p>Запросы пишите прямо здесь, внутри полей. Под каждым полем в предпросмотре появится результат (это учебная песочница, а не настоящий PostgreSQL). Запросы выполняются по порядку, сверху вниз.<\/p>
+
+      <h3>1. Таблица<\/h3>
+      <textarea class="sql" id="q-create" rows="7">CREATE TABLE items (
+  id …,
+  title …,
+  price …,
+  category text
+);<\/textarea>
+      <div class="out" id="q-create-out"><\/div>
+
+      <h3>2. Данные: не меньше пяти строк, каждая в скобках на отдельной строке<\/h3>
+      <textarea class="sql" id="q-insert" rows="9">INSERT INTO items (title, price, category) VALUES
+  ('{{items.0.title}}', 3000, 'основная');<\/textarea>
+      <div class="out" id="q-insert-out"><\/div>
+
+      <h3>3. Отобрать, упорядочить, ограничить<\/h3>
+      <textarea class="sql" id="q-select" rows="4">SELECT * FROM items;<\/textarea>
+      <div class="out" id="q-select-out"><\/div>
+
+      <h3>4. Посчитать по категориям<\/h3>
+      <textarea class="sql" id="q-group" rows="4">-- напишите запрос: сколько пунктов в каждой категории
+SELECT …<\/textarea>
+      <div class="out" id="q-group-out"><\/div>
+
+      <h3>5. Изменить одну запись<\/h3>
+      <textarea class="sql" id="q-update" rows="3">-- измените цену одного пункта
+UPDATE …<\/textarea>
+      <div class="out" id="q-update-out"><\/div>
+
+      <h3>6. Удалить одну запись<\/h3>
+      <textarea class="sql" id="q-delete" rows="3">-- удалите один пункт
+DELETE …<\/textarea>
+      <div class="out" id="q-delete-out"><\/div>
+
+      <p>Какой из запросов был бы опасен без WHERE и почему: <span id="danger">…<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="sql-runner">
+      // Учебный SQL (не настоящий PostgreSQL): запросы из полей выше выполняются здесь, в памяти страницы.
+      // Читать этот блок не нужно. Он не входит в ваш сайт.
+      class SqlError extends Error {}
+      const KEYWORDS = new Set(
+      'select from where group by having order limit offset asc desc distinct as join inner left right outer on and or not null is in like between true false insert into values update set delete create table index unique primary key references default begin commit rollback explain integer int serial text varchar numeric boolean date timestamp real if exists'.split(
+      ' '
+      )
+      );
+      function tokenize(src) {
+      const out = [];
+      const re = /\\s+|--[^\\n]*|('(?:[^']|'')*')|("(?:[^"]*)")|(\\d+(?:\\.\\d+)?)|([A-Za-z_\\u0400-\\u04FF][A-Za-z0-9_\\u0400-\\u04FF]*)|(<=|>=|<>|!=|\\|\\||[(),.*+\\-\\/=<>;])/gy;
+      let pos = 0;
+      while (pos < src.length) {
+      re.lastIndex = pos;
+      const m = re.exec(src);
+      if (!m) throw new SqlError(\`синтаксическая ошибка: не понимаю символ «\${src[pos]}»\`);
+      pos = re.lastIndex;
+      if (m[1] !== undefined) out.push({ t: 'str', v: m[1].slice(1, -1).replace(/''/g, "'") });
+      else if (m[2] !== undefined) out.push({ t: 'id', v: m[2].slice(1, -1).toLowerCase(), quoted: true });
+      else if (m[3] !== undefined) out.push({ t: 'num', v: Number(m[3]) });
+      else if (m[4] !== undefined) {
+      const low = m[4].toLowerCase();
+      out.push(KEYWORDS.has(low) ? { t: 'kw', v: low, raw: m[4] } : { t: 'id', v: low });
+      } else if (m[5] !== undefined) out.push({ t: 'op', v: m[5] });
+      }
+      return out;
+      }
+      /** The text of a script, split into statements by «;» outside quotes. */
+      function splitStatements(sql) {
+      const parts = [];
+      let cur = '';
+      let q = false;
+      for (let i = 0; i < sql.length; i++) {
+      const c = sql[i];
+      if (c === "'") q = !q;
+      if (c === ';' && !q) {
+      parts.push(cur);
+      cur = '';
+      } else cur += c;
+      }
+      parts.push(cur);
+      return parts.map((s) => s.replace(/--[^\\n]*/g, '').trim()).filter(Boolean);
+      }
+      class Parser {
+      constructor(tokens) {
+      this.k = tokens;
+      this.i = 0;
+      }
+      peek(o = 0) {
+      return this.k[this.i + o];
+      }
+      isKw(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'kw' && t.v === v;
+      }
+      isOp(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'op' && t.v === v;
+      }
+      eatKw(v) {
+      if (this.isKw(v)) return this.i++, true;
+      return false;
+      }
+      eatOp(v) {
+      if (this.isOp(v)) return this.i++, true;
+      return false;
+      }
+      expectKw(v) {
+      if (!this.eatKw(v)) this.fail(\`ожидалось слово \${v.toUpperCase()}\`);
+      }
+      expectOp(v) {
+      if (!this.eatOp(v)) this.fail(\`ожидался символ «\${v}»\`);
+      }
+      fail(msg) {
+      const t = this.peek();
+      const near = t ? \` около «\${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}»\` : ' в конце запроса';
+      throw new SqlError(\`синтаксическая ошибка\${near}: \${msg}\`);
+      }
+      name() {
+      const t = this.peek();
+      if (t && (t.t === 'id' || (t.t === 'kw' && ['key', 'text', 'date', 'index'].includes(t.v)))) return this.i++, t.v;
+      this.fail('ожидалось имя');
+      }
+      done() {
+      return this.i >= this.k.length;
+      }
+      /* expressions */
+      expr() {
+      return this.or();
+      }
+      or() {
+      let l = this.and();
+      while (this.eatKw('or')) l = { op: 'or', l, r: this.and() };
+      return l;
+      }
+      and() {
+      let l = this.not();
+      while (this.eatKw('and')) l = { op: 'and', l, r: this.not() };
+      return l;
+      }
+      not() {
+      if (this.eatKw('not')) return { op: 'not', e: this.not() };
+      return this.cmp();
+      }
+      cmp() {
+      const l = this.add();
+      const t = this.peek();
+      if (t && t.t === 'op' && ['=', '<>', '!=', '<', '>', '<=', '>='].includes(t.v)) {
+      this.i++;
+      return { op: t.v === '!=' ? '<>' : t.v, l, r: this.add() };
+      }
+      if (this.isKw('is')) {
+      this.i++;
+      const neg = this.eatKw('not');
+      this.expectKw('null');
+      return { op: 'isnull', e: l, neg };
+      }
+      const neg = this.isKw('not') && (this.isKw('like', 1) || this.isKw('in', 1) || this.isKw('between', 1));
+      if (neg) this.i++;
+      if (this.eatKw('like')) return { op: 'like', l, r: this.add(), neg };
+      if (this.eatKw('in')) {
+      this.expectOp('(');
+      const list = [this.expr()];
+      while (this.eatOp(',')) list.push(this.expr());
+      this.expectOp(')');
+      return { op: 'in', l, list, neg };
+      }
+      if (this.eatKw('between')) {
+      const lo = this.add();
+      this.expectKw('and');
+      const hi = this.add();
+      return { op: 'between', e: l, lo, hi, neg };
+      }
+      return l;
+      }
+      add() {
+      let l = this.mul();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['+', '-', '||'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.mul() };
+      } else return l;
+      }
+      }
+      mul() {
+      let l = this.unary();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['*', '/'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.unary() };
+      } else return l;
+      }
+      }
+      unary() {
+      if (this.eatOp('-')) return { op: 'neg', e: this.unary() };
+      return this.primary();
+      }
+      primary() {
+      const t = this.peek();
+      if (!t) this.fail('ожидалось значение');
+      if (t.t === 'num') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'str') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'kw' && t.v === 'null') return this.i++, { op: 'lit', v: null };
+      if (t.t === 'kw' && t.v === 'true') return this.i++, { op: 'lit', v: true };
+      if (t.t === 'kw' && t.v === 'false') return this.i++, { op: 'lit', v: false };
+      if (this.eatOp('(')) {
+      const e = this.expr();
+      this.expectOp(')');
+      return e;
+      }
+      if (t.t === 'id' && this.isOp('(', 1)) {
+      this.i += 2;
+      const fn = t.v;
+      if (!['count', 'sum', 'avg', 'min', 'max', 'lower', 'upper', 'length', 'coalesce'].includes(fn)) throw new SqlError(\`функция \${fn}() здесь не поддерживается\`);
+      if (fn === 'count' && this.eatOp('*')) {
+      this.expectOp(')');
+      return { op: 'agg', fn, star: true };
+      }
+      const args = [this.expr()];
+      while (this.eatOp(',')) args.push(this.expr());
+      this.expectOp(')');
+      return ['count', 'sum', 'avg', 'min', 'max'].includes(fn) ? { op: 'agg', fn, e: args[0] } : { op: 'fn', fn, args };
+      }
+      if (t.t === 'id' || (t.t === 'kw' && ['text', 'date', 'key', 'index'].includes(t.v))) {
+      this.i++;
+      if (this.isOp('.') && this.peek(1) && (this.peek(1).t === 'id' || this.peek(1).t === 'kw')) {
+      this.i++;
+      const c = this.peek();
+      this.i++;
+      return { op: 'col', table: t.v, name: c.v };
+      }
+      return { op: 'col', name: t.v };
+      }
+      this.fail('ожидалось значение или имя столбца');
+      }
+      }
+      const text = (e) => {
+      switch (e.op) {
+      case 'col':
+      return e.table ? \`\${e.table}.\${e.name}\` : e.name;
+      case 'lit':
+      return e.v === null ? 'NULL' : typeof e.v === 'string' ? \`'\${e.v}'\` : String(e.v);
+      case 'agg':
+      return \`\${e.fn}(\${e.star ? '*' : text(e.e)})\`;
+      case 'fn':
+      return \`\${e.fn}(\${e.args.map(text).join(', ')})\`;
+      default:
+      return e.op;
+      }
+      };
+      const hasAgg = (e) => !!e && (e.op === 'agg' || [e.l, e.r, e.e, e.lo, e.hi].some(hasAgg) || (e.args || e.list || []).some(hasAgg));
+      function createDb() {
+      return { tables: {}, indexes: [], txn: null, aborted: false };
+      }
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      const isNum = (v) => typeof v === 'number';
+      function table(db, name) {
+      const t = db.tables[name];
+      if (!t) throw new SqlError(\`таблицы «\${name}» нет. Есть: \${Object.keys(db.tables).join(', ') || 'ни одной'}\`);
+      return t;
+      }
+      function coerce(col, v) {
+      if (v === null || v === undefined) return null;
+      const ty = col.type;
+      if (['integer', 'int', 'serial'].includes(ty)) {
+      if (isNum(v) && Number.isInteger(v)) return v;
+      if (typeof v === 'string' && /^-?\\d+$/.test(v.trim())) return Number(v);
+      throw new SqlError(\`значение \${typeof v === 'string' ? \`«\${v}»\` : v} не подходит к типу integer (столбец \${col.name})\`);
+      }
+      if (['numeric', 'real'].includes(ty)) {
+      if (isNum(v)) return v;
+      if (typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v))) return Number(v);
+      throw new SqlError(\`значение «\${v}» не подходит к типу \${ty} (столбец \${col.name})\`);
+      }
+      if (ty === 'boolean') {
+      if (typeof v === 'boolean') return v;
+      throw new SqlError(\`значение «\${v}» не подходит к типу boolean (столбец \${col.name})\`);
+      }
+      return typeof v === 'string' ? v : String(v);
+      }
+      /* ---------- evaluation ---------- */
+      function resolve(ctx, e) {
+      const found = [];
+      for (const c of ctx) {
+      if (e.table && c.alias !== e.table) continue;
+      if (c.cols.includes(e.name)) found.push(c);
+      }
+      if (!found.length) {
+      const all = ctx.flatMap((c) => c.cols.map((n) => \`\${c.alias}.\${n}\`));
+      throw new SqlError(\`столбца «\${e.table ? e.table + '.' : ''}\${e.name}» нет. Доступны: \${all.join(', ')}\`);
+      }
+      if (found.length > 1) throw new SqlError(\`столбец «\${e.name}» неоднозначен: он есть в таблицах \${found.map((f) => f.alias).join(' и ')}. Напишите \${found[0].alias}.\${e.name}\`);
+      return found[0].row ? found[0].row[e.name] : null;
+      }
+      function cmpVals(a, b) {
+      if (a === null || b === null) return null;
+      if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
+      if (typeof a !== typeof b) throw new SqlError(\`нельзя сравнить \${typeof a === 'number' ? 'число' : 'текст'} и \${typeof b === 'number' ? 'число' : 'текст'}\`);
+      return a < b ? -1 : a > b ? 1 : 0;
+      }
+      function like(s, p) {
+      const re = new RegExp('^' + p.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', 'is');
+      return re.test(s);
+      }
+      function ev(e, ctx, grp) {
+      switch (e.op) {
+      case 'lit':
+      return e.v;
+      case 'col':
+      return resolve(ctx, e);
+      case 'neg': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : -v;
+      }
+      case 'not': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : !v;
+      }
+      case 'and': {
+      const l = ev(e.l, ctx, grp);
+      if (l === false) return false;
+      const r = ev(e.r, ctx, grp);
+      if (r === false) return false;
+      return l === null || r === null ? null : true;
+      }
+      case 'or': {
+      const l = ev(e.l, ctx, grp);
+      if (l === true) return true;
+      const r = ev(e.r, ctx, grp);
+      if (r === true) return true;
+      return l === null || r === null ? null : false;
+      }
+      case '=':
+      case '<>':
+      case '<':
+      case '>':
+      case '<=':
+      case '>=': {
+      const c = cmpVals(ev(e.l, ctx, grp), ev(e.r, ctx, grp));
+      if (c === null) return null;
+      return { '=': c === 0, '<>': c !== 0, '<': c < 0, '>': c > 0, '<=': c <= 0, '>=': c >= 0 }[e.op];
+      }
+      case 'isnull': {
+      const v = ev(e.e, ctx, grp);
+      return e.neg ? v !== null : v === null;
+      }
+      case 'like': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      const m = like(String(l), String(r));
+      return e.neg ? !m : m;
+      }
+      case 'in': {
+      const l = ev(e.l, ctx, grp);
+      if (l === null) return null;
+      const m = e.list.some((x) => cmpVals(l, ev(x, ctx, grp)) === 0);
+      return e.neg ? !m : m;
+      }
+      case 'between': {
+      const v = ev(e.e, ctx, grp);
+      const lo = cmpVals(v, ev(e.lo, ctx, grp)),
+      hi = cmpVals(v, ev(e.hi, ctx, grp));
+      if (lo === null || hi === null) return null;
+      const m = lo >= 0 && hi <= 0;
+      return e.neg ? !m : m;
+      }
+      case '+':
+      case '-':
+      case '*':
+      case '/': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      if (!isNum(l) || !isNum(r)) throw new SqlError(\`арифметика (\${e.op}) работает с числами, а здесь текст\`);
+      if (e.op === '/' && r === 0) throw new SqlError('деление на ноль');
+      return e.op === '+' ? l + r : e.op === '-' ? l - r : e.op === '*' ? l * r : l / r;
+      }
+      case '||': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      return l === null || r === null ? null : String(l) + String(r);
+      }
+      case 'fn': {
+      const a = e.args.map((x) => ev(x, ctx, grp));
+      if (e.fn === 'coalesce') return a.find((x) => x !== null) ?? null;
+      if (a[0] === null) return null;
+      if (e.fn === 'lower') return String(a[0]).toLowerCase();
+      if (e.fn === 'upper') return String(a[0]).toUpperCase();
+      return String(a[0]).length;
+      }
+      case 'agg': {
+      if (!grp) throw new SqlError(\`\${e.fn.toUpperCase()}() можно писать только в SELECT или HAVING, но не в WHERE\`);
+      if (e.star) return grp.length;
+      const vals = grp.map((g) => ev(e.e, g, null)).filter((v) => v !== null);
+      if (e.fn === 'count') return vals.length;
+      if (!vals.length) return null;
+      if (e.fn === 'min') return vals.reduce((a, b) => (cmpVals(a, b) <= 0 ? a : b));
+      if (e.fn === 'max') return vals.reduce((a, b) => (cmpVals(a, b) >= 0 ? a : b));
+      if (!vals.every(isNum)) throw new SqlError(\`\${e.fn.toUpperCase()}() считает только числа\`);
+      const s = vals.reduce((a, b) => a + b, 0);
+      return e.fn === 'sum' ? s : s / vals.length;
+      }
+      }
+      throw new SqlError('не понимаю выражение');
+      }
+      /* ---------- statements ---------- */
+      function parseSelect(p) {
+      const q = { distinct: false, items: [], from: null, joins: [], where: null, group: [], having: null, order: [], limit: null, offset: 0 };
+      p.expectKw('select');
+      q.distinct = p.eatKw('distinct');
+      do {
+      if (p.eatOp('*')) q.items.push({ star: true });
+      else if (p.peek() && p.peek().t === 'id' && p.isOp('.', 1) && p.isOp('*', 2)) {
+      const tb = p.peek().v;
+      p.i += 3;
+      q.items.push({ star: true, table: tb });
+      } else {
+      const e = p.expr();
+      let alias = null;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      q.items.push({ e, alias });
+      }
+      } while (p.eatOp(','));
+      if (p.eatKw('from')) {
+      const tableRef = () => {
+      const name = p.name();
+      let alias = name;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      return { name, alias };
+      };
+      q.from = tableRef();
+      for (;;) {
+      let kind = null;
+      if (p.eatKw('left')) {
+      p.eatKw('outer');
+      p.expectKw('join');
+      kind = 'left';
+      } else if (p.eatKw('inner')) {
+      p.expectKw('join');
+      kind = 'inner';
+      } else if (p.eatKw('join')) kind = 'inner';
+      else if (p.isKw('right')) throw new SqlError('RIGHT JOIN в учебной песочнице не поддерживается: поменяйте таблицы местами и напишите LEFT JOIN');
+      else break;
+      const ref = tableRef();
+      p.expectKw('on');
+      q.joins.push({ kind, ...ref, on: p.expr() });
+      }
+      }
+      if (p.eatKw('where')) q.where = p.expr();
+      if (p.eatKw('group')) {
+      p.expectKw('by');
+      do q.group.push(p.expr());
+      while (p.eatOp(','));
+      }
+      if (p.eatKw('having')) q.having = p.expr();
+      if (p.eatKw('order')) {
+      p.expectKw('by');
+      do {
+      const e = p.expr();
+      const desc = p.eatKw('desc');
+      if (!desc) p.eatKw('asc');
+      q.order.push({ e, desc });
+      } while (p.eatOp(','));
+      }
+      if (p.eatKw('limit')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('после LIMIT нужно число');
+      p.i++;
+      q.limit = t.v;
+      }
+      if (p.eatKw('offset')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('после OFFSET нужно число');
+      p.i++;
+      q.offset = t.v;
+      }
+      return q;
+      }
+      /** An index can serve \`col = literal\` among the AND-ed conditions of WHERE. */
+      function indexFor(db, q, tname, alias) {
+      if (!q.where) return null;
+      const conj = [];
+      (function walk(e) {
+      if (e.op === 'and') (walk(e.l), walk(e.r));
+      else conj.push(e);
+      })(q.where);
+      for (const c of conj) {
+      if (c.op !== '=') continue;
+      const [a, b] = c.l.op === 'col' ? [c.l, c.r] : [c.r, c.l];
+      if (a.op !== 'col' || b.op !== 'lit' || (a.table && a.table !== alias)) continue;
+      const ix = db.indexes.find((i) => i.table === tname && i.cols[0] === a.name);
+      if (ix) return { ix, col: a.name, value: b.v };
+      const t = db.tables[tname];
+      if (t.pk.length === 1 && t.pk[0] === a.name) return { ix: { name: \`\${tname}_pkey\`, table: tname, cols: [a.name] }, col: a.name, value: b.v };
+      }
+      return null;
+      }
+      function execSelect(db, q, explain) {
+      let scanned = 0;
+      const plan = [];
+      const trace = { from: 0, where: 0, groups: null, result: 0, limit: 0 };
+      let ctxRows = [];
+      if (!q.from) {
+      ctxRows = [[]];
+      } else {
+      const t0 = table(db, q.from.name);
+      const hit = indexFor(db, q, q.from.name, q.from.alias);
+      let base = t0.rows;
+      if (hit) {
+      base = t0.rows.filter((r) => r[hit.col] === hit.value);
+      scanned += base.length;
+      plan.push(\`Index Scan по индексу \${hit.ix.name} на «\${q.from.name}»: прочитано строк \${base.length}\`);
+      } else {
+      scanned += t0.rows.length;
+      plan.push(\`Seq Scan на «\${q.from.name}»: просмотрена вся таблица, строк \${t0.rows.length}\`);
+      }
+      ctxRows = base.map((r) => [{ alias: q.from.alias, cols: t0.columns.map((c) => c.name), row: r }]);
+      for (const j of q.joins) {
+      const tj = table(db, j.name);
+      const cols = tj.columns.map((c) => c.name);
+      const next = [];
+      scanned += tj.rows.length;
+      plan.push(\`\${j.kind === 'left' ? 'Left ' : ''}Join с «\${j.name}»: просмотрено строк \${tj.rows.length}\`);
+      for (const left of ctxRows) {
+      let matched = false;
+      for (const r of tj.rows) {
+      const ctx = [...left, { alias: j.alias, cols, row: r }];
+      if (ev(j.on, ctx, null) === true) {
+      next.push(ctx);
+      matched = true;
+      }
+      }
+      if (!matched && j.kind === 'left') next.push([...left, { alias: j.alias, cols, row: null }]);
+      }
+      ctxRows = next;
+      }
+      }
+      trace.from = ctxRows.length;
+      if (q.where) {
+      if (hasAgg(q.where)) throw new SqlError('в WHERE нельзя писать COUNT, SUM и подобные: они считаются после отбора. Для условий по ним есть HAVING');
+      ctxRows = ctxRows.filter((c) => ev(q.where, c, null) === true);
+      }
+      trace.where = ctxRows.length;
+      const aggregated = q.group.length > 0 || q.items.some((i) => i.e && hasAgg(i.e)) || (q.having && hasAgg(q.having));
+      const columns = [];
+      const exprs = [];
+      for (const it of q.items) {
+      if (it.star) {
+      const sample = q.from ? [{ alias: q.from.alias, cols: table(db, q.from.name).columns.map((c) => c.name) }, ...q.joins.map((j) => ({ alias: j.alias, cols: table(db, j.name).columns.map((c) => c.name) }))] : [];
+      for (const s of sample) {
+      if (it.table && s.alias !== it.table) continue;
+      for (const n of s.cols) {
+      columns.push(n);
+      exprs.push({ op: 'col', table: s.alias, name: n });
+      }
+      }
+      } else {
+      columns.push(it.alias || (it.e.op === 'col' ? it.e.name : it.e.op === 'agg' || it.e.op === 'fn' ? it.e.fn : text(it.e)));
+      exprs.push(it.e);
+      }
+      }
+      let rows; // each: { out: [...], ctx, grp }
+      if (aggregated) {
+      const groups = new Map();
+      for (const c of ctxRows) {
+      const key = JSON.stringify(q.group.map((g) => ev(g, c, null)));
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(c);
+      }
+      if (!q.group.length && !groups.size) groups.set('', []);
+      const groupText = q.group.map((g) => (g.op === 'col' ? g.name : text(g)));
+      for (const [i, e] of exprs.entries()) {
+      const bare = (x) => !x || x.op === 'agg' || x.op === 'lit' || groupText.includes(x.op === 'col' ? x.name : text(x)) || ([x.l, x.r, x.e].some((s) => s) && [x.l, x.r, x.e].filter(Boolean).every(bare));
+      if (!bare(e)) throw new SqlError(\`столбец «\${columns[i]}» нужно либо добавить в GROUP BY, либо обернуть в COUNT, SUM, MIN, MAX или AVG: иначе непонятно, какую из строк группы показать\`);
+      }
+      rows = [...groups.values()].map((g) => ({ grp: g, ctx: g[0] || [] }));
+      trace.groups = rows.length;
+      if (q.having) rows = rows.filter((r) => ev(q.having, r.ctx, r.grp) === true);
+      rows.forEach((r) => (r.out = exprs.map((e) => ev(e, r.ctx, r.grp))));
+      } else {
+      rows = ctxRows.map((c) => ({ ctx: c, grp: null, out: exprs.map((e) => ev(e, c, null)) }));
+      }
+      if (q.distinct) {
+      const seen = new Set();
+      rows = rows.filter((r) => {
+      const k = JSON.stringify(r.out);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+      });
+      }
+      if (q.order.length) {
+      const keyOf = (r, o) => {
+      if (o.e.op === 'lit' && isNum(o.e.v)) return r.out[o.e.v - 1];
+      if (o.e.op === 'col' && !o.e.table && columns.includes(o.e.name)) return r.out[columns.indexOf(o.e.name)];
+      return ev(o.e, r.ctx, r.grp);
+      };
+      rows.sort((a, b) => {
+      for (const o of q.order) {
+      const x = keyOf(a, o),
+      y = keyOf(b, o);
+      if (x === y) continue;
+      if (x === null) return o.desc ? -1 : 1;
+      if (y === null) return o.desc ? 1 : -1;
+      const c = cmpVals(x, y);
+      if (c !== 0) return o.desc ? -c : c;
+      }
+      return 0;
+      });
+      }
+      trace.result = rows.length;
+      const total = rows.length;
+      if (q.offset) rows = rows.slice(q.offset);
+      if (q.limit !== null) rows = rows.slice(0, q.limit);
+      trace.limit = rows.length;
+      return { kind: 'select', columns, rows: rows.map((r) => r.out), scanned, plan, total, trace };
+      }
+      function checkRow(db, t, row, skipPk) {
+      for (const c of t.columns) {
+      if (row[c.name] === null && (c.notNull || t.pk.includes(c.name))) throw new SqlError(\`в столбец «\${c.name}» таблицы «\${t.name}» нельзя записать NULL (нарушено ограничение NOT NULL)\`);
+      if (c.ref && row[c.name] !== null) {
+      const rt = db.tables[c.ref.table];
+      if (!rt) throw new SqlError(\`таблицы «\${c.ref.table}» нет\`);
+      if (!rt.rows.some((r) => r[c.ref.col] === row[c.name])) throw new SqlError(\`нарушен внешний ключ: в таблице «\${c.ref.table}» нет строки, где \${c.ref.col} = \${row[c.name]}\`);
+      }
+      }
+      const uniq = [t.pk.length ? t.pk : null, ...t.columns.filter((c) => c.unique).map((c) => [c.name])].filter(Boolean);
+      for (const cols of uniq) {
+      const dup = t.rows.some((r) => r !== skipPk && cols.every((c) => r[c] === row[c]));
+      if (dup) throw new SqlError(\`нарушено ограничение уникальности: строка с \${cols.map((c) => \`\${c} = \${row[c]}\`).join(', ')} в таблице «\${t.name}» уже есть\`);
+      }
+      }
+      function execOne(db, sql) {
+      const p = new Parser(tokenize(sql));
+      const first = p.peek();
+      if (!first) return null;
+      let explain = false;
+      if (p.eatKw('explain')) explain = true;
+      if (p.isKw('select')) {
+      const q = parseSelect(p);
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      const r = execSelect(db, q, explain);
+      if (explain) return { kind: 'plan', lines: r.plan, scanned: r.scanned };
+      return r;
+      }
+      if (explain) throw new SqlError('EXPLAIN в песочнице работает только с SELECT');
+      if (p.eatKw('begin')) {
+      if (db.txn) throw new SqlError('транзакция уже начата');
+      db.txn = clone({ tables: db.tables, indexes: db.indexes });
+      return { kind: 'msg', message: 'BEGIN: транзакция началась. До COMMIT изменения можно отменить командой ROLLBACK' };
+      }
+      if (p.eatKw('commit')) {
+      if (!db.txn) return { kind: 'msg', message: 'COMMIT: транзакции не было, ничего не произошло' };
+      db.txn = null;
+      return { kind: 'msg', message: 'COMMIT: изменения записаны насовсем' };
+      }
+      if (p.eatKw('rollback')) {
+      if (!db.txn) return { kind: 'msg', message: 'ROLLBACK: транзакции не было, ничего не произошло' };
+      db.tables = db.txn.tables;
+      db.indexes = db.txn.indexes;
+      db.txn = null;
+      db.aborted = false;
+      return { kind: 'msg', message: 'ROLLBACK: все изменения с BEGIN отменены' };
+      }
+      if (p.eatKw('create')) {
+      if (p.eatKw('unique')) {
+      p.expectKw('index');
+      return createIndex(db, p, true);
+      }
+      if (p.eatKw('index')) return createIndex(db, p, false);
+      p.expectKw('table');
+      if (p.eatKw('if')) (p.expectKw('not'), p.expectKw('exists'));
+      const name = p.name();
+      if (db.tables[name]) throw new SqlError(\`таблица «\${name}» уже есть\`);
+      p.expectOp('(');
+      const t = { name, columns: [], pk: [], rows: [], seq: 0 };
+      do {
+      if (p.eatKw('primary')) {
+      p.expectKw('key');
+      p.expectOp('(');
+      do t.pk.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      continue;
+      }
+      const col = { name: p.name(), type: 'text', notNull: false, unique: false, def: undefined, ref: null };
+      const ty = p.peek();
+      if (!ty || ty.t !== 'kw' || !['integer', 'int', 'serial', 'text', 'varchar', 'numeric', 'boolean', 'date', 'timestamp', 'real'].includes(ty.v)) p.fail('ожидался тип столбца: integer, text, numeric, boolean, date или timestamp');
+      p.i++;
+      col.type = ty.v === 'varchar' ? 'text' : ty.v;
+      if (p.eatOp('(')) {
+      while (!p.eatOp(')')) p.i++;
+      }
+      for (;;) {
+      if (p.eatKw('primary')) (p.expectKw('key'), t.pk.push(col.name));
+      else if (p.eatKw('not')) (p.expectKw('null'), (col.notNull = true));
+      else if (p.eatKw('unique')) col.unique = true;
+      else if (p.eatKw('default')) col.def = p.primary().v;
+      else if (p.eatKw('references')) {
+      const rt = p.name();
+      p.expectOp('(');
+      const rc = p.name();
+      p.expectOp(')');
+      if (!db.tables[rt]) throw new SqlError(\`таблица «\${rt}» ещё не создана: сначала создайте её, потом ссылайтесь\`);
+      col.ref = { table: rt, col: rc };
+      } else break;
+      }
+      t.columns.push(col);
+      } while (p.eatOp(','));
+      p.expectOp(')');
+      for (const k of t.pk) if (!t.columns.some((c) => c.name === k)) throw new SqlError(\`в PRIMARY KEY указан столбец «\${k}», которого нет\`);
+      db.tables[name] = t;
+      return { kind: 'msg', message: \`CREATE TABLE: таблица «\${name}» создана\${t.pk.length ? \`, ключ: \${t.pk.join(', ')}\` : ', но первичного ключа нет'}\` };
+      }
+      if (p.eatKw('insert')) {
+      p.expectKw('into');
+      const t = table(db, p.name());
+      let cols = t.columns.map((c) => c.name);
+      if (p.eatOp('(')) {
+      cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`в таблице «\${t.name}» нет столбца «\${c}». Есть: \${t.columns.map((x) => x.name).join(', ')}\`);
+      }
+      p.expectKw('values');
+      const made = [];
+      do {
+      p.expectOp('(');
+      const vals = [];
+      do vals.push(ev(p.expr(), [], null));
+      while (p.eatOp(','));
+      p.expectOp(')');
+      if (vals.length !== cols.length) throw new SqlError(\`столбцов \${cols.length}, а значений \${vals.length}: их должно быть поровну\`);
+      const row = {};
+      for (const c of t.columns) {
+      const at = cols.indexOf(c.name);
+      let v = at >= 0 ? vals[at] : c.def !== undefined ? c.def : null;
+      if (v === null && c.type === 'serial') v = ++t.seq;
+      row[c.name] = coerce(c, v);
+      if (c.type === 'serial' && row[c.name] > t.seq) t.seq = row[c.name];
+      }
+      checkRow(db, t, row);
+      t.rows.push(row);
+      made.push(row);
+      } while (p.eatOp(','));
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      return { kind: 'msg', message: \`INSERT: добавлено строк \${made.length}\`, changed: made.length };
+      }
+      if (p.eatKw('update')) {
+      const t = table(db, p.name());
+      p.expectKw('set');
+      const sets = [];
+      do {
+      const c = p.name();
+      if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`в таблице «\${t.name}» нет столбца «\${c}»\`);
+      p.expectOp('=');
+      sets.push([c, p.expr()]);
+      } while (p.eatOp(','));
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      const cols = t.columns.map((c) => c.name);
+      const hit = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      const next = hit.map((r) => {
+      const n = { ...r };
+      for (const [c, e] of sets) n[c] = coerce(t.columns.find((x) => x.name === c), ev(e, [{ alias: t.name, cols, row: r }], null));
+      return [r, n];
+      });
+      for (const [r, n] of next) {
+      checkRow(db, t, n, r);
+      Object.assign(r, n);
+      }
+      return { kind: 'msg', message: \`UPDATE: изменено строк \${hit.length}\${where ? '' : '. Условия WHERE не было, поэтому изменены ВСЕ строки таблицы'}\`, changed: hit.length };
+      }
+      if (p.eatKw('delete')) {
+      p.expectKw('from');
+      const t = table(db, p.name());
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      const cols = t.columns.map((c) => c.name);
+      const gone = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      for (const r of gone)
+      for (const o of Object.values(db.tables))
+      for (const c of o.columns)
+      if (c.ref && c.ref.table === t.name && o.rows.some((x) => x[c.name] !== null && x[c.name] === r[c.ref.col])) throw new SqlError(\`нельзя удалить: на эту строку ссылается таблица «\${o.name}» (столбец \${c.name}). Сначала уберите ссылки\`);
+      t.rows = t.rows.filter((r) => !gone.includes(r));
+      return { kind: 'msg', message: \`DELETE: удалено строк \${gone.length}\${where ? '' : '. Условия WHERE не было, поэтому удалены ВСЕ строки таблицы'}\`, changed: gone.length };
+      }
+      throw new SqlError('эта песочница знает команды SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK и EXPLAIN SELECT');
+      }
+      function createIndex(db, p, unique) {
+      let name = null;
+      if (!p.isKw('on')) name = p.name();
+      p.expectKw('on');
+      const tn = p.name();
+      const t = table(db, tn);
+      p.expectOp('(');
+      const cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`в таблице «\${tn}» нет столбца «\${c}»\`);
+      name = name || \`\${tn}_\${cols.join('_')}_idx\`;
+      if (db.indexes.some((i) => i.name === name)) throw new SqlError(\`индекс «\${name}» уже есть\`);
+      db.indexes.push({ name, table: tn, cols, unique });
+      return { kind: 'msg', message: \`CREATE INDEX: индекс «\${name}» по \${tn}(\${cols.join(', ')}) построен. Теперь каждая запись в «\${tn}» обновляет и его\` };
+      }
+      /**
+      * Runs a script: statements split by «;», executed in order, stopping at the first error.
+      * Returns { results, error }. After an error inside BEGIN the transaction is «aborted»
+      * and every command is refused until ROLLBACK, as in PostgreSQL.
+      */
+      function run(db, sql) {
+      const results = [];
+      for (const s of splitStatements(sql)) {
+      try {
+      if (db.aborted && !/^\\s*rollback\\b/i.test(s)) throw new SqlError('транзакция прервана после ошибки: все команды игнорируются, пока не будет ROLLBACK');
+      const r = execOne(db, s);
+      if (r) results.push({ ...r, sql: s });
+      } catch (e) {
+      if (!(e instanceof SqlError)) throw e;
+      if (db.txn) db.aborted = true;
+      return { results, error: { message: e.message, sql: s } };
+      }
+      }
+      return { results, error: null };
+      }
+      /** Puts ready rows into an existing table (for seeding a page from the person's brief). */
+      function load(db, name, rows) {
+      const t = table(db, name);
+      for (const r of rows) {
+      const row = {};
+      for (const c of t.columns) {
+      row[c.name] = r[c.name] === undefined ? null : r[c.name];
+      if (c.type === 'serial') (row[c.name] === null && (row[c.name] = ++t.seq), (t.seq = Math.max(t.seq, row[c.name])));
+      }
+      t.rows.push(row);
+      }
+      }
+      /** A value as the person reads it in a result table. */
+      function show(v) {
+      return v === null ? 'NULL' : v === true ? 'true' : v === false ? 'false' : String(v);
+      }
+
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+      function draw(box, r) {
+        box.replaceChildren();
+        for (const res of r.results) {
+          const p = document.createElement('p');
+          if (res.kind === 'select') {
+            const t = document.createElement('table');
+            const head = t.insertRow();
+            for (const c of res.columns) head.appendChild(Object.assign(document.createElement('th'), { textContent: c }));
+            for (const row of res.rows) {
+              const tr = t.insertRow();
+              for (const v of row) tr.insertCell().textContent = show(v);
+            }
+            box.appendChild(t);
+            p.textContent = 'Строк: ' + res.rows.length + '. Прочитано из таблиц: ' + res.scanned + '.';
+          } else if (res.kind === 'plan') {
+            p.textContent = 'План (упрощённая модель): ' + res.lines.join('; ');
+          } else p.textContent = res.message;
+          box.appendChild(p);
+        }
+        if (r.error) {
+          const e = document.createElement('p');
+          e.className = 'err';
+          e.textContent = 'Ошибка: ' + r.error.message;
+          box.appendChild(e);
+        }
+      }
+
+      function runAll() {
+        const db = createDb();
+        for (const area of document.querySelectorAll('#sql-work textarea.sql')) {
+          const box = document.getElementById(area.id + '-out');
+          const r = run(db, area.value);
+          if (box) draw(box, r);
+        }
+      }
+      for (const area of document.querySelectorAll('#sql-work textarea.sql')) area.addEventListener('input', runAll);
+      runAll();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="sql-work">
+      <h2>Мои запросы к таблице items<\/h2>
+      <p>Запросы пишите прямо здесь, внутри полей. Под каждым полем в предпросмотре появится результат (это учебная песочница, а не настоящий PostgreSQL). Запросы выполняются по порядку, сверху вниз.<\/p>
+
+      <h3>1. Таблица<\/h3>
+      <textarea class="sql" id="q-create" rows="7">CREATE TABLE items (
+  id serial PRIMARY KEY,
+  title text NOT NULL,
+  price integer,
+  category text
+);<\/textarea>
+      <div class="out" id="q-create-out"><\/div>
+
+      <h3>2. Данные: не меньше пяти строк, каждая в скобках на отдельной строке<\/h3>
+      <textarea class="sql" id="q-insert" rows="9">INSERT INTO items (title, price, category) VALUES
+{{#each items}}  ('{{title}}', 3000, 'основная'),
+{{/each}}  ('Дополнительная позиция 1', 1500, 'дополнительная'),
+  ('Дополнительная позиция 2', 800, 'дополнительная'),
+  ('Дополнительная позиция 3', 5000, 'основная'),
+  ('Дополнительная позиция 4', 2000, 'основная'),
+  ('Дополнительная позиция 5', 12000, 'дополнительная');<\/textarea>
+      <div class="out" id="q-insert-out"><\/div>
+
+      <h3>3. Отобрать, упорядочить, ограничить<\/h3>
+      <textarea class="sql" id="q-select" rows="4">SELECT title, price
+FROM items
+WHERE price > 1000
+ORDER BY price DESC
+LIMIT 3;<\/textarea>
+      <div class="out" id="q-select-out"><\/div>
+
+      <h3>4. Посчитать по категориям<\/h3>
+      <textarea class="sql" id="q-group" rows="4">SELECT category, COUNT(*) AS n
+FROM items
+GROUP BY category
+ORDER BY n DESC;<\/textarea>
+      <div class="out" id="q-group-out"><\/div>
+
+      <h3>5. Изменить одну запись<\/h3>
+      <textarea class="sql" id="q-update" rows="3">UPDATE items
+SET price = price + 500
+WHERE id = 2;<\/textarea>
+      <div class="out" id="q-update-out"><\/div>
+
+      <h3>6. Удалить одну запись<\/h3>
+      <textarea class="sql" id="q-delete" rows="3">DELETE FROM items
+WHERE id = 5;<\/textarea>
+      <div class="out" id="q-delete-out"><\/div>
+
+      <p>Какой из запросов был бы опасен без WHERE и почему: <span id="danger">DELETE и UPDATE: без WHERE они затронут все строки таблицы, и вернуть их будет нечем<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="sql-runner">
+      // Учебный SQL (не настоящий PostgreSQL): запросы из полей выше выполняются здесь, в памяти страницы.
+      // Читать этот блок не нужно. Он не входит в ваш сайт.
+      class SqlError extends Error {}
+      const KEYWORDS = new Set(
+      'select from where group by having order limit offset asc desc distinct as join inner left right outer on and or not null is in like between true false insert into values update set delete create table index unique primary key references default begin commit rollback explain integer int serial text varchar numeric boolean date timestamp real if exists'.split(
+      ' '
+      )
+      );
+      function tokenize(src) {
+      const out = [];
+      const re = /\\s+|--[^\\n]*|('(?:[^']|'')*')|("(?:[^"]*)")|(\\d+(?:\\.\\d+)?)|([A-Za-z_\\u0400-\\u04FF][A-Za-z0-9_\\u0400-\\u04FF]*)|(<=|>=|<>|!=|\\|\\||[(),.*+\\-\\/=<>;])/gy;
+      let pos = 0;
+      while (pos < src.length) {
+      re.lastIndex = pos;
+      const m = re.exec(src);
+      if (!m) throw new SqlError(\`синтаксическая ошибка: не понимаю символ «\${src[pos]}»\`);
+      pos = re.lastIndex;
+      if (m[1] !== undefined) out.push({ t: 'str', v: m[1].slice(1, -1).replace(/''/g, "'") });
+      else if (m[2] !== undefined) out.push({ t: 'id', v: m[2].slice(1, -1).toLowerCase(), quoted: true });
+      else if (m[3] !== undefined) out.push({ t: 'num', v: Number(m[3]) });
+      else if (m[4] !== undefined) {
+      const low = m[4].toLowerCase();
+      out.push(KEYWORDS.has(low) ? { t: 'kw', v: low, raw: m[4] } : { t: 'id', v: low });
+      } else if (m[5] !== undefined) out.push({ t: 'op', v: m[5] });
+      }
+      return out;
+      }
+      /** The text of a script, split into statements by «;» outside quotes. */
+      function splitStatements(sql) {
+      const parts = [];
+      let cur = '';
+      let q = false;
+      for (let i = 0; i < sql.length; i++) {
+      const c = sql[i];
+      if (c === "'") q = !q;
+      if (c === ';' && !q) {
+      parts.push(cur);
+      cur = '';
+      } else cur += c;
+      }
+      parts.push(cur);
+      return parts.map((s) => s.replace(/--[^\\n]*/g, '').trim()).filter(Boolean);
+      }
+      class Parser {
+      constructor(tokens) {
+      this.k = tokens;
+      this.i = 0;
+      }
+      peek(o = 0) {
+      return this.k[this.i + o];
+      }
+      isKw(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'kw' && t.v === v;
+      }
+      isOp(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'op' && t.v === v;
+      }
+      eatKw(v) {
+      if (this.isKw(v)) return this.i++, true;
+      return false;
+      }
+      eatOp(v) {
+      if (this.isOp(v)) return this.i++, true;
+      return false;
+      }
+      expectKw(v) {
+      if (!this.eatKw(v)) this.fail(\`ожидалось слово \${v.toUpperCase()}\`);
+      }
+      expectOp(v) {
+      if (!this.eatOp(v)) this.fail(\`ожидался символ «\${v}»\`);
+      }
+      fail(msg) {
+      const t = this.peek();
+      const near = t ? \` около «\${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}»\` : ' в конце запроса';
+      throw new SqlError(\`синтаксическая ошибка\${near}: \${msg}\`);
+      }
+      name() {
+      const t = this.peek();
+      if (t && (t.t === 'id' || (t.t === 'kw' && ['key', 'text', 'date', 'index'].includes(t.v)))) return this.i++, t.v;
+      this.fail('ожидалось имя');
+      }
+      done() {
+      return this.i >= this.k.length;
+      }
+      /* expressions */
+      expr() {
+      return this.or();
+      }
+      or() {
+      let l = this.and();
+      while (this.eatKw('or')) l = { op: 'or', l, r: this.and() };
+      return l;
+      }
+      and() {
+      let l = this.not();
+      while (this.eatKw('and')) l = { op: 'and', l, r: this.not() };
+      return l;
+      }
+      not() {
+      if (this.eatKw('not')) return { op: 'not', e: this.not() };
+      return this.cmp();
+      }
+      cmp() {
+      const l = this.add();
+      const t = this.peek();
+      if (t && t.t === 'op' && ['=', '<>', '!=', '<', '>', '<=', '>='].includes(t.v)) {
+      this.i++;
+      return { op: t.v === '!=' ? '<>' : t.v, l, r: this.add() };
+      }
+      if (this.isKw('is')) {
+      this.i++;
+      const neg = this.eatKw('not');
+      this.expectKw('null');
+      return { op: 'isnull', e: l, neg };
+      }
+      const neg = this.isKw('not') && (this.isKw('like', 1) || this.isKw('in', 1) || this.isKw('between', 1));
+      if (neg) this.i++;
+      if (this.eatKw('like')) return { op: 'like', l, r: this.add(), neg };
+      if (this.eatKw('in')) {
+      this.expectOp('(');
+      const list = [this.expr()];
+      while (this.eatOp(',')) list.push(this.expr());
+      this.expectOp(')');
+      return { op: 'in', l, list, neg };
+      }
+      if (this.eatKw('between')) {
+      const lo = this.add();
+      this.expectKw('and');
+      const hi = this.add();
+      return { op: 'between', e: l, lo, hi, neg };
+      }
+      return l;
+      }
+      add() {
+      let l = this.mul();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['+', '-', '||'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.mul() };
+      } else return l;
+      }
+      }
+      mul() {
+      let l = this.unary();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['*', '/'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.unary() };
+      } else return l;
+      }
+      }
+      unary() {
+      if (this.eatOp('-')) return { op: 'neg', e: this.unary() };
+      return this.primary();
+      }
+      primary() {
+      const t = this.peek();
+      if (!t) this.fail('ожидалось значение');
+      if (t.t === 'num') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'str') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'kw' && t.v === 'null') return this.i++, { op: 'lit', v: null };
+      if (t.t === 'kw' && t.v === 'true') return this.i++, { op: 'lit', v: true };
+      if (t.t === 'kw' && t.v === 'false') return this.i++, { op: 'lit', v: false };
+      if (this.eatOp('(')) {
+      const e = this.expr();
+      this.expectOp(')');
+      return e;
+      }
+      if (t.t === 'id' && this.isOp('(', 1)) {
+      this.i += 2;
+      const fn = t.v;
+      if (!['count', 'sum', 'avg', 'min', 'max', 'lower', 'upper', 'length', 'coalesce'].includes(fn)) throw new SqlError(\`функция \${fn}() здесь не поддерживается\`);
+      if (fn === 'count' && this.eatOp('*')) {
+      this.expectOp(')');
+      return { op: 'agg', fn, star: true };
+      }
+      const args = [this.expr()];
+      while (this.eatOp(',')) args.push(this.expr());
+      this.expectOp(')');
+      return ['count', 'sum', 'avg', 'min', 'max'].includes(fn) ? { op: 'agg', fn, e: args[0] } : { op: 'fn', fn, args };
+      }
+      if (t.t === 'id' || (t.t === 'kw' && ['text', 'date', 'key', 'index'].includes(t.v))) {
+      this.i++;
+      if (this.isOp('.') && this.peek(1) && (this.peek(1).t === 'id' || this.peek(1).t === 'kw')) {
+      this.i++;
+      const c = this.peek();
+      this.i++;
+      return { op: 'col', table: t.v, name: c.v };
+      }
+      return { op: 'col', name: t.v };
+      }
+      this.fail('ожидалось значение или имя столбца');
+      }
+      }
+      const text = (e) => {
+      switch (e.op) {
+      case 'col':
+      return e.table ? \`\${e.table}.\${e.name}\` : e.name;
+      case 'lit':
+      return e.v === null ? 'NULL' : typeof e.v === 'string' ? \`'\${e.v}'\` : String(e.v);
+      case 'agg':
+      return \`\${e.fn}(\${e.star ? '*' : text(e.e)})\`;
+      case 'fn':
+      return \`\${e.fn}(\${e.args.map(text).join(', ')})\`;
+      default:
+      return e.op;
+      }
+      };
+      const hasAgg = (e) => !!e && (e.op === 'agg' || [e.l, e.r, e.e, e.lo, e.hi].some(hasAgg) || (e.args || e.list || []).some(hasAgg));
+      function createDb() {
+      return { tables: {}, indexes: [], txn: null, aborted: false };
+      }
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      const isNum = (v) => typeof v === 'number';
+      function table(db, name) {
+      const t = db.tables[name];
+      if (!t) throw new SqlError(\`таблицы «\${name}» нет. Есть: \${Object.keys(db.tables).join(', ') || 'ни одной'}\`);
+      return t;
+      }
+      function coerce(col, v) {
+      if (v === null || v === undefined) return null;
+      const ty = col.type;
+      if (['integer', 'int', 'serial'].includes(ty)) {
+      if (isNum(v) && Number.isInteger(v)) return v;
+      if (typeof v === 'string' && /^-?\\d+$/.test(v.trim())) return Number(v);
+      throw new SqlError(\`значение \${typeof v === 'string' ? \`«\${v}»\` : v} не подходит к типу integer (столбец \${col.name})\`);
+      }
+      if (['numeric', 'real'].includes(ty)) {
+      if (isNum(v)) return v;
+      if (typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v))) return Number(v);
+      throw new SqlError(\`значение «\${v}» не подходит к типу \${ty} (столбец \${col.name})\`);
+      }
+      if (ty === 'boolean') {
+      if (typeof v === 'boolean') return v;
+      throw new SqlError(\`значение «\${v}» не подходит к типу boolean (столбец \${col.name})\`);
+      }
+      return typeof v === 'string' ? v : String(v);
+      }
+      /* ---------- evaluation ---------- */
+      function resolve(ctx, e) {
+      const found = [];
+      for (const c of ctx) {
+      if (e.table && c.alias !== e.table) continue;
+      if (c.cols.includes(e.name)) found.push(c);
+      }
+      if (!found.length) {
+      const all = ctx.flatMap((c) => c.cols.map((n) => \`\${c.alias}.\${n}\`));
+      throw new SqlError(\`столбца «\${e.table ? e.table + '.' : ''}\${e.name}» нет. Доступны: \${all.join(', ')}\`);
+      }
+      if (found.length > 1) throw new SqlError(\`столбец «\${e.name}» неоднозначен: он есть в таблицах \${found.map((f) => f.alias).join(' и ')}. Напишите \${found[0].alias}.\${e.name}\`);
+      return found[0].row ? found[0].row[e.name] : null;
+      }
+      function cmpVals(a, b) {
+      if (a === null || b === null) return null;
+      if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
+      if (typeof a !== typeof b) throw new SqlError(\`нельзя сравнить \${typeof a === 'number' ? 'число' : 'текст'} и \${typeof b === 'number' ? 'число' : 'текст'}\`);
+      return a < b ? -1 : a > b ? 1 : 0;
+      }
+      function like(s, p) {
+      const re = new RegExp('^' + p.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', 'is');
+      return re.test(s);
+      }
+      function ev(e, ctx, grp) {
+      switch (e.op) {
+      case 'lit':
+      return e.v;
+      case 'col':
+      return resolve(ctx, e);
+      case 'neg': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : -v;
+      }
+      case 'not': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : !v;
+      }
+      case 'and': {
+      const l = ev(e.l, ctx, grp);
+      if (l === false) return false;
+      const r = ev(e.r, ctx, grp);
+      if (r === false) return false;
+      return l === null || r === null ? null : true;
+      }
+      case 'or': {
+      const l = ev(e.l, ctx, grp);
+      if (l === true) return true;
+      const r = ev(e.r, ctx, grp);
+      if (r === true) return true;
+      return l === null || r === null ? null : false;
+      }
+      case '=':
+      case '<>':
+      case '<':
+      case '>':
+      case '<=':
+      case '>=': {
+      const c = cmpVals(ev(e.l, ctx, grp), ev(e.r, ctx, grp));
+      if (c === null) return null;
+      return { '=': c === 0, '<>': c !== 0, '<': c < 0, '>': c > 0, '<=': c <= 0, '>=': c >= 0 }[e.op];
+      }
+      case 'isnull': {
+      const v = ev(e.e, ctx, grp);
+      return e.neg ? v !== null : v === null;
+      }
+      case 'like': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      const m = like(String(l), String(r));
+      return e.neg ? !m : m;
+      }
+      case 'in': {
+      const l = ev(e.l, ctx, grp);
+      if (l === null) return null;
+      const m = e.list.some((x) => cmpVals(l, ev(x, ctx, grp)) === 0);
+      return e.neg ? !m : m;
+      }
+      case 'between': {
+      const v = ev(e.e, ctx, grp);
+      const lo = cmpVals(v, ev(e.lo, ctx, grp)),
+      hi = cmpVals(v, ev(e.hi, ctx, grp));
+      if (lo === null || hi === null) return null;
+      const m = lo >= 0 && hi <= 0;
+      return e.neg ? !m : m;
+      }
+      case '+':
+      case '-':
+      case '*':
+      case '/': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      if (!isNum(l) || !isNum(r)) throw new SqlError(\`арифметика (\${e.op}) работает с числами, а здесь текст\`);
+      if (e.op === '/' && r === 0) throw new SqlError('деление на ноль');
+      return e.op === '+' ? l + r : e.op === '-' ? l - r : e.op === '*' ? l * r : l / r;
+      }
+      case '||': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      return l === null || r === null ? null : String(l) + String(r);
+      }
+      case 'fn': {
+      const a = e.args.map((x) => ev(x, ctx, grp));
+      if (e.fn === 'coalesce') return a.find((x) => x !== null) ?? null;
+      if (a[0] === null) return null;
+      if (e.fn === 'lower') return String(a[0]).toLowerCase();
+      if (e.fn === 'upper') return String(a[0]).toUpperCase();
+      return String(a[0]).length;
+      }
+      case 'agg': {
+      if (!grp) throw new SqlError(\`\${e.fn.toUpperCase()}() можно писать только в SELECT или HAVING, но не в WHERE\`);
+      if (e.star) return grp.length;
+      const vals = grp.map((g) => ev(e.e, g, null)).filter((v) => v !== null);
+      if (e.fn === 'count') return vals.length;
+      if (!vals.length) return null;
+      if (e.fn === 'min') return vals.reduce((a, b) => (cmpVals(a, b) <= 0 ? a : b));
+      if (e.fn === 'max') return vals.reduce((a, b) => (cmpVals(a, b) >= 0 ? a : b));
+      if (!vals.every(isNum)) throw new SqlError(\`\${e.fn.toUpperCase()}() считает только числа\`);
+      const s = vals.reduce((a, b) => a + b, 0);
+      return e.fn === 'sum' ? s : s / vals.length;
+      }
+      }
+      throw new SqlError('не понимаю выражение');
+      }
+      /* ---------- statements ---------- */
+      function parseSelect(p) {
+      const q = { distinct: false, items: [], from: null, joins: [], where: null, group: [], having: null, order: [], limit: null, offset: 0 };
+      p.expectKw('select');
+      q.distinct = p.eatKw('distinct');
+      do {
+      if (p.eatOp('*')) q.items.push({ star: true });
+      else if (p.peek() && p.peek().t === 'id' && p.isOp('.', 1) && p.isOp('*', 2)) {
+      const tb = p.peek().v;
+      p.i += 3;
+      q.items.push({ star: true, table: tb });
+      } else {
+      const e = p.expr();
+      let alias = null;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      q.items.push({ e, alias });
+      }
+      } while (p.eatOp(','));
+      if (p.eatKw('from')) {
+      const tableRef = () => {
+      const name = p.name();
+      let alias = name;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      return { name, alias };
+      };
+      q.from = tableRef();
+      for (;;) {
+      let kind = null;
+      if (p.eatKw('left')) {
+      p.eatKw('outer');
+      p.expectKw('join');
+      kind = 'left';
+      } else if (p.eatKw('inner')) {
+      p.expectKw('join');
+      kind = 'inner';
+      } else if (p.eatKw('join')) kind = 'inner';
+      else if (p.isKw('right')) throw new SqlError('RIGHT JOIN в учебной песочнице не поддерживается: поменяйте таблицы местами и напишите LEFT JOIN');
+      else break;
+      const ref = tableRef();
+      p.expectKw('on');
+      q.joins.push({ kind, ...ref, on: p.expr() });
+      }
+      }
+      if (p.eatKw('where')) q.where = p.expr();
+      if (p.eatKw('group')) {
+      p.expectKw('by');
+      do q.group.push(p.expr());
+      while (p.eatOp(','));
+      }
+      if (p.eatKw('having')) q.having = p.expr();
+      if (p.eatKw('order')) {
+      p.expectKw('by');
+      do {
+      const e = p.expr();
+      const desc = p.eatKw('desc');
+      if (!desc) p.eatKw('asc');
+      q.order.push({ e, desc });
+      } while (p.eatOp(','));
+      }
+      if (p.eatKw('limit')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('после LIMIT нужно число');
+      p.i++;
+      q.limit = t.v;
+      }
+      if (p.eatKw('offset')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('после OFFSET нужно число');
+      p.i++;
+      q.offset = t.v;
+      }
+      return q;
+      }
+      /** An index can serve \`col = literal\` among the AND-ed conditions of WHERE. */
+      function indexFor(db, q, tname, alias) {
+      if (!q.where) return null;
+      const conj = [];
+      (function walk(e) {
+      if (e.op === 'and') (walk(e.l), walk(e.r));
+      else conj.push(e);
+      })(q.where);
+      for (const c of conj) {
+      if (c.op !== '=') continue;
+      const [a, b] = c.l.op === 'col' ? [c.l, c.r] : [c.r, c.l];
+      if (a.op !== 'col' || b.op !== 'lit' || (a.table && a.table !== alias)) continue;
+      const ix = db.indexes.find((i) => i.table === tname && i.cols[0] === a.name);
+      if (ix) return { ix, col: a.name, value: b.v };
+      const t = db.tables[tname];
+      if (t.pk.length === 1 && t.pk[0] === a.name) return { ix: { name: \`\${tname}_pkey\`, table: tname, cols: [a.name] }, col: a.name, value: b.v };
+      }
+      return null;
+      }
+      function execSelect(db, q, explain) {
+      let scanned = 0;
+      const plan = [];
+      const trace = { from: 0, where: 0, groups: null, result: 0, limit: 0 };
+      let ctxRows = [];
+      if (!q.from) {
+      ctxRows = [[]];
+      } else {
+      const t0 = table(db, q.from.name);
+      const hit = indexFor(db, q, q.from.name, q.from.alias);
+      let base = t0.rows;
+      if (hit) {
+      base = t0.rows.filter((r) => r[hit.col] === hit.value);
+      scanned += base.length;
+      plan.push(\`Index Scan по индексу \${hit.ix.name} на «\${q.from.name}»: прочитано строк \${base.length}\`);
+      } else {
+      scanned += t0.rows.length;
+      plan.push(\`Seq Scan на «\${q.from.name}»: просмотрена вся таблица, строк \${t0.rows.length}\`);
+      }
+      ctxRows = base.map((r) => [{ alias: q.from.alias, cols: t0.columns.map((c) => c.name), row: r }]);
+      for (const j of q.joins) {
+      const tj = table(db, j.name);
+      const cols = tj.columns.map((c) => c.name);
+      const next = [];
+      scanned += tj.rows.length;
+      plan.push(\`\${j.kind === 'left' ? 'Left ' : ''}Join с «\${j.name}»: просмотрено строк \${tj.rows.length}\`);
+      for (const left of ctxRows) {
+      let matched = false;
+      for (const r of tj.rows) {
+      const ctx = [...left, { alias: j.alias, cols, row: r }];
+      if (ev(j.on, ctx, null) === true) {
+      next.push(ctx);
+      matched = true;
+      }
+      }
+      if (!matched && j.kind === 'left') next.push([...left, { alias: j.alias, cols, row: null }]);
+      }
+      ctxRows = next;
+      }
+      }
+      trace.from = ctxRows.length;
+      if (q.where) {
+      if (hasAgg(q.where)) throw new SqlError('в WHERE нельзя писать COUNT, SUM и подобные: они считаются после отбора. Для условий по ним есть HAVING');
+      ctxRows = ctxRows.filter((c) => ev(q.where, c, null) === true);
+      }
+      trace.where = ctxRows.length;
+      const aggregated = q.group.length > 0 || q.items.some((i) => i.e && hasAgg(i.e)) || (q.having && hasAgg(q.having));
+      const columns = [];
+      const exprs = [];
+      for (const it of q.items) {
+      if (it.star) {
+      const sample = q.from ? [{ alias: q.from.alias, cols: table(db, q.from.name).columns.map((c) => c.name) }, ...q.joins.map((j) => ({ alias: j.alias, cols: table(db, j.name).columns.map((c) => c.name) }))] : [];
+      for (const s of sample) {
+      if (it.table && s.alias !== it.table) continue;
+      for (const n of s.cols) {
+      columns.push(n);
+      exprs.push({ op: 'col', table: s.alias, name: n });
+      }
+      }
+      } else {
+      columns.push(it.alias || (it.e.op === 'col' ? it.e.name : it.e.op === 'agg' || it.e.op === 'fn' ? it.e.fn : text(it.e)));
+      exprs.push(it.e);
+      }
+      }
+      let rows; // each: { out: [...], ctx, grp }
+      if (aggregated) {
+      const groups = new Map();
+      for (const c of ctxRows) {
+      const key = JSON.stringify(q.group.map((g) => ev(g, c, null)));
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(c);
+      }
+      if (!q.group.length && !groups.size) groups.set('', []);
+      const groupText = q.group.map((g) => (g.op === 'col' ? g.name : text(g)));
+      for (const [i, e] of exprs.entries()) {
+      const bare = (x) => !x || x.op === 'agg' || x.op === 'lit' || groupText.includes(x.op === 'col' ? x.name : text(x)) || ([x.l, x.r, x.e].some((s) => s) && [x.l, x.r, x.e].filter(Boolean).every(bare));
+      if (!bare(e)) throw new SqlError(\`столбец «\${columns[i]}» нужно либо добавить в GROUP BY, либо обернуть в COUNT, SUM, MIN, MAX или AVG: иначе непонятно, какую из строк группы показать\`);
+      }
+      rows = [...groups.values()].map((g) => ({ grp: g, ctx: g[0] || [] }));
+      trace.groups = rows.length;
+      if (q.having) rows = rows.filter((r) => ev(q.having, r.ctx, r.grp) === true);
+      rows.forEach((r) => (r.out = exprs.map((e) => ev(e, r.ctx, r.grp))));
+      } else {
+      rows = ctxRows.map((c) => ({ ctx: c, grp: null, out: exprs.map((e) => ev(e, c, null)) }));
+      }
+      if (q.distinct) {
+      const seen = new Set();
+      rows = rows.filter((r) => {
+      const k = JSON.stringify(r.out);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+      });
+      }
+      if (q.order.length) {
+      const keyOf = (r, o) => {
+      if (o.e.op === 'lit' && isNum(o.e.v)) return r.out[o.e.v - 1];
+      if (o.e.op === 'col' && !o.e.table && columns.includes(o.e.name)) return r.out[columns.indexOf(o.e.name)];
+      return ev(o.e, r.ctx, r.grp);
+      };
+      rows.sort((a, b) => {
+      for (const o of q.order) {
+      const x = keyOf(a, o),
+      y = keyOf(b, o);
+      if (x === y) continue;
+      if (x === null) return o.desc ? -1 : 1;
+      if (y === null) return o.desc ? 1 : -1;
+      const c = cmpVals(x, y);
+      if (c !== 0) return o.desc ? -c : c;
+      }
+      return 0;
+      });
+      }
+      trace.result = rows.length;
+      const total = rows.length;
+      if (q.offset) rows = rows.slice(q.offset);
+      if (q.limit !== null) rows = rows.slice(0, q.limit);
+      trace.limit = rows.length;
+      return { kind: 'select', columns, rows: rows.map((r) => r.out), scanned, plan, total, trace };
+      }
+      function checkRow(db, t, row, skipPk) {
+      for (const c of t.columns) {
+      if (row[c.name] === null && (c.notNull || t.pk.includes(c.name))) throw new SqlError(\`в столбец «\${c.name}» таблицы «\${t.name}» нельзя записать NULL (нарушено ограничение NOT NULL)\`);
+      if (c.ref && row[c.name] !== null) {
+      const rt = db.tables[c.ref.table];
+      if (!rt) throw new SqlError(\`таблицы «\${c.ref.table}» нет\`);
+      if (!rt.rows.some((r) => r[c.ref.col] === row[c.name])) throw new SqlError(\`нарушен внешний ключ: в таблице «\${c.ref.table}» нет строки, где \${c.ref.col} = \${row[c.name]}\`);
+      }
+      }
+      const uniq = [t.pk.length ? t.pk : null, ...t.columns.filter((c) => c.unique).map((c) => [c.name])].filter(Boolean);
+      for (const cols of uniq) {
+      const dup = t.rows.some((r) => r !== skipPk && cols.every((c) => r[c] === row[c]));
+      if (dup) throw new SqlError(\`нарушено ограничение уникальности: строка с \${cols.map((c) => \`\${c} = \${row[c]}\`).join(', ')} в таблице «\${t.name}» уже есть\`);
+      }
+      }
+      function execOne(db, sql) {
+      const p = new Parser(tokenize(sql));
+      const first = p.peek();
+      if (!first) return null;
+      let explain = false;
+      if (p.eatKw('explain')) explain = true;
+      if (p.isKw('select')) {
+      const q = parseSelect(p);
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      const r = execSelect(db, q, explain);
+      if (explain) return { kind: 'plan', lines: r.plan, scanned: r.scanned };
+      return r;
+      }
+      if (explain) throw new SqlError('EXPLAIN в песочнице работает только с SELECT');
+      if (p.eatKw('begin')) {
+      if (db.txn) throw new SqlError('транзакция уже начата');
+      db.txn = clone({ tables: db.tables, indexes: db.indexes });
+      return { kind: 'msg', message: 'BEGIN: транзакция началась. До COMMIT изменения можно отменить командой ROLLBACK' };
+      }
+      if (p.eatKw('commit')) {
+      if (!db.txn) return { kind: 'msg', message: 'COMMIT: транзакции не было, ничего не произошло' };
+      db.txn = null;
+      return { kind: 'msg', message: 'COMMIT: изменения записаны насовсем' };
+      }
+      if (p.eatKw('rollback')) {
+      if (!db.txn) return { kind: 'msg', message: 'ROLLBACK: транзакции не было, ничего не произошло' };
+      db.tables = db.txn.tables;
+      db.indexes = db.txn.indexes;
+      db.txn = null;
+      db.aborted = false;
+      return { kind: 'msg', message: 'ROLLBACK: все изменения с BEGIN отменены' };
+      }
+      if (p.eatKw('create')) {
+      if (p.eatKw('unique')) {
+      p.expectKw('index');
+      return createIndex(db, p, true);
+      }
+      if (p.eatKw('index')) return createIndex(db, p, false);
+      p.expectKw('table');
+      if (p.eatKw('if')) (p.expectKw('not'), p.expectKw('exists'));
+      const name = p.name();
+      if (db.tables[name]) throw new SqlError(\`таблица «\${name}» уже есть\`);
+      p.expectOp('(');
+      const t = { name, columns: [], pk: [], rows: [], seq: 0 };
+      do {
+      if (p.eatKw('primary')) {
+      p.expectKw('key');
+      p.expectOp('(');
+      do t.pk.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      continue;
+      }
+      const col = { name: p.name(), type: 'text', notNull: false, unique: false, def: undefined, ref: null };
+      const ty = p.peek();
+      if (!ty || ty.t !== 'kw' || !['integer', 'int', 'serial', 'text', 'varchar', 'numeric', 'boolean', 'date', 'timestamp', 'real'].includes(ty.v)) p.fail('ожидался тип столбца: integer, text, numeric, boolean, date или timestamp');
+      p.i++;
+      col.type = ty.v === 'varchar' ? 'text' : ty.v;
+      if (p.eatOp('(')) {
+      while (!p.eatOp(')')) p.i++;
+      }
+      for (;;) {
+      if (p.eatKw('primary')) (p.expectKw('key'), t.pk.push(col.name));
+      else if (p.eatKw('not')) (p.expectKw('null'), (col.notNull = true));
+      else if (p.eatKw('unique')) col.unique = true;
+      else if (p.eatKw('default')) col.def = p.primary().v;
+      else if (p.eatKw('references')) {
+      const rt = p.name();
+      p.expectOp('(');
+      const rc = p.name();
+      p.expectOp(')');
+      if (!db.tables[rt]) throw new SqlError(\`таблица «\${rt}» ещё не создана: сначала создайте её, потом ссылайтесь\`);
+      col.ref = { table: rt, col: rc };
+      } else break;
+      }
+      t.columns.push(col);
+      } while (p.eatOp(','));
+      p.expectOp(')');
+      for (const k of t.pk) if (!t.columns.some((c) => c.name === k)) throw new SqlError(\`в PRIMARY KEY указан столбец «\${k}», которого нет\`);
+      db.tables[name] = t;
+      return { kind: 'msg', message: \`CREATE TABLE: таблица «\${name}» создана\${t.pk.length ? \`, ключ: \${t.pk.join(', ')}\` : ', но первичного ключа нет'}\` };
+      }
+      if (p.eatKw('insert')) {
+      p.expectKw('into');
+      const t = table(db, p.name());
+      let cols = t.columns.map((c) => c.name);
+      if (p.eatOp('(')) {
+      cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`в таблице «\${t.name}» нет столбца «\${c}». Есть: \${t.columns.map((x) => x.name).join(', ')}\`);
+      }
+      p.expectKw('values');
+      const made = [];
+      do {
+      p.expectOp('(');
+      const vals = [];
+      do vals.push(ev(p.expr(), [], null));
+      while (p.eatOp(','));
+      p.expectOp(')');
+      if (vals.length !== cols.length) throw new SqlError(\`столбцов \${cols.length}, а значений \${vals.length}: их должно быть поровну\`);
+      const row = {};
+      for (const c of t.columns) {
+      const at = cols.indexOf(c.name);
+      let v = at >= 0 ? vals[at] : c.def !== undefined ? c.def : null;
+      if (v === null && c.type === 'serial') v = ++t.seq;
+      row[c.name] = coerce(c, v);
+      if (c.type === 'serial' && row[c.name] > t.seq) t.seq = row[c.name];
+      }
+      checkRow(db, t, row);
+      t.rows.push(row);
+      made.push(row);
+      } while (p.eatOp(','));
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      return { kind: 'msg', message: \`INSERT: добавлено строк \${made.length}\`, changed: made.length };
+      }
+      if (p.eatKw('update')) {
+      const t = table(db, p.name());
+      p.expectKw('set');
+      const sets = [];
+      do {
+      const c = p.name();
+      if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`в таблице «\${t.name}» нет столбца «\${c}»\`);
+      p.expectOp('=');
+      sets.push([c, p.expr()]);
+      } while (p.eatOp(','));
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      const cols = t.columns.map((c) => c.name);
+      const hit = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      const next = hit.map((r) => {
+      const n = { ...r };
+      for (const [c, e] of sets) n[c] = coerce(t.columns.find((x) => x.name === c), ev(e, [{ alias: t.name, cols, row: r }], null));
+      return [r, n];
+      });
+      for (const [r, n] of next) {
+      checkRow(db, t, n, r);
+      Object.assign(r, n);
+      }
+      return { kind: 'msg', message: \`UPDATE: изменено строк \${hit.length}\${where ? '' : '. Условия WHERE не было, поэтому изменены ВСЕ строки таблицы'}\`, changed: hit.length };
+      }
+      if (p.eatKw('delete')) {
+      p.expectKw('from');
+      const t = table(db, p.name());
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('лишнее после конца запроса');
+      const cols = t.columns.map((c) => c.name);
+      const gone = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      for (const r of gone)
+      for (const o of Object.values(db.tables))
+      for (const c of o.columns)
+      if (c.ref && c.ref.table === t.name && o.rows.some((x) => x[c.name] !== null && x[c.name] === r[c.ref.col])) throw new SqlError(\`нельзя удалить: на эту строку ссылается таблица «\${o.name}» (столбец \${c.name}). Сначала уберите ссылки\`);
+      t.rows = t.rows.filter((r) => !gone.includes(r));
+      return { kind: 'msg', message: \`DELETE: удалено строк \${gone.length}\${where ? '' : '. Условия WHERE не было, поэтому удалены ВСЕ строки таблицы'}\`, changed: gone.length };
+      }
+      throw new SqlError('эта песочница знает команды SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK и EXPLAIN SELECT');
+      }
+      function createIndex(db, p, unique) {
+      let name = null;
+      if (!p.isKw('on')) name = p.name();
+      p.expectKw('on');
+      const tn = p.name();
+      const t = table(db, tn);
+      p.expectOp('(');
+      const cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`в таблице «\${tn}» нет столбца «\${c}»\`);
+      name = name || \`\${tn}_\${cols.join('_')}_idx\`;
+      if (db.indexes.some((i) => i.name === name)) throw new SqlError(\`индекс «\${name}» уже есть\`);
+      db.indexes.push({ name, table: tn, cols, unique });
+      return { kind: 'msg', message: \`CREATE INDEX: индекс «\${name}» по \${tn}(\${cols.join(', ')}) построен. Теперь каждая запись в «\${tn}» обновляет и его\` };
+      }
+      /**
+      * Runs a script: statements split by «;», executed in order, stopping at the first error.
+      * Returns { results, error }. After an error inside BEGIN the transaction is «aborted»
+      * and every command is refused until ROLLBACK, as in PostgreSQL.
+      */
+      function run(db, sql) {
+      const results = [];
+      for (const s of splitStatements(sql)) {
+      try {
+      if (db.aborted && !/^\\s*rollback\\b/i.test(s)) throw new SqlError('транзакция прервана после ошибки: все команды игнорируются, пока не будет ROLLBACK');
+      const r = execOne(db, s);
+      if (r) results.push({ ...r, sql: s });
+      } catch (e) {
+      if (!(e instanceof SqlError)) throw e;
+      if (db.txn) db.aborted = true;
+      return { results, error: { message: e.message, sql: s } };
+      }
+      }
+      return { results, error: null };
+      }
+      /** Puts ready rows into an existing table (for seeding a page from the person's brief). */
+      function load(db, name, rows) {
+      const t = table(db, name);
+      for (const r of rows) {
+      const row = {};
+      for (const c of t.columns) {
+      row[c.name] = r[c.name] === undefined ? null : r[c.name];
+      if (c.type === 'serial') (row[c.name] === null && (row[c.name] = ++t.seq), (t.seq = Math.max(t.seq, row[c.name])));
+      }
+      t.rows.push(row);
+      }
+      }
+      /** A value as the person reads it in a result table. */
+      function show(v) {
+      return v === null ? 'NULL' : v === true ? 'true' : v === false ? 'false' : String(v);
+      }
+
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+      function draw(box, r) {
+        box.replaceChildren();
+        for (const res of r.results) {
+          const p = document.createElement('p');
+          if (res.kind === 'select') {
+            const t = document.createElement('table');
+            const head = t.insertRow();
+            for (const c of res.columns) head.appendChild(Object.assign(document.createElement('th'), { textContent: c }));
+            for (const row of res.rows) {
+              const tr = t.insertRow();
+              for (const v of row) tr.insertCell().textContent = show(v);
+            }
+            box.appendChild(t);
+            p.textContent = 'Строк: ' + res.rows.length + '. Прочитано из таблиц: ' + res.scanned + '.';
+          } else if (res.kind === 'plan') {
+            p.textContent = 'План (упрощённая модель): ' + res.lines.join('; ');
+          } else p.textContent = res.message;
+          box.appendChild(p);
+        }
+        if (r.error) {
+          const e = document.createElement('p');
+          e.className = 'err';
+          e.textContent = 'Ошибка: ' + r.error.message;
+          box.appendChild(e);
+        }
+      }
+
+      function runAll() {
+        const db = createDb();
+        for (const area of document.querySelectorAll('#sql-work textarea.sql')) {
+          const box = document.getElementById(area.id + '-out');
+          const r = run(db, area.value);
+          if (box) draw(box, r);
+        }
+      }
+      for (const area of document.querySelectorAll('#sql-work textarea.sql')) area.addEventListener('input', runAll);
+      runAll();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{
+					id: 'work-exists',
+					kind: 'exists',
+					selector: '#sql-work'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#sql-work',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'create-table',
+					kind: 'text',
+					selector: '#q-create',
+					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+[Ii][Tt][Ee][Mm][Ss]'
+				},
+				{
+					id: 'primary-key',
+					kind: 'text',
+					selector: '#q-create',
+					matches: '[Pp][Rr][Ii][Mm][Aa][Rr][Yy]\\s+[Kk][Ee][Yy]'
+				},
+				{
+					id: 'column-types',
+					kind: 'text',
+					selector: '#q-create',
+					matches: '(?:[Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Ii][Nn][Tt]|[Ss][Ee][Rr][Ii][Aa][Ll])[\\s\\S]*(?:[Tt][Ee][Xx][Tt]|[Vv][Aa][Rr][Cc][Hh][Aa][Rr])[\\s\\S]*(?:[Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Nn][Uu][Mm][Ee][Rr][Ii][Cc]|[Ii][Nn][Tt])'
+				},
+				{
+					id: 'five-rows',
+					kind: 'text',
+					selector: '#q-insert',
+					matches: '[Vv][Aa][Ll][Uu][Ee][Ss](?:\\n[ \\t]*\\([^\\n]*){5}'
+				},
+				{
+					id: 'rows-from-brief',
+					kind: 'field',
+					selector: '#q-insert',
+					field: 'items[].title',
+					min: 1,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'select-where',
+					kind: 'text',
+					selector: '#q-select',
+					matches: '[Ss][Ee][Ll][Ee][Cc][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee]'
+				},
+				{
+					id: 'select-order',
+					kind: 'text',
+					selector: '#q-select',
+					matches: '[Oo][Rr][Dd][Ee][Rr]\\s+[Bb][Yy]'
+				},
+				{
+					id: 'select-limit',
+					kind: 'text',
+					selector: '#q-select',
+					matches: '[Ll][Ii][Mm][Ii][Tt]\\s+\\d+'
+				},
+				{
+					id: 'group-by',
+					kind: 'text',
+					selector: '#q-group',
+					matches: '[Gg][Rr][Oo][Uu][Pp]\\s+[Bb][Yy]'
+				},
+				{
+					id: 'group-count',
+					kind: 'text',
+					selector: '#q-group',
+					matches: '[Cc][Oo][Uu][Nn][Tt]\\('
+				},
+				{
+					id: 'update-where',
+					kind: 'text',
+					selector: '#q-update',
+					matches: '[Uu][Pp][Dd][Aa][Tt][Ee]\\s+\\w+\\s+[Ss][Ee][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee]'
+				},
+				{
+					id: 'delete-where',
+					kind: 'text',
+					selector: '#q-delete',
+					matches: '[Dd][Ee][Ll][Ee][Tt][Ee]\\s+[Ff][Rr][Oo][Mm]\\s+\\w+[\\s\\S]*[Ww][Hh][Ee][Rr][Ee]'
+				},
+				{
+					id: 'danger-named',
+					kind: 'text',
+					selector: '#danger',
+					matches: '[Ww][Hh][Ee][Rr][Ee]|услови|все строки|всей таблиц|все записи'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'В каком порядке база на самом деле выполняет части запроса SELECT?',
+				items: [
+					'FROM: взять таблицу',
+					'WHERE: оставить подходящие строки',
+					'GROUP BY: собрать строки в группы',
+					'SELECT: выбрать нужные столбцы',
+					'ORDER BY: упорядочить',
+					'LIMIT: обрезать до нужного числа'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что сделает запрос UPDATE items SET price = 0; (без WHERE)?',
+				options: [
+					'Обнулит цену у всех строк таблицы',
+					'Ничего: без WHERE запрос не выполняется',
+					'Обнулит цену только у первой строки'
+				],
+				answer: 0,
+				why: [
+					'Да. WHERE это единственное, что ограничивает изменение. Без него затронуты все строки, и база не станет переспрашивать.',
+					'Нет: запрос без WHERE совершенно законный, поэтому и опасный.',
+					'Нет: «первой строки» в таблице нет, порядок строк не гарантирован.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Вы хотите найти услуги, у которых цена не указана (NULL). Какое условие верное?',
+				options: ['WHERE price IS NULL', 'WHERE price = NULL', 'WHERE price = 0'],
+				answer: 0,
+				why: [
+					'Да. NULL значит «неизвестно», и сравнивать с ним можно только словами IS NULL.',
+					'Нет: любое сравнение с NULL даёт «неизвестно», и такой запрос не вернёт ни одной строки.',
+					'Нет: ноль это известная цена, а не отсутствие цены.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините функцию с тем, что она считает',
+				pairs: [
+					['COUNT(*)', 'сколько строк в группе'],
+					['SUM(price)', 'сумма цен'],
+					['AVG(price)', 'средняя цена'],
+					['MIN(price)', 'самая низкая цена'],
+					['MAX(price)', 'самая высокая цена']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что вернёт SELECT category, COUNT(*) FROM items GROUP BY category?',
+				options: [
+					'Одну строку на каждую категорию: название и сколько в ней услуг',
+					'Все услуги, отсортированные по категории',
+					'Одно число: сколько всего услуг'
+				],
+				answer: 0,
+				why: [
+					'Да. GROUP BY собирает строки с одинаковой категорией в группы, а COUNT считает размер каждой.',
+					'Нет: сортировку делает ORDER BY, а GROUP BY сворачивает строки в группы.',
+					'Нет: одно число вышло бы без GROUP BY.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Как правильно передать в запрос слово, которое ввёл посетитель, чтобы его не смогли превратить в команду?',
+				options: [
+					'Через параметры запроса: база получает команду и значение раздельно',
+					'Склеить строку запроса со словом посетителя, обрамив его кавычками',
+					'Запретить посетителям вводить кавычки'
+				],
+				answer: 0,
+				why: [
+					'Да. Когда команда и значение приходят раздельно, значение никогда не станет частью команды, что бы в нём ни было.',
+					'Нет: именно такая склейка и называется SQL-инъекцией: кавычка в слове закроет кавычки запроса, а дальше текст станет командой.',
+					'Нет: список «опасных символов» всегда неполон, а настоящие данные, например фамилия О’Брайен, содержат кавычки.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что делает WHERE?',
+				options: [
+					'Отбирает строки до группировки',
+					'Может сравнивать числа, текст и NULL',
+					'Не может содержать COUNT или SUM (для них есть HAVING)',
+					'Выбирает, какие столбцы показать'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: WHERE работает второй после FROM, ещё до GROUP BY.',
+					'Да: условия строятся из сравнений, AND, OR, LIKE, IN и IS NULL.',
+					'Да: когда WHERE выполняется, группы ещё не собраны, и считать нечего. Условие по счёту пишут в HAVING.',
+					'Нет: столбцы выбирает SELECT.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-sql-select-shape',
+				front: 'Из каких частей состоит запрос SELECT?',
+				back: 'SELECT что показать, FROM откуда, WHERE какие строки оставить, GROUP BY как сгруппировать, ORDER BY как упорядочить, LIMIT сколько оставить. Выполняются в порядке FROM, WHERE, GROUP BY, SELECT, ORDER BY, LIMIT.'
+			},
+			{
+				id: 'data-sql-write-shape',
+				front: 'Какие команды меняют данные и что в них опасно?',
+				back: 'INSERT добавляет строки, UPDATE меняет, DELETE удаляет. UPDATE и DELETE без WHERE затронут всю таблицу: сначала проверьте условие запросом SELECT.'
+			},
+			{
+				id: 'data-sql-null',
+				front: 'Что такое NULL и как с ним сравнивать?',
+				back: 'NULL значит «значение неизвестно». Это не ноль и не пустая строка. Сравнивать можно только через IS NULL и IS NOT NULL: price = NULL не найдёт ничего.'
+			},
+			{
+				id: 'data-sql-group',
+				front: 'Для чего нужны GROUP BY и агрегаты?',
+				back: 'GROUP BY собирает строки в группы по значению столбца, а COUNT, SUM, AVG, MIN и MAX считают по группе одно число. Условие на посчитанное пишут в HAVING.'
+			},
+			{
+				id: 'data-sql-injection',
+				front: 'Что такое SQL-инъекция и как от неё защищаться?',
+				back: 'Это когда слова посетителя склеены с текстом запроса и становятся частью команды. Защита: параметризованные запросы, где команда и значения передаются раздельно.'
+			}
+		],
+		sources: [
+			{
+				title: 'Postgres Pro: Язык SQL (учебник)',
+				url: 'https://postgrespro.ru/docs/postgresql/current/tutorial-sql',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'PostgreSQL: Queries',
+				url: 'https://www.postgresql.org/docs/current/queries.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'SQLBolt: интерактивные упражнения по SQL',
+				url: 'https://sqlbolt.com/',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'PGlite: настоящий Postgres в браузере',
+				url: 'https://pglite.dev/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'OWASP: SQL Injection Prevention Cheat Sheet',
+				url: 'https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'Вся база SQL для начинающих за 1 час (Vlad Mishustin)',
+				url: 'https://www.youtube.com/watch?v=5sG9kmXYsKU',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'ru'
+			}
+		],
+		guide: {
+			intro: 'Сейчас вы создадите настоящую таблицу услуг и зададите ей шесть вопросов. Песочница на странице сразу покажет, что ответила таблица, и скажет, если запрос непонятен.',
+			hints: [
+				'В CREATE TABLE каждому столбцу нужен тип: id serial PRIMARY KEY, title text NOT NULL, price integer. Слово «…» нужно заменить.',
+				'В INSERT каждая строка это скобки со значениями через запятую: (\'Название\', 3000, \'основная\'). Строки разделяют запятой, а в конце ставят точку с запятой.',
+				'SELECT собирают по порядку: SELECT столбцы FROM items WHERE условие ORDER BY столбец DESC LIMIT число. Если запрос не работает, прочтите сообщение об ошибке под полем.'
+			],
+			mistakes: {
+				'work-exists': 'Блок с запросами исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				'create-table': 'Нужна команда CREATE TABLE items (…) в первом поле.',
+				'primary-key': 'У таблицы нет первичного ключа. Допишите к id слова PRIMARY KEY.',
+				'column-types': 'Не у всех столбцов есть тип. Нужны числовые (serial или integer для id, integer для цены) и текстовый (text для названия).',
+				'five-rows': 'Нужно не меньше пяти строк данных. Каждую напишите в скобках, на отдельной строке, после слова VALUES.',
+				'rows-from-brief': 'В добавленных строках нет названий ваших услуг. Возьмите их из брифа.',
+				'select-where': 'В запросе из третьего поля нет условия: допишите WHERE, например price > 1000.',
+				'select-order': 'Запрос не упорядочен. Допишите ORDER BY, например ORDER BY price DESC.',
+				'select-limit': 'Не хватает ограничения. Допишите LIMIT и число, например LIMIT 3.',
+				'group-by': 'В четвёртом поле нет GROUP BY. Он собирает строки по категории.',
+				'group-count': 'Нужно что-то посчитать: добавьте в SELECT функцию COUNT(*).',
+				'update-where': 'UPDATE должен выглядеть так: UPDATE items SET price = 3500 WHERE id = 2. Без WHERE изменятся все строки.',
+				'delete-where': 'DELETE должен выглядеть так: DELETE FROM items WHERE id = 5. Без WHERE удалятся все строки.',
+				'danger-named': 'Назовите опасный запрос и объясните одним предложением, что будет без WHERE.'
+			},
+			outro: 'У вашего проекта есть таблица и вы умеете задавать ей вопросы. Следующий шаг: разнести данные по нескольким таблицам и собирать их обратно соединениями.'
+		},
+		say: {
+			SQL: 'эс-ку-эль',
+			SELECT: 'селект',
+			INSERT: 'инсёрт',
+			UPDATE: 'апдейт',
+			DELETE: 'делит',
+			WHERE: 'вэа',
+			FROM: 'фром',
+			LIMIT: 'лимит',
+			NULL: 'нал',
+			COUNT: 'каунт',
+			GROUP: 'груп',
+			ORDER: 'ордер',
+			PostgreSQL: 'постгрес-кью-эль',
+			PGlite: 'пи-джи-лайт',
+			OWASP: 'оваспа',
+			MySQL: 'май-эс-кью-эль',
+			PHP: 'пи-эйч-пи'
+		}
+	};
+</script>
+
+<script>
+	import SqlLab from '../../diagrams/SqlLab.svelte';
+</script>
+
+## Язык вопросов к базе
+
+Мы научились делать таблицы. Теперь нужен способ задавать им вопросы и вносить в них изменения. Для этого придуман **SQL** (произносят «эс-ку-эль» или «сиквел»), Structured Query Language, язык структурированных запросов. Его придумали в 1970-х в IBM для реляционных баз: за основу взяли идеи математика Эдгара Кодда о таблицах и связях. С тех пор он стал международным стандартом, и вы встретите его почти в каждой базе: PostgreSQL, MySQL, SQLite, Oracle и других. Диалекты слегка различаются, но основа одна.
+
+SQL **декларативный**: вы пишете, **что** хотите получить, а не **как** искать. Вы не говорите «пройди по всем строкам и сравни цену». Вы пишете «дай услуги дороже тысячи», а как это сделать, решает сама база. Это большое облегчение, и за него придётся заплатить привычкой: SQL читают не сверху вниз, как обычный код, а по смыслу (мы дойдём до этого).
+
+## Создать таблицу
+
+Таблица описывается один раз командой `CREATE TABLE`.
+
+```sql
+CREATE TABLE items (
+  id    serial PRIMARY KEY,
+  title text NOT NULL,
+  price integer,
+  category text
+);
+```
+
+Для каждого столбца пишут имя и **тип**: `integer` (целое число), `text` (текст), `numeric` (число с дробной частью, для денег), `boolean` (да/нет), `date` и `timestamp` (дата и момент времени). `serial` это целое число, которое база выдаёт сама по порядку. `PRIMARY KEY` делает столбец первичным ключом. `NOT NULL` запрещает оставлять поле пустым.
+
+## Добавить строки
+
+```sql
+INSERT INTO items (title, price, category) VALUES
+  ('Первая услуга', 3000, 'основная'),
+  ('Вторая услуга', 1500, 'дополнительная');
+```
+
+Сначала имя таблицы и список столбцов, потом после VALUES строки в скобках. Текст всегда в одинарных кавычках, числа без них. Столбец `id` мы не называем: его выдаст `serial`.
+
+## Выбрать: SELECT
+
+Самая частая команда в SQL это `SELECT`: «покажи». Подвигайте песочницу ниже: у неё есть таблица из ваших услуг (цены и категории придуманы) и готовые запросы. Меняйте запросы, ломайте их, читайте ошибки.
+
+<SqlLab />
+
+Теперь по частям.
+
+```sql
+SELECT title, price     -- какие столбцы показать
+FROM items              -- из какой таблицы
+WHERE price > 1000      -- какие строки оставить
+ORDER BY price DESC     -- как упорядочить (DESC: от большего к меньшему)
+LIMIT 3;                -- сколько строк оставить
+```
+
+- `SELECT *` значит «все столбцы». Удобно, пока вы смотрите; в настоящей программе лучше называть нужные столбцы: так запрос не сломается, когда в таблицу добавят новый.
+- В `WHERE` сравнивают: `=`, `<>` (не равно), `<`, `>`, `<=`, `>=`. Условия соединяют `AND` и `OR`. `LIKE 'М%'` ищет текст, начинающийся с «М» (знак % значит «что угодно»), а `IN ('а', 'б')` проверяет, входит ли значение в список.
+- `ORDER BY` без слова `DESC` упорядочивает по возрастанию.
+- `LIMIT` пригодится, когда нужны «три самых дорогих» или одна страница из длинного списка.
+
+## NULL: «неизвестно»
+
+Если в столбце ничего нет, там лежит особое значение `NULL`. Это **не ноль и не пустая строка**: это «значение неизвестно». Из этого следует странность: сравнение с неизвестным тоже даёт «неизвестно». Поэтому `WHERE price = NULL` не найдёт **ни одной** строки. Пустые значения ищут словами `IS NULL`, а непустые словами `IS NOT NULL`. Это одна из самых частых ловушек начинающих.
+
+<details>
+<summary>Проверьте себя: как найти услуги без цены?</summary>
+
+`WHERE price IS NULL`. Запись `price = NULL` не вернёт ничего, потому что любое сравнение с NULL даёт «неизвестно».
+
+</details>
+
+## Порядок, в котором SQL выполняется
+
+Посмотрите на ленту «В каком порядке выполняется SELECT» под результатом в песочнице. Запрос написан сверху вниз, а выполняется иначе:
+
+1. `FROM`: взять таблицу (или несколько).
+2. `WHERE`: оставить подходящие строки.
+3. `GROUP BY`: собрать оставшиеся в группы.
+4. `SELECT`: выбрать столбцы и посчитать выражения.
+5. `ORDER BY`: упорядочить.
+6. `LIMIT`: обрезать.
+
+От этого порядка зависят две вещи, которые сбивают всех. Во-первых, в `WHERE` нельзя написать `COUNT(*)`: когда WHERE работает, групп ещё нет, считать нечего. Во-вторых, в `WHERE` нельзя пользоваться псевдонимом из `SELECT` (`SELECT price * 2 AS double`, `WHERE double > 100` не сработает), потому что SELECT выполнится позже.
+
+## Посчитать: GROUP BY
+
+Допустим, нужно узнать, сколько услуг в каждой категории.
+
+```sql
+SELECT category, COUNT(*) AS n
+FROM items
+GROUP BY category
+ORDER BY n DESC;
+```
+
+`GROUP BY` собирает строки с одинаковой категорией в группы, а `COUNT(*)` считает, сколько строк в каждой. Кроме `COUNT` есть `SUM` (сумма), `AVG` (среднее), `MIN` и `MAX`. Они называются **агрегатами**: сворачивают много строк в одно число.
+
+Правило, которое настоящий PostgreSQL проверяет строго: в `SELECT` могут стоять только столбцы из `GROUP BY` и агрегаты. Иначе непонятно, какую из строк группы показать, и база откажет. А если условие нужно поставить **на посчитанное** («только категории, где больше двух услуг»), для этого есть `HAVING`, он работает после группировки.
+
+## Изменить и удалить
+
+```sql
+UPDATE items SET price = price + 500 WHERE id = 2;
+DELETE FROM items WHERE id = 5;
+```
+
+Теперь внимание: **без `WHERE` оба запроса затронут все строки**. `DELETE FROM items;` очистит таблицу целиком, и база не переспросит. Правила, которые спасают на практике:
+
+- Сначала напишите тот же запрос как `SELECT * FROM items WHERE id = 5` и убедитесь, что нашлась именно та строка. Потом замените SELECT * на DELETE.
+- Условие пишите по первичному ключу (`id`), а не по названию: ключ не повторяется.
+- Перед рискованным изменением заверните его в транзакцию, которую можно отменить (урок 4).
+
+В песочнице кнопка «UPDATE без WHERE» показывает, что бывает, а «Сбросить таблицу» возвращает всё как было. В настоящей базе возвращать было бы нечем, кроме резервной копии.
+
+## Как не открыть дверь злоумышленнику
+
+Самая известная дыра в сайтах с базой называется **SQL-инъекцией**. Пример: сайт ищет услуги по слову из строки поиска и собирает запрос склейкой текста: «SELECT … WHERE title = '» плюс слово посетителя плюс «'». Если посетитель введёт слово с кавычкой и дальше команду, кавычка закроет кавычки запроса, и остаток станет **частью команды**. Так крали данные и удаляли таблицы у тысяч сайтов.
+
+Лекарство одно: **параметризованные запросы**. Команда и значение отправляются базе раздельно (в тексте команды стоит заглушка вроде `$1`, а слово посетителя передают отдельно), и значение уже не может стать командой, что бы в нём ни было. Любая библиотека для работы с базой это умеет. Никогда не склеивайте запрос из слов посетителей: это правило без исключений.
+
+## Что здесь настоящее, а что нет
+
+Честная оговорка. Песочница в этом уроке (и поля в практике ниже) это **учебный разборщик, который понимает основные команды**. Он написан для курса, живёт в памяти страницы и пропадёт при перезагрузке. Настоящий PostgreSQL умеет несравнимо больше, а ошибки говорит другими словами. Если хотите попробовать настоящий: **PGlite** это PostgreSQL, собранный для браузера (ссылка в источниках), а на SQLBolt есть интерактивные упражнения со своим набором данных. Всё, чему вы научились здесь (SELECT, WHERE, GROUP BY, UPDATE, DELETE), работает там так же.
+
+## Практика
+
+Вы в эпохе 2010 года. Сайты на PHP уже хранят данные в базе MySQL, а услуги и цены можно менять без правки HTML. Создайте таблицу услуг вашего проекта и задайте ей вопросы.
+
+В странице шесть полей для запросов. Заполните их по порядку: создайте таблицу, добавьте не меньше пяти строк (названия возьмите из своих услуг, остальные придумайте), отберите и упорядочите, посчитайте по категориям, измените одну запись и удалите другую. Под каждым полем песочница покажет результат. В последней строке назовите запрос, который без WHERE был бы опасен.
+
+## Что было не так с 2010 годом
+
+В 2010-м самый обычный PHP-код собирал запрос склейкой: `mysql_query("SELECT ... WHERE id = " . $_GET['id'])`. Это и есть SQL-инъекция, и из-за неё за десятилетие утекли огромные базы. Расширение `mysql_*` в PHP объявили устаревшим в версии 5.5 и убрали в 7.0, а теперь везде принято работать через параметры. Принцип остался тем же: команда и значение никогда не смешиваются.
