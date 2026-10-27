@@ -1,0 +1,935 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '07-data/06-vector-search',
+		part: 7,
+		order: 6,
+		title: 'Поиск: полнотекстовый и векторный',
+		summary: 'Вы понимаете, как сайт ищет по словам и по смыслу: токены, указатель, ранжирование, эмбеддинги и ближайшие соседи. После урока вы выберете между поиском внутри Postgres, отдельным движком и векторной базой и поймёте, как ИИ-ответы используют ваши тексты.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'editor',
+					label: 'LIKE \'%услуга%\'',
+					caption: 'Поиск в лоб',
+					say: [
+						{ text: 'Ищу «услуга».' },
+						{ who: 'LIKE', text: 'А «услуги»? Это другое слово. Не нашёл.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'услуг → 1, 3, 7',
+					caption: 'Указатель',
+					say: 'Слова сводят к основе и строят указатель: основа → в каких текстах она есть.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'network',
+					label: 'близко по смыслу',
+					caption: 'Эмбеддинг',
+					say: [
+						{ text: 'Сколько это стоит?' },
+						{ who: 'Поиск', text: 'Слов общих нет, но «Цены и оплата» рядом по смыслу.' }
+					]
+				}
+			]
+		},
+		minutes: 30,
+		teaches: ['data-full-text-search', 'data-vector-db'],
+		requires: ['data-index', 'data-choose-database'],
+		practice: {
+			id: 'data-search-items',
+			title: 'Поиск по услугам: слова, основа, запрос',
+			task: 'В странице работает демо поиска по вашим услугам. 1) Попробуйте в нём запрос в разных формах слова. 2) В таблице выпишите три формы одного слова из своих услуг и их основу (основа общая). 3) В поле запроса напишите для PostgreSQL выборку услуг с русской полнотекстовой конфигурацией: to_tsvector(\'russian\', …) @@ plainto_tsquery(\'russian\', …), ts_rank и ORDER BY … DESC. 4) В поле индекса создайте GIN-индекс по to_tsvector. 5) Ответьте тремя фразами: когда вам хватит поиска по словам; когда понадобился бы поиск по смыслу и какие тексты в него пошли бы; какие тексты ушли бы стороннему сервису и нужно ли согласие. Все «…» нужно заменить.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="search-work">
+      <h2>Поиск по услугам<\/h2>
+      <p>Демо ниже ищет по вашим услугам с учётом форм слов. Введите, например, одно из слов названия в другой форме: основа та же, результат тот же.<\/p>
+      <p><label for="fts-q">Запрос<\/label> <input id="fts-q" type="search" value="услуги" autocomplete="off"><\/p>
+      <ol id="fts-results"><\/ol>
+
+      <h3>Три формы одного слова из ваших услуг и их основа<\/h3>
+      <table id="lemma">
+        <tr><th>Форма слова<\/th><th>Основа<\/th><\/tr>
+        <tr class="form"><td class="word">…<\/td><td class="stem">…<\/td><\/tr>
+        <tr class="form"><td class="word">…<\/td><td class="stem">…<\/td><\/tr>
+        <tr class="form"><td class="word">…<\/td><td class="stem">…<\/td><\/tr>
+      <\/table>
+
+      <h3>Запрос для PostgreSQL: найти и упорядочить по релевантности<\/h3>
+      <p>Таблица items(id, title, text). Используйте русскую конфигурацию. Здесь запрос только проверяется по тексту; настоящий PostgreSQL в браузере есть на pglite.dev.<\/p>
+      <textarea id="q-fts" rows="8">SELECT …
+FROM items
+WHERE …
+ORDER BY …;<\/textarea>
+
+      <h3>Индекс под этот поиск<\/h3>
+      <textarea id="q-gin" rows="3">CREATE INDEX …<\/textarea>
+
+      <p>Когда полнотекстового поиска мне хватит: <span id="enough">…<\/span><\/p>
+      <p>Когда понадобился бы поиск по смыслу и какие тексты в него пошли бы: <span id="vector-when">…<\/span><\/p>
+      <p>Какие тексты ушли бы стороннему сервису и нужно ли согласие: <span id="vector-send">…<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fts-demo">
+      // Демо поиска (упрощённая модель, не PostgreSQL): ваши услуги из брифа и срезание русских окончаний.
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      const own = [{{#each items}}{ title: '{{title}}', text: '{{text}}' }, {{/each}}].map((d) => ({ title: unesc(d.title), text: unesc(d.text) }));
+      const docs = own.length ? own : [{ title: 'Первая услуга', text: 'Описание услуги.' }, { title: 'Вторая услуга', text: 'Ещё одна услуга и её цена.' }];
+      const STOP = new Set('и в во на с по к о от до за из для не что как а но или это'.split(' '));
+      const ENDINGS = 'ыми ими ого его ому ему ией иям иях ами ями ов ев ей ий ый ой ом ем ам ям ах ях ия ие ые ых их ая яя ое ее ую юю ью ию а я о е у ю ы и ь й'.split(' ').sort((a, b) => b.length - a.length);
+      const stem = (w) => { for (const e of ENDINGS) if (w.length - e.length >= 3 && w.endsWith(e)) return w.slice(0, -e.length); return w; };
+      const tokens = (s) => (s.toLowerCase().match(/[а-яёa-z0-9]+/g) || []).filter((t) => !STOP.has(t)).map(stem);
+      const input = document.getElementById('fts-q');
+      const list = document.getElementById('fts-results');
+      function draw() {
+        const q = tokens(input.value);
+        const rows = docs.map((d, i) => ({ d, i, s: q.reduce((n, w) => n + 2 * tokens(d.title).filter((x) => x === w).length + tokens(d.text).filter((x) => x === w).length, 0) }))
+          .filter((r) => r.s > 0).sort((a, b) => b.s - a.s || a.i - b.i);
+        list.replaceChildren(...(rows.length ? rows.map((r) => Object.assign(document.createElement('li'), { textContent: r.d.title + ' (вес ' + r.s + ')' })) : [Object.assign(document.createElement('li'), { textContent: 'Ничего не нашлось' })]));
+      }
+      input.addEventListener('input', draw);
+      draw();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="search-work">
+      <h2>Поиск по услугам<\/h2>
+      <p>Демо ниже ищет по вашим услугам с учётом форм слов. Введите, например, одно из слов названия в другой форме: основа та же, результат тот же.<\/p>
+      <p><label for="fts-q">Запрос<\/label> <input id="fts-q" type="search" value="услуги" autocomplete="off"><\/p>
+      <ol id="fts-results"><\/ol>
+
+      <h3>Три формы одного слова из ваших услуг и их основа<\/h3>
+      <table id="lemma">
+        <tr><th>Форма слова<\/th><th>Основа<\/th><\/tr>
+        <tr class="form"><td class="word">услуга<\/td><td class="stem">услуг<\/td><\/tr>
+        <tr class="form"><td class="word">услуги<\/td><td class="stem">услуг<\/td><\/tr>
+        <tr class="form"><td class="word">услугу<\/td><td class="stem">услуг<\/td><\/tr>
+      <\/table>
+
+      <h3>Запрос для PostgreSQL: найти и упорядочить по релевантности<\/h3>
+      <p>Таблица items(id, title, text). Используйте русскую конфигурацию. Здесь запрос только проверяется по тексту; настоящий PostgreSQL в браузере есть на pglite.dev.<\/p>
+      <textarea id="q-fts" rows="8">SELECT title,
+       ts_rank(to_tsvector('russian', title || ' ' || text), plainto_tsquery('russian', 'услуга')) AS rank
+FROM items
+WHERE to_tsvector('russian', title || ' ' || text) @@ plainto_tsquery('russian', 'услуга')
+ORDER BY rank DESC;<\/textarea>
+
+      <h3>Индекс под этот поиск<\/h3>
+      <textarea id="q-gin" rows="3">CREATE INDEX items_fts_idx ON items USING GIN (to_tsvector('russian', title || ' ' || text));<\/textarea>
+
+      <p>Когда полнотекстового поиска мне хватит: <span id="enough">когда услуг десятки, посетители пишут слова из названий, и нужны разные формы слова и ранжирование: тогда хватает поиска внутри PostgreSQL<\/span><\/p>
+      <p>Когда понадобился бы поиск по смыслу и какие тексты в него пошли бы: <span id="vector-when">если посетители задают вопросы своими словами и слова не совпадают с текстом (синонимы), тогда в него пошли бы тексты услуг и ответы на частые вопросы<\/span><\/p>
+      <p>Какие тексты ушли бы стороннему сервису и нужно ли согласие: <span id="vector-send">тексты услуг и вопросов ушли бы стороннему сервису для эмбеддингов; без персональных данных согласие не нужно, а с ними нужны основание и согласие, либо локальная модель на своём сервере<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fts-demo">
+      // Демо поиска (упрощённая модель, не PostgreSQL): ваши услуги из брифа и срезание русских окончаний.
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      const own = [{{#each items}}{ title: '{{title}}', text: '{{text}}' }, {{/each}}].map((d) => ({ title: unesc(d.title), text: unesc(d.text) }));
+      const docs = own.length ? own : [{ title: 'Первая услуга', text: 'Описание услуги.' }, { title: 'Вторая услуга', text: 'Ещё одна услуга и её цена.' }];
+      const STOP = new Set('и в во на с по к о от до за из для не что как а но или это'.split(' '));
+      const ENDINGS = 'ыми ими ого его ому ему ией иям иях ами ями ов ев ей ий ый ой ом ем ам ям ах ях ия ие ые ых их ая яя ое ее ую юю ью ию а я о е у ю ы и ь й'.split(' ').sort((a, b) => b.length - a.length);
+      const stem = (w) => { for (const e of ENDINGS) if (w.length - e.length >= 3 && w.endsWith(e)) return w.slice(0, -e.length); return w; };
+      const tokens = (s) => (s.toLowerCase().match(/[а-яёa-z0-9]+/g) || []).filter((t) => !STOP.has(t)).map(stem);
+      const input = document.getElementById('fts-q');
+      const list = document.getElementById('fts-results');
+      function draw() {
+        const q = tokens(input.value);
+        const rows = docs.map((d, i) => ({ d, i, s: q.reduce((n, w) => n + 2 * tokens(d.title).filter((x) => x === w).length + tokens(d.text).filter((x) => x === w).length, 0) }))
+          .filter((r) => r.s > 0).sort((a, b) => b.s - a.s || a.i - b.i);
+        list.replaceChildren(...(rows.length ? rows.map((r) => Object.assign(document.createElement('li'), { textContent: r.d.title + ' (вес ' + r.s + ')' })) : [Object.assign(document.createElement('li'), { textContent: 'Ничего не нашлось' })]));
+      }
+      input.addEventListener('input', draw);
+      draw();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'search-exists', kind: 'exists', selector: '#search-work' },
+				{ id: 'no-blanks', kind: 'text', selector: '#search-work', matches: '^[^…]*$' },
+				{ id: 'forms', kind: 'count', selector: '#lemma tr.form', min: 3 },
+				{ id: 'fts-vector', kind: 'text', selector: '#q-fts', matches: '[Tt][Oo]_[Tt][Ss][Vv][Ee][Cc][Tt][Oo][Rr]\\(\\s*\'russian\'' },
+				{
+					id: 'fts-match',
+					kind: 'text',
+					selector: '#q-fts',
+					matches: '@@\\s*(?:[Pp][Ll][Aa][Ii][Nn][Tt][Oo]_[Tt][Ss][Qq][Uu][Ee][Rr][Yy]|[Ww][Ee][Bb][Ss][Ee][Aa][Rr][Cc][Hh]_[Tt][Oo]_[Tt][Ss][Qq][Uu][Ee][Rr][Yy]|[Tt][Oo]_[Tt][Ss][Qq][Uu][Ee][Rr][Yy])\\(\\s*\'russian\''
+				},
+				{ id: 'fts-rank', kind: 'text', selector: '#q-fts', matches: '[Tt][Ss]_[Rr][Aa][Nn][Kk]' },
+				{ id: 'fts-order', kind: 'text', selector: '#q-fts', matches: '[Oo][Rr][Dd][Ee][Rr]\\s+[Bb][Yy][\\s\\S]*[Dd][Ee][Ss][Cc]' },
+				{
+					id: 'gin-index',
+					kind: 'text',
+					selector: '#q-gin',
+					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Ii][Nn][Dd][Ee][Xx][\\s\\S]*[Uu][Ss][Ii][Nn][Gg]\\s+[Gg][Ii][Nn]'
+				},
+				{
+					id: 'enough',
+					kind: 'text',
+					selector: '#enough',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:слов|морфолог|форм|названи|небольш|десятк|ранжир))'
+				},
+				{
+					id: 'vector-when',
+					kind: 'text',
+					selector: '#vector-when',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:смысл|синоним|вопрос|похож))'
+				},
+				{ id: 'vector-third-party', kind: 'text', selector: '#vector-send', matches: 'сторонн|провайдер|внешн|облач|API|модел' },
+				{ id: 'vector-consent', kind: 'text', selector: '#vector-send', matches: 'согласи|персональн|не отправ|обезлич|анонимн|локальн' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Почему поиск LIKE \'%услуга%\' не находит текст со словом «услуги»?',
+				options: [
+					'LIKE ищет подстроку буква в букву и ничего не знает о формах слова',
+					'LIKE не умеет искать русские буквы',
+					'Слово «услуги» в базе записано иначе'
+				],
+				answer: 0,
+				why: [
+					'Да. «услуга» и «услуги» отличаются последней буквой, и для LIKE это разные строки. Полнотекстовый поиск сводит обе формы к основе.',
+					'Нет: русские буквы LIKE ищет без проблем.',
+					'Нет: запись как раз та же, дело в способе сравнения.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте шаги подготовки текста для полнотекстового поиска по порядку',
+				items: [
+					'Разбить текст на слова (токены)',
+					'Привести к одному регистру и отбросить служебные слова',
+					'Свести слова к основе',
+					'Построить указатель: основа и список текстов, где она есть',
+					'При запросе упорядочить найденное по релевантности'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините инструмент с тем, когда он уместен',
+				pairs: [
+					['PostgreSQL: tsvector и GIN-индекс', 'сайт небольшой или средний, данные и так в этой базе'],
+					['Meilisearch или Typesense', 'нужен быстрый поиск «по мере набора» с поправкой опечаток'],
+					['Elasticsearch или OpenSearch', 'огромные объёмы, сложные фильтры и настройки, команда, которая это обслужит'],
+					['pgvector или векторная база', 'нужно находить по смыслу, когда слова запроса и текста не совпадают']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Посетитель пишет «сколько это стоит», а страница называется «Цены и оплата». Общих слов нет. Что найдёт её?',
+				options: [
+					'Поиск по смыслу: эмбеддинги вопроса и страницы окажутся рядом',
+					'Полнотекстовый поиск: он знает, что «стоит» и «цены» одно и то же',
+					'Обычный LIKE с подстановкой'
+				],
+				answer: 0,
+				why: [
+					'Да. Модель превратила оба текста в числа, и по смыслу они близки, хотя слова разные.',
+					'Нет: полнотекстовый поиск сводит формы одного слова, а синонимов не знает (если вы сами не заведёте словарь синонимов).',
+					'Нет: LIKE ищет только подстроку.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Посетитель ищет по точному номеру договора «Д-2024-117». Что надёжнее?',
+				options: [
+					'Поиск по словам (точное совпадение): векторный может «угадать» похожие номера',
+					'Только векторный: он понимает смысл номера',
+					'Всё равно, они одинаковы'
+				],
+				answer: 0,
+				why: [
+					'Да. Коды, артикулы и номера статей это не смысл, а точная строка. Здесь лучше точное совпадение, а часто объединяют оба способа (гибридный поиск).',
+					'Нет: у номера нет «смысла», векторный поиск вернёт похожие, но не те.',
+					'Нет: для точных идентификаторов разница большая.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что такое RAG простыми словами?',
+				options: [
+					'Найти в ваших текстах куски, ближайшие к вопросу, и дать их модели вместе с вопросом, чтобы она отвечала по ним',
+					'Обучить новую модель на ваших текстах с нуля',
+					'Сжать базу данных'
+				],
+				answer: 0,
+				why: [
+					'Да. Retrieval-augmented generation: сначала поиск (часто векторный), потом ответ модели с найденными кусками в подсказке. Так чат-бот отвечает «по вашей базе знаний».',
+					'Нет: модель при RAG не переобучают, ей просто показывают нужные куски.',
+					'Нет: это не про сжатие.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что стоит выяснить, прежде чем отправлять тексты стороннему сервису для расчёта эмбеддингов?',
+				options: [
+					'Есть ли в текстах персональные данные людей',
+					'Где сервис обрабатывает и хранит тексты, и какие у него условия',
+					'Нужно ли согласие или иное основание для такой передачи',
+					'Какого цвета логотип сервиса'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: если есть, передача это обработка персональных данных со всеми требованиями закона.',
+					'Да: от этого зависит, где окажутся данные и кто к ним получит доступ.',
+					'Да: это вопрос к юристу, а не к разработчику. Часто проще не отправлять персональные данные или считать эмбеддинги у себя.',
+					'Нет: на защиту данных логотип не влияет.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-search-like',
+				front: 'Чем LIKE не годится для поиска по сайту?',
+				back: 'Он ищет подстроку буква в букву: не знает форм слова, не ранжирует и на больших таблицах медленный. Для поиска нужен полнотекстовый механизм.'
+			},
+			{
+				id: 'data-search-fts',
+				front: 'Как устроен полнотекстовый поиск?',
+				back: 'Текст делят на слова, убирают служебные, сводят к основе, строят указатель «основа → тексты» (обратный индекс) и упорядочивают найденное по релевантности. В PostgreSQL это tsvector, tsquery и GIN-индекс.'
+			},
+			{
+				id: 'data-search-tools',
+				front: 'Когда хватит PostgreSQL, а когда нужен отдельный движок?',
+				back: 'Для небольшого и среднего сайта хватает поиска внутри PostgreSQL. Meilisearch и Typesense дают быстрый поиск с поправкой опечаток, Elasticsearch нужен на больших объёмах и сложных настройках.'
+			},
+			{
+				id: 'data-vector-embedding',
+				front: 'Что такое эмбеддинг и поиск по смыслу?',
+				back: 'Модель превращает текст в список чисел, «координаты смысла». Близкие по смыслу тексты оказываются рядом, и ближайших соседей запроса находят даже при разных словах. Слабое место: точные коды и номера.'
+			},
+			{
+				id: 'data-vector-privacy',
+				front: 'Что учесть, отправляя тексты на эмбеддинги стороннему сервису?',
+				back: 'Это передача текстов третьей стороне. Если в них есть персональные данные, нужны основание и согласие, и надо знать, где сервис хранит данные. Альтернатива: считать эмбеддинги на своём сервере.'
+			}
+		],
+		sources: [
+			{
+				title: 'PostgreSQL: Full Text Search',
+				url: 'https://www.postgresql.org/docs/current/textsearch.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Postgres Pro: Полнотекстовый поиск',
+				url: 'https://postgrespro.ru/docs/postgresql/current/textsearch',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'pgvector: векторный поиск для Postgres',
+				url: 'https://github.com/pgvector/pgvector',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Meilisearch: документация', url: 'https://www.meilisearch.com/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'Векторное представление слов (Википедия)',
+				url: 'https://ru.wikipedia.org/wiki/Векторное_представление_слов',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'ru'
+			}
+		],
+		videos: [
+			{
+				title: 'Векторные базы данных: самое понятное объяснение (AI RANEZ)',
+				url: 'https://www.youtube.com/watch?v=H1EyiGPZwwc',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'ru'
+			}
+		],
+		guide: {
+			intro: 'Сейчас вы научите свой сайт находить услуги по словам, и поймёте, где слов уже не хватит и нужен смысл.',
+			hints: [
+				'Демо выше ищет по основе слова. Введите одно из слов названия услуги в другой форме и посмотрите, что найдётся.',
+				'Запрос для PostgreSQL собирают из частей: to_tsvector(\'russian\', title || \' \' || text) @@ plainto_tsquery(\'russian\', \'слово\') в WHERE, ts_rank(…) для веса и ORDER BY rank DESC.',
+				'В ответе про векторный поиск скажите, что в него пошло бы, и честно оцените: уйдут ли персональные данные стороннему сервису.'
+			],
+			mistakes: {
+				'search-exists': 'Блок поиска исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				forms: 'В таблице нужны три строки: форма слова и основа.',
+				'fts-vector': 'В запросе нет to_tsvector(\'russian\', …): так текст превращается в набор основ для русского языка.',
+				'fts-match': 'Не хватает сравнения: to_tsvector(…) @@ plainto_tsquery(\'russian\', \'слово\').',
+				'fts-rank': 'Нужен вес найденного: функция ts_rank(…).',
+				'fts-order': 'Результаты надо упорядочить по весу: ORDER BY rank DESC.',
+				'gin-index': 'Индекс создают так: CREATE INDEX имя ON items USING GIN (to_tsvector(\'russian\', …)).',
+				enough: 'Объясните в нескольких словах, когда вам хватит поиска по словам.',
+				'vector-when': 'Скажите, когда понадобился бы поиск по смыслу: например, когда посетители пишут вопросы своими словами и слова не совпадают с текстом.',
+				'vector-third-party': 'Назовите, какие тексты ушли бы стороннему сервису (провайдеру эмбеддингов).',
+				'vector-consent': 'Скажите, нужно ли согласие: есть ли в этих текстах персональные данные.'
+			},
+			outro: 'Теперь ваши данные ищутся и по словам, и (если понадобится) по смыслу. Остался последний вопрос части о данных: что хранить о людях и где.'
+		},
+		say: {
+			LIKE: 'лайк',
+			tsvector: 'ти-эс-вектор',
+			tsquery: 'ти-эс-кветри',
+			GIN: 'джин',
+			RAG: 'раг',
+			pgvector: 'пи-джи-вектор',
+			Meilisearch: 'мейлисёрч',
+			Elasticsearch: 'эластиксёрч',
+			Typesense: 'тайпсенс'
+		}
+	};
+</script>
+
+<script>
+	import SearchModes from '../../diagrams/SearchModes.svelte';
+</script>
+
+## Поиск это не LIKE
+
+Допустим, на сайте строка поиска. Самое простое, что приходит в голову: `WHERE title LIKE '%услуга%'`. Это ищет подстроку **буква в букву**. Он не найдёт «услуги» (последняя буква другая), не отличит главное от упомянутого мимоходом, ничего не упорядочит по важности, а на большой таблице будет медленным: обычный индекс с «%» в начале не помогает. Для поиска по тексту придумано отдельное устройство.
+
+## Поиск по словам: как он устроен
+
+**Полнотекстовый поиск** готовит текст заранее, как указатель в конце книги (вы помните это по уроку об индексах).
+
+1. **Токены.** Текст режут на слова.
+2. **Нормализация.** Всё приводят к одному регистру и отбрасывают служебные слова: «и», «в», «на», «для», «как». Они есть везде и ничего не различают.
+3. **Основы.** Слова сводят к основе: «услуга», «услуги», «услугу» превращаются в «услуг». Это называют стеммингом или лемматизацией (лемма это словарная форма). Для русского это важнее, чем для английского: у слова много окончаний.
+4. **Указатель.** Строят таблицу «основа → в каких текстах она встречается». Это **обратный индекс**.
+5. **Ранжирование.** Найденное упорядочивают. Идея такая: слово важнее, если оно часто встречается в этом тексте и редко во всей коллекции (так считают TF-IDF и его улучшение BM25), а совпадение в заголовке весомее, чем в теле.
+
+Подвигайте схему. На вкладке «По словам» поиск идёт по вашим услугам. Нажмите «Другая форма слова», а потом выключите «Учитывать формы слов»: именно это сделал бы LIKE.
+
+<SearchModes />
+
+В PostgreSQL всё это встроено. Тип `tsvector` хранит текст, разложенный на основы, `tsquery` хранит запрос, оператор `@@` проверяет совпадение, `ts_rank` считает вес, а GIN-индекс ускоряет всё это на больших таблицах.
+
+```sql
+SELECT title,
+       ts_rank(to_tsvector('russian', title || ' ' || text), q) AS rank
+FROM items, plainto_tsquery('russian', 'услуга') AS q
+WHERE to_tsvector('russian', title || ' ' || text) @@ q
+ORDER BY rank DESC;
+
+CREATE INDEX items_fts_idx ON items
+  USING GIN (to_tsvector('russian', title || ' ' || text));
+```
+
+Слово `'russian'` выбирает русскую конфигурацию: словарь окончаний и список служебных слов. Без неё PostgreSQL применит конфигурацию по умолчанию, и русские слова не сведутся к основам.
+
+У встроенного поиска есть пределы: он не исправляет опечатки и не подсказывает по мере набора. Когда это важно, берут **отдельный поисковый движок**. Meilisearch и Typesense просты в установке, умеют опечатки и «мгновенный» поиск. Elasticsearch и OpenSearch нужны, когда данных очень много, а фильтры и настройки сложны, и когда есть, кому это обслуживать. Цена та же, что у любой новой базы: ещё один сервер, ещё одна копия данных, которую надо держать в согласии с основной (вспомните про намеренную копию из урока 3).
+
+<details>
+<summary>Проверьте себя: почему перед поиском служебные слова отбрасывают?</summary>
+
+Они есть почти в каждом тексте, поэтому не помогают отличить один текст от другого, а указатель из-за них разбухает.
+
+</details>
+
+## Поиск по смыслу
+
+Теперь вопрос, на который слова не отвечают. Посетитель пишет «сколько это стоит», а страница называется «Цены и оплата». Общих слов нет, но смысл тот же.
+
+Для этого придумали **эмбеддинги**. Специальная модель превращает текст в список из сотен или тысяч чисел: «координаты смысла». Тексты, близкие по значению, получают близкие координаты, как города на карте. Чтобы ответить на вопрос, его тоже превращают в координаты и берут **ближайших соседей**: тексты, лежащие рядом. Так находят и тогда, когда слова другие.
+
+Переключитесь на вкладку «По смыслу». Там карта нарисована вручную, на ней всего две оси вместо сотен, и она показывает идею: вопрос о цене оказывается рядом с «Ценами и оплатой» и «Способами оплаты», а вопрос о возврате рядом с «Условиями возврата». Внизу видно, что нашёл бы поиск по словам: часто ничего.
+
+Хранить эти числа и искать среди них ближайшие умеют **векторные базы** (Qdrant, Pinecone, Weaviate) и расширение **pgvector** для PostgreSQL. Чтобы не сравнивать вопрос с каждым текстом, они строят особый индекс приближённого поиска (HNSW, IVF), и снова платят: ответ «почти самый близкий», зато быстро.
+
+Что поиск по смыслу делает плохо:
+
+- **Точные идентификаторы.** Номер договора, артикул, номер статьи закона это не смысл. Векторный поиск вернёт «похожие», а нужен точный. Поэтому часто объединяют оба способа в **гибридный поиск**.
+- **Объяснимость.** Почему нашлось именно это, сказать трудно: сходство это число.
+- **Ошибки модели.** Она может счесть близкими тексты, которые противоположны («можно вернуть» и «нельзя вернуть»).
+
+## RAG: как ИИ отвечает по вашим текстам
+
+Эти же эмбеддинги стоят за большинством чат-ботов, которые отвечают «по базе знаний» компании. Схема называется **RAG** (retrieval-augmented generation, генерация с подбором материала):
+
+1. Ваши тексты заранее режут на куски и считают эмбеддинги.
+2. Пришёл вопрос. Его эмбеддинг сравнивают с кусками и берут несколько ближайших.
+3. Модели отдают вопрос и найденные куски: «ответь, используя только это».
+
+Модель при этом не переучивают, ей просто показывают нужные страницы. Поэтому ответ можно проверить по источнику, а чтобы бот знал новое, достаточно обновить тексты.
+
+## Чьи тексты уходят и куда
+
+Практический вопрос, который часто забывают. Эмбеддинги многие считают на **чужом сервисе**: тексты отправляются стороннему провайдеру по сети. Если в этих текстах есть **персональные данные** (имена, телефоны, подробности заявок), то отправка это уже обработка персональных данных третьей стороной, с требованиями закона (об этом урок 7). Что с этим делать:
+
+- Не отправлять лишнее: для эмбеддингов страниц услуг и ответов на частые вопросы персональных данных обычно нет.
+- Узнать, где провайдер обрабатывает и хранит тексты, и на каких условиях.
+- Если данные нужны, получить основание и согласие или считать эмбеддинги **у себя**, на своём сервере, открытой моделью.
+
+Решение здесь принимает не разработчик, а владелец сайта вместе с юристом. Но задать вопрос «что именно мы отправляем» должен тот, кто строит поиск.
+
+## Практика
+
+Вы в эпохе 2022 года: у сайтов появилась строка поиска, которая понимает формы слов. Добавьте её своему проекту.
+
+В странице демо поиска по вашим услугам. Выпишите три формы одного слова и их основу, напишите для PostgreSQL запрос с русской конфигурацией, ранжированием и индексом, а затем ответьте коротко, когда вам хватит поиска по словам и когда понадобился бы смысл. Настоящий PostgreSQL в браузере есть на сайте PGlite; здесь же проверяется текст запроса.
+
+## Что было не так раньше
+
+Встроенный поиск у сайтов 2010-х обычно был простым: искал слова в заголовке и тексте и ранжировал слабо. Многие подключали внешний движок. В Рунете много лет популярным был Sphinx, который написал Андрей Аксёнов. Поиск по смыслу тогда оставался уделом исследовательских лабораторий. Сегодня векторный поиск доступен любому сайту, и главный вопрос уже не «как это сделать», а «что именно мы отправляем и кому».
