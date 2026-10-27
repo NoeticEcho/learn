@@ -65,7 +65,7 @@ async function answerQuiz(page: Page) {
 	await expect(page.getByText('Все ответы верны.')).toBeVisible();
 }
 
-test('a lesson end to end, and progress survives export and import', async ({ page, context }) => {
+test('a lesson end to end, and progress survives export and import', async ({ page, context, baseURL }) => {
 	await page.goto(LESSON);
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Первая страница: теги, заголовок, ссылка');
 
@@ -86,11 +86,11 @@ test('a lesson end to end, and progress survives export and import', async ({ pa
 
 	const fresh = await context.browser()!.newContext();
 	const p2 = await fresh.newPage();
-	await p2.goto('http://localhost:4173/learn/settings/');
+	await p2.goto(new URL('settings/', baseURL).href);
 	await p2.setInputFiles('input[type=file]', file!);
 	await p2.getByRole('button', { name: 'Загрузить' }).click();
 	await expect(p2.getByText('Прогресс загружен.')).toBeVisible();
-	await p2.goto('http://localhost:4173/learn/map/');
+	await p2.goto(new URL('map/', baseURL).href);
 	await expect(p2.getByTestId('lesson-02-html/01-first-page')).toHaveAttribute('data-status', 'done');
 	await fresh.close();
 });

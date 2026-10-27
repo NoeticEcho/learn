@@ -30,7 +30,7 @@ test('the first screen sets the faces from same-origin files, and offline they c
 	});
 	await page.goto('./');
 	await page.evaluate(() => document.fonts.ready);
-	expect([...fontHosts]).toEqual(['http://localhost:4173']);
+	expect([...fontHosts]).toEqual([new URL(page.url()).origin]);
 	const faces = () =>
 		page.evaluate(async () => {
 			await document.fonts.ready;
