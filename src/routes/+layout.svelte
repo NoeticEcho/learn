@@ -8,6 +8,7 @@
 	import { page } from '$app/state';
 	import { t } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
+	import OfflineButton from '#lib/offline/OfflineButton.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
@@ -46,7 +47,10 @@
 
 <footer class="foot">
 	<div class="container cols">
-		<p class="private">{t('footer.private')}</p>
+		<div class="private">
+			<p>{t('footer.private')}</p>
+			<OfflineButton />
+		</div>
 		<p class="meta">
 			{t('footer.licence')}<br />
 			<a href="https://github.com/NoeticEcho/learn">{t('footer.source')}</a>
@@ -133,6 +137,8 @@
 		color: var(--text-secondary);
 	}
 	.private {
+		display: grid;
+		gap: var(--space-2);
 		max-width: var(--measure-narrow);
 	}
 	.meta {
