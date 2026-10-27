@@ -1,432 +1,1147 @@
+# Regenerated from the written lessons (28.10.2026). Changes against the draft: fourteen lessons instead of eight.
+# - Accessibility became three lessons: WCAG 2.2 in depth with a fix pass on a page given to the learner (02), keyboard and screen
+#   reader, names, roles and states (03), and the law with the rules of other countries and an accessibility statement (13).
+# - A new lesson on what a test is and what an end-to-end test checks (04), because the part is about quality before launch.
+# - Security is two lessons: OWASP, HTTPS, headers, updates, passwords and two-factor sign-in (05), and the form and spam (06).
+#   Backups are not a lesson of their own: part 9 (lesson 9) teaches them, and this part links back and lists them in the checklist.
+# - The 152-FZ lesson is split into the law and the operator's register (07) and the policy and the consent block (08).
+# - New: the law on advertising stays (11), and consumer protection and the offer for online sales has its own lesson (12);
+#   the comparison with GDPR, ePrivacy, ADA and the European Accessibility Act is in lesson 13.
+# - Every legal statement is dated 28.10.2026 and says it is not legal advice; the lawyer's list is in the coordinator's report.
+# - A source the Links CI cannot reach from GitHub's runners (pd.rkn.gov.ru, eur-lex.europa.eu answering 202) is not cited: the
+#   law is cited through consultant.ru, and EU law through gdpr-info.eu and the Commission.
 part: 15
 slug: quality
 title: Качество и право
 era: null
-summary: 'Что отличает готовый сайт от черновика: скорость (Core Web Vitals), доступность (WCAG 2.2), безопасность (OWASP),
-  персональные данные по 152-ФЗ, cookie, авторские права, реклама и этика профессии, и предзапусковый чек-лист.'
+summary: "Что отличает готовый сайт от черновика: скорость (Core Web Vitals), доступность (WCAG 2.2, клавиатура и
+  диктор), тесты, безопасность (OWASP), форма и спам, персональные данные по 152-ФЗ, политика и согласие, cookie,
+  авторское право, закон о рекламе, защита прав потребителей, правила других стран и предзапусковый чек-лист."
 concepts:
-- id: quality.core-web-vitals
-  title: 'Core Web Vitals: LCP, INP, CLS'
-- id: quality.performance-budget
-  title: Бюджет производительности
-- id: quality.wcag22
-  title: 'WCAG 2.2: принципы и критерии'
-- id: quality.a11y-law
-  title: Доступность и закон
-- id: quality.owasp-basics
-  title: 'OWASP: основы безопасности сайта'
-- id: quality.forms-spam-security
-  title: Безопасность форм и спам
-- id: quality.security-headers
-  title: Заголовки безопасности и HTTPS
-- id: quality.152fz
-  title: '152-ФЗ: персональные данные, согласие, оператор'
-- id: quality.privacy-notice
-  title: Политика и уведомление об обработке
-- id: quality.cookies
-  title: Cookie и трекеры
-- id: quality.copyright-images
-  title: Авторское право и изображения
-- id: quality.ad-law-ethics
-  title: Закон о рекламе и этика адвокатов и экспертов
-- id: quality.prelaunch-checklist
-  title: Предзапусковый чек-лист
+  - id: quality.core-web-vitals
+    title: "Core Web Vitals: LCP, INP, CLS"
+  - id: quality.performance-budget
+    title: Бюджет производительности
+  - id: quality.wcag22
+    title: "WCAG 2.2: принципы, уровни и новые критерии"
+  - id: quality.a11y-audit
+    title: "Проверка доступности: автоматика и руками"
+  - id: quality.keyboard-screen-reader
+    title: "Клавиатура и чтение с экрана: имя, роль, состояние"
+  - id: quality.e2e-testing
+    title: "Тесты сайта: что такое сквозной (e2e) тест"
+  - id: quality.owasp-basics
+    title: "OWASP: основы безопасности сайта"
+  - id: quality.site-hygiene
+    title: "Гигиена сайта: HTTPS, обновления, пароли и двухфакторный вход"
+  - id: quality.security-headers
+    title: Заголовки безопасности и HTTPS
+  - id: quality.forms-spam-security
+    title: Безопасность форм и спам
+  - id: quality.152fz
+    title: "152-ФЗ: персональные данные, согласие, оператор"
+  - id: quality.privacy-notice
+    title: Политика обработки и согласие на сайте
+  - id: quality.cookies
+    title: Cookie и трекеры
+  - id: quality.copyright-images
+    title: "Авторское право: изображения, шрифты, тексты и лицензии"
+  - id: quality.ad-law-ethics
+    title: Закон о рекламе и этика адвокатов и экспертов
+  - id: quality.consumer-law
+    title: "Защита прав потребителей: продажа и оферта онлайн"
+  - id: quality.a11y-law
+    title: "Доступность и закон: ГОСТ Р 52872-2019"
+  - id: quality.intl-law
+    title: "GDPR, ePrivacy, ADA и EAA: если посетители не только из России"
+  - id: quality.prelaunch-checklist
+    title: Предзапусковый чек-лист
 lessons:
-- id: 15-quality/01-performance
-  order: 1
-  title: 'Скорость: Core Web Vitals'
-  summary: 'Зачем: измерить и ускорить сайт по трём показателям: LCP (загрузка главного), INP (отклик) и CLS (скачки макета).
-    После урока человек находит главную причину медленной загрузки и исправляет её.'
-  minutes: 25
-  teaches:
-  - quality.core-web-vitals
-  - quality.performance-budget
-  requires:
-  - net.rendering-pipeline
-  - html.images
-  - css.responsive
-  - js.events
-  - infra.cdn
-  diagram: 'Водопад загрузки учебной страницы: человек сжимает изображение, откладывает скрипт, добавляет размеры картинке,
-    и три индикатора LCP/INP/CLS меняют цвет по порогам 2,5 с, 200 мс, 0,1.'
-  practice: 'Эпоха 5: найти LCP-элемент главной страницы (изображение или заголовок из brief.sections), довести LCP до зелёной
-    зоны на медленной сети в песочнице, задать размеры всем изображениям, и записать бюджет: не больше N килобайт на страницу.
-    Для конструктора указать, какие настройки сжимают изображения.'
-  checks:
-  - Определён LCP-элемент главной страницы.
-  - Всем изображениям заданы ширина и высота, макет не прыгает.
-  - Записан бюджет в килобайтах и числе запросов.
-  - Изображения подобраны под размер экрана (srcset или эквивалент).
-  - Для brief.languages шрифты загружаются без блокировки (swap) и с нужными начертаниями.
-  sources:
-  - title: 'web.dev: Web Vitals'
-    url: https://web.dev/articles/vitals
-    licence: CC-BY
-    kind: article
-    lang: en
-  - title: 'web.dev: Optimize Largest Contentful Paint'
-    url: https://web.dev/articles/optimize-lcp
-    licence: CC-BY
-    kind: article
-    lang: en
-  - title: 'web.dev: Interaction to Next Paint (INP)'
-    url: https://web.dev/articles/inp
-    licence: CC-BY
-    kind: article
-    lang: en
-  - title: 'Web Almanac 2024: SEO'
-    url: https://almanac.httparchive.org/en/2024/seo
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  videos: []
-- id: 15-quality/02-accessibility
-  order: 2
-  title: 'Доступность: WCAG 2.2 и закон'
-  summary: 'Зачем: сделать сайт пригодным для людей с нарушениями зрения, моторики и слуха и понимать юридический контекст
-    в России и мире. После урока человек проходит чек-лист WCAG 2.2 уровня AA для своего сайта.'
-  minutes: 25
-  teaches:
-  - quality.wcag22
-  - quality.a11y-law
-  requires:
-  - html.a11y-basics
-  - css.contrast
-  - design.contrast
-  diagram: 'Три режима одной страницы: «обычный», «только клавиатура» и «скринридер» (читается порядок): человек чинит контраст,
-    фокус, подписи форм, и счётчик критериев WCAG 2.2 AA растёт.'
-  practice: 'Эпоха 4: проверить сайт на критерии WCAG 2.2 AA: контраст, фокус, размер цели касания, подписи полей из brief.contacts,
-    альтернативы изображений из brief.proofs, язык страницы для каждого значения brief.languages. Записать три найденных проблемы
-    и исправления.'
-  checks:
-  - У каждой формы есть подписанные поля и понятные сообщения об ошибках.
-  - Контраст текста не ниже 4,5:1, у крупного не ниже 3:1.
-  - Весь сайт проходится клавиатурой и фокус виден.
-  - Атрибут lang соответствует каждому языку из brief.languages.
-  - Изображения-доказательства имеют осмысленное alt.
-  sources:
-  - title: 'web.dev: Learn Accessibility'
-    url: https://web.dev/learn/accessibility
-    licence: CC-BY
-    kind: course
-    lang: en
-  - title: 'W3C: Web Content Accessibility Guidelines (WCAG) 2.2'
-    url: https://www.w3.org/TR/WCAG22/
-    licence: link-only
-    kind: spec
-    lang: en
-  - title: 'W3C WAI: What''s new in WCAG 2.2'
-    url: https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/
-    licence: link-only
-    kind: article
-    lang: en
-  - title: 'Web Almanac 2024: Accessibility'
-    url: https://almanac.httparchive.org/en/2024/accessibility
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  - title: 'GOV.UK Service Manual: Making your service accessible'
-    url: https://www.gov.uk/service-manual/helping-people-to-use-your-service/making-your-service-accessible-an-introduction
-    licence: proprietary-link
-    kind: article
-    lang: en
-  videos: []
-- id: 15-quality/03-security
-  order: 3
-  title: 'Безопасность: основы OWASP, формы и спам'
-  summary: 'Зачем: закрыть самые частые дыры: инъекции, XSS, слабые пароли, открытые секреты, спам в формах. После урока человек
-    проверяет свой сайт и форму и настраивает заголовки безопасности.'
-  minutes: 25
-  teaches:
-  - quality.owasp-basics
-  - quality.forms-spam-security
-  - quality.security-headers
-  requires:
-  - server.authentication
-  - html.forms
-  - net.tls
-  - data.sql-select
-  - infra.ci-cd
-  diagram: 'Форма обратной связи под атакой: человек включает проверку на сервере, экранирование, CSP, ограничение частоты
-    и скрытую ловушку для ботов, и лента попыток показывает, что пропускается; шкала HTTP Observatory.'
-  practice: 'Эпоха 6: для формы из brief.mainAction (заявка, запись) добавить серверную валидацию, honeypot-поле, ограничение
-    частоты и сообщение без раскрытия данных; настроить CSP и HTTPS-заголовки и прогнать сайт через HTTP Observatory. Секреты
-    вынести из кода.'
-  checks:
-  - Ввод валидируется на сервере, а не только в браузере.
-  - В форме есть защита от спама без обязательной капчи с чужим трекингом.
-  - Заданы Content-Security-Policy и HSTS.
-  - В репозитории нет ключей и паролей.
-  - Результат проверки заголовков записан.
-  sources:
-  - title: OWASP Top 10
-    url: https://top10.owasp.org/
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: OWASP Cheat Sheet Series
-    url: https://cheatsheetseries.owasp.org/
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'MDN: Content Security Policy (CSP)'
-    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'MDN: Using HTTP cookies'
-    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'MDN HTTP Observatory: HTTP header security test'
-    url: https://developer.mozilla.org/en-US/observatory
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'Web Almanac 2024: Security'
-    url: https://almanac.httparchive.org/en/2024/security
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  videos: []
-- id: 15-quality/04-152fz
-  order: 4
-  title: '152-ФЗ: персональные данные, согласие, политика'
-  summary: 'Зачем: понять, что любая форма делает владельца сайта оператором персональных данных, и выполнить минимум: цель,
-    основание, согласие, политика на сайте, уведомление Роскомнадзора, хранение в России. После урока человек готовит набор
-    документов для своего сайта.'
-  minutes: 30
-  teaches:
-  - quality.152fz
-  - quality.privacy-notice
-  requires:
-  - html.forms
-  - data.privacy-by-design
-  - infra.data-localisation-ru
-  - quality.forms-spam-security
-  diagram: 'Карта данных сайта: человек отмечает, где собираются данные (форма, Метрика, чат, запись), и для каждого выбирает
-    цель, основание и срок; при хранении за границей сервис подсвечивает риск локализации; итог превращается в черновик политики.'
-  practice: 'Эпоха 3/6: составить перечень данных из brief.contacts и форм brief.mainAction, для каждого поля цель, основание,
-    срок хранения; добавить отдельное согласие и ссылку на политику рядом с формой, указать оператора (brief.who), место хранения
-    и сервисы, которым передаются данные. Решить, нужно ли подавать уведомление. Для нескольких языков (brief.languages) указать,
-    какой текст имеет юридическую силу.'
-  checks:
-  - Для каждого поля формы указаны цель обработки и срок хранения.
-  - Согласие отдельное и непредзаполненное, рядом с кнопкой отправки.
-  - Политика обработки опубликована и доступна с каждой страницы с формой.
-  - Указано место хранения данных граждан РФ.
-  - Перечислены сторонние сервисы, получающие данные (Метрика, почта, CRM, мессенджеры).
-  sources:
-  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
-    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: 'Роскомнадзор: Портал персональных данных'
-    url: https://pd.rkn.gov.ru/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: 'Web Almanac 2024: Privacy'
-    url: https://almanac.httparchive.org/en/2024/privacy
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  - title: 'MDN: Using HTTP cookies'
-    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  videos: []
-- id: 15-quality/05-cookies
-  order: 5
-  title: Cookie, трекеры и согласие
-  summary: 'Зачем: понимать, какие cookie ставит сайт, какие из них нужны и как честно спросить согласие там, где это нужно,
-    в России и по правилам ЕС для посетителей оттуда. После урока человек составляет таблицу cookie и баннер, которые не подталкивают
-    к «принять всё».'
-  minutes: 20
-  teaches:
-  - quality.cookies
-  requires:
-  - quality.152fz
-  - metrics.counter-setup
-  - net.http-status-headers
-  diagram: 'Инспектор cookie: страница ставит cookie по очереди (сессия, язык, Метрика, чат, карты), человек классифицирует
-    их, а баннер собирается из результата; индикатор тёмных паттернов оценивает «принять» и «отклонить» по равному весу.'
-  practice: 'Эпоха 6: инвентаризовать cookie и локальное хранилище проекта, разбить на необходимые и аналитические, составить
-    таблицу (имя, цель, срок, кто ставит) и баннер с равноценными кнопками. Подключать аналитику после согласия для brief.languages-аудиторий,
-    где это требуется.'
-  checks:
-  - Таблица содержит имя, цель, срок и владельца для каждой cookie.
-  - Необходимые cookie не требуют согласия, аналитические отделены.
-  - Кнопки «принять» и «отклонить» равнозначны по виду и месту.
-  - Метрика и другие трекеры не запускаются до решения, если оно требуется.
-  sources:
-  - title: 'MDN: Using HTTP cookies'
-    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'Web Almanac 2024: Privacy'
-    url: https://almanac.httparchive.org/en/2024/privacy
-    licence: CC-BY-SA
-    kind: article
-    lang: en
-  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
-    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: Microsoft Clarity documentation (heatmaps, recordings, masking, consent)
-    url: https://learn.microsoft.com/en-us/clarity/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  videos: []
-- id: 15-quality/06-copyright
-  order: 6
-  title: Авторское право и изображения
-  summary: 'Зачем: не нарушать чужие права и защитить свои: лицензии на фото, шрифты и тексты, лицензии Creative Commons,
-    ГК РФ часть 4. После урока человек делает реестр материалов сайта с лицензиями и указанием авторства.'
-  minutes: 20
-  teaches:
-  - quality.copyright-images
-  requires:
-  - html.images
-  - texts.expert-text
-  diagram: 'Игра «можно ли использовать»: для десяти материалов (фото, шрифт, иконка, цитата, карта) человек выбирает лицензию
-    и условия, а реестр заполняется строками.'
-  practice: 'Эпоха 5: составить реестр всех изображений, шрифтов, иконок и текстов проекта (brief.items, brief.people, brief.proofs):
-    источник, автор, лицензия, ссылка, условия. Заменить материалы без подтверждённого права. Для фото людей из brief.people
-    получить письменное согласие.'
-  checks:
-  - Реестр содержит источник, автора, лицензию и ссылку для каждого материала.
-  - Нет материалов без права использования.
-  - Для лицензий с указанием авторства оно размещено.
-  - Для фото людей из brief.people есть согласие.
-  - Указана лицензия собственного контента сайта.
-  sources:
-  - title: Гражданский кодекс РФ, часть 4 (КонсультантПлюс)
-    url: https://www.consultant.ru/document/cons_doc_LAW_64629/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: 'Creative Commons: Sharing openly, sharing globally'
-    url: https://creativecommons.org/share-your-work/cclicenses/
-    licence: CC-BY
-    kind: docs
-    lang: en
-  - title: 'Creative Commons: CC BY-SA 4.0 (русский)'
-    url: https://creativecommons.org/licenses/by-sa/4.0/deed.ru
-    licence: CC-BY
-    kind: docs
-    lang: ru
-  videos: []
-- id: 15-quality/07-ad-law-ethics
-  order: 7
-  title: Закон о рекламе и этика адвокатов и экспертов
-  summary: 'Зачем: проверить тексты сайта на соответствие закону о рекламе и профессиональной этике: что считается рекламой,
-    какие утверждения запрещены, что можно указать об адвокате или эксперте. После урока человек пересматривает свои тексты
-    по списку рисков.'
-  minutes: 25
-  teaches:
-  - quality.ad-law-ethics
-  requires:
-  - story.expert-ethics
-  - growth.ad-labelling
-  - texts.expert-text
-  diagram: 'Лента фраз с сайта: человек отмечает, какие из них нарушают закон о рекламе или этику (гарантия результата, «лучший»,
-    отзывы, сравнения), и объяснение показывает норму; затем он переписывает фразу без нарушения.'
-  practice: 'Эпоха 7: пройти по всем текстам сайта из brief.sections, отметить утверждения, которые нельзя подтвердить (brief.proofs)
-    или которые запрещены правилами профессии (brief.who), и переписать. Для адвоката учесть Кодекс профессиональной этики;
-    для других профессий найти свои требования.'
-  checks:
-  - Все превосходные степени либо подтверждены в brief.proofs, либо удалены.
-  - Нет гарантий результата и обещаний выигрыша.
-  - Отзывы или результаты дел указаны только если допускаются профессией.
-  - Для каждого утверждения указан источник или нормативный документ.
-  sources:
-  - title: Федеральный закон «О рекламе» 38-ФЗ (КонсультантПлюс)
-    url: https://www.consultant.ru/document/cons_doc_LAW_58968/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: 'КонсультантПлюс: Кодекс профессиональной этики адвоката (подборка)'
-    url: https://www.consultant.ru/law/podborki/kodeks_professionalnoj_jetiki_advokata/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: 'Адвокатская газета: «Критерии допустимости. К вопросу о правомерности рекламы адвокатской деятельности»'
-    url: https://www.advgazeta.ru/arhivnye-zapisi/kriterii-dopustimosti/
-    licence: proprietary-link
-    kind: article
-    lang: ru
-  - title: 'Яндекс Директ: как работает обязательная маркировка рекламы в интернете'
-    url: https://direct.yandex.ru/base/articles/markirovka-reklamy-v-internete
-    licence: proprietary-link
-    kind: article
-    lang: ru
-  videos: []
-- id: 15-quality/08-prelaunch
-  order: 8
-  title: Предзапусковый чек-лист
-  summary: 'Зачем: собрать в один список всё, что проверяется перед запуском: скорость, доступность, безопасность, право,
-    SEO, аналитику, резервные копии и откат. После урока человек пройдёт чек-лист по собственному сайту и получает отчёт «готов
-    / не готов».'
-  minutes: 25
-  teaches:
-  - quality.prelaunch-checklist
-  requires:
-  - quality.core-web-vitals
-  - quality.wcag22
-  - quality.security-headers
-  - quality.152fz
-  - quality.cookies
-  - quality.copyright-images
-  - quality.ad-law-ethics
-  - growth.technical-seo
-  - infra.backups
-  diagram: 'Панель запуска: 30 пунктов в шести группах, каждый открывает мини-проверку на живом превью сайта человека; итоговая
-    шкала готовности и список блокирующих ошибок.'
-  practice: 'Эпоха 8: пройти чек-лист по сайту проекта, записать для каждого блока «зелёный / жёлтый / красный» и план исправлений;
-    проверить, что brief.mainAction выполняется на телефоне и без JavaScript там, где это возможно; убедиться в наличии резервной
-    копии и способа откатить публикацию.'
-  checks:
-  - Пройдены все шесть блоков чек-листа с отметкой по каждому.
-  - Красные пункты имеют срок и ответственного.
-  - brief.mainAction проверен на телефоне.
-  - Есть резервная копия и описан откат.
-  - Контакты из brief.contacts работают и совпадают во всех местах.
-  sources:
-  - title: 'web.dev: Web Vitals'
-    url: https://web.dev/articles/vitals
-    licence: CC-BY
-    kind: article
-    lang: en
-  - title: 'web.dev: Learn Accessibility'
-    url: https://web.dev/learn/accessibility
-    licence: CC-BY
-    kind: course
-    lang: en
-  - title: OWASP Cheat Sheet Series
-    url: https://cheatsheetseries.owasp.org/
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'MDN HTTP Observatory: HTTP header security test'
-    url: https://developer.mozilla.org/en-US/observatory
-    licence: CC-BY-SA
-    kind: docs
-    lang: en
-  - title: 'Google Search Central: SEO Starter Guide'
-    url: https://developers.google.com/search/docs/fundamentals/seo-starter-guide
-    licence: CC-BY
-    kind: docs
-    lang: en
-  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
-    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  videos: []
+  - id: 15-quality/01-performance
+    order: 1
+    title: "Скорость: Core Web Vitals и бюджет"
+    definition: "Core Web Vitals — три показателя скорости страницы: LCP (показ главного), INP (отклик) и CLS (сдвиги
+      макета). Бюджет задаёт пределы заранее."
+    summary: "Медленный сайт теряет людей раньше, чем они прочли первое слово. После урока вы знаете три показателя скорости
+      (LCP, INP и CLS) и их пороги, находите главный элемент своей страницы, исправляете типичные причины медленной
+      загрузки и прыжков макета и записываете бюджет: сколько килобайт и запросов вашей странице разрешено."
+    minutes: 25
+    teaches:
+      - quality.core-web-vitals
+      - quality.performance-budget
+    requires:
+      - net.rendering-pipeline
+      - html.images
+      - css.responsive
+      - js.events
+      - infra.cdn
+      - css.web-fonts
+    diagram: "PerfWaterfall: «Водопад загрузки» (part 15, lesson 1). A teaching model of one landing page on a slow mobile
+      network (200 KB/s, 150 ms round trip). Seven switches (compress the hero, no lazy and fetchpriority, image sizes,
+      defer, less JavaScript, a late chat widget, font swap) move three gauges (LCP, INP, CLS) across the Core Web
+      Vitals thresholds (2.5 s and 200 ms and 0.1 good; 4 s and 500 ms and 0.25 poor); two number fields hold a weight
+      and a request budget. The formulas are a simplification chosen to show which fix matters, not a measurement."
+    practice: 'Ускорьте страницу и запишите бюджет. 1) Главную картинку первого экрана (она в разделе .hero) отметьте
+      fetchpriority="high" и уберите у неё loading="lazy": она и есть LCP. 2) Всем картинкам задайте width и height. 3)
+      Картинке первого экрана добавьте srcset и sizes (два размера), остальным картинкам оставьте loading="lazy". 4)
+      Подключите скрипт с defer. 5) В @font-face поставьте font-display: swap, а для кириллического начертания
+      ограничьте набор знаков через unicode-range (U+0400-04FF). 6) В заметке: в раздел первого экрана впишите название
+      раздела из брифа (первый пункт списка разделов) и скажите, что это за элемент; запишите бюджет числами: сколько
+      килобайт и запросов страница не должна превышать и за сколько секунд должна показать главное. Все «…» нужно
+      заменить. Эпоха: 5.'
+    checks:
+      - Главной картинке первого экрана (.hero) нужен атрибут fetchpriority="high".
+      - 'У главной картинки не должно быть loading="lazy": её нужно грузить сразу.'
+      - Есть картинка без width или height. Задайте оба, чтобы браузер заранее оставил место.
+      - Главной картинке добавьте srcset с двумя размерами и sizes.
+      - 'Картинки ниже первого экрана стоит грузить лениво: loading="lazy".'
+      - Остался скрипт без defer. Он блокирует показ страницы.
+      - "В @font-face добавьте font-display: swap;."
+      - "Для кириллического начертания добавьте unicode-range: U+0400-04FF;"
+      - Впишите в заметку название первого раздела из брифа.
+      - "Скажите, что за элемент главный: картинка, заголовок или абзац."
+      - "Бюджет по весу: число килобайт, например 500."
+      - "Бюджет по запросам: число, например 15."
+      - "Время показа главного: число секунд от 1 до 4, например 2,5."
+    sources:
+      - title: Web Vitals (web.dev)
+        url: https://web.dev/articles/vitals
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: Optimize Largest Contentful Paint (web.dev)
+        url: https://web.dev/articles/optimize-lcp
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: Optimize Cumulative Layout Shift (web.dev)
+        url: https://web.dev/articles/optimize-cls
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: Interaction to Next Paint, INP (web.dev)
+        url: https://web.dev/articles/inp
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: Performance budgets 101 (web.dev)
+        url: https://web.dev/articles/performance-budgets-101
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: "Web Almanac 2024: Performance"
+        url: https://almanac.httparchive.org/en/2024/performance
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+    videos: []
+  - id: 15-quality/02-wcag22
+    order: 2
+    title: "Доступность вглубь: WCAG 2.2 и проход по странице"
+    definition: WCAG 2.2 — международный стандарт доступности веб-содержимого с критериями уровней A, AA и AAA. Его
+      проверяют автоматикой, клавиатурой и диктором.
+    summary: "В части про HTML вы сделали первый проход по доступности. После этого урока вы знаете, что нового в WCAG 2.2,
+      умеете проверить страницу тремя способами (автоматикой, клавиатурой и диктором) и исправляете типичные недочёты:
+      контраст, фокус, размер цели касания, подписи полей, язык и сообщения об ошибках."
+    minutes: 30
+    teaches:
+      - quality.wcag22
+      - quality.a11y-audit
+    requires:
+      - html.a11y-basics
+      - html.aria-first-rule
+      - css.contrast
+      - design.contrast
+      - css.reduced-motion
+    diagram: "A11yViews: «Одна страница, три способа её пройти» (part 15, lesson 2). Nine defects of a contact page, each
+      tied to a WCAG 2.2 criterion (contrast, alt, label, focus visible, focus not obscured, target size, language,
+      status message, accessible authentication). The person switches the view (eyes and finger, keyboard only, screen
+      reader) and fixes defects one by one; a counter shows how many of the nine criteria are met."
+    practice: 'Вам дана страница с недочётами. Исправьте: 1) lang="ru" у html, ссылка «Перейти к содержимому» первой в body
+      и id="main" у main; 2) один h1 на странице (второй сделайте абзацем); 3) контраст: у .muted и у .btn не ниже 4,5 к
+      1; 4) у .icon-btn размер не меньше 44 на 44 (min-width, min-height) и aria-label; 5) верните рамку фокуса: уберите
+      outline: none и добавьте :focus-visible с видимым outline, а для фиксированной шапки задайте scroll-padding-top у
+      html; 6) у каждого поля label и autocomplete (name, tel, current-password), у поля пароля разрешите вставку; 7) у
+      сообщения об ошибке role="status"; 8) у каждого изображения-доказательства осмысленный alt, у каждого абзаца
+      lang-note свой lang по языку из брифа; 9) для прокрутки учтите prefers-reduced-motion. В заметке впишите три
+      найденные вами проблемы, каждую с номером критерия (например, 2.4.7) и исправлением. Все «…» нужно заменить.
+      Эпоха: 4.'
+    checks:
+      - У html должен быть lang="ru".
+      - Первым элементом в body нужна ссылка <a href="#main">Перейти к содержимому</a>.
+      - У main нужен id="main".
+      - На странице должен быть ровно один h1. Второй сделайте абзацем.
+      - "У .muted слишком светлый текст: нужен контраст не ниже 4,5 к 1."
+      - "У .btn контраст текста и фона ниже 4,5 к 1: сделайте фон темнее."
+      - У .icon-btn min-width должен быть не меньше 44px.
+      - У .icon-btn min-height должен быть не меньше 44px.
+      - 'У кнопки-значка нет названия: добавьте aria-label="Закрыть".'
+      - Добавьте правило :focus-visible с outline, чтобы фокус был виден.
+      - "Уберите outline: none, не заменив рамку чем-то видимым."
+      - "Для фиксированной шапки добавьте html { scroll-padding-top: 4rem }: фокус не уйдёт под неё."
+      - "Плавную прокрутку оберните в @media (prefers-reduced-motion: reduce) с scroll-behavior: auto."
+      - У какого-то поля нет подписи label.
+      - "У каждого поля нужен autocomplete: name, tel, current-password."
+      - 'Уберите onpaste="return false": менеджеру паролей и людям нужна вставка.'
+      - Контейнеру сообщения об ошибке нужен role="status" (или "alert").
+      - У изображений-доказательств должен быть непустой alt.
+      - 'У каждого абзаца .lang-note нужен свой lang по языку версии: lang="ru" или lang="en".'
+      - В первой проблеме укажите номер критерия, например 2.4.7.
+      - Во второй проблеме укажите номер критерия, например 1.4.3.
+      - В третьей проблеме укажите номер критерия, например 2.5.8.
+    sources:
+      - title: Web Content Accessibility Guidelines (WCAG) 2.2
+        url: https://www.w3.org/TR/WCAG22/
+        licence: link-only
+        kind: spec
+        lang: en
+      - title: What’s New in WCAG 2.2 (W3C WAI)
+        url: https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: "How to Meet WCAG: a quick reference (W3C WAI)"
+        url: https://www.w3.org/WAI/WCAG22/quickref/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "Easy checks: a first review of web accessibility (W3C WAI)"
+        url: https://www.w3.org/WAI/test-evaluate/preliminary/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: "The WebAIM Million: an accessibility analysis of the top 1,000,000 home pages"
+        url: https://webaim.org/projects/million/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: Learn Accessibility (web.dev)
+        url: https://web.dev/learn/accessibility
+        licence: CC-BY
+        kind: course
+        lang: en
+    videos: []
+  - id: 15-quality/03-keyboard-reader
+    order: 3
+    title: "Клавиатура и диктор: имя, роль, состояние"
+    definition: "Дерево доступности — то, что браузер строит из разметки для диктора: у каждого элемента есть имя, роль и
+      состояние. Нативные элементы дают их сами."
+    summary: "Человек с диктором не видит страницу, а слушает её дерево: у каждого элемента есть имя, роль и состояние.
+      После урока вы понимаете, как браузер собирает это дерево, делаете кнопку меню, окно и навигацию, с которыми
+      справляются клавиатура и диктор, и умеете за пять минут проверить свою страницу NVDA или VoiceOver."
+    minutes: 30
+    teaches:
+      - quality.keyboard-screen-reader
+    requires:
+      - quality.wcag22
+      - html.forms
+      - js.events
+    diagram: "AccName: «Что слышит диктор и что делает Tab» (part 15, lesson 3). A menu button, a phone field and a dialog,
+      each written several ways (div with onclick, role without behaviour, tabindex, native button, aria-expanded;
+      placeholder, aria-label, label; plain div, role=dialog, native dialog). For each: does Tab reach it, do Enter and
+      Space work, what a screen reader says (a teaching simplification), and the verdict."
+    practice: 'На странице «кнопки» сделаны из div и работают только мышью. Перепишите разметку так, чтобы она работала
+      клавиатурой и диктором. 1) Шапка, навигация, основное и подвал: элементы header, nav, main, footer; у nav своё имя
+      (aria-label), у текущего пункта aria-current="page". 2) Заголовок страницы h1 с названием проекта из брифа. 3)
+      Кнопка меню: button с id="menu-toggle", aria-expanded="false" и aria-controls="menu"; в навигации ссылки a со
+      всеми разделами из брифа. 4) Кнопка главного действия: button с id="open-d", aria-haspopup="dialog" и текстом
+      действия из брифа. 5) Окно: dialog с id="d", aria-labelledby и заголовком h2 с текстом действия, внутри кнопка
+      «Закрыть». 6) Кнопка-значок поиска: button с aria-label и svg с aria-hidden="true". 7) Место для сообщений:
+      role="status". 8) Не оставляйте div с onclick и role="button". В заметке напишите, что скажет диктор на кнопке
+      меню (роль и состояние) и на окне. Все «…» нужно заменить. Эпоха: 4.'
+    checks:
+      - Нужны элементы header, nav, main и footer вместо div.
+      - 'У nav должно быть имя: aria-label="Разделы сайта".'
+      - Текущему пункту навигации добавьте aria-current="page".
+      - Название проекта из брифа нужно в h1.
+      - 'Кнопка меню: button с id="menu-toggle", aria-expanded="false" и aria-controls="menu".'
+      - В nav должны быть ссылки a со всеми разделами из брифа.
+      - 'Кнопка главного действия: button с id="open-d", aria-haspopup="dialog" и текстом действия из брифа.'
+      - Нужен элемент dialog с id="d" и aria-labelledby.
+      - В dialog должен быть заголовок h2 с названием действия из брифа.
+      - В окне нужна кнопка «Закрыть».
+      - 'Кнопка-значок: aria-label у button и aria-hidden="true" у svg.'
+      - Добавьте место для сообщений с role="status".
+      - Остался div или span с onclick или role="button". Замените на нативные элементы.
+      - "Напишите, что скажет диктор на кнопке меню: роль «кнопка» и состояние (свёрнуто)."
+      - "Напишите, что скажет диктор на окне: название и слово «диалог»."
+    sources:
+      - title: ARIA Authoring Practices Guide (W3C WAI)
+        url: https://www.w3.org/WAI/ARIA/apg/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "APG: Modal Dialog pattern"
+        url: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "APG: Disclosure pattern"
+        url: https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: <dialog> (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: ARIA live regions (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Manual Screen Reader Testing (WebAIM)
+        url: https://webaim.org/articles/screenreader_testing/
+        licence: link-only
+        kind: article
+        lang: en
+      - title: "Screen Reader User Survey #11 (WebAIM, 2026)"
+        url: https://webaim.org/projects/screenreadersurvey11/
+        licence: link-only
+        kind: article
+        lang: en
+    videos: []
+  - id: 15-quality/04-testing-e2e
+    order: 4
+    title: "Тесты сайта: что такое сквозной тест"
+    definition: Сквозной (e2e) тест — программа, которая в настоящем браузере проходит путь человека по сайту и сверяет
+      результат с ожидаемым.
+    summary: "Сайт ломается тихо: поправили стиль, а форма перестала отправляться. После урока вы понимаете, что такое тест,
+      чем различаются юнит-, интеграционные и сквозные (e2e) тесты, читаете пример на Playwright и составляете план из
+      сценариев для главного действия своего проекта, с тестовыми данными и без чужих настоящих."
+    minutes: 25
+    teaches:
+      - quality.e2e-testing
+    requires:
+      - html.forms
+      - js.events
+      - net.http-status-headers
+      - infra.ci-cd
+      - quality.keyboard-screen-reader
+    diagram: "E2eTrace: «Что скажет сквозной тест» (part 15, lesson 4). One five-step end-to-end test of the main action,
+      written with locators by role and label or by a CSS class. The person breaks the site four ways (a missing label,
+      a banner over the button, a 500 from the server, a harmless class rename) and runs the test: the log shows which
+      step stops. A role-based test catches the label and survives the rename; a class-based one does the opposite."
+    practice: "Составьте план проверки сайта. 1) В таблице #plan у каждой строки класс scenario и три ячейки: given
+      («Дано»), when («Когда») и then («Тогда»). Заполните четыре готовые строки: путь главного действия на телефоне (в
+      «Когда» назовите действие словами из брифа), отправка пустой формы, открытие двух разделов из брифа (назовите их),
+      проход клавиатурой. Не оставляйте «…». 2) По одной строке на каждый язык из брифа уже добавлено: заполните их так
+      же. 3) В блоке #test-code допишите тест на Playwright: переход на страницу, нажатие ссылки или кнопки по роли и
+      имени (название действия из брифа), ввод в поле по подписи, нажатие кнопки, проверка сообщения; без пауз
+      waitForTimeout. 4) В #test-data скажите, какие данные используют тесты (тестовые, выдуманные). 5) В #ci-run
+      скажите, когда тесты запускаются (при каждой выкладке или правке). Все «…» нужно заменить. Эпоха: 6."
+    checks:
+      - В таблице должно быть не меньше пяти строк-сценариев (четыре и по строке на язык).
+      - В таблице остались «…». Заполните все ячейки.
+      - В одном из сценариев «Когда» назовите главное действие словами из брифа.
+      - Назовите в плане хотя бы два раздела из брифа.
+      - Тест начинается с import { test, expect } from '@playwright/test';
+      - "В тесте нужен переход на страницу: await page.goto('/');"
+      - "Ищите элементы по роли и подписи: getByRole и getByLabel."
+      - В тесте назовите главное действие словами из брифа.
+      - "Тест должен что-то проверять: await expect(…)…."
+      - "Уберите waitForTimeout: Playwright сам ждёт появления элемента."
+      - В блоке теста остались «…». Допишите шаги.
+      - Скажите, что данные тестов выдуманные («Тест», телефон из нулей, example.com).
+      - "Скажите, когда запускаются тесты: при каждой правке и перед выкладкой."
+    sources:
+      - title: "Playwright: Installation and writing tests"
+        url: https://playwright.dev/docs/intro
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "Playwright: Best practices"
+        url: https://playwright.dev/docs/best-practices
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: The Practical Test Pyramid (Ham Vocke, martinfowler.com)
+        url: https://martinfowler.com/articles/practical-test-pyramid.html
+        licence: link-only
+        kind: article
+        lang: en
+      - title: Automated testing (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Testing/Automated_testing
+        licence: CC-BY-SA
+        kind: course
+        lang: en
+      - title: Тестирование программного обеспечения (Википедия)
+        url: https://ru.wikipedia.org/wiki/Тестирование_программного_обеспечения
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+    videos: []
+  - id: 15-quality/05-security
+    order: 5
+    title: "Безопасность сайта: OWASP, HTTPS, обновления и пароли"
+    definition: OWASP Top 10 — список самых распространённых классов уязвимостей веб-приложений. От массовых атак защищают
+      HTTPS, обновления, пароли и второй фактор.
+    summary: Сайты взламывают не по личной неприязни, а автоматически и пачками, цепляясь за устаревшие плагины, слабые
+      пароли и забытые ключи. После урока вы знаете десять самых частых классов проблем из списка OWASP Top 10 простыми
+      словами, настраиваете HTTPS и заголовки безопасности, заводите двухфакторный вход и составляете для своего проекта
+      короткий план защиты.
+    minutes: 30
+    teaches:
+      - quality.owasp-basics
+      - quality.site-hygiene
+      - quality.security-headers
+    requires:
+      - server.authentication
+      - server.sessions-and-cookies
+      - net.tls
+      - infra.tls-certificates
+      - data.sql-select
+      - infra.ci-cd
+    diagram: "AttackFeed: «Лента попыток» (part 15, lesson 5). Nine everyday automated attempts (password guessing, an
+      outdated plugin, script and SQL in a form, a public Wi-Fi, framing, a hunt for .env, a changed number in the
+      address, spam) and nine measures that stop them. An attempt is stopped when a measure it depends on is on; each
+      line names the OWASP Top 10:2025 class. A teaching map, not a model of an attacker."
+    practice: "Составьте план защиты сайта. 1) В блоке #headers допишите файл заголовков (формат _headers):
+      Strict-Transport-Security с max-age, Content-Security-Policy с default-src 'self', object-src 'none',
+      frame-ancestors, form-action 'self' (без 'unsafe-inline' и 'unsafe-eval'), X-Content-Type-Options: nosniff и
+      Referrer-Policy. 2) В таблице #accounts для каждого из пяти аккаунтов впишите защиту: второй фактор
+      (приложение-аутентификатор, аппаратный ключ или пасскей). 3) В #updates скажите, что и как часто вы обновляете и
+      кто за это отвечает. 4) В #secrets скажите, где хранятся ключи и пароли (не в репозитории). 5) В #form-note
+      напишите, какие данные принимает главное действие проекта (названное словами из брифа) и почему форма может
+      отправлять их только на ваш домен. Все «…» нужно заменить. Эпоха: 6."
+    checks:
+      - "Нужна строка Strict-Transport-Security: max-age=31536000 (число секунд, не меньше семи цифр)."
+      - В Content-Security-Policy нужен default-src 'self'.
+      - Добавьте object-src 'none'.
+      - Добавьте frame-ancestors 'none' (или 'self'), чтобы сайт нельзя было встроить в чужую страницу.
+      - "Добавьте form-action 'self': форма сможет отправлять данные только на ваш адрес."
+      - "Уберите 'unsafe-inline' и 'unsafe-eval': они сводят CSP на нет."
+      - "Нужна строка X-Content-Type-Options: nosniff."
+      - Нужна строка Referrer-Policy со значением, например strict-origin-when-cross-origin.
+      - В заголовках остались «…». Допишите все значения.
+      - В таблице должно быть пять ячеек второго фактора.
+      - В таблице остались «…». Заполните каждую ячейку.
+      - "Назовите способ второго фактора: приложение-аутентификатор, аппаратный ключ или пасскей."
+      - "В обновлениях скажите, как часто и кто отвечает: например «раз в месяц, отвечаю я»."
+      - В секретах скажите, где хранятся (переменные окружения, менеджер паролей) и что не в репозитории.
+      - Назовите в заметке о форме главное действие проекта словами из брифа.
+      - Объясните, почему форма должна отправлять данные только на ваш домен (form-action 'self').
+    sources:
+      - title: OWASP Top 10:2025
+        url: https://top10.owasp.org/
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: OWASP Cheat Sheet Series
+        url: https://cheatsheetseries.owasp.org/
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Content Security Policy (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: MDN HTTP Observatory
+        url: https://developer.mozilla.org/en-US/observatory
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "OWASP: Password Storage Cheat Sheet"
+        url: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "NIST SP 800-63B: Digital Identity Guidelines, Authentication"
+        url: https://pages.nist.gov/800-63-4/sp800-63b.html
+        licence: PD
+        kind: spec
+        lang: en
+      - title: "Web Almanac 2024: Security"
+        url: https://almanac.httparchive.org/en/2024/security
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+      - title: Двухфакторная аутентификация (Википедия)
+        url: https://ru.wikipedia.org/wiki/Двухфакторная_аутентификация
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+    videos: []
+  - id: 15-quality/06-forms-spam
+    order: 6
+    title: "Безопасность формы: проверка на сервере и спам"
+    definition: Проверка формы на сервере — защита, которую нельзя обойти запросом мимо страницы. Спам останавливают
+      ловушка, лимит частоты и пауза, а не капча.
+    summary: Форма это единственное место сайта, где чужой текст попадает к вам в базу и в почту. После урока вы знаете,
+      почему проверка в браузере не защита, что проверяет сервер, как остановить спам без капчи, которая мешает людям и
+      делится данными с третьими сторонами, и пишете форму главного действия своего проекта с правилами для сервера.
+    minutes: 30
+    teaches:
+      - quality.forms-spam-security
+    requires:
+      - quality.owasp-basics
+      - html.form-validation
+      - infra.serverless-edge
+    diagram: "FormTrap: «Ловушка для ботов» (part 15, lesson 6). Four visitors (a person with a mouse, a person with a
+      screen reader and a password manager, a simple bot, a smart bot) meet a form with defences the person switches on:
+      a trap field hidden by colour, by display:none or off-screen with aria-hidden, a time check, a rate limit, a
+      third-party captcha. The table says who passes and which honest person is stopped by mistake. AttackFeed is reused
+      with a subset of measures."
+    practice: 'Защитите форму. 1) Форма отправляется методом post; у имени и телефона required, у всех трёх полей maxlength.
+      2) Добавьте ловушку для ботов: блок с классом hp, aria-hidden="true", внутри поле с tabindex="-1" и
+      autocomplete="off"; блок скрывайте сдвигом за край (position: absolute, большой отрицательный left), а не display:
+      none. 3) Добавьте скрытое поле ts для времени показа формы. 4) Уберите стороннюю капчу (скрипт recaptcha). 5) У
+      сообщения об ошибке form-error поставьте role="alert". 6) Кнопка отправки называется главным действием из брифа.
+      7) В таблице «Что делает сервер» для каждого поля впишите правило (с числами) и текст ошибки, текст ошибки для
+      посетителя не должен раскрывать внутренности (без SQL, stack, exception). 8) В #rate впишите лимит частоты числом
+      и единицей времени. Все «…» нужно заменить. Эпоха: 6.'
+    checks:
+      - Форма должна отправляться методом post, у неё должен быть action.
+      - У имени и телефона нужен required.
+      - У каждого поля нужен maxlength.
+      - Нужен блок .hp с aria-hidden="true" и полем с tabindex="-1" и autocomplete="off".
+      - "В стилях .hp сдвигают за край: position: absolute и большой отрицательный left."
+      - "Не прячьте ловушку через display: none: умные боты такие поля обходят."
+      - Добавьте скрытое поле name="ts".
+      - Уберите скрипт сторонней капчи.
+      - 'У #form-error нужен role="alert".'
+      - Кнопка отправки должна называться главным действием из брифа.
+      - В таблице должно быть три правила.
+      - В таблице правил остались «…». Заполните все ячейки.
+      - "В правилах нужны числа: длина, число знаков."
+      - "Текст ошибки для посетителя: «Не удалось отправить, повторите позже»; без SQL, stack и других внутренностей."
+      - Ограничение частоты запишите числом и единицей времени, например «5 заявок в час».
+    sources:
+      - title: "OWASP: Input Validation Cheat Sheet"
+        url: https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "OWASP: Query Parameterization Cheat Sheet"
+        url: https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "OWASP: Error Handling Cheat Sheet"
+        url: https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "OWASP: Cross-Site Request Forgery Prevention Cheat Sheet"
+        url: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Client-side form validation (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation
+        licence: CC-BY-SA
+        kind: course
+        lang: en
+      - title: Inaccessibility of CAPTCHA (W3C)
+        url: https://www.w3.org/TR/turingtest/
+        licence: link-only
+        kind: article
+        lang: en
+    videos: []
+  - id: 15-quality/07-152fz
+    order: 7
+    title: "152-ФЗ: персональные данные, оператор, согласие"
+    definition: Оператор персональных данных — тот, кто организует их обработку, например владелец сайта с формой. Для
+      каждого поля нужны цель, основание и срок хранения.
+    summary: Любая форма делает владельца сайта оператором персональных данных. После урока вы знаете, что считается
+      персональными данными, какие основания обработки бывают, как устроено согласие после изменений 2025 года, какие
+      обязанности лежат на операторе (политика, уведомление, хранение в России, утечки) и составляете реестр обработки
+      для формы своего проекта. Это ориентир на 28 октября 2026 года, а не юридическая консультация.
+    minutes: 35
+    teaches:
+      - quality.152fz
+    requires:
+      - html.forms
+      - data.privacy-by-design
+      - data.data-localisation
+      - quality.forms-spam-security
+      - texts.legal-text
+    diagram: "DutiesMap: «Что на мне лежит» (part 15, lesson 7). Ten things a site may do with people data (a form, a
+      counter, session recording, a foreign chat widget, a newsletter, an account, payment, a third-party form handler,
+      free text about a case, photographs). The person ticks the ones the site has and the map lists the duties of an
+      operator that follow, each with its article of 152-FZ (or 38-FZ, the Civil Code). Dated 28.10.2026, not legal
+      advice."
+    practice: "Составьте реестр обработки для формы своего проекта. 1) Оператор: название или имя проекта из брифа. 2)
+      Источник данных: форма главного действия (назовите словами из брифа). 3) В таблице для каждого поля (имя, телефон,
+      почта, сообщение) впишите цель, основание (согласие, договор, закон или законный интерес) и срок хранения с
+      числом. 4) Где хранится первичная запись данных граждан РФ: в России, у какого провайдера или на каком сервере. 5)
+      Перечислите минимум два сервиса, которые получают данные (счётчик, почтовая служба, CRM, приёмник форм). 6) В
+      #special скажите, как вы поступаете с особыми данными (здоровье, дело человека в свободном тексте). 7) В #notify
+      решите, подавать ли уведомление Роскомнадзору, и объясните почему (не короче четырёх слов). 8) Если в брифе есть
+      английский, скажите в #lang-force, какой язык текста имеет юридическую силу. Все «…» нужно заменить. Эпоха: 6."
+    checks:
+      - "Оператор: название или имя проекта из брифа."
+      - Назовите форму главным действием проекта словами из брифа.
+      - "В таблице должно быть четыре поля: имя, телефон, почта, сообщение."
+      - В таблице остались «…». Заполните цель, основание и срок для каждого поля.
+      - "Основание: согласие, договор, закон или законный интерес."
+      - "Срок хранения нужен с числом: например «3 года после последнего обращения»."
+      - Скажите, что первичные данные хранятся в России, и у какого провайдера или на каком сервере.
+      - Перечислите минимум два сервиса, получающих данные.
+      - В списке сервисов остались «…».
+      - "Скажите, как вы поступаете с особыми данными: не собираете, подсказываете не писать, удаляете."
+      - Решите, подавать ли уведомление Роскомнадзору, и объясните причину не короче четырёх слов.
+      - Скажите, текст на каком языке имеет юридическую силу (например, на русском).
+    sources:
+      - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: Федеральный закон «О персональных данных» (Википедия)
+        url: https://ru.wikipedia.org/wiki/Федеральный_закон_«О_персональных_данных»
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: "Web Almanac 2024: Privacy"
+        url: https://almanac.httparchive.org/en/2024/privacy
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+    videos: []
+  - id: 15-quality/08-policy-consent
+    order: 8
+    title: Политика обработки и согласие на сайте
+    definition: Политика обработки — публичный документ о том, что делают с данными посетителей. Согласие — отдельное
+      действие человека с собственным текстом.
+    summary: "Реестр из прошлого урока превращается в два документа: политику, которую читает любой, и согласие, которое
+      человек даёт сам. После урока вы знаете, из каких разделов состоит политика, как оформить согласие отдельно от
+      других условий, чего в нём не должно быть, и собираете для своей формы политику из десяти разделов и честное
+      согласие с отдельной галочкой на рассылку."
+    minutes: 30
+    teaches:
+      - quality.privacy-notice
+    requires:
+      - quality.152fz
+      - texts.legal-text
+      - html.form-validation
+      - html.lang-i18n
+    diagram: "ConsentDesign: «Пять способов спросить согласие» (part 15, lesson 8). Five consent lines under a request form
+      shown as form fragments (pre-ticked with the offer, no checkbox, one box for offer and data, a separate empty box
+      with operator, data and purpose, the same plus a separate newsletter box). A verdict against article 9 as the
+      lesson reads it, and for the good ones the consent record (date, text version, purpose)."
+    practice: 'Приведите форму и политику в порядок. 1) Согласие в блоке #consent: чекбокс name="consent" должен быть пустым
+      (без checked) и обязательным (required); текст без слова «оферта»; в нём назван оператор (имя проекта из брифа),
+      данные и цель («для…» или «чтобы…»), слово «обработк…», и ссылка на политику (#privacy). 2) Рассылка отдельным
+      чекбоксом name="newsletter": пустой и необязательный. 3) В подвале ссылка на #privacy. 4) Политика: десять
+      разделов с id p-operator, p-data, p-purposes, p-basis, p-keep, p-recipients, p-storage, p-rights, p-cookies,
+      p-version. В p-operator укажите имя и город из брифа, в p-rights почту из брифа, срок ответа в десять рабочих дней
+      и отзыв согласия, в p-keep срок числом, в p-storage Россию, в p-recipients сервисы, в p-cookies счётчик, в
+      p-version дату по образцу 28.10.2026. Если в брифе есть английский, скажите, что юридическую силу имеет русский
+      текст. Не оставляйте «…». Эпоха: 4.'
+    checks:
+      - У какого-то поля нет подписи.
+      - Чекбокс согласия name="consent" должен быть обязательным (required) и пустым (без checked).
+      - "Уберите оферту из текста согласия: оно должно быть отдельным."
+      - "В согласии нужны слово «обработк…» и цель: «чтобы ответить на заявку»."
+      - "В согласии назовите оператора: имя проекта из брифа."
+      - 'В согласии нужна ссылка на политику: <a href="#privacy">.'
+      - 'Рассылке нужен отдельный чекбокс name="newsletter": пустой и необязательный.'
+      - В подвале нужна ссылка на политику.
+      - В политике должны быть десять разделов с указанными id.
+      - В политике остались «…». Заполните каждый раздел.
+      - "В p-operator назовите оператора: имя из брифа."
+      - В p-operator укажите город из брифа.
+      - "В p-keep назовите срок: например «три года»."
+      - "В p-recipients назовите получателей: хостинг, почтовую службу, счётчик."
+      - В p-storage скажите, что данные хранятся в России.
+      - В p-rights укажите почту из брифа.
+      - В p-rights напишите срок ответа (десять рабочих дней) и что согласие можно отозвать.
+      - В p-cookies скажите про cookie и счётчик.
+      - В p-version нужна дата по образцу 28.10.2026.
+      - В политике скажите, что юридическую силу имеет русский текст.
+    sources:
+      - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: "GDPR, статья 13: информация, которую нужно сообщить человеку (для сравнения)"
+        url: https://gdpr-info.eu/art-13-gdpr/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "Web Almanac 2024: Privacy"
+        url: https://almanac.httparchive.org/en/2024/privacy
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+    videos: []
+  - id: 15-quality/09-cookies
+    order: 9
+    title: Cookie, трекеры и честный баннер
+    definition: Cookie — небольшие файлы в браузере, их делят на необходимые, предпочтения, аналитику и рекламу. Честный
+      баннер даёт равный выбор.
+    summary: Cookie ставит почти каждый сайт, и не все они одинаковы. После урока вы отличаете необходимые cookie от
+      аналитических и рекламных, знаете, что на этот счёт говорит российская практика и правила ЕС для посетителей
+      оттуда, составляете таблицу cookie своего проекта и баннер, где «принять» и «отклонить» равноценны, а счётчик не
+      запускается до выбора. Это ориентир на 28 октября 2026 года, а не юридическая консультация.
+    minutes: 25
+    teaches:
+      - quality.cookies
+    requires:
+      - quality.152fz
+      - metrics.counter-setup
+      - metrics.analytics-ethics
+      - server.sessions-and-cookies
+      - net.http-status-headers
+    diagram: "CookieInspector: «Инспектор cookie» (part 15, lesson 9). Seven cookies of a small site (session, csrf, lang,
+      consent record, Metrika id, chat visitor, ad id) to sort into necessary, preferences, analytics or advertising,
+      then checked; and a banner whose five features the person sets (a bigger accept, a buried reject, pre-ticked
+      switches, a cookie wall, a returning banner) with a count of the signs of steering."
+    practice: 'Опишите cookie своего проекта и сделайте баннер. 1) В таблице #cookies (строки tr.cookie) минимум пять
+      cookie: у каждой строки атрибут data-cat (necessary, prefs, analytics или ads) и data-consent (yes или no: нужно
+      ли согласие). Необходимые (necessary) не требуют согласия, аналитические требуют. Хотя бы одна строка должна
+      называть главное действие проекта словами из брифа. 2) Баннер #cookie-banner: role="dialog" и aria-label, три
+      кнопки с одним классом btn: #accept, #reject и #settings; без класса primary; ссылка на политику #privacy. 3) Код
+      счётчика сделайте «спящим»: script type="text/plain" с data-consent="analytics". 4) В подвале ссылка или кнопка с
+      атрибутом data-cookie-settings, чтобы человек мог передумать. 5) В заметке #eu-note скажите, что делаете для
+      посетителей из ЕС (согласие до запуска аналитики), и назовите язык или аудиторию из брифа. Все «…» нужно заменить.
+      Эпоха: 6.'
+    checks:
+      - В таблице нужно минимум пять строк tr.cookie с data-cat и data-consent.
+      - В таблице остались «…». Заполните все ячейки.
+      - Нужна хотя бы одна необходимая cookie с data-consent="no".
+      - 'Необходимой cookie не нужно согласие: поставьте data-consent="no".'
+      - Нужна аналитическая cookie с data-consent="yes".
+      - 'Аналитической cookie согласие нужно: data-consent="yes".'
+      - Одна строка должна называть главное действие проекта словами из брифа.
+      - 'У #cookie-banner нужны role="dialog" и aria-label.'
+      - "В баннере нужны кнопки #accept и #reject с классом btn."
+      - "Нужно три кнопки с одним классом btn: принять, отклонить, настроить."
+      - "Уберите класс primary: кнопки должны быть равноценны."
+      - "В баннере нужна кнопка #reject."
+      - "В баннере нужна кнопка #settings."
+      - "В баннере нужна ссылка на политику #privacy."
+      - 'Сделайте код счётчика «спящим»: script type="text/plain" data-consent="analytics".'
+      - "Остался обычный script: счётчик не должен запускаться до согласия."
+      - В подвале нужна ссылка с атрибутом data-cookie-settings, чтобы передумать.
+      - В заметке скажите, что для посетителей из ЕС аналитика включается после согласия, и назовите язык или аудиторию.
+    sources:
+      - title: Using HTTP cookies (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: Third-party cookies (MDN)
+        url: https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/Third-party_cookies
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "Web Almanac 2024: Privacy"
+        url: https://almanac.httparchive.org/en/2024/privacy
+        licence: CC-BY-SA
+        kind: article
+        lang: en
+      - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: "EDPB: Guidelines 05/2020 on consent under GDPR"
+        url: https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "ICO: Guidance on the use of storage and access technologies"
+        url: https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/
+        licence: link-only
+        kind: docs
+        lang: en
+    videos: []
+  - id: 15-quality/10-copyright
+    order: 10
+    title: "Авторское право: фото, шрифты, тексты и лицензии"
+    definition: Авторское право возникает у автора с созданием произведения, без регистрации. Чужое используют по лицензии
+      или в случаях, прямо названных в законе.
+    summary: Найти картинку не значит получить на неё право. После урока вы знаете, как в России возникает авторское право и
+      что такое исключительное право и лицензия, читаете лицензии Creative Commons, Unsplash, SIL OFL и MIT, отличаете
+      цитату от заимствования, понимаете, что нужно для фото человека, и составляете реестр материалов своего сайта с
+      лицензиями, заменяя то, на что права нет. Это ориентир на 28 октября 2026 года, а не юридическая консультация.
+    minutes: 30
+    teaches:
+      - quality.copyright-images
+    requires:
+      - html.images
+      - texts.expert-text
+      - css.web-fonts
+    diagram: "LicenceGame: «Можно ли это использовать» (part 15, lesson 10). Eleven materials for a commercial site (an
+      unattributed search-result photo, Unsplash, CC BY-SA, CC BY-NC, an OFL font, a pirated font, MIT icons, a short
+      quotation, a copied competitor text, a staff photo, an AI image). The person picks allowed, allowed with
+      conditions or not allowed, reads the reason with the article of the Civil Code or the licence, and gets a
+      register."
+    practice: 'Проведите аудит материалов сайта. В реестре #audit у каждого материала (строка tr.asset) четыре ячейки:
+      источник, автор, лицензия и ссылка. 1) Замените материалы без права: у них стоят «неизвестна», «из поиска» и
+      data-licence="unknown". Выберите источник с понятной лицензией (Wikimedia Commons, Unsplash, Pexels, собственная
+      съёмка) и пропишите его, а data-licence замените на cc0, cc-by, cc-by-sa, unsplash, own, ofl или mit. 2) Материал
+      с лицензией CC BY-NC (data-licence="cc-by-nc") не годится для коммерческого сайта: замените. 3) У материалов cc-by
+      и cc-by-sa поставьте data-credited="yes" и разместите указание авторства в подвале (footer.credits: слова «Фото»,
+      «Автор» или «Источник»). 4) Для каждого человека из брифа (если он есть) в строке напишите, что получено
+      письменное согласие на публикацию фото. 5) В #own-licence напишите, под какой лицензией ваши собственные тексты и
+      изображения (например, © с годом или CC BY 4.0). Не оставляйте «…». Строки для items, people и proofs из брифа уже
+      в таблице. Эпоха: 5.'
+    checks:
+      - В реестре должно быть не меньше пяти материалов.
+      - В реестре остались «…». Заполните источник, автора, лицензию и ссылку.
+      - "Остались «неизвестна», «не знаю», «из поиска» или «согласия нет»: замените материалы с неясным правом."
+      - 'У какой-то строки data-licence="unknown": выберите источник с понятной лицензией.'
+      - Лицензия CC BY-NC не подходит сайту, который продаёт услуги. Замените материал.
+      - Для материалов cc-by и cc-by-sa нужно разместить указание авторства и поставить data-credited="yes".
+      - "В подвале footer.credits напишите указание авторства: «Фото: …»."
+      - В подвале остались «…».
+      - В реестре нужна строка про шрифт.
+      - В реестре нужны строки для каждой услуги или товара из брифа.
+      - В реестре нужны строки для подтверждений из брифа.
+      - Для фото людей из брифа напишите, что получено письменное согласие.
+      - Скажите, под какой лицензией ваши тексты и изображения, и укажите год.
+    sources:
+      - title: Гражданский кодекс РФ, часть 4 (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_64629/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: "Creative Commons: Share your work, licences explained"
+        url: https://creativecommons.org/share-your-work/cclicenses/
+        licence: CC-BY
+        kind: docs
+        lang: en
+      - title: "Creative Commons: CC BY-SA 4.0 (русский)"
+        url: https://creativecommons.org/licenses/by-sa/4.0/deed.ru
+        licence: CC-BY
+        kind: docs
+        lang: ru
+      - title: "Creative Commons: Best practices for attribution"
+        url: https://wiki.creativecommons.org/wiki/Best_practices_for_attribution
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: "Google Fonts: Licensing and FAQ"
+        url: https://developers.google.com/fonts/faq
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "Pexels: License"
+        url: https://www.pexels.com/license/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: Авторское право (Википедия)
+        url: https://ru.wikipedia.org/wiki/Авторское_право
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+    videos: []
+  - id: 15-quality/11-ad-law
+    order: 11
+    title: Закон о рекламе и правила профессии
+    definition: Реклама по закону — информация для неопределённого круга лиц, привлекающая внимание к объекту. Она должна
+      быть добросовестной и достоверной.
+    summary: Описание услуг на сайте, скорее всего, реклама, и на неё действует закон. После урока вы знаете, что считается
+      рекламой, какие четыре беды перечисляет статья 5 закона «О рекламе» (недобросовестность, недостоверность,
+      неэтичность, скрытость), какие фразы нарушают её чаще всего, как правила профессии (на примере адвоката)
+      ограничивают рассказ о себе, и проверяете тексты своего сайта по списку. Это ориентир на 28 октября 2026 года, не
+      юридическая консультация.
+    minutes: 30
+    teaches:
+      - quality.ad-law-ethics
+    requires:
+      - story.expert-ethics
+      - growth.ad-labelling
+      - texts.expert-text
+    diagram: "ClaimLens: «Лупа для фраз» (part 15, lesson 11). Seven phrases of expert sites (best in town, guaranteed
+      result, a starred condition, a daily sale, thousands of clients, cheaper than competitors, a lawyer review of a
+      won case). For each: what is wrong (superlative, guarantee, hidden condition, false urgency, unverifiable figure,
+      unfair comparison, professional rules) and the honest rewrite out of three, with the rule it rests on."
+    practice: "Вам дан абзац сайта с шестью рискованными фразами. 1) В таблице #claims для каждой фразы (строка tr.claim)
+      впишите в ячейки: type (что не так: превосходная степень, гарантия, скрытое условие, ложная срочность,
+      непроверяемая цифра, сравнение), rewrite (честная замена) и basis (чем подтверждается: документ, реестр, номер,
+      или «удалено»). 2) В basis хотя бы одной фразы назовите подтверждение из брифа (одно из доказательств). 3)
+      Перепишите абзац #final-text: уберите превосходные степени, гарантии, «только сегодня», «тысячи», сравнения со
+      звёздочками, оставьте название проекта и чем он занимается из брифа и хотя бы одно число или дату. 4) В
+      #profession-rules напишите, какие правила вашей профессии вы проверили (кодекс этики, СРО, палата, закон) и что
+      они запрещают, не короче пяти слов. Не оставляйте «…». Эпоха: 7."
+    checks:
+      - В таблице должно быть шесть строк с фразами.
+      - В таблице остались «…». Заполните «что не так», замену и подтверждение.
+      - "Назовите, что не так: превосходная степень, гарантия, скрытое условие, ложная срочность, непроверяемая цифра,
+        сравнение."
+      - В «чем подтверждается» назовите документ, реестр, номер или напишите «удалено».
+      - В одной из ячеек «чем подтверждается» назовите подтверждение из брифа.
+      - В абзаце остались превосходные степени, гарантия, «только сегодня», «тысячи», сравнение или звёздочка.
+      - В абзаце должно быть название проекта из брифа.
+      - В абзаце должно быть, чем занимается проект, словами из брифа.
+      - Добавьте в абзац число или дату, которые вы можете подтвердить.
+      - Назовите правила профессии, которые проверили (кодекс, СРО, палата, закон), и что они запрещают, не короче пяти
+        слов.
+    sources:
+      - title: Федеральный закон «О рекламе» 38-ФЗ (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_58968/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: "КонсультантПлюс: Кодекс профессиональной этики адвоката (подборка)"
+        url: https://www.consultant.ru/law/podborki/kodeks_professionalnoj_jetiki_advokata/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: "Адвокатская газета: «Критерии допустимости. К вопросу о правомерности рекламы адвокатской деятельности»"
+        url: https://www.advgazeta.ru/arhivnye-zapisi/kriterii-dopustimosti/
+        licence: proprietary-link
+        kind: article
+        lang: ru
+      - title: "Яндекс Директ: как работает обязательная маркировка рекламы в интернете"
+        url: https://direct.yandex.ru/base/articles/markirovka-reklamy-v-internete
+        licence: proprietary-link
+        kind: article
+        lang: ru
+    videos: []
+  - id: 15-quality/12-consumer
+    order: 12
+    title: "Защита прав потребителей: продажа и оферта онлайн"
+    definition: Закон о защите прав потребителей требует, чтобы продавец заранее сообщал сведения о себе и о товаре и давал
+      покупателю право отказаться.
+    summary: Как только сайт что-то продаёт или предлагает платную услугу человеку, он подчиняется закону «О защите прав
+      потребителей». После урока вы знаете, какую информацию о продавце и товаре закон требует показать, когда
+      выставленная на сайте цена становится публичной офертой, на какие сроки может отказаться от покупки или услуги
+      человек, и собираете страницу условий для своего проекта. Это ориентир на 28 октября 2026 года, не юридическая
+      консультация.
+    minutes: 30
+    teaches:
+      - quality.consumer-law
+    requires:
+      - quality.ad-law-ethics
+      - quality.privacy-notice
+      - html.forms
+      - texts.legal-text
+    diagram: "ReturnClock: «Часы возврата» (part 15, lesson 12). A distance purchase or a paid service: delivery date, date
+      of the request, whether the return procedure was given in writing, whether the goods are custom. The diagram says
+      until when the buyer may withdraw (7 days, 3 months, before delivery any time), when the refund is due (10 days)
+      and that a service may be refused at any time against actual costs."
+    practice: "Соберите страницу условий для проекта. Шесть разделов с id: seller, goods, payment, delivery, return, claims,
+      а также offer. 1) seller: название или имя проекта из брифа, ИНН (в учебном образце нули), адрес или город, режим
+      работы, телефон и почта из брифа. 2) goods: каждый товар или услуга из брифа с ценой в рублях (₽ или «руб.») и что
+      входит в цену. 3) payment и delivery: как платят и как и когда оказывается услуга или доставляется товар; payment
+      упоминает чек. 4) return: в return-goods скажите о семи днях, в return-service об отказе от услуги с оплатой
+      фактических расходов (или «не применимо», если вы этого не продаёте). 5) claims: куда писать претензию (почта из
+      брифа) и что вы ответите. 6) offer: ссылка на текст оферты и фраза о том, что договор заключается, когда человек
+      делает главное действие из брифа и оплачивает. Все «…» нужно заменить. Эпоха: 6."
+    checks:
+      - Нужны семь разделов с id seller, goods, payment, delivery, return, claims, offer.
+      - На странице остались «…». Заполните все разделы.
+      - "Назовите продавца: имя или название проекта из брифа."
+      - В «Кто продаёт» нужны ИНН или ОГРН (в учебном образце нули).
+      - Укажите телефон из брифа.
+      - Укажите почту из брифа.
+      - Укажите город или адрес из брифа.
+      - Перечислите каждый товар или услугу из брифа.
+      - "Цена указывается в рублях: «₽» или «руб.»."
+      - В разделе об оплате скажите про кассовый чек.
+      - Скажите, как и в какой срок оказывается услуга или доставляется товар.
+      - "Для товаров: семь дней (или «не продаём» / «не применимо»)."
+      - "Для услуг: отказ в любое время с оплатой фактических расходов (или «не применимо»)."
+      - В претензиях укажите почту из брифа.
+      - В разделе об оферте нужна ссылка на её текст.
+      - В разделе об оферте назовите главное действие проекта словами из брифа.
+    sources:
+      - title: Закон РФ «О защите прав потребителей» (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_305/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: Гражданский кодекс РФ, часть 2 (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_9027/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: Защита прав потребителей (Википедия)
+        url: https://ru.wikipedia.org/wiki/Защита_прав_потребителей
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: "Федеральный закон «О рекламе» 38-ФЗ, статья 8: реклама при дистанционной продаже (КонсультантПлюс)"
+        url: https://www.consultant.ru/document/cons_doc_LAW_58968/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+    videos: []
+  - id: 15-quality/13-a11y-law-world
+    order: 13
+    title: Доступность и закон, и правила других стран
+    definition: Заявление о доступности — страница, где честно сказано, что на сайте проверено, а что нет. ГОСТ Р 52872-2019
+      основан на WCAG 2.1.
+    summary: Сайт читают не только в России. После урока вы знаете, что есть в России про доступность сайтов (ГОСТ Р
+      52872-2019 и требования к официальным сайтам), чем отличаются GDPR, ePrivacy, ADA и европейский закон о
+      доступности и когда они касаются небольшого сайта, и составляете для проекта карту аудитории и честное заявление о
+      доступности. Это ориентир на 28 октября 2026 года, не юридическая консультация.
+    minutes: 30
+    teaches:
+      - quality.a11y-law
+      - quality.intl-law
+    requires:
+      - quality.wcag22
+      - quality.keyboard-screen-reader
+      - quality.152fz
+      - quality.cookies
+      - html.lang-i18n
+    diagram: "RegimeMatrix: «Какие правила рядом» (part 15, lesson 13). The person ticks where visitors come from (Russia,
+      the EU, the USA) and what the site does (a form, analytics cookies, online sales, a public commercial site); the
+      matrix lists the regimes that may apply (152-FZ, the advertising law, the consumer law, GDPR, ePrivacy, the
+      European Accessibility Act, ADA, US state laws) with what a small site does about each and the sanction in a
+      word."
+    practice: "Составьте две вещи. 1) Карту аудитории: в таблице #audience по строке на каждый язык из брифа уже есть
+      (tr.aud). Для каждой впишите: где живёт аудитория, какие правила рядом (152-ФЗ, GDPR, ePrivacy, EAA, ADA) и что вы
+      для этого делаете. Для английского не забудьте GDPR. 2) Заявление о доступности в разделе #a11y-statement: цель
+      (WCAG 2.2, уровень AA; можно и ГОСТ Р 52872-2019), статус проверки (частично проверено, что не проверялось), дата
+      проверки по образцу 28.10.2026, список известных ограничений (минимум два пункта в списке #limits) и почта для
+      сообщений о проблемах из брифа. Не пишите «полностью соответствует»: пока нет проверки, это неправда. Не
+      оставляйте «…». Эпоха: 8."
+    checks:
+      - В таблице должна быть строка на каждый язык из брифа.
+      - В таблице аудитории остались «…».
+      - "В «Какие правила рядом» назовите акты: 152-ФЗ, GDPR, ePrivacy, EAA или ADA."
+      - Для английской версии назовите GDPR.
+      - "Цель: WCAG 2.2, уровень AA."
+      - В статусе скажите, что проверено и что нет (не короче пяти слов).
+      - "Уберите «полностью соответствует»: без полной проверки это неправда."
+      - Дата проверки по образцу 28.10.2026.
+      - Нужно минимум два известных ограничения в списке.
+      - В ограничениях остались «…».
+      - Укажите почту из брифа для сообщений о проблемах.
+    sources:
+      - title: Приказ Росстандарта от 29.08.2019 № 589-ст об утверждении ГОСТ Р 52872-2019
+        url: https://legalacts.ru/doc/prikaz-rosstandarta-ot-29082019-n-589-st-ob-utverzhdenii-natsionalnogo/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: ГОСТ Р 52872-2019 (текст на сайте Тифлоцентра)
+        url: https://tiflocentre.ru/documents/gost-r-52872-2019.php
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+      - title: "W3C WAI: Web Accessibility Laws and Policies"
+        url: https://www.w3.org/WAI/policies/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "W3C WAI: Developing an Accessibility Statement"
+        url: https://www.w3.org/WAI/planning/statements/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "GDPR, статья 3: территориальная сфера действия"
+        url: https://gdpr-info.eu/art-3-gdpr/
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: Общий регламент по защите данных (Википедия)
+        url: https://ru.wikipedia.org/wiki/Общий_регламент_по_защите_данных
+        licence: CC-BY-SA
+        kind: article
+        lang: ru
+      - title: European Accessibility Act (Европейская комиссия)
+        url: https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/union-equality-strategy-rights-persons-disabilities-2021-2030/european-accessibility-act_en
+        licence: link-only
+        kind: docs
+        lang: en
+      - title: "ADA.gov: Guidance on Web Accessibility and the ADA"
+        url: https://www.ada.gov/resources/web-guidance/
+        licence: PD
+        kind: docs
+        lang: en
+    videos: []
+  - id: 15-quality/14-prelaunch
+    order: 14
+    title: Предзапусковый чек-лист
+    definition: Предзапусковый чек-лист — список проверок по шести блокам перед выкладкой сайта. Блокер не оставляют
+      неисправленным, замечания получают срок.
+    summary: "Запуск сайта не момент вдохновения, а список, который проходят по пунктам. После урока вы собираете тридцать
+      проверок из всей части в шесть блоков (скорость и надёжность, доступность, безопасность, право, поиск и аналитика,
+      главное действие), умеете отличать блокер от замечания и составляете отчёт «готов или не готов» для своего
+      проекта: цвет каждого блока, красные пункты со сроком и ответственным, проверка на телефоне и план отката."
+    minutes: 30
+    teaches:
+      - quality.prelaunch-checklist
+    requires:
+      - quality.core-web-vitals
+      - quality.wcag22
+      - quality.e2e-testing
+      - quality.security-headers
+      - quality.forms-spam-security
+      - quality.152fz
+      - quality.privacy-notice
+      - quality.cookies
+      - quality.copyright-images
+      - quality.ad-law-ethics
+      - quality.consumer-law
+      - quality.a11y-law
+      - growth.technical-seo
+      - infra.backups
+    diagram: "LaunchPanel: «Панель запуска» (part 15, lesson 14). Thirty checks in six blocks (speed and reliability,
+      accessibility, security, law, search and analytics, the main action and content), each not checked, fine or a
+      problem. Block colours (green, yellow, red), readiness out of thirty and the list of blockers that stop the
+      launch."
+    practice: "Составьте отчёт о готовности. 1) В каждом из шести блоков (.block с id b-speed, b-a11y, b-security, b-law,
+      b-seo, b-action) поставьте data-status: green, yellow или red, и запишите в .note один главный вывод (не
+      оставляйте «…»). 2) В таблице #fixes для каждого красного или жёлтого пункта впишите, что исправить,
+      ответственного и срок по образцу 04.11.2026. 3) #mobile: скажите, что главное действие проекта (названное словами
+      из брифа) пройдено на телефоне. 4) #nojs: что происходит, если скрипт не загрузился. 5) #backup: где резервная
+      копия и как откатить выкладку. 6) В таблице #contacts для трёх мест (шапка, подвал, страница контактов) впишите
+      телефон и почту из брифа и отметьте, что они совпадают. 7) Вердикт #verdict с атрибутом data-ready (yes или no) и
+      словами «готов» или «не готов». Не оставляйте «…». Эпоха: 8."
+    checks:
+      - Нужно шесть блоков .block.
+      - У каждого блока data-status должен быть green, yellow или red.
+      - В каждом блоке нужен вывод в .note.
+      - В отчёте остались «…». Заполните всё.
+      - В таблице исправлений нужна хотя бы одна строка.
+      - В исправлениях укажите ответственного.
+      - В исправлениях укажите срок по образцу 04.11.2026.
+      - "В #mobile назовите главное действие проекта словами из брифа."
+      - "В #mobile скажите, что проверка была на телефоне."
+      - "В #nojs скажите, что работает без скрипта."
+      - "В #backup скажите про копию и про откат."
+      - "Нужны три строки контактов: шапка, подвал, страница контактов."
+      - В контактах нужен телефон из брифа.
+      - В контактах нужна почта из брифа.
+      - "Отметьте, что контакты совпадают: «да, совпадает»."
+      - 'У #verdict нужен data-ready="yes" или "no".'
+      - В вердикте напишите «готов» или «не готов».
+    sources:
+      - title: Web Vitals (web.dev)
+        url: https://web.dev/articles/vitals
+        licence: CC-BY
+        kind: article
+        lang: en
+      - title: Learn Accessibility (web.dev)
+        url: https://web.dev/learn/accessibility
+        licence: CC-BY
+        kind: course
+        lang: en
+      - title: OWASP Cheat Sheet Series
+        url: https://cheatsheetseries.owasp.org/
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: MDN HTTP Observatory
+        url: https://developer.mozilla.org/en-US/observatory
+        licence: CC-BY-SA
+        kind: docs
+        lang: en
+      - title: "Google Search Central: SEO Starter Guide"
+        url: https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+        licence: CC-BY
+        kind: docs
+        lang: en
+      - title: Lighthouse overview (Chrome for Developers)
+        url: https://developer.chrome.com/docs/lighthouse/overview
+        licence: CC-BY
+        kind: docs
+        lang: en
+      - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+        url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+        licence: proprietary-link
+        kind: docs
+        lang: ru
+    videos: []
