@@ -1,9 +1,19 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="ink">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="text-scale" content="scale" />
+		<meta name="color-scheme" content="dark light" />
+		<script>
+			// Before paint: the theme the person chose, else the system's, else Ink.
+			try {
+				var t = localStorage.getItem('learn.theme');
+				var l = matchMedia('(prefers-color-scheme: light)').matches;
+				document.documentElement.dataset.theme = t === 'ink' || t === 'paper' ? t : l ? 'paper' : 'ink';
+			} catch (e) {
+				document.documentElement.dataset.theme = 'ink';
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
