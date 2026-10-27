@@ -70,7 +70,7 @@
 		{/each}
 	</div>
 
-	<pre class="dg-box dg-mono code" tabindex="0" aria-label="Разметка варианта">{way.code}</pre>
+	<pre class="dg-box dg-mono code">{way.code}</pre>
 
 	<dl class="res" aria-live="polite">
 		<div><dt>Tab доходит</dt><dd>{way.tab ? '✓ да' : '✕ нет'}</dd></div>

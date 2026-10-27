@@ -1,6 +1,6 @@
 <!--
 	«Часы возврата» (part 15, lesson 12). A distance purchase or a paid service: the person sets the
-	dates (order, delivery) and three facts (goods or service; whether the seller gave the return
+	dates (delivery and the day of the request) and three facts (goods or service; whether the seller gave the return
 	procedure in writing at delivery; whether the goods were made to the buyer's own specification),
 	and the diagram says until when the buyer may withdraw and what the seller owes. The periods are
 	those of article 26.1 and article 32 of the Law on Consumer Protection as the lesson reads them on
@@ -12,7 +12,6 @@
 
 	type Kind = 'goods' | 'service';
 	let kind = $state<Kind>('goods');
-	let order = $state('2026-11-02');
 	let delivered = $state('2026-11-06');
 	let informed = $state(true);
 	let custom = $state(false);
@@ -62,7 +61,6 @@
 
 	{#if kind === 'goods'}
 		<div class="grid">
-			<label>Дата заказа <input type="date" bind:value={order} /></label>
 			<label>Дата получения <input type="date" bind:value={delivered} /></label>
 			<label>Дата требования о возврате <input type="date" bind:value={requestDay} /></label>
 		</div>
