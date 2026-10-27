@@ -1,6 +1,6 @@
 <!--
 	One prop of the comic kit (kit.ts), drawn in a 150 × 130 box in the system's line language:
-	brass strokes on ink bodies, the CRT's amber only on a 1991 screen, the echo light for what is
+	brass strokes on ink bodies (no window has traffic lights: a browser is its address field), the CRT's amber only on a 1991 screen, the echo light for what is
 	alive (a link, a packet in flight, a lit LED). Every colour is a token, so Paper redraws it.
 	The label is drawn text and the whole scene is aria-hidden: whatever the label says, the
 	panel's lines must say too.
@@ -22,9 +22,9 @@
 	<rect class="body" x="14" y="4" width="122" height="96" rx="7" />
 	<rect class="screen crt-screen" x="26" y="15" width="98" height="70" rx="4" />
 	{#if label}
-		<text class="amber t" x="33" y="33" textLength={fit(label, 86, 11)} lengthAdjust="spacingAndGlyphs">{label}</text>
+		<text class="amber t code" x="33" y="33" textLength={fit(label, 86, 11)} lengthAdjust="spacingAndGlyphs">{label}</text>
 	{:else}
-		<text class="amber t" x="33" y="33">WorldWideWeb</text>
+		<text class="amber t code" x="33" y="33">WorldWideWeb</text>
 	{/if}
 	<path class="amber-line" d="M33 45 H104 M33 54 H92" />
 	<path class="echo-line" d="M33 66 H78" />
@@ -37,19 +37,18 @@
 	<rect class="btn" x="118" y="13" width="9" height="9" /><rect class="btn" x="130" y="13" width="9" height="9" />
 	<rect class="btn" x="10" y="28" width="16" height="12" /><rect class="btn" x="29" y="28" width="16" height="12" />
 	<rect class="field" x="49" y="28" width="92" height="12" />
-	{#if label}<text class="t small" x="52" y="37" textLength={fit(label, 86, 8.5)} lengthAdjust="spacingAndGlyphs">{label}</text>{/if}
+	{#if label}<text class="t small code" x="52" y="37" textLength={fit(label, 86, 8.5)} lengthAdjust="spacingAndGlyphs">{label}</text>{/if}
 	<rect class="screen paperish" x="10" y="44" width="130" height="76" />
 	<path class="rule" d="M10 62 H140 M54 62 V120" />
 	<path class="echo-line" d="M16 72 H46 M16 82 H44 M16 92 H46" />
 	<path class="ink-line" d="M60 72 H132 M60 80 H126 M60 88 H130" />
 	<rect class="counter" x="84" y="102" width="46" height="12" />
-	<text class="amber t small" x="88" y="111">000137</text>
+	<text class="amber t small code" x="88" y="111">000137</text>
 {:else if name === 'browser'}
 	<rect class="body" x="4" y="10" width="142" height="110" />
 	<path class="rule" d="M4 28 H146" />
-	<circle class="dot" cx="13" cy="19" r="2.5" /><circle class="dot" cx="21" cy="19" r="2.5" /><circle class="dot" cx="29" cy="19" r="2.5" />
-	<rect class="field" x="38" y="14" width="102" height="10" />
-	{#if label}<text class="t small" x="42" y="22" textLength={fit(label, 94, 8.5)} lengthAdjust="spacingAndGlyphs">{label}</text>{/if}
+	<rect class="field" x="10" y="14" width="130" height="10" />
+	{#if label}<text class="t small code" x="14" y="22" textLength={fit(label, 122, 8.5)} lengthAdjust="spacingAndGlyphs">{label}</text>{/if}
 	<rect class="screen" x="10" y="34" width="130" height="80" />
 	<path class="brass-line" d="M20 50 H96" />
 	<path class="ink-line" d="M20 64 H128 M20 73 H120 M20 82 H110" />
@@ -57,7 +56,7 @@
 {:else if name === 'editor'}
 	<rect class="body" x="2" y="10" width="146" height="110" />
 	<path class="rule" d="M75 10 V120 M2 24 H148" />
-	<text class="t small" x="8" y="20" textLength={fit(label ?? 'index.html', 62, 8.5)} lengthAdjust="spacingAndGlyphs">{label ?? 'index.html'}</text>
+	<text class="t small code" x="8" y="20" textLength={fit(label ?? 'index.html', 62, 8.5)} lengthAdjust="spacingAndGlyphs">{label ?? 'index.html'}</text>
 	<path class="brass-line" d="M9 36 H32" /><path class="echo-line" d="M36 36 H58" />
 	<path class="ink-line" d="M15 48 H50 M15 58 H66 M15 68 H44" />
 	<path class="brass-line" d="M9 80 H30" />
@@ -112,7 +111,7 @@
 		<g transform="rotate({[-8, 5, -3][i]} {x + 22} {y + 15})">
 			<rect class="body" {x} {y} width="44" height="30" />
 			<path class="rule" d="M{x} {y} L{x + 22} {y + 16} L{x + 44} {y}" />
-			<text class="echo-fill t" x={x + 22} y={y + 27} text-anchor="middle">{n}</text>
+			<text class="echo-fill t code" x={x + 22} y={y + 27} text-anchor="middle">{n}</text>
 		</g>
 	{/each}
 	<path class="echo-line dash" d="M4 118 C40 108 70 124 104 112 S140 104 148 108" />
@@ -277,10 +276,15 @@
 		stroke-width: 1.6;
 		stroke-linecap: round;
 	}
+	/* Drawn words are in the body face; mono only where the drawing shows code or a machine's
+	   screen (hallmark 64). */
 	.t {
-		font-family: var(--font-mono);
+		font-family: var(--font-sans);
 		font-size: 11px;
 		fill: var(--text-body);
+	}
+	.code {
+		font-family: var(--font-mono);
 	}
 	.small {
 		font-size: 8.5px;
