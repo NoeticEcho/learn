@@ -13,3 +13,5 @@ export const lesson = (id: string) => {
 	const [part, lesson] = id.split('/');
 	return `${resolve('/lesson/[part]/[lesson]', { part, lesson })}/`;
 };
+/** The returning home's lesson list, named by its content's hash (catalogue.server.ts homeIndex). */
+export const homeIndex = (hash: string) => resolve('/data/home-[hash].json', { hash });

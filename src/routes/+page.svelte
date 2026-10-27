@@ -10,6 +10,7 @@
 	import * as links from '#lib/links.ts';
 	import Prologue, { type Answers } from '#lib/prologue/Prologue.svelte';
 	import persona from '#lib/persona/default.ru.json';
+	import type { HomeLesson } from '#lib/content/catalogue.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -29,14 +30,15 @@
 	let ready = $state(false);
 
 	async function refresh() {
-		const [{ db, progress }, { nextHome }, game] = await Promise.all([
+		const [{ db, progress }, { nextHome }, game, lessons] = await Promise.all([
 			import('#lib/learner.ts'),
 			import('#lib/content/catalogue.ts'),
-			import('#lib/game/index.ts')
+			import('#lib/game/index.ts'),
+			fetch(links.homeIndex(data.home.index)).then((r) => r.json() as Promise<HomeLesson[]>)
 		]);
 		const d = await db();
 		const done = await progress.doneSet(d);
-		next = nextHome(data.home.lessons, done) ?? null;
+		next = nextHome(lessons, done) ?? null;
 		doneCount = done.size;
 		const log = await d.getAll('log');
 		xp = game.totalXp(log);
@@ -64,8 +66,8 @@
 		await seen();
 	}
 
-	const firstLesson = $derived(data.home.lessons[0]?.id);
-	const total = $derived(data.home.lessons.length);
+	const firstLesson = $derived(data.home.first);
+	const total = $derived(data.home.total);
 </script>
 
 <svelte:head>

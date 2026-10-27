@@ -1,6 +1,6 @@
 /**
  * Offline (spec §4.8). On install, the shell: the build's immutable files, the static files and
- * every prerendered page that is not a lesson. A lesson is cached when the person opens it, and
+ * every prerendered page that is not a lesson (the home's hashed lesson list among them). A lesson is cached when the person opens it, and
  * «Скачать курс целиком» (a `cache-all` message) caches every prerendered page.
  *
  * Same-origin GETs only: the model APIs and the video hosts are never touched, and nothing is
@@ -55,7 +55,8 @@ self.addEventListener('fetch', (event) => {
 	const u = new URL(req.url);
 	if (u.origin !== self.location.origin || !req.url.startsWith(scope())) return;
 
-	const immutableFile = u.pathname.includes('/_app/immutable/');
+	// The home's lesson list is named by its content's hash too (catalogue.server.ts homeIndex).
+	const immutableFile = u.pathname.includes('/_app/immutable/') || /\/data\/home-[0-9a-f]{12}\.json$/.test(u.pathname);
 	event.respondWith(
 		(async () => {
 			const cache = await caches.open(CACHE);

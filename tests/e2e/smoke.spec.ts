@@ -24,3 +24,27 @@ for (const [route, title] of [
 		if (title) await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
 		expect(errors).toEqual([]);
 	});
+
+test('a returning person is sent to the next lesson, from the hashed lesson list, online and offline', async ({ page, context }) => {
+	const index: string[] = [];
+	page.on('request', (r) => {
+		if (/\/data\/home-[0-9a-f]{12}\.json$/.test(r.url())) index.push(r.url());
+	});
+	await page.goto('./');
+	expect(index).toEqual([]); // the first visit's prologue does not need it
+	await page.getByRole('link', { name: 'Пропустить вступление' }).click();
+	await page.waitForURL(/\/map\/$/);
+	// the skip's write to the store may land after the map opens: reload home until it has
+	await expect(async () => {
+		await page.goto('./');
+		await expect(page.getByRole('link', { name: 'Продолжить: Как устроен этот учебник' })).toBeVisible({ timeout: 1000 });
+	}).toPass({ timeout: 10_000 });
+	expect(index.length).toBeGreaterThan(0);
+	await page.evaluate(() => navigator.serviceWorker.ready);
+	await page.reload(); // the worker controls the page from here on
+	await expect(page.getByRole('link', { name: /^Продолжить:/ })).toBeVisible();
+	await context.setOffline(true);
+	await page.reload();
+	await expect(page.getByRole('link', { name: 'Продолжить: Как устроен этот учебник' })).toBeVisible();
+	await context.setOffline(false);
+});
