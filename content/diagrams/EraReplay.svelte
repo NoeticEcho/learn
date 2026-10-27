@@ -47,7 +47,7 @@
 		<p class="ln">Одно и то же слово в каждой эпохе. Менялась только одежда.</p>
 		<span class="btn" style={e.btn}>{action}</span>
 	</div>
-	<h4>{e.year}: {e.title}</h4>
+	<div class="dh">{e.year}: {e.title}</div>
 	<ul class="notes" aria-live="polite">
 		<li><strong>Инструменты:</strong> {e.tool}.</li>
 		<li><strong>Что изменилось:</strong> {e.changed}</li>
@@ -74,7 +74,7 @@
 		display: inline-block;
 		padding: var(--space-2) var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

@@ -91,13 +91,13 @@
 		<p class="dg-out" aria-live="polite">Бриф заполнен на <strong>{count} из {qs.length}</strong>.{#if missing.length} Пока пусто: {missing.map((m) => m.id).join(', ')}.{/if}</p>
 	{:else}
 		<div class="res" aria-live="polite">
-			<h4>Бриф после интервью: {count} из {qs.length} полей</h4>
+			<div class="dh">Бриф после интервью: {count} из {qs.length} полей</div>
 			{#if missing.length}<p>Не заполнено: <strong>{missing.map((m) => m.id).join(', ')}</strong>. Искин ничего не выдумает: на этих местах будут пустые блоки с пометкой для вас, и на странице их не будет.</p>{:else}<p>Все поля заполнены.</p>{/if}
-			<h4>Структура сайта</h4>
+			<div class="dh">Структура сайта</div>
 			<ol>{#each sections as s, i (i)}<li>{s}</li>{:else}<li>Разделов нет: Искин спросит ещё раз.</li>{/each}</ol>
-			<h4>Сервис для действия «{answers.action || '…'}»</h4>
+			<div class="dh">Сервис для действия «{answers.action || '…'}»</div>
 			<ul>{#each service as s, i (i)}<li>{s}</li>{/each}</ul>
-			<h4>Что Искин оставляет вам</h4>
+			<div class="dh">Что Искин оставляет вам</div>
 			<ul>
 				<li>Каждое утверждение и цифра: он берёт их только из ответов и подтверждений.</li>
 				<li>Политика обработки данных и согласие: текст согласуете вы с юристом.</li>
@@ -135,7 +135,7 @@
 		color: var(--text-body);
 		font: inherit;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-3) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);
