@@ -382,6 +382,23 @@ Every lesson has the same parts, so the engine can render, test and track it:
 - **Each era's practice site looks like its era.** That is the point.
 - **Accessibility:** WCAG 2.2 AA, keyboard-first, visible focus, and reduced motion.
 
+### 4.9 Narration
+
+Martin, 27.10: every lesson can be listened to, because listening is easier than
+reading for people far from IT. The quality matters.
+
+- **Pre-generated, not live.** Each lesson's theory is synthesised once, at build time, into static Opus files: one per section, so that a text edit re-renders only that section. A player reads along, highlighting the current sentence from per-sentence timestamps. The audio is cached offline with the lesson.
+- **The engine:** CosyVoice 3 (`Fun-CosyVoice3-0.5B`, FunAudioLLM, Apache-2.0; it lists Russian among its nine languages), run locally.
+  - **The fallback:** Silero (`v5_ru`), which already runs here for Приборка's training videos. Its models are CC BY-NC, which sits badly with CC BY-SA lessons, so it is used only if CosyVoice fails the spike.
+  - **The spike decides:**
+    - a sample lesson section rendered by both;
+    - the real-time factor on this machine (CPU only: 32 cores, no NVIDIA GPU);
+    - the weights' licence on the model card;
+    - a listening comparison by Martin.
+- **Pronunciation.** Terms (HTML, CSS, DNS, JSON, nginx) are spelt out through a per-lesson pronunciation map in front matter, `say: { "CSS": "си-эс-эс" }`, so the voice says what a person would. Code blocks are not read out; the player says «пример кода» and pauses.
+- **One voice for the course,** chosen by Martin from the spike's samples, and one for Эхо's lines if the two should differ.
+- **Licences:** the generated audio carries the lesson's CC BY-SA 4.0 and names the voice model in the credits.
+
 ### 4.8 Offline
 
 A service worker precaches the shell and every lesson the person has opened. «Скачать курс целиком» precaches all of it.
