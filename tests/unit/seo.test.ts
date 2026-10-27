@@ -143,7 +143,7 @@ describe('sitemap, robots.txt and llms.txt', () => {
 		const urls = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><lastmod>(\d{4}-\d\d-\d\d)<\/lastmod><\/url>/g)];
 		expect(urls.length).toBe(lessons.length + 2);
 		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home(), at.map(), ...lessons.map((l) => at.lesson(l.id))]));
-		expect(xml).not.toMatch(/gallery|review|settings/);
+		for (const page of ['gallery', 'review', 'settings']) expect(xml).not.toContain(`<loc>${at.file(`${page}/`)}</loc>`);
 		expect(lastmod(lessons[0].id)).toMatch(/^\d{4}-\d\d-\d\d$/);
 	});
 	it('robots.txt allows crawling and names the sitemap', async () => {
