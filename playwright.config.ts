@@ -7,6 +7,6 @@ export default defineConfig({
 		reuseExistingServer: !process.env.CI,
 		timeout: 240_000
 	},
-	use: { baseURL: 'http://localhost:4173/learn/' },
+	use: { baseURL: 'http://localhost:4173/learn/', trace: 'retain-on-failure' },
 	testDir: 'tests/e2e'
 });

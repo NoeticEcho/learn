@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
 
-	let phase = $state<'idle' | 'busy' | 'done' | 'unsupported'>('idle');
+	let phase = $state<'idle' | 'busy' | 'done' | 'partial' | 'unsupported'>('idle');
 	let done = $state(0);
 	let total = $state(0);
 
@@ -14,7 +14,7 @@
 		}
 		const onMessage = (e: MessageEvent) => {
 			if (e.data?.type === 'cache-progress') ({ done, total } = e.data);
-			if (e.data?.type === 'cache-done') phase = 'done';
+			if (e.data?.type === 'cache-done') phase = e.data.failed ? 'partial' : 'done';
 		};
 		navigator.serviceWorker.addEventListener('message', onMessage);
 		return () => navigator.serviceWorker.removeEventListener('message', onMessage);
@@ -32,6 +32,9 @@
 		<p>{t('offline.unsupported')}</p>
 	{:else if phase === 'done'}
 		<p role="status">{t('offline.done')}</p>
+	{:else if phase === 'partial'}
+		<p role="status">{t('offline.partial')}</p>
+		<button type="button" class="quiet" onclick={start}>{t('offline.retry')}</button>
 	{:else}
 		<button type="button" class="quiet" disabled={phase === 'busy'} onclick={start}>{t('offline.button')}</button>
 		{#if phase === 'busy'}<p role="status">{total ? t('offline.progress', { done, total }) : t('offline.starting')}</p>{/if}

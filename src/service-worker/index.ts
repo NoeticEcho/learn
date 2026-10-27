@@ -10,9 +10,11 @@
  */
 import { self } from '$app/service-worker';
 import { immutable, assets, prerendered } from '$app/manifest';
-import { version } from '$app/env';
-
-const CACHE = `learn-${version}`;
+// `$app/env`'s version is not set inside a worker, so the cache is named after the build itself:
+// a hash of its immutable file names, which change whenever any of the code does.
+let h = 2166136261;
+for (const f of immutable) for (const ch of f.path) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+const CACHE = `learn-${(h >>> 0).toString(36)}`;
 const scope = () => self.registration.scope;
 const url = (path: string) => new URL(path.replace(/^\//, ''), scope()).href;
 
@@ -81,19 +83,21 @@ self.addEventListener('message', (event) => {
 			const all = [...shell(), ...prerendered.map((p) => url(p.path))];
 			const todo = [...new Set(all)];
 			let done = 0;
+			let failed = 0;
 			for (const href of todo) {
 				if (!(await cache.match(href))) {
 					try {
 						const res = await fetch(href);
 						if (res.ok) await cache.put(href, res);
+						else failed++;
 					} catch {
-						/* offline already: keep what we have */
+						failed++; // offline already: keep what we have, and say so
 					}
 				}
 				done++;
 				if (done % 5 === 0 || done === todo.length) source?.postMessage({ type: 'cache-progress', done, total: todo.length });
 			}
-			source?.postMessage({ type: 'cache-done', total: todo.length });
+			source?.postMessage({ type: 'cache-done', total: todo.length, failed });
 		})()
 	);
 });
