@@ -21,7 +21,7 @@
 		practice: {
 			id: 'js-progressive-page',
 			title: 'Страница, которая работает и без скрипта',
-			task: 'Сделайте страницу устойчивой. 1) Заполните таблицу «Что обязательно, а что улучшение»: не меньше пяти функций, у каждой слово «обязательная» или «улучшение» и что видит посетитель без JavaScript. 2) Сделайте обязательное независимым от скрипта: добавьте блок <aside id="contacts"> с адресом из брифа и ссылками tel: и mailto: (телефон и почта из брифа), а после шапки вставьте <noscript> с абзацем, что страница работает и без JavaScript. Форма заявки остаётся с action и method, а главное действие подписано словами из брифа. 3) Поиск без скрипта бесполезен, поэтому скройте его в разметке (атрибут hidden у form#search), а показывать будет скрипт. 4) Добавьте пятый скрипт <script type="module" id="enhance-code">: он показывает форму поиска (search.hidden = false) и проверяет телефон на лету: слушатель input на поле #f-phone, aria-invalid и сообщение в <span id="phone-hint" role="status"> после поля. Оба действия обёрнуты в проверку «элемент есть» (if). Проверьте без скрипта: у себя, в инструментах разработчика, выключите JavaScript и обновите страницу.',
+			task: 'Сделайте страницу устойчивой. 1) Заполните таблицу «Что обязательно, а что улучшение»: не меньше пяти функций, у каждой слово «обязательная» или «улучшение» и что видит посетитель без JavaScript. 2) Сделайте обязательное независимым от скрипта: добавьте блок <aside id="contacts"> с адресом из брифа и ссылками tel: и mailto: (телефон и почта из брифа), а после шапки вставьте <noscript> с абзацем, что страница работает и без JavaScript. Форма заявки остаётся с action и method, а главное действие подписано словами из брифа. 3) Поиск без скрипта бесполезен, поэтому скройте его в разметке (атрибут hidden у form#search), а показывать будет скрипт. 4) Добавьте пятый скрипт <script type="module" id="enhance-code">: он показывает форму поиска (search.hidden = false) и проверяет телефон на лету: слушатель input на поле #f-phone, aria-invalid и сообщение в <span id="phone-hint" role="status"> после поля. Оба действия обёрнуты в проверку «элемент есть» (if). Проверьте без скрипта: у себя, в инструментах разработчика, выключите JavaScript и обновите страницу. Автоматическая проверка видит страницу уже после скриптов, когда hidden снят, поэтому что поиск без JavaScript скрыт, видно только так.',
 			era: 5,
 			files: {
 				'index.html': `<!doctype html>
@@ -969,10 +969,12 @@ input {
 					matches: '^/'
 				},
 				{
-					id: 'search-hidden',
-					kind: 'attr',
-					selector: 'form#search',
-					name: 'hidden'
+					// The preview runs the scripts, so by the time checks run #enhance-code has removed
+					// hidden; a check cannot see the markup's attribute (content-plan README). It sees the
+					// form, and the learner checks the no-script state by hand, as the task says.
+					id: 'search-form',
+					kind: 'exists',
+					selector: 'form#search[role="search"]'
 				},
 				{
 					id: 'phone-status',
@@ -1180,7 +1182,7 @@ input {
 				'main-action-label': 'Главное действие должно быть подписано словами из брифа: на ссылке-кнопке или на кнопке формы.',
 				'form-native': 'У формы должен остаться method="post": без скрипта она отправляется обычным способом.',
 				'form-action': 'У формы должен остаться action с адресом, начинающимся с «/».',
-				'search-hidden': 'Форму поиска надо скрыть в разметке: <form id="search" … hidden>. Показывать её будет скрипт.',
+				'search-form': 'Форма поиска должна остаться: <form id="search" role="search" … hidden>. Атрибут hidden прячет её без скрипта, а показывает её скрипт.',
 				'phone-status': 'После поля телефона нужен <span id="phone-hint" role="status">: туда скрипт пишет подсказку.',
 				'enhance-code-exists': 'Не нашёл пятый скрипт: <script type="module" id="enhance-code">.',
 				'is-module': 'У скрипта нужен атрибут type="module".',
