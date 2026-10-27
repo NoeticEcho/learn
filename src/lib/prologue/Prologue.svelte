@@ -277,7 +277,7 @@
 		padding: 0 var(--space-3);
 		border: var(--line) solid var(--border-rule);
 		border-radius: 0;
-		background: var(--surface-inset);
+		background: var(--surface-body);
 		color: var(--text-primary);
 	}
 	input::placeholder {

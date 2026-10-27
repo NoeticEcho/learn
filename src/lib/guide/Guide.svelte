@@ -142,7 +142,7 @@
 		padding: var(--space-2) var(--space-3);
 		border: var(--line) solid var(--border-rule);
 		border-radius: 0;
-		background: var(--surface-inset);
+		background: var(--surface-body);
 		resize: vertical;
 	}
 	.meta {

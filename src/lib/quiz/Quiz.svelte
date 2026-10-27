@@ -291,7 +291,7 @@
 	}
 	select,
 	textarea {
-		background: var(--surface-inset);
+		background: var(--surface-body);
 		border: var(--line) solid var(--border-hairline);
 		border-radius: 0;
 		min-height: var(--hit-min);

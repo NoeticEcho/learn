@@ -23,6 +23,9 @@ export default defineConfig({
 	test: {
 		include: ['tests/unit/**/*.test.ts'],
 		environment: 'node',
-		passWithNoTests: true
+		passWithNoTests: true,
+		// Off: the cache keys a module by its own source, but an import.meta.glob's result depends
+		// on which files exist, so a new lesson was invisible to tests until the cache was cleared.
+		fsModuleCache: false
 	}
 });

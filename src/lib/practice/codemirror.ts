@@ -16,7 +16,7 @@ export type Lang = 'html' | 'css' | 'js';
 const theme = EditorView.theme({
 	'&': {
 		color: 'var(--text-primary)',
-		backgroundColor: 'var(--surface-inset)',
+		backgroundColor: 'var(--surface-body)',
 		fontSize: 'var(--text-body-sm)',
 		height: '100%'
 	},
@@ -24,7 +24,7 @@ const theme = EditorView.theme({
 	'.cm-content': { caretColor: 'var(--brass-300)', padding: 'var(--space-3) 0' },
 	'.cm-gutters': {
 		backgroundColor: 'transparent',
-		color: 'var(--text-muted)',
+		color: 'var(--text-secondary)',
 		border: 'none',
 		borderRight: '1px solid var(--border-hairline)'
 	},
@@ -43,7 +43,7 @@ const highlight = HighlightStyle.define([
 	{ tag: [tags.attributeName, tags.propertyName], color: 'var(--echo-400)' },
 	{ tag: [tags.string, tags.attributeValue], color: 'var(--accent-state-text)' },
 	{ tag: [tags.number, tags.bool, tags.atom], color: 'var(--saffron)' },
-	{ tag: [tags.comment], color: 'var(--text-muted)', fontStyle: 'italic' },
+	{ tag: [tags.comment], color: 'var(--text-secondary)', fontStyle: 'italic' },
 	{ tag: [tags.angleBracket, tags.punctuation, tags.bracket], color: 'var(--text-secondary)' },
 	{ tag: [tags.function(tags.variableName), tags.className], color: 'var(--paper-100)' },
 	{ tag: tags.invalid, color: 'var(--accent-command-text)' }

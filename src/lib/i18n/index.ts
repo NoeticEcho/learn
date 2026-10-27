@@ -24,3 +24,8 @@ export function plural(n: number, [one, few, many]: [string, string, string]): s
 export function has(key: string): boolean {
 	return key in dict;
 }
+
+/** A plural from a catalogue entry of three forms joined by «|»: pl(5, 'day.forms') → «дней». */
+export function pl(n: number, key: string): string {
+	return plural(n, t(key).split('|') as [string, string, string]);
+}

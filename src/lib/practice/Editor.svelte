@@ -69,7 +69,7 @@
 		height: 100%;
 		min-height: 16rem;
 		border: var(--line) solid var(--border-hairline);
-		background: var(--surface-inset);
+		background: var(--surface-body);
 		overflow: auto;
 	}
 	.editor :global(.cm-editor) {

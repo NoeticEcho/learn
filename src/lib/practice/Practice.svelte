@@ -268,7 +268,7 @@
 		width: 100%;
 		height: 20rem;
 		border: var(--line) solid var(--border-hairline);
-		background: #fff;
+		background: var(--preview-canvas);
 	}
 	h4 {
 		font-family: var(--font-sans);
@@ -329,7 +329,7 @@
 	pre {
 		margin: 0;
 		padding: var(--space-3) var(--space-4);
-		background: var(--surface-inset);
+		background: var(--surface-body);
 		border: var(--line) solid var(--border-hairline);
 		overflow-x: auto;
 		font-size: var(--text-body-sm);
