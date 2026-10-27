@@ -29,16 +29,14 @@
 	let ready = $state(false);
 
 	async function refresh() {
-		const [{ db, progress }, { buildGraph, nextLessons }, game] = await Promise.all([
+		const [{ db, progress }, { nextHome }, game] = await Promise.all([
 			import('#lib/learner.ts'),
-			import('#lib/content/graph.ts'),
+			import('#lib/content/catalogue.ts'),
 			import('#lib/game/index.ts')
 		]);
 		const d = await db();
 		const done = await progress.doneSet(d);
-		const graph = buildGraph(data.catalogue.lessons, data.catalogue);
-		const id = nextLessons(graph, done)[0];
-		next = id ? { id, title: graph.lessons.get(id)!.title } : null;
+		next = nextHome(data.home.lessons, done) ?? null;
 		doneCount = done.size;
 		const log = await d.getAll('log');
 		xp = game.totalXp(log);
@@ -66,8 +64,8 @@
 		await seen();
 	}
 
-	const firstLesson = $derived(data.catalogue.lessons[0]?.id);
-	const total = $derived(data.catalogue.lessons.length);
+	const firstLesson = $derived(data.home.lessons[0]?.id);
+	const total = $derived(data.home.lessons.length);
 </script>
 
 <svelte:head>

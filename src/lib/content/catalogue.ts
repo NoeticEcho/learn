@@ -40,3 +40,28 @@ export const lessonParams = (id: string) => {
 	const [part, lesson] = id.split('/');
 	return { part, lesson };
 };
+
+/**
+ * What the home page needs about a lesson: its id, its title, and the lessons it waits for (the
+ * ones that teach a concept it requires). Home is prerendered with its data inline, so this is
+ * paid by every first visit, and it grows with every lesson: no summaries, concepts or parts.
+ */
+export type HomeLesson = { id: string; title: string; after: string[] };
+
+/** In curriculum order. The graph has been validated at build time, so every requirement has a teacher. */
+export function homeLessons(lessons: LessonSummary[]): HomeLesson[] {
+	const teacher = new Map<string, string>();
+	for (const l of lessons) for (const c of l.teaches) teacher.set(c, l.id);
+	return [...lessons]
+		.sort((a, b) => a.part - b.part || a.order - b.order)
+		.map((l) => ({
+			id: l.id,
+			title: l.title,
+			after: [...new Set(l.requires.map((c) => teacher.get(c)).filter((id): id is string => !!id && id !== l.id))]
+		}));
+}
+
+/** The first lesson, in curriculum order, not done and waiting for nothing undone (graph.ts nextLessons). */
+export function nextHome(lessons: HomeLesson[], done: Set<string>): HomeLesson | undefined {
+	return lessons.find((l) => !done.has(l.id) && l.after.every((id) => done.has(id)));
+}
