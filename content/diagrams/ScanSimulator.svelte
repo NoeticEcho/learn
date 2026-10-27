@@ -95,7 +95,7 @@
 		line-height: 1.5;
 	}
 	.ln.dimmed {
-		opacity: 0.4;
+		color: var(--text-secondary);
 	}
 	.h1 {
 		font-family: var(--font-serif);
