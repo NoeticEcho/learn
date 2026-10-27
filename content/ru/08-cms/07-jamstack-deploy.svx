@@ -1,0 +1,782 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/07-jamstack-deploy',
+		part: 8,
+		order: 7,
+		title: 'Jamstack: сборка, CDN и вебхук',
+		definition: 'Jamstack — подход, при котором страницы собирают заранее и раздают через CDN, а динамику берут из API и внешних сервисов. Правку в CMS подхватывает вебхук.',
+		summary: 'Вы настроите на бумаге схему «правка в CMS, вебхук, сборка, выкладка на CDN» для своего сайта, поймёте, что в такой схеме быстро и безопасно, а что требует отдельных сервисов (формы, поиск, оплата, личный кабинет). Это эпоха 6 (2022). Про CDN здесь коротко, подробно в части 9.',
+		comic: {
+			panels: [
+				{
+					mood: 'explain',
+					prop: 'flowchart',
+					label: 'CMS|вебхук|сборка|CDN',
+					caption: 'Путь правки',
+					say: 'Редактор нажал «Опубликовать», вебхук разбудил сборку, готовый сайт уехал на CDN.'
+				},
+				{
+					mood: 'cheer',
+					side: 'right',
+					prop: 'server',
+					label: 'v12 на месте',
+					caption: 'Сборка упала',
+					say: [
+						{ text: 'Сборка упала!' },
+						{ who: 'Сайт', text: 'Я не заметил: пока работает прошлая версия.' }
+					]
+				},
+				{
+					mood: 'hmm',
+					prop: 'envelope',
+					label: 'форма заявки',
+					caption: 'А динамика?',
+					say: 'Заявку принимает внешний сервис или функция. Сайт сам почту не отправит: он набор файлов.'
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-jamstack', 'cms-build-webhook-rebuild'],
+		requires: ['cms-headless', 'cms-static-site-generator'],
+		practice: {
+			id: 'cms-deploy-scheme',
+			title: 'Схема выкладки вашего сайта',
+			task: 'Опишите, как правка содержания попадает на сайт вашего проекта. 1) В таблице для четырёх шагов (источник содержания, сборка, выкладка, раздача) впишите, что происходит и где или кем это делается. Упомяните вебхук там, где сборку запускает правка. 2) Скажите, какой внешний сервис или функция обслуживает главное действие посетителя (форма, запись, оплата), если у сайта нет своего серверного кода. 3) Скажите, где лягут персональные данные посетителей и что нужно для хранения в России. 4) Назовите способ откатить неудачную публикацию. Все «…» нужно заменить.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="scheme">
+      <h2>Схема выкладки сайта<\/h2>
+      <table id="steps">
+        <tr><th>Шаг<\/th><th>Что происходит<\/th><th>Где и кто<\/th><\/tr>
+        <tr class="step source"><td class="name">Источник содержания<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+        <tr class="step build"><td class="name">Сборка<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+        <tr class="step deploy"><td class="name">Выкладка<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+        <tr class="step serve"><td class="name">Раздача посетителям<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+      <\/table>
+      <p id="action">Главное действие посетителя «{{mainAction.label}}» обслуживает: <span id="action-by">…<\/span><\/p>
+      <p>Где лежат персональные данные посетителей и что нужно для хранения в России: <span id="action-pd">…<\/span><\/p>
+      <p>Как откатить неудачную публикацию: <span id="rollback">…<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="scheme">
+      <h2>Схема выкладки сайта<\/h2>
+      <table id="steps">
+        <tr><th>Шаг<\/th><th>Что происходит<\/th><th>Где и кто<\/th><\/tr>
+        <tr class="step source"><td class="name">Источник содержания<\/td><td class="what">редактор правит записи в headless-CMS; после сохранения CMS шлёт вебхук сборщику<\/td><td class="where">CMS, правит владелец<\/td><\/tr>
+        <tr class="step build"><td class="name">Сборка<\/td><td class="what">генератор по вебхуку запрашивает содержание у API и собирает все страницы заново<\/td><td class="where">сервис сборки (CI), запускается сам<\/td><\/tr>
+        <tr class="step deploy"><td class="name">Выкладка<\/td><td class="what">готовая папка загружается на хостинг и включается целиком, одним переключением<\/td><td class="where">хостинг статических сайтов, например Pages<\/td><\/tr>
+        <tr class="step serve"><td class="name">Раздача посетителям<\/td><td class="what">страницы отдаются из ближайшей копии, после выкладки кэш сбрасывается<\/td><td class="where">CDN хостинга<\/td><\/tr>
+      <\/table>
+      <p id="action">Главное действие посетителя «{{mainAction.label}}» обслуживает: <span id="action-by">внешний сервис форм: форма отправляет заявку ему, и он пересылает её мне на почту, а своего серверного кода у сайта нет<\/span><\/p>
+      <p>Где лежат персональные данные посетителей и что нужно для хранения в России: <span id="action-pd">заявки хранятся у сервиса форм и в моей почте; для хранения в России нужен сервис или своя функция на сервере в России, а согласие и политика стоят рядом с формой<\/span><\/p>
+      <p>Как откатить неудачную публикацию: <span id="rollback">в панели хостинга включить предыдущую собранную версию, это занимает секунды, а потом исправить запись и опубликовать заново<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'scheme-exists', kind: 'exists', selector: '#scheme' },
+				{ id: 'no-blanks', kind: 'text', selector: '#scheme', matches: '^[^…]*$' },
+				{ id: 'four-steps', kind: 'count', selector: '#steps tr.step', min: 4 },
+				{ id: 'steps-described', kind: 'text', selector: '#steps td.what', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'webhook', kind: 'text', selector: '#steps', matches: 'вебхук|webhook|триггер|коммит' },
+				{ id: 'serve-cdn', kind: 'text', selector: '#steps tr.serve td.where', matches: 'CDN|раздач|Pages|хостинг|Netlify|Vercel|Cloudflare|сервер' },
+				{
+					id: 'action-external',
+					kind: 'text',
+					selector: '#action-by',
+					matches: 'сервис|функци|Formspree|Netlify|Tilda|Битрикс|ЮKassa|ЮКасса|CRM|облачн|почт|Telegram|бот|внешн|платформ'
+				},
+				{
+					id: 'pd-where',
+					kind: 'text',
+					selector: '#action-pd',
+					matches: '(?=[\\s\\S]*(?:Росси|РФ))(?=[\\s\\S]*(?:сервер|хран|сервис|платформ|CRM|почт|функци))'
+				},
+				{
+					id: 'rollback-way',
+					kind: 'text',
+					selector: '#rollback',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:откат|предыдущ|прежн|верси|вернуть|переключ))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Расставьте путь правки от редактора до посетителя',
+				items: [
+					'Редактор нажимает «Опубликовать» в CMS',
+					'CMS отправляет сборщику вебхук',
+					'Генератор собирает сайт заново по содержанию из API',
+					'Готовая папка выкладывается на хостинг',
+					'CDN обновляет копии и сбрасывает старый кэш'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Сборка нового сайта упала с ошибкой. Что увидит посетитель?',
+				options: [
+					'Прежнюю версию: новая включается только после успешной сборки и целиком',
+					'Белый экран',
+					'Половину страниц новых, половину старых'
+				],
+				answer: 0,
+				why: [
+					'Да. Такая выкладка называется атомарной: сайт переключается с одной полной версии на другую, поэтому «полусломанного» состояния нет.',
+					'Нет: именно этого предоставляемая схема не допускает, пока вы не включили неудачную сборку руками.',
+					'Нет: версии не смешиваются, переключение происходит разом.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что подключают к статическому сайту из внешних сервисов, потому что своего серверного кода у него нет?',
+				options: ['Приём заявок из формы', 'Поиск по сайту', 'Оплату', 'Вёрстку страниц'],
+				answer: [0, 1, 2],
+				why: [
+					'Да: сервис форм или функция принимает данные и пересылает на почту.',
+					'Да: поиск строят на сервисе или готовом индексе, который собирается вместе с сайтом (урок 6 части 7).',
+					'Да: оплату принимает платёжный сервис, сайт только отправляет туда посетителя.',
+					'Нет: вёрстка это то, что генератор как раз делает сам.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что такое откат публикации в такой схеме?',
+				options: [
+					'Переключение сайта на прошлую уже собранную версию: заново собирать не нужно, и это занимает секунды',
+					'Повторная сборка всего сайта с нуля',
+					'Удаление записи в CMS'
+				],
+				answer: 0,
+				why: [
+					'Да. Хостинги хранят прошлые сборки, поэтому откат это переключение. Потом исправляют запись и публикуют заново.',
+					'Нет: сборка, как правило, самая долгая часть, откат её не повторяет.',
+					'Нет: запись остаётся, меняется версия сайта, которую видит посетитель.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'На сайте десять тысяч страниц, и при каждой правке он пересобирается целиком. В чём слабое место?',
+				options: [
+					'Время сборки растёт с числом страниц, и правка доходит до посетителя долго',
+					'Сайт становится небезопасным',
+					'Он перестаёт открываться на телефонах'
+				],
+				answer: 0,
+				why: [
+					'Да. Это главный предел предсборки. Решают быстрыми генераторами и пересборкой только изменённых страниц.',
+					'Нет: безопасность от размера не зависит.',
+					'Нет: к телефонам это отношения не имеет.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что на самом деле объединяет всё, что называют Jamstack?',
+				options: [
+					'Страницы собираются заранее и раздаются CDN, а динамика приходит из API и внешних сервисов',
+					'Все сайты написаны на JavaScript и хранятся в базе',
+					'Любой сайт, у которого есть форма'
+				],
+				answer: 0,
+				why: [
+					'Да. Само слово придумано в 2010-х (J: JavaScript, A: API, M: разметка) и стало названием архитектурного подхода: отделить показ от данных и логики.',
+					'Нет: базы тут как раз нет, а язык не определяет подход.',
+					'Нет: форма есть почти на любом сайте.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-jamstack-def',
+				front: 'Что такое Jamstack?',
+				back: 'Подход, при котором страницы собираются заранее и раздаются через CDN, а динамика (формы, поиск, оплата) приходит из API и внешних сервисов. Слово придумали в 2010-х (JavaScript, APIs, Markup), популярным сделал Матиас Биллманн из Netlify.'
+			},
+			{
+				id: 'cms-webhook-rebuild',
+				front: 'Как правка в CMS попадает на сайт?',
+				back: 'Редактор сохраняет запись, CMS шлёт вебхук, сборщик запрашивает содержание у API и пересобирает сайт, новая версия выкладывается и включается целиком, CDN обновляет копии.'
+			},
+			{
+				id: 'cms-atomic-deploy',
+				front: 'Что такое атомарная выкладка и откат?',
+				back: 'Новая версия сайта включается целиком и только после успешной сборки, поэтому при сбое посетитель видит прежнюю. Откат это переключение на прошлую собранную версию за секунды.'
+			},
+			{
+				id: 'cms-jamstack-services',
+				front: 'Чего у статического сайта нет и откуда это берут?',
+				back: 'Серверного кода: формы, поиск, комментарии, оплату и личный кабинет берут из внешних сервисов или функций. Персональные данные при этом уходят к ним: нужны согласие и ответ, где они хранятся.'
+			},
+			{
+				id: 'cms-jamstack-limit',
+				front: 'Какой у предсборки главный предел?',
+				back: 'Время сборки растёт с числом страниц, и каждая правка пересобирает сайт. Для больших сайтов нужны быстрые генераторы и пересборка только изменённого.'
+			}
+		],
+		sources: [
+			{ title: 'Jamstack.org: что такое Jamstack', url: 'https://jamstack.org/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Cloudflare Pages: документация', url: 'https://developers.cloudflare.com/pages/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'Cloudflare Pages: откат к прошлой версии',
+				url: 'https://developers.cloudflare.com/pages/configuration/rollbacks/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'web.dev: Content delivery networks (CDN)',
+				url: 'https://web.dev/articles/content-delivery-networks',
+				licence: 'CC-BY',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'GitHub Pages: документация', url: 'https://docs.github.com/en/pages', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [
+			{
+				title: 'JAMstack: генерация статических сайтов в 2k19 (Валентин Гиль, «Веб-стандарты»)',
+				url: 'https://www.youtube.com/watch?v=JEYrIGLLIl0',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'ru'
+			}
+		],
+		guide: {
+			intro: 'Теперь вы расписываете, как правка в CMS превращается в живой сайт: от вебхука до посетителя. Рядом решим, кто принимает заявки, если на сайте нет своего сервера.',
+			hints: [
+				'Четыре шага в таблице: откуда берётся содержание, кто собирает, куда выкладывается готовое и откуда оно раздаётся. В «что происходит» упомяните вебхук там, где сборка запускается сама.',
+				'Заявки на статическом сайте принимает внешний сервис форм или функция. Они же получают персональные данные, поэтому нужны согласие и ответ на вопрос «где это хранится».',
+				'Откат это переключение на прошлую собранную версию в панели хостинга. Скажите, где вы это сделаете.'
+			],
+			mistakes: {
+				'scheme-exists': 'Блок со схемой исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				'four-steps': 'В таблице должны остаться четыре шага.',
+				'steps-described': 'В колонке «Что происходит» опишите шаг хотя бы четырьмя-пятью словами.',
+				webhook: 'Нигде не упомянут вебхук: он запускает сборку после правки в CMS.',
+				'serve-cdn': 'Для раздачи напишите, где она идёт: CDN или хостинг статических сайтов.',
+				'action-external': 'Скажите, какой внешний сервис или функция обслуживает главное действие посетителя.',
+				'pd-where': 'Скажите, где лягут персональные данные и что нужно для хранения в России.',
+				'rollback-way': 'Назовите способ отката: например, переключиться на предыдущую собранную версию.'
+			},
+			outro: 'Схема выкладки готова: от правки до посетителя и обратно, если что-то пошло не так. Остался последний урок части: как выбрать между всеми этими путями для своего проекта.'
+		},
+		say: {
+			Jamstack: 'джем-стек',
+			CDN: 'си-ди-эн',
+			CMS: 'си-эм-эс',
+			API: 'эй-пи-ай',
+			CI: 'си-ай',
+			Netlify: 'нетлифай',
+			Cloudflare: 'клаудфлэа',
+			GitHub: 'гитхаб',
+			Pages: 'пейджес'
+		}
+	};
+</script>
+
+<script>
+	import ReleasePipeline from '../../diagrams/ReleasePipeline.svelte';
+</script>
+
+## Что такое Jamstack
+
+Слово придумали в 2010-х: **J**avaScript, **A**PI и **M**arkup (разметка). Популярным его сделал Матиас Биллманн, основатель компании Netlify, в докладе 2016 года. Сегодня на сайте Jamstack.org подход описан так: **показ страницы отделён от данных и логики, а нужная логика и сторонние сервисы подключаются через API**. Слово «Jamstack» в маркетинге стало менее модным, но идея осталась: её называют «составным» (composable) вебом.
+
+На практике это значит три вещи, и вы уже знаете каждую:
+
+1. **Страницы собираются заранее** (урок 5): на сервере лежат готовые HTML-файлы.
+2. **Раздаются через CDN** (сеть серверов по миру: ближайшая копия отдаёт страницу быстро; подробно в части 9).
+3. **Динамика берётся извне**: содержание у API headless-CMS (урок 6), формы, поиск и оплата у сервисов или в коротких функциях.
+
+## Путь правки до посетителя
+
+Самый важный механизм здесь, как правка в CMS попадает на живой сайт. Поэтому вебхук, сборка и откат стоит увидеть вживую. Нажмите «Опубликовать», пройдите по шагам и сломайте любой этап.
+
+<ReleasePipeline />
+
+Что стоит заметить.
+
+- **Вебхук** это «звонок»: CMS сама сообщает сборщику «содержание изменилось». Без него правку пришлось бы запускать вручную.
+- **Выкладка атомарная**: новая версия включается целиком и только после успешной сборки. Поэтому упавшая сборка не ломает сайт: посетитель продолжает видеть прежнюю версию. Даже на живом сайте нет «наполовину обновлённого» состояния.
+- **Откат** это переключение на прошлую собранную версию. Хостинги хранят их, и возврат занимает секунды. Потом вы спокойно исправляете запись и публикуете снова.
+- **Время растёт с размером сайта.** На двухстах страницах сборка занимает меньше минуты, на десяти тысячах уже заметно. Предел предсборки: каждая правка пересобирает всё. Решения: быстрые генераторы, пересборка только изменённых страниц, и страницы, которые собираются по запросу и кэшируются (гибрид, который умеют современные фреймворки).
+
+<details>
+<summary>Проверьте себя: что увидит посетитель, если сборка упала?</summary>
+
+Прежнюю версию. Новая версия включается только после успешной сборки и целиком, поэтому сайт остаётся на последней рабочей.
+
+</details>
+
+## Чего у такого сайта нет
+
+У статического сайта нет серверного кода: он не может сам принять форму, поискать по базе или принять платёж. Для этого есть три пути, и вы их уже видели:
+
+- **Внешний сервис.** Форму принимает сервис форм (и пересылает на почту, в таблицу, в мессенджер), оплату принимает платёжный сервис, поиск строится как индекс, который собирается вместе с сайтом, или как сервис.
+- **Короткая функция.** «Бессерверная» функция (о ней в части 9) запускается по запросу, принимает данные и что-то делает. Это тот же серверный код, только маленький, без сервера, которым вы управляете.
+- **Своё API.** Если логики много (личный кабинет, заказы), то нужен настоящий сервер, и сайт перестаёт быть чисто статическим. Это нормально: Jamstack не догма, а способ вынести на сервер только нужное.
+
+И здесь возвращается тема урока 7 части 7. Любой внешний сервис, который принимает заявку, получает **персональные данные посетителей**. Вы по-прежнему оператор и отвечаете за них. Нужны **согласие** и политика рядом с формой, и ответ на вопрос «где сервис хранит заявки, и в какой стране». Для хранения данных граждан РФ это не прихоть, и вы либо выбираете сервис, который хранит в России, либо принимаете заявки функцией на сервере в России. Выбор надо сделать на схеме, а не на самотёке.
+
+## Практика
+
+Вы в эпохе 2022 года: сайт собирается по вебхуку из CMS и лежит на CDN. Опишите схему выкладки своего проекта в четырёх шагах (источник, сборка, выкладка, раздача), назовите сервис или функцию, которая принимает главное действие посетителя, скажите, где лягут персональные данные, и как вы откатите неудачную публикацию.
+
+## Что было не так
+
+Первые схемы «правка → пересборка» требовали, чтобы разработчик вручную запускал сборку и копировал файлы по FTP: один неосторожный жест, и сайт был наполовину обновлён. Атомарные выкладки хостингов, откат одной кнопкой и вебхуки убрали и эту, и многие другие ручные ошибки.
