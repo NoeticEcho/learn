@@ -1,0 +1,874 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/06-headless',
+		part: 8,
+		order: 6,
+		title: 'Headless CMS: когда контент отделён от сайта',
+		definition: 'Headless CMS — система управления содержимым без собственного сайта: редактор правит записи в админке, а сайт и приложения получают их по API.',
+		summary: 'Вы поймёте, почему «безголовая» CMS даёт редактору удобную админку, а разработчику свободу выбрать сайт, и сравните Strapi, Directus, Sanity, Contentful и Decap по месту хранения (Git, свой сервер, облако) и цене. После урока вы описываете тип содержания, вносите записи и получаете их запросом, как это делает настоящий сайт.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser',
+					label: 'сайт + админка',
+					caption: 'Монолит',
+					say: [
+						{ text: 'Хочу новый сайт на другом движке.' },
+						{ who: 'CMS', text: 'Тогда и админку выбрасывай, они у меня вместе.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'network',
+					label: 'API',
+					caption: 'Без головы',
+					say: 'Админка и содержание отдельно, сайт отдельно. Между ними только API: сайт, приложение, всё читают одно и то же.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'server',
+					label: '/api/items',
+					caption: 'Запрос',
+					say: [
+						{ text: 'GET /api/items' },
+						{ who: 'CMS', text: 'Вот JSON. Рисуй, как хочешь.' }
+					]
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-headless', 'cms-headless-landscape'],
+		requires: ['cms-content-model', 'cms-static-site-generator', 'server-rest', 'js-fetch'],
+		practice: {
+			id: 'cms-headless-api',
+			title: 'Тип, записи и запрос к headless-CMS',
+			task: 'Страница получает услуги не из HTML, а запросом к «API» (имитация, потому что песочница не пускает в сеть). 1) В поле «Тип содержания» впишите тип поля price и добавьте текстовые поля для второго языка, если у проекта их два (title_en, text_en). 2) В поле «Записи» уже лежат ваши услуги из брифа; добавьте ещё одну запись вместо «…» (для двух языков с полями title_en и text_en). 3) В скрипте headless-code допишите функцию load: запросите fetch(\'/api/items\'), прочитайте ответ как JSON и для каждой записи создайте карточку (article с классом card, внутри h3 и p), положите карточки в .cards. 4) Скажите, где живёт CMS (Git, свой сервер или облако) и почему: привяжите к бюджету и данным проекта. Проверки читают поля и текст скрипта. Все «…» нужно заменить.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards"><\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="headless">
+      <h2>Headless-CMS: тип, записи и запрос<\/h2>
+
+      <h3>Тип содержания (так выглядит схема в админке)<\/h3>
+      <textarea id="schema" rows="12">{
+  "type": "items",
+  "fields": {
+    "title": "string",
+    "text": "text",
+    "price": …
+  }
+}<\/textarea>
+
+      <h3>Записи: ответ API по адресу /api/items<\/h3>
+      <textarea id="entries" rows="14">[
+{{#each items}}  { "title": "{{title}}", "text": "{{text}}", "price": "{{price}}" },
+{{/each}}  { "title": "…", "text": "…", "price": "…" }
+]<\/textarea>
+
+      <p>Где живёт CMS: <span id="hosting">…<\/span>, потому что <span id="hosting-why">…<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fake-api">
+      // Имитация API headless-CMS (не настоящий сервер): на запрос /api/items отвечает записями из поля «Записи».
+      // Песочница не пускает в сеть, поэтому настоящий запрос здесь невозможен. Читать этот блок не нужно.
+      window.fetch = async (url) => {
+        if (String(url) !== '/api/items') return new Response('Not Found', { status: 404 });
+        await new Promise((r) => setTimeout(r, 250));
+        try {
+          const data = JSON.parse(document.getElementById('entries').value.replace(/,\\s*\\]/g, ']'));
+          return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+          return new Response('Ошибка в JSON записей: ' + e.message, { status: 500 });
+        }
+      };
+    <\/script>
+
+    <script type="module" id="headless-code">
+      // Страница получает услуги от «API» и выводит карточки.
+      async function load() {
+        const cards = document.querySelector('.cards');
+        // 1) запросите записи: fetch('/api/items')
+        // 2) прочитайте ответ как JSON
+        // 3) для каждой записи создайте карточку (article с классом card, внутри h3 и p) и положите в cards
+      }
+      load();
+    <\/script>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards"><\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="headless">
+      <h2>Headless-CMS: тип, записи и запрос<\/h2>
+
+      <h3>Тип содержания (так выглядит схема в админке)<\/h3>
+      <textarea id="schema" rows="12">{
+  "type": "items",
+  "fields": {
+    "title": "string",
+    "title_en": "string",
+    "text": "text",
+    "text_en": "text",
+    "price": "string"
+  }
+}<\/textarea>
+
+      <h3>Записи: ответ API по адресу /api/items<\/h3>
+      <textarea id="entries" rows="14">[
+{{#each items}}  { "title": "{{title}}", "text": "{{text}}", "price": "{{price}}" },
+{{/each}}  { "title": "Новая услуга", "title_en": "New service", "text": "Описание новой услуги", "text_en": "A short description", "price": "по договорённости" }
+]<\/textarea>
+
+      <p>Где живёт CMS: <span id="hosting">файлы в Git (Decap)<\/span>, потому что <span id="hosting-why">бюджет небольшой, содержание правит один человек раз в месяц, а персональных данных в записях нет<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fake-api">
+      // Имитация API headless-CMS (не настоящий сервер): на запрос /api/items отвечает записями из поля «Записи».
+      // Песочница не пускает в сеть, поэтому настоящий запрос здесь невозможен. Читать этот блок не нужно.
+      window.fetch = async (url) => {
+        if (String(url) !== '/api/items') return new Response('Not Found', { status: 404 });
+        await new Promise((r) => setTimeout(r, 250));
+        try {
+          const data = JSON.parse(document.getElementById('entries').value.replace(/,\\s*\\]/g, ']'));
+          return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+          return new Response('Ошибка в JSON записей: ' + e.message, { status: 500 });
+        }
+      };
+    <\/script>
+
+    <script type="module" id="headless-code">
+      // Страница получает услуги от «API» и выводит карточки.
+      async function load() {
+        const cards = document.querySelector('.cards');
+        const response = await fetch('/api/items');
+        if (!response.ok) {
+          cards.textContent = 'Не удалось загрузить список. Попробуйте позже.';
+          return;
+        }
+        const items = await response.json();
+        cards.replaceChildren(
+          ...items.map((item) => {
+            const card = document.createElement('article');
+            card.className = 'card';
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+            const text = document.createElement('p');
+            text.textContent = item.text;
+            const price = document.createElement('p');
+            price.className = 'price';
+            price.textContent = item.price || '';
+            card.append(title, text, price);
+            return card;
+          })
+        );
+      }
+      load();
+    <\/script>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'headless-exists', kind: 'exists', selector: '#headless' },
+				{ id: 'no-blanks', kind: 'text', selector: '#headless', matches: '^[^…]*$' },
+				{ id: 'schema-type', kind: 'text', selector: '#schema', matches: '"type"\\s*:\\s*"\\w+"' },
+				{ id: 'schema-fields', kind: 'text', selector: '#schema', matches: '(?=[\\s\\S]*"title")(?=[\\s\\S]*"text")(?=[\\s\\S]*"price")' },
+				{ id: 'schema-languages', kind: 'text', selector: '#schema', matches: '_en|"en"|locale|translations', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'entries-names', kind: 'text', selector: '#entries', matches: '(?=[\\s\\S]*"title"\\s*:)(?=[\\s\\S]*"text"\\s*:)(?=[\\s\\S]*"price"\\s*:)' },
+				{ id: 'entries-brief', kind: 'field', selector: '#entries', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'entries-filled', kind: 'text', selector: '#entries', matches: '"title"\\s*:\\s*"[^"]{2,}"' },
+				{ id: 'entries-new', kind: 'text', selector: '#entries', matches: '(?:"title"[\\s\\S]*){2,}', when: { brief: 'items[].title' } },
+				{ id: 'entries-languages', kind: 'text', selector: '#entries', matches: '_en|"en"', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'code-fetch', kind: 'text', selector: '#headless-code', matches: 'fetch\\(\\s*[\'"`]/api/items[\'"`]' },
+				{ id: 'code-json', kind: 'text', selector: '#headless-code', matches: '\\.json\\(\\)' },
+				{ id: 'code-render', kind: 'text', selector: '#headless-code', matches: 'createElement|replaceChildren|append' },
+				{ id: 'hosting', kind: 'text', selector: '#hosting', matches: 'Git|Decap|свой сервер|своём сервере|Strapi|Directus|облак|Sanity|Contentful' },
+				{ id: 'hosting-why', kind: 'text', selector: '#hosting-why', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что значит «безголовая» (headless) CMS?',
+				options: [
+					'У неё нет своего сайта-«головы»: она хранит содержание и отдаёт его по API, а сайт строится отдельно',
+					'Она работает без администратора',
+					'У неё нет базы данных'
+				],
+				answer: 0,
+				why: [
+					'Да. «Голова» это то, что показывает содержание посетителю. Её отделили, и теперь содержание может показывать и сайт, и приложение.',
+					'Нет: админка в такой CMS как раз есть, и это её главная часть.',
+					'Нет: хранилище есть, иногда это даже файлы в Git.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что даёт отделение содержания от сайта?',
+				options: [
+					'Разработчик свободно выбирает, на чём строить сайт',
+					'Одно и то же содержание могут показывать сайт и приложение',
+					'Админка остаётся удобной для редактора',
+					'Не нужно никого, кто построит сайт'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: сайт можно написать на любом инструменте, который умеет читать API.',
+					'Да: источник один, а каналов много.',
+					'Да: в этом смысл: редактор работает в привычной форме.',
+					'Нет, наоборот: сайт теперь надо построить, а в монолитной CMS он уже есть в виде темы.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините систему с тем, где она хранит содержание',
+				pairs: [
+					['Decap CMS', 'файлы в Git-репозитории, правка это коммит'],
+					['Strapi', 'база данных на вашем сервере (или в облаке Strapi)'],
+					['Directus', 'ваша SQL-база, поверх неё админка и API'],
+					['Sanity', 'облако провайдера, студия правки встраивается в ваш проект'],
+					['Contentful', 'облачный сервис, содержание у провайдера']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что делает «вебхук» в схеме headless-сайта?',
+				options: [
+					'После сохранения записи CMS сама сообщает сборщику «содержание изменилось, пересобери сайт»',
+					'Скачивает записи на компьютер редактора',
+					'Шифрует записи'
+				],
+				answer: 0,
+				why: [
+					'Да. Вебхук это обратный вызов: событие в одной системе запускает действие в другой. Подробнее в следующем уроке.',
+					'Нет: к редактору он не относится.',
+					'Нет: вебхук ничего не шифрует, он только сообщает о событии.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Бюджет небольшой, содержание правит один человек раз в месяц, персональных данных в записях нет. Какое размещение headless-CMS самое разумное?',
+				options: [
+					'Файлы в Git (Decap): ни сервера, ни базы, ни платы за облако',
+					'Своя база на отдельном сервере с настройкой ролей',
+					'Дорогой облачный тариф для команды'
+				],
+				answer: 0,
+				why: [
+					'Да. Чем проще проект, тем меньше нужно инфраструктуры. Если редактор не готов работать с Git-входом, возможны другие варианты, но сначала простое.',
+					'Нет: сервер, обновления и копии это работа ради возможностей, которые проекту не нужны.',
+					'Нет: платить за команду и запросы при одном редакторе незачем.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Чем нужно заплатить за переход на headless-CMS по сравнению с WordPress?',
+				options: [
+					'Нужно построить сайт, а к нему добавляется ещё одна система, которую надо обслуживать и связывать с сайтом',
+					'Редактор теряет админку',
+					'Содержание перестаёт сохраняться в структурированном виде'
+				],
+				answer: 0,
+				why: [
+					'Да. Свобода обходится в работу: два звена вместо одного, и предпросмотр правок не бывает «из коробки».',
+					'Нет: админка остаётся и бывает даже удобнее.',
+					'Нет: именно структура записей (типы и поля) и есть основа headless.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-headless-def',
+				front: 'Что такое headless CMS?',
+				back: 'CMS без своего сайта: редактор правит записи в админке, а сайт и приложения получают их по API (REST или GraphQL). «Голову» (показ) отделили от «тела» (содержание).'
+			},
+			{
+				id: 'cms-headless-gain',
+				front: 'Что даёт headless и чем платим?',
+				back: 'Даёт: свободу выбрать инструмент для сайта, один источник для многих каналов, удобную админку. Платим: нужно построить сайт, есть ещё система для обслуживания, предпросмотр не «из коробки».'
+			},
+			{
+				id: 'cms-headless-hosting',
+				front: 'Три места, где хранится содержание headless-CMS',
+				back: 'Файлы в Git (Decap): просто и бесплатно. База на своём сервере (Strapi, Directus): контроль и данные у вас. Облако (Sanity, Contentful): быстро, но данные у провайдера и цена растёт.'
+			},
+			{
+				id: 'cms-headless-query',
+				front: 'Как сайт получает содержание от headless-CMS?',
+				back: 'Запросом к API: fetch(\'/api/items\') возвращает JSON с записями под теми же именами, что в типе. Сайт либо запрашивает при открытии страницы, либо читает при сборке.'
+			},
+			{
+				id: 'cms-headless-lang',
+				front: 'Как в headless хранить два языка?',
+				back: 'Поля на каждый язык (title_ru, title_en) или перевод записи, связанный с оригиналом. В API они приходят под своими именами, и сайт выбирает нужное.'
+			}
+		],
+		sources: [
+			{ title: 'Strapi Docs', url: 'https://docs.strapi.io/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Directus Docs', url: 'https://directus.io/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Sanity Docs', url: 'https://www.sanity.io/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Decap CMS Docs: Intro', url: 'https://decapcms.org/docs/intro/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'Headless content management system (Wikipedia)',
+				url: 'https://en.wikipedia.org/wiki/Headless_content_management_system',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Теперь содержание живёт отдельно от сайта, а сайт берёт его запросом. Опишем тип, внесём запись и напишем сам запрос.',
+			hints: [
+				'Тип описывает поля: название и тип данных. Для цены подойдёт "string" (текстом: «от 3000»), а для второго языка заведите те же поля с суффиксом _en.',
+				'В скрипте три шага: запросить (fetch), прочитать JSON (response.json()) и вывести карточки (createElement и textContent). Не забудьте await: ответ приходит не сразу.',
+				'Размещение выбирайте по бюджету и данным: небольшой проект с одним редактором часто обходится файлами в Git, а если нужны сложные связи и контроль над данными, то свой сервер.'
+			],
+			mistakes: {
+				'headless-exists': 'Блок с типом и записями исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				'schema-type': 'В типе нет строки "type": "items". Не удаляйте её.',
+				'schema-fields': 'В типе должны быть поля title, text и price: они совпадают с полями услуги в брифе.',
+				'schema-languages': 'У проекта несколько языков. Добавьте в тип поля для второго языка: title_en, text_en.',
+				'entries-names': 'В записях поля должны называться так же, как в типе: title, text, price.',
+				'entries-brief': 'В записях нет названий ваших услуг. Они подставляются из брифа: не удаляйте их.',
+				'entries-filled': 'Нужна хотя бы одна запись с настоящим названием: впишите её вместо «…».',
+				'entries-new': 'Нужна ещё одна запись помимо услуг из брифа: впишите свою вместо строки с «…».',
+				'entries-languages': 'В записях нет полей второго языка: добавьте в новую запись title_en и text_en.',
+				'code-fetch': 'В скрипте нет запроса fetch(\'/api/items\').',
+				'code-json': 'Ответ нужно прочитать как JSON: await response.json().',
+				'code-render': 'Не видно, где карточки создаются: используйте createElement и append или replaceChildren.',
+				hosting: 'Назовите вариант размещения: файлы в Git, свой сервер или облако.',
+				'hosting-why': 'Объясните выбор в нескольких словах: через бюджет, число редакторов, данные проекта.'
+			},
+			outro: 'Теперь ваша страница живёт на данных, а не на скопированном тексте. Остаётся один вопрос: как правка в CMS попадает на живой сайт. Это сборка по вебхуку, и она в следующем уроке.'
+		},
+		say: {
+			headless: 'хедлесс',
+			CMS: 'си-эм-эс',
+			API: 'эй-пи-ай',
+			REST: 'рест',
+			GraphQL: 'графкью-эль',
+			JSON: 'джейсон',
+			Strapi: 'страпи',
+			Directus: 'директус',
+			Sanity: 'сэнити',
+			Contentful: 'контентфул',
+			Decap: 'декап',
+			Git: 'гит',
+			Jamstack: 'джем-стек'
+		}
+	};
+</script>
+
+<script>
+	import HeadlessPaths from '../../diagrams/HeadlessPaths.svelte';
+</script>
+
+## Когда сайт и админка срослись
+
+Обычная CMS, такая как WordPress, это **монолит**: админка, хранилище и сайт (тема) в одной программе. Это удобно, пока вам нужен один сайт именно такой. Но представьте, что вы хотите написать сайт на современном инструменте из прошлого урока, а для редактора оставить привычную админку. Или показать одно и то же содержание на сайте и в мобильном приложении. Монолит такого не даёт: сайт и админка у него неразлучны.
+
+## Без головы
+
+**Headless CMS** (безголовая CMS) разрезает монолит. «Голова» это то, что показывает содержание посетителю: тема, сайт, приложение. Её отрезают, остаётся «тело»: хранилище, админка и **API** (REST или GraphQL, о них мы говорили в части 6). Сайт, приложение или что угодно ещё запрашивает содержание у API и рисует как хочет.
+
+Что получаем:
+
+- **Свобода сайта.** Его пишут на любом инструменте, который умеет читать API, например на генераторе из урока 5.
+- **Один источник, много каналов.** Те же записи показывают сайт, приложение, голосовой помощник.
+- **Удобная админка** для редактора: форма с полями, а не файлы и Git.
+- **Безопасность.** Админка и хранилище не торчат наружу вместе с сайтом, а сайт может быть статическим.
+
+Чем платим:
+
+- сайт **надо построить**: в WordPress он был в комплекте;
+- появляется **ещё одна система** для обслуживания и связи с сайтом (урок 7);
+- **предпросмотр** правок («как это будет выглядеть») не работает сам собой, его надо настраивать;
+- цена облачных сервисов растёт с числом редакторов и запросов.
+
+## Тип, записи и запрос
+
+Работа с headless-CMS начинается с модели контента из урока 1. Для услуги вы создаёте **тип** (его называют ещё content type или схемой): список полей и их типов.
+
+```json
+{
+  "type": "items",
+  "fields": { "title": "string", "text": "text", "price": "string" }
+}
+```
+
+Редактор заполняет форму по этой схеме и сохраняет **записи**. Сайт запрашивает их у API, и в ответ приходит JSON с теми же именами полей:
+
+```js
+const response = await fetch('/api/items');
+const items = await response.json();   // [{ title: '…', text: '…', price: '…' }, …]
+```
+
+Этот запрос вам знаком по части 5. Сайт либо делает его в браузере при открытии страницы, либо делает при сборке и вкладывает результат в готовый HTML (так поступают генераторы, урок 7). Для двух языков поля повторяют (`title_ru`, `title_en`) или делают перевод записи, связанный с оригиналом: в API они приходят под своими именами, и сайт выбирает нужное.
+
+<details>
+<summary>Проверьте себя: что изменится на сайте, если в CMS поправить цену?</summary>
+
+Сама цена изменится в записи. Сайт увидит новую, когда сделает следующий запрос или когда будет пересобран (в зависимости от схемы). Правку текста делает редактор, код сайта не трогает никто.
+
+</details>
+
+## Где живёт содержание: пять систем и три места
+
+Систем десятки, но их удобно сравнивать по главному вопросу: **где хранится содержание**. Выберите вариант в схеме и пройдите путь одной правки.
+
+<HeadlessPaths />
+
+- **Файлы в Git: Decap CMS** (прежде Netlify CMS). Админка редактирует файлы Markdown и JSON прямо в репозитории сайта, каждая правка это коммит. Серверов нет, цена нулевая, история в Git. Подходит маленьким проектам.
+- **База на вашем сервере: Strapi и Directus.** **Strapi** написан на JavaScript, в нём вы описываете типы мышкой, и он сразу даёт API. **Directus** надстраивается над обычной SQL-базой (вспомните часть 7) и показывает её в админке с API. Данные у вас, роли и связи сложные, зато сервер, обновления и защита на вас.
+- **Облако: Sanity и Contentful.** **Sanity** предлагает «студию» для редакторов, встроенную в ваш проект, и свой язык запросов. **Contentful** облачная служба для крупных команд. Старт быстрый, предпросмотр и совместная работа встроены, а содержание хранит провайдер. Для проекта с персональными данными это вопрос (часть 7), а цена растёт вместе с проектом.
+
+Мы не называем цен: они меняются, а смотреть их надо на сайте самого сервиса.
+
+## Как выбирать
+
+Три вопроса, как и раньше: **сколько редакторов и кто они**, **какой бюджет**, **что за данные** в записях. Один редактор и маленький бюджет: Decap или даже просто файлы. Нужны сложные связи, роли и данные в России: свой сервер. Много редакторов, быстрый старт, данных о людях в записях нет: облако. Решение принимается в уроке 8 вместе с остальными.
+
+## Практика
+
+Вы в эпохе 2022 года: сайт и содержание разошлись по разным сервисам. Опишите тип содержания для услуги, внесите запись и напишите запрос, который выводит услуги на страницу. Сервер имитирован, потому что песочница не пускает в сеть, но запрос ровно такой, как был бы настоящим. Выберите, где жила бы ваша CMS, и объясните выбор.
+
+## Что было не так
+
+Первые «безголовые» сервисы были иностранными облаками, и для проектов с персональными данными или платежами из России это порождало вопросы к месту хранения и оплате. Поэтому российские команды часто берут открытые системы (Strapi, Directus) и ставят их на свой сервер. Заранее спросите у себя, где лежат данные и кто может перестать их отдавать.
