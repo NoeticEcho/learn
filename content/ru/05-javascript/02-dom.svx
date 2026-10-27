@@ -1,0 +1,825 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/02-dom',
+		part: 5,
+		order: 2,
+		title: 'DOM: страница как дерево, которое можно менять',
+		summary: 'Браузер хранит страницу как дерево, и JavaScript может в нём искать, читать и менять. После урока вы находите элементы селекторами, создаёте новые из данных и понимаете, почему чужой текст нельзя вставлять через innerHTML.',
+		minutes: 25,
+		teaches: ['js-dom'],
+		requires: ['js-arrays-and-objects', 'html-semantic-elements'],
+		practice: {
+			id: 'js-dom-quick-nav',
+			title: 'Быстрый переход по вашим предложениям: список из карточек',
+			task: 'Пусть скрипт сам построит навигацию по карточкам. 1) В секции #offer после заголовка добавьте пустой nav с id="quick" и aria-label (например «Быстрый переход по предложениям») и пустой абзац с id="offer-count". 2) Добавьте второй скрипт <script type="module" id="dom-code">. В нём найдите все карточки (#offer .card) через querySelectorAll. 3) Если карточек нет, покажите в #quick понятное сообщение (через textContent). Если есть, создайте список ul: каждой карточке задайте id вида item-1, item-2 и сделайте для неё li со ссылкой a, у которой href ведёт на этот id, а текст взят из заголовка карточки. Всё это через createElement, textContent и append. 4) В #offer-count напишите «Предложений: N». Использовать innerHTML для вставки текста нельзя. Проверки читают текст вашего скрипта и разметку; список ссылок вы увидите в предпросмотре.',
+			era: 4,
+			continues: 'js-first-code',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'quick-nav',
+					kind: 'exists',
+					selector: '#offer nav#quick'
+				},
+				{
+					id: 'quick-label',
+					kind: 'attr',
+					selector: 'nav#quick',
+					name: 'aria-label',
+					matches: '\\S'
+				},
+				{
+					id: 'count-element',
+					kind: 'exists',
+					selector: '#offer-count'
+				},
+				{
+					id: 'dom-code-exists',
+					kind: 'exists',
+					selector: 'script#dom-code'
+				},
+				{
+					id: 'is-module',
+					kind: 'attr',
+					selector: '#dom-code',
+					name: 'type',
+					matches: '^module$'
+				},
+				{
+					id: 'cards-kept',
+					kind: 'count',
+					selector: '#offer article.card',
+					min: {
+						brief: 'items'
+					}
+				},
+				{
+					id: 'finds-cards',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: 'querySelectorAll\\('
+				},
+				{
+					id: 'creates',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: 'createElement\\('
+				},
+				{
+					id: 'inserts',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: '\\.(?:append|appendChild|prepend|replaceChildren)\\('
+				},
+				{
+					id: 'text-content',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: 'textContent'
+				},
+				{
+					id: 'no-inner-html',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: '^(?![\\s\\S]*(?:\\.(?:innerHTML|outerHTML)\\s*\\+?=|insertAdjacentHTML|document\\.write))[\\s\\S]*\\S'
+				},
+				{
+					id: 'empty-state',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: '\\.length\\s*(?:===?|<=?)\\s*[01]\\b|!\\s*[\\w.]+\\.length'
+				},
+				{
+					id: 'semantic-list',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: '^(?=[\\s\\S]*createElement\\(\\s*[\'"](?:ul|ol)[\'"]\\s*\\))(?=[\\s\\S]*createElement\\(\\s*[\'"]li[\'"]\\s*\\))'
+				},
+				{
+					id: 'anchors',
+					kind: 'text',
+					selector: '#dom-code',
+					matches: '^(?=[\\s\\S]*(?:\\.id\\s*=|setAttribute\\(\\s*[\'"]id[\'"]))(?=[\\s\\S]*(?:\\.href\\s*=|setAttribute\\(\\s*[\'"]href[\'"]))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что вернёт document.querySelector(".нет-такого"), если на странице нет подходящего элемента?',
+				options: ['null: пустое значение', 'Пустой массив', 'Ошибку, и скрипт остановится сразу'],
+				answer: 0,
+				why: [
+					'Да. querySelector возвращает первый подходящий элемент или null. Поэтому, если элемент может отсутствовать, результат проверяют, иначе следующая строка (null.textContent) упадёт с TypeError.',
+					'Нет: пустой список возвращает querySelectorAll, а querySelector возвращает один элемент или null.',
+					'Нет: сам поиск ничего не бросает. Ошибка случится позже, когда вы попробуете что-то сделать с null.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините команду с тем, что она делает',
+				pairs: [
+					['document.querySelector(sel)', 'находит первый подходящий элемент'],
+					['document.querySelectorAll(sel)', 'находит все подходящие, возвращает список'],
+					['document.createElement("li")', 'создаёт элемент в памяти, на странице его ещё нет'],
+					['parent.append(child)', 'вставляет элемент в дерево страницы'],
+					['el.textContent = text', 'записывает текст как текст, без разбора тегов']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Посетитель вписал в поле «Имя» строку <img src=x onerror=alert(1)>, и вы показываете её на странице. Как сделать это безопасно?',
+				options: [
+					'Записать через textContent: строка останется текстом',
+					'Записать через innerHTML',
+					'Ничего не делать: браузер сам всё отфильтрует'
+				],
+				answer: 0,
+				why: [
+					'Да. textContent никогда не разбирает теги: строка появится на странице буквами, и скрипт в ней не сработает.',
+					'Нет. innerHTML разберёт строку как разметку, создаст картинку, а её обработчик onerror выполнит чужой код. Это называется XSS, межсайтовое выполнение скриптов.',
+					'Нет: браузер не знает, что в строке вражеский код. Фильтровать должен автор страницы, и проще всего не разбирать чужой текст как разметку вообще.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте шаги добавления новой карточки в список',
+				items: [
+					'Найти контейнер: document.querySelector(".cards")',
+					'Создать элемент: document.createElement("article")',
+					'Записать текст: element.textContent = title',
+					'Вставить в страницу: container.append(element)'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Какие способы вставки не разбирают текст как разметку?',
+				options: ['textContent', 'document.createTextNode', 'innerHTML', 'insertAdjacentHTML'],
+				answer: [0, 1],
+				why: [
+					'Да: textContent вставляет чистый текст.',
+					'Да: createTextNode создаёт текстовый узел, в котором нет тегов.',
+					'Нет: innerHTML превращает строку в элементы.',
+					'Нет: insertAdjacentHTML тоже разбирает строку как разметку, поэтому для чужого текста его нельзя использовать.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Скрипт без type="module" и без defer стоит в head и ищет заголовок h1. Почему он получает null?',
+				options: [
+					'Браузер ещё не дошёл до h1: скрипт выполнился во время разбора страницы',
+					'В JavaScript нельзя искать h1',
+					'Скрипты в head вообще не работают'
+				],
+				answer: 0,
+				why: [
+					'Да. Обычный скрипт останавливает разбор и выполняется сразу, а элементов ниже по документу ещё нет. Поэтому скрипт кладут в конец страницы, добавляют defer или делают модулем.',
+					'Нет: искать можно любой элемент, но только когда он уже есть в дереве.',
+					'Нет: работают, просто выполняются раньше, чем строится нужная часть страницы.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'В скрипте найдите на странице первый заголовок h1 и положите его в переменную title',
+				starter: '<h1>Привет</h1>\n<script type="module" id="q">\n\n<\\/script>',
+				checks: [
+					{
+						id: 'finds-h1',
+						kind: 'text',
+						selector: '#q',
+						matches: '(?:const|let)\\s+title\\s*=\\s*document\\.querySelector\\(\\s*[\'"]h1[\'"]\\s*\\)'
+					}
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-dom-what',
+				front: 'Что такое DOM?',
+				back: 'Дерево объектов, которое браузер строит из HTML. JavaScript получает его как document и может искать, читать и менять узлы. Страница на экране перерисовывается следом.'
+			},
+			{
+				id: 'js-query',
+				front: 'Чем querySelector отличается от querySelectorAll?',
+				back: 'querySelector находит первый подходящий элемент или null. querySelectorAll возвращает список всех подходящих (возможно, пустой). Селекторы те же, что в CSS.'
+			},
+			{
+				id: 'js-create-append',
+				front: 'Как добавить на страницу новый элемент?',
+				back: 'Создать createElement, настроить (textContent, атрибуты, classList) и вставить в дерево через append. Пока не вставлен, на странице его нет.'
+			},
+			{
+				id: 'js-innerhtml-xss',
+				front: 'Почему чужой текст нельзя вставлять через innerHTML?',
+				back: 'innerHTML разбирает строку как разметку. Если в ней есть тег с обработчиком, чужой код выполнится на вашей странице (XSS). textContent показывает текст как текст.'
+			},
+			{
+				id: 'js-nodelist',
+				front: 'Что возвращает querySelectorAll и что с этим делать?',
+				back: 'NodeList: список, который можно обойти через forEach или for...of. Чтобы применить map и filter, его сначала превращают в массив: Array.from(list).'
+			}
+		],
+		sources: [
+			{
+				title: 'Введение в DOM (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Web/API/Document_Object_Model/Introduction',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'Document.querySelector (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Web/API/Document/querySelector',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'DOM Standard (WHATWG)',
+				url: 'https://dom.spec.whatwg.org/',
+				licence: 'CC-BY',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'Документ: учебник learn.javascript.ru',
+				url: 'https://learn.javascript.ru/document',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'ru'
+			},
+			{
+				title: 'OWASP: DOM based XSS Prevention Cheat Sheet',
+				url: 'https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Теперь скрипт будет не считать, а менять страницу. Он найдёт ваши карточки, построит из них список ссылок и посчитает их. Идите по шагам: сначала разметка, потом скрипт.',
+			hints: [
+				'В разметке после заголовка «Что мы предлагаем» нужны два пустых элемента: <nav id="quick" aria-label="Быстрый переход по предложениям"></nav> и <p id="offer-count"></p>. Их заполнит скрипт.',
+				'Скрипт: <script type="module" id="dom-code"> … <\\/script>, второй после вашего первого. Начните со строки const cards = document.querySelectorAll("#offer .card");',
+				'Для каждой карточки: cards.forEach((card, index) => { … }). Внутри: card.id = "item-" + (index + 1); создайте a (createElement("a")), задайте link.href = "#" + card.id и link.textContent = card.querySelector("h3").textContent; оберните в li и добавьте в ul.',
+				'Если карточек нет: if (cards.length === 0) { quick.textContent = "Пока в списке нет предложений."; }. Счётчик: count.textContent = "Предложений: " + cards.length;'
+			],
+			mistakes: {
+				'quick-nav': 'В секции #offer нужен элемент <nav id="quick" aria-label="…">. Скрипт построит в нём список.',
+				'quick-label': 'У nav нужно подпись для скринридера: aria-label="Быстрый переход по предложениям".',
+				'count-element': 'Нужен абзац для счётчика: <p id="offer-count"></p>.',
+				'dom-code-exists': 'Не нашёл второй скрипт: <script type="module" id="dom-code">.',
+				'is-module': 'У скрипта нужен атрибут type="module".',
+				'cards-kept': 'Карточки в разметке (article с классом card) должны остаться на месте: скрипт строит навигацию, а не заменяет их.',
+				'finds-cards': 'Карточки ищутся через querySelectorAll: document.querySelectorAll("#offer .card").',
+				creates: 'Не вижу createElement. Элементы списка создаются командой document.createElement("li").',
+				inserts: 'Созданные элементы надо вставить в страницу: list.append(row), quick.append(list).',
+				'text-content': 'Текст ссылок записывайте через textContent.',
+				'no-inner-html': 'Уберите innerHTML, outerHTML, insertAdjacentHTML и document.write: текст надо вставлять через textContent.',
+				'empty-state': 'Нужна проверка пустого списка: if (cards.length === 0) { … }. Сообщение для посетителя запишите в #quick через textContent.',
+				'semantic-list': 'Навигация должна быть настоящим списком: создайте ul (или ol) и li через createElement.',
+				anchors: 'Каждой карточке задайте id (card.id = "item-" + …), а ссылке href, который на этот id указывает: link.href = "#" + card.id.'
+			},
+			outro: 'Страница стала сама строить навигацию по тому, что на ней есть. Добавьте пятую карточку в разметку, и в списке ссылок появится пятая ссылка: скрипту не нужно знать про это заранее.'
+		},
+		say: {
+			DOM: 'дом',
+			querySelector: 'квери-селектор',
+			querySelectorAll: 'квери-селектор-ол',
+			createElement: 'креэйт-элемент',
+			textContent: 'текст-контент',
+			innerHTML: 'иннер-эйч-ти-эм-эль',
+			XSS: 'икс-эс-эс',
+			append: 'эппенд',
+			NodeList: 'ноуд-лист',
+			jQuery: 'джей-квери',
+			WHATWG: 'ватвэг',
+			null: 'налл'
+		}
+	};
+</script>
+
+<script>
+	import DomTree from '../../diagrams/DomTree.svelte';
+</script>
+
+## Страница, которую можно потрогать
+
+В уроке про рендеринг вы видели, что браузер читает HTML и строит из него **DOM** (Document Object Model, объектную модель документа): дерево, в котором каждый тег, каждый кусок текста и каждый атрибут становятся узлом. Страница на экране рисуется с этого дерева. Главное для нас: браузер отдаёт это дерево JavaScript. В скрипте оно доступно под именем `document`, и всё, что скрипт в нём поменяет, браузер тут же перерисует.
+
+Так делается любая интерактивность: меню открывается, потому что скрипт убрал у элемента атрибут `hidden`; счётчик растёт, потому что скрипт записал в элемент новое число; список появляется, потому что скрипт создал для каждого пункта элемент и вставил его на страницу. Три действия: **найти**, **прочитать или изменить**, **создать и вставить**.
+
+## Найти элемент
+
+Для поиска в языке есть две команды, и в них те же **селекторы**, что вы писали в CSS: `h3`, `.card`, `#offer`, `nav a`.
+
+```js
+const first = document.querySelector('.card');          // первый подходящий или null
+const all = document.querySelectorAll('#offer .card');  // все подходящие
+```
+
+`querySelector` возвращает один элемент или `null`, если ничего не нашлось. `querySelectorAll` возвращает **список** узлов (`NodeList`), возможно пустой. Его можно обойти через `forEach` или `for...of`, а чтобы пользоваться `map` и `filter`, превращают в массив: `Array.from(all)`.
+
+Из найденного элемента можно искать дальше: `card.querySelector('h3')` ищет только внутри этой карточки. Поэтому селектор можно писать короче, а скрипт получается аккуратнее.
+
+Попробуйте селекторы на маленькой странице, и найденное подсветится и в разметке, и в дереве:
+
+<DomTree />
+
+<details>
+<summary>Проверьте себя: что вернёт querySelector, если элемента нет?</summary>
+
+`null`. Поэтому, когда элемент может отсутствовать, результат проверяют, иначе следующая строка вроде `el.textContent = ...` упадёт с ошибкой.
+
+</details>
+
+## Прочитать и изменить
+
+Когда элемент найден, у него есть свойства и методы:
+
+- `textContent` читает и записывает **текст** элемента: `title.textContent = 'Новое название'`;
+- `getAttribute('href')` и `setAttribute('href', '#top')` работают с атрибутами. У многих атрибутов есть и короткие свойства: `link.href`, `input.value`, `el.id`, `el.hidden`;
+- `classList.add('selected')`, `classList.remove('selected')`, `classList.toggle('selected')` управляют классами. Это лучший способ менять вид: скрипт навешивает класс, а CSS знает, что с ним делать. Так оформление остаётся в CSS, а логика в JS;
+- `dataset` даёт доступ к атрибутам вида `data-price="1200"`: `card.dataset.price`. Через них разметка передаёт скрипту свои данные.
+
+## Создать и вставить
+
+Чтобы добавить новое, элемент сначала создают в памяти, настраивают, а потом вставляют в дерево:
+
+```js
+const row = document.createElement('li');   // пока его нет на странице
+row.textContent = 'Новый пункт';
+list.append(row);                           // теперь есть
+```
+
+Другие нужные команды: `prepend` (в начало), `remove()` (убрать элемент), `replaceChildren(...)` (заменить всё содержимое). Если вставляете много элементов подряд, собирайте их в памяти и вставляйте одним `append` с несколькими аргументами: браузеру не надо перерисовывать страницу после каждого.
+
+## Почему чужой текст нельзя вставлять через innerHTML
+
+Есть и более короткий способ: свойство `innerHTML`. В него записывают строку с разметкой, и браузер её разбирает:
+
+```js
+box.innerHTML = '<p>Привет, ' + name + '</p>';
+```
+
+Выглядит удобно, но если `name` пришёл от посетителя (из поля формы, из комментария, из ответа сервера, из адреса страницы), то в нём может быть не имя, а разметка с обработчиком события. Браузер не видит разницы между «вашей» разметкой и «чужой»: он разберёт всё и выполнит чужой код от имени вашего сайта. Такая уязвимость называется **XSS** (cross-site scripting, межсайтовое выполнение скриптов). Через неё воруют сессии и подменяют страницы.
+
+Правило простое: **чужой текст вставляют через `textContent`**. Он записывает строку как текст, символы `<` и `>` остаются обычными буквами, и ничего не выполняется. `innerHTML` оставьте для разметки, которую целиком написали вы.
+
+Проверьте на одной и той же строке два способа:
+
+<DomTree mode="inject" />
+
+## Когда скрипт запускается
+
+Ошибка, на которой спотыкаются все: скрипт ищет элемент, а его ещё нет. Обычный `<script>` останавливает разбор страницы и выполняется сразу, поэтому всё, что стоит в документе ниже, ему пока не видно. Выходов три: положить скрипт в самый конец страницы, добавить ему атрибут `defer` или сделать его модулем, как в нашем редакторе (`type="module"`). Модуль выполняется после разбора страницы, и искать в нём можно что угодно.
+
+## Практика
+
+Сайт эпохи 2014 года. У вас уже есть список карточек, но на длинной странице их не видно с первого экрана. Пусть скрипт построит из карточек **быстрый переход**: ссылки на каждое предложение вверху секции, плюс счётчик.
+
+Скрипт ничего не придумывает, он читает то, что есть в разметке: находит карточки, берёт заголовок каждой и делает ссылку на неё. Добавите в разметку ещё одну карточку, и ссылка появится сама. А если карточек нет, посетитель увидит понятное сообщение, а не пустое место.
+
+Обратите внимание, чего нет в задании: слова `innerHTML`. Заголовок карточки может содержать что угодно, поэтому всё идёт через `textContent`.
+
+## Что было не так раньше
+
+Когда-то DOM в разных браузерах был разным: у Internet Explorer одни методы, у Netscape другие, и `document.all`, `document.layers` нужно было угадывать. Стандарт появился в конце 90-х, а его последователи сначала неохотно его поддерживали. Именно из-за этой путаницы в 2006 году родилась библиотека **jQuery**: одна функция `$('.card')`, которая работала одинаково в любом браузере. На ней сделаны миллионы сайтов, и многие работают до сих пор, а если вы читаете чужой код со знаком доллара, то перед вами jQuery.
+
+Сегодня браузеры ведут себя одинаково, стандарт называется DOM Standard (WHATWG), а `querySelector`, `classList` и `append` делают то, ради чего раньше ставили библиотеку. Для новых сайтов jQuery не нужен: он весит десятки килобайт и решает проблемы, которых больше нет. Правильным осталось другое: искать элементы по селекторам, менять классы, а не стили, и не доверять чужому тексту.

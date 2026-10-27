@@ -1,0 +1,1203 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/04-async-fetch-json',
+		part: 5,
+		order: 4,
+		title: 'Асинхронность, fetch и JSON',
+		summary: 'Данные с сервера приходят не сразу, а страница при этом не должна зависать. После урока вы запрашиваете данные через fetch, читаете и пишете JSON, понимаете промисы и async/await и показываете посетителю состояния «загрузка» и «ошибка».',
+		minutes: 30,
+		teaches: ['js-async', 'js-fetch', 'js-json', 'js-error-handling'],
+		requires: ['js-events', 'net-http-request-response'],
+		practice: {
+			id: 'js-fetch-items-form',
+			title: 'Список с сервера и заявка без перезагрузки',
+			task: 'Подключите страницу к «серверу». 1) Вставьте из урока блок имитации сервера (fieldset и скрипт с пометкой data-scaffold) перед своим скриптом: песочница не пускает настоящие запросы, и этот блок подменяет fetch. 2) В разметку добавьте: в секцию #offer абзац <p id="status" role="status"> и скрытую кнопку <button type="button" id="retry" hidden>Повторить</button>; форме заявки дайте id="request-form", а в конец формы абзац <p id="form-status" role="status">. 3) Четвёртый скрипт <script type="module" id="fetch-code">. Функция loadItems (async) запрашивает fetch("/items.json"), проверяет response.ok, читает response.json(), собирает карточки через createElement и textContent и кладёт их в .cards (replaceChildren). Показывайте «Загружаем…» в #status и убирайте индикатор в любом исходе (finally), при сбое покажите понятное сообщение, оставьте прежние карточки и покажите кнопку «Повторить». 4) На форме заявки: слушатель submit с preventDefault, на время отправки блокируйте кнопку (disabled), отправляйте fetch("/zayavka", { method: "POST", body: new FormData(form) }) и пишите результат в #form-status, а после отправки снова включайте кнопку. Проверки читают разметку и текст скрипта; переключайте «связь» в имитации и смотрите на свою страницу в каждом случае.',
+			era: 4,
+			continues: 'js-events-menu-search',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			checks: [
+				{
+					id: 'sim-present',
+					kind: 'exists',
+					selector: '#net-sim input[name="net"]'
+				},
+				{
+					id: 'status-region',
+					kind: 'exists',
+					selector: '#offer p#status[role="status"], #offer p#status[aria-live]'
+				},
+				{
+					id: 'retry-button',
+					kind: 'exists',
+					selector: 'button#retry[type="button"]'
+				},
+				{
+					id: 'form-status',
+					kind: 'exists',
+					selector: '#request-form #form-status[role="status"], #request-form #form-status[aria-live]'
+				},
+				{
+					id: 'form-works-without-js',
+					kind: 'attr',
+					selector: '#request-form',
+					name: 'action',
+					matches: '^/zayavka$'
+				},
+				{
+					id: 'fetch-code-exists',
+					kind: 'exists',
+					selector: 'script#fetch-code'
+				},
+				{
+					id: 'is-module',
+					kind: 'attr',
+					selector: '#fetch-code',
+					name: 'type',
+					matches: '^module$'
+				},
+				{
+					id: 'async-await',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '^(?=[\\s\\S]*\\basync\\b)(?=[\\s\\S]*\\bawait\\b)'
+				},
+				{
+					id: 'fetch-items',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: 'fetch\\(\\s*[\'"][^\'"]*items\\.json[\'"]'
+				},
+				{
+					id: 'checks-ok',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '\\.ok\\b'
+				},
+				{
+					id: 'parses-json',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '\\.json\\(\\)'
+				},
+				{
+					id: 'try-catch',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: 'try\\s*\\{[\\s\\S]*\\}\\s*catch'
+				},
+				{
+					id: 'finally',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '\\bfinally\\s*\\{'
+				},
+				{
+					id: 'cards-from-data',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '^(?=[\\s\\S]*createElement\\()(?=[\\s\\S]*textContent)(?=[\\s\\S]*replaceChildren\\()'
+				},
+				{
+					id: 'no-inner-html',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '^(?![\\s\\S]*(?:\\.(?:innerHTML|outerHTML)\\s*\\+?=|insertAdjacentHTML|document\\.write))[\\s\\S]*\\S'
+				},
+				{
+					id: 'retry-wired',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: 'retry\\w*\\.addEventListener\\(\\s*[\'"]click[\'"]'
+				},
+				{
+					id: 'prevents-default',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: 'preventDefault\\('
+				},
+				{
+					id: 'post-form',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: 'method:\\s*[\'"]POST[\'"]'
+				},
+				{
+					id: 'form-data',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: 'new\\s+FormData\\(|JSON\\.stringify\\('
+				},
+				{
+					id: 'no-double-submit',
+					kind: 'text',
+					selector: '#fetch-code',
+					matches: '^(?=[\\s\\S]*\\.disabled\\s*=\\s*true)(?=[\\s\\S]*\\.disabled\\s*=\\s*false)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Запрос на сервер идёт три секунды. Что происходит со страницей, если обращаться к нему через fetch?',
+				options: [
+					'Страница остаётся живой: скрипт ждёт ответа, а браузер продолжает обрабатывать клики и прокрутку',
+					'Страница замерзает на три секунды',
+					'Скрипт выполняется параллельно в другом потоке'
+				],
+				answer: 0,
+				why: [
+					'Да. fetch возвращает промис и сразу отдаёт управление. Ответ придёт позже, и тогда сработает код после await. Пока ждём, страница работает.',
+					'Нет: так было бы с синхронным запросом, который в браузере давно не рекомендуется. fetch асинхронный.',
+					'Нет: JavaScript выполняется в одном потоке. Ожидание ответа делает браузер, а скрипт получает результат, когда придёт его очередь.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Сервер ответил кодом 404. Что произойдёт с промисом, который вернул fetch?',
+				options: [
+					'Он выполнится успешно: сервер ответил, поэтому надо проверить response.ok',
+					'Он будет отклонён с ошибкой, и сработает catch',
+					'Он навсегда зависнет'
+				],
+				answer: 0,
+				why: [
+					'Да. fetch отклоняет промис только при сетевом сбое (нет связи, адрес не найден). Ответ 404 или 500 это тоже ответ, и промис выполняется. Поэтому после fetch всегда проверяют response.ok.',
+					'Нет, на этом ловятся многие. catch сработает только при сбое сети или если вы сами бросите ошибку (throw) при !response.ok.',
+					'Нет: промис всегда получает один из двух исходов.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините состояние промиса с тем, что оно значит',
+				pairs: [
+					['pending', 'ответа ещё нет, ждём'],
+					['fulfilled', 'ответ получен, результат есть'],
+					['rejected', 'произошёл сбой, результата нет'],
+					[
+						'await',
+						'подождать промис внутри async-функции и взять его результат'
+					],
+					['finally', 'выполнить в любом исходе, и при успехе, и при сбое']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что из этого является правильным JSON?',
+				options: [
+					'{"title": "Скатерть", "price": 4500}',
+					'{\'title\': \'Скатерть\'}',
+					'[{"id": 1}, {"id": 2}]',
+					'{"title": "Скатерть",}'
+				],
+				answer: [0, 2],
+				why: [
+					'Да: имена и строки в двойных кавычках, число без кавычек.',
+					'Нет: в JSON кавычки только двойные. Одинарные допустимы в JavaScript, но не в JSON.',
+					'Да: массив объектов, самая обычная форма ответа сервера.',
+					'Нет: запятая после последнего элемента в JSON запрещена. Из-за неё JSON.parse выдаст ошибку.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте шаги загрузки данных в правильном порядке',
+				items: [
+					'Показать «Загружаем…»',
+					'Сделать запрос: await fetch(url)',
+					'Проверить response.ok',
+					'Прочитать данные: await response.json()',
+					'Показать данные или сообщение об ошибке',
+					'Убрать индикатор загрузки (finally)'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Посетитель дважды быстро нажал «Отправить», и пришло две одинаковые заявки. Что надо было сделать?',
+				options: [
+					'Отключить кнопку на время отправки (disabled) и включить после ответа',
+					'Просто убрать кнопку из формы',
+					'Ничего, это ошибка посетителя'
+				],
+				answer: 0,
+				why: [
+					'Да. Пока запрос идёт, кнопка выключена, и второго нажатия просто нет. А в блоке finally её включают снова, чтобы при сбое можно было повторить.',
+					'Нет: без кнопки отправить заявку нельзя вообще.',
+					'Нет: на медленной сети человек не знает, прошла ли заявка, и нажимает ещё раз. Это ожидаемое поведение, и защищает от него страница.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что прочитает JSON.parse("{\\"a\\": 1}") и во что превратит строку?',
+				options: ['Объект {a: 1}', 'Строку без изменений', 'Массив [1]'],
+				answer: 0,
+				why: [
+					'Да. JSON.parse превращает строку с JSON в обычное значение JavaScript: объект, массив, число. Обратное действие делает JSON.stringify.',
+					'Нет: если бы строка оставалась строкой, разбор был бы бессмысленным.',
+					'Нет: объект с ключом a остаётся объектом.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-async-why',
+				front: 'Почему запросы на сервер асинхронные?',
+				back: 'JavaScript работает в одном потоке, и ждать ответа сети, не замораживая страницу, можно только так: запрос уходит, скрипт продолжает, а ответ обрабатывается позже.'
+			},
+			{
+				id: 'js-promise',
+				front: 'Что такое промис и какие у него состояния?',
+				back: 'Обещание результата. pending (ждём), fulfilled (результат есть), rejected (сбой). await внутри async-функции ждёт промис, а try/catch ловит отказ.'
+			},
+			{
+				id: 'js-fetch-ok',
+				front: 'Что обязательно проверять после fetch?',
+				back: 'response.ok. fetch отклоняется только при сбое сети, а ответы 404 и 500 приходят как обычные. Без проверки страница покажет «данные», которых нет.'
+			},
+			{
+				id: 'js-json-rules',
+				front: 'Каковы правила JSON?',
+				back: 'Текст с массивами, объектами, строками, числами, true, false и null. Имена и строки только в двойных кавычках; без комментариев и без запятой после последнего элемента. JSON.parse читает, JSON.stringify пишет.'
+			},
+			{
+				id: 'js-states',
+				front: 'Какие состояния надо показать посетителю при загрузке?',
+				back: 'Загрузка (индикатор), успех (данные), ошибка (понятный текст без жаргона и кнопка «Повторить»). Индикатор убирают в finally, чтобы он не остался навсегда.'
+			}
+		],
+		sources: [
+			{
+				title: 'Использование Fetch (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Web/API/Fetch_API/Using_Fetch',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'Работа с JSON (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Scripting/JSON',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'Асинхронный JavaScript (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Learn_web_development/Extensions/Async_JS',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'Промисы, async/await (learn.javascript.ru)',
+				url: 'https://learn.javascript.ru/async',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'ru'
+			},
+			{
+				title: 'RFC 8259: The JSON Data Interchange Format',
+				url: 'https://www.rfc-editor.org/rfc/rfc8259',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Здесь страница впервые разговаривает с сервером. Сервер, конечно, будет понарошку, но код вы пишете настоящий: тот же fetch и тот же JSON. Идите по порядку: разметка, имитация, список, форма.',
+			hints: [
+				'Сначала вставьте блок имитации из урока перед своим скриптом (fieldset с радиокнопками и скрипт data-scaffold). Без него fetch в песочнице не сможет ответить.',
+				'Разметка: в #offer абзац <p id="status" role="status"></p> и кнопка <button type="button" id="retry" hidden>Повторить</button>; у формы id="request-form" и в конце абзац <p id="form-status" role="status"></p>.',
+				'Загрузка: async function loadItems() { try { const response = await fetch("/items.json"); if (!response.ok) throw new Error("код " + response.status); const items = await response.json(); … } catch (error) { … } finally { … } }.',
+				'Для формы: form.addEventListener("submit", async (event) => { event.preventDefault(); button.disabled = true; try { … await fetch("/zayavka", { method: "POST", body: new FormData(form) }) … } finally { button.disabled = false; } }.'
+			],
+			mistakes: {
+				'sim-present': 'Не вижу блок имитации сервера (fieldset id="net-sim" с радиокнопками). Скопируйте его из урока в страницу.',
+				'status-region': 'В секции #offer нужен абзац <p id="status" role="status">: дикторы сообщат посетителю, что список загружается.',
+				'retry-button': 'Нужна кнопка <button type="button" id="retry" hidden>Повторить</button>.',
+				'form-status': 'В форме нужен абзац <p id="form-status" role="status">, и сама форма должна иметь id="request-form".',
+				'form-works-without-js': 'У формы должно остаться action="/zayavka": без скрипта она отправляется обычным способом.',
+				'fetch-code-exists': 'Не нашёл четвёртый скрипт: <script type="module" id="fetch-code">.',
+				'is-module': 'У скрипта нужен атрибут type="module".',
+				'async-await': 'Функция загрузки должна быть async, а внутри ждать ответ через await.',
+				'fetch-items': 'Не вижу запроса fetch("/items.json").',
+				'checks-ok': 'После fetch проверьте response.ok: ответ 404 или 500 тоже приходит как обычный.',
+				'parses-json': 'Данные читаются командой await response.json().',
+				'try-catch': 'Запрос должен быть в блоке try { … } catch (error) { … }: так вы поймаете сбой сети.',
+				finally: 'Индикатор загрузки надо убирать в блоке finally { … }: он сработает и при успехе, и при сбое.',
+				'cards-from-data': 'Карточки из данных собирайте так: createElement, textContent и cardsBox.replaceChildren(...cards).',
+				'no-inner-html': 'Уберите innerHTML и подобное: данные сервера тоже чужие, пишите их через textContent.',
+				'retry-wired': 'Кнопке «Повторить» нужен обработчик: retry.addEventListener("click", loadItems).',
+				'prevents-default': 'В обработчике отправки формы нужен event.preventDefault().',
+				'post-form': 'Заявку отправляют методом POST: fetch("/zayavka", { method: "POST", … }).',
+				'form-data': 'Тело запроса берите из формы: body: new FormData(form).',
+				'no-double-submit': 'Кнопку надо блокировать на время отправки (button.disabled = true) и включать снова после ответа (disabled = false, лучше в finally).'
+			},
+			outro: 'Страница умеет теперь и ждать, и ошибаться красиво: с индикатором, понятным сообщением и повтором. А ещё вы увидели в быстром переходе, что новый пункт туда не попал: это не случайность, а неудобство ручной синхронизации. К нему мы вернёмся в уроке про фреймворки.'
+		},
+		say: {
+			fetch: 'фэтч',
+			JSON: 'джейсон',
+			async: 'эсинк',
+			await: 'эвейт',
+			Promise: 'промис',
+			promise: 'промис',
+			pending: 'пендинг',
+			fulfilled: 'фулфиллд',
+			rejected: 'риджектед',
+			response: 'респонс',
+			FormData: 'форм-дата',
+			finally: 'файналли',
+			try: 'трай',
+			catch: 'кэтч',
+			RFC: 'эр-эф-си'
+		}
+	};
+</script>
+
+<script>
+	import AsyncTimeline from '../../diagrams/AsyncTimeline.svelte';
+</script>
+
+## Данные, которые приходят не сразу
+
+До сих пор скрипт работал с тем, что уже лежит на странице. Но настоящий сайт часто берёт данные с сервера: список событий, свободное время для записи, статус заказа. И отправляет туда: заявку, отзыв, поиск. Это всегда занимает время: запрос идёт по сети, сервер думает, ответ идёт обратно. Секунду, три, иногда не приходит вовсе.
+
+Если бы скрипт во время этого ожидания просто стоял, страница бы замерзла: ни прокрутки, ни кликов. Чтобы этого не было, всё, что связано с ожиданием, в JavaScript сделано **асинхронным**. JavaScript выполняется в одном потоке, то есть делает одно дело за раз. Но ожидание ответа он поручает браузеру («пришлёшь, когда придёт»), занимается остальным, и когда ответ готов, браузер ставит его обработку в очередь, и скрипт доходит до неё в свою очередь. Такую очередь называют **циклом событий** (event loop), и именно поэтому обработчики из прошлого урока вызываются «когда-нибудь», а не сразу.
+
+## Промисы и async/await
+
+Результат, которого пока нет, в JavaScript представлен значением, которое называется **промис** (promise, «обещание»). Это ящик, в который результат положат позже. У промиса три состояния:
+
+- `pending`: ответа ещё нет;
+- `fulfilled`: пришёл результат;
+- `rejected`: произошёл сбой.
+
+Раньше такие вещи делали «колбэками»: функцию передавали и просили вызвать, когда будет готово. Если за одним ожиданием шло другое, а за ним третье, получалась лестница из вложенных функций, которую называли адом колбэков. В 2015 году появились промисы, в 2017 новая запись `async`/`await`, которая позволяет писать ожидание как обычный код сверху вниз:
+
+```js
+async function loadItems() {
+  const response = await fetch('/items.json');   // ждём ответ, но страница живая
+  const items = await response.json();           // ждём, пока тело дочитается
+  return items;
+}
+```
+
+Слово `await` ставится перед промисом и означает: «подожди результата, а потом продолжай». Писать его можно только внутри функции, объявленной с `async`. Сама такая функция тоже возвращает промис, поэтому её можно ждать в другом месте.
+
+Посмотрите, что происходит со страницей, пока запрос в пути. Нажимайте на счётчик, пока ждёте ответ: в обычном режиме страница живёт, а в «блокирующем» вы увидите, как выглядела бы страница, ждущая ответа без асинхронности.
+
+<AsyncTimeline />
+
+<details>
+<summary>Проверьте себя: почему страница не зависает, пока fetch ждёт ответ?</summary>
+
+Ожидание делает браузер, а не скрипт. Скрипт получает промис и продолжает, а когда ответ готов, его обработка встаёт в очередь событий.
+
+</details>
+
+## fetch
+
+**`fetch(адрес)`** отправляет HTTP-запрос (тот самый, что вы разбирали в уроке про HTTP) и возвращает промис с ответом. Метод по умолчанию `GET`. Чтобы отправить данные, добавляют параметры:
+
+```js
+const response = await fetch('/zayavka', {
+  method: 'POST',
+  body: new FormData(form)    // данные формы, как их отправил бы браузер
+});
+```
+
+Ответ (`response`) похож на то, что показывала вам вкладка «Сеть»: у него есть `status` (код), `ok` (удобное «код от 200 до 299») и методы чтения тела: `text()`, `json()` и другие. Читать тело тоже асинхронно, поэтому и перед `response.json()` стоит `await`.
+
+Здесь ловушка, на которой спотыкаются почти все. **`fetch` отклоняет промис только при сбое сети**: нет связи, адрес не найден, соединение оборвано. Если сервер ответил, пусть даже `404` или `500`, это тоже *ответ*, и промис выполняется успешно. Поэтому после каждого `fetch` пишут проверку:
+
+```js
+if (!response.ok) {
+  throw new Error('Сервер ответил кодом ' + response.status);
+}
+```
+
+Без неё страница попытается прочитать страницу ошибки как данные и покажет посетителю пустоту или странный текст.
+
+Есть и ограничение безопасности: браузер разрешает странице запрашивать данные у **своего** сайта. Запрос к чужому сайту пройдёт, только если тот в своих заголовках разрешил (это называют CORS). Если вы видите в консоли красное «blocked by CORS policy», проблема на стороне сервера, а не в вашем коде.
+
+## JSON
+
+Сервер и страница обмениваются данными в виде текста, и самый распространённый формат этого текста называется **JSON** (JavaScript Object Notation). Его придумал Дуглас Крокфорд в начале 2000-х как замену тяжёлому XML, и он оказался настолько простым, что стал стандартом (RFC 8259). По виду он почти совпадает с объектами и массивами JavaScript, которые вы писали в первом уроке:
+
+```json
+[
+  { "title": "Скатерть", "text": "Лён, ручная обработка края.", "price": "0 000 ₽" },
+  { "title": "Фартук", "text": "С карманом.", "price": "" }
+]
+```
+
+Но правила строже:
+
+- имена и строки только в **двойных** кавычках;
+- допустимы объекты, массивы, строки, числа, `true`, `false` и `null`;
+- **нет комментариев** и **нет запятой** после последнего элемента.
+
+Из-за последней запятой падает много скриптов: JavaScript её простит, а JSON нет. Две команды превращают текст и значения друг в друга: `JSON.parse(текст)` читает JSON в обычное значение, а `JSON.stringify(значение)` записывает значение в JSON. Метод `response.json()` делает `JSON.parse` над телом ответа за вас.
+
+## Когда что-то пошло не так
+
+Три разных беды выглядят по-разному:
+
+1. **Сети нет.** `fetch` отклоняется (в консоли `TypeError: Failed to fetch`), и сработает `catch`.
+2. **Сервер ответил ошибкой.** Промис выполнен, `response.ok` равен `false`: проверка выше превращает это в такую же ошибку, как и первое.
+3. **Ответ не тот.** Это не JSON, или в нём нет нужного поля. `response.json()` сам отклонится, а недостающие поля надо проверять.
+
+Оборачивают всё в `try ... catch ... finally`. В `try` идёт то, что может сломаться. В `catch` попадает ошибка. А блок `finally` выполняется **в любом случае**, и там убирают индикатор загрузки, чтобы он не остался висеть вечно после сбоя.
+
+Что видит посетитель, важнее того, что видит консоль. Ему нужны три состояния и честный текст:
+
+- **загрузка**: «Загружаем свежий список…» (в области `role="status"` дикторы сообщат об этом слепым посетителям);
+- **успех**: данные;
+- **ошибка**: не «TypeError: Failed to fetch», а «Не удалось обновить список, показан сохранённый. Проверьте связь и повторите», и рядом кнопка «Повторить».
+
+Технические подробности остаются в `console.error(error)`. Кнопку отправки на время запроса выключают (`disabled`), иначе нетерпеливый посетитель нажмёт дважды, и вы получите две одинаковые заявки.
+
+## Практика
+
+Продолжаем страницу эпохи 2014 года. Мы подключим её к «серверу» и к его данным. Сервера у нас, конечно, нет: песочница не пускает настоящие запросы. Поэтому вы вставите в страницу блок, который **подменяет `fetch`** и отвечает так, как скажет переключатель «связь»: всё хорошо, медленно, обрыв, сервер сломался, файла нет. Ваш код при этом настоящий: на настоящем сайте вы просто удалите этот блок, и тот же `fetch('/items.json')` пойдёт на ваш сервер. Блок помечен `data-scaffold`, поэтому в вашем скачанном сайте и в галерее его не будет.
+
+Вставьте блок целиком в конец `body`, перед своими скриптами:
+
+```html
+  <fieldset data-scaffold id="net-sim">
+    <legend>Имитация сервера: какая сейчас связь</legend>
+    <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+    <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+    <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+    <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+    <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+  </fieldset>
+  <script type="module" data-scaffold>
+    // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+    // на этой странице подменён: он отвечает так, как выбрано выше.
+    // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+    const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+      title: card.querySelector('h3').textContent,
+      text: card.querySelector('p').textContent,
+      price: card.querySelector('.price')?.textContent ?? ''
+    }));
+    const reply = (data, status = 200) =>
+      new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+    const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    window.fetch = async (url, options = {}) => {
+      const mode = document.querySelector('input[name="net"]:checked').value;
+      await pause(mode === 'slow' ? 3000 : 600);
+      if (mode === 'offline') throw new TypeError('Failed to fetch');
+      if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+      if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+      const path = new URL(url, 'https://site.example/').pathname;
+      if (path === '/items.json') {
+        return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+      }
+      if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+      return reply({ error: 'Не найдено' }, 404);
+    };
+  </script>
+```
+
+Дальше ваша часть. Список карточек в разметке остаётся (без скрипта он должен быть виден), а скрипт при открытии страницы запросит свежий список с сервера и заменит им карточки. В имитации к списку добавлен один пункт «Новый пункт с сервера»: так вы увидите, что данные пришли именно оттуда. Форма заявки получает отправку без перезагрузки. И поиграйте переключателем связи: при «обрыве» и «500» прежний список должен остаться на месте, появиться понятное сообщение и кнопка «Повторить».
+
+Если вы скачаете сайт, положите рядом файл `items.json` (образец выше). Пока его нет, страница честно покажет сохранённые в разметке карточки и сообщение об ошибке.
+
+Одну странность вы заметите сами: в блоке «быстрый переход» из прошлых уроков нового пункта нет. Скрипт построил его один раз при загрузке и ничего не знает о том, что список потом изменился. Исправить можно, но чем больше на странице мест, которые надо обновлять вручную при каждой смене данных, тем больше шансов что-то забыть. К этой проблеме мы вернёмся в уроке про фреймворки.
+
+## Что было не так раньше
+
+До `fetch` данные запрашивали через `XMLHttpRequest`, громоздкий объект с колбэками, который к тому же умел блокировать страницу на время запроса. Приём называли **AJAX** (этот термин в 2005 году придумал Джесси Джеймс Гарретт, описывая Gmail и Google Maps): страница обновляется кусками, без перезагрузки. Обмен шёл в XML или в JSON, а чужие сайты запрашивали хитростью под названием JSONP, которая позволяла любому подгружаемому скрипту делать на вашей странице что угодно. Всё это упрощали библиотеки вроде jQuery со своим `$.ajax`.
+
+Хорошее оттуда осталось: страница, которая обновляется кусками. Плохое: перегруженная ожиданиями страница без индикаторов, молча проглатывающая ошибки. Кнопка, которая ничего не делает, когда сеть пропала, и не говорит об этом, до сих пор встречается на сайтах.

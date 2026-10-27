@@ -1,0 +1,989 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/03-events',
+		part: 5,
+		order: 3,
+		title: 'События: реакция на клики, ввод и клавиши',
+		summary: 'Страница оживает, когда реагирует на посетителя. После урока вы вешаете обработчики на клики, ввод и клавиши, понимаете, как событие всплывает по дереву и зачем делегирование, и не ломаете управление с клавиатуры.',
+		minutes: 25,
+		teaches: ['js-events'],
+		requires: ['js-dom', 'html-forms'],
+		practice: {
+			id: 'js-events-menu-search',
+			title: 'Меню-кнопка и поиск по предложениям, с клавиатуры',
+			task: 'Оживите страницу двумя вещами. 1) Меню. В nav с разделами добавьте перед списком кнопку <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button> и дайте ul список id="menu-list". Без скрипта список виден всегда, а скрипт убирает у кнопки hidden, прячет список и по клику открывает и закрывает его, обновляя aria-expanded. Клавиша Escape закрывает меню и возвращает фокус на кнопку. В styles.css добавьте [hidden] { display: none !important }: иначе display: flex у списка перебьёт атрибут. 2) Поиск. В секции #offer после счётчика добавьте форму <form id="search" role="search" aria-label="…"> с полем type="search" и подписью label, и абзац <p id="nothing" hidden> с текстом «Ничего не нашлось». 3) Третий скрипт <script type="module" id="events-code">: слушатель click на кнопке, keydown для Escape, на форме submit с preventDefault (иначе Enter перезагрузит страницу) и input: по введённому слову скрывайте карточки (card.hidden), в котором нет слова, без учёта регистра; пустую выдачу показывайте абзацем #nothing, а в #offer-count пишите «Показано: N из M». Обработчики на onclick в разметке не пишите.',
+			era: 4,
+			continues: 'js-dom-quick-nav',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			checks: [
+				{
+					id: 'menu-button',
+					kind: 'exists',
+					selector: 'nav button#menu-button'
+				},
+				{
+					id: 'button-type',
+					kind: 'attr',
+					selector: '#menu-button',
+					name: 'type',
+					matches: '^button$'
+				},
+				{
+					id: 'button-expanded',
+					kind: 'attr',
+					selector: '#menu-button',
+					name: 'aria-expanded',
+					matches: '^(?:true|false)$'
+				},
+				{
+					id: 'button-controls',
+					kind: 'attr',
+					selector: '#menu-button',
+					name: 'aria-controls',
+					matches: '\\S'
+				},
+				{
+					id: 'menu-list',
+					kind: 'exists',
+					selector: 'ul#menu-list'
+				},
+				{
+					id: 'search-form',
+					kind: 'exists',
+					selector: 'form#search input[type="search"]'
+				},
+				{
+					id: 'labels',
+					kind: 'label'
+				},
+				{
+					id: 'nothing-message',
+					kind: 'text',
+					selector: '#nothing',
+					matches: '\\S'
+				},
+				{
+					id: 'no-inline-handlers',
+					kind: 'count',
+					selector: '[onclick],[oninput],[onchange],[onkeydown],[onsubmit]',
+					max: 0
+				},
+				{
+					id: 'events-code-exists',
+					kind: 'exists',
+					selector: 'script#events-code'
+				},
+				{
+					id: 'is-module',
+					kind: 'attr',
+					selector: '#events-code',
+					name: 'type',
+					matches: '^module$'
+				},
+				{
+					id: 'click-listener',
+					kind: 'text',
+					selector: '#events-code',
+					matches: 'addEventListener\\(\\s*[\'"]click[\'"]'
+				},
+				{
+					id: 'escape-key',
+					kind: 'text',
+					selector: '#events-code',
+					matches: '^(?=[\\s\\S]*addEventListener\\(\\s*[\'"]key(?:down|up)[\'"])(?=[\\s\\S]*[\'"]Escape[\'"])'
+				},
+				{
+					id: 'aria-expanded-updated',
+					kind: 'text',
+					selector: '#events-code',
+					matches: 'setAttribute\\(\\s*[\'"]aria-expanded[\'"]|\\.ariaExpanded\\s*='
+				},
+				{
+					id: 'toggles-hidden',
+					kind: 'text',
+					selector: '#events-code',
+					matches: '\\.hidden\\s*=|toggleAttribute\\(\\s*[\'"]hidden[\'"]|classList\\.(?:toggle|add|remove)\\('
+				},
+				{
+					id: 'focus-returns',
+					kind: 'text',
+					selector: '#events-code',
+					matches: '\\.focus\\(\\)'
+				},
+				{
+					id: 'input-listener',
+					kind: 'text',
+					selector: '#events-code',
+					matches: 'addEventListener\\(\\s*[\'"]input[\'"]'
+				},
+				{
+					id: 'submit-prevented',
+					kind: 'text',
+					selector: '#events-code',
+					matches: '^(?=[\\s\\S]*addEventListener\\(\\s*[\'"]submit[\'"])(?=[\\s\\S]*preventDefault\\()'
+				},
+				{
+					id: 'uses-target',
+					kind: 'text',
+					selector: '#events-code',
+					matches: '\\.target\\b|\\.closest\\('
+				},
+				{
+					id: 'case-insensitive',
+					kind: 'text',
+					selector: '#events-code',
+					matches: 'toLowerCase\\(\\)|toLocaleLowerCase\\('
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что делает event.preventDefault() в обработчике события submit формы?',
+				options: [
+					'Отменяет отправку формы и перезагрузку страницы, дальше решает ваш код',
+					'Запрещает посетителю нажимать кнопку',
+					'Удаляет форму со страницы'
+				],
+				answer: 0,
+				why: [
+					'Да. У многих событий есть действие по умолчанию: ссылка ведёт по адресу, форма отправляется. preventDefault отменяет его, и страница остаётся на месте, а данные формы можно отправить самому через fetch.',
+					'Нет: кнопка остаётся рабочей, отменяется только то, что браузер сделал бы сам.',
+					'Нет: элемент остаётся на странице, меняется только поведение события.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините событие с тем, когда оно возникает',
+				pairs: [
+					[
+						'click',
+						'нажали кнопкой мыши, пальцем, Enter или пробелом на кнопке'
+					],
+					['input', 'значение поля изменилось, пока человек печатает'],
+					['submit', 'форму отправляют'],
+					['keydown', 'нажата клавиша на клавиатуре'],
+					['DOMContentLoaded', 'страница разобрана и дерево готово']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Посетитель нажимает на ссылку внутри карточки. Расставьте узлы в порядке, в котором событие всплывает вверх по дереву',
+				items: [
+					'a: ссылка, по которой кликнули',
+					'article.card: карточка',
+					'div.cards: контейнер списка',
+					'body',
+					'document'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Карточки в список добавляет скрипт уже после загрузки. Почему делегирование (один обработчик на контейнере) удобнее обработчика на каждой карточке?',
+				options: [
+					'Обработчик контейнера уже есть и сработает и для будущих карточек, а отдельные пришлось бы вешать заново',
+					'Так страница загружается быстрее в любом случае',
+					'Браузер не позволяет вешать обработчик на карточку'
+				],
+				answer: 0,
+				why: [
+					'Да. Событие всплывает до контейнера, и обработчик смотрит в event.target, что именно нажали. Новые карточки подхватываются сами. Заодно и слушателей меньше.',
+					'Не обязательно: на трёх карточках разницы нет. Выгода в том, что код не зависит от числа карточек и момента их появления.',
+					'Позволяет, но придётся помнить навесить обработчик на каждую новую.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что нужно, чтобы кнопка-меню была доступна без мыши?',
+				options: [
+					'Настоящий button вместо div с обработчиком',
+					'Атрибут aria-expanded, который меняется вместе с меню',
+					'Закрытие по Escape и возврат фокуса на кнопку',
+					'Обработчик только на mousedown'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: button получает фокус клавишей Tab и нажимается Enter и пробелом сам, без вашего кода.',
+					'Да: экранный диктор сообщает «развёрнуто» или «свёрнуто» именно по этому атрибуту.',
+					'Да: это ожидаемое поведение раскрывающихся блоков, и после закрытия фокус не должен теряться.',
+					'Нет: mousedown это только мышь. Клик через клавиатуру его не вызовет, и человек без мыши меню не откроет.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'В чём разница между event.target и event.currentTarget?',
+				options: [
+					'target: элемент, на котором событие возникло; currentTarget: элемент, на котором висит сработавший обработчик',
+					'Это одно и то же, два имени',
+					'target это страница, currentTarget это окно'
+				],
+				answer: 0,
+				why: [
+					'Да. При делегировании обработчик висит на контейнере (это currentTarget), а нажали на карточку или кнопку внутри (это target).',
+					'Нет: пока событие всплывает, они различаются, и именно на этом построено делегирование.',
+					'Нет: оба относятся к элементам дерева.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Повесьте на кнопку с id="go" обработчик клика: используйте addEventListener',
+				starter: `<button type="button" id="go">Нажми</button>
+<script type="module" id="q">
+const go = document.querySelector("#go");
+
+<\/script>`,
+				checks: [
+					{
+						id: 'listens-click',
+						kind: 'text',
+						selector: '#q',
+						matches: 'go\\.addEventListener\\(\\s*[\'"]click[\'"]'
+					}
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-events-listen',
+				front: 'Как навесить обработчик события?',
+				back: 'element.addEventListener("click", функция). Функция получит объект события: у него есть type, target, key и другие поля. Атрибуты onclick в разметке не используют.'
+			},
+			{
+				id: 'js-bubbling',
+				front: 'Что такое всплытие события?',
+				back: 'После срабатывания на элементе событие идёт вверх по предкам: карточка, контейнер, body, document. Каждый предок с обработчиком получит его. event.target остаётся тем, где всё началось.'
+			},
+			{
+				id: 'js-delegation',
+				front: 'Что такое делегирование и когда оно нужно?',
+				back: 'Один обработчик на общем родителе вместо многих на детях; внутри смотрят event.target или closest. Нужно, когда детей много или их добавляет скрипт позже.'
+			},
+			{
+				id: 'js-prevent-default',
+				front: 'Для чего preventDefault?',
+				back: 'Отменяет действие браузера по умолчанию: переход по ссылке, отправку формы. Для формы без него Enter перезагрузит страницу, и ваш код не успеет сработать.'
+			},
+			{
+				id: 'js-keyboard-a11y',
+				front: 'Как сделать интерактивность доступной с клавиатуры?',
+				back: 'Использовать настоящие button и a, показывать фокус, менять aria-expanded вместе с состоянием, закрывать по Escape и возвращать фокус. Один только click на div этого не умеет.'
+			}
+		],
+		sources: [
+			{
+				title: 'Введение в события (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Scripting/Events',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'EventTarget.addEventListener (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Web/API/EventTarget/addEventListener',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'Введение в браузерные события (learn.javascript.ru)',
+				url: 'https://learn.javascript.ru/events',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'ru'
+			},
+			{
+				title: 'ARIA Authoring Practices Guide: Disclosure (W3C)',
+				url: 'https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'Уроки JavaScript для начинающих, №11: События и обработчик событий (Школа itProger)',
+				url: 'https://www.youtube.com/watch?v=Tw-_axj7Jis',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'ru'
+			}
+		],
+		guide: {
+			intro: 'Сделаем две вещи: меню, которое открывается кнопкой, и поиск, который скрывает лишние карточки. И то, и другое должно работать с клавиатуры. Начните с разметки, потом скрипт.',
+			hints: [
+				'Разметка меню: перед списком в nav поставьте <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>, а ul назовите id="menu-list". В styles.css добавьте правило [hidden] { display: none !important }.',
+				'Разметка поиска в секции #offer: <form id="search" role="search" aria-label="Поиск по предложениям"><label for="q">Найти в списке</label> <input id="q" type="search"></form> и <p id="nothing" hidden>Ничего не нашлось</p>.',
+				'Скрипт: <script type="module" id="events-code">. Начните с поиска элементов (querySelector) и с button.hidden = false; menu.hidden = true;. Потом button.addEventListener("click", …): переключите menu.hidden и запишите button.setAttribute("aria-expanded", …).',
+				'Для поиска: search.addEventListener("input", (event) => { … }) и search.addEventListener("submit", (event) => event.preventDefault()). Внутри input возьмите event.target.value.toLowerCase() и для каждой карточки card.hidden = !card.textContent.toLowerCase().includes(query).'
+			],
+			mistakes: {
+				'menu-button': 'В nav с разделами нужна кнопка <button id="menu-button">.',
+				'button-type': 'У кнопки нужен type="button": без него в форме она бы отправляла форму.',
+				'button-expanded': 'У кнопки нужен атрибут aria-expanded со значением "false" или "true".',
+				'button-controls': 'Добавьте кнопке aria-controls: в нём id списка, которым она управляет: aria-controls="menu-list".',
+				'menu-list': 'Список разделов должен называться ul#menu-list.',
+				'search-form': 'Нужна форма id="search" с полем <input type="search">.',
+				labels: 'У каждого поля должна быть подпись label. Проверьте новое поле поиска: <label for="q"> и id="q" у input.',
+				'nothing-message': 'Абзац <p id="nothing" hidden> должен содержать текст сообщения, например «Ничего не нашлось».',
+				'no-inline-handlers': 'Уберите атрибуты onclick, oninput и подобные из разметки: обработчики вешает скрипт через addEventListener.',
+				'events-code-exists': 'Не нашёл третий скрипт: <script type="module" id="events-code">.',
+				'is-module': 'У скрипта нужен атрибут type="module".',
+				'click-listener': 'Не вижу addEventListener("click", …) для кнопки меню.',
+				'escape-key': 'Для Escape нужен слушатель клавиатуры: document.addEventListener("keydown", (event) => { if (event.key === "Escape") … }).',
+				'aria-expanded-updated': 'Меняйте aria-expanded вместе с меню: button.setAttribute("aria-expanded", String(open)).',
+				'toggles-hidden': 'Прячьте и показывайте через свойство hidden: menu.hidden = true.',
+				'focus-returns': 'После закрытия по Escape верните фокус на кнопку: button.focus().',
+				'input-listener': 'Нужен слушатель события input для поля поиска: search.addEventListener("input", …).',
+				'submit-prevented': 'У формы поиска нужен обработчик submit с event.preventDefault(), иначе Enter перезагрузит страницу.',
+				'uses-target': 'Значение поля берите из события: event.target.value. Так обработчик на форме работает для любого её поля.',
+				'case-insensitive': 'Поиск должен не зависеть от регистра: приведите и запрос, и текст карточки к нижнему регистру через toLowerCase().'
+			},
+			outro: 'Теперь страница реагирует на посетителя, и без мыши тоже. Проверьте себя: нажмите Tab до кнопки меню, откройте её клавишей Enter и закройте Escape. Если всё сработало, вы сделали то, что делает половина «интерактива» в вебе.'
+		},
+		say: {
+			addEventListener: 'эд-ивент-листенер',
+			preventDefault: 'превент-дефолт',
+			stopPropagation: 'стоп-пропагейшн',
+			click: 'клик',
+			input: 'инпут',
+			submit: 'сабмит',
+			keydown: 'кидаун',
+			Escape: 'эскейп',
+			DOMContentLoaded: 'дом-контент-лоудед',
+			aria: 'ария',
+			ARIA: 'ария',
+			target: 'таргет',
+			hidden: 'хидден'
+		}
+	};
+</script>
+
+<script>
+	import EventFlight from '../../diagrams/EventFlight.svelte';
+</script>
+
+## Страница, которая слушает
+
+Браузер непрерывно замечает, что делает посетитель: нажал, провёл, напечатал букву, переключил вкладку, повернул телефон. Каждое такое замечание браузер оформляет как **событие** и сообщает странице. Страница ничего не делает, пока не «подписана» на событие, а подписать её — работа скрипта.
+
+```js
+const button = document.querySelector('#menu-button');
+
+button.addEventListener('click', (event) => {
+  console.log('Нажали, тип события:', event.type);
+});
+```
+
+Метод `addEventListener` принимает два аргумента: **тип события** и **обработчик**, функцию, которую браузер вызовет, когда событие случится. Ей он передаёт объект события: у него есть `type` (какое событие), `target` (где оно возникло), для клавиатуры `key` (какая клавиша), и многое другое. Снять подписку можно через `removeEventListener`.
+
+Старых способов два, и оба хуже. Атрибут в разметке (`<button onclick="...">`) смешивает разметку с кодом и позволяет повесить лишь один обработчик. Свойство (`button.onclick = ...`) тоже даёт один обработчик на событие: следующий затрёт предыдущий. `addEventListener` позволяет подписывать на одно событие сколько угодно функций.
+
+## События, которые нужны сайту
+
+Событий десятки, но почти всё на сайте строится на пяти:
+
+- `click`: нажатие мышью или пальцем, а у кнопки ещё и клавиши Enter и пробел;
+- `input`: значение поля меняется, пока человек печатает (а `change` срабатывает, когда он закончил, например отпустил поле или переключил флажок);
+- `submit`: отправка формы, по кнопке или по Enter;
+- `keydown`: нажата клавиша, `event.key` называет её (`'Escape'`, `'Enter'`, `'a'`);
+- `DOMContentLoaded`: страница разобрана. В нашем редакторе модульные скрипты и так выполняются после этого момента, поэтому слушать это событие не нужно.
+
+## Отмена действия браузера
+
+У многих событий есть действие **по умолчанию**: ссылка ведёт по адресу, форма отправляется и страница перезагружается, Tab переводит фокус. Когда нужно сделать по-своему, действие отменяют вызовом `event.preventDefault()`.
+
+```js
+form.addEventListener('submit', (event) => {
+  event.preventDefault();   // страница не перезагрузится
+  // дальше отправляем данные сами: это урок про fetch
+});
+```
+
+Без этой строки Enter в поле поиска отправит форму и страница перезагрузится с пустым результатом: самая частая ошибка начинающего.
+
+<details>
+<summary>Проверьте себя: что будет, если в обработчике submit забыть preventDefault?</summary>
+
+Браузер выполнит действие по умолчанию: отправит форму и перезагрузит страницу, и всё, что скрипт успел сделать, пропадёт.
+
+</details>
+
+## Всплытие и делегирование
+
+Событие не остаётся в одном месте. Когда вы нажимаете на ссылку внутри карточки, браузер сначала передаёт событие самой ссылке, а потом **всплывает** вверх по предкам: карточка, контейнер списка, `body`, `document`. Каждый из них может иметь свой обработчик и получить то же событие. Поэтому у объекта события два адреса:
+
+- `event.target`: где событие **возникло** (самый глубокий элемент, по которому нажали);
+- `event.currentTarget`: на ком висит **сейчас сработавший** обработчик.
+
+Это даёт приём, которым пользуются все: **делегирование**. Вместо обработчика на каждой из ста карточек вешают один на контейнер и смотрят в `event.target`, что именно нажали:
+
+```js
+cards.addEventListener('click', (event) => {
+  const card = event.target.closest('.card');   // ближайшая карточка вверх от места нажатия
+  if (!card) return;                            // нажали мимо
+  card.classList.toggle('selected');
+});
+```
+
+Метод `closest` ищет подходящий элемент от места нажатия вверх по дереву. Выгод две. Слушателей меньше, а главное, обработчик работает и для карточек, которые скрипт добавит позже: события от них тоже всплывут до контейнера. Поэтому, если у вас список, который меняется, вешайте обработчик на родителя.
+
+Остановить всплытие можно через `event.stopPropagation()`, но делать это стоит редко: оно ломает чужие обработчики, которые вы могли не учесть.
+
+Посмотрите, как событие идёт по дереву. Выберите, куда нажимать, на каких узлах стоят обработчики, и попробуйте остановить всплытие:
+
+<EventFlight />
+
+И второй вопрос схемы: сколько обработчиков нужно, когда карточек становится больше и когда одну из них добавил скрипт:
+
+<EventFlight mode="delegate" />
+
+<details>
+<summary>Проверьте себя: чем event.target отличается от event.currentTarget?</summary>
+
+`target`: где событие возникло. `currentTarget`: на каком элементе висит сработавший обработчик. При делегировании обработчик на контейнере (`currentTarget`), а нажали на элемент внутри (`target`).
+
+</details>
+
+## Доступно с клавиатуры
+
+Самая коварная ошибка с событиями: сделать так, что работает только мышь. Клавиатурой пользуются многие: люди с нарушениями моторики, те, кто слушает страницу экранным диктором, да и просто те, кому быстрее без мыши. Правила короткие.
+
+1. **Используйте настоящий `button`.** Он получает фокус клавишей Tab, нажимается Enter и пробелом, объявляется диктором как «кнопка», и всё это бесплатно. `div` с обработчиком `click` ничего из этого не умеет, а ссылка `<a href="#">`, которая работает как кнопка, путает и тех, и других.
+2. **Сообщайте состояние.** У кнопки, раскрывающей блок, есть атрибут `aria-expanded` (`false` или `true`), и скрипт меняет его вместе с блоком. Атрибут `aria-controls` называет id управляемого блока. Диктор прочитает «Разделы, кнопка, свёрнуто».
+3. **Закрывайте по Escape и возвращайте фокус.** Если меню открыли клавишей, фокус остался на кнопке. Закрывая меню, не теряйте его: `button.focus()`.
+4. **Не убирайте видимый фокус.** Рамка вокруг элемента, до которого дошёл Tab, это единственный способ понять, где вы находитесь.
+
+В первом правиле есть и вторая половина: если без скрипта меню должно работать (а мы разберём почему в конце части), то список разделов в разметке виден всегда, а скрипт прячет его за кнопку. Не наоборот.
+
+## Практика
+
+Продолжаем страницу эпохи 2014 года. Добавим два типичных элемента: меню, которое сворачивается за кнопку, и поиск по предложениям, который прямо при вводе скрывает лишние карточки.
+
+Заметьте три детали в задании. Атрибут `hidden` проигрывает любому правилу CSS, которое задаёт `display`, поэтому нужно правило `[hidden] { display: none !important }`. Форма поиска получает обработчик `submit` с `preventDefault`, иначе Enter перезагрузит страницу. А карточки ищутся в момент ввода, а не один раз при запуске: список может поменяться, и вы увидите это в уроке про fetch.
+
+Проверки, как и в прошлых уроках, читают разметку и текст скрипта. Работает ли он, вы проверяете сами: нажмите Tab до кнопки меню, откройте и закройте её клавишами, введите слово в поиск.
+
+## Что было не так раньше
+
+В эпоху до `addEventListener` обработчики вешали по-разному: Internet Explorer до девятой версии использовал `attachEvent`, остальные браузеры `addEventListener`, и каждый разработчик писал свою обёртку (jQuery с её `.click()` и `.on()` была в том числе такой обёрткой). Меню делали из ссылок `<a href="#">`, у которых вместо адреса стоял «ничего»: они нажимались мышью, не объявлялись как кнопки и добавляли в адресную строку лишнюю решётку. Всплытие часто останавливали по привычке, и поэтому чужие скрипты (аналитика, например) переставали видеть клики.
+
+Что осталось верным: слушать события лучше на общем родителе, не навешивая сто обработчиков, и считать клавиатуру равноправной с мышью.

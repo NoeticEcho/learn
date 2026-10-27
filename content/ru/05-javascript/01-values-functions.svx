@@ -1,0 +1,833 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/01-values-functions',
+		part: 5,
+		order: 1,
+		title: 'Значения, функции, массивы и объекты',
+		summary: 'HTML и CSS ничего не решают: решает JavaScript. После урока вы читаете и пишете короткие программы: храните пункты вашего списка в массиве объектов, превращаете их функциями в другие данные и знаете, чем отличаются тип, переменная и область видимости.',
+		minutes: 25,
+		teaches: ['js-values-and-types', 'js-functions', 'js-arrays-and-objects'],
+		requires: ['html-document-structure', 'net-rendering-pipeline'],
+		practice: {
+			id: 'js-first-code',
+			title: 'Первая программа на вашем сайте: сводка по списку',
+			task: 'Добавьте на страницу первый скрипт. 1) В подвале (footer) поставьте пустой абзац с id="summary". 2) В конец body, перед закрывающим тегом, вставьте тег <script type="module" id="my-code">. Внутри запишите данные вашего списка массивом объектов: const items = [{ title: "…", price: "…" }, …], с вашими пунктами из брифа (не пишите var). 3) Напишите три функции: titlesOf(list) возвращает массив названий через map, withPrice(list) оставляет пункты с указанной ценой через filter, countOf(list) возвращает количество. Исходный массив менять нельзя: никаких push, sort и splice. 4) Составьте строку-сводку и покажите её в двух местах: console.log(summary) и document.querySelector("#summary").textContent = summary. Проверки читают текст вашего скрипта; что он делает, вы видите сами: сводка появится в подвале предпросмотра.',
+			era: 4,
+			continues: 'responsive-page',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'summary-element',
+					kind: 'exists',
+					selector: 'footer #summary'
+				},
+				{
+					id: 'my-code-exists',
+					kind: 'exists',
+					selector: 'script#my-code'
+				},
+				{
+					id: 'is-module',
+					kind: 'attr',
+					selector: '#my-code',
+					name: 'type',
+					matches: '^module$'
+				},
+				{
+					id: 'items-array',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '(?:const|let)\\s+items\\s*=\\s*\\[\\s*\\{',
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'items-own-titles',
+					kind: 'field',
+					selector: '#my-code',
+					field: 'items[].title',
+					min: 2,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'no-var',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '^(?![\\s\\S]*\\bvar\\s+[\\w$])[\\s\\S]*\\S'
+				},
+				{
+					id: 'uses-map',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '\\.map\\('
+				},
+				{
+					id: 'uses-filter',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '\\.filter\\('
+				},
+				{
+					id: 'uses-length',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '\\.length\\b'
+				},
+				{
+					id: 'no-mutation',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '^(?![\\s\\S]*\\.(?:push|pop|shift|unshift|splice|sort|reverse)\\s*\\()[\\s\\S]*\\S'
+				},
+				{
+					id: 'three-functions',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '^(?=[\\s\\S]*titlesOf)(?=[\\s\\S]*withPrice)(?=[\\s\\S]*countOf)'
+				},
+				{
+					id: 'console-log',
+					kind: 'text',
+					selector: '#my-code',
+					matches: 'console\\.log\\('
+				},
+				{
+					id: 'writes-summary',
+					kind: 'text',
+					selector: '#my-code',
+					matches: '^(?=[\\s\\S]*[\'"]#?summary[\'"])(?=[\\s\\S]*textContent)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Соедините значение с его типом',
+				pairs: [
+					['42', 'число (number)'],
+					['"Скатерть"', 'строка (string)'],
+					['true', 'логическое значение: да или нет (boolean)'],
+					['undefined', 'значения нет, переменную не заполнили'],
+					['[1, 2, 3]', 'массив: пронумерованный список']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что получится из выражения "5" + 3?',
+				options: ['Строка "53": плюс склеил текст', 'Число 8', 'Ошибка'],
+				answer: 0,
+				why: [
+					'Да. Если один из операндов строка, плюс склеивает. А вот "5" - 3 даст число 2: у минуса нет склеивающего смысла. Данные из полей формы всегда приходят строками, поэтому такие сюрпризы случаются на настоящих сайтах.',
+					'Нет: JavaScript не станет превращать строку в число, если один из операндов уже строка.',
+					'Нет: ошибки не будет, язык молча склеит значения. Именно эта молчаливость и опасна.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что случится при const price = 100; price = 200;?',
+				options: [
+					'Ошибка: const нельзя присвоить заново',
+					'Цена станет 200',
+					'Цена останется 100, ошибки не будет'
+				],
+				answer: 0,
+				why: [
+					'Да. const закрепляет связь имени с значением. Если значение нужно менять, берут let; по умолчанию берут const, чтобы случайно не затереть нужное.',
+					'Нет: для этого есть let. С const скрипт остановится с ошибкой TypeError.',
+					'Нет: молча игнорировать присваивание JavaScript не станет, он сообщит об ошибке.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Какие методы массива возвращают новый массив и не меняют исходный?',
+				options: ['map', 'filter', 'push', 'sort'],
+				answer: [0, 1],
+				why: [
+					'Да: map создаёт новый массив той же длины.',
+					'Да: filter создаёт новый массив из подходящих элементов.',
+					'Нет: push добавляет элемент прямо в исходный массив.',
+					'Нет: sort переставляет элементы в самом исходном массиве. Если нужна отсортированная копия, делают её сначала или берут toSorted.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте шаги конвейера «покажи названия пунктов с ценой» в порядке выполнения',
+				items: [
+					'Исходный массив items',
+					'filter: оставить пункты с ценой',
+					'map: взять из каждого название',
+					'join: склеить названия в одну строку',
+					'textContent: показать строку на странице'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что выведет консоль? function f() { const secret = 1; } f(); console.log(secret);',
+				options: ['ReferenceError: secret is not defined', '1', 'undefined'],
+				answer: 0,
+				why: [
+					'Да. Переменная, объявленная внутри функции, живёт только в ней. Снаружи её не существует, и язык говорит, что такого имени нет.',
+					'Нет: значение осталось внутри функции, снаружи его не достать.',
+					'Нет: undefined был бы у существующей переменной без значения, а здесь имени нет вообще.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Внутри скрипта запишите стрелочную функцию double, которая возвращает число, умноженное на 2',
+				starter: '<script id="q">\n\n<\\/script>',
+				checks: [
+					{
+						id: 'double-arrow',
+						kind: 'text',
+						selector: '#q',
+						matches: '(?:const|let)\\s+double\\s*=\\s*\\(?\\s*\\w+\\s*\\)?\\s*=>[\\s\\S]*\\*\\s*2|(?:const|let)\\s+double\\s*=\\s*\\(?\\s*\\w+\\s*\\)?\\s*=>[\\s\\S]*2\\s*\\*'
+					}
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-types',
+				front: 'Какие бывают типы значений в JavaScript?',
+				back: 'Число, строка, логическое значение (true и false), undefined (нет значения), null (нарочно пусто), а ещё объекты, в том числе массивы и функции. Тип показывает typeof.'
+			},
+			{
+				id: 'js-const-let',
+				front: 'Чем const отличается от let, и почему не var?',
+				back: 'const: имя привязано к значению навсегда. let: значение можно менять. var устарел: у него странная область видимости, в новом коде его нет. По умолчанию берут const.'
+			},
+			{
+				id: 'js-strict-equal',
+				front: 'Чем === отличается от ==?',
+				back: '=== сравнивает значение и тип. == сначала приводит типы и даёт сюрпризы (0 == "" истинно). Всегда пишите ===.'
+			},
+			{
+				id: 'js-map-filter',
+				front: 'Что делают map, filter и reduce?',
+				back: 'map: новый массив, где к каждому элементу применили функцию. filter: новый массив из подходящих. reduce: свернуть массив в одно значение. Исходный массив они не меняют.'
+			},
+			{
+				id: 'js-scope',
+				front: 'Что такое область видимости?',
+				back: 'Место, где имя переменной существует. Переменная из функции или блока снаружи не видна, а внешняя изнутри видна.'
+			}
+		],
+		sources: [
+			{
+				title: 'Руководство по JavaScript (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'ru'
+			},
+			{
+				title: 'Основы JavaScript (MDN)',
+				url: 'https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Scripting',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'ru'
+			},
+			{
+				title: 'Современный учебник JavaScript (learn.javascript.ru)',
+				url: 'https://learn.javascript.ru/',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'ru'
+			},
+			{
+				title: 'JavaScript (Википедия)',
+				url: 'https://ru.wikipedia.org/wiki/JavaScript',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'ru'
+			},
+			{
+				title: 'Eloquent JavaScript (Марейн Хавербеке)',
+				url: 'https://eloquentjavascript.net/',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Это ваш первый скрипт. Он берёт список пунктов, считает по нему сводку и показывает её в подвале. Пишите по частям и после каждой смотрите в предпросмотр: сводка должна появиться.',
+			hints: [
+				'Сначала два «каркаса»: пустой абзац <p id="summary"></p> в подвале и тег <script type="module" id="my-code"> перед </body>. Пока скрипт пустой, проверки про его содержимое будут красными.',
+				'Массив пишется так: const items = [{ title: "Скатерть", price: "0 000 ₽" }, { title: "Фартук", price: "" }]; Поставьте свои пункты из брифа, каждый в фигурных скобках, через запятую.',
+				'Стрелочная функция: const titlesOf = (list) => list.map((item) => item.title); Остальные две устроены так же, только вместо map у одной filter, у другой length.',
+				'Сводку показывают двумя командами: console.log(summary) и document.querySelector("#summary").textContent = summary. Обе должны быть в скрипте.'
+			],
+			mistakes: {
+				'summary-element': 'В подвале нужен абзац с id="summary": <p id="summary"></p>. Скрипт будет писать сводку в него.',
+				'my-code-exists': 'Не нашёл тег <script type="module" id="my-code">. Он должен стоять в странице, ближе к концу body.',
+				'is-module': 'У тега script нужен атрибут type="module": <script type="module" id="my-code">. Так скрипт выполняется после разбора страницы и живёт в собственной области видимости.',
+				'items-array': 'Данные должны быть массивом объектов: const items = [{ title: "…", price: "…" }, …]. Проверьте, что это const или let и что внутри квадратных скобок сразу идёт фигурная.',
+				'items-own-titles': 'В массиве должны быть ваши пункты из брифа: хотя бы два названия записаны в скрипте так же, как в брифе.',
+				'no-var': 'В скрипте не должно быть var. Замените его на const (если значение не меняется) или let.',
+				'uses-map': 'Для названий нужен метод map: list.map((item) => item.title).',
+				'uses-filter': 'Для отбора нужен метод filter: list.filter((item) => item.price !== "").',
+				'uses-length': 'Для подсчёта нужно свойство length: list.length.',
+				'no-mutation': 'Исходный массив менять нельзя. Уберите push, pop, shift, unshift, splice, sort и reverse: map и filter и так создают новые массивы.',
+				'three-functions': 'Нужны три функции с этими именами: titlesOf, withPrice и countOf.',
+				'console-log': 'Не нашёл console.log(...). Выведите сводку в консоль: console.log(summary).',
+				'writes-summary': 'Сводку надо ещё и показать на странице: document.querySelector("#summary").textContent = summary.'
+			},
+			outro: 'Ваш сайт впервые что-то посчитал сам. Данные в массиве, функции вокруг них, результат на странице: на этой схеме построен весь остальной JavaScript.'
+		},
+		say: {
+			JavaScript: 'джаваскрипт',
+			ECMAScript: 'экмаскрипт',
+			const: 'конст',
+			let: 'лет',
+			var: 'вар',
+			map: 'мэп',
+			filter: 'фильтр',
+			reduce: 'редьюс',
+			JSON: 'джейсон',
+			typeof: 'тайп-оф',
+			Netscape: 'нетскейп',
+			V8: 'ви-восемь',
+			SpiderMonkey: 'спайдер-манки',
+			JavaScriptCore: 'джаваскрипт-кор',
+			console: 'консоль',
+			log: 'лог'
+		}
+	};
+</script>
+
+<script>
+	import ValueLab from '../../diagrams/ValueLab.svelte';
+</script>
+
+## Язык, который умеет решать
+
+HTML говорит, что есть на странице. CSS говорит, как это выглядит. Но ни тот, ни другой не умеют **решать**: открыть меню по нажатию, проверить, что телефон введён целиком, показать только те пункты списка, которые нашёл посетитель. Для этого нужен язык программирования, и в браузере он один: **JavaScript** (его часто сокращают до JS).
+
+Коротко о его истории. В 1995 году в компании Netscape (она встречалась нам в рассказе о браузерных войнах) Брендан Эйх написал язык для её браузера; по его собственным словам, первый вариант был готов за десять дней. Имя JavaScript язык получил из-за моды на Java, и общее у них только начало слова. Потом Microsoft сделала собственную копию для Internet Explorer, и у веб-разработчиков настали годы, когда один и тот же скрипт приходилось писать дважды. Чтобы с этим покончить, язык отдали организации Ecma International. Его стандарт называется **ECMAScript**, а новая редакция выходит раз в год. Исполняет код в браузере «движок»: V8 в Chrome и в браузерах на его основе, SpiderMonkey в Firefox, JavaScriptCore в Safari.
+
+## Где его писать
+
+Мест два.
+
+- **Консоль** в инструментах разработчика (F12, вкладка «Консоль»; вы открывали её на рабочем месте). Набрали строку, нажали Enter, увидели результат. Это лучший способ попробовать что-то на пять секунд.
+- **Тег `<script>`** на странице. Браузер выполняет его код, когда доходит до него при разборе страницы. Вспомните конвейер из урока о рендеринге: пока обычный скрипт не выполнится, разбор HTML ждёт, и скрипт в начале страницы не видит элементов, которые ещё не разобраны. Самый простой способ избежать этого сегодня: `<script type="module">`. Такой скрипт выполняется только после разбора страницы, а всё, что он объявил, остаётся внутри него и не мешает другим скриптам. (Старые способы: класть скрипт в самый конец `<body>` или добавлять атрибут `defer`.)
+
+В настоящем проекте код живёт в отдельном файле (`<script type="module" src="script.js"></script>`). В нашем редакторе скрипт пишется прямо в страницу, внутрь тега: так проверки могут прочитать ваш код. Ничего страшного, это один и тот же JavaScript. О том, что такое модуль, мы поговорим позже, в уроке про модули; пока достаточно слов «такому скрипту можно доверять, что страница уже готова».
+
+## Значения и типы
+
+Программа работает со **значениями**, и у каждого значения есть **тип**:
+
+- **число** (`number`): `42`, `3.14`. Целые и дробные в JavaScript одного типа;
+- **строка** (`string`): текст в кавычках, `'Скатерть'` или `"Скатерть"`;
+- **логическое значение** (`boolean`): `true` или `false`, «да» и «нет»;
+- `undefined`: «значения нет», например переменную объявили и ничего в неё не положили;
+- `null`: «здесь нарочно пусто»;
+- **объекты**, к которым относятся и массивы, и функции (о них ниже).
+
+Тип любого значения показывает оператор `typeof`: `typeof 42` даёт `'number'`.
+
+Значение кладут в **переменную**: имя, по которому его потом достают.
+
+```js
+const price = 4500;   // const: имя навсегда привязано к значению
+let count = 0;        // let: значение можно будет заменить
+count = count + 1;
+```
+
+Правило такое: по умолчанию пишите `const`, а `let` берите, когда значение действительно должно меняться. Есть и третье слово, `var`. Это единственный способ объявить переменную до 2015 года, и у него странные правила: переменная «подпрыгивает» к началу функции и видна там, где вы её не ждёте. В новом коде `var` не пишут. Если встретите его в старом, это знак возраста кода.
+
+Сравнивать значения надо тройным знаком равенства: `===`. Он сравнивает и значение, и тип. Двойной `==` сначала пытается привести типы друг к другу, и результаты удивляют: `0 == ''` оказывается истиной. Привыкайте к `===` и забудьте про `==`.
+
+Типы иногда подставляют ловушки. Плюс умеет и складывать, и склеивать строки, поэтому `'5' + 3` даёт строку `'53'`, а `'5' - 3` даёт число `2`. Значения из полей формы всегда приходят строками, и `Number('42')` превращает строку в число. Покрутите примеры:
+
+<ValueLab />
+
+<details>
+<summary>Проверьте себя: что даст '5' + 3 и почему?</summary>
+
+Строку `'53'`. Если хотя бы один операнд строка, плюс склеивает текст, а не складывает числа.
+
+</details>
+
+## Объекты и массивы
+
+**Объект** это карточка: набор пар «ключ: значение». Один пункт вашего списка (услуга, товар, блюдо) естественно записывается объектом:
+
+```js
+const item = { title: 'Скатерть', price: '0 000 ₽' };
+item.title;        // 'Скатерть'
+item.price;        // '0 000 ₽'
+```
+
+**Массив** это пронумерованный список. Номера идут с нуля, длина лежит в свойстве `length`:
+
+```js
+const names = ['Скатерть', 'Фартук', 'Полотенца'];
+names[0];          // 'Скатерть'
+names.length;      // 3
+```
+
+Вместе они дают главный способ хранить данные: **массив объектов**. Список `items` из вашего брифа выглядит именно так, и дальше на нём держится вся часть: его рисуют, фильтруют и получают с сервера. Запись, очень похожая на неё, называется JSON, и мы разберём её в уроке про fetch.
+
+```js
+const items = [
+  { title: 'Скатерть', price: '0 000 ₽' },
+  { title: 'Фартук', price: '' }
+];
+```
+
+## Функции
+
+**Функция** это именованная последовательность действий. Ей передают данные (**параметры**), она возвращает результат (`return`).
+
+```js
+function priceOf(item) {
+  return item.price;
+}
+const titleOf = (item) => item.title;   // стрелочная запись, с 2015 года
+```
+
+Две записи делают почти одно и то же; стрелочную пишут, когда функция короткая и нужна на месте. Вызывают функцию по имени со скобками: `priceOf(items[0])`. Функция без `return` возвращает `undefined`.
+
+Лучшая привычка: делайте функции **чистыми**. Чистая функция берёт данные из параметров, возвращает результат и больше ничего не трогает. Такую легко проверить («дал это, получил то»), легко переиспользовать, и в ней негде спрятаться ошибке «кто-то поменял мой массив».
+
+**Область видимости** говорит, где имя существует. Переменная, объявленная внутри функции или блока `{ ... }`, видна только там. Изнутри можно смотреть наружу, снаружи внутрь нельзя. Благодаря этому две функции могут иметь по переменной `total`, и они не перепутаются. (Есть и тонкость: функция запоминает переменные того места, где её создали. Это называется замыканием, и именно оно позволит вам в уроке про события держать состояние меню в одном месте.)
+
+<details>
+<summary>Проверьте себя: почему console.log(secret) снаружи функции даёт ошибку, если secret объявлен внутри неё?</summary>
+
+Переменная живёт только в своей области видимости. Снаружи функции такого имени не существует.
+
+</details>
+
+## map, filter, reduce: конвейер вместо цикла
+
+Работу над списком часто описывают циклом со счётчиком. Привычнее и надёжнее описывать её **методами массива**, которые принимают функцию:
+
+- `map(f)` возвращает **новый** массив той же длины: к каждому элементу применили `f`;
+- `filter(f)` возвращает **новый** массив из тех элементов, для которых `f` вернула `true`;
+- `reduce(f, начало)` сворачивает массив в одно значение: сумму, самый большой, самый дешёвый;
+- `join(', ')` склеивает массив строк в одну строку.
+
+Главное свойство: исходный массив они **не меняют**. А вот `push`, `sort`, `splice` меняют его на месте, и из-за них чаще всего ломаются программы («я только отсортировал для показа, а список пропал в другом месте»). Методы можно соединять в цепочку, и она читается как предложение:
+
+```js
+items
+  .filter((item) => item.price !== '')   // оставить с ценой
+  .map((item) => item.title)              // взять названия
+  .join(', ');                            // склеить в строку
+```
+
+Соберите конвейер на пунктах вашего списка. Это те же пункты, что в брифе:
+
+<ValueLab mode="pipeline" />
+
+## Читаем ошибки
+
+Красные строки в консоли не приговор, а подсказка: в них названа ошибка, сказано, что не так, и указаны файл и строка. Три самые частые:
+
+- `ReferenceError: x is not defined`: опечатка в имени или обращение к переменной вне её области видимости;
+- `TypeError: Cannot read properties of undefined (reading 'title')`: вы взяли поле у того, чего нет, например `items[10].title`, хотя в списке три пункта;
+- `SyntaxError`: потерянная скобка, кавычка или запятая. Скрипт при этом не запускается вообще.
+
+А `console.log(значение)` остаётся главным способом заглянуть внутрь программы: что лежит в переменной в этом месте. Прочитайте ошибку целиком и сверху, прежде чем менять что-то наугад.
+
+## Практика
+
+Вы на сайте эпохи 2014 года, где страница уже адаптивная, а скрипта ещё нет. Добавьте первый. Он возьмёт список ваших пунктов, посчитает по нему сводку и покажет её в подвале.
+
+Данные пока лежат прямо в скрипте, продублированные из разметки. Это временно: чуть дальше (уроки про DOM и fetch) мы научим скрипт читать их со страницы и с сервера. Написанный здесь код пригодится: те же функции будут работать на любых данных.
+
+Заметьте, как устроены проверки. Они **читают текст вашего скрипта**: есть ли массив объектов с вашими названиями, нет ли `var`, нет ли `push`. Что скрипт *делает*, проверка не запускает: это вы видите сами, в подвале предпросмотра должна появиться строка вида «Всего позиций: 3, с ценой: 3. Скатерть, Фартук…». Если не появилась, откройте консоль окна предпросмотра (F12; в списке контекстов консоли выберите рамку предпросмотра) и прочитайте красную строку.
+
+## Что было не так раньше
+
+В 2000-е JavaScript писали иначе. Обработчики вешали прямо в разметку (`onclick="..."`), ссылки делали с адресом `javascript:void(0)`, значения держали в глобальных переменных, а сообщения показывали окошком `alert()`. Результат: логика размазана по HTML, любое имя может быть случайно перезаписано другим скриптом, а без скриптов ссылки не работают. Определяли браузер по его названию (`navigator.userAgent`), потому что Internet Explorer и Netscape отличались.
+
+Сохранилось и правильное: маленькие функции с понятными именами и один источник данных вместо копий. А то, что в 2015 году появились `const`, `let` и стрелочные функции, а потом язык стал выходить обновлениями каждый год, привело к тому, что код 2025 года заметно короче и надёжнее кода 2005 года.
