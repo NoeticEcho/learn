@@ -6,7 +6,7 @@
 	once, at the end. A two-sided two-proportion z-test at the 5% level decides what «значимая» means.
 	With identical variants a single look at the end gives about 5% false wins; ten looks give several
 	times more. With the real uplift the same run shows how often the test notices it (its power). The
-	rule of thumb n ≈ 16·p(1−p)/δ² for 80% power is shown beside it. Nothing here is real data.
+	rule of thumb n ≈ 16·p(1−p)/d² for 80% power is shown beside it. Nothing here is real data.
 -->
 <script lang="ts">
 	import './shared.css';
@@ -74,5 +74,5 @@
 			{/if}
 		</p>
 	{/if}
-	<p class="dg-out">Правило для оценки: чтобы заметить разницу в δ процентных пунктов при доле p, нужно около 16·p·(1−p)/δ² человек на вариант. Для 5% против 6% это около {need}. Это грубая оценка для привычных порогов (5% ложных побед и 80% шанса заметить). Всё в схеме смоделировано, настоящих людей нет.</p>
+	<p class="dg-out">Правило для оценки: чтобы заметить разницу в d процентных пунктов при доле p, нужно около 16·p·(1−p)/d² человек на вариант. Для 5% против 6% это около {need}. Это грубая оценка для привычных порогов (5% ложных побед и 80% шанса заметить). Всё в схеме смоделировано, настоящих людей нет.</p>
 </figure>
