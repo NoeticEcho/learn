@@ -88,3 +88,32 @@ beyond what the course uses.
   lesson). Screenshots of home and two lessons at 1280 and 375 are pixel-identical before and
   after. `tests/e2e/fonts.spec.ts` checks the build names no Google host and inlines no font, and
   that the faces are same-origin and come back offline.
+
+## Эхо crossing the eras, and whose textbook this is (27.10.2026)
+
+Martin: the returning home had an empty right column on a computer; put Эхо there, crossing the
+digital eras, and say that this is a NoeticEcho project, the last textbook of the era before AI.
+
+- **The scene** (`src/lib/home/EraScene.svelte`), at 1024 px and wider only, beside the hero and
+  the path. A window shows one era's web at a time, in that era's own colours, which the hallmark
+  token gates leave alone as they do the prologue's frames: 1991 (text and blue links), 1996
+  (grey, a table, a hit counter, under construction), 2000 (the portal and «Skip intro»), 2005
+  (glossy, beta), 2014 (flat), 2019 (a design system), 2025 (a chat) and Искин (agents, a check).
+  Each holds 3.2 s and glides on in 0.8 s, away behind Эхо, whose ring lights the dot of the era
+  in the window. Эхо is the approved `design/mascot/echo.svg`, untouched: the lit dots are a
+  layer over the ring, faded, because the ring's own `era-<n>` class repaints fill and radius.
+- **Motion** is transform and opacity only. The scene is fetched only on a wide screen, after home
+  is drawn, and starts two frames after mount, on 2025 where its still pose is, so it does not
+  jump. It stops on hover, while «Остановить анимацию» is pressed (an auto-playing animation
+  longer than five seconds must have a pause, WCAG 2.2.2) and while the tab is hidden. Under
+  reduced motion it is a still: Эхо, the window on 2025, Искин next. Its box is reserved, so
+  nothing moves when it arrives. On Ink the eras are dimmed to 86%, so a white 1991 page does not
+  outshine the text.
+- **The line**, under the scene and under the question screen's lede, everywhere: «Проект
+  NoeticEcho. Последний учебник эпохи до ИИ. Кто понимает, как устроен веб, тот ставит ИИ задачи
+  и проверяет ответы, а не верит в магию.» It does not say AI makes learning pointless; it says
+  understanding is what lets a person direct the machine.
+- **Measured:** the question screen (the first visit, and the LCP page) LCP 2403 → 2403 ms, CLS 0,
+  performance 0.98, accessibility 1.00 before and after; first-route JS 54.8 KB of 150.
+  `tests/e2e/scene.spec.ts`: the scene moves on a wide screen and its button stops it, is still
+  under reduced motion, and is neither shown nor fetched on a phone.

@@ -9,6 +9,7 @@
 	import { t, pl } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Prologue, { type Answers } from '#lib/prologue/Prologue.svelte';
+	import Project from '#lib/home/Project.svelte';
 	import persona from '#lib/persona/default.ru.json';
 	import type { HomeLesson } from '#lib/content/catalogue.ts';
 	import type { PageProps } from './$types';
@@ -46,10 +47,22 @@
 		ready = true;
 	}
 
+	// The era scene is for a wide screen only, and is fetched only there, after home is drawn.
+	let Scene = $state<typeof import('#lib/home/EraScene.svelte').default | null>(null);
+	function wantScene() {
+		const wide = matchMedia('(min-width: 1024px)');
+		const load = () => {
+			if (wide.matches && !Scene) import('#lib/home/EraScene.svelte').then((m) => (Scene = m.default));
+		};
+		wide.addEventListener('change', load);
+		load();
+	}
+
 	onMount(async () => {
 		const { db, progress } = await import('#lib/learner.ts');
 		if (await progress.getSetting(await db(), 'prologueSeen')) {
 			mode = 'home';
+			wantScene();
 			await refresh();
 		}
 	});
@@ -85,47 +98,84 @@
 			skipHref={links.map()}
 		/>
 	{:else}
-		<section class="hero" aria-labelledby="home-h">
-			<h1 id="home-h">{t('app.title')}</h1>
-			<p class="lede">{t('home.lede')}</p>
-			<div class="actions">
-				{#if !ready}
-					<span class="primary placeholder" aria-hidden="true">{t('home.start')}</span>
-				{:else if next}
-					<a class="primary" href={links.lesson(next.id)}>{t('home.continue', { title: next.title })}</a>
-				{:else}
-					<span class="done">{t('home.finished')}</span>
-				{/if}
-				<a class="secondary" href={links.map()}>{t('home.map')}</a>
-			</div>
-		</section>
+		<div class="top">
+			<section class="hero" aria-labelledby="home-h">
+				<h1 id="home-h">{t('app.title')}</h1>
+				<p class="lede">{t('home.lede')}</p>
+				<div class="actions">
+					{#if !ready}
+						<span class="primary placeholder" aria-hidden="true">{t('home.start')}</span>
+					{:else if next}
+						<a class="primary" href={links.lesson(next.id)}>{t('home.continue', { title: next.title })}</a>
+					{:else}
+						<span class="done">{t('home.finished')}</span>
+					{/if}
+					<a class="secondary" href={links.map()}>{t('home.map')}</a>
+				</div>
+			</section>
+			<aside class="side" aria-label="{t('project.label')} NoeticEcho">
+				<div class="stage">{#if Scene}<Scene />{/if}</div>
+				<Project />
+			</aside>
 
-		<section class="path" aria-label={t('home.stats')}>
-			<dl>
-				<div>
-					<dt>{days ? t('home.streak', { n: days, days: pl(days, 'day.forms') }) : t('home.streak.none')}</dt>
-					{#if frozen}<dd>{t('home.freeze')}</dd>{/if}
-				</div>
-				<div>
-					<dt>{t('home.lessons', { done: doneCount, total })}</dt>
-				</div>
-				<div>
-					<dt>{t('home.xp', { n: xp })}</dt>
-				</div>
-			</dl>
-			<p class="private">
-				{t('home.private')}
-				<a href={links.settings()}>{t('home.private.link')}</a>
-			</p>
-			<button type="button" class="quiet" onclick={() => (mode = 'prologue')}>{t('home.replay')}</button>
-		</section>
+			<section class="path" aria-label={t('home.stats')}>
+				<dl>
+					<div>
+						<dt>{days ? t('home.streak', { n: days, days: pl(days, 'day.forms') }) : t('home.streak.none')}</dt>
+						{#if frozen}<dd>{t('home.freeze')}</dd>{/if}
+					</div>
+					<div>
+						<dt>{t('home.lessons', { done: doneCount, total })}</dt>
+					</div>
+					<div>
+						<dt>{t('home.xp', { n: xp })}</dt>
+					</div>
+				</dl>
+				<p class="private">
+					{t('home.private')}
+					<a href={links.settings()}>{t('home.private.link')}</a>
+				</p>
+				<button type="button" class="quiet" onclick={() => (mode = 'prologue')}>{t('home.replay')}</button>
+			</section>
+		</div>
 	{/if}
 </div>
 
 <style>
+	.top {
+		display: grid;
+		gap: var(--space-5) 0;
+	}
 	.hero {
-		padding-block: var(--space-9) var(--space-7);
+		padding-block: var(--space-9) 0;
 		max-width: 46rem;
+	}
+	/* The scene's box is reserved before it arrives, so nothing moves when it does. */
+	.stage {
+		display: none;
+	}
+	@media (min-width: 1024px) {
+		.top {
+			grid-template-columns: minmax(0, 1fr) 440px;
+			column-gap: var(--space-8);
+			align-items: start;
+		}
+		/* The scene and the line beside the hero and the path, so neither is pushed down. */
+		.side {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+			padding-top: var(--space-8);
+		}
+		.stage {
+			display: block;
+			min-height: calc(300px + var(--hit-min) + var(--space-2));
+			margin-bottom: var(--space-3);
+		}
+	}
+	@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+		.stage {
+			min-height: 300px;
+		}
 	}
 	h1 {
 		font-size: var(--text-display);
@@ -155,6 +205,7 @@
 		color: var(--text-body);
 	}
 	.path {
+		margin-top: var(--space-2);
 		border-top: var(--line) solid var(--border-hairline);
 		padding-top: var(--space-6);
 		display: grid;
@@ -191,7 +242,7 @@
 			font-size: var(--text-display-sm);
 		}
 		.hero {
-			padding-block: var(--space-7) var(--space-6);
+			padding-block: var(--space-7) 0;
 		}
 	}
 </style>

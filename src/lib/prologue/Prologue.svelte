@@ -9,6 +9,7 @@
 	still filmstrip, stepped with «Следующая эпоха». Sound is opt-in and off by default.
 -->
 <script lang="ts">
+	import Project from '#lib/home/Project.svelte';
 	import { onMount, tick, untrack, type Component } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
 	import { SEQUENCE, RING_ERA, type EraId } from './sequence.ts';
@@ -155,6 +156,7 @@
 		<div class="intro">
 			<h1 id="{uid}-h">{t('app.title')}</h1>
 			<p class="lede">{t('prologue.lede')}</p>
+			<div class="project"><Project /></div>
 		</div>
 		<form onsubmit={start}>
 			<label for="{uid}-who">{t('prologue.q.who')}</label>
@@ -244,6 +246,9 @@
 		color: var(--text-body);
 		max-width: 34ch;
 		margin: 0;
+	}
+	.project {
+		margin-top: var(--space-5);
 	}
 	form {
 		display: grid;
