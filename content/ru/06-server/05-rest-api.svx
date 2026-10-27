@@ -1,0 +1,844 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '06-server/05-rest-api',
+		part: 6,
+		order: 5,
+		title: 'API и REST: как программы разговаривают друг с другом',
+		summary: 'Страница и сервер, а часто и две программы разных компаний, общаются по правилам API. После урока вы читаете и проектируете простой HTTP API: ресурсы, методы GET, POST, PUT и DELETE, коды ответа, ошибки и версии, и описываете его файлом OpenAPI.',
+		minutes: 30,
+		teaches: ['server-rest', 'server-openapi'],
+		requires: ['net-http-request-response', 'js-fetch', 'js-json'],
+		practice: {
+			id: 'server-openapi',
+			title: 'Описание API вашего проекта по OpenAPI',
+			task: 'Песочница не проверяет YAML, поэтому описание вы пишете текстом в блоке pre id="openapi" (вместо «…»), как файл openapi.yaml, и сверяете с примером из урока. Опишите API для ваших предложений и заявок. 1) Версия: openapi: 3.1.0, info, servers с адресом https://…/api/v1. 2) Пути-существительные во множественном числе: /items для списка предложений (get) и /items/{id} для одного, а для заявки из формы /requests (post). Глаголов в путях быть не должно. 3) У GET нет побочных эффектов; заявка создаётся методом POST и отвечает 201 (или 202). 4) Описаны ответы 200, 400 и 404 и общий формат ошибки в components.schemas.Error (поля code и message). 5) У заявки перечислены обязательные поля required и сказано, что персональные данные принимаются только по HTTPS.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="api-spec">
+      <h2>Описание API моего проекта</h2>
+      <pre id="openapi">…<\/pre>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="api-spec">
+      <h2>Описание API моего проекта</h2>
+      <pre id="openapi">openapi: 3.1.0
+info:
+  title: API моего сайта
+  version: 1.0.0
+servers:
+  - url: https://example.ru/api/v1
+paths:
+  /items:
+    get:
+      summary: Список предложений
+      responses:
+        '200':
+          description: Массив предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+  /items/{id}:
+    get:
+      summary: Одно предложение
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Предложение
+        '404':
+          description: Такого предложения нет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /requests:
+    post:
+      summary: Создать заявку из формы
+      description: Принимает персональные данные посетителя, поэтому работает только по HTTPS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone]
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: Заявка создана
+        '400':
+          description: Данные заявки неверны
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        title:
+          type: string
+        price:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string<\/pre>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'spec-section',
+					kind: 'exists',
+					selector: '#api-spec #openapi'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'version',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s*openapi:\\s*3\\.\\d\\.\\d'
+				},
+				{
+					id: 'servers-https',
+					kind: 'text',
+					selector: '#openapi',
+					matches: 'url:\\s*https://\\S+'
+				},
+				{
+					id: 'plural-nouns',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{2}/[a-z][a-z-]*s:\\s*(?:\\n|$)'
+				},
+				{
+					id: 'no-verbs',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^(?![\\s\\S]*\\n\\s{2}/(?:get|create|add|delete|update|remove|list|fetch|send|save)[A-Za-z-]*[:/])'
+				},
+				{
+					id: 'one-item-path',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{2}/[a-z][a-z-]*s/\\{\\w+\\}:'
+				},
+				{
+					id: 'get-operation',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{4}get:'
+				},
+				{
+					id: 'post-creates',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{4}post:[\\s\\S]*[\'"]?20[12][\'"]?\\s*:'
+				},
+				{
+					id: 'statuses',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^(?=[\\s\\S]*[\'"]?200[\'"]?\\s*:)(?=[\\s\\S]*[\'"]?400[\'"]?\\s*:)(?=[\\s\\S]*[\'"]?404[\'"]?\\s*:)'
+				},
+				{
+					id: 'error-schema',
+					kind: 'text',
+					selector: '#openapi',
+					matches: 'Error:[\\s\\S]*code:[\\s\\S]*message:|Error:[\\s\\S]*message:[\\s\\S]*code:'
+				},
+				{
+					id: 'required-fields',
+					kind: 'text',
+					selector: '#openapi',
+					matches: 'required:\\s*\\[[^\\]]+\\]|required:\\s*\\n\\s*-\\s*\\w+'
+				},
+				{
+					id: 'https-personal-data',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^(?=[\\s\\S]*(?:HTTPS|https))(?=[\\s\\S]*персональн)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Страница обращается к адресу GET /items?delete=2, и после этого пункт 2 пропадает. Что не так?',
+				options: [
+					'GET должен быть безопасным и ничего не менять: для удаления нужен DELETE',
+					'Всё правильно: адрес вы выбрали сами',
+					'Нужно было использовать POST для чтения списка'
+				],
+				answer: 0,
+				why: [
+					'Да. GET считается безопасным: его вправе вызывать кто угодно и сколько угодно раз (браузер, поисковый робот, расширение). Если от него что-то удаляется, то один любопытный робот сотрёт ваши данные.',
+					'Нет: свободный выбор адреса не отменяет правил методов. От них зависят кэши, роботы и безопасность.',
+					'Нет: чтение списка это как раз GET.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините метод HTTP с его обычным смыслом в API',
+				pairs: [
+					['GET', 'прочитать ресурс, ничего не меняя'],
+					['POST', 'создать новый ресурс или выполнить действие'],
+					['PUT', 'заменить ресурс целиком'],
+					['PATCH', 'изменить часть полей ресурса'],
+					['DELETE', 'удалить ресурс']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Какой адрес лучше для списка предложений в REST-стиле?',
+				options: ['GET /items', 'GET /getAllItems', 'POST /items/list'],
+				answer: 0,
+				why: [
+					'Да. Адрес называет ресурс (предложения, во множественном числе), а действие выражает метод. Так API получается предсказуемым: /items, /items/7, /requests.',
+					'Нет: глагол в адресе дублирует то, что уже сказал метод GET.',
+					'Нет: читать нужно GET, а POST означает «создать».'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Заявка принята и создана на сервере. Какой код ответа ожидается?',
+				options: ['201 Created, обычно с заголовком Location', '200 OK без пояснений', '404 Not Found'],
+				answer: 0,
+				why: [
+					'Да. 201 сообщает, что ресурс создан, а Location называет его адрес. 202 берут, если заявку приняли, но обрабатывают позже.',
+					'Формально можно, но 201 информативнее: он говорит именно о создании.',
+					'Нет: 404 означает, что чего-то нет, а не то, что оно создано.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что полезно включить в сообщение об ошибке API?',
+				options: [
+					'Правильный код состояния (400, 404, 409…)',
+					'Короткий машинный код ошибки',
+					'Понятный человеку текст без секретов',
+					'Подробный стек вызовов и пароль к базе'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: код сразу сообщает класс беды.',
+					'Да: по нему клиентская программа решает, что делать (повторить, показать поле, выйти).',
+					'Да: текст помогает разработчику и посетителю, но не должен раскрывать внутреннее устройство.',
+					'Нет: так утекают пароли и устройство сервера. Подробности пишут в журнал, а не в ответ.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Зачем нужен файл OpenAPI?',
+				options: [
+					'Это описание API в машиночитаемом виде: по нему строят документацию, проверяют запросы и генерируют клиентов',
+					'Он ускоряет работу сервера',
+					'Он заменяет базу данных'
+				],
+				answer: 0,
+				why: [
+					'Да. Один файл служит договором между теми, кто делает сервер, и теми, кто его использует. Из него автоматически получается интерактивная документация (Swagger UI), заготовки кода и тесты.',
+					'Нет: сервер он не ускоряет, он описывает его интерфейс.',
+					'Нет: базы он не заменяет.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-rest-what',
+				front: 'Что такое REST?',
+				back: 'Стиль проектирования web API из диссертации Роя Филдинга (2000): ресурсы с адресами, методы HTTP как действия, коды состояния, ответы без привязки к прошлым запросам. Чаще всего это JSON по HTTP.'
+			},
+			{
+				id: 'server-rest-methods',
+				front: 'Какие методы HTTP и что они значат?',
+				back: 'GET: прочитать (безопасный). POST: создать. PUT: заменить целиком. PATCH: изменить часть. DELETE: удалить. GET, PUT и DELETE идемпотентны: повтор даёт тот же результат.'
+			},
+			{
+				id: 'server-rest-codes',
+				front: 'Какие коды ответа API нужно знать?',
+				back: '200 успех, 201 создано, 204 успех без тела, 400 ошибка в запросе, 401 нет входа, 403 нельзя, 404 нет такого, 409 конфликт, 429 слишком часто, 500 ошибка сервера.'
+			},
+			{
+				id: 'server-api-errors',
+				front: 'Как оформить ошибки API?',
+				back: 'Одинаково везде: код состояния, короткий код ошибки и понятный текст (поля code и message или формат RFC 9457). Без секретов и стека вызовов.'
+			},
+			{
+				id: 'server-openapi',
+				front: 'Что такое OpenAPI?',
+				back: 'Формат описания HTTP API файлом YAML или JSON: пути, методы, параметры, ответы, схемы данных. Из него получают документацию (Swagger UI), клиентов и тесты. Вырос из Swagger (2011).'
+			}
+		],
+		sources: [
+			{
+				title: 'Fielding: Architectural Styles and the Design of Network-based Software Architectures, глава 5 (REST)',
+				url: 'https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			},
+			{
+				title: 'RFC 9110: HTTP Semantics',
+				url: 'https://www.rfc-editor.org/rfc/rfc9110',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'OpenAPI Specification',
+				url: 'https://spec.openapis.org/oas/latest.html',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: HTTP request methods',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: HTTP response status codes',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'RFC 9457: Problem Details for HTTP APIs',
+				url: 'https://www.rfc-editor.org/rfc/rfc9457',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'REST API простыми словами: что такое REST API (Свят404)',
+				url: 'https://www.youtube.com/watch?v=EaFr0wYaxxM',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'ru'
+			}
+		],
+		guide: {
+			intro: 'Вы опишете API так, как это делают в настоящих проектах: файлом по стандарту OpenAPI. Пример есть в уроке. Подставьте свои пути и поля и держитесь правил: существительные, правильные методы, честные коды.',
+			hints: [
+				'Начало: openapi: 3.1.0, info с title и version, servers: - url: https://example.ru/api/v1. Отступы это два пробела на уровень.',
+				'Пути идут с отступом в два пробела и косой чертой: /items: и /items/{id}: и /requests:. Метод ещё на два пробела вправо: get: или post:.',
+				'Ответы: responses: и под ним коды в кавычках: "200":, "404":, для заявки "201": и "400":. Общую ошибку вынесите в components: schemas: Error: с полями code и message.',
+				'У заявки: required: [name, phone] и фраза в description: «персональные данные принимаются только по HTTPS».'
+			],
+			mistakes: {
+				'spec-section': 'Нужен блок section id="api-spec" с pre id="openapi". Верните его.',
+				'no-blanks': 'В описании остались многоточия «…». Замените весь блок описанием API.',
+				version: 'Описание начинается строкой openapi: 3.1.0.',
+				'servers-https': 'В servers нужен адрес по HTTPS: - url: https://example.ru/api/v1.',
+				'plural-nouns': 'Пути должны быть существительными во множественном числе: /items, /requests.',
+				'no-verbs': 'В путях не должно быть глаголов (getItems, createRequest, delete…): действие говорит метод.',
+				'one-item-path': 'Нужен путь одного ресурса с параметром: /items/{id}.',
+				'get-operation': 'Нужна операция чтения: get: внутри пути.',
+				'post-creates': 'Заявка создаётся методом post и отвечает кодом "201" (или "202").',
+				statuses: 'Опишите ответы 200, 400 и 404.',
+				'error-schema': 'Общий формат ошибки: components → schemas → Error с полями code и message.',
+				'required-fields': 'Для заявки перечислите обязательные поля: required: [name, phone].',
+				'https-personal-data': 'Напишите, что персональные данные принимаются только по HTTPS (в описании заявки).'
+			},
+			outro: 'У вашего проекта есть договор: любой программист (и любая нейросеть) по этому файлу поймёт, как с ним разговаривать. Вставьте текст в редактор Swagger (editor.swagger.io), и он нарисует интерактивную документацию.'
+		},
+		say: {
+			API: 'эй-пи-ай',
+			REST: 'рест',
+			OpenAPI: 'оупен-эй-пи-ай',
+			Swagger: 'сваггер',
+			YAML: 'ямл',
+			JSON: 'джейсон',
+			GET: 'гет',
+			POST: 'пост',
+			PUT: 'пут',
+			PATCH: 'патч',
+			DELETE: 'делит',
+			Fielding: 'филдинг',
+			RFC: 'эр-эф-си',
+			Location: 'локейшн',
+			curl: 'керл',
+			Postman: 'постман'
+		}
+	};
+</script>
+
+<script>
+	import RestTrainer from '../../diagrams/RestTrainer.svelte';
+</script>
+
+## Программы тоже разговаривают
+
+До сих пор «клиентом» сервера был браузер, а читал ответ человек. Но в вебе всё чаще разговаривают друг с другом **программы**: ваша страница просит у сервера список предложений (вы делали это в уроке про fetch), мобильное приложение отправляет заявку, сайт магазина спрашивает у службы доставки цену, а нейросеть читает данные через инструмент. Для таких разговоров нужны правила: что спрашивать, в каком виде, какие ответы бывают. Набор таких правил называют **API** (Application Programming Interface, программный интерфейс приложения).
+
+Чаще всего веб-API это обычный HTTP, уже знакомый вам: запрос с методом и адресом, ответ с кодом и телом, и тело обычно в JSON. Отличие от страницы только в том, что ответ рассчитан не на глаза, а на программу.
+
+## REST: ресурсы и глаголы
+
+Самый распространённый стиль таких API называется **REST** (Representational State Transfer). В 2000 году его описал в докторской диссертации Рой Филдинг, один из авторов HTTP. Идея в том, чтобы использовать HTTP так, как он задуман:
+
+- в адресе называют **ресурс**, то есть существительное во множественном числе: `/items` (предложения), `/items/7` (седьмое предложение), `/requests` (заявки);
+- **действие** выражает метод HTTP, а не слово в адресе;
+- результат сообщает **код состояния**;
+- сервер не хранит между запросами ничего о клиенте: всё нужное приходит в самом запросе.
+
+Честности ради: то, что в индустрии называют «REST API», обычно лишь следует этой идее приблизительно (строгий REST требует ещё ссылок в ответах, и их почти никто не делает). Для нас важны сами правила, они делают API предсказуемым: увидев `/items`, любой разработчик догадается, как выглядит `/requests`.
+
+## Методы
+
+Каждый метод имеет принятый смысл, записанный в стандарте HTTP (RFC 9110):
+
+- **GET**: прочитать. Он **безопасен**: ничего не меняет, поэтому его можно вызывать сколько угодно раз и кому угодно (браузеру, поисковому роботу, расширению).
+- **POST**: создать новый ресурс или выполнить действие («отправить заявку»). Повтор может создать вторую копию, поэтому POST не идемпотентен.
+- **PUT**: заменить ресурс целиком.
+- **PATCH**: изменить часть полей.
+- **DELETE**: удалить.
+
+Слово **идемпотентный** значит «повтор не меняет результат»: два одинаковых `DELETE /items/7` оставят сервер в том же состоянии, что и один. GET, PUT и DELETE идемпотентны, и клиент может смело повторить запрос, если ответа не было. POST этого не гарантирует, поэтому в уроке про fetch мы блокировали кнопку на время отправки.
+
+## Коды ответа
+
+Вы знаете группы кодов (2xx, 3xx, 4xx, 5xx). В API используют вполне определённый набор:
+
+- `200 OK`: успех; `201 Created`: создано (с заголовком `Location`: адрес нового ресурса); `202 Accepted`: принято, обработка позже; `204 No Content`: успех без тела;
+- `400 Bad Request`: запрос неверен (пропущено поле); `401 Unauthorized`: нужно войти; `403 Forbidden`: войти недостаточно, нельзя; `404 Not Found`: такого ресурса нет; `409 Conflict`: конфликт с текущим состоянием; `422`: данные понятны, но не прошли проверку; `429 Too Many Requests`: слишком часто;
+- `500 Internal Server Error`: ошибка на сервере, а клиент ни при чём.
+
+Выберите запрос и посмотрите на ответ. Два из запросов нарушают правила специально:
+
+<RestTrainer />
+
+<details>
+<summary>Проверьте себя: почему удалять по адресу GET /deleteItem?id=1 нельзя?</summary>
+
+GET должен быть безопасным, а такой запрос меняет данные. Его может отправить кто угодно и не нарочно: робот, предзагрузка страницы, расширение. Для удаления есть метод DELETE, а действие по адресу описывать глаголом не нужно.
+
+</details>
+
+## Хорошая ошибка
+
+Самое раздражающее в чужом API: ответ `500` без объяснений или код `200` с текстом «ошибка» внутри. Договоритесь, как выглядят ошибки, и держитесь этого везде. Минимум: **правильный код состояния**, **короткий машинный код** (`invalid`, `not_found`), по которому программа решает, что делать, и **человеческий текст**. Есть стандарт такого формата, RFC 9457 «Problem Details». Подробности (стек вызовов, пароли, пути на диске) в ответ не идут, они остаются в журнале сервера.
+
+## Версии, страницы и безопасность
+
+- **Версии.** API меняется, а те, кто им пользуется, не успевают за вами. Поэтому номер версии кладут в адрес (`/api/v1/items`), и старая версия живёт, пока ею пользуются.
+- **Страницы и фильтры.** Список из тысячи записей не отдают целиком: `/items?page=2&limit=20`, `/items?q=межевание`.
+- **HTTPS всегда**, а особенно когда в запросе персональные данные (имя, телефон). Закон о персональных данных (152-ФЗ) ждёт от вас защиты, и первый шаг к ней шифрование.
+- **Проверка входа.** Что угодно может прийти в запрос: сервер проверяет все поля, а не верит клиенту.
+- **Ограничение частоты**, чтобы один злоумышленник не завалил сервер.
+
+## OpenAPI: договор в виде файла
+
+Чтобы не объяснять API на словах, его описывают файлом по стандарту **OpenAPI**: в YAML или JSON перечислены адреса, методы, параметры, формы запросов и ответов. Формат вырос из проекта Swagger (2011), а с 2015 года развивается как открытый стандарт. По такому файлу автоматически получают интерактивную документацию (Swagger UI), заготовки программ-клиентов и проверку, что сервер отвечает как обещано.
+
+```yaml
+paths:
+  /requests:
+    post:
+      summary: Создать заявку из формы
+      responses:
+        '201':
+          description: Заявка создана
+```
+
+Отступы пробелами важны: вложенность в YAML задаётся ими.
+
+## Как пробовать API
+
+Три способа, ни одному не нужна специальная программа: вкладка «Сеть» в инструментах разработчика (смотреть настоящие запросы страницы), команда `curl` в терминале (`curl https://example.ru/api/v1/items` покажет ответ), и редактор Swagger (`editor.swagger.io`), в который можно вставить файл OpenAPI и нажать «Try it out».
+
+## Практика
+
+Вы на сайте эпохи 2022 года, когда сайты общаются через API (это время Jamstack). Опишите API вашего проекта файлом OpenAPI: список ваших предложений, одно предложение и создание заявки из формы. Текст пишете в блоке pre прямо на странице, проверки читают его.
+
+Три правила, которые проверка поймает: пути это существительные во множественном числе без глаголов; GET читает, а заявка создаётся POST и отвечает 201; описаны ответы 200, 400, 404 и общий формат ошибки. И одно правило, которое проверка не поймёт, но поймёт закон: персональные данные из формы принимаются только по HTTPS. Напишите это в описании заявки.
+
+## Что было не так раньше
+
+До REST была мода на SOAP: обмен сообщениями в XML-конвертах, с огромными описаниями (WSDL) и инструментами, без которых их было не прочитать. А в простых API 2000-х годов всё шло через один адрес с параметром действия (`/api.php?action=deleteItem&id=7`), метод почти всегда был GET или POST без разбора, а ответ `200` приходил и при успехе, и при ошибке: просто с разным текстом. Любая программа, читавшая такой API, сначала писала разбор «что тут имели в виду».
+
+Сегодняшнее соглашение скромнее, но надёжнее: адрес называет вещь, метод выражает действие, код говорит, получилось ли, а файл OpenAPI записывает всё это для людей и машин.

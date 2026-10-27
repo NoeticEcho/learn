@@ -1,0 +1,760 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '06-server/06-graphql-webhooks',
+		part: 6,
+		order: 6,
+		title: 'GraphQL и вебхуки',
+		summary: 'GraphQL отдаёт ровно те поля, которые попросил клиент, а вебхук позволяет сервису самому сообщить вам о событии. После урока вы знаете, чем GraphQL отличается от REST, и настраиваете уведомление о заявке с проверкой подписи и защитой от повторов.',
+		minutes: 25,
+		teaches: ['server-graphql', 'server-webhooks'],
+		requires: ['server-rest'],
+		practice: {
+			id: 'server-webhook',
+			title: 'Заявка с формы доходит до владельца: вебхук и его защита',
+			task: 'Настоящий приёмник в песочнице не запустить, поэтому код обработчика вы пишете текстом в блоке pre id="handler" и проверяете подпись на схеме выше. 1) В абзаце «Канал» назовите, куда придёт заявка: Telegram, почта или другой канал. 2) В pre напишите обработчик (на Node.js, по образцу из урока): секрет из process.env, подпись HMAC SHA-256 по сырому телу (crypto.createHmac("sha256", …)), безопасное сравнение (timingSafeEqual), ответ 401 при несовпадении, повтор события с тем же id игнорируется, при успехе быстрый ответ 200. 3) В абзаце «Если приёмник недоступен» опишите, что произойдёт при сбое и почему заявка не потеряется и не придёт дважды. 4) В абзаце про GraphQL сравните с REST для ваших данных: назовите один пункт из брифа и случай, когда удобнее GraphQL. Значение секрета прямо в код не записывайте. Все «…» нужно заменить.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="webhook-plan">
+      <h2>Заявка, вебхук, владелец</h2>
+      <p id="channel">Канал: …</p>
+      <pre id="handler">…<\/pre>
+      <p id="retry">Если приёмник недоступен: …</p>
+      <p id="graphql">GraphQL или REST для моих данных: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="webhook-plan">
+      <h2>Заявка, вебхук, владелец</h2>
+      <p id="channel">Канал: Telegram. Бот отправляет владельцу сообщение с именем и телефоном посетителя, как только в обработчик пришла заявка. Запасной канал: письмо на почту.</p>
+      <pre id="handler">import crypto from 'node:crypto';
+
+const SECRET = process.env.WEBHOOK_SECRET;   // секрет не в коде, а в переменных окружения
+const seen = new Set();                       // номера уже обработанных событий
+
+export async function handleWebhook(req, res) {
+  const signature = req.headers['x-signature'];
+  const expected = crypto.createHmac('sha256', SECRET).update(req.rawBody).digest('hex');
+  const ok = signature && signature.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  if (!ok) return res.status(401).end();      // подпись не сошлась: чужой запрос
+
+  const event = JSON.parse(req.rawBody);
+  if (seen.has(event.id)) return res.status(200).end();   // повтор: уже обработано
+  seen.add(event.id);
+
+  await sendToOwner(event);                   // сообщение владельцу, например через Bot API Telegram
+  res.status(200).end();
+}<\/pre>
+      <p id="retry">Если приёмник недоступен: сервис повторит доставку через минуту, через час и позже. Заявка не потеряется, потому что обработчик идемпотентен (повтор с тем же номером события игнорируется) и отвечает 200 быстро, а отправка владельцу идёт в очереди. При долгой недоступности смотрю журнал доставок.</p>
+      <p id="graphql">GraphQL или REST для моих данных: для списка «{{items.0.title}}» и остальных пунктов хватает REST, потому что запросы простые и одинаковые. GraphQL пригодится, если разным экранам нужны разные поля одних и тех же данных.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'plan-section',
+					kind: 'exists',
+					selector: '#webhook-plan'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#webhook-plan',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'channel',
+					kind: 'text',
+					selector: '#channel',
+					matches: 'Telegram|Телеграм|почт|[Ee]-?mail|ВКонтакте|VK|Макс|SMS|чат'
+				},
+				{
+					id: 'hmac',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'createHmac\\(\\s*[\'"]sha256[\'"]'
+				},
+				{
+					id: 'secret-from-env',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'process\\.env\\.\\w+'
+				},
+				{
+					id: 'no-hardcoded-secret',
+					kind: 'text',
+					selector: '#handler',
+					matches: '^(?![\\s\\S]*(?:SECRET|secret|TOKEN|token|KEY|key)\\s*=\\s*[\'"][^\'"]{6,}[\'"])'
+				},
+				{
+					id: 'safe-compare',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'timingSafeEqual'
+				},
+				{
+					id: 'rejects-bad-signature',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'status\\(\\s*40[13]\\s*\\)|statusCode\\s*=\\s*40[13]'
+				},
+				{
+					id: 'idempotent',
+					kind: 'text',
+					selector: '#handler',
+					matches: '^(?=[\\s\\S]*(?:event\\.id|delivery|idempot))(?=[\\s\\S]*(?:\\.has\\(|already|processed|seen|SELECT))'
+				},
+				{
+					id: 'fast-ack',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'status\\(\\s*200\\s*\\)|statusCode\\s*=\\s*200|sendStatus\\(\\s*200\\s*\\)'
+				},
+				{
+					id: 'retry-answer',
+					kind: 'text',
+					selector: '#retry',
+					matches: '^(?=[\\s\\S]*(?:повтор|ретра|retry|ещё раз|снова))(?=[\\s\\S]*(?:очеред|журнал|не потер|идемпот))'
+				},
+				{
+					id: 'graphql-vs-rest',
+					kind: 'text',
+					selector: '#graphql',
+					matches: '^(?=[\\s\\S]*GraphQL)(?=[\\s\\S]*REST)(?=[\\s\\S]*(?:если|когда|потому|так как))'
+				},
+				{
+					id: 'graphql-names-item',
+					kind: 'field',
+					selector: '#graphql',
+					field: 'items[].title',
+					min: 1,
+					when: {
+						brief: 'items[].title'
+					}
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Чем вебхук отличается от «опроса»?',
+				options: [
+					'При опросе вы сами каждые несколько минут спрашиваете «есть новости?», а вебхук сам приходит к вам запросом, когда событие случилось',
+					'Вебхук работает только в браузере',
+					'Опрос быстрее, потому что не использует сеть'
+				],
+				answer: 0,
+				why: [
+					'Да. Опрос расточителен (чаще всего ответ «ничего нового») и запаздывает. Вебхук обращает направление: сервис, у которого случилось событие, сам делает POST на ваш адрес.',
+					'Нет: вебхук это обычный HTTP-запрос между серверами, браузер не участвует.',
+					'Нет: опрос как раз гоняет по сети много пустых запросов.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Для чего проверяют подпись входящего вебхука?',
+				options: [
+					'Чтобы убедиться, что запрос прислал настоящий сервис и тело не изменили по дороге',
+					'Чтобы ускорить обработку',
+					'Чтобы посчитать число заявок'
+				],
+				answer: 0,
+				why: [
+					'Да. Адрес вашего приёмника может узнать кто угодно. Подпись (HMAC от тела с общим секретом) умеет создать только тот, кто знает секрет, поэтому поддельный запрос отсекается до обработки.',
+					'Нет: проверка добавляет работы, но защищает от подделок.',
+					'Нет: подпись к подсчёту отношения не имеет.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Ваш обработчик не ответил вовремя, и сервис прислал то же событие второй раз. Что должен делать правильный обработчик?',
+				options: [
+					'Узнать событие по номеру (id) и не обрабатывать повторно: обработка идемпотентна',
+					'Обработать второй раз: может, пригодится',
+					'Заблокировать сервис навсегда'
+				],
+				answer: 0,
+				why: [
+					'Да. Вебхуки доставляются «хотя бы один раз», а значит, повторы бывают и от сервиса, и из-за сбоев. Если помнить id обработанных событий, заявка не придёт владельцу дважды.',
+					'Нет: владелец получил бы две одинаковые заявки, а оплата списалась бы дважды.',
+					'Нет: повтор доказывает, что сервис работает как должен.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что верно про хранение секрета для проверки подписи?',
+				options: [
+					'Его кладут в переменные окружения или хранилище секретов',
+					'Его нельзя записывать в публичный код и репозиторий',
+					'Его можно выложить в README, чтобы не потерять',
+					'Его меняют, если он мог утечь'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: код видят многие, а переменные окружения только сервер.',
+					'Да: что попало в публичный репозиторий, считается утёкшим навсегда.',
+					'Нет: README читают все, и подпись перестанет что-либо гарантировать.',
+					'Да: ротация секрета обычная гигиена.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините подход с описанием',
+				pairs: [
+					['REST', 'много адресов, каждый отдаёт свой ресурс целиком'],
+					['GraphQL', 'один адрес, клиент сам перечисляет нужные поля'],
+					['вебхук', 'сервис сам присылает запрос о событии на ваш адрес'],
+					['HMAC-подпись', 'хэш тела с общим секретом: доказывает подлинность запроса']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Для списка из трёх услуг на сайте-визитке что разумнее взять, REST или GraphQL?',
+				options: [
+					'REST: запросы простые и одинаковые, и GraphQL принесёт сложность без выгоды',
+					'GraphQL: он всегда лучше',
+					'Ни то ни другое: API для списка не нужен вообще'
+				],
+				answer: 0,
+				why: [
+					'Да. GraphQL окупается, когда разным клиентам нужны разные поля или много связанных ресурсов (мобильное приложение и сайт). Для трёх услуг выгоды нет, а цена в сложности и в кэшировании есть.',
+					'Нет: у него есть цена: сложнее кэшировать, надо защищаться от слишком тяжёлых запросов, нужен отдельный сервер запросов.',
+					'Нет: если список меняется без перезаливки сайта, ему нужен API, пусть самый простой.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-webhook',
+				front: 'Что такое вебхук?',
+				back: 'Обратный вызов по HTTP: когда в сервисе случилось событие (оплата, заявка, коммит), он сам отправляет POST на ваш адрес с описанием события, вместо того чтобы вы его опрашивали.'
+			},
+			{
+				id: 'server-webhook-signature',
+				front: 'Как проверяют подлинность вебхука?',
+				back: 'Сервис подписывает сырое тело запроса общим секретом (HMAC SHA-256) и присылает подпись в заголовке. Приёмник считает свою подпись и сравнивает безопасной функцией. Не сошлись: 401, событие не обрабатывать.'
+			},
+			{
+				id: 'server-idempotent-webhook',
+				front: 'Почему обработка вебхука должна быть идемпотентной?',
+				back: 'Доставка «хотя бы один раз»: при сбоях сервис повторяет запрос. Запоминайте id событий и не обрабатывайте повторно. Отвечайте 200 быстро, тяжёлую работу делайте в очереди.'
+			},
+			{
+				id: 'server-graphql',
+				front: 'Что такое GraphQL?',
+				back: 'Язык запросов к API (Facebook, 2015): один адрес, типизированная схема, клиент сам перечисляет нужные поля и связанные данные. Нет лишних полей и лишних запросов, зато сложнее кэширование и защита.'
+			},
+			{
+				id: 'server-graphql-or-rest',
+				front: 'Когда GraphQL, а когда REST?',
+				back: 'REST: простые одинаковые запросы, кэш, небольшие сайты. GraphQL: много разных клиентов (сайт, мобильное приложение) и много связанных данных; нужна команда, готовая его поддерживать.'
+			}
+		],
+		sources: [
+			{
+				title: 'GraphQL: Introduction to GraphQL',
+				url: 'https://graphql.org/learn/',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Telegram Bot API: setWebhook',
+				url: 'https://core.telegram.org/bots/api#setwebhook',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Stripe: Webhooks',
+				url: 'https://docs.stripe.com/webhooks',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'GitHub Docs: Validating webhook deliveries',
+				url: 'https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Вы настроите путь заявки: форма, потом вебхук, потом владелец. Код приёмника пишется как для настоящего сервера, а проверить подпись можно на схеме выше. Главные слова урока: подпись, секрет не в коде и повторы.',
+			hints: [
+				'Первая строка: import crypto from "node:crypto";. Секрет: const SECRET = process.env.WEBHOOK_SECRET; (значение секрета в код не пишите).',
+				'Подпись: crypto.createHmac("sha256", SECRET).update(req.rawBody).digest("hex"). Сравнивайте через crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b)). Не совпало: res.status(401).end().',
+				'Повторы: const seen = new Set(); и if (seen.has(event.id)) return res.status(200).end(); seen.add(event.id);. В конце res.status(200).end().',
+				'В абзацах: канал (Telegram или почта), что будет при сбое (повтор, очередь, идемпотентность) и сравнение GraphQL с REST на одном из ваших пунктов с оговоркой «если…».'
+			],
+			mistakes: {
+				'plan-section': 'Блок «Заявка, вебхук, владелец» (section id="webhook-plan") пропал. Верните его.',
+				'no-blanks': 'Остались многоточия «…». Замените каждое.',
+				channel: 'Назовите канал доставки: Telegram, почта или другой.',
+				hmac: 'Подпись считают через HMAC SHA-256: crypto.createHmac("sha256", SECRET).',
+				'secret-from-env': 'Секрет берут из переменных окружения: process.env.WEBHOOK_SECRET.',
+				'no-hardcoded-secret': 'Секрет не должен быть записан в коде строкой. Уберите значение и возьмите его из process.env.',
+				'safe-compare': 'Подписи сравнивают безопасной функцией: crypto.timingSafeEqual(…).',
+				'rejects-bad-signature': 'Если подпись не сошлась, ответьте 401: res.status(401).end().',
+				idempotent: 'Нужна защита от повторов: запоминайте event.id и проверяйте, обработано ли событие (seen.has(event.id)).',
+				'fast-ack': 'При успехе быстро отвечайте 200: res.status(200).end().',
+				'retry-answer': 'Расскажите, что произойдёт при недоступности приёмника: повтор доставки, очередь или журнал, и почему заявка не потеряется.',
+				'graphql-vs-rest': 'В последнем абзаце сравните GraphQL и REST: «REST… потому что…», «GraphQL пригодится, если…».',
+				'graphql-names-item': 'Назовите в сравнении один из ваших пунктов из брифа: рассуждать надо на ваших данных.'
+			},
+			outro: 'У вашей заявки есть надёжный путь: подпись защищает от подделки, идентификатор от повторов, а быстрый ответ позволяет сервису не нервничать. Это почти полный набор правил приёма вебхуков.'
+		},
+		say: {
+			GraphQL: 'граф-кью-эль',
+			webhook: 'вебхук',
+			HMAC: 'эйч-мак',
+			SHA: 'ша',
+			Telegram: 'телеграм',
+			Stripe: 'страйп',
+			GitHub: 'гитхаб',
+			REST: 'рест',
+			'Bot API': 'бот-эй-пи-ай',
+			process: 'процесс',
+			env: 'энв',
+			Facebook: 'фейсбук',
+			timingSafeEqual: 'тайминг-сейф-икуал',
+			idempotent: 'идемпотентный'
+		}
+	};
+</script>
+
+<script>
+	import WebhookGraphQL from '../../diagrams/WebhookGraphQL.svelte';
+</script>
+
+## Когда сервер сам стучится к вам
+
+Представьте, что вам должен прийти платёж или заявка с формы. Как узнать об этом? Есть два способа. Можно **спрашивать**: каждые несколько минут обращаться к сервису «ну что, пришло?», и в девяти случаях из десяти слышать «нет». Это называется опросом, он расточителен и всегда запаздывает. А можно попросить сервис **позвонить самому**: «когда придёт, пришли мне сообщение на такой-то адрес». Такой обратный вызов по HTTP называется **вебхуком** (webhook, «веб-крючок»).
+
+Работает он так. Вы сообщаете сервису адрес своего обработчика (`https://example.ru/hooks/request`). Когда событие случается (оплата, заявка, новый коммит), сервис сам отправляет на этот адрес запрос `POST` с описанием события в JSON. Ваш обработчик читает его, делает дело (например, пересылает заявку владельцу) и отвечает кодом `200`. На том же принципе строятся уведомления об оплате, сообщения в мессенджерах и запуск сборки сайта после правки.
+
+Три правила хорошего обработчика, и каждое родилось из чьей-то беды.
+
+## Правило первое: проверяйте, что запрос настоящий
+
+Адрес вашего обработчика не секрет: его может узнать и отправить на него что угодно любой. Если обработчик верит первому попавшемуся запросу, то «заявкой» или «оплатой» можно притвориться. Поэтому сервис **подписывает** запрос. Самый распространённый способ называется **HMAC**: сервис берёт тело запроса и общий с вами **секрет**, считает из них хэш (контрольную строку) и присылает её в заголовке. Обработчик считает такую же сам и сравнивает. Совпало: запрос прислал тот, кто знает секрет, и тело не менялось по дороге. Не совпало: ответ `401` и больше ничего.
+
+Подпись считают по **сырому телу**, ровно в том виде, в каком оно пришло (если сначала разобрать JSON и записать его заново, пробелы изменятся и подпись не сойдётся). Сравнивать подписи надо специальной функцией (`timingSafeEqual`), которая работает одинаковое время: обычное сравнение строк по скорости ответа подсказывает атакующему, сколько первых символов он угадал. Некоторые сервисы (например, Telegram) вместо подписи присылают в заголовке сам секрет, который вы задали при настройке, и тогда сравнивается он.
+
+Проверьте руками: измените тело или секрет и посмотрите, как ведёт себя подпись. Браузер считает её настоящей криптографией, но ничего никуда не отправляет:
+
+<WebhookGraphQL mode="webhook" />
+
+А секрет живёт **не в коде**. Всё, что попало в публичный репозиторий, считается утёкшим навсегда, поэтому секрет кладут в переменные окружения сервера (`process.env.WEBHOOK_SECRET`) или в хранилище секретов, а если он мог утечь, меняют.
+
+## Правило второе: отвечайте быстро
+
+Сервис ждёт ответа недолго, секунды. Если вы за это время не ответили `2xx`, он решает, что запрос не дошёл. Поэтому в обработчике сначала проверяют подпись, записывают событие и отвечают `200`, а тяжёлую работу (отправить сообщение, пересчитать, вызвать другой сервис) делают после, например в очереди.
+
+## Правило третье: повтор не должен ничего испортить
+
+Если ответа нет или он пришёл с ошибкой, сервис **повторит** запрос: через минуту, через пять, через час, с нарастающими паузами. Значит, доставка работает по принципу «хотя бы один раз», а не «ровно один». Один и тот же запрос может прийти дважды: например, вы обработали событие, но ответ потерялся по дороге.
+
+Поэтому обработка должна быть **идемпотентной**: повторный запрос не должен давать повторного эффекта. Для этого у каждого события есть номер (`id`). Обработчик помнит, какие номера уже видел, и повторное событие просто подтверждает (`200`), не делая ничего. Без этого клиент получит две заявки, а покупатель заплатит дважды.
+
+<details>
+<summary>Проверьте себя: почему обработчик, получив повтор события, всё равно отвечает 200?</summary>
+
+Ответ «200» говорит сервису «принято, больше не присылай». Если ответить ошибкой, сервис будет повторять дальше. А событие уже обработано, поэтому повторять работу не нужно.
+
+</details>
+
+## Куда отправить заявку
+
+Пересылать заявку владельцу можно разными путями: письмом на почту, сообщением в мессенджер, записью в таблицу. Для Telegram есть бот-API: обработчик отправляет запрос на `sendMessage` с токеном бота и текстом. Токен это такой же секрет, как и подпись: в коде его быть не должно.
+
+Здесь есть и юридическая сторона. Имя и телефон посетителя персональные данные (152-ФЗ), а сообщение в мессенджер уходит на серверы за пределами вашего хостинга, а возможно, и страны. Каждый такой канал надо отразить в политике обработки персональных данных, и это стоит обсудить с юристом. О законе мы поговорим в части про качество и право.
+
+## GraphQL: клиент выбирает поля сам
+
+Параллельно с REST появился другой способ спрашивать у сервера данные: **GraphQL**. Его придумали во Facebook в 2012 году (внутри компании, для мобильного приложения), а открыли в 2015. Отличие в том, что у API **один адрес** (`POST /graphql`), а клиент в теле запроса сам перечисляет, какие поля ему нужны:
+
+```graphql
+{
+  items {
+    title
+    price
+  }
+}
+```
+
+и получает ровно их, ни больше ни меньше. В REST адрес `/items` отдаёт каждое предложение целиком, даже если странице нужно только название и цена. Если нужны данные нескольких связанных ресурсов, REST требует нескольких запросов, а GraphQL один. Структура данных описана **схемой** с типами, и по ней строятся документация и проверки.
+
+Выберите поля и сравните размеры ответа:
+
+<WebhookGraphQL />
+
+Цена у GraphQL тоже есть: нужен отдельный слой на сервере, кэшировать труднее (все запросы идут на один адрес), и надо защищаться от слишком тяжёлых запросов («дай всё про всех»). Поэтому его берут, когда у проекта несколько разных клиентов (сайт, мобильное приложение), которым нужны разные поля, и много связанных данных. А для списка из десятка услуг на сайте-визитке REST проще и достаточен.
+
+## Практика
+
+Вы на сайте эпохи 2022 года, где сайты общаются с сервисами. Настройте путь заявки из формы до владельца. Настоящий приёмник в песочнице не запустить, и код обработчика вы напишете текстом, как он лежал бы на сервере, по образцу из уроков про подпись и повторы: в блоке `pre` на странице. Проверки найдут в нём главное: секрет из окружения, подпись HMAC, безопасное сравнение, ответ `401`, защиту от повторов и быстрый ответ.
+
+В двух абзацах ответьте словами: что будет, если приёмник недоступен, и когда для ваших данных удобнее GraphQL, а когда REST. Назовите один из ваших пунктов из брифа, чтобы рассуждение было про ваш проект.
+
+## Что было не так раньше
+
+Главным способом узнать о событии был опрос, а для обмена между сервисами служил SOAP и файлы, которые кто-то по расписанию клал на FTP. Когда вебхуки появились, их принимали без подписи («адрес же никто не знает»), секрет вшивали в код и выкладывали на GitHub, а ответ «200» отдавали только после тяжёлой работы, из-за чего сервисы слали повторы, и дубли заявок приходилось разгребать вручную.
+
+Правильное осталось: обратный вызов вместо опроса, подпись, быстрый ответ и идемпотентность. А GraphQL так и не вытеснил REST: оба живут, потому что решают чуть разные задачи.
