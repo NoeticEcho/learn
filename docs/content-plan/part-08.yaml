@@ -1,9 +1,18 @@
+# Regenerated from the written lessons (28.10.2026). Changes against the draft:
+# - Lesson 2's practice is a WordPress-2010-style theme (floats, a sidebar, a grey page) that the learner completes, so the era-3 site looks like its era.
+# - Lesson 5's practice is a working miniature generator in the sandbox (`content/diagrams/ssgmini.ts`): Markdown with front matter, a Liquid-style template
+#   and a collection, rebuilt on every edit. The template's double braces carry harmless Liquid filters (`{{ site.title | escape }}`) because the practice
+#   editor substitutes values into plain `{{ x }}`; the lesson says so.
+# - Lesson 6's practice is a content type, entries as JSON and a `fetch` against a pretend API (the sandbox allows no network), not a Decap-like admin.
+# - The draft's video for lesson 6 (a talk on Jamstack) moved to lesson 7, where Jamstack is taught.
+# - Lesson 6 requires `server.rest` and `js.fetch`; lesson 1 requires `data.relational-model`, so part 8 follows part 7.
+# - The claim «half of Russian landing pages are on Tilda» is not in the lessons: nothing in the sources supports a share.
 part: 8
 slug: cms
 title: CMS, генераторы и Jamstack
 era: null
-summary: 'От админки с темой и плагинами к Markdown-файлам и безголовой CMS: человек понимает, где живёт контент сайта, кто
-  его правит и как выбрать инструмент под свой проект.'
+summary: 'От админки с темой и плагинами к Markdown-файлам и безголовой CMS: человек понимает, где живёт контент сайта, кто его правит
+  и как выбрать инструмент под свой проект.'
 concepts:
 - id: cms.what-is-cms
   title: Что такое CMS
@@ -39,9 +48,11 @@ lessons:
 - id: 08-cms/01-what-is-cms
   order: 1
   title: Что такое CMS и зачем она нужна
-  summary: 'Зачем: после урока вы объясните, чем сайт на HTML-файлах отличается от сайта на CMS, назовёте три слоя (контент,
-    шаблон, код) и опишете модель контента своего проекта — какие бывают «сущности» (услуга, статья, человек, отзыв) и какие
-    у них поля.'
+  definition: 'CMS (система управления содержимым) — программа, в которой содержание сайта правят без знания HTML: админка, хранилище,
+    шаблоны, роли и публикация.'
+  summary: 'Вы объясните, чем сайт на HTML-файлах отличается от сайта на CMS, назовёте три слоя (содержание, шаблон, код) и опишете
+    модель контента своего проекта: какие бывают «сущности» (услуга, статья, человек, отзыв) и какие у них поля. После урока у вас есть
+    таблица типов содержания с редакторами и частотой правок.'
   minutes: 15
   teaches:
   - cms.what-is-cms
@@ -50,23 +61,33 @@ lessons:
   - server.static-vs-dynamic
   - data.relational-model
   - start.project-brief
-  diagram: 'Три слоя сайта: ползунок «кто правит» (разработчик / редактор / клиент) двигает контент, шаблон и код между «файлы
-    на диске» и «база + админка»; рядом показывается, где лежит каждая правка.'
-  practice: 'Эпоха 3 (2010). Из поля brief «items» (услуги, товары, люди, доказательства) и «sections» человек строит таблицу
-    модели контента: тип → поля → кто и как часто правит. Для проекта без услуг (портфолио, мероприятие) предлагаются типы
-    по умолчанию для этого вида проекта.'
+  diagram: 'ThreeLayers: «Три слоя сайта» (part 8, lesson 1). Content, template and code, and where each lives at three stages: HTML
+    files, a CMS with pages, a CMS with a content model. The person moves a slider and sees where each layer lives, who can change it,
+    and what changing one service''s price takes. The service is the first item of the person''s own brief; everything else is the lesson''s
+    explanation.'
+  practice: 'Заполните таблицу типов содержания. Первая строка (услуги или товары из items) почти готова: допишите, кто их правит и
+    как часто. В остальных строках впишите: люди (people), подтверждения (proofs) и страницы-разделы. Для каждого: название типа, поля
+    через запятую, кто правит (владелец, редактор или разработчик) и как часто (например, «раз в месяц»). Если в вашем проекте нет людей
+    или подтверждений, замените строку своим типом (например, «Отзыв», «Событие»). Во второй таблице для каждого раздела вашего сайта
+    впишите, какие типы он выводит. Если у сайта несколько языков, поля с текстами сделайте на каждом языке (например, title_ru и title_en).
+    Все «…» нужно заменить. Эпоха: 3.'
   checks:
-  - Каждый пункт из brief.items отнесён к типу контента с названием и списком полей.
-  - У каждого типа указано, кто его правит (владелец, редактор, разработчик).
-  - Для каждой секции из brief.sections указано, какие типы контента она выводит.
-  - Есть хотя бы одно поле, повторяющееся на нескольких языках, если в brief.languages больше одного языка.
+  - Блок с моделью исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - В таблице должно быть не меньше четырёх типов (четыре строки).
+  - 'Поля пишите через запятую: например, title, text, price.'
+  - 'В колонке «Кто правит» напишите: владелец, редактор или разработчик.'
+  - 'В колонке «Как часто» напишите частоту: например, «раз в месяц».'
+  - Во второй таблице нужна строка на каждый раздел вашего сайта. Не удаляйте их.
+  - Названия разделов в таблице должны совпадать с брифом.
+  - У сайта несколько языков, а полей на каждый язык нет. Сделайте title_ru и title_en или напишите «перевод записи».
   sources:
-  - title: 'MDN: Glossary — CMS'
+  - title: 'MDN: Глоссарий, CMS'
     url: https://developer.mozilla.org/en-US/docs/Glossary/CMS
     licence: CC-BY-SA
     kind: docs
     lang: en
-  - title: 'Википедия: Система управления содержимым'
+  - title: Система управления содержимым (Википедия)
     url: https://ru.wikipedia.org/wiki/Система_управления_содержимым
     licence: CC-BY-SA
     kind: article
@@ -80,8 +101,10 @@ lessons:
 - id: 08-cms/02-wordpress
   order: 2
   title: 'WordPress: тема, плагины и эпоха 2010 года'
-  summary: 'Зачем: вы разберёте, как устроен WordPress — записи и страницы, тема, плагины, меню, — и соберёте на бумаге (а
-    в редакторе приложения в песочнице) сайт эпохи 2010 года для своего проекта, понимая, что именно тема решает, а что плагин.'
+  definition: WordPress — открытая CMS на PHP и MySQL. Тема решает, как сайт выглядит, плагины — что он умеет; с версии 3.0 (2010) на
+    нём собирают любые сайты.
+  summary: 'Вы разберёте, как устроен WordPress: записи и страницы, тема, плагины, меню. И соберёте в песочнице сайт эпохи 2010 года
+    для своего проекта, понимая, что именно решает тема, а что плагин.'
   minutes: 20
   teaches:
   - cms.wordpress-themes-plugins
@@ -90,28 +113,51 @@ lessons:
   - cms.content-model
   - html.semantic-elements
   - css.box-model
-  diagram: 'Схема страницы WordPress: щёлкаешь по областям (шапка, цикл записей, боковая колонка, подвал) и видишь, какой
-    файл темы за них отвечает (header.php, index.php, sidebar.php, footer.php) и какой плагин может вмешаться.'
-  practice: 'Эпоха 3 (2010). Человек выбирает в песочнице стартовую тему-шаблон и раскладывает материалы из brief: что станет
-    страницей, что записью, что пунктом меню (из brief.sections), какие плагины нужны (форма из brief.mainAction, SEO, кэш)
-    — и зачем каждый.'
+  diagram: 'WpAnatomy: «Страница WordPress изнутри» (part 8, lesson 2). A schematic page of a classic theme. The person picks an area
+    (header, menu, loop, sidebar, footer) and sees which theme file draws it, what the editor changes there, and what a plugin can do
+    through hooks. The site''s name and the first section titles come from the person''s brief.'
+  practice: 'Перед вами тема в духе WordPress 2010 года. 1) Слоган сайта (в шапке) сейчас «…»: напишите его. 2) Постройте меню: в списке
+    меню только «Главная»; добавьте по пункту на каждый раздел вашего брифа. 3) На главной над списком записей добавьте кнопку главного
+    действия: ссылка с классом button и текстом из брифа. 4) В плане под страницей для каждого раздела скажите, станет он страницей
+    или рубрикой и есть ли он в меню. 5) Перечислите плагины: не меньше двух и не больше пяти, у каждого название и причина. 6) Скажите,
+    какой плагин обслуживает главное действие и где он выведен. 7) Скажите, как тон проекта отражён в названии и слогане. Все «…» нужно
+    заменить. Эпоха: 3.'
   checks:
-  - Каждая секция из brief.sections стала страницей или рубрикой, есть меню, в котором она видна.
-  - Для главного действия посетителя (brief.mainAction) выбран плагин или блок, и он выведен на главной.
-  - Список плагинов короткий (не больше пяти) и для каждого записана причина.
-  - Тон из brief.tone отражён в заголовке сайта и слогане.
+  - Блок с планом исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - Слоган сайта в шапке пока пустой. Напишите короткую фразу вместо «…».
+  - В меню нет всех разделов брифа. Добавьте li со ссылкой на каждый.
+  - На главной нет кнопки главного действия. Добавьте в content ссылку с классом button и текстом действия.
+  - В плане должна быть строка на каждый раздел. Не удаляйте строки.
+  - 'Для каждого раздела напишите: страница или рубрика.'
+  - В колонке «Есть в меню?» напишите «да» или «нет».
+  - Плагинов должно быть не меньше двух и не больше пяти.
+  - У каждого плагина запишите причину хотя бы в несколько слов.
+  - Скажите, какой плагин или блок обслуживает главное действие.
+  - 'Скажите, где выведено главное действие: например, на главной странице.'
+  - Опишите в нескольких словах, как тон проекта отражён в названии и слогане.
   sources:
-  - title: 'WordPress Developer Resources: Theme Handbook — Getting Started'
+  - title: 'WordPress Developer Resources: Theme Handbook, Getting Started'
     url: https://developer.wordpress.org/themes/getting-started/
     licence: proprietary-link
     kind: docs
     lang: en
-  - title: WordPress.org Documentation
-    url: https://wordpress.org/documentation/
+  - title: 'WordPress: Template Hierarchy'
+    url: https://developer.wordpress.org/themes/basics/template-hierarchy/
     licence: proprietary-link
     kind: docs
     lang: en
-  - title: 'HTTP Archive Web Almanac 2024: CMS (доля WordPress)'
+  - title: 'WordPress Plugin Handbook: Hooks'
+    url: https://developer.wordpress.org/plugins/hooks/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'WordPress.org: History'
+    url: https://wordpress.org/about/history/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'HTTP Archive Web Almanac 2024: CMS'
     url: https://almanac.httparchive.org/en/2024/cms
     licence: CC-BY-SA
     kind: article
@@ -120,27 +166,46 @@ lessons:
 - id: 08-cms/03-wordpress-upkeep
   order: 3
   title: Что ломается у WordPress и сколько он на самом деле стоит
-  summary: 'Зачем: вы научитесь честно считать цену владения CMS — обновления, взломы, зависимость от плагинов, хостинг —
-    и сможете сказать, когда WordPress уместен, а когда он станет обузой. Это страница «что было не так» для эпохи 3.'
+  definition: 'Цена владения CMS — всё, что сайт стоит после установки: хостинг, платные темы и плагины, обновления, резервные копии,
+    защита от взлома и починка.'
+  summary: Вы научитесь честно считать цену владения CMS (обновления, взломы, зависимость от плагинов, хостинг) и сможете сказать, когда
+    WordPress уместен, а когда станет обузой. Это страница «что было не так» для эпохи 3, и вы составите план обслуживания своего сайта.
   minutes: 15
   teaches:
   - cms.wordpress-maintenance
   - cms.cms-history
   requires:
   - cms.wordpress-themes-plugins
-  diagram: 'Лента «год жизни сайта на WordPress»: ползунок времени показывает выход обновлений ядра, уязвимости плагинов и
-    прогрессирующую потерю совместимости темы; кнопка «обновить» чинит одно и ломает другое.'
-  practice: 'Эпоха 3 (2010). Человек составляет план обслуживания для своего проекта: кто обновляет, как часто, что копируется
-    (связка с резервным копированием из части 9), сколько времени в месяц это займёт при его brief.items и brief.mainAction.
-    Сравнивает с Drupal и Joomla по тому же плану в одной таблице.'
+  diagram: 'WpYear: «Год жизни сайта на WordPress» (part 8, lesson 3). Seven things that typically happen over a year (an update, a
+    plugin vulnerability, a big release, a conflict, an abandoned plugin, an old PHP, a spam wave), and what each costs under the settings
+    the person chooses: automatic updates, backups, number of plugins. A model with invented hours, to show the shape of the cost, not
+    to price it.'
+  practice: 'Составьте план обслуживания сайта вашего проекта на CMS. 1) В таблице для каждой из четырёх задач впишите, кто делает (конкретный
+    человек или роль), как часто и сколько часов в месяц это займёт (число). 2) Впишите общее число часов в месяц. 3) Опишите резервную
+    копию: что копируется, где хранится и как проверяется. 4) Назовите не меньше двух рисков плагина, который обслуживает главное действие
+    вашего проекта (форма, запись, оплата). 5) В таблице сравнения для WordPress, Drupal и Joomla впишите, как у них с обновлениями
+    и подходят ли они вам. 6) В выводе скажите: оставить WordPress, взять другое или отказаться от CMS. Все «…» нужно заменить. Эпоха:
+    3.'
   checks:
-  - В плане есть ответственный человек и периодичность обновлений.
-  - Указано, что делается резервная копия и где она хранится.
-  - Названы минимум два риска, связанных с плагинами нужного brief.mainAction.
-  - 'В таблице сравнения для проекта есть вывод: оставить WordPress, взять другое или отказаться от CMS.'
+  - Блок с планом исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'В колонке «Кто делает» должен быть человек или роль: владелец, подрядчик, редактор.'
+  - 'В колонке «Как часто» напишите частоту: например, «раз в неделю».'
+  - 'В колонке «Часов в месяц» нужно число: например, 0.5.'
+  - В строке с общим числом часов нужно число.
+  - 'Опишите копию: что копируется и где хранится.'
+  - Нужно не меньше двух рисков, каждый в своём пункте списка.
+  - 'Риски должны быть про плагины: упомяните слово «плагин» и что с ним может случиться.'
+  - 'В таблице сравнения должны остаться три строки: WordPress, Drupal и Joomla.'
+  - 'В выводе скажите: оставить WordPress, взять другое или отказаться от CMS, и почему.'
   sources:
   - title: 'WordPress Advanced Administration: Hardening WordPress'
     url: https://developer.wordpress.org/advanced-administration/security/hardening/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'WordPress Advanced Administration: Backups'
+    url: https://developer.wordpress.org/advanced-administration/security/backup/
     licence: proprietary-link
     kind: docs
     lang: en
@@ -163,9 +228,11 @@ lessons:
 - id: 08-cms/04-tilda-bitrix
   order: 4
   title: 'Tilda и 1С-Битрикс: российский рынок сайтов'
-  summary: 'Зачем: вы поймёте, почему в России половина лендингов живёт на Tilda, а магазины и корпоративные порталы — на
-    «1С-Битрикс», чем это отличается от WordPress, и сможете решить, что подходит вашему проекту по бюджету, поддержке и интеграциям
-    (оплата, 1С, CRM, Метрика).'
+  definition: 'Tilda — конструктор: страницу складывают из готовых блоков, сайт живёт на платформе. «1С-Битрикс» — платная CMS, связанная
+    с учётной системой «1С».'
+  summary: Вы поймёте, зачем в России нужны конструкторы вроде Tilda и системы вроде «1С-Битрикс», чем они отличаются от WordPress,
+    и решите, что подходит вашему проекту по бюджету, поддержке и интеграциям (оплата, 1С, CRM, Метрика). После урока у вас есть обоснованный
+    выбор с оценкой стоимости и путём выхода.
   minutes: 20
   teaches:
   - cms.tilda
@@ -174,18 +241,30 @@ lessons:
   - cms.what-is-cms
   - cms.content-model
   - html.forms
-  diagram: 'Сравнение «три пути»: Tilda / Битрикс / WordPress. Бегунки «бюджет», «нужна интеграция с 1С», «кто правит», «нужен
-    магазин» подсвечивают подходящее; под каждым — типичные ограничения (экспорт кода, лицензия, хостинг).'
-  practice: 'Эпоха 3 (2010, как современная альтернатива WordPress). Человек собирает таблицу решения для своего проекта:
-    по brief.items (товары или услуги), brief.mainAction (оплата, заявка, запись) и brief.languages выбирает Tilda, Битрикс
-    или WordPress, указывает, где будет жить форма заявки и куда пойдут персональные данные (связка с 152-ФЗ).'
+  diagram: 'ThreeWays: «Три пути: Tilda, Битрикс, WordPress» (part 8, lesson 4). Four questions about the person''s project (budget,
+    1С, who edits, a shop) and the typical limits of each path. A few simple rules add points to each path and show their reasons; the
+    rules are the lesson''s simplification, not a benchmark, and the answer is a starting point for a conversation, not a verdict.'
+  practice: 'Заполните таблицу решения. 1) Для каждой из трёх платформ (Tilda, 1С-Битрикс, WordPress) напишите, подходит ли она вашему
+    проекту (да, нет или условно), и почему. 2) Назовите выбор. 3) Обоснуйте его двумя полями брифа: напишите в обосновании название
+    главного действия (в кавычках, как в брифе) и, если у проекта есть услуги или товары, хотя бы одно название. 4) Скажите, где будут
+    храниться заявки и данные посетителей. 5) Скажите, какая страница нужна рядом с формой из-за персональных данных. 6) В таблице стоимости
+    впишите числа в рублях за год по четырём статьям. 7) Опишите, как вы сможете уйти с платформы и что получится вынести. Все «…» нужно
+    заменить. Эпоха: 3.'
   checks:
-  - Выбор платформы обоснован двумя полями brief (например, items и mainAction), а не вкусом.
-  - Указано, где хранятся данные заявок и какую страницу согласия на обработку персональных данных нужно вывести.
-  - 'Названа стоимость владения за год: платформа, хостинг, домен, поддержка.'
-  - 'Описан способ выйти с платформы: что можно экспортировать.'
+  - Блок с решением исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - В таблице должны быть три платформы. Не удаляйте строки.
+  - В колонке «Подходит?» начинайте со слов «да», «нет» или «условно».
+  - 'Назовите выбор: Tilda, 1С-Битрикс или WordPress.'
+  - В обосновании нет главного действия вашего проекта. Впишите его название, как в брифе.
+  - В обосновании нет ни одной вашей услуги или товара. Назовите хотя бы одну.
+  - 'Опишите подробнее, где хранятся заявки: на серверах платформы, на вашем хостинге, в почте.'
+  - 'Скажите, какая страница нужна: политика обработки персональных данных и согласие рядом с формой.'
+  - В таблице стоимости должны остаться четыре строки.
+  - В колонке «Сумма в год» должны быть только числа, например 12000.
+  - Опишите, что можно вынести с платформы (код, тексты, картинки) и что придётся делать заново.
   sources:
-  - title: Tilda Education
+  - title: 'Tilda Education: учебный центр Tilda'
     url: https://tilda.education/
     licence: proprietary-link
     kind: course
@@ -195,22 +274,30 @@ lessons:
     licence: proprietary-link
     kind: docs
     lang: ru
+  - title: Tilda Publishing (Википедия)
+    url: https://ru.wikipedia.org/wiki/Tilda_Publishing
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
   - title: '1С-Битрикс: Школа разработчиков и документация'
     url: https://dev.1c-bitrix.ru/learning/
     licence: proprietary-link
     kind: course
     lang: ru
-  - title: 'HTTP Archive Web Almanac 2024: CMS'
-    url: https://almanac.httparchive.org/en/2024/cms
+  - title: '1С-Битрикс: Управление сайтом (Википедия)'
+    url: https://ru.wikipedia.org/wiki/1С-Битрикс:_Управление_сайтом
     licence: CC-BY-SA
     kind: article
-    lang: en
+    lang: ru
   videos: []
 - id: 08-cms/05-static-generators
   order: 5
   title: Генераторы статических сайтов и Markdown
-  summary: 'Зачем: вы напишете страницы в Markdown с front matter, увидите, как генератор превращает их и шаблон в обычный
-    HTML, и сможете выбрать между Jekyll, Hugo, Eleventy, Astro и SvelteKit по задаче — это эпоха 5 (2019) вашего сайта.'
+  definition: Генератор статических сайтов — программа, которая при сборке превращает файлы Markdown, данные и общий шаблон в готовые
+    HTML-файлы; на сервер кладут только их.
+  summary: 'Вы напишете страницы в Markdown с front matter, увидите, как генератор превращает их и шаблон в обычный HTML, и сможете
+    выбрать между Jekyll, Hugo, Eleventy, Astro и SvelteKit по задаче. Это эпоха 5 (2019) вашего сайта: страницы по разделам, коллекция
+    из ваших услуг и один общий шаблон.'
   minutes: 25
   teaches:
   - cms.markdown-frontmatter
@@ -221,30 +308,45 @@ lessons:
   - html.semantic-elements
   - css.responsive
   - net.http-request-response
-  diagram: 'Конвейер сборки: слева файл Markdown с front matter, в середине шаблон и «ручки» (layout, коллекция), справа готовый
-    HTML. Правится любая строка — страница пересобирается в панели рядом; переключатель имитирует Jekyll / Eleventy / Astro
-    (одни входные данные, разные шаблоны).'
-  practice: 'Эпоха 5 (2019). Человек переносит содержимое своего brief в проект генератора в песочнице: по одной странице
-    Markdown на каждую секцию из brief.sections, коллекция из brief.items (услуги, товары, люди), общий шаблон с шапкой и
-    подвалом, язык по brief.languages.'
+  diagram: 'SsgPipeline: «Конвейер генератора» (part 8, lesson 5). A Markdown page with front matter, a layout and the person''s own
+    services (the data) go through a teaching generator (`ssgmini.ts`, not Jekyll or Hugo) and come out as HTML, rebuilt on every edit.
+    The person can switch the layout, change the Markdown, and see the same loop written the way five real tools write it. Prices are
+    invented.'
+  practice: 'В странице проект маленького генератора: настройки, общий шаблон, по странице Markdown на каждый раздел вашего брифа, страница
+    каталога и коллекция услуг. 1) В site.yml впишите язык сайта (lang: ru) и языки (languages: …, как в брифе). 2) В layout.html: lang
+    возьмите из настроек ({{ site.lang | escape }}), добавьте шапку (header) с меню из списка страниц ({% for p in pages %} … {% endfor
+    %}) и подвал (footer); {{ content | strip }} оставьте. 3) В файле каждого раздела допишите в front matter description и напишите
+    текст. 4) В catalog.md выведите услуги циклом по коллекции: {% for item in items %}- **{{ item.title | escape }}**, {{ item.price
+    | escape }} {% endfor %}. Проверки читают файлы проекта; внизу вы видите собранный HTML. Двойные скобки в шаблоне дополнены фильтрами,
+    потому что редактор курса сам подставляет значения в простые скобки. Все «…» нужно заменить. Эпоха: 5.'
   checks:
-  - Для каждой секции из brief.sections есть Markdown-файл с заголовком и описанием в front matter.
-  - Элементы из brief.items лежат в коллекции и выводятся списком через шаблон, а не вставлены вручную.
-  - Шапка и подвал заданы в одном месте и общие для всех страниц.
-  - Собранный HTML содержит атрибут lang, соответствующий brief.languages.
+  - Блок проекта исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'В site.yml нужна строка lang: ru (или en).'
+  - 'В site.yml нужна строка languages: со списком языков, например languages: ru.'
+  - 'У проекта два языка, а в languages нет en. Напишите languages: ru, en.'
+  - Нужно по файлу Markdown на каждый раздел брифа. Не удаляйте поля.
+  - Заголовки страниц должны совпадать с названиями разделов из брифа.
+  - 'В начале файла страницы нужен front matter: между строками «---» строка title: Название.'
+  - 'В front matter нужна строка description: с коротким описанием страницы.'
+  - 'В шаблоне нет места для содержания страницы: {{ content | strip }}.'
+  - 'В шаблоне должны быть шапка header и подвал footer: они одинаковы для всех страниц.'
+  - 'Меню должно строиться циклом по страницам: {% for p in pages %} … {% endfor %}.'
+  - 'Язык страницы берите из настроек: <html lang="{{ site.lang | escape }}">.'
+  - 'Список услуг должен выводиться циклом по коллекции, а не вписываться вручную: {% for item in items %}.'
   sources:
   - title: 'Markdown Guide: Basic Syntax'
     url: https://www.markdownguide.org/basic-syntax/
     licence: CC-BY-SA
     kind: docs
     lang: en
-  - title: 'CommonMark: Markdown cheat-sheet'
+  - title: 'CommonMark: справка по Markdown'
     url: https://commonmark.org/help/
     licence: CC-BY-SA
     kind: docs
     lang: en
-  - title: Jekyll Docs
-    url: https://jekyllrb.com/docs/
+  - title: 'Jekyll: Front Matter'
+    url: https://jekyllrb.com/docs/front-matter/
     licence: proprietary-link
     kind: docs
     lang: en
@@ -267,8 +369,11 @@ lessons:
 - id: 08-cms/06-headless
   order: 6
   title: 'Headless CMS: когда контент отделён от сайта'
-  summary: 'Зачем: вы поймёте, почему «безголовая» CMS даёт редактору удобную админку, а разработчику — свободу выбирать сайт,
-    и сможете сравнить Strapi, Directus, Sanity, Contentful и Decap по модели размещения (свой сервер, облако, Git) и цене.'
+  definition: 'Headless CMS — система управления содержимым без собственного сайта: редактор правит записи в админке, а сайт и приложения
+    получают их по API.'
+  summary: Вы поймёте, почему «безголовая» CMS даёт редактору удобную админку, а разработчику свободу выбрать сайт, и сравните Strapi,
+    Directus, Sanity, Contentful и Decap по месту хранения (Git, свой сервер, облако) и цене. После урока вы описываете тип содержания,
+    вносите записи и получаете их запросом, как это делает настоящий сайт.
   minutes: 20
   teaches:
   - cms.headless
@@ -278,16 +383,33 @@ lessons:
   - cms.static-site-generator
   - server.rest
   - js.fetch
-  diagram: 'Три колонки «где хранится»: файлы в Git (Decap), база на своём сервере (Strapi, Directus), облако (Sanity, Contentful).
-    Редактор вносит правку — стрелки показывают путь контента к API, к сборщику и к сайту.'
-  practice: 'Эпоха 6 (2022). Человек переносит модель контента из урока 1 в headless-CMS (в песочнице — упрощённая админка
-    на Decap-подобной схеме): создаёт типы из brief.items, вносит по одному примеру и получает JSON; затем пишет запрос на
-    выборку для страницы секции из brief.sections.'
+  diagram: 'HeadlessPaths: «Где живёт headless-CMS» (part 8, lesson 6). Three columns: content as files in Git (Decap), a database on
+    your own server (Strapi, Directus), a cloud service (Sanity, Contentful). The person picks one and presses «Редактор сохраняет правку»;
+    the path of the change (editor, store, API or build, site) lights up step by step, with what each choice means for the data and
+    the money. The service names are real; the judgements are the lesson''s, and prices are not stated.'
+  practice: 'Страница получает услуги не из HTML, а запросом к «API» (имитация, потому что песочница не пускает в сеть). 1) В поле «Тип
+    содержания» впишите тип поля price и добавьте текстовые поля для второго языка, если у проекта их два (title_en, text_en). 2) В
+    поле «Записи» уже лежат ваши услуги из брифа; добавьте ещё одну запись вместо «…» (для двух языков с полями title_en и text_en).
+    3) В скрипте headless-code допишите функцию load: запросите fetch(''/api/items''), прочитайте ответ как JSON и для каждой записи
+    создайте карточку (article с классом card, внутри h3 и p), положите карточки в .cards. 4) Скажите, где живёт CMS (Git, свой сервер
+    или облако) и почему: привяжите к бюджету и данным проекта. Проверки читают поля и текст скрипта. Все «…» нужно заменить. Эпоха:
+    6.'
   checks:
-  - Для каждого типа из brief.items описаны поля, и в JSON они видны под теми же именами.
-  - Поля для языков из brief.languages заданы отдельно либо как перевод одного элемента.
-  - Страница секции получает данные запросом (fetch или при сборке), а не копирует текст.
-  - Выбран вариант размещения (Git, свой сервер или облако) с короткой причиной, привязанной к бюджету и данным проекта.
+  - Блок с типом и записями исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'В типе нет строки "type": "items". Не удаляйте её.'
+  - 'В типе должны быть поля title, text и price: они совпадают с полями услуги в брифе.'
+  - 'У проекта несколько языков. Добавьте в тип поля для второго языка: title_en, text_en.'
+  - 'В записях поля должны называться так же, как в типе: title, text, price.'
+  - 'В записях нет названий ваших услуг. Они подставляются из брифа: не удаляйте их.'
+  - 'Нужна хотя бы одна запись с настоящим названием: впишите её вместо «…».'
+  - 'Нужна ещё одна запись помимо услуг из брифа: впишите свою вместо строки с «…».'
+  - 'В записях нет полей второго языка: добавьте в новую запись title_en и text_en.'
+  - В скрипте нет запроса fetch('/api/items').
+  - 'Ответ нужно прочитать как JSON: await response.json().'
+  - 'Не видно, где карточки создаются: используйте createElement и append или replaceChildren.'
+  - 'Назовите вариант размещения: файлы в Git, свой сервер или облако.'
+  - 'Объясните выбор в нескольких словах: через бюджет, число редакторов, данные проекта.'
   sources:
   - title: Strapi Docs
     url: https://docs.strapi.io/
@@ -309,21 +431,20 @@ lessons:
     licence: proprietary-link
     kind: docs
     lang: en
-  - title: 'Svelte: SvelteKit Introduction'
-    url: https://svelte.dev/docs/kit/introduction
-    licence: proprietary-link
-    kind: docs
+  - title: Headless content management system (Wikipedia)
+    url: https://en.wikipedia.org/wiki/Headless_content_management_system
+    licence: CC-BY-SA
+    kind: article
     lang: en
-  videos:
-  - title: JAMstack — генерация статических сайтов в 2k19, Валентин Гиль
-    url: https://www.youtube.com/watch?v=JEYrIGLLIl0
-    lang: ru
+  videos: []
 - id: 08-cms/07-jamstack-deploy
   order: 7
   title: 'Jamstack: сборка, CDN и вебхук'
-  summary: 'Зачем: вы настроите схему «правка в CMS → вебхук → сборка → выкладка на CDN» для своего сайта, поймёте, что в
-    такой схеме быстро и безопасно, а что требует отдельных сервисов (формы, поиск, оплата, личный кабинет) — эпоха 6 (2022).
-    (CDN здесь — коротко; подробно — в части 9.)'
+  definition: Jamstack — подход, при котором страницы собирают заранее и раздают через CDN, а динамику берут из API и внешних сервисов.
+    Правку в CMS подхватывает вебхук.
+  summary: Вы настроите на бумаге схему «правка в CMS, вебхук, сборка, выкладка на CDN» для своего сайта, поймёте, что в такой схеме
+    быстро и безопасно, а что требует отдельных сервисов (формы, поиск, оплата, личный кабинет). Это эпоха 6 (2022). Про CDN здесь коротко,
+    подробно в части 9.
   minutes: 20
   teaches:
   - cms.jamstack
@@ -331,20 +452,27 @@ lessons:
   requires:
   - cms.headless
   - cms.static-site-generator
-  diagram: 'Живая схема релиза: нажимаешь «Опубликовать» в админке — пакет путешествует по цепочке (вебхук, сборка, загрузка
-    на CDN, сброс кэша), на каждом этапе его можно «сломать» и увидеть, что видит посетитель. Ползунок — размер сайта и время
-    сборки.'
-  practice: 'Эпоха 6 (2022). Человек строит схему выкладки для своего проекта: откуда берётся контент, кто запускает сборку,
-    куда уходит готовый сайт; подключает внешний сервис для главного действия посетителя (brief.mainAction — форма, запись,
-    оплата) и отмечает, куда попадут персональные данные.'
+  diagram: 'ReleasePipeline: «Путь правки до посетителя» (part 8, lesson 7). Editor presses «Опубликовать»; a webhook starts a build,
+    the build is uploaded, the CDN''s cache is refreshed. The person steps through, can break any stage and see what a visitor still
+    sees (the old version, because a deploy is switched all at once and a failed build leaves the old site alone), can roll back, and
+    moves a slider for the number of pages to see how build time grows. All numbers are a model, not a measurement.'
+  practice: 'Опишите, как правка содержания попадает на сайт вашего проекта. 1) В таблице для четырёх шагов (источник содержания, сборка,
+    выкладка, раздача) впишите, что происходит и где или кем это делается. Упомяните вебхук там, где сборку запускает правка. 2) Скажите,
+    какой внешний сервис или функция обслуживает главное действие посетителя (форма, запись, оплата), если у сайта нет своего серверного
+    кода. 3) Скажите, где лягут персональные данные посетителей и что нужно для хранения в России. 4) Назовите способ откатить неудачную
+    публикацию. Все «…» нужно заменить. Эпоха: 6.'
   checks:
-  - 'В схеме названы четыре шага: источник контента, сборка, выкладка, раздача.'
-  - Главное действие посетителя (brief.mainAction) реализовано через внешний сервис или функцию, а не через серверный код
-    сайта.
-  - Указано, где лежат персональные данные посетителей и что нужно для хранения в России.
-  - Назван способ откатить неудачную публикацию.
+  - Блок со схемой исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - В таблице должны остаться четыре шага.
+  - В колонке «Что происходит» опишите шаг хотя бы четырьмя-пятью словами.
+  - 'Нигде не упомянут вебхук: он запускает сборку после правки в CMS.'
+  - 'Для раздачи напишите, где она идёт: CDN или хостинг статических сайтов.'
+  - Скажите, какой внешний сервис или функция обслуживает главное действие посетителя.
+  - Скажите, где лягут персональные данные и что нужно для хранения в России.
+  - 'Назовите способ отката: например, переключиться на предыдущую собранную версию.'
   sources:
-  - title: Jamstack.org
+  - title: 'Jamstack.org: что такое Jamstack'
     url: https://jamstack.org/
     licence: proprietary-link
     kind: article
@@ -354,23 +482,35 @@ lessons:
     licence: proprietary-link
     kind: docs
     lang: en
+  - title: 'Cloudflare Pages: откат к прошлой версии'
+    url: https://developers.cloudflare.com/pages/configuration/rollbacks/
+    licence: proprietary-link
+    kind: docs
+    lang: en
   - title: 'web.dev: Content delivery networks (CDN)'
     url: https://web.dev/articles/content-delivery-networks
     licence: CC-BY
     kind: article
     lang: en
-  - title: 'HTTP Archive Web Almanac 2024: CMS'
-    url: https://almanac.httparchive.org/en/2024/cms
-    licence: CC-BY-SA
-    kind: article
+  - title: 'GitHub Pages: документация'
+    url: https://docs.github.com/en/pages
+    licence: proprietary-link
+    kind: docs
     lang: en
-  videos: []
+  videos:
+  - title: 'JAMstack: генерация статических сайтов в 2k19 (Валентин Гиль, «Веб-стандарты»)'
+    url: https://www.youtube.com/watch?v=JEYrIGLLIl0
+    licence: proprietary-link
+    kind: video
+    lang: ru
 - id: 08-cms/08-choosing
   order: 8
   title: 'Как выбрать: дерево решений для вашего проекта'
-  summary: 'Зачем: вы получите рабочий метод выбора между конструктором, WordPress, Битрикс, генератором и headless — по пяти
-    вопросам про ваш brief — и защитите выбор перед заказчиком или самим собой; выбранное сохранится как основа для следующих
-    частей.'
+  definition: 'Выбор CMS или генератора сайта начинается с пяти вопросов: кто правит, как часто, что нужно кроме страниц, бюджет и языки.
+    Свою CMS пишут последней.'
+  summary: 'Вы получите рабочий метод выбора между конструктором, WordPress, «Битрикс», генератором и headless по пяти вопросам про
+    ваш бриф, и защитите выбор перед заказчиком или самим собой. После урока у вас есть карточка решения: выбор, два отвергнутых варианта
+    с причинами и условие пересмотра. Заодно вы узнаете, когда не надо делать свою CMS.'
   minutes: 15
   teaches:
   - cms.choosing-stack
@@ -380,25 +520,35 @@ lessons:
   - cms.bitrix
   - cms.ssg-landscape
   - cms.jamstack
-  diagram: 'Интерактивное дерево решений: пять вопросов (кто правит, как часто, нужен ли магазин или личный кабинет, бюджет,
-    языки) — ответы подсвечивают путь к рекомендации; можно сравнить свой путь с путями других шаблонных проектов (портфолио,
-    кафе, SaaS).'
-  practice: 'Эпоха 6 (2022) с взглядом назад. Человек заполняет карточку решения: проект, редактор, частота правок, главное
-    действие (brief.mainAction), языки, бюджет → выбранный стек и два отвергнутых варианта с причинами; карточка сохраняется
-    в галерее рядом с версиями эпох 3, 5 и 6.'
+  diagram: 'StackTree: «Дерево выбора» (part 8, lesson 8). Five questions about a project (who edits, how often, what besides pages,
+    budget, languages) and a recommendation: a stack, why, what it costs, where it breaks, two options set aside with reasons, and when
+    to reconsider. Buttons load the answers of the course''s template projects. The rules are the lesson''s judgement, kept simple on
+    purpose.'
+  practice: 'Заполните карточку решения. 1) Кто правит содержание и как часто. 2) Что обслуживает главное действие проекта (форма, оплата,
+    запись): сервис, плагин или своя функция. 3) Как хранятся тексты на языках проекта (поле на каждый язык, перевод записи, копии страниц).
+    4) Бюджет. 5) Выберите стек и объясните, как выбор связан с ответами выше. 6) Назовите два отвергнутых варианта и для каждого свою
+    причину: причины не должны повторять друг друга. 7) Напишите, при каком условии вы пересмотрите решение. Все «…» нужно заменить.
+    Эпоха: 6.'
   checks:
-  - В карточке названы редактор контента и частота правок, и выбор согласован с ними.
-  - Для brief.mainAction указано, что именно его обслуживает.
-  - Два отвергнутых варианта имеют причины, не совпадающие друг с другом.
-  - Учтено число языков из brief.languages и способ их хранения.
-  - Есть строка «когда пересмотрю решение» — условие, при котором выбор поменяется.
+  - Карточка исчезла. Она была в странице, верните её.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'Скажите, кто правит содержание: владелец, редактор, разработчик или команда.'
+  - 'Напишите, как часто правят содержание: например, «раз в месяц».'
+  - 'Скажите, что обслуживает главное действие: сервис, плагин или функцию, хотя бы тремя словами.'
+  - 'Скажите, как хранятся тексты на языках проекта: полем на каждый язык, переводом записи или копиями страниц.'
+  - 'У проекта два языка: напишите, как хранятся тексты на них (поле на каждый язык или перевод записи).'
+  - 'Назовите выбранный стек: конструктор, WordPress, Битрикс, генератор, headless или приложение.'
+  - 'Объясните выбор развёрнуто, через ответы выше: кто правит, как часто, бюджет.'
+  - Нужны два отвергнутых варианта. Не удаляйте строки таблицы.
+  - У каждого отвергнутого варианта нужна своя причина, хотя бы в несколько слов.
+  - 'Назовите условие пересмотра: «если…» или «когда…».'
   sources:
   - title: 'HTTP Archive Web Almanac 2024: CMS'
     url: https://almanac.httparchive.org/en/2024/cms
     licence: CC-BY-SA
     kind: article
     lang: en
-  - title: Jamstack.org
+  - title: 'Jamstack.org: что такое Jamstack'
     url: https://jamstack.org/
     licence: proprietary-link
     kind: article
@@ -412,5 +562,10 @@ lessons:
     url: https://wordpress.org/documentation/
     licence: proprietary-link
     kind: docs
+    lang: en
+  - title: 'Joel Spolsky: Things You Should Never Do, Part I'
+    url: https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/
+    licence: link-only
+    kind: article
     lang: en
   videos: []

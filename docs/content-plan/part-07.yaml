@@ -1,10 +1,18 @@
+# Regenerated from the written lessons (28.10.2026). Changes against the draft:
+# - The app has no SQL engine yet (the draft assumed PGlite in `lib/sql`), so the SQL lessons run a teaching interpreter, `content/diagrams/sqlmini.ts`
+#   (CREATE TABLE and INDEX, INSERT, SELECT with JOIN, GROUP BY and HAVING, UPDATE, DELETE, BEGIN/COMMIT/ROLLBACK, EXPLAIN as a simplified model).
+#   It is written to be honest about itself: every lesson and diagram says it is not PostgreSQL, and links PGlite for the real thing. The practice
+#   page embeds it as a data-scaffold module, so the learner's own queries run against tables built from their brief. The checks read the text of the SQL.
+# - Lesson 7 keeps `server.authentication` (taught in part 6) as a requirement. `data.privacy-by-design` exists now: part 10 lesson 6 requires
+#   `html-form-validation` only because it did not, and can require the new concept instead.
+# - Each lesson's practice is a complete page (the learner's site plus an exercise block marked data-scaffold), so the era's gallery site stays a site.
+# - Videos: the draft's list kept for lessons 2, 4, 5, 6 (checked by oEmbed, a title and a channel are what was judged).
 part: 7
 slug: data
 title: Данные
 era: null
-summary: Что такое база данных, как работают реляционные базы и SQL (практика на настоящем Postgres в браузере), зачем нужны
-  индексы и транзакции, когда подходят документные, ключ-значение, графовые и векторные базы, как устроен поиск и что такое
-  приватность по замыслу.
+summary: Что такое база данных, как работают реляционные базы и SQL (практика на настоящем Postgres в браузере), зачем нужны индексы
+  и транзакции, когда подходят документные, ключ-значение, графовые и векторные базы, как устроен поиск и что такое приватность по замыслу.
 concepts:
 - id: data.what-is-database
   title: База данных
@@ -42,9 +50,10 @@ lessons:
 - id: 07-data/01-what-is-a-database
   order: 1
   title: Что такое база данных и зачем она сайту
-  summary: 'Зачем: вы понимаете, чем база данных лучше файла и таблицы Excel (одновременный доступ, целостность, быстрый поиск,
-    права), и разбираете данные своего проекта на «сущности» и связи между ними. После урока вы нарисуете схему данных для
-    брифа.'
+  definition: База данных — упорядоченное хранилище под присмотром программы-сторожа, СУБД. Реляционная база хранит данные в таблицах,
+    связанных ключами.
+  summary: 'Вы поймёте, чем база данных лучше файла и таблицы Excel, и разберёте данные своего проекта на сущности и связи. После урока
+    у вас есть схема данных вашего брифа: что хранить, под каким ключом и какие поля считаются персональными данными.'
   minutes: 20
   teaches:
   - data.what-is-database
@@ -52,113 +61,160 @@ lessons:
   requires:
   - server.static-vs-dynamic
   - js.json
-  diagram: Один и тот же список заказов в файле JSON, в таблице и в базе; двое «редакторов» одновременно меняют запись, и
-    видно, как файл портит данные, а база их сериализует.
-  practice: 'Эпоха 3 (2010, WordPress): по полям брифа items, people, proofs и contacts выделить сущности и связи на схеме
-    (прямоугольники и стрелки), указать для каждой ключ и несколько полей.'
+  diagram: 'FileVsDatabase: «Двое правят одно и то же» (part 7, lesson 1). The same two edits twice: once in a plain file, once in a
+    database. Step by step, the person sees the file lose an edit (both editors read the old value) and the database make the second
+    editor wait for the first. The numbers are invented; the item''s name comes from the person''s own brief.'
+  practice: 'Заполните таблицу схемы данных. Первая строка (услуги из items) уже готова как образец. Допишите три остальных: люди (people),
+    подтверждения (proofs) и заявки (то, что посетитель отправляет через форму). В каждой строке: название сущности, ключ (уникальное
+    поле, обычно id), поля через запятую, связь с другой сущностью (например «ссылается на услугу») и отметка, есть ли там персональные
+    данные («да» или «нет» с пояснением). Заявку делайте отдельной сущностью, а не полем чужой. Если в вашем проекте нет людей или подтверждений,
+    напишите в строке, что сущность не нужна, и объясните почему. Все «…» нужно заменить. Эпоха: 3.'
   checks:
-  - На схеме есть минимум три сущности, соответствующие items, people или proofs, и связи между ними.
-  - У каждой сущности есть уникальный идентификатор.
-  - Заявки из contacts вынесены в отдельную сущность, а не в поле другой.
-  - Отмечено, какие поля — персональные данные.
+  - Блока со схемой не видно. Он был в странице, не удаляйте его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'Нужны не меньше четырёх строк с классом entity: услуги, люди, подтверждения и заявки.'
+  - У каждой сущности должна быть ячейка td.key с ключом.
+  - 'В ключе напишите id: так называют уникальный номер строки.'
+  - 'В полях заявки не видно контактов посетителя. Напишите, что именно он оставляет: имя, телефон, почту.'
+  - 'Не видно связей. Напишите, с чем сущность связана: например «ссылается на услугу (item_id)».'
+  - Имя и телефон посетителя это персональные данные. В ячейке заявки начните с «да».
   sources:
   - title: 'PostgreSQL Documentation: Tutorial'
     url: https://www.postgresql.org/docs/current/tutorial.html
     licence: proprietary-link
     kind: docs
     lang: en
-  - title: 'Postgres Pro: Документация PostgreSQL (русская)'
-    url: https://postgrespro.ru/docs/postgresql/current/
+  - title: 'Postgres Pro: учебник PostgreSQL на русском'
+    url: https://postgrespro.ru/docs/postgresql/current/tutorial
     licence: proprietary-link
     kind: docs
     lang: ru
-  - title: 'SQLite: Appropriate Uses For SQLite'
+  - title: 'SQLite: когда стоит применять SQLite'
     url: https://www.sqlite.org/whentouse.html
     licence: PD
     kind: docs
     lang: en
-  - title: 'Википедия: Реляционная модель данных'
+  - title: Реляционная модель данных (Википедия)
     url: https://ru.wikipedia.org/wiki/Реляционная_модель_данных
     licence: CC-BY-SA
     kind: article
     lang: ru
-  - title: 'CMU 15-445: Introduction to Database Systems'
-    url: https://15445.courses.cs.cmu.edu/
-    licence: link-only
-    kind: course
+  - title: 'PostgreSQL: Concurrency Control (введение)'
+    url: https://www.postgresql.org/docs/current/mvcc-intro.html
+    licence: proprietary-link
+    kind: docs
     lang: en
   videos: []
 - id: 07-data/02-sql-basics
   order: 2
-  title: 'SQL: читаем и пишем данные (Postgres в браузере)'
-  summary: 'Зачем: вы пишете запросы SELECT, INSERT, UPDATE и DELETE на настоящем PostgreSQL, который работает прямо в браузере
-    (PGlite), и понимаете, что делает каждое слово запроса. После урока вы получите нужные данные из таблиц своего проекта.'
+  title: 'SQL: читаем и пишем данные'
+  definition: 'SQL — декларативный язык запросов к реляционной базе: SELECT читает данные, INSERT добавляет строки, UPDATE и DELETE
+    меняют и удаляют их.'
+  summary: 'Вы пишете запросы SELECT, INSERT, UPDATE и DELETE и понимаете, что делает каждое слово. После урока вы создаёте таблицу
+    своих услуг, добавляете в неё строки и получаете нужные данные: отобранные, упорядоченные и посчитанные.'
   minutes: 35
   teaches:
   - data.sql-select
   - data.sql-write
   requires:
   - data.relational-model
-  diagram: 'SQL-песочница на PGlite: таблицы слева, запрос в центре, результат справа; подсветка выполнения по шагам FROM
-    → WHERE → GROUP BY → SELECT → ORDER BY → LIMIT.'
-  practice: 'Эпоха 3 (2010): создать таблицу items по полям брифа, вставить минимум пять строк, написать запросы: все пункты,
-    отобранные по условию, отсортированные, посчитанные по категориям; изменить одну запись и удалить другую.'
+  diagram: 'SqlLab: «Песочница SQL» (part 7, lesson 2). A small table made from the person''s own items (prices are invented) and a
+    query box. The query runs in `sqlmini.ts`, a teaching interpreter, NOT PostgreSQL; the lesson says so. Beside the result it shows
+    the order a SELECT is carried out in (FROM, WHERE, GROUP BY, SELECT, ORDER BY, LIMIT) with the number of rows left after each step.
+    UPDATE and DELETE change the table for real, and «Сбросить таблицу» puts it back.'
+  practice: 'В странице шесть полей для запросов. 1) Создайте таблицу items: у каждого «…» впишите тип столбца (для id подойдёт serial
+    с PRIMARY KEY, для названия text NOT NULL, для цены integer). 2) Добавьте не меньше пяти строк, каждую в скобках на отдельной строке;
+    названия возьмите из своих услуг. 3) Напишите SELECT с WHERE, ORDER BY и LIMIT. 4) Напишите запрос с GROUP BY и COUNT, который считает
+    пункты по категориям. 5) Измените цену одной записи через UPDATE и 6) удалите другую через DELETE, оба с WHERE. 7) В последней строке
+    напишите, какой запрос без WHERE опасен. Проверки читают текст запросов; результаты выполнения вы видите под полями в предпросмотре.
+    Все «…» нужно заменить. Эпоха: 3.'
   checks:
-  - Таблица items создана с первичным ключом и типами столбцов, подходящими данным брифа.
-  - Запросы возвращают пункты, отобранные по условию, отсортированные и ограниченные LIMIT.
-  - Есть запрос с GROUP BY и подсчётом пунктов по категориям.
-  - UPDATE и DELETE написаны с условием WHERE; запрос без WHERE отмечен как опасный.
+  - Блок с запросами исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - Нужна команда CREATE TABLE items (…) в первом поле.
+  - У таблицы нет первичного ключа. Допишите к id слова PRIMARY KEY.
+  - Не у всех столбцов есть тип. Нужны числовые (serial или integer для id, integer для цены) и текстовый (text для названия).
+  - Нужно не меньше пяти строк данных. Каждую напишите в скобках, на отдельной строке, после слова VALUES.
+  - В добавленных строках нет названий ваших услуг. Возьмите их из брифа.
+  - 'В запросе из третьего поля нет условия: допишите WHERE, например price > 1000.'
+  - Запрос не упорядочен. Допишите ORDER BY, например ORDER BY price DESC.
+  - Не хватает ограничения. Допишите LIMIT и число, например LIMIT 3.
+  - В четвёртом поле нет GROUP BY. Он собирает строки по категории.
+  - 'Нужно что-то посчитать: добавьте в SELECT функцию COUNT(*).'
+  - 'UPDATE должен выглядеть так: UPDATE items SET price = 3500 WHERE id = 2. Без WHERE изменятся все строки.'
+  - 'DELETE должен выглядеть так: DELETE FROM items WHERE id = 5. Без WHERE удалятся все строки.'
+  - Назовите опасный запрос и объясните одним предложением, что будет без WHERE.
   sources:
-  - title: 'PGlite: Postgres в браузере'
-    url: https://pglite.dev/
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'PostgreSQL: SQL Syntax'
-    url: https://www.postgresql.org/docs/current/sql-syntax.html
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'SQLBolt: Learn SQL with simple interactive exercises'
-    url: https://sqlbolt.com/
-    licence: link-only
-    kind: course
-    lang: en
-  - title: 'Postgres Pro: Учебник по SQL'
+  - title: 'Postgres Pro: Язык SQL (учебник)'
     url: https://postgrespro.ru/docs/postgresql/current/tutorial-sql
     licence: proprietary-link
     kind: docs
     lang: ru
-  - title: 'MDN: Server-side website programming — работа с базами'
-    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Website_security
+  - title: 'PostgreSQL: Queries'
+    url: https://www.postgresql.org/docs/current/queries.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'SQLBolt: интерактивные упражнения по SQL'
+    url: https://sqlbolt.com/
+    licence: link-only
+    kind: course
+    lang: en
+  - title: 'PGlite: настоящий Postgres в браузере'
+    url: https://pglite.dev/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'OWASP: SQL Injection Prevention Cheat Sheet'
+    url: https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
     licence: CC-BY-SA
     kind: docs
     lang: en
   videos:
-  - title: Вся база SQL для начинающих за 1 час
+  - title: Вся база SQL для начинающих за 1 час (Vlad Mishustin)
     url: https://www.youtube.com/watch?v=5sG9kmXYsKU
+    licence: proprietary-link
+    kind: video
     lang: ru
 - id: 07-data/03-joins-normalization
   order: 3
   title: 'Связи между таблицами: JOIN и нормализация'
-  summary: 'Зачем: вы разносите данные по таблицам так, чтобы каждый факт хранился один раз, и собираете их обратно соединениями.
-    После урока вы читаете запрос с JOIN, понимаете, чем INNER отличается от LEFT, и видите, где нормализация мешает и когда
-    её нарушают намеренно.'
+  definition: Нормализация — способ разнести данные по таблицам так, чтобы каждый факт хранился один раз. JOIN собирает их обратно,
+    склеивая строки с совпавшим ключом.
+  summary: Вы разносите данные по таблицам так, чтобы каждый факт хранился один раз, и собираете их обратно соединениями. После урока
+    вы читаете запрос с JOIN, понимаете, чем INNER отличается от LEFT, и знаете, где нормализацию нарушают намеренно.
   minutes: 30
   teaches:
   - data.sql-join
   - data.normalization
   requires:
   - data.sql-select
-  diagram: 'Диаграммы JOIN на живых таблицах: перетаскиваешь строки, видишь, какие попадают в INNER, LEFT, RIGHT; рядом таблица
-    с дублями данных и пошаговое приведение к 1НФ, 2НФ, 3НФ.'
-  practice: 'Эпоха 3 (2010): добавить в БД проекта таблицы categories и people (из брифа) и связи между ними и items; написать
-    запрос, показывающий пункты вместе с категорией и ответственным человеком, и запрос по пунктам без категории.'
+  diagram: 'JoinsNormal: «Соединения и нормализация» (part 7, lesson 3). Two views on the same invented data, with the names of services
+    taken from the person''s brief. «Соединения»: services and categories, one service without a category and one category without services;
+    INNER, LEFT and RIGHT JOIN shown as the rows that come out. «Нормализация»: one wide table of orders before and after it is split,
+    and three events (a price changes, a phone changes, the only order is cancelled) showing how many rows each one touches.'
+  practice: 'В странице четыре поля для SQL и одна строка для вывода. 1) В первом поле допишите таблицы: у people тип столбца name,
+    а в items добавьте столбцы category_id и person_id, каждый со ссылкой через REFERENCES на свою таблицу. Никакого столбца с названием
+    категории в items быть не должно: название живёт только в categories. 2) Во втором поле добавьте свои услуги (и людей из брифа);
+    одна услуга должна остаться без категории (NULL). 3) Напишите запрос с двумя JOIN: услуга, название категории, имя ответственного.
+    4) Напишите запрос с LEFT JOIN, который находит услуги без категории. 5) В последней строке скажите, где в вашем проекте данные
+    продублированы намеренно и зачем. Все «…» нужно заменить. Эпоха: 3.'
   checks:
-  - Категория и человек хранятся отдельными таблицами и связаны внешними ключами с items.
-  - Один JOIN выводит пункты вместе с названием категории, а LEFT JOIN находит пункты без категории.
-  - В схеме нет повторяющихся строк-значений (например, названия категории в каждой строке).
-  - Указан случай, где данные намеренно продублированы для скорости, и сказано почему.
+  - Блок с запросами исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'Нужны две отдельные таблицы: categories и people.'
+  - 'В items нет ссылки на categories. Допишите: category_id integer REFERENCES categories(id).'
+  - 'В items нет ссылки на people. Допишите: person_id integer REFERENCES people(id).'
+  - 'В items есть столбец с названием категории текстом. Так название повторяется в каждой строке. Оставьте только category_id: название
+    живёт в таблице categories.'
+  - В данных нет названий ваших услуг. Возьмите их из брифа.
+  - В данных нет имён людей из вашего брифа.
+  - 'Одна услуга должна остаться без категории: поставьте в ней NULL вместо номера категории.'
+  - В запросе нет соединения с categories. Нужно JOIN categories ON items.category_id = categories.id.
+  - В запросе нет соединения с people. Добавьте JOIN people ON items.person_id = people.id.
+  - Для услуг без категории нужен LEFT JOIN, а не обычный.
+  - 'Не хватает условия IS NULL: именно оно оставляет услуги, у которых справа пусто.'
+  - 'Расскажите чуть подробнее: что продублировано и зачем. Хватит двух предложений.'
   sources:
   - title: 'PostgreSQL: Joins Between Tables'
     url: https://www.postgresql.org/docs/current/tutorial-join.html
@@ -175,17 +231,24 @@ lessons:
     licence: link-only
     kind: course
     lang: en
-  - title: 'Википедия: Нормальная форма'
+  - title: Нормальная форма (Википедия)
     url: https://ru.wikipedia.org/wiki/Нормальная_форма
     licence: CC-BY-SA
     kind: article
     lang: ru
+  - title: Database normalization (Wikipedia)
+    url: https://en.wikipedia.org/wiki/Database_normalization
+    licence: CC-BY-SA
+    kind: article
+    lang: en
   videos: []
 - id: 07-data/04-indexes-transactions
   order: 4
   title: Индексы и транзакции
-  summary: 'Зачем: вы понимаете, почему запрос медленный и как индекс его ускоряет, и что делает транзакция, когда два человека
-    одновременно покупают последний билет. После урока вы читаете EXPLAIN простых запросов и знаете, что значит ACID.'
+  definition: Индекс — упорядоченная структура из значений столбца и ссылок на строки, которая ускоряет поиск. Транзакция — группа команд,
+    выполняемая целиком или никак.
+  summary: Вы понимаете, почему запрос бывает медленным и как индекс его ускоряет, и что делает транзакция, когда сбой случается посреди
+    двух записей. После урока вы читаете план запроса, создаёте индекс там, где он нужен, и знаете, что значит ACID.
   minutes: 30
   teaches:
   - data.index
@@ -193,18 +256,42 @@ lessons:
   requires:
   - data.sql-join
   - data.sql-write
-  diagram: 'Таблица на миллион строк: полный просмотр против поиска по индексу (B-дерево), счётчик прочитанных страниц; вторая
-    панель: два клиента, одна запись, с транзакцией и без неё.'
-  practice: 'Эпоха 6 (2022): для запроса по items брифа (поиск по категории и сортировка по дате) сгенерировать тысячу строк,
-    измерить время до и после индекса и оформить заявку из contacts транзакцией из двух шагов (заявка и уведомление).'
+  diagram: 'IndexAndTransaction: «Индекс и транзакция» (part 7, lesson 4). Two small models, both labelled as models. The first counts
+    how many pages the database would read to find a few rows with and without an index (100 rows per page, a tree with 200 children
+    per node), for a table size and a share of matching rows the person sets: the index wins on big tables with rare matches and loses
+    on small ones or common values, and every extra index adds a write. The second walks one purchase (a seat taken and an order recorded)
+    through a crash with and without a transaction. Numbers are invented.'
+  practice: 'В странице уже есть таблицы items (2000 строк), requests и notifications. 1) В первом поле спросите план запроса EXPLAIN
+    SELECT: пункты категории 7, новые сначала, первые десять (WHERE category_id = 7, ORDER BY day DESC, LIMIT 10). 2) Во втором создайте
+    индекс по столбцу из WHERE и снова спросите план. Сколько строк просмотрено до и после, впишите в строку под полем (число из результата).
+    3) В третьем поле напишите транзакцию из двух вставок (заявка и уведомление) с BEGIN и COMMIT. 4) В четвёртом сделайте то же, но
+    второй вставкой допустите ошибку (например, NULL в text) и COMMIT не пишите. 5) В пятом поле откатите транзакцию и проверьте, что
+    заявок не прибавилось. 6) Ответьте, какую цену платит запись за каждый лишний индекс. Все «…» нужно заменить. Эпоха: 6.'
   checks:
-  - Время запроса измерено до и после индекса, и индекс создан по тем столбцам, которые участвуют в условии.
-  - В выводе EXPLAIN показано различие просмотра всей таблицы и использования индекса.
-  - 'Заявка и её уведомление записываются одной транзакцией: при сбое откатываются обе записи.'
-  - Объяснено, какую цену платит запись за каждый лишний индекс.
+  - Блок с запросами исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - В первом поле нужен запрос вида EXPLAIN SELECT * FROM items WHERE category_id = 7 …
+  - Индекс создаётся командой CREATE INDEX имя ON items (category_id). Столбец в скобках должен быть тем, что стоит в WHERE.
+  - Во втором поле после CREATE INDEX снова напишите EXPLAIN SELECT …, чтобы увидеть разницу.
+  - 'В строке «до индекса» нужно число: сколько строк просмотрено, как написано в ответе песочницы.'
+  - В строке «после индекса» нужно число из второго плана.
+  - 'В третьем поле нужна цепочка: BEGIN, INSERT INTO requests …, INSERT INTO notifications …, COMMIT.'
+  - 'В четвёртом поле нужны BEGIN и две вставки, но без COMMIT: транзакция должна остаться открытой после ошибки.'
+  - В пятом поле напишите ROLLBACK, а затем SELECT COUNT(*) FROM requests, чтобы проверить, что от сбойной заявки ничего не осталось.
+  - 'Скажите, чем плох лишний индекс: запись замедляется, потому что индекс обновляется вместе с таблицей, и он занимает место.'
   sources:
   - title: 'PostgreSQL: Indexes'
     url: https://www.postgresql.org/docs/current/indexes.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Postgres Pro: Индексы'
+    url: https://postgrespro.ru/docs/postgresql/current/indexes
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'PostgreSQL: Using EXPLAIN'
+    url: https://www.postgresql.org/docs/current/using-explain.html
     licence: proprietary-link
     kind: docs
     lang: en
@@ -218,25 +305,19 @@ lessons:
     licence: link-only
     kind: book
     lang: en
-  - title: 'Postgres Pro: Индексы'
-    url: https://postgrespro.ru/docs/postgresql/current/indexes
-    licence: proprietary-link
-    kind: docs
-    lang: ru
-  - title: 'PostgreSQL: Using EXPLAIN'
-    url: https://www.postgresql.org/docs/current/using-explain.html
-    licence: proprietary-link
-    kind: docs
-    lang: en
   videos:
-  - title: Что такое SQL-индексы за 10 минут
+  - title: Что такое SQL ИНДЕКСЫ за 10 минут (Listen IT)
     url: https://www.youtube.com/watch?v=LpEwssOYRKA
+    licence: proprietary-link
+    kind: video
     lang: ru
 - id: 07-data/05-nosql
   order: 5
-  title: 'Документные, ключ-значение и графовые базы: когда, а когда не стоит'
-  summary: 'Зачем: вы понимаете, какую задачу решает каждая «не-реляционная» база (MongoDB, Redis, Neo4j) и когда реляционной
-    достаточно. После урока вы можете выбрать модель данных под функцию проекта и не гнаться за модой.'
+  title: 'Документные, ключ-значение и графовые базы: когда и когда не стоит'
+  definition: 'NoSQL — базы не на таблицах: документные (MongoDB), ключ-значение (Redis) и графовые (Neo4j). У каждой своя задача, а
+    по умолчанию хватает реляционной.'
+  summary: Вы понимаете, какую задачу решает каждая «не-реляционная» база (MongoDB, Redis, Neo4j) и когда хватает реляционной. После
+    урока вы выбираете хранилище под каждую функцию своего проекта и не гонитесь за модой.
   minutes: 25
   teaches:
   - data.document-db
@@ -246,17 +327,26 @@ lessons:
   requires:
   - data.relational-model
   - data.index
-  diagram: 'Одни и те же данные брифа в четырёх представлениях: таблицы, документ JSON, пары ключ-значение, граф; для запросов
-    («все пункты категории», «кто связан с кем», «сессия по токену») подсвечивается, где ответ быстрее.'
-  practice: 'Эпоха 6 (2022, headless): для каждой функции проекта из брифа (каталог items, сессии, связи people между собой,
-    быстрый счётчик посетителей) выбрать тип базы или обосновать, что хватит одной реляционной.'
+  diagram: 'DataShapes: «Одни данные, четыре формы» (part 7, lesson 5). The person''s own services and people shown as tables, as a
+    JSON document, as key-value pairs and as a graph, with a question picker: for each question the diagram says whether that shape
+    answers it naturally, possibly, or awkwardly, and why. The ratings are the lesson''s judgement, not a benchmark. Sessions and counters
+    are invented.'
+  practice: 'В таблице пять функций вашего проекта. Для каждой допишите три ячейки: тип хранилища (реляционная база, документная, ключ-значение,
+    графовая или файл), почему так, и чем вы за это платите (например: нет связей, нет транзакций, ещё один сервер, данные в памяти).
+    Если для функции хватает одной реляционной базы, так и напишите, и не ищите другую. Ниже ответьте, где лежат данные и кто может
+    их читать, и где вы выбрали реляционную базу, хотя соблазн был другой. Все «…» нужно заменить. Эпоха: 6.'
   checks:
-  - Для каждой названной функции указан тип хранилища и причина.
-  - Минимум в одном случае выбрана реляционная база там, где соблазнял другой вариант, и это объяснено.
-  - 'Названа цена: что теряется при выборе нереляционной базы (связи, транзакции, привычные инструменты).'
-  - Указано, где хранятся данные и кто может их читать.
+  - Блок с таблицей решения исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - Нужны пять строк с функциями. Не удаляйте строки таблицы.
+  - 'В колонке «Тип хранилища» нужно назвать тип: реляционная база, документная, ключ-значение, графовая или файл.'
+  - Ни разу не выбрана реляционная база. Для связанных данных проекта она почти всегда подходит.
+  - 'Объясните выбор развёрнуто: хотя бы несколько слов в каждой строке колонки «Почему».'
+  - В колонке «Чем платим» ничего не сказано про цену. Напишите, чего хранилищу не хватает или что оно требует.
+  - Скажите, где лежат данные (на каком сервере, в какой стране) и кто может их читать.
+  - Назовите случай, где выбрали реляционную базу, и объясните, чем её выбор лучше соблазнительного.
   sources:
-  - title: 'MongoDB Docs: Data modeling'
+  - title: 'MongoDB Docs: Data Modeling'
     url: https://www.mongodb.com/docs/manual/data-modeling/
     licence: proprietary-link
     kind: docs
@@ -276,21 +366,24 @@ lessons:
     licence: proprietary-link
     kind: docs
     lang: en
-  - title: 'Википедия: NoSQL'
-    url: https://ru.wikipedia.org/wiki/NoSQL
-    licence: CC-BY-SA
+  - title: 'Dan McKinley: Choose Boring Technology'
+    url: https://mcfunley.com/choose-boring-technology
+    licence: link-only
     kind: article
-    lang: ru
+    lang: en
   videos:
-  - title: 'NoSQL простым языком: что это и зачем нужно?'
+  - title: 'NoSQL простым языком: что это и зачем нужно? (Merion Academy)'
     url: https://www.youtube.com/watch?v=IBzTDkYNB7I
+    licence: proprietary-link
+    kind: video
     lang: ru
 - id: 07-data/06-vector-search
   order: 6
   title: 'Поиск: полнотекстовый и векторный'
-  summary: 'Зачем: вы понимаете, как сайт ищет по смыслу и по словам: токены, индекс, ранжирование, эмбеддинги и ближайшие
-    соседи. После урока вы выберете между поиском внутри Postgres, отдельным движком (Meilisearch, Elasticsearch) и векторной
-    базой, и поймёте, как ИИ-ответы используют ваши данные (RAG).'
+  definition: Полнотекстовый поиск находит тексты по словам через обратный индекс и основы слов, а векторный — по смыслу, через эмбеддинги
+    и ближайших соседей.
+  summary: 'Вы понимаете, как сайт ищет по словам и по смыслу: токены, указатель, ранжирование, эмбеддинги и ближайшие соседи. После
+    урока вы выберете между поиском внутри Postgres, отдельным движком и векторной базой и поймёте, как ИИ-ответы используют ваши тексты.'
   minutes: 30
   teaches:
   - data.full-text-search
@@ -298,21 +391,41 @@ lessons:
   requires:
   - data.index
   - data.choose-database
-  diagram: 'Поисковая строка по данным брифа: переключатель «по словам / по смыслу»; показаны токены, лемматизация и вес слов
-    у первого режима, и точки в пространстве эмбеддингов с кругом ближайших соседей у второго.'
-  practice: 'Эпоха 6 (2022): добавить в БД проекта поиск по items и proofs брифа: сначала полнотекстовый в PGlite (tsvector,
-    русская конфигурация), затем описать, при каких условиях потребовался бы векторный и что туда пошло бы.'
+  diagram: 'SearchModes: «Поиск по словам и по смыслу» (part 7, lesson 6). Words: the person''s own services searched with a teaching
+    stemmer (it cuts common Russian endings; real search engines use fuller dictionaries), showing the tokens, stems and a ranking,
+    and what LIKE would do without morphology. Meaning: nine invented questions of visitors on a 2D map whose coordinates were placed
+    by hand, because real embeddings have hundreds of dimensions and come from a model; the nearest three to a chosen query are lit,
+    beside what a word search would have found.'
+  practice: 'В странице работает демо поиска по вашим услугам. 1) Попробуйте в нём запрос в разных формах слова. 2) В таблице выпишите
+    три формы одного слова из своих услуг и их основу (основа общая). 3) В поле запроса напишите для PostgreSQL выборку услуг с русской
+    полнотекстовой конфигурацией: to_tsvector(''russian'', …) @@ plainto_tsquery(''russian'', …), ts_rank и ORDER BY … DESC. 4) В поле
+    индекса создайте GIN-индекс по to_tsvector. 5) Ответьте тремя фразами: когда вам хватит поиска по словам; когда понадобился бы поиск
+    по смыслу и какие тексты в него пошли бы; какие тексты ушли бы стороннему сервису и нужно ли согласие. Все «…» нужно заменить. Эпоха:
+    6.'
   checks:
-  - Поиск находит пункты по другой форме слова (русская морфология), например «услуга» и «услуги».
-  - Результаты упорядочены по релевантности, а не по порядку записей.
-  - Описано, когда полнотекстового поиска хватит, а когда нужен векторный.
-  - Для векторного варианта названо, какие тексты отправляются стороннему сервису и нужно ли согласие.
+  - Блок поиска исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - 'В таблице нужны три строки: форма слова и основа.'
+  - 'В запросе нет to_tsvector(''russian'', …): так текст превращается в набор основ для русского языка.'
+  - 'Не хватает сравнения: to_tsvector(…) @@ plainto_tsquery(''russian'', ''слово'').'
+  - 'Нужен вес найденного: функция ts_rank(…).'
+  - 'Результаты надо упорядочить по весу: ORDER BY rank DESC.'
+  - 'Индекс создают так: CREATE INDEX имя ON items USING GIN (to_tsvector(''russian'', …)).'
+  - Объясните в нескольких словах, когда вам хватит поиска по словам.
+  - 'Скажите, когда понадобился бы поиск по смыслу: например, когда посетители пишут вопросы своими словами и слова не совпадают с текстом.'
+  - Назовите, какие тексты ушли бы стороннему сервису (провайдеру эмбеддингов).
+  - 'Скажите, нужно ли согласие: есть ли в этих текстах персональные данные.'
   sources:
   - title: 'PostgreSQL: Full Text Search'
     url: https://www.postgresql.org/docs/current/textsearch.html
     licence: proprietary-link
     kind: docs
     lang: en
+  - title: 'Postgres Pro: Полнотекстовый поиск'
+    url: https://postgrespro.ru/docs/postgresql/current/textsearch
+    licence: proprietary-link
+    kind: docs
+    lang: ru
   - title: 'pgvector: векторный поиск для Postgres'
     url: https://github.com/pgvector/pgvector
     licence: proprietary-link
@@ -323,26 +436,25 @@ lessons:
     licence: proprietary-link
     kind: docs
     lang: en
-  - title: 'Elasticsearch: Full-text search'
-    url: https://www.elastic.co/docs/solutions/search/full-text
-    licence: proprietary-link
-    kind: docs
-    lang: en
-  - title: 'Postgres Pro: Полнотекстовый поиск'
-    url: https://postgrespro.ru/docs/postgresql/current/textsearch
-    licence: proprietary-link
-    kind: docs
+  - title: Векторное представление слов (Википедия)
+    url: https://ru.wikipedia.org/wiki/Векторное_представление_слов
+    licence: CC-BY-SA
+    kind: article
     lang: ru
   videos:
-  - title: 'Векторные базы данных: самое понятное объяснение'
+  - title: 'Векторные базы данных: самое понятное объяснение (AI RANEZ)'
     url: https://www.youtube.com/watch?v=H1EyiGPZwwc
+    licence: proprietary-link
+    kind: video
     lang: ru
 - id: 07-data/07-privacy-by-design
   order: 7
   title: 'Приватность по замыслу: что хранить и где'
-  summary: 'Зачем: вы закладываете защиту данных в схему базы, а не прикручиваете потом: собираете минимум, ставите сроки
-    хранения, разделяете персональное и обычное, шифруете и логируете доступ. После урока вы знаете, чего требуют 152-ФЗ (включая
-    хранение данных граждан РФ на серверах в России) и GDPR, и можете перечислить, какие данные проекта подпадают под закон.'
+  definition: 'Приватность по замыслу — защита данных, заложенная в схему заранее: минимум полей, цель и срок у каждого. По 152-ФЗ данные
+    граждан РФ хранят в базах в России.'
+  summary: 'Вы закладываете защиту данных в схему базы, а не прикручиваете её потом: собираете минимум, ставите сроки хранения, отделяете
+    персональное и записываете согласие как факт. После урока вы знаете главное из 152-ФЗ (включая хранение данных граждан РФ на серверах
+    в России) и можете перечислить, какие данные вашего проекта под него подпадают.'
   minutes: 30
   teaches:
   - data.privacy-by-design
@@ -351,38 +463,56 @@ lessons:
   - data.transaction
   - data.sql-write
   - server.authentication
-  diagram: 'Реестр данных проекта: перетаскиваешь поля формы в корзины «нужно», «можно не собирать», «персональные», «специальные»;
-    рядом счётчик «срок хранения» и карта «где лежит копия» с предупреждением при иностранном хостинге.'
-  practice: 'Эпоха 6 (2022): по полям брифа (contacts, people, proofs, заявки) составить реестр: какие данные, зачем, где,
-    сколько хранить, кто имеет доступ; отметить то, что можно не собирать, и добавить в схему поле «согласие» с датой.'
+  diagram: 'DataRegister: «Реестр данных» (part 7, lesson 7). Nine candidate fields of a request form (the purpose is the person''s
+    own main action). The person switches each on or off and sees what they would be holding: how many fields, how many are personal
+    data, special categories, high-risk, and which collected fields the purpose does not need. A retention slider and a place of storage
+    show the two other questions of a data register. The classification is the lesson''s teaching simplification, not legal advice.'
+  practice: 'В странице таблица реестра данных и поле для SQL. 1) Для каждой из четырёх строк (имя, телефон, комментарий, данные людей
+    с сайта) заполните шесть ячеек: зачем, где хранятся, срок и условие удаления (например «3 года после заявки, затем удаляется»),
+    кто имеет доступ и персональные ли данные («да» или «нет» с пояснением). 2) Укажите поле, которое вы решили не собирать, хотя хотелось
+    (дата рождения, паспорт, электронная почта), и почему. 3) Скажите, где первичная запись данных посетителей (для граждан РФ на сервере
+    в России) и что с зарубежными копиями. 4) Скажите, как персональные данные отделены от остальных (например, отдельная таблица заявок).
+    5) В поле SQL создайте таблицу consents: согласие хранится с датой, версией текста и целью, и ссылается на заявку. Все «…» нужно
+    заменить. Это учебный черновик, а не юридический документ. Эпоха: 6.'
   checks:
-  - В реестре каждое поле формы связано с целью, и лишние поля убраны.
-  - Для каждой категории данных указан срок хранения и условие удаления.
-  - Персональные данные отделены от остальных и помечены в схеме.
-  - Указано место хранения и сказано, что первичная запись данных граждан РФ идёт на сервер в России.
-  - Согласие хранится с датой и версией текста, а не только галочкой.
+  - Блок с реестром исчез. Он был в странице, верните его.
+  - Где-то осталось многоточие «…». Замените его своим текстом.
+  - В реестре должно остаться не меньше четырёх строк.
+  - В колонке «Зачем» не видно цели. Начните со слов «чтобы…».
+  - 'В сроке нужно число: например, «3 года» или «6 месяцев».'
+  - 'К сроку допишите, что произойдёт потом: данные удаляются или обезличиваются.'
+  - 'Скажите, кто имеет доступ: например «владелец через админку».'
+  - Имя и телефон это персональные данные. В последней колонке начните с «да».
+  - Назовите поле, которое вы не стали собирать, и объясните, почему оно не нужно для цели.
+  - Скажите, что первичная запись данных идёт в базу на сервере в России, и что с копиями за рубежом.
+  - Скажите, как персональные данные отделены от остальных, например отдельной таблицей заявок.
+  - 'Таблица согласий называется consents: CREATE TABLE consents (…).'
+  - 'Согласию нужна дата: столбец given_at типа timestamp.'
+  - 'Согласию нужна версия текста: столбец text_version.'
+  - 'Согласию нужна цель: столбец purpose.'
+  - 'Согласие должно ссылаться на заявку: request_id integer REFERENCES requests(id).'
   sources:
   - title: Федеральный закон № 152-ФЗ «О персональных данных»
     url: https://www.consultant.ru/document/cons_doc_LAW_61801/
     licence: proprietary-link
     kind: spec
     lang: ru
-  - title: 'Роскомнадзор: портал персональных данных'
-    url: https://pd.rkn.gov.ru/
-    licence: proprietary-link
-    kind: docs
+  - title: Федеральный закон «О персональных данных» (Википедия)
+    url: https://ru.wikipedia.org/wiki/Федеральный_закон_«О_персональных_данных»
+    licence: CC-BY-SA
+    kind: article
     lang: ru
   - title: 'GDPR, статья 25: Data protection by design and by default'
     url: https://gdpr-info.eu/art-25-gdpr/
     licence: link-only
     kind: spec
     lang: en
-  - title: 'Википедия: Privacy by design (семь принципов Кавукян)'
+  - title: Privacy by design (Википедия)
     url: https://en.wikipedia.org/wiki/Privacy_by_design
     licence: CC-BY-SA
     kind: article
     lang: en
-  - title: 'OWASP Cheat Sheet: Database Security'
+  - title: 'OWASP: Database Security Cheat Sheet'
     url: https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html
     licence: CC-BY-SA
     kind: docs
