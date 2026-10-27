@@ -6,7 +6,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { t, pl } from '#lib/i18n/index.ts';
+	import { t, pl, midSentence } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import { buildGraph, status, unmet, type LessonStatus } from '#lib/content/graph.ts';
 	import type { PageProps } from './$types';
@@ -15,18 +15,32 @@
 	const cat = $derived(data.catalogue);
 	const graph = $derived(buildGraph(cat.lessons, cat));
 	let done = $state(new Set<string>());
-	const conceptTitle = (id: string) => cat.concepts.find((c) => c.id === id)?.title ?? id;
+	const conceptTitle = (id: string) => midSentence(cat.concepts.find((c) => c.id === id)?.title ?? id);
 	const statusOf = (id: string): LessonStatus => status(graph, id, done);
 
 	let host: HTMLDivElement;
-	let edges = $state<{ d: string; key: string }[]>([]);
+	let edges = $state<{ d: string; key: string; from: string; to: string }[]>([]);
+	// The lesson under the pointer or the focus: its edges and its neighbours light up, the rest
+	// of the graph steps back. At rest every edge is a hairline, so 150 of them read as texture.
+	let active = $state<string | null>(null);
+	const near = $derived.by(() => {
+		const out = new Set<string>();
+		for (const e of edges) {
+			if (e.from === active) out.add(e.to);
+			if (e.to === active) out.add(e.from);
+		}
+		return out;
+	});
+	const track = (ev: Event) => {
+		active = (ev.target as Element | null)?.closest?.('[data-node]')?.getAttribute('data-node') ?? null;
+	};
 	let size = $state({ w: 0, h: 0 });
 
 	function draw() {
 		if (!host) return;
 		const box = host.getBoundingClientRect();
 		size = { w: box.width, h: box.height };
-		const out: { d: string; key: string }[] = [];
+		const out: { d: string; key: string; from: string; to: string }[] = [];
 		// One edge per pair of lessons: a lesson may require two concepts the same lesson teaches,
 		// and a repeated key in the keyed {#each} below throws (each_key_duplicate) and breaks the map.
 		const seen = new Set<string>();
@@ -47,7 +61,7 @@
 						: [ra.left + 12 - box.left, ra.bottom - box.top, rb.left + 12 - box.left, rb.top - box.top];
 				const mx = (x1 + x2) / 2;
 				const d = sameRow || rb.left > ra.right ? `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}` : `M${x1},${y1} C${x1 - 24},${(y1 + y2) / 2} ${x2 - 24},${(y1 + y2) / 2} ${x2},${y2}`;
-				out.push({ d, key: `${from}->${l.id}` });
+				out.push({ d, key: `${from}->${l.id}`, from, to: l.id });
 			}
 		edges = out;
 	}
@@ -75,9 +89,11 @@
 		</ul>
 	</header>
 
-	<div class="map" bind:this={host}>
+	<!-- The pointer and focus handlers only light the hovered lesson's edges; the lessons are links. -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="map" class:tracing={!!active} bind:this={host} onpointerover={track} onfocusin={track} onpointerleave={() => (active = null)} onfocusout={() => (active = null)}>
 		<svg class="edges" width={size.w} height={size.h} aria-hidden="true">
-			{#each edges as e (e.key)}<path d={e.d} />{/each}
+			{#each edges as e (e.key)}<path d={e.d} class:on={e.from === active || e.to === active} />{/each}
 		</svg>
 		{#each cat.parts as part (part.number)}
 			{@const items = cat.lessons.filter((l) => l.part === part.number)}
@@ -89,7 +105,7 @@
 						{#each items as l (l.id)}
 							{@const s = statusOf(l.id)}
 							<li>
-								<a class="node {s}" href={links.lesson(l.id)} data-node={l.id} data-testid="lesson-{l.id}" data-status={s}>
+								<a class="node {s}" class:near={near.has(l.id)} href={links.lesson(l.id)} data-node={l.id} data-testid="lesson-{l.id}" data-status={s}>
 									<span class="title">{l.title}</span>
 									<span class="meta">
 										{#if s === 'done'}{t('map.status.done')}{:else if s === 'open'}{t('map.minutes', { n: l.minutes, minutes: pl(l.minutes, 'minute.forms') })}{:else}{t('map.status.locked', {
@@ -167,8 +183,17 @@
 	}
 	.edges path {
 		fill: none;
-		stroke: var(--border-brass);
+		stroke: var(--border-hairline);
 		stroke-width: 1;
+		transition: opacity var(--dur-micro) var(--ease-stop);
+	}
+	.tracing .edges path {
+		opacity: 0.4;
+	}
+	.tracing .edges path.on {
+		opacity: 1;
+		stroke: var(--brass-500);
+		stroke-width: 1.5;
 	}
 	.part {
 		position: relative;
@@ -219,7 +244,8 @@
 		color: var(--text-primary);
 		transition: border-color var(--dur-micro) var(--ease-stop);
 	}
-	.node:hover {
+	.node:hover,
+	.node.near {
 		border-color: var(--border-brass);
 	}
 	.node.open {

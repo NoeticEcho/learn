@@ -475,7 +475,7 @@
 		min-width: 0;
 	}
 	section {
-		padding-block: var(--space-4);
+		padding-block: var(--space-5);
 	}
 	section + section {
 		border-top: var(--line) solid var(--border-hairline);
@@ -487,9 +487,11 @@
 	}
 	h4 {
 		font-family: var(--font-sans);
-		font-size: var(--text-body);
+		font-size: var(--text-body-size);
 		font-weight: var(--weight-medium);
-		margin: var(--space-4) 0 var(--space-2);
+		/* Twice the space above a group's head as below it: the head belongs to what follows,
+		   not to the add button above it (hallmark 71). */
+		margin: var(--space-6) 0 var(--space-2);
 	}
 	.group:first-of-type h4 {
 		margin-top: 0;
@@ -582,7 +584,7 @@
 		gap: var(--space-2);
 		min-height: var(--hit-min);
 		color: var(--text-body);
-		font-size: var(--text-body);
+		font-size: var(--text-body-size);
 	}
 	.hint {
 		margin: 0 0 var(--space-3);

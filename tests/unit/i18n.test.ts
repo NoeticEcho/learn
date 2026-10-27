@@ -12,3 +12,14 @@ describe('i18n', () => {
 		]);
 	});
 });
+
+describe('midSentence', () => {
+	it('lowers a Russian common noun and keeps acronyms, Latin names and proper names', async () => {
+		const { midSentence } = await import('#lib/i18n/index.ts');
+		expect(midSentence('Структура HTML-документа')).toBe('структура HTML-документа');
+		expect(midSentence('ИИ-конструкторы')).toBe('ИИ-конструкторы');
+		expect(midSentence('HTML')).toBe('HTML');
+		expect(midSentence('Flexbox')).toBe('Flexbox');
+		expect(midSentence('Яндекс Метрика')).toBe('Яндекс Метрика');
+	});
+});

@@ -25,6 +25,7 @@
 
 	let includeKey = $state(false);
 	let pending = $state.raw<unknown>(null); // raw: IndexedDB cannot clone a proxy
+	let fileName = $state('');
 	let previewText = $state('');
 	let importNote = $state('');
 
@@ -101,6 +102,7 @@
 		importNote = '';
 		pending = null;
 		const file = (e.currentTarget as HTMLInputElement).files?.[0];
+		fileName = file?.name ?? '';
 		if (!file) return;
 		try {
 			const data = JSON.parse(await file.text());
@@ -149,9 +151,12 @@
 			<label class="check"><input type="checkbox" bind:checked={includeKey} /> {t('settings.export.key')}</label>
 		</div>
 		<div class="row">
+			<!-- The browser's own picker speaks the browser's language («Choose File»); this one speaks
+			     the page's. The input stays real and focusable, only visually hidden. -->
 			<label class="file">
-				<span>{t('settings.import.pick')}</span>
-				<input type="file" accept="application/json,.json" onchange={pick} />
+				<input class="visually-hidden" type="file" accept="application/json,.json" onchange={pick} />
+				<span class="secondary pick">{t('settings.import.pick')}</span>
+				<span class="chosen">{fileName || t('settings.import.none')}</span>
 			</label>
 		</div>
 		{#if pending}
@@ -297,33 +302,30 @@
 		accent-color: var(--brass-500);
 	}
 	.file {
-		display: grid;
-		gap: var(--space-2);
-	}
-	/* The native picker's button, in the system's secondary recipe rather than the browser's grey. */
-	.file input::file-selector-button {
-		min-height: var(--hit-min);
-		margin-right: var(--space-3);
-		padding: 0 var(--space-5);
-		border: var(--line) solid var(--field-edge);
-		border-radius: var(--radius-none);
-		background: transparent;
-		color: var(--text-primary);
-		font: inherit;
-		font-size: var(--text-body-sm);
-		font-weight: var(--weight-medium);
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-4);
 		cursor: pointer;
-		transition: border-color var(--dur-micro) var(--ease-stop);
 	}
-	.file input:hover::file-selector-button {
+	.file:hover .pick {
 		border-color: var(--border-brass);
 	}
-	.file input:active::file-selector-button {
+	.file:active .pick {
 		background: var(--surface-inset);
 	}
-	.file input {
+	.file:has(input:focus-visible) .pick {
+		outline: 2px solid var(--border-focus);
+		outline-offset: 2px;
+	}
+	.pick {
+		padding: 0 var(--space-5);
+	}
+	.chosen {
 		color: var(--text-secondary);
 		font-size: var(--text-body-sm);
+		overflow-wrap: anywhere;
+		min-width: 0;
 	}
 	.preview {
 		max-width: var(--measure);

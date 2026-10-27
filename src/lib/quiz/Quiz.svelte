@@ -188,9 +188,9 @@
 </section>
 
 <style>
+	/* A test is read, not laid out: options as long as a line of the theory, not the screen. */
 	.quiz {
-		border-top: var(--line) solid var(--border-hairline);
-		padding-top: var(--space-5);
+		max-width: 48rem;
 	}
 	.progress {
 		font-size: var(--text-caption);

@@ -2,6 +2,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { t, pl } from '#lib/i18n/index.ts';
+	import * as links from '#lib/links.ts';
+	import Echo from '#lib/guide/Echo.svelte';
 	import type { ReviewCard, RatingName } from '#lib/srs/index.ts';
 
 	let queue = $state<ReviewCard[]>([]);
@@ -68,9 +70,14 @@
 				{/if}
 			</section>
 		{:else}
+			<!-- Not a card-shaped box: an empty queue drawn like a card reads as a card to answer. -->
 			<section class="empty">
-				<p class="front">{t('review.empty')}</p>
-				<p>{t('review.empty.next')}</p>
+				<span class="echo" aria-hidden="true"><Echo mood="idle" size={96} /></span>
+				<div>
+					<p class="front">{t('review.empty')}</p>
+					<p>{t('review.empty.next')}</p>
+					<a class="secondary" href={links.map()}>{t('home.map')}</a>
+				</div>
 			</section>
 		{/if}
 	{/if}
@@ -98,12 +105,27 @@
 		color: var(--text-secondary);
 		font-size: var(--text-body-sm);
 	}
-	.card,
-	.empty {
+	.card {
 		max-width: 40rem;
 		padding: var(--space-7) var(--space-6);
 		border: var(--line) solid var(--border-hairline);
 		background: var(--surface-body);
+	}
+	.empty {
+		display: flex;
+		gap: var(--space-5);
+		align-items: flex-start;
+		max-width: 40rem;
+		padding-block: var(--space-4);
+	}
+	.empty .front {
+		margin-bottom: var(--space-3);
+	}
+	.empty p {
+		max-width: var(--measure-narrow);
+	}
+	.empty .secondary {
+		margin-top: var(--space-5);
 	}
 	.front {
 		margin: 0 0 var(--space-5);
@@ -134,7 +156,7 @@
 		flex-wrap: wrap;
 		gap: var(--space-3);
 	}
-	.empty p:last-child {
+	.empty p:not(.front) {
 		margin: 0;
 		color: var(--text-body);
 	}
@@ -142,9 +164,11 @@
 		h1 {
 			font-size: var(--text-display-sm);
 		}
-		.card,
-		.empty {
+		.card {
 			padding: var(--space-5) var(--space-4);
+		}
+		.empty {
+			flex-direction: column;
 		}
 	}
 </style>

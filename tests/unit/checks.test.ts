@@ -75,3 +75,17 @@ it('evaluate is self-contained: it runs after a round trip through toString', ()
 	document.documentElement.innerHTML = '<body><h1>x</h1><font>y</font></body>';
 	expect(rebuilt(document, window, [{ id: 'h', kind: 'exists', selector: 'h1' }, { id: 'n', kind: 'noTag', tags: ['font'] }], facts([], {})).map((r: { ok: boolean }) => r.ok)).toEqual([true, false]);
 });
+
+describe('an attribute pattern in the checklist', () => {
+	const say = (matches: string) => describeCheck({ id: 'a', kind: 'attr', selector: 'a', name: 'href', matches } as never);
+	it('reads a plain pattern as words', () => {
+		expect(say('^tel:')).toBe('Атрибут href у a начинается с tel:');
+		expect(say('^#top$')).toBe('Атрибут href у a: #top');
+		expect(say('^privacy\\.html$')).toBe('Атрибут href у a: privacy.html');
+		expect(say('width=device-width')).toBe('В атрибуте href у a есть width=device-width');
+	});
+	it('never shows a real regex to the learner', () => {
+		for (const p of ['\\S', '^https://\\S+', '^\\d{4}-\\d{2}-\\d{2}$', 'light\\s+dark|dark\\s+light'])
+			expect(say(p)).toBe('Атрибут href у a подходит под образец');
+	});
+});

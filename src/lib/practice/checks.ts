@@ -223,10 +223,13 @@ export function describeCheck(c: Check): string {
 		}
 		case 'text':
 			return t('check.text', { selector: c.selector });
-		case 'attr':
-			return c.matches === undefined
-				? t('check.attr', { selector: c.selector, name: c.name })
-				: t('check.attr.matches', { selector: c.selector, name: c.name, pattern: c.matches });
+		case 'attr': {
+			if (c.matches === undefined) return t('check.attr', { selector: c.selector, name: c.name });
+			const said = literal(c.matches);
+			return said
+				? t(`check.attr.${said.how}`, { selector: c.selector, name: c.name, text: said.text })
+				: t('check.attr.matches', { selector: c.selector, name: c.name });
+		}
 		case 'style':
 			return t('check.style', { selector: c.selector, prop: c.prop, value: c.equals ?? c.matches ?? '' });
 		case 'contrast':
@@ -244,6 +247,21 @@ export function describeCheck(c: Check): string {
 			return t(list ? 'check.field.all' : 'check.field', { selector: c.selector, field });
 		}
 	}
+}
+
+/**
+ * A pattern a person can read as words: `^tel:` is «начинается с tel:», `^#top$` is «равен
+ * #top». Anything with real regex in it is said as «подходит под образец», never shown raw:
+ * the checklist is for the learner, and `^\\s*\\S[\\s\\S]{48,158}` tells them nothing.
+ */
+export function literal(pattern: string): { how: 'equals' | 'starts' | 'ends' | 'contains'; text: string } | null {
+	const start = pattern.startsWith('^');
+	const end = pattern.endsWith('$') && !pattern.endsWith('\\$');
+	const body = pattern.slice(start ? 1 : 0, end ? -1 : undefined);
+	if (/(^|[^\\])[\^$.*+?()[\]{}|]/.test(body) || /\\[a-zA-Z0-9]/.test(body)) return null;
+	const text = body.replace(/\\(.)/g, '$1');
+	if (!text) return null;
+	return { how: start && end ? 'equals' : start ? 'starts' : end ? 'ends' : 'contains', text };
 }
 
 /** The brief's lists of values, which a `field` check reads item by item. */

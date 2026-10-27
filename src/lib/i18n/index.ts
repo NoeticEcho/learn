@@ -29,3 +29,16 @@ export function has(key: string): boolean {
 export function pl(n: number, key: string): string {
 	return plural(n, t(key).split('|') as [string, string, string]);
 }
+
+/**
+ * A title set mid-sentence, after a colon or in a list: «Теперь вы знаете: структура
+ * HTML-документа, теги». A Russian common noun loses its capital; an acronym (HTML, ИИ), a
+ * Latin name (Flexbox, WordPress) and a proper name keep theirs.
+ */
+const PROPER = new Set(['Яндекс', 'Искин', 'Эхо', 'Рунет', 'Россия', 'Тильда']);
+export function midSentence(title: string): string {
+	const [a, b] = title;
+	if (!a || !b || !/[А-ЯЁ]/.test(a) || !/[а-яё]/.test(b)) return title;
+	if (PROPER.has(title.split(/[\s,.:;!?»)]/)[0])) return title;
+	return a.toLowerCase() + title.slice(1);
+}

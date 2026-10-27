@@ -113,6 +113,7 @@
 	}
 
 	let moving = false;
+	let theatre = $state<HTMLElement>();
 	async function advance() {
 		if (moving) return;
 		if (index + 1 >= SEQUENCE.length) {
@@ -127,6 +128,10 @@
 			moving = false;
 		}
 		if (!still) schedule(SEQUENCE[index].ms);
+		// On a phone the controls sit below a frame taller than half the screen, so the next era
+		// arrived above the fold: bring its year back into view (instantly; nothing here animates).
+		const top = theatre?.getBoundingClientRect().top ?? 0;
+		if (top < 0) theatre?.scrollIntoView({ block: 'start' });
 	}
 
 	function click() {
@@ -174,7 +179,7 @@
 		<a class="skip" href={skipHref} onclick={() => onskip?.()}>{t('prologue.skip')}</a>
 	</section>
 {:else}
-	<section class="theatre" data-mode={still ? 'filmstrip' : 'motion'} aria-label={t('prologue.label')}>
+	<section class="theatre" bind:this={theatre} data-mode={still ? 'filmstrip' : 'motion'} aria-label={t('prologue.label')}>
 		{#if phase === 'play'}
 			<header class="caption">
 				<p class="year" aria-live="polite">{t(`era.${era}.year`)}</p>

@@ -9,7 +9,7 @@
 	import type { LessonMeta, Part, Question } from '#lib/content/schema.ts';
 	import type { Catalogue } from '#lib/content/catalogue.ts';
 	import { buildGraph, nextLessons } from '#lib/content/graph.ts';
-	import { t, pl } from '#lib/i18n/index.ts';
+	import { t, pl, midSentence } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Quiz from '#lib/quiz/Quiz.svelte';
 	import Guide from '#lib/guide/Guide.svelte';
@@ -44,7 +44,7 @@
 			.filter((id) => !was.has(id) && id !== lesson.id)
 			.map((id) => graph.lessons.get(id)!);
 	});
-	const concepts = $derived(lesson.teaches.map((c) => catalogue.concepts.find((x) => x.id === c)?.title ?? c));
+	const concepts = $derived(lesson.teaches.map((c) => midSentence(catalogue.concepts.find((x) => x.id === c)?.title ?? c)));
 
 	onMount(async () => {
 		const learner = await import('#lib/learner.ts');
@@ -268,9 +268,10 @@
 		min-width: 0;
 		margin-bottom: var(--space-5);
 	}
+	/* A two-sentence lede: at 40ch it stood as a five-line ragged column beside an empty half. */
 	.why {
 		margin: 0 0 var(--space-3);
-		max-width: 40ch;
+		max-width: 52ch;
 		font-family: var(--font-serif);
 		font-size: var(--text-body-lg);
 		line-height: var(--lh-body-lg);

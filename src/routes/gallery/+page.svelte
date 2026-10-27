@@ -7,6 +7,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
+	import * as links from '#lib/links.ts';
 	import { buildSrcdoc } from '#lib/practice/sandbox.ts';
 	import { withoutScaffold } from '#lib/practice/scaffold.ts';
 	import type { PageProps } from './$types';
@@ -53,8 +54,11 @@
 						<iframe sandbox="allow-scripts" loading="lazy" title={t('gallery.preview', { year: t(`era.${era}.name`) })} srcdoc={srcdoc(files)} tabindex="-1"></iframe>
 					</div>
 					<button type="button" class="secondary" onclick={() => save(era)}>{t('gallery.download')}</button>
+				{:else if data.starts[era]}
+					<!-- What to do about an empty era, said once per era and different for each. -->
+					<p class="empty">{t('gallery.starts')} <a href={links.lesson(data.starts[era].id)}>{data.starts[era].title}</a></p>
 				{:else}
-					<p class="empty">{t('gallery.empty')}</p>
+					<p class="empty">{t('gallery.soon')}</p>
 				{/if}
 			</li>
 		{/each}

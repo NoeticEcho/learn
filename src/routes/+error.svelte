@@ -2,11 +2,13 @@
 	import { page } from '$app/state';
 	import { t } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
+	import Echo from '#lib/guide/Echo.svelte';
 </script>
 
 <svelte:head><title>{page.status === 404 ? t('error.404') : t('error.other')}: {t('app.title')}</title></svelte:head>
 
 <div class="container err">
+	<span class="echo" aria-hidden="true"><Echo mood="hmm" size={120} /></span>
 	<h1>{page.status === 404 ? t('error.404') : t('error.other')}</h1>
 	<p>{t('error.404.lede')}</p>
 	<p class="row">
@@ -17,7 +19,11 @@
 
 <style>
 	.err {
-		padding-block: var(--space-9);
+		padding-block: var(--space-8) var(--space-9);
+	}
+	.echo {
+		display: block;
+		margin-bottom: var(--space-5);
 	}
 	h1 {
 		font-size: var(--text-display);

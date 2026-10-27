@@ -117,3 +117,85 @@ digital eras, and say that this is a NoeticEcho project, the last textbook of th
   performance 0.98, accessibility 1.00 before and after; first-route JS 54.8 KB of 150.
   `tests/e2e/scene.spec.ts`: the scene moves on a wide screen and its button stops it, is still
   under reduced motion, and is neither shown nor fetched on a phone.
+
+## The comic rail and the second review (27.10.2026)
+
+Martin: «на текстовых уроках также справа есть большое пустое пространство — я предлагаю там тоже
+разместить что-то вроде рисованного комикса с маскотом Эха в стиле дизайна NoeticEcho — да и в
+целом, просмотреть все страницы и шаблоны уроков на предмет качественного дизайна и улучшений».
+
+### The comic
+
+A lesson's `comic` (format in `docs/content-plan/README.md`, «Комикс»; code in `src/lib/comic/`)
+is two to four panels of Эхо with one prop each, written for all 13 lessons of parts 0 and 1.
+
+- **Where.** From 1100 px it is a column of 16 to 21 rem a gutter after the theory, which keeps
+  its measure; the composition stays left with the header rather than pushing the rail to the
+  container's edge. It is sticky inside the theory and ends with it, so it never reaches the
+  practice. Its top is `min(32px, 100dvh − its height − 32px)`, the height measured by a
+  ResizeObserver: a rail taller than the screen (1100 × 800) scrolls with the text until its last
+  panel shows, then stays. Below 1100 px it is a strip under the header, a panel and the next
+  one's edge, scrolled sideways inside itself and run to the screen's edges; it takes a tab stop
+  only while it scrolls (axe's scrollable-region rule), never on a wide screen.
+- **Panel.** A rule-edged frame on the body surface: a caption in the corner (secondary text on
+  the canvas: on Paper's inset it was 4.0:1, found by axe), the lines as bubbles above the
+  drawing, Эхо's edged in its own echo light, a prop's in the plain rule, a tail pointing down at
+  the speaker. Эхо's words are Literata, the guide's voice in the tokens.
+- **Drawing.** One SVG, `aria-hidden`; the mascot nested inside it from `design/mascot/echo.svg`
+  with its `<title>` removed and its gradient id made unique per panel, in the panel's mood and
+  era. It is still: the guide's idle motion beside text being read was a distraction. Props are
+  line drawings in tokens; a CRT's glass is the one pinned colour (`--crt-ground`, Ink's canvas),
+  because the phosphor amber only reads on black and Paper inverts the ink ramp.
+- **Text.** Every word is in the list as text, each line named for its speaker («Эхо: …»,
+  «Сервер: …»), so nothing lives only in the drawing. Labels drawn on props repeat what a line says.
+- **Motion.** The panels arrive (opacity and 8 px, `--dur-ui`, 120 ms apart) as a self-running
+  CSS animation inside `prefers-reduced-motion: no-preference`; there is none under reduce
+  (`tests/e2e/comic.spec.ts` checks both, and placement at 1100, 1280, 1440 and 1600).
+- **Cost.** No new JavaScript on the first route (54.6 KB of 150); a lesson's HTML grows by the
+  inlined mascot, about 7 KB per panel before gzip, which compresses to almost nothing as the
+  copies repeat.
+
+**Gates, read for the comic.**
+
+| Gate | Reading |
+|---|---|
+| 80 (Reflex), the drawn illustration | **Waived**: Martin asked for a drawn comic with the mascot; the mascot is approved and reused, never redrawn, and the props are drawn in the same line language. |
+| 47a (Floor), a drawn browser bar | Not a frame standing for a screenshot of a product: a browser is the subject of these lessons, drawn as an object in a comic. To stay clear of the tell, the browser prop has no traffic lights; it is a window and its address field. The 1996 window keeps a title bar because the 1996 bevel is what the panel is about. |
+| 64 (Reflex), mono as costume | Fixed: drawn labels are in the body face; mono only on a CRT, an address field, a file name and packet numbers. |
+| 75 (Reflex), text that strains | **Answered**: labels drawn on props render at about 9 px. They are decoration inside an `aria-hidden` drawing and every one repeats a line set at 14 px. |
+| 19 (Floor), dashes | Fixed: five comic lines had an em dash; the lessons' house style writes «Интернет это дороги». |
+| 62 (Floor), hidden at rest | Passes: the reveal is a self-running CSS animation from visible-by-default markup. |
+
+### The review
+
+Walked at 360, 768, 1280 and 1600, Ink and Paper, on a private build: a lesson with practice
+(02-html/01), lessons with comics (all of parts 0 and 1), the map, review, gallery, settings with
+the brief editor, the prologue's seven frames, the error page, and the empty states.
+
+| Where | Finding | Gate | What was done |
+|---|---|---|---|
+| Brief editor | `font-size: var(--text-body)` twice: that token is the body *colour* (the size is `--text-body-size`), so the declaration was invalid and the size only inherited by luck | tokens | The size token. |
+| Brief editor | Group heads («Люди», «Доказательства») sat 28 px under the add button above them and 16 px over their list | 71 | 32 px above a group head; sections padded 24 px. |
+| Settings | The progress file picker said «Choose File / No file chosen» in an English browser: the native control speaks the browser's language, not the page's | 26b, copy | A label styled as the secondary button, «Выбрать файл с прогрессом», and «Файл не выбран» or the file's name; the input stays real and focusable, its ring drawn on the button. |
+| Practice | A check's line showed its regex: «начинается как нужно (^tel:)», and elsewhere `^\s*\S[\s\S]{48,158}` | copy | A plain pattern is said in words («начинается с tel:», «Атрибут href у a: #top»); anything else is «подходит под образец». Unit-tested. |
+| Lesson, «Дальше» and map | Concept titles mid-sentence kept their capitals: «Теперь вы знаете: Структура HTML-документа, Теги» | copy | `midSentence`: a Russian common noun loses its capital; acronyms, Latin names and proper names (Яндекс, Искин, Эхо) keep it. |
+| Lesson, test | Options ran the container's full 1232 px at 1280, and a rule sat under the heading that no other section has | 25, 9 | 48 rem, no rule. |
+| Lesson, header | The «Зачем» lede at 40 ch stood as a five-line ragged column | 25 | 52 ch. |
+| Map | About 150 edges drawn in brass at all times read as noise, not as a graph | 9, restraint | Edges are hairlines at rest; pointing at or focusing a lesson lights its edges in brass and outlines the lessons it needs and opens. |
+| Gallery | «Эта версия появится, когда вы дойдёте до практики этой эпохи» eight times over | 69 | Said once in the lede; each empty era links to the lesson where its practice begins, or says its practice is still being written. |
+| Review, empty | «Повторять нечего» drawn in the same box as a card to answer | judged | Эхо beside the line, no box, and a way on («Открыть карту»). |
+| Error page | A heading and two buttons in an empty screen | judged | Эхо in «hmm» above the heading. |
+| Prologue, phone | Stepping the filmstrip at 360 left the next era's year and the top of its frame above the screen | judged | After a step, a frame whose top is above the screen is scrolled to its start (instantly). |
+
+**Checked and not changed.**
+
+- **The editor's gutter** looked misaligned with its lines in full-page screenshots; measured live,
+  the gutter's numbers and the lines share their tops to the pixel. It was the screenshot
+  catching CodeMirror before its first measure.
+- **The preview** was white in the same screenshots for the same reason; the frame holds the page.
+- **Cards** keep their grid's count (three, then one: F20, as before).
+- **The prologue's frames** are meant to look like their eras and were judged only for the
+  phone scroll above.
+- **Diagrams** in `content/diagrams/` use rem and em font sizes of their own; they belong to the
+  lessons' authors and were left to them.
+- **Home** (`src/routes/+page*`) and the fonts are another agent's work and were not touched.
