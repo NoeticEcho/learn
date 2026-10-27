@@ -7,6 +7,12 @@
  * cached from them. Immutable files are cache-first; pages and their data are network-first,
  * falling back to the cache, so a new release reaches the person as soon as they are online.
  * The cache carries the build's version, and activate deletes every other one.
+ *
+ * Every lookup ignores `Vary`. A host that answers `Vary: Origin` (vite preview does, and a
+ * mirror may) made each cached module a miss, because a page's module request carries headers
+ * the worker's own `addAll` did not: offline, every lesson opened on «Что-то сломалось». The
+ * immutable files are named by their hash and the pages are the same for every visitor, so
+ * nothing here varies by request header.
  */
 import { self } from '$app/service-worker';
 import { immutable, assets, prerendered } from '$app/manifest';
@@ -54,7 +60,7 @@ self.addEventListener('fetch', (event) => {
 		(async () => {
 			const cache = await caches.open(CACHE);
 			if (immutableFile) {
-				const hit = await cache.match(req);
+				const hit = await cache.match(req, { ignoreVary: true });
 				if (hit) return hit;
 			}
 			try {
@@ -62,7 +68,7 @@ self.addEventListener('fetch', (event) => {
 				if (res.ok && res.type === 'basic') cache.put(req, res.clone());
 				return res;
 			} catch (e) {
-				const hit = (await cache.match(req)) ?? (await cache.match(req, { ignoreSearch: true }));
+				const hit = (await cache.match(req, { ignoreVary: true })) ?? (await cache.match(req, { ignoreSearch: true, ignoreVary: true }));
 				if (hit) return hit;
 				if (req.mode === 'navigate') {
 					const fallback = await cache.match(url('404.html'));
