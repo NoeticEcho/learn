@@ -19,6 +19,15 @@ test('typing <h1> flips the exists check', async ({ page }) => {
 	await expect(check(page, 'name')).toHaveAttribute('data-ok', 'true');
 });
 
+test('noTag script and style sees the person’s page, not the sandbox’s own tags', async ({ page }) => {
+	await page.goto('./_dev/practice/');
+	await expect(check(page, 'no-inline')).toHaveAttribute('data-ok', 'true');
+	await write(page, '<h1>Анна Берёзкина</h1><style>h1{color:red}</style>');
+	await expect(check(page, 'no-inline')).toHaveAttribute('data-ok', 'false');
+	await write(page, '<h1>Анна Берёзкина</h1>');
+	await expect(check(page, 'no-inline')).toHaveAttribute('data-ok', 'true');
+});
+
 test('the preview cannot read the app', async ({ page }) => {
 	await page.goto('./_dev/practice/');
 	await page.getByRole('tab', { name: 'script.js' }).click();

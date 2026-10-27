@@ -20,9 +20,12 @@ export function evaluate(
 	checks: Check[],
 	persona: Record<string, unknown>
 ): CheckResult[] {
+	// What the sandbox adds to the page carries this mark (sandbox.ts SANDBOX_MARK); the checks
+	// look only at what the person wrote.
+	const mine = (els: ArrayLike<Element>): Element[] => Array.from(els).filter((e) => !e.hasAttribute('data-learn-sandbox'));
 	const all = (selector: string): Element[] | null => {
 		try {
-			return Array.from(doc.querySelectorAll(selector));
+			return mine(doc.querySelectorAll(selector));
 		} catch {
 			return null;
 		}
@@ -149,7 +152,7 @@ export function evaluate(
 				return ok(lang === want || lang.startsWith(`${want}-`), `lang:${lang}`);
 			}
 			case 'noTag': {
-				const found = c.tags.filter((tag) => doc.getElementsByTagName(tag).length > 0);
+				const found = c.tags.filter((tag) => mine(doc.getElementsByTagName(tag)).length > 0);
 				return ok(found.length === 0, `found:${found.join(',')}`);
 			}
 			case 'field': {

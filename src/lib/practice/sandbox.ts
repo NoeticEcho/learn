@@ -7,9 +7,17 @@
  * comes first in <head>, before anything the person wrote, so even an <img> they put at the top
  * cannot reach the network. The app's own CSP (app.html) also applies here, because a srcdoc
  * document inherits it; its frame-src keeps the frame from navigating away to another site.
+ *
+ * Every element this file adds (the CSP, the error reporter, the person's styles.css and
+ * script.js, the check runner) carries `data-learn-sandbox`, and the checks skip such elements:
+ * a check sees the page the person wrote in index.html, so `noTag` with `script` or `style`, or
+ * a count of `meta`, is not failed by the sandbox's own parts.
  */
 import { evaluate, type Check } from './checks.ts';
 import type { PracticeFiles } from '#lib/content/schema.ts';
+
+/** The marker on what the sandbox adds; `checks.ts` spells the same literal, since it cannot import. */
+export const SANDBOX_MARK = 'data-learn-sandbox';
 
 export const SANDBOX_CSP =
 	"default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src data:; media-src data:";
@@ -36,12 +44,12 @@ export function buildSrcdoc(
 	const js = files['script.js'] ?? '';
 	return [
 		'<!doctype html>',
-		`<meta http-equiv="Content-Security-Policy" content="${SANDBOX_CSP}">`,
-		`<script>(function(){var r=${report};addEventListener('error',function(e){r(e.message)});addEventListener('unhandledrejection',function(e){r(e.reason&&e.reason.message||e.reason)})})();</script>`,
-		css ? `<style>${raw(css, 'style')}</style>` : '',
+		`<meta ${SANDBOX_MARK} http-equiv="Content-Security-Policy" content="${SANDBOX_CSP}">`,
+		`<script ${SANDBOX_MARK}>(function(){var r=${report};addEventListener('error',function(e){r(e.message)});addEventListener('unhandledrejection',function(e){r(e.reason&&e.reason.message||e.reason)})})();</script>`,
+		css ? `<style ${SANDBOX_MARK}>${raw(css, 'style')}</style>` : '',
 		html,
-		js ? `<script>try{${raw(js, 'script')}\n}catch(e){(${report})(e&&e.message||e)}</script>` : '',
-		`<script>(function(){var evaluate=(${evaluate.toString()});var checks=${json(checks)};var persona=${json(persona)};` +
+		js ? `<script ${SANDBOX_MARK}>try{${raw(js, 'script')}\n}catch(e){(${report})(e&&e.message||e)}</script>` : '',
+		`<script ${SANDBOX_MARK}>(function(){var evaluate=(${evaluate.toString()});var checks=${json(checks)};var persona=${json(persona)};` +
 			`function run(){var results;try{results=evaluate(document,window,checks,persona)}catch(e){(${report})(e&&e.message||e);return}` +
 			`parent.postMessage({type:'learn:checks',results:results},'*')}` +
 			`if(document.readyState==='complete')run();else addEventListener('load',run)})();</script>`

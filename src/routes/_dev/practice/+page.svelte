@@ -11,7 +11,8 @@
 		solution: { 'index.html': '<h1>{{name}}</h1>', 'script.js': '' },
 		checks: [
 			{ id: 'h1', kind: 'exists', selector: 'h1' },
-			{ id: 'name', kind: 'field', selector: 'h1', field: 'name' }
+			{ id: 'name', kind: 'field', selector: 'h1', field: 'name' },
+			{ id: 'no-inline', kind: 'noTag', tags: ['script', 'style'] }
 		]
 	};
 	const persona = { name: 'Анна Берёзкина' };
