@@ -81,7 +81,7 @@
 			<a href="#top" tabindex="-1" class="act" class:colour={emphasis !== 'none'} class:big={emphasis === 'both'}>{brief.action}</a>
 		</p>
 		<div class="grid" style="gap:{gap}px;margin-top:{gap}px;grid-template-columns:repeat({cols},1fr)">
-			{#each brief.sections as s (s)}
+			{#each brief.sections as s, k (k)}
 				<div class="card">
 					<h4>{s}</h4>
 					<p>Несколько строк обычного текста раздела.</p>

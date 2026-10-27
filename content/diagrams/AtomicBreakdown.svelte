@@ -61,7 +61,7 @@
 		<div class="org section">
 			<h4 class="atom">{t('Что мы делаем')}</h4>
 			<div class="grid">
-				{#each brief.items as it (it)}
+				{#each brief.items as it, k (k)}
 					<div class="mol card">
 						<span class="atom ttl">{t(it)}</span>
 						<span class="atom txt">{t('Описание в одну строку')}</span>

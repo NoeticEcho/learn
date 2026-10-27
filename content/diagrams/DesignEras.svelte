@@ -144,7 +144,7 @@
 			<h3 style={look.h}>{brief.title}</h3>
 			<p style={look.p}>Для кого: {brief.forWhom}</p>
 			<ul class="items">
-				{#each brief.items as it (it)}<li style={look.li}>{it}</li>{/each}
+				{#each brief.items as it, k (k)}<li style={look.li}>{it}</li>{/each}
 			</ul>
 			<p style="margin:12px 0 0"><button type="button" style={look.btn} tabindex="-1">{brief.action}</button></p>
 		</div>
