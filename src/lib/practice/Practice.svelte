@@ -44,11 +44,23 @@
 	let results = $state<CheckResult[] | null>(null);
 	let error = $state('');
 	let asking = $state(false);
+	/** «Сбросить» asks first: the era's files are the person's site across all its lessons. */
+	let resetting = $state(false);
 	let showing = $state(false);
 	let frame: HTMLIFrameElement;
 
 	let renderTimer: ReturnType<typeof setTimeout> | undefined;
-	let saveTimer: ReturnType<typeof setTimeout> | undefined;
+	// One pending save per file, flushed rather than dropped: a single shared timer lost the first
+	// file's last edit when a second file was edited, and leaving the lesson within the debounce
+	// lost the last edit outright.
+	const pending = new Map<FileName, { timer: ReturnType<typeof setTimeout>; text: string }>();
+	function flush() {
+		for (const [file, { timer, text }] of pending) {
+			clearTimeout(timer);
+			store?.save(step.era, file, text);
+		}
+		pending.clear();
+	}
 
 	function render(now = false) {
 		clearTimeout(renderTimer);
@@ -64,11 +76,18 @@
 	function edit(file: FileName, text: string) {
 		files[file] = text;
 		render();
-		clearTimeout(saveTimer);
-		saveTimer = setTimeout(() => store?.save(step.era, file, text), 400);
+		clearTimeout(pending.get(file)?.timer);
+		const timer = setTimeout(() => {
+			pending.delete(file);
+			store?.save(step.era, file, text);
+		}, 400);
+		pending.set(file, { timer, text });
 	}
 
 	function reset() {
+		resetting = false;
+		for (const { timer } of pending.values()) clearTimeout(timer);
+		pending.clear();
 		files = starter();
 		for (const f of names) store?.save(step.era, f, files[f] ?? '');
 		render(true);
@@ -84,6 +103,7 @@
 			} else if (m?.type === 'learn:error') error = String(m.message).slice(0, 300);
 		};
 		addEventListener('message', onMessage);
+		addEventListener('pagehide', flush);
 		(async () => {
 			const loaded = starter();
 			if (store)
@@ -96,8 +116,9 @@
 		})();
 		return () => {
 			removeEventListener('message', onMessage);
+			removeEventListener('pagehide', flush);
 			clearTimeout(renderTimer);
-			clearTimeout(saveTimer);
+			flush();
 		};
 	});
 
@@ -143,7 +164,15 @@
 				{/key}
 			</div>
 			<div class="tools">
-				<button type="button" class="secondary" onclick={reset}>{t('practice.reset')}</button>
+				{#if resetting}
+					<span class="ask" role="alert">
+						{t('practice.reset.confirm')}
+						<button type="button" class="secondary" onclick={reset}>{t('practice.reset.yes')}</button>
+						<button type="button" class="quiet" onclick={() => (resetting = false)}>{t('practice.cancel')}</button>
+					</span>
+				{:else}
+					<button type="button" class="secondary" onclick={() => ((resetting = true), (asking = false))}>{t('practice.reset')}</button>
+				{/if}
 				{#if showing}
 					<button type="button" class="quiet" onclick={() => (showing = false)}>{t('practice.solution.hide')}</button>
 				{:else if asking}
@@ -153,7 +182,7 @@
 						<button type="button" class="quiet" onclick={() => (asking = false)}>{t('practice.cancel')}</button>
 					</span>
 				{:else}
-					<button type="button" class="quiet" onclick={() => (asking = true)}>{t('practice.solution')}</button>
+					<button type="button" class="quiet" onclick={() => ((asking = true), (resetting = false))}>{t('practice.solution')}</button>
 				{/if}
 			</div>
 		</div>
