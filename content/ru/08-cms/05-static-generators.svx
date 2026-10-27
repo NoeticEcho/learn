@@ -1,0 +1,1073 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/05-static-generators',
+		part: 8,
+		order: 5,
+		title: 'Генераторы статических сайтов и Markdown',
+		summary: 'Вы напишете страницы в Markdown с front matter, увидите, как генератор превращает их и шаблон в обычный HTML, и сможете выбрать между Jekyll, Hugo, Eleventy, Astro и SvelteKit по задаче. Это эпоха 5 (2019) вашего сайта: страницы по разделам, коллекция из ваших услуг и один общий шаблон.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser-1996', label: 'шапка × 50 файлов', caption: 'Было', say: 'Поменялся телефон в шапке. Открываю пятьдесят файлов…' },
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'flowchart',
+					label: 'Markdown|шаблон|HTML',
+					caption: 'Сборка',
+					say: 'Тексты в Markdown, оформление в одном шаблоне. Генератор собирает из них готовые HTML-файлы.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'server',
+					label: 'готовые файлы',
+					caption: 'На сервере',
+					say: [
+						{ text: 'А на сервере что?' },
+						{ who: 'Сервер', text: 'Только готовые файлы. Ломать нечего.' }
+					]
+				}
+			]
+		},
+		minutes: 25,
+		teaches: ['cms-markdown-frontmatter', 'cms-static-site-generator', 'cms-ssg-landscape'],
+		requires: ['cms-what-is-cms', 'html-semantic-elements', 'css-responsive', 'net-http-request-response'],
+		practice: {
+			id: 'cms-ssg-project',
+			title: 'Сайт на генераторе: Markdown, коллекция и шаблон',
+			task: 'В странице проект маленького генератора: настройки, общий шаблон, по странице Markdown на каждый раздел вашего брифа, страница каталога и коллекция услуг. 1) В site.yml впишите язык сайта (lang: ru) и языки (languages: …, как в брифе). 2) В layout.html: lang возьмите из настроек ({{ site.lang | escape }}), добавьте шапку (header) с меню из списка страниц ({% for p in pages %} … {% endfor %}) и подвал (footer); {{ content | strip }} оставьте. 3) В файле каждого раздела допишите в front matter description и напишите текст. 4) В catalog.md выведите услуги циклом по коллекции: {% for item in items %}- **{{ item.title | escape }}**, {{ item.price | escape }} {% endfor %}. Проверки читают файлы проекта; внизу вы видите собранный HTML. Двойные скобки в шаблоне дополнены фильтрами, потому что редактор курса сам подставляет значения в простые скобки. Все «…» нужно заменить.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="ssg">
+      <h2>Проект сайта на генераторе<\/h2>
+      <p>Это файлы проекта, как в настоящем генераторе. Правьте их прямо здесь: внизу в «Результате сборки» появится HTML каждой страницы.<\/p>
+
+      <h3>site.yml: настройки сайта<\/h3>
+      <textarea id="cfg" rows="4">title: {{name}}
+lang: …
+languages: …<\/textarea>
+
+      <h3>layout.html: общий шаблон, один на все страницы<\/h3>
+      <textarea id="layout" rows="16"><!doctype html>
+<html lang="…">
+<head>
+<meta charset="utf-8">
+<title>{{ page.title | escape }}<\/title>
+<\/head>
+<body>
+<main>{{ content | strip }}<\/main>
+<\/body>
+<\/html><\/textarea>
+
+      <h3>Страницы: по одному файлу Markdown на раздел<\/h3>
+      {{#each sections}}<textarea class="md-file" data-collection="pages" data-path="{{.}}.md" rows="7">---
+title: {{.}}
+description: …
+---
+# {{.}}
+
+…<\/textarea>
+      {{/each}}
+      <h3>catalog.md: страница каталога, которая берёт данные из коллекции<\/h3>
+      <textarea class="md-file" data-collection="pages" data-path="catalog.md" rows="8">---
+title: Каталог
+description: …
+---
+# Каталог
+
+…<\/textarea>
+
+      <h3>Коллекция items: по файлу на услугу или товар (данные из вашего брифа)<\/h3>
+      {{#each items}}<textarea class="md-file" data-collection="items" data-path="items/{{title}}.md" rows="5">---
+title: {{title}}
+price: {{price}}
+---
+{{text}}<\/textarea>
+      {{/each}}
+      <h3>Результат сборки<\/h3>
+      <div id="built"><\/div>
+    <\/section>
+
+    <script type="module" data-scaffold id="ssg-build">
+      // Учебный генератор (не Jekyll и не Hugo): собирает страницы из полей выше и показывает результат.
+      // Читать этот блок не нужно. Он не входит в ваш сайт.
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/<\/g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      /** «---\\nключ: значение\\n---\\nтекст» → { data, body }. Значения остаются строками. */
+      function frontMatter(text) {
+      const m = /^\\s*---\\s*\\n([\\s\\S]*?)\\n---\\s*(?:\\n([\\s\\S]*))?$/.exec(text);
+      if (!m) return { data: {}, body: text, ok: false };
+      const data = {};
+      for (const line of m[1].split('\\n')) {
+      const k = /^([A-Za-z_][\\w-]*):\\s*(.*)$/.exec(line.trim());
+      if (k) data[k[1]] = k[2].replace(/^["']|["']$/g, '');
+      }
+      return { data, body: m[2] ?? '', ok: true };
+      }
+      /** Подстановка: циклы, {{ путь | фильтр }}. */
+      function liquid(tpl, ctx) {
+      const out = tpl.replace(/\\{%\\s*for\\s+(\\w+)\\s+in\\s+(\\w+)\\s*%\\}([\\s\\S]*?)\\{%\\s*endfor\\s*%\\}/g, (_, v, list, body) =>
+      (Array.isArray(ctx[list]) ? ctx[list] : []).map((item) => liquid(body, { ...ctx, [v]: item })).join('')
+      );
+      return out.replace(/\\{\\{\\s*([\\w.]+)\\s*(?:\\|\\s*(\\w+))?[^}]*\\}\\}/g, (_, path, filter) => {
+      let v = path.split('.').reduce((o, k) => (o == null ? o : o[k]), ctx);
+      if (v == null) v = '';
+      return filter === 'escape' ? esc(v) : String(v).trim();
+      });
+      }
+      const inline = (s) =>
+      s
+      .replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1<\/strong>')
+      .replace(/\\[([^\\]]+)\\]\\(([^)\\s]+)\\)/g, '<a href="$2">$1<\/a>');
+      /** Markdown в миниатюре: # и ## заголовки, абзацы, списки «- », **жирный**, [ссылка](адрес). */
+      function markdown(src) {
+      const html = [];
+      let para = [];
+      let list = false;
+      const flush = () => {
+      if (para.length) html.push('<p>' + inline(para.join(' ')) + '<\/p>');
+      para = [];
+      };
+      const close = () => {
+      if (list) html.push('<\/ul>');
+      list = false;
+      };
+      for (const raw of src.split('\\n')) {
+      const line = raw.trim();
+      let m;
+      if (!line) (flush(), close());
+      else if ((m = /^(#{1,3})\\s+(.*)$/.exec(line))) (flush(), close(), html.push(\`<h\${m[1].length}>\${inline(m[2])}<\/h\${m[1].length}>\`));
+      else if ((m = /^[-*]\\s+(.*)$/.exec(line))) (flush(), list || html.push('<ul>'), (list = true), html.push('<li>' + inline(m[1]) + '<\/li>'));
+      else (close(), para.push(line));
+      }
+      flush();
+      close();
+      return html.join('\\n');
+      }
+      /**
+      * Собирает одну страницу: front matter, подстановка данных в текст, Markdown, потом layout.
+      * site: настройки (title, lang...), pages: все страницы [{title, path}], collections: { items: [...] }.
+      */
+      function buildPage(layout, site, file, pages, collections) {
+      const fm = frontMatter(file);
+      const ctx = { site, pages, ...collections, page: fm.data };
+      const content = markdown(liquid(fm.body, ctx));
+      return liquid(layout, { ...ctx, content });
+      }
+
+      function config() {
+        const out = {};
+        for (const line of document.getElementById('cfg').value.split('\\n')) {
+          const m = /^([A-Za-z_]\\w*):\\s*(.*)$/.exec(line.trim());
+          if (m) out[m[1]] = m[2];
+        }
+        return out;
+      }
+      function build() {
+        const box = document.getElementById('built');
+        box.replaceChildren();
+        const layout = document.getElementById('layout').value;
+        const files = (kind) => [...document.querySelectorAll('textarea.md-file[data-collection="' + kind + '"]')];
+        const items = files('items').map((t) => frontMatter(t.value).data);
+        const list = files('pages').map((t) => ({ t, title: frontMatter(t.value).data.title || t.dataset.path, path: t.dataset.path.replace(/\\.md$/, '.html') }));
+        for (const p of list) {
+          const html = buildPage(layout, config(), p.t.value, list.map((x) => ({ title: x.title, path: x.path })), { items });
+          const d = document.createElement('details');
+          const s = document.createElement('summary');
+          s.textContent = p.path + ' (' + html.length + ' символов HTML)';
+          const pre = document.createElement('pre');
+          pre.textContent = html;
+          d.append(s, pre);
+          box.append(d);
+        }
+      }
+      for (const t of document.querySelectorAll('#ssg textarea')) t.addEventListener('input', build);
+      build();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="ssg">
+      <h2>Проект сайта на генераторе<\/h2>
+      <p>Это файлы проекта, как в настоящем генераторе. Правьте их прямо здесь: внизу в «Результате сборки» появится HTML каждой страницы.<\/p>
+
+      <h3>site.yml: настройки сайта<\/h3>
+      <textarea id="cfg" rows="4">title: {{name}}
+lang: ru
+languages: {{languages}}<\/textarea>
+
+      <h3>layout.html: общий шаблон, один на все страницы<\/h3>
+      <textarea id="layout" rows="16"><!doctype html>
+<html lang="{{ site.lang | escape }}">
+<head>
+<meta charset="utf-8">
+<title>{{ page.title | escape }} | {{ site.title | escape }}<\/title>
+<\/head>
+<body>
+<header><strong>{{ site.title | escape }}<\/strong>
+<nav>{% for p in pages %}<a href="{{ p.path | escape }}">{{ p.title | escape }}<\/a> {% endfor %}<\/nav><\/header>
+<main>{{ content | strip }}<\/main>
+<footer>{{ site.title | escape }}, все права защищены<\/footer>
+<\/body>
+<\/html><\/textarea>
+
+      <h3>Страницы: по одному файлу Markdown на раздел<\/h3>
+      {{#each sections}}<textarea class="md-file" data-collection="pages" data-path="{{.}}.md" rows="7">---
+title: {{.}}
+description: Раздел сайта
+---
+# {{.}}
+
+Текст раздела пишется здесь обычными словами, а шапка и подвал подставятся из шаблона.<\/textarea>
+      {{/each}}
+      <h3>catalog.md: страница каталога, которая берёт данные из коллекции<\/h3>
+      <textarea class="md-file" data-collection="pages" data-path="catalog.md" rows="8">---
+title: Каталог
+description: Все позиции из коллекции
+---
+# Каталог
+
+{% for item in items %}- **{{ item.title | escape }}**, {{ item.price | escape }}
+{% endfor %}<\/textarea>
+
+      <h3>Коллекция items: по файлу на услугу или товар (данные из вашего брифа)<\/h3>
+      {{#each items}}<textarea class="md-file" data-collection="items" data-path="items/{{title}}.md" rows="5">---
+title: {{title}}
+price: {{price}}
+---
+{{text}}<\/textarea>
+      {{/each}}
+      <h3>Результат сборки<\/h3>
+      <div id="built"><\/div>
+    <\/section>
+
+    <script type="module" data-scaffold id="ssg-build">
+      // Учебный генератор (не Jekyll и не Hugo): собирает страницы из полей выше и показывает результат.
+      // Читать этот блок не нужно. Он не входит в ваш сайт.
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/<\/g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      /** «---\\nключ: значение\\n---\\nтекст» → { data, body }. Значения остаются строками. */
+      function frontMatter(text) {
+      const m = /^\\s*---\\s*\\n([\\s\\S]*?)\\n---\\s*(?:\\n([\\s\\S]*))?$/.exec(text);
+      if (!m) return { data: {}, body: text, ok: false };
+      const data = {};
+      for (const line of m[1].split('\\n')) {
+      const k = /^([A-Za-z_][\\w-]*):\\s*(.*)$/.exec(line.trim());
+      if (k) data[k[1]] = k[2].replace(/^["']|["']$/g, '');
+      }
+      return { data, body: m[2] ?? '', ok: true };
+      }
+      /** Подстановка: циклы, {{ путь | фильтр }}. */
+      function liquid(tpl, ctx) {
+      const out = tpl.replace(/\\{%\\s*for\\s+(\\w+)\\s+in\\s+(\\w+)\\s*%\\}([\\s\\S]*?)\\{%\\s*endfor\\s*%\\}/g, (_, v, list, body) =>
+      (Array.isArray(ctx[list]) ? ctx[list] : []).map((item) => liquid(body, { ...ctx, [v]: item })).join('')
+      );
+      return out.replace(/\\{\\{\\s*([\\w.]+)\\s*(?:\\|\\s*(\\w+))?[^}]*\\}\\}/g, (_, path, filter) => {
+      let v = path.split('.').reduce((o, k) => (o == null ? o : o[k]), ctx);
+      if (v == null) v = '';
+      return filter === 'escape' ? esc(v) : String(v).trim();
+      });
+      }
+      const inline = (s) =>
+      s
+      .replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1<\/strong>')
+      .replace(/\\[([^\\]]+)\\]\\(([^)\\s]+)\\)/g, '<a href="$2">$1<\/a>');
+      /** Markdown в миниатюре: # и ## заголовки, абзацы, списки «- », **жирный**, [ссылка](адрес). */
+      function markdown(src) {
+      const html = [];
+      let para = [];
+      let list = false;
+      const flush = () => {
+      if (para.length) html.push('<p>' + inline(para.join(' ')) + '<\/p>');
+      para = [];
+      };
+      const close = () => {
+      if (list) html.push('<\/ul>');
+      list = false;
+      };
+      for (const raw of src.split('\\n')) {
+      const line = raw.trim();
+      let m;
+      if (!line) (flush(), close());
+      else if ((m = /^(#{1,3})\\s+(.*)$/.exec(line))) (flush(), close(), html.push(\`<h\${m[1].length}>\${inline(m[2])}<\/h\${m[1].length}>\`));
+      else if ((m = /^[-*]\\s+(.*)$/.exec(line))) (flush(), list || html.push('<ul>'), (list = true), html.push('<li>' + inline(m[1]) + '<\/li>'));
+      else (close(), para.push(line));
+      }
+      flush();
+      close();
+      return html.join('\\n');
+      }
+      /**
+      * Собирает одну страницу: front matter, подстановка данных в текст, Markdown, потом layout.
+      * site: настройки (title, lang...), pages: все страницы [{title, path}], collections: { items: [...] }.
+      */
+      function buildPage(layout, site, file, pages, collections) {
+      const fm = frontMatter(file);
+      const ctx = { site, pages, ...collections, page: fm.data };
+      const content = markdown(liquid(fm.body, ctx));
+      return liquid(layout, { ...ctx, content });
+      }
+
+      function config() {
+        const out = {};
+        for (const line of document.getElementById('cfg').value.split('\\n')) {
+          const m = /^([A-Za-z_]\\w*):\\s*(.*)$/.exec(line.trim());
+          if (m) out[m[1]] = m[2];
+        }
+        return out;
+      }
+      function build() {
+        const box = document.getElementById('built');
+        box.replaceChildren();
+        const layout = document.getElementById('layout').value;
+        const files = (kind) => [...document.querySelectorAll('textarea.md-file[data-collection="' + kind + '"]')];
+        const items = files('items').map((t) => frontMatter(t.value).data);
+        const list = files('pages').map((t) => ({ t, title: frontMatter(t.value).data.title || t.dataset.path, path: t.dataset.path.replace(/\\.md$/, '.html') }));
+        for (const p of list) {
+          const html = buildPage(layout, config(), p.t.value, list.map((x) => ({ title: x.title, path: x.path })), { items });
+          const d = document.createElement('details');
+          const s = document.createElement('summary');
+          s.textContent = p.path + ' (' + html.length + ' символов HTML)';
+          const pre = document.createElement('pre');
+          pre.textContent = html;
+          d.append(s, pre);
+          box.append(d);
+        }
+      }
+      for (const t of document.querySelectorAll('#ssg textarea')) t.addEventListener('input', build);
+      build();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'ssg-exists', kind: 'exists', selector: '#ssg' },
+				{ id: 'no-blanks', kind: 'text', selector: '#ssg', matches: '^[^…]*$' },
+				{ id: 'cfg-lang', kind: 'text', selector: '#cfg', matches: '(?:^|\\n)lang:\\s*(?:ru|en)\\b' },
+				{ id: 'cfg-languages', kind: 'text', selector: '#cfg', matches: 'languages:\\s*[a-z]{2}' },
+				{ id: 'cfg-bilingual', kind: 'text', selector: '#cfg', matches: 'languages:\\s*[^\\n]*\\ben\\b', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'page-per-section', kind: 'count', selector: 'textarea.md-file[data-collection="pages"]', min: { brief: 'sections' } },
+				{ id: 'sections-named', kind: 'field', selector: 'textarea.md-file[data-collection="pages"]', field: 'sections' },
+				{ id: 'front-title', kind: 'text', selector: 'textarea.md-file[data-collection="pages"]', matches: '^\\s*---\\s*\\n\\s*title:\\s*\\S' },
+				{ id: 'front-description', kind: 'text', selector: 'textarea.md-file[data-collection="pages"]', matches: '\\ndescription:\\s*\\S{3,}' },
+				{ id: 'layout-content', kind: 'text', selector: '#layout', matches: '\\{\\{\\s*content\\s*(?:\\|[^}]*)?\\}\\}' },
+				{ id: 'layout-shared', kind: 'text', selector: '#layout', matches: '(?=[\\s\\S]*<header)(?=[\\s\\S]*<footer)' },
+				{ id: 'layout-nav', kind: 'text', selector: '#layout', matches: '\\{%\\s*for\\s+\\w+\\s+in\\s+pages\\s*%\\}' },
+				{ id: 'layout-lang', kind: 'text', selector: '#layout', matches: '<html[^>]*lang="\\{\\{\\s*site\\.lang' },
+				{
+					id: 'items-loop',
+					kind: 'text',
+					selector: 'textarea.md-file[data-collection="pages"]',
+					matches: '\\{%\\s*for\\s+\\w+\\s+in\\s+items\\s*%\\}[\\s\\S]*\\{\\{\\s*item\\.title',
+					when: { brief: 'items[].title' }
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Расставьте по порядку, что делает генератор статических сайтов при сборке',
+				items: [
+					'Читает файлы Markdown и данные',
+					'Разбирает front matter: заголовок, описание и другие поля страницы',
+					'Подставляет данные в текст и превращает Markdown в HTML',
+					'Вставляет результат в общий шаблон',
+					'Записывает готовые HTML-файлы в папку для выкладки'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что такое front matter?',
+				options: [
+					'Блок настроек в начале файла Markdown, между строками «---»: заголовок, описание, дата и другие поля страницы',
+					'Передняя часть шаблона с шапкой сайта',
+					'Первый абзац статьи'
+				],
+				answer: 0,
+				why: [
+					'Да. Это «паспорт» страницы: шаблон берёт оттуда заголовок и описание, а коллекции сортируют по полям.',
+					'Нет: шапка это часть шаблона, а не файла содержания.',
+					'Нет: front matter не показывается посетителю, он служит генератору.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что лежит на сервере сайта, собранного генератором?',
+				options: [
+					'Готовые HTML, CSS и картинки: обычные файлы, которые отдаёт веб-сервер',
+					'Базa данных и PHP-код, которые собирают страницу под каждого посетителя',
+					'Файлы Markdown, которые сервер превращает в HTML по запросу'
+				],
+				answer: 0,
+				why: [
+					'Да. Сборка происходит заранее, у вас или в сервисе сборки. Поэтому сайт быстрый, а взламывать на сервере нечего.',
+					'Нет: это описание динамического сайта.',
+					'Нет: Markdown превращается в HTML при сборке, а не по запросу.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините генератор с тем, что о нём стоит знать',
+				pairs: [
+					['Jekyll', 'один из первых (2008, Ruby), на нём работают GitHub Pages'],
+					['Hugo', 'очень быстрая сборка, один исполняемый файл (Go)'],
+					['Eleventy', 'гибкий, на JavaScript, поддерживает много языков шаблонов'],
+					['Astro', 'сайты содержания, который почти не отправляет JavaScript браузеру'],
+					['SvelteKit', 'полноценный фреймворк, умеющий предварительную сборку страниц']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'В каких случаях генератор статического сайта подходит хуже обычной CMS?',
+				options: [
+					'Содержание правят ежедневно несколько человек без технических знаний',
+					'Нужен личный кабинет и заказы с постоянно меняющимися данными',
+					'Сайт из тридцати страниц, которые правит один разработчик раз в месяц',
+					'Нужны живые комментарии и оплата прямо на сайте без внешних сервисов'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: у генератора нет привычной админки, правят файлы и вносят изменения через Git.',
+					'Да: личные кабинеты и заказы это динамика, нужен сервер или сервис.',
+					'Нет: это лучший случай для генератора: быстро, безопасно, дёшево.',
+					'Да: комментарии и оплату подключают внешними сервисами, а не из самого генератора.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Телефон в шапке поменялся. Как это делается на сайте с генератором?',
+				options: [
+					'Правится одна строка в общем шаблоне, потом сайт пересобирается, и телефон меняется на всех страницах',
+					'Открывают и правят каждую страницу отдельно',
+					'Телефон правят прямо на сервере в готовом HTML'
+				],
+				answer: 0,
+				why: [
+					'Да. Шапка и подвал живут в одном шаблоне: правка одна, сборка раскладывает её по всем страницам.',
+					'Нет: ради того, чтобы так не делать, шаблон и придуман.',
+					'Нет: готовые файлы пересоздаются при следующей сборке, и правка пропадёт.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-markdown',
+				front: 'Что такое Markdown?',
+				back: 'Простой способ писать текст с разметкой обычными знаками: # заголовок, - пункт списка, **жирный**, [ссылка](адрес). Превращается в HTML. Его придумали в 2004 году, а строгий общий вариант называется CommonMark.'
+			},
+			{
+				id: 'cms-frontmatter',
+				front: 'Что такое front matter?',
+				back: 'Блок настроек страницы в начале файла Markdown между строками «---»: title, description, date и другие поля. Шаблон берёт их оттуда, коллекции по ним сортируют.'
+			},
+			{
+				id: 'cms-ssg-pipeline',
+				front: 'Что делает генератор статического сайта?',
+				back: 'При сборке читает Markdown и данные, разбирает front matter, подставляет данные в шаблон и записывает готовые HTML-файлы. На сервере остаются обычные файлы.'
+			},
+			{
+				id: 'cms-ssg-tradeoffs',
+				front: 'Плюсы и минусы статического сайта',
+				back: 'Плюсы: быстро, безопасно (нечего взламывать), дёшево или бесплатно, история в Git. Минусы: нет привычной админки, динамику (формы, поиск, оплату) берут из сервисов, а сборка растёт с числом страниц.'
+			},
+			{
+				id: 'cms-ssg-landscape',
+				front: 'Чем отличаются Jekyll, Hugo, Eleventy, Astro, SvelteKit?',
+				back: 'Jekyll (Ruby, 2008) классика GitHub Pages. Hugo (Go) самый быстрый. Eleventy (JS) гибкий. Astro (2021) для сайтов содержания с минимумом JavaScript. SvelteKit полноценный фреймворк с предсборкой страниц.'
+			}
+		],
+		sources: [
+			{ title: 'Markdown Guide: Basic Syntax', url: 'https://www.markdownguide.org/basic-syntax/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'CommonMark: справка по Markdown', url: 'https://commonmark.org/help/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Jekyll: Front Matter', url: 'https://jekyllrb.com/docs/front-matter/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Hugo: Introduction', url: 'https://gohugo.io/about/introduction/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Eleventy Docs', url: 'https://www.11ty.dev/docs/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Astro Docs: начало работы', url: 'https://docs.astro.build/ru/getting-started/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Сейчас вы построите маленький сайт так, как строят на генераторе: тексты в Markdown, оформление в одном шаблоне, а HTML собирается сам. Внизу страницы вы увидите результат сборки.',
+			hints: [
+				'Сначала настройки: lang это язык сайта (ru), languages список языков, как в брифе. Потом шаблон: шапка, подвал и lang из настроек.',
+				'Список страниц для меню шаблон берёт сам: {% for p in pages %}<a href="…">{{ p.title | escape }}<\/a>{% endfor %}. Не забудьте закрыть цикл словом endfor.',
+				'В каталоге список услуг выводит цикл: {% for item in items %}- **{{ item.title | escape }}**, {{ item.price | escape }} и в конце {% endfor %}. Каждая услуга должна быть отдельным пунктом списка с дефисом.'
+			],
+			mistakes: {
+				'ssg-exists': 'Блок проекта исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				'cfg-lang': 'В site.yml нужна строка lang: ru (или en).',
+				'cfg-languages': 'В site.yml нужна строка languages: со списком языков, например languages: ru.',
+				'cfg-bilingual': 'У проекта два языка, а в languages нет en. Напишите languages: ru, en.',
+				'page-per-section': 'Нужно по файлу Markdown на каждый раздел брифа. Не удаляйте поля.',
+				'sections-named': 'Заголовки страниц должны совпадать с названиями разделов из брифа.',
+				'front-title': 'В начале файла страницы нужен front matter: между строками «---» строка title: Название.',
+				'front-description': 'В front matter нужна строка description: с коротким описанием страницы.',
+				'layout-content': 'В шаблоне нет места для содержания страницы: {{ content | strip }}.',
+				'layout-shared': 'В шаблоне должны быть шапка header и подвал footer: они одинаковы для всех страниц.',
+				'layout-nav': 'Меню должно строиться циклом по страницам: {% for p in pages %} … {% endfor %}.',
+				'layout-lang': 'Язык страницы берите из настроек: <html lang="{{ site.lang | escape }}">.',
+				'items-loop': 'Список услуг должен выводиться циклом по коллекции, а не вписываться вручную: {% for item in items %}.'
+			},
+			outro: 'Ваш сайт теперь собирается из текстов и одного шаблона. Следующий шаг: отдать правку содержания редактору через удобную админку, не теряя этой схемы. Это «безголовая» CMS.'
+		},
+		say: {
+			Markdown: 'маркдаун',
+			CommonMark: 'коммон-марк',
+			Jekyll: 'джекил',
+			Hugo: 'хьюго',
+			Eleventy: 'элевенти',
+			Astro: 'астро',
+			SvelteKit: 'свелт-кит',
+			YAML: 'ямл',
+			Liquid: 'ликвид',
+			Git: 'гит',
+			'front matter': 'фронт маттер',
+			HTML: 'эйч-ти-эм-эл',
+			CMS: 'си-эм-эс'
+		}
+	};
+</script>
+
+<script>
+	import SsgPipeline from '../../diagrams/SsgPipeline.svelte';
+</script>
+
+## Другой путь: сайт как результат сборки
+
+В предыдущих уроках страница собиралась **при каждом запросе**: сервер брал содержание из базы и вставлял в шаблон. Есть другой путь, знакомый вам по части 6 как «статика»: страницы собирают **один раз заранее**, а на сервер кладут готовые файлы. Программа, которая это делает, называется **генератором статических сайтов**. Когда в 2010-х сайты начали взламывать, замедлять и дорого обслуживать, этот подход вернулся, потому что у такого сайта нет базы, кода на сервере и, значит, почти нечего ломать.
+
+## Markdown: текст без HTML
+
+Чтобы писать страницы, не набирая теги, придумали **Markdown** (Джон Грубер, 2004). Это несколько знаков, которые читаются глазами и превращаются в HTML:
+
+```markdown
+# Заголовок первого уровня
+## Заголовок второго уровня
+
+Обычный абзац с **жирным** словом и [ссылкой](https://example.ru).
+
+- пункт списка
+- ещё пункт
+```
+
+Правила Грубера были описаны примерами, и разные программы понимали их по-разному. Поэтому позже появился строгий общий вариант, **CommonMark**. Файл Markdown это обычный текст: его откроет любой редактор, он хранится в Git, а его содержание не привязано к оформлению. Если завтра вы смените шаблон, тексты не пострадают.
+
+## Front matter: паспорт страницы
+
+Над текстом страницы ставят небольшой блок настроек между строками из трёх дефисов. Он называется **front matter**:
+
+```markdown
+---
+title: Каталог
+description: Что мы делаем и сколько это стоит
+---
+# Каталог
+```
+
+Это «паспорт» страницы: заголовок, описание для поисковика, дата, любые ваши поля. Шаблон берёт их оттуда (`page.title`), а коллекции по ним сортируются. Такой приём придумал Jekyll, и теперь он есть почти везде.
+
+## Что делает генератор
+
+Подвигайте схему ниже. Слева Markdown со своим front matter, справа готовая страница. Услуги выводятся циклом по данным.
+
+<SsgPipeline />
+
+Работа генератора укладывается в пять шагов: прочитать файлы и данные; разобрать front matter; подставить данные в текст и превратить Markdown в HTML; вставить результат в **общий шаблон**; записать готовые файлы в папку. Эта работа называется **сборкой** (build) и идёт у вас на компьютере или на сервере сборки. Результат это обычная папка с HTML, CSS и картинками, которую можно положить куда угодно.
+
+Три понятия, которые встречаются в любом генераторе:
+
+- **Шаблон** (layout) задаёт общую рамку: шапка, меню, подвал. Он один, и телефон в шапке правится в одном месте.
+- **Данные и коллекции**: набор однотипных записей (все услуги, все статьи). Шаблон проходит по ним циклом и выводит список. Новая услуга это новый файл, а не правка страницы.
+- **Фильтры и вставки**: небольшие функции в шаблоне (экранирование, форматирование даты) и повторно используемые куски разметки.
+
+<details>
+<summary>Проверьте себя: где лежит телефон в шапке и сколько файлов править, чтобы его поменять?</summary>
+
+В общем шаблоне, один файл. После пересборки новая шапка окажется на всех страницах.
+
+</details>
+
+## Jekyll, Hugo, Eleventy, Astro, SvelteKit
+
+Генераторов сотни, и принцип у них один. Различаются язык, скорость и привычки. Вот пять самых полезных для знакомства.
+
+| Инструмент | Откуда | Чем известен |
+|---|---|---|
+| **Jekyll** | 2008, Ruby | классика, на нём работают GitHub Pages; шаблоны Liquid |
+| **Hugo** | 2013, Go | очень быстрая сборка тысяч страниц, один исполняемый файл |
+| **Eleventy** | 2018, JavaScript | гибкий и простой, поддерживает много языков шаблонов |
+| **Astro** | 2021, JavaScript | создан для сайтов содержания, шлёт браузеру минимум JavaScript |
+| **SvelteKit** | 2020-е, JavaScript | полноценный фреймворк: умеет собирать страницы заранее |
+
+Курс, который вы читаете, устроен так же. Каждый урок это файл Markdown с метаданными (мы называем их front matter), компоненты Svelte для живых схем, а сайт собирается в папку готовых HTML-файлов и лежит на бесплатном хостинге. Это SvelteKit в режиме предсборки.
+
+Как выбрать? Если нужен просто сайт со страницами и коллекциями, годится любой. Hugo берут за скорость на больших сайтах, Eleventy за простоту, Astro когда страницы почти не требуют скриптов, SvelteKit когда сайту нужны ещё и живые интерфейсы. Знакомство с одним из них поможет освоить остальные.
+
+## Что получаем и чем платим
+
+Плюсы статического сайта: **быстрый** (отдаётся готовый файл), **безопасный** (на сервере нет кода и базы), **дешёвый** (хостинг для статики часто бесплатен), **с историей** (каждая правка в Git, откат одной командой), **переносимый** (папку можно положить куда угодно).
+
+Минусы:
+
+- **нет привычной админки**: редактор должен уметь править файлы и отправлять изменения в Git (позже мы увидим, как это упрощает «безголовая» CMS);
+- **динамики нет**: формы, поиск, комментарии, оплата и личный кабинет подключаются как внешние сервисы или функции (урок 7);
+- **сборка растёт** вместе с числом страниц: для тысяч страниц нужны быстрый генератор и умная выкладка.
+
+## Практика
+
+Вы в эпохе 2019 года: «статика» вернулась в моду, и вы переносите свой сайт на генератор. В странице проект из четырёх видов файлов: настройки, общий шаблон, по странице Markdown на каждый раздел брифа и коллекция из ваших услуг. Допишите настройки и шаблон (язык, шапка с меню и подвал), заполните страницы и выведите услуги в каталоге циклом.
+
+Заметьте одну особенность. Редактор курса сам подставляет значения вашего брифа в простые двойные скобки, поэтому в шаблонах задачи рядом с каждым значением стоит безобидный фильтр: `{{ site.title | escape }}`. В настоящем Jekyll вы писали бы просто `{{ site.title }}`.
+
+## Что было не так с 2019 годом
+
+Генераторы 2019-го были замечательны для разработчиков и тяжелы для остальных. Установка Jekyll на Windows превращалась в испытание, сборка большого сайта длилась минутами, а редактору приходилось осваивать Git, чтобы поправить одну опечатку. Эти же проблемы решали следующие шаги: быстрые сборщики, визуальные редакторы поверх Git и «безголовые» CMS, о которых следующий урок.
