@@ -1,0 +1,543 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '02-html/09-languages',
+		part: 2,
+		order: 9,
+		title: 'Языки сайта: lang, hreflang и перевод',
+		summary:
+			'Если сайт на двух языках, поисковикам и программам чтения надо сказать, где какой, а адреса не должны путаться. После урока вы размечаете язык страницы и её переводов и знаете, почему машинный перевод юридических текстов рискован.',
+		minutes: 15,
+		teaches: ['html-lang-i18n'],
+		requires: ['html-head-meta', 'html-a11y-basics'],
+		practice: {
+			id: 'languages-hreflang',
+			title: 'Языки вашего сайта',
+			task: 'Разметьте языки страницы по полю languages из брифа. У html должен стоять lang="ru". В head добавьте для каждого языка сайта link rel="alternate" с hreflang и полным адресом (например https://zarechye.example/ru/ и https://zarechye.example/en/), а ещё запись x-default для случая, когда ни один язык не подошёл. Если у проекта есть английская версия, добавьте в шапку навигацию с ссылкой на неё: в ссылке hreflang="en" и lang="en", подпись по-английски. Если язык один, оставьте самоссылку и x-default, место под будущий второй язык уже готово.',
+			era: 4,
+			continues: 'a11y-pass',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://zarechye.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://zarechye.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Язык сайта">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'lang', kind: 'lang', equals: 'ru' },
+				{ id: 'self', kind: 'exists', selector: 'link[rel="alternate"][hreflang="ru"]' },
+				{ id: 'x-default', kind: 'exists', selector: 'link[rel="alternate"][hreflang="x-default"]' },
+				{ id: 'absolute', kind: 'count', selector: 'link[rel="alternate"][hreflang]:not([href^="https://"])', max: 0 },
+				{ id: 'en-version', kind: 'exists', selector: 'link[rel="alternate"][hreflang="en"]', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'switch', kind: 'exists', selector: 'nav a[hreflang="en"][lang="en"]', when: { brief: 'languages', contains: 'en' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Зачем нужен атрибут lang у элемента html?',
+				options: [
+					'Чтобы программа чтения выбрала правильное произношение, а браузер и поисковик знали язык',
+					'Чтобы браузер автоматически переводил страницу',
+					'Чтобы страница открывалась быстрее'
+				],
+				answer: 0,
+				why: [
+					'Да. Без lang диктор может читать русский текст английским голосом. Ещё по нему работают переносы, кавычки, проверка орфографии и подсказка «перевести страницу?».',
+					'Нет: перевод браузер предложит, но сам не включит. lang ему только помогает понять, что переводить.',
+					'Нет: скорость от него не меняется.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что верно про hreflang?',
+				options: [
+					'Связь должна быть взаимной: русская страница ссылается на английскую, а английская на русскую',
+					'Страница тоже указывает сама на себя',
+					'Адреса пишут относительные, чтобы они были короче',
+					'Запись x-default говорит, что показывать, если язык посетителя не подошёл'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: одностороннюю связь поисковик игнорирует.',
+					'Да: в списке версий каждая страница перечисляет и себя.',
+					'Нет: адреса в hreflang полные, с https://.',
+					'Да: это запасной вариант для всех остальных.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините способ различать языки в адресе с его названием',
+				pairs: [
+					['example.ru/en/', 'подпапка'],
+					['en.example.ru', 'поддомен'],
+					['example.com для англоязычной версии', 'отдельный домен']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Как лучше подписать ссылку на английскую версию?',
+				options: [
+					'English, с атрибутами hreflang="en" и lang="en"',
+					'EN',
+					'Флаг Великобритании'
+				],
+				answer: 0,
+				why: [
+					'Да. Название языка пишут на нём самом: человек, который его знает, найдёт ссылку, даже если остальная страница ему непонятна. lang="en" нужен, чтобы диктор прочитал слово по-английски.',
+					'Нет: код не всем понятен, а диктор его прочтёт по буквам.',
+					'Нет: флаг означает страну, а не язык, и его не прочитает диктор.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Нужно ли автоматически перенаправлять посетителя на нужный язык по его IP?',
+				options: [
+					'Лучше предложить, но не навязывать: язык браузера и страна не всегда совпадают с желанием человека',
+					'Да, всегда',
+					'Нет, язык нельзя менять никогда'
+				],
+				answer: 0,
+				why: [
+					'Да. Человек может путешествовать, пользоваться чужим компьютером или хотеть другую версию. Поэтому предложите перейти и дайте переключатель.',
+					'Нет: навязанная смена языка раздражает, а поисковик может не увидеть другую версию.',
+					'Нет: предложить можно, главное оставить выбор.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите абзац по-русски, в котором английское слово «online» стоит в span с атрибутом lang="en".',
+				starter: '',
+				checks: [
+					{ id: 'span-lang', kind: 'attr', selector: 'p span', name: 'lang', matches: '^en$' },
+					{ id: 'online', kind: 'text', selector: 'p span', matches: 'online' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-lang-attr',
+				front: 'Что делает lang?',
+				back: 'Сообщает язык страницы или куска: диктор выбирает произношение, браузер понимает переносы, кавычки и перевод, поисковик знает язык. Ставят у html и у фрагментов на другом языке.'
+			},
+			{
+				id: 'html-hreflang',
+				front: 'Как связать переводы страницы?',
+				back: 'В head каждой версии: link rel="alternate" hreflang="ru" href="…" для всех версий, включая себя, плюс x-default. Связь взаимная, адреса полные.'
+			},
+			{
+				id: 'html-lang-urls',
+				front: 'Как различать языки в адресе?',
+				back: 'Подпапкой (/ru/, /en/), поддоменом (en.example.ru) или отдельным доменом. Выберите один способ и держитесь его.'
+			},
+			{
+				id: 'html-lang-mt',
+				front: 'Чем опасен машинный перевод юридического текста?',
+				back: 'Термины в разных странах значат разное, одно слово меняет обязательства. Переводить такие тексты нужно человеку, который знает предмет, и его же просить проверить.'
+			}
+		],
+		sources: [
+			{
+				title: 'lang (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/lang',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Declaring language in HTML (W3C)',
+				url: 'https://www.w3.org/International/questions/qa-html-language-declarations',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Tell Google about localized versions of your page',
+				url: 'https://developers.google.com/search/docs/specialty/international/localized-versions',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Сайт на двух языках это две страницы, которые знают друг о друге. Скажем об этом и людям, и поисковику.',
+			hints: [
+				'В head для каждого языка: <link rel="alternate" hreflang="ru" href="https://zarechye.example/ru/">. Для английского то же с hreflang="en".',
+				'Запись для остальных: <link rel="alternate" hreflang="x-default" href="https://zarechye.example/">. Адреса везде полные.',
+				'Ссылка на английскую версию: <a href="/en/" hreflang="en" lang="en">English</a> внутри <nav aria-label="Язык сайта">.'
+			],
+			mistakes: {
+				lang: 'У html должен быть lang="ru".',
+				self: 'Страница должна указывать и на себя: link rel="alternate" с hreflang="ru".',
+				'x-default': 'Добавьте запись x-default: link rel="alternate" hreflang="x-default".',
+				absolute: 'Адреса в hreflang должны быть полными и начинаться с https://.',
+				'en-version': 'У вашего сайта есть английская версия: нужна запись hreflang="en".',
+				switch: 'Добавьте в навигацию ссылку на английскую версию с атрибутами hreflang="en" и lang="en".'
+			},
+			outro: 'Теперь страницы знают друг о друге, а диктор читает каждое слово нужным голосом. Это последний шаг к эпохе 2014 года, и дальше мы нарядим страницу в CSS.'
+		},
+		say: { HTML: 'эйч-ти-эм-эль', lang: 'ленг', hreflang: 'эйч-реф-ленг', alternate: 'альтернейт', 'x-default': 'икс-дефолт', UTF: 'ю-ти-эф', 'ccTLD': 'си-си-ти-эл-ди', English: 'инглиш' }
+	};
+</script>
+
+<script>
+	import HreflangMap from '../../diagrams/HreflangMap.svelte';
+</script>
+
+## Язык страницы
+
+Страница на русском должна сказать об этом. Атрибут `lang` у элемента `html` вы ставили ещё на первом уроке. Зачем он на самом деле?
+
+- **Программа чтения с экрана** выбирает голос и правила произношения по языку. Русский текст, прочитанный английским голосом, неразборчив.
+- **Браузер** по нему расставляет переносы и кавычки, проверяет орфографию и решает, предлагать ли перевод.
+- **Поисковик** подтверждает по нему язык страницы.
+
+Язык ставят не только странице. Если внутри русского текста есть фраза на другом языке, ей дают собственный `lang`: `<span lang="en">online</span>`. Диктор прочитает слово по-английски, а не по буквам. Язык указывают двух- или трёхбуквенным кодом (`ru`, `en`, `de`), при необходимости с регионом (`en-GB`, `pt-BR`).
+
+<details>
+<summary>Проверьте себя: зачем помечать lang слово на другом языке в тексте?</summary>
+
+Чтобы диктор прочитал его нужным голосом, а не как набор русских букв.
+
+</details>
+
+## Сайт на двух языках
+
+Если у проекта в брифе два языка, у вас две версии каждой страницы. Три вопроса: как различать адреса, как связать версии и как перевести.
+
+### Адреса
+
+Три способа:
+
+- **подпапка** — `example.ru/ru/` и `example.ru/en/`: проще всего, всё на одном домене;
+- **поддомен** — `en.example.ru`: удобно, если версии ведут разные люди;
+- **отдельный домен** — `example.ru` и `example.com`: полезно для рынков разных стран, но всё надо вести дважды.
+
+Выберите один способ и держитесь его. Страницы в обеих версиях удобно называть в соответствии с языком: `/ru/uslugi/` и `/en/services/`. Так адрес и читается, и хорошо понятен поиску.
+
+### Связь между версиями
+
+Поисковик сам не поймёт, что две страницы переводы друг друга. Ему говорят об этом в `head` каждой версии:
+
+```html
+<link rel="alternate" hreflang="ru" href="https://example.ru/ru/">
+<link rel="alternate" hreflang="en" href="https://example.ru/en/">
+<link rel="alternate" hreflang="x-default" href="https://example.ru/">
+```
+
+Правила: адреса полные; **связь взаимная** (если русская указывает на английскую, английская указывает на русскую, иначе связь игнорируют); страница перечисляет и **саму себя**; запись `x-default` показывает, что выбрать, если язык посетителя не подошёл. Это подсказка поисковику, а не команда. Для Google правила описаны в документации, и они общие для разных поисковиков, а для Яндекса загляните в справку Вебмастера.
+
+Поиграйте на схеме: поменяйте язык посетителя и связь.
+
+<HreflangMap />
+
+<details>
+<summary>Проверьте себя: что будет с односторонней связью hreflang?</summary>
+
+Поисковик её проигнорирует. Взаимность обязательна: обе страницы должны ссылаться друг на друга.
+
+</details>
+
+### Переключатель
+
+Для людей нужна ссылка на другую версию в шапке. Её подписывают **на самом языке**: «English», а не «EN» и не флаг. Человек, который знает английский, найдёт её, даже если не понимает остальной страницы. Ссылке дают `hreflang="en"` и `lang="en"`.
+
+Не перенаправляйте посетителя по его IP или языку браузера насильно: он может быть в поездке, за границей, за чужим компьютером. Предложите, но оставьте выбор.
+
+## Перевод
+
+Перевести интерфейс (кнопки, меню) несложно. Перевести настоящий текст куда труднее, и вот что стоит знать.
+
+- **Машинный перевод** хорош для понимания «о чём это», но не для выпуска. Нужно, чтобы перевод вычитал человек, знающий предмет и язык.
+- **Юридические и профессиональные тексты** — особая зона риска. Один и тот же термин в разных странах значит разное: должность, звание, документ, вид экспертизы не имеют точных соответствий. Одно слово в перевод может изменить обязательства или ввести клиента в заблуждение. Для экспертов, юристов, врачей перевод стоит доверить тому, кто разбирается, и проверить.
+- **Не всё надо переводить.** Имена, названия документов, адреса лучше оставить и объяснить.
+
+И последнее: две версии нужно вести обе. Лучше один язык, который вы поддерживаете, чем два, один из которых устарел.
+
+## Практика
+
+Разметьте языки своей страницы. Если по брифу у вас один язык, всё равно сделайте самоссылку и `x-default`: когда придёт второй язык, структура готова. Если два, добавьте и ссылку на другую версию.
+
+## Что было не так с 2014 годом
+
+Сайты на двух языках собирали одной страницей с переключением скриптом, с одним адресом: поисковик видел только одну версию, а диктор читал всё одним голосом. Автоматический перевод через виджет вставляли на страницы с условиями и договорами. Сегодня лучше две полноценные версии с взаимными ссылками и человеческим переводом там, где от слов зависят обязательства.

@@ -1,0 +1,534 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '02-html/08-accessibility',
+		part: 2,
+		order: 8,
+		title: 'Доступность: сайт для всех',
+		summary:
+			'Доступный сайт читают люди с нарушениями зрения и слуха, на клавиатуре и в шумной электричке, а поисковики видят его лучше. После урока вы проверяете страницу по основным принципам WCAG, добавляете ссылку «перейти к содержимому» и знаете, когда ARIA не нужна.',
+		minutes: 25,
+		teaches: ['html-a11y-basics', 'html-aria-first-rule'],
+		requires: ['html-forms', 'html-images', 'html-heading-outline'],
+		practice: {
+			id: 'a11y-pass',
+			title: 'Проход по доступности',
+			task: 'Пройдитесь по своей странице глазами человека с клавиатурой и диктором. 1) Первой в body поставьте ссылку «Перейти к содержимому» с href="#main" и дайте main id="main". 2) К полю телефона добавьте подсказку: короткий текст в small с id и атрибут aria-describedby у поля. 3) В форме добавьте группу переключателей «Когда удобно позвонить» (радиокнопки с label) и заверните её в fieldset с legend. 4) Убедитесь, что у каждой картинки есть alt, у каждого поля label, у каждого nav своё имя (aria-label), нет пустых ссылок и кнопок, нет tabindex больше нуля и нет самодельных кнопок из div.',
+			era: 4,
+			continues: 'head-meta',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+            </p>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://zarechye.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://zarechye.example/og.png">
+    <meta property="og:locale" content="ru_RU">
+  </head>
+  <body>
+    <a class="skip" href="#main">Перейти к содержимому</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">Например, +7 000 000-00-00. Позвоним в рабочее время.</small>
+            </p>
+            <fieldset>
+              <legend>Когда удобно позвонить</legend>
+              <label><input type="radio" name="when" value="morning" checked> Утром</label>
+              <label><input type="radio" name="when" value="day"> Днём</label>
+              <label><input type="radio" name="when" value="evening"> Вечером</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'skip', kind: 'exists', selector: 'body > a:first-child[href="#main"]' },
+				{ id: 'main-id', kind: 'exists', selector: 'main#main' },
+				{ id: 'lang', kind: 'lang', equals: 'ru' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'alt', kind: 'count', selector: 'img:not([alt])', max: 0 },
+				{ id: 'hint', kind: 'exists', selector: 'input[aria-describedby]' },
+				{ id: 'fieldset', kind: 'exists', selector: 'fieldset > legend' },
+				{ id: 'nav-names', kind: 'count', selector: 'nav:not([aria-label]):not([aria-labelledby])', max: 0 },
+				{ id: 'tabindex', kind: 'count', selector: '[tabindex]:not([tabindex="0"]):not([tabindex="-1"])', max: 0 },
+				{ id: 'native', kind: 'count', selector: '[role="button"], [role="link"], [onclick]', max: 0 },
+				{ id: 'no-empty', kind: 'count', selector: 'a:empty, button:empty', max: 0 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'В чём первое правило ARIA?',
+				options: [
+					'Если есть подходящий нативный элемент HTML, берите его, а не наделяйте div ролью',
+					'Добавляйте aria-label ко всему, что видите',
+					'ARIA нужна каждому элементу страницы'
+				],
+				answer: 0,
+				why: [
+					'Да. Нативный button уже умеет получать фокус, нажиматься с клавиатуры и называться кнопкой. ARIA только меняет, что слышит диктор, но не добавляет поведения. «Нет ARIA лучше, чем плохая ARIA».',
+					'Нет: лишние подписи путают, иногда читаются дважды или перекрывают видимый текст.',
+					'Нет: хорошо размеченной странице ARIA нужна лишь изредка.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините принцип WCAG с его смыслом',
+				pairs: [
+					['Воспринимаемость', 'информацию можно увидеть или услышать: есть alt, субтитры, контраст'],
+					['Управляемость', 'всем можно пользоваться с клавиатуры и без спешки'],
+					['Понятность', 'текст и поведение страницы предсказуемы, ошибки объяснены'],
+					['Надёжность', 'страница работает в разных браузерах и с программами чтения']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Зачем ссылка «Перейти к содержимому» в самом начале страницы?',
+				options: [
+					'Чтобы человек с клавиатуры или диктором не прокликивал всё меню на каждой странице',
+					'Чтобы поисковик быстрее нашёл главное',
+					'Для красоты: на ней обычно рисуют стрелку'
+				],
+				answer: 0,
+				why: [
+					'Да. Она первая в порядке табуляции и ведёт сразу к main. Обычно её скрывают, пока она не получит фокус.',
+					'Нет: поиск здесь ни при чём.',
+					'Нет: она функциональная, а не декоративная.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что верно про порядок табуляции?',
+				options: [
+					'Он идёт в том порядке, в каком элементы стоят в разметке',
+					'Рамку фокуса нельзя убирать, не заменив чем-то заметным',
+					'Чтобы поменять порядок, ставят tabindex="5", "6", "7"',
+					'Нативные ссылки, кнопки и поля получают фокус сами'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: поэтому важен порядок самих элементов в HTML.',
+					'Да: по рамке человек с клавиатуры видит, где он. Убрать её можно только заменив лучшей.',
+					'Нет: положительный tabindex ломает естественный порядок и сопровождать такую страницу невозможно. Правильно ставить элементы в нужном порядке в разметке.',
+					'Да: ссылка с href, button, input, select, textarea уже в порядке табуляции.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Каков минимальный контраст обычного текста с фоном по WCAG, уровень AA?',
+				options: ['4,5 к 1', '3 к 1', '7 к 1'],
+				answer: 0,
+				why: [
+					'Да. Для крупного текста достаточно 3 к 1, а 7 к 1 — это уровень AAA. Как его измерить, вы узнаете в части про CSS.',
+					'Нет: 3 к 1 нужно крупному тексту и значкам, а обычному больше.',
+					'Нет: 7 к 1 это более строгий уровень AAA, обязательным его делают не всюду.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите кнопку с текстом «Открыть меню» нативным элементом.',
+				starter: '',
+				checks: [
+					{ id: 'button', kind: 'exists', selector: 'button' },
+					{ id: 'text', kind: 'text', selector: 'button', matches: 'Открыть меню' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-a11y-why',
+				front: 'Для кого доступность?',
+				back: 'Для людей с нарушениями зрения, слуха, моторики, но и для всех в разных обстоятельствах: солнце на экране, одна рука, шумный вагон. Она же помогает поиску.'
+			},
+			{
+				id: 'html-a11y-pour',
+				front: 'Что такое POUR в WCAG?',
+				back: 'Четыре принципа: Perceivable (воспринимаемость), Operable (управляемость), Understandable (понятность), Robust (надёжность).'
+			},
+			{
+				id: 'html-a11y-aria',
+				front: 'Первое правило ARIA?',
+				back: 'Если есть нативный элемент с нужным смыслом и поведением, берите его. ARIA меняет только то, что слышит диктор, и не добавляет поведения.'
+			},
+			{
+				id: 'html-a11y-focus',
+				front: 'Что важно про фокус с клавиатуры?',
+				back: 'Порядок по разметке, видимая рамка фокуса, доступность всего без мыши и ссылка «перейти к содержимому» в начале.'
+			},
+			{
+				id: 'html-a11y-basics',
+				front: 'Назовите быстрые победы в доступности',
+				back: 'alt у картинок, label у полей, заголовки по порядку, lang у страницы, смысловые элементы, нативные кнопки, контраст не ниже 4,5 к 1.'
+			}
+		],
+		sources: [
+			{
+				title: 'HTML: A good basis for accessibility (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'What is accessibility? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/What_is_accessibility',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Learn Accessibility (web.dev)', url: 'https://web.dev/learn/accessibility', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Web Content Accessibility Guidelines (WCAG) 2.2', url: 'https://www.w3.org/TR/WCAG22/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Using ARIA (W3C)', url: 'https://www.w3.org/TR/using-aria/', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Сейчас вы пройдёте по странице так, как её проходит человек с клавиатурой или диктором. Это быстрее, чем кажется, и хорошо видно, что исправить.',
+			hints: [
+				'Ссылка «Перейти к содержимому» ставится самым первым элементом в body: <a href="#main">…</a>. У main должен быть id="main".',
+				'Подсказка к полю: <input … aria-describedby="phone-hint"> и <small id="phone-hint">Текст подсказки</small>. Значение aria-describedby равно id подсказки.',
+				'Группа переключателей: <fieldset><legend>Когда удобно позвонить</legend><label><input type="radio" name="when" value="day"> Днём</label>…</fieldset>.'
+			],
+			mistakes: {
+				skip: 'Первым элементом в body должна быть ссылка <a href="#main">Перейти к содержимому</a>.',
+				'main-id': 'У main нужен id="main", чтобы ссылка «перейти к содержимому» знала, куда вести.',
+				lang: 'У html должен быть lang="ru".',
+				labels: 'У какого-то поля нет подписи label.',
+				alt: 'У каждой картинки должен быть alt.',
+				hint: 'Добавьте подсказку и свяжите её с полем через aria-describedby.',
+				fieldset: 'Группу переключателей заверните в <fieldset> с <legend>: подписью всей группы.',
+				'nav-names': 'У каждого nav должно быть имя: aria-label="Разделы сайта".',
+				tabindex: 'Остался tabindex больше нуля. Уберите его: порядок задаёт разметка.',
+				native: 'Остался самодельный элемент с role="button" или onclick. Замените его на нативный button или a.',
+				'no-empty': 'Есть пустая ссылка или кнопка без текста. У неё должно быть название.'
+			},
+			outro: 'Теперь страницей можно пользоваться без мыши и без глаз. И заодно она понятнее всем остальным.'
+		},
+		say: { HTML: 'эйч-ти-эм-эль', WCAG: 'вэ-кэг', ARIA: 'ария', POUR: 'пор', AA: 'а-а', AAA: 'а-а-а', tabindex: 'табиндекс', fieldset: 'филдсет', legend: 'леджент', skip: 'скип', alt: 'альт', Tab: 'таб', Enter: 'энтер', WebAIM: 'веб-эйм' }
+	};
+</script>
+
+<script>
+	import KeyboardTest from '../../diagrams/KeyboardTest.svelte';
+</script>
+
+## Кому это нужно
+
+Доступность — это не «специальная версия сайта для инвалидов». Это сайт, которым можно пользоваться разными способами. Вот кто на самом деле его читает:
+
+- люди, которые **не видят** страницу и слушают её диктором (программой чтения с экрана) или читают пальцами на брайлевской строке;
+- люди с **плохим зрением**, которые увеличивают текст в несколько раз, или с нарушением цветоощущения;
+- люди, которые **не могут пользоваться мышью**: после травмы, с дрожью в руках, или просто пока у них в другой руке ребёнок;
+- люди, которые **не слышат**, и всем, кто смотрит видео без звука в метро;
+- люди с **когнитивными особенностями**, которым нужен понятный текст и спокойный порядок.
+
+Каждый из нас бывал в этом списке: на ярком солнце экран телефона нечитаем, со сломанной рукой мышь недоступна. А поисковик устроен как самый терпеливый слепой читатель: он тоже не видит картинок и идёт по разметке. Поэтому доступные страницы почти всегда лучше находятся в поиске.
+
+Каждый год исследование WebAIM Million проверяет автоматически главные страницы миллиона сайтов, и каждый год подавляющее большинство из них имеют ошибки. Самые частые: низкий контраст текста, картинки без alt, поля без подписи, пустые ссылки и кнопки. Их легко исправить, и вы умеете их исправлять: все они уже были в предыдущих уроках.
+
+## Четыре принципа
+
+Стандарт WCAG (Web Content Accessibility Guidelines, «Руководство по доступности веб-содержимого»; сейчас версия 2.2) строится на четырёх принципах, которые по первым буквам английских слов называют POUR:
+
+1. **Воспринимаемость** (Perceivable): информацию можно увидеть или услышать. Для картинки есть `alt`, для видео субтитры, для текста достаточный контраст.
+2. **Управляемость** (Operable): всем можно пользоваться с клавиатуры, и никто не торопит.
+3. **Понятность** (Understandable): язык страницы указан, текст ясен, поведение предсказуемо, ошибки в форме объяснены словами.
+4. **Надёжность** (Robust): страница работает в разных браузерах и с разными программами. Лучший способ этого добиться: писать правильный HTML.
+
+У каждого требования есть уровень: A (минимум), AA (то, что обычно требуют) и AAA (строже всего). Целиться стоит в AA. О законе вернёмся в части про качество и право: в России есть национальный стандарт на доступность сайтов для людей с нарушениями зрения, ГОСТ Р 52872-2019, и обязанности, которые зависят от вида организации.
+
+<details>
+<summary>Проверьте себя: что значит буква O в POUR?</summary>
+
+Operable, управляемость: всем можно пользоваться с клавиатуры, никто не торопит.
+
+</details>
+
+## Клавиатура: порядок и фокус
+
+Многие пользуются сайтом без мыши, только клавишей Tab. Tab переносит **фокус** (выбранный элемент) на следующую ссылку, кнопку или поле; Shift+Tab назад; Enter нажимает ссылку, Enter или Пробел кнопку. Что важно:
+
+- порядок фокуса идёт в **порядке разметки**. Поэтому элементы нужно ставить в HTML в том порядке, в котором их читают, а не двигать потом через CSS;
+- элемент в фокусе должен быть **виден**: рамка фокуса показывает, где вы. Стандартную рамку нельзя убирать (`outline: none`), не заменив чем-то заметным;
+- ссылки, кнопки и поля **получают фокус сами**. Положительный `tabindex="5"` не нужен: он ломает естественный порядок. Допустимы два значения: `tabindex="0"` (сделать фокусируемым то, что не было) и `tabindex="-1"` (убрать из порядка, но оставить доступным скрипту);
+- в самом начале страницы стоит ссылка **«Перейти к содержимому»**: она ведёт к `main` и позволяет не нажимать Tab двадцать раз по меню на каждой странице. Её обычно прячут, пока она не получила фокус.
+
+Попробуйте сами: на схеме три «кнопки» одного вида. Походите по ним Tab и нажмите Enter и Пробел.
+
+<KeyboardTest />
+
+<details>
+<summary>Проверьте себя: чем нативный button лучше div с обработчиком клика?</summary>
+
+Он сам получает фокус, нажимается Enter и Пробелом, и диктор знает, что это кнопка. Для div всё это пришлось бы дописывать.
+
+</details>
+
+## ARIA: когда нужна и когда нет
+
+**ARIA** (Accessible Rich Internet Applications) — набор дополнительных атрибутов, которые меняют то, что слышит диктор: `role` (роль), `aria-label` (имя), `aria-describedby` (подсказка), `aria-current` (текущий пункт), `aria-expanded` (раскрыто или нет). Она нужна для сложных интерфейсов, у которых нет нативного элемента.
+
+Первое правило ARIA: **если есть нативный элемент HTML с нужным смыслом и поведением, берите его**. ARIA лишь меняет озвучивание, но не добавляет поведения: `role="button"` не сделает div нажимаемым с клавиатуры. И неверная ARIA хуже, чем никакой: она обещает диктору то, чего нет. «Нет ARIA лучше, чем плохая ARIA», говорят в W3C.
+
+Есть и вторая половина: **часть «сложных» интерфейсов теперь тоже нативна**. Раскрывающийся блок делает `<details>` с `<summary>`, диалог — `<dialog>`, выбор из списка — `<select>`. Пользуйтесь ими.
+
+Где ARIA уместна и на нашей странице: `aria-label` у `nav`, если на странице больше одной навигации; `aria-describedby` связывает поле с подсказкой; `aria-current="page"` отмечает текущий пункт меню.
+
+<details>
+<summary>Проверьте себя: помогает ли role="button" на div пользоваться им с клавиатуры?</summary>
+
+Нет. Роль меняет только то, что слышит диктор. Фокус и нажатие по Enter и Пробелу пришлось бы писать скриптом. Проще взять нативный button.
+
+</details>
+
+## Практика
+
+Вы пройдёте по странице эпохи 2014 года как по чужой. Нужное сделать несложно, но каждое действие вы увидите в проверке. Дополнительно, уже вне нашего предпросмотра: откройте свою страницу в браузере, нажмите Tab и пройдите по ней, не трогая мышь. Видно ли, где фокус? Не застряли ли вы в меню? А потом запустите в инструментах разработчика проверку Lighthouse, раздел «Доступность», и посмотрите, что она найдёт.
+
+## Что было не так с 2014 годом
+
+Тогда доступность называли «хорошим тоном». Скриптовые меню без клавиатуры, «кнопки» из div, полупрозрачный серый текст на белом были нормой. Многие сайты убирали рамку фокуса, потому что она «некрасива». Сегодня за недоступный сайт можно получить жалобу и штраф (в США и ЕС это уже происходит), а правила WCAG стали основой законов во многих странах.

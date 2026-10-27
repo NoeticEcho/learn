@@ -1,0 +1,515 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '02-html/06-forms',
+		part: 2,
+		order: 6,
+		title: 'Формы: как человек что-то отправляет',
+		summary:
+			'Форма превращает посетителя в клиента, и от неё зависит результат сайта. После урока вы собираете форму под главное действие своего проекта, подписываете каждое поле, включаете проверку в браузере и ставите отдельную галочку согласия на обработку персональных данных.',
+		minutes: 30,
+		teaches: ['html-forms', 'html-form-validation'],
+		requires: ['html-links', 'net-http-request-response', 'net-tls'],
+		practice: {
+			id: 'contact-form',
+			title: 'Форма для главного действия вашего сайта 2014 года',
+			task: 'Начинается эпоха 2014 года. Страница ниже похожа на вашу из 2005-го, она уже собрана. Добавьте в неё форму для главного действия проекта: отдельным section с заголовком h2, в нём form с method="post" и action. Поля: имя (type text), телефон (type tel), коротко о задаче (textarea). У каждого поля label и атрибут autocomplete, имя и телефон обязательные. Потом отдельная галочка согласия на обработку персональных данных: обязательная, не отмеченная заранее, со ссылкой на privacy.html. Кнопка отправки type="submit" называется так же, как главное действие вашего проекта. Кнопку главного действия вверху страницы направьте на форму: href="#zayavka".',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">Как к вам обращаться</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Телефон</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+            </p>
+            <p>
+              <label for="f-comment">Коротко о задаче</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> Я согласен на обработку персональных данных, <a href="privacy.html">политика обработки</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'method', kind: 'attr', selector: 'form', name: 'method', matches: '^post$' },
+				{ id: 'action', kind: 'attr', selector: 'form', name: 'action', matches: '\\S' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'types', kind: 'count', selector: 'form input[type="tel"], form input[type="email"]', min: 1 },
+				{ id: 'autocomplete', kind: 'count', selector: 'form input[autocomplete]', min: 2 },
+				{ id: 'required', kind: 'count', selector: 'form input[required]', min: 2 },
+				{ id: 'consent', kind: 'exists', selector: 'form input[type="checkbox"][required]' },
+				{ id: 'consent-clean', kind: 'count', selector: 'form input[type="checkbox"][checked]', max: 0 },
+				{ id: 'policy', kind: 'attr', selector: 'form a', name: 'href', matches: 'privacy' },
+				{ id: 'submit', kind: 'field', selector: 'form button[type="submit"]', field: 'mainAction.label' },
+				{ id: 'few-fields', kind: 'count', selector: 'form input:not([type="checkbox"]):not([type="hidden"]):not([type="submit"]), form select, form textarea', max: 4 },
+				{ id: 'cta', kind: 'attr', selector: 'a.button', name: 'href', matches: '^#zayavka$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Почему у поля должен быть label, а не только подсказка placeholder?',
+				options: [
+					'Placeholder исчезает, как только человек начинает печатать, и не читается программой так, как подпись',
+					'Placeholder не умеет показывать русский текст',
+					'Без label форма не отправится'
+				],
+				answer: 0,
+				why: [
+					'Да. Подсказку в поле видно, пока оно пусто; потом человек забывает, что тут просили. Кроме того, label связан с полем, и по нажатию на текст курсор встаёт в поле, а программа чтения называет поле по подписи.',
+					'Нет: русский текст он показывает без проблем.',
+					'Нет: форма отправится и без label, просто будет неудобной и недоступной.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините данные с подходящим type поля',
+				pairs: [
+					['телефон', 'tel'],
+					['почта', 'email'],
+					['дата визита', 'date'],
+					['количество штук', 'number']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Каким методом отправлять заявку с именем и телефоном?',
+				options: ['POST', 'GET', 'Любым, разницы нет'],
+				answer: 0,
+				why: [
+					'Да. POST кладёт данные в тело запроса, а не в адрес, и не оставляет их в истории и в логах как часть ссылки.',
+					'Нет: GET кладёт данные в адрес. Они попадут в историю, в логи и в ссылку, которой можно поделиться. GET хорош для поиска, а не для заявок.',
+					'Нет: разница есть, и она про безопасность и про то, что с запросом можно делать.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что требуется от галочки согласия на обработку персональных данных?',
+				options: [
+					'Она не отмечена заранее: человек сам решает',
+					'Рядом ссылка на политику обработки персональных данных',
+					'Её можно спрятать мелким шрифтом внизу страницы',
+					'Согласие дают отдельным действием, не вместе с другими условиями'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: согласие должно быть осознанным действием человека, а не настройкой по умолчанию.',
+					'Да: человек должен иметь возможность узнать, что и зачем с его данными будет сделано.',
+					'Нет: согласие должно быть осознанным, а не спрятанным.',
+					'Да: согласие должно быть отдельным и конкретным, а не растворённым в других условиях.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Достаточно ли проверки полей в браузере (required, type="email")?',
+				options: [
+					'Нет, сервер обязан проверять всё заново: запрос можно отправить в обход формы',
+					'Да, браузер всё проверит',
+					'Да, но только если форма отправляется методом POST'
+				],
+				answer: 0,
+				why: [
+					'Да. Проверка в браузере — удобство для человека, а не защита. Любой может отправить запрос без вашей формы, поэтому сервер проверяет сам.',
+					'Нет: проверку в браузере можно обойти в одну минуту.',
+					'Нет: метод ни при чём.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите обязательное поле для адреса почты с подписью «Почта».',
+				starter: '',
+				checks: [
+					{ id: 'label', kind: 'label' },
+					{ id: 'email', kind: 'exists', selector: 'input[type="email"][required]' },
+					{ id: 'text', kind: 'text', selector: 'label', matches: 'Почта' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-form-anatomy',
+				front: 'Из чего состоит форма?',
+				back: 'Элемент form с action (куда) и method (как), поля input, textarea, select с именами name, подписи label и кнопка button type="submit".'
+			},
+			{
+				id: 'html-form-label',
+				front: 'Как подписывать поле?',
+				back: 'Элементом label, связанным с полем: for="id" у подписи и id у поля. Placeholder не заменяет подпись.'
+			},
+			{
+				id: 'html-form-types',
+				front: 'Зачем разные type у input?',
+				back: 'Телефон (tel), почта (email), дата (date), число (number): браузер показывает подходящую клавиатуру и проверяет формат.'
+			},
+			{
+				id: 'html-form-post',
+				front: 'GET или POST для заявки?',
+				back: 'POST: данные в теле запроса. GET кладёт их в адрес, где они остаются в истории и логах. Форму отдают только по HTTPS.'
+			},
+			{
+				id: 'html-form-consent',
+				front: 'Что нужно от согласия на обработку персональных данных?',
+				back: 'Отдельная галочка, не отмеченная заранее, со ссылкой на политику. Согласие осознанное и конкретное. Юридические детали: часть 15.'
+			}
+		],
+		sources: [
+			{
+				title: 'Your first form (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Your_first_form',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Client-side form validation (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Learn Forms (web.dev)', url: 'https://web.dev/learn/forms', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Forms Tutorial (W3C WAI)', url: 'https://www.w3.org/WAI/tutorials/forms/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{
+				title: 'Федеральный закон «О персональных данных» (Википедия)',
+				url: 'https://ru.wikipedia.org/wiki/Федеральный_закон_«О_персональных_данных»',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'ru'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Форма это место, где посетитель решается и что-то делает. Постараемся, чтобы ей хотелось пользоваться, и чтобы она была честной.',
+			hints: [
+				'Скелет: <form action="/zayavka" method="post">…</form>. Внутри каждое поле в паре с подписью: <label for="f-name">Имя</label> и <input id="f-name" name="name" type="text">.',
+				'Телефон: type="tel". Подсказка браузеру: autocomplete="tel" (для имени autocomplete="name"). Обязательность: атрибут required.',
+				'Согласие: <label><input type="checkbox" name="consent" required> Согласен на обработку данных, <a href="privacy.html">политика</a></label>. Без атрибута checked.'
+			],
+			mistakes: {
+				method: 'Заявка отправляется методом POST: напишите method="post" у form.',
+				action: 'У form нужен action: адрес, на который уходят данные, например action="/zayavka".',
+				labels: 'У какого-то поля нет подписи label. Свяжите их: for у label равно id у поля.',
+				types: 'Телефон или почта ещё обычный текст. Поставьте type="tel" или type="email".',
+				autocomplete: 'Добавьте атрибут autocomplete хотя бы двум полям: name и tel.',
+				required: 'Хотя бы два поля (имя и телефон) должны быть обязательными: атрибут required.',
+				consent: 'Нужна галочка согласия: input type="checkbox" с атрибутом required.',
+				'consent-clean': 'Галочка согласия не должна быть отмечена заранее: уберите атрибут checked.',
+				policy: 'Рядом с галочкой нужна ссылка на политику обработки данных: href="privacy.html".',
+				submit: 'Текст кнопки отправки должен быть вашим главным действием, как оно написано в брифе.',
+				'few-fields': 'Полей слишком много. Оставьте только нужное для вашего главного действия: до четырёх полей без галочек.',
+				cta: 'Кнопка главного действия вверху страницы теперь ведёт к форме: href="#zayavka", а у section с формой id="zayavka".'
+			},
+			outro: 'Теперь у посетителя есть простой способ сделать то, ради чего он пришёл. И сделать это честно: с понятными подписями и свободным согласием.'
+		},
+		say: { HTML: 'эйч-ти-эм-эль', GET: 'гет', POST: 'пост', HTTPS: 'эйч-ти-ти-пи-эс', action: 'экшен', method: 'метод', label: 'лейбл', placeholder: 'плейсхолдер', autocomplete: 'автокомплит', required: 'риквайрд', type: 'тайп', tel: 'тел', email: 'имейл' }
+	};
+</script>
+
+<script>
+	import FormRequest from '../../diagrams/FormRequest.svelte';
+</script>
+
+## Форма — главное, ради чего сайт
+
+Всё, что мы делали до сих пор, посетитель читает. Форма единственное место, где он отвечает: оставляет заявку, записывается, заказывает, подписывается. Поэтому именно от неё зависит, получится ли у сайта то, ради чего он создан: ваше главное действие из брифа.
+
+В 2014 году, в этой эпохе нашей машины времени, у форм появилось много нового. В HTML5 пришли типы полей (`email`, `tel`, `date`), встроенная проверка и атрибут `autocomplete`; телефоны научились показывать нужную клавиатуру. Раньше всё это делали скриптом, а теперь оно встроено в браузер.
+
+## Из чего состоит форма
+
+```html
+<form action="/zayavka" method="post">
+  <label for="f-name">Как к вам обращаться</label>
+  <input id="f-name" name="name" type="text" autocomplete="name" required>
+
+  <label for="f-phone">Телефон</label>
+  <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+
+  <button type="submit">Записаться на консультацию</button>
+</form>
+```
+
+- `<form>` объединяет поля. `action` говорит, куда отправить данные, `method` как: `get` или `post`.
+- `<input>` — поле. Атрибут `type` определяет вид и проверку, а `name` имя, под которым значение уйдёт на сервер. Без `name` поле не отправится.
+- `<textarea>` — многострочное поле, `<select>` — выбор из списка.
+- `<label>` — подпись, связанная с полем: у подписи `for="f-name"`, у поля `id="f-name"`. Нажатие на подпись ставит курсор в поле, а программа чтения называет поле по подписи.
+- `<button type="submit">` — отправка. На ней пишут действие («Записаться»), а не «Отправить».
+
+Посмотрите на схему: слева форма, справа запрос, который построит браузер, и сообщения проверки. Переключайте метод и тип поля.
+
+<FormRequest />
+
+<details>
+<summary>Проверьте себя: какое поле не уйдёт на сервер?</summary>
+
+Поле без атрибута name: имя нужно, чтобы значение попало в запрос.
+
+</details>
+
+## GET и POST
+
+**GET** кладёт данные в адрес: `/poisk?q=границы`. Так хорошо работает поиск: результат можно сохранить в закладки и переслать ссылкой. **POST** кладёт данные в тело запроса, а не в адрес. Заявки, регистрации и всё, что меняет что-то на сервере, отправляют именно так. Телефон человека не должен оказаться в истории браузера и в строке адреса.
+
+И конечно, форму отдают и принимают только по HTTPS: иначе тело запроса можно прочитать по дороге. Вы разбирали это в уроке про TLS.
+
+Откуда сервер знает, что делать с данными? У нас пока нет сервера, и мы просто пишем `action="/zayavka"`. В части про серверы вы увидите, что за этим адресом стоит программа. А для статических сайтов, где своего сервера нет, бывают готовые сервисы приёма форм.
+
+## Типы полей, подсказки и проверка
+
+Тип подсказывает браузеру, что за данные ждёт поле:
+
+- `type="tel"` — телефон: на телефоне откроется цифровая клавиатура;
+- `type="email"` — почта: браузер проверит, что есть `@`;
+- `type="date"`, `type="number"`, `type="url"` — дата, число, адрес.
+
+Атрибут `autocomplete` говорит, что за данные просят: `name`, `tel`, `email`, `street-address`. Браузер подставит сохранённое значение, и человек заполнит форму за секунды. Это ещё и требование доступности: тем, кому трудно печатать, автозаполнение помогает больше всех.
+
+Проверку включают атрибутами: `required` (поле обязательно), `minlength`, `pattern` (шаблон), `min` и `max`. Браузер сам не даст отправить неверную форму и покажет сообщение. Для простых проверок этого достаточно. Но запомните главное: проверка в браузере удобство, а не защита. Запрос можно отправить в обход вашей формы, поэтому сервер всегда проверяет данные заново.
+
+<details>
+<summary>Проверьте себя: зачем нужен autocomplete?</summary>
+
+Браузер подставит сохранённые данные, и человек быстрее заполнит форму. Для людей, которым трудно печатать, это ещё и вопрос доступности.
+
+</details>
+
+## Меньше полей — больше заявок
+
+Каждое поле это препятствие. Спрашивайте только то, без чего вы не можете выполнить действие: для записи это имя и способ связи, остальное можно выяснить потом. Не требуйте то, что у вас уже есть. Не делайте полей «отчество» и «индекс» там, где они не нужны.
+
+Подпись поля пишите для человека, а не для базы данных. «Как к вам обращаться» теплее, чем «ФИО». А на кнопке напишите, что произойдёт: «Записаться на консультацию».
+
+## Согласие на обработку персональных данных
+
+Имя и телефон — персональные данные: сведения, по которым можно узнать человека. Если вы их собираете, вы становитесь оператором и должны соблюдать закон «О персональных данных» (152-ФЗ). Подробно о нём в части про право и качество; в форме нужно минимум:
+
+- **отдельная галочка согласия**, которую посетитель ставит сам. Атрибут `checked` не используйте, предустановленная галочка согласием не считается;
+- **согласие отдельное и конкретное**: его нельзя прятать в общем соглашении с сайтом. Закон требует, чтобы человек понимал, на что именно соглашается;
+- **ссылка на политику обработки** персональных данных, где написано, какие данные, зачем и как долго хранятся, и как отозвать согласие;
+- форма работает по HTTPS.
+
+Это не юридическая консультация, а ориентир для учебного проекта. Для настоящего сайта проверьте тексты согласия и политики у юриста: требования закона меняются, в последний раз в 2025 году.
+
+<details>
+<summary>Проверьте себя: можно ли поставить галочку согласия отмеченной заранее?</summary>
+
+Нет. Согласие должно быть осознанным действием человека, а предустановленная галочка таким не считается.
+
+</details>
+
+## Практика
+
+Вы начинаете эпоху 2014 года: страница ниже похожа на вашу из 2005-го, но это новая версия сайта (в эпохах машины времени каждый раз собирается своя). Добавьте в неё форму для главного действия вашего проекта.
+
+Если ваше главное действие «позвонить» или «прочитать», форма всё равно полезна как запасной путь: человеку, который не любит звонить, она даёт оставить номер.
+
+## Что было не так с формами раньше
+
+Поля подписывали обычным текстом рядом, проверяли только скриптами, которые у кого-то не работали, а телефон просили «в любом формате». Галочек согласия не было вовсе, и данные собирались без всякого уведомления. Сегодня браузер и закон требуют больше. И то и другое защищает человека.

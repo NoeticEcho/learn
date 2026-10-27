@@ -1,0 +1,416 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '02-html/05-tables',
+		part: 2,
+		order: 5,
+		title: 'Таблицы: для данных, не для раскладки',
+		summary:
+			'Таблица нужна, когда у вас действительно есть строки и столбцы: цены, расписание, сравнение тарифов. После урока вы строите таблицу с заголовками и подписью, понимаете, чем она отличается от старой табличной раскладки, и знаете, где таблица уместна.',
+		minutes: 15,
+		teaches: ['html-data-tables'],
+		requires: ['html-legacy-layout', 'html-semantic-elements'],
+		practice: {
+			id: 'data-table',
+			title: 'Таблица условий и цен',
+			task: 'Добавьте на страницу таблицу. Сделайте для неё section с заголовком h2 «Условия и цены» (или своим). В нём table: сначала caption, потом thead с заголовками столбцов th scope="col" (позиция, что входит, цена), потом tbody. В каждой строке название позиции из вашего брифа это th scope="row", а описание и цена это td. Если у вас нет услуг и цен, сделайте таблицу «Режим работы» с теми же частями: столбцы «День» и «Часы». Атрибутов оформления (width, border, cellpadding) в таблице быть не должно.',
+			era: 2,
+			continues: 'links-images',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>Пара предложений о разделе.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Фотография: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>Пара предложений о разделе.</p>
+        </section>
+
+        <section id="offer">
+          <h2>Что мы предлагаем</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Условия и цены</h2>
+          <table>
+            <caption>Что входит и сколько это стоит</caption>
+            <thead>
+              <tr>
+                <th scope="col">Позиция</th>
+                <th scope="col">Что входит</th>
+                <th scope="col">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Подтверждения</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Скан документа">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Политика обработки персональных данных</a> · <a href="#top">Наверх</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'table', kind: 'exists', selector: 'table' },
+				{ id: 'caption', kind: 'exists', selector: 'table > caption' },
+				{ id: 'col-heads', kind: 'count', selector: 'table thead th[scope="col"]', min: 2 },
+				{ id: 'row-heads', kind: 'count', selector: 'table tbody th[scope="row"]', min: { brief: 'items' } },
+				{ id: 'rows', kind: 'field', selector: 'table tbody', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'no-style-attrs', kind: 'count', selector: 'table[width], table[border], table[cellpadding], table[cellspacing], td[width], td[valign], td[bgcolor]', max: 0 },
+				{ id: 'no-nesting', kind: 'count', selector: 'table table', max: 0 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'В каком случае таблица уместна?',
+				options: [
+					'Когда у данных есть строки и столбцы: цены, расписание, сравнение',
+					'Когда нужно поставить меню слева, а текст справа',
+					'Когда нужно выровнять кнопки в ряд'
+				],
+				answer: 0,
+				why: [
+					'Да. Таблица для данных, у которых есть и «что», и «чего»: ячейка получает смысл от своих строки и столбца.',
+					'Нет: это раскладка, и для неё есть CSS. Таблица для неё — устаревший приём.',
+					'Нет: ряд кнопок раскладывает CSS, смысла таблицы здесь нет.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что делает таблицу доступной?',
+				options: [
+					'Подпись caption, которая говорит, о чём таблица',
+					'Заголовки th с атрибутом scope',
+					'Ячейки td, которые просто сделали жирными вместо заголовков',
+					'Отказ от вложенных таблиц'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: подпись объявляет тему заранее.',
+					'Да: scope говорит, к чему относится заголовок: к столбцу (col) или к строке (row).',
+					'Нет: жирный шрифт видят глаза, но программа не поймёт, что это заголовок.',
+					'Да: вложенная таблица превращает чтение в лабиринт.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте части таблицы в том порядке, в каком они идут в разметке',
+				items: ['<table>', '<caption>', '<thead>', '<tbody>']
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините элемент таблицы с его ролью',
+				pairs: [
+					['caption', 'подпись: о чём таблица'],
+					['thead', 'группа строк-заголовков'],
+					['th scope="row"', 'заголовок строки'],
+					['td', 'ячейка с данными']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Таблица не помещается в экран телефона. Что лучше всего сделать?',
+				options: [
+					'Обернуть её в блок с горизонтальной прокруткой (overflow-x: auto)',
+					'Уменьшить шрифт до нечитаемого',
+					'Заменить таблицу скриншотом'
+				],
+				answer: 0,
+				why: [
+					'Да. Таблица прокручивается вбок, а страница остаётся на месте. Как это сделать в CSS, вы узнаете в следующей части.',
+					'Нет: нечитаемое бесполезно.',
+					'Нет: скриншот не прочитает ни программа, ни поисковик, ни человек с увеличением.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите таблицу: одна строка заголовков из двух th («День», «Часы») и одна строка данных из двух td.',
+				starter: '',
+				checks: [
+					{ id: 'heads', kind: 'count', selector: 'th', min: 2 },
+					{ id: 'data', kind: 'count', selector: 'td', min: 2 },
+					{ id: 'day', kind: 'text', selector: 'th', matches: 'День' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-table-when',
+				front: 'Когда нужна таблица?',
+				back: 'Когда у данных есть и строки, и столбцы: цены, расписание, сравнение тарифов. Раскладывать блоки таблицей нельзя.'
+			},
+			{
+				id: 'html-table-parts',
+				front: 'Из чего состоит хорошая таблица?',
+				back: 'caption (подпись), thead с th scope="col", tbody со строками: в каждой th scope="row" (заголовок строки) и td (данные).'
+			},
+			{
+				id: 'html-table-scope',
+				front: 'Что делает атрибут scope у th?',
+				back: 'Говорит, к чему относится заголовок: scope="col" к столбцу, scope="row" к строке. Диктор озвучивает ячейку вместе с заголовками.'
+			},
+			{
+				id: 'html-table-phone',
+				front: 'Что делать с широкой таблицей на телефоне?',
+				back: 'Дать ей горизонтальную прокрутку внутри блока. Не уменьшать шрифт и не заменять таблицу картинкой.'
+			}
+		],
+		sources: [
+			{
+				title: 'HTML table basics (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'HTML table advanced features and accessibility (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Table_accessibility',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Tables Tutorial (W3C WAI)', url: 'https://www.w3.org/WAI/tutorials/tables/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'Таблицы — Дока', url: 'https://doka.guide/html/tables/', licence: 'link-only', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'В прошлых уроках таблица была сеткой для страницы. Теперь она делает то, ради чего придумана: показывает данные.',
+			hints: [
+				'Скелет: <table><caption>Что входит и сколько стоит</caption><thead><tr><th scope="col">Позиция</th>…</tr></thead><tbody>…</tbody></table>.',
+				'В каждой строке тела первая ячейка это заголовок строки: <th scope="row">Название</th>. Остальные обычные <td>.',
+				'Атрибуты width, border, cellpadding не нужны: вид таблице придаст CSS позже.'
+			],
+			mistakes: {
+				table: 'На странице нет таблицы. Добавьте <table> в отдельный section.',
+				caption: 'Первой в таблице должна идти подпись <caption>: о чём таблица.',
+				'col-heads': 'В thead нужны заголовки столбцов <th scope="col">: не меньше двух.',
+				'row-heads': 'Каждая строка данных начинается с заголовка строки <th scope="row"> с названием позиции. Строк должно быть столько, сколько у вас услуг или товаров.',
+				rows: 'В таблице должны быть названия ваших услуг или товаров из брифа.',
+				'no-style-attrs': 'В таблице остались атрибуты оформления (width, border, cellpadding, valign). Уберите их: вид задаст CSS.',
+				'no-nesting': 'Таблица внутри таблицы не нужна. Оставьте одну плоскую таблицу.'
+			},
+			outro: 'Вот так таблица работает по назначению. Она не держит страницу, а рассказывает данные: и глазам, и диктору.'
+		},
+		say: { HTML: 'эйч-ти-эм-эль', scope: 'скоуп', caption: 'кэпшен', thead: 'ти-хэд', tbody: 'ти-боди', colspan: 'колспан', CSS: 'си-эс-эс' }
+	};
+</script>
+
+<script>
+	import TableReader from '../../diagrams/TableReader.svelte';
+</script>
+
+## Таблица для данных
+
+В уроке про 1996 год вы видели, как таблицы заменяли сетку. Но таблица придумана для другого: для данных, у которых есть строки и столбцы. Расписание, цены, сравнение тарифов, список документов с датами. В такой таблице ячейка получает смысл от своих строки и столбца: «от 5 000 ₽» значит цену, потому что стоит в столбце «Цена», а в строке «Межевание».
+
+Хорошая проверка: если убрать визуальную сетку, останется ли смысл у соседства? Для меню слева и текста справа нет: это раскладка. Для цены и услуги есть: это таблица.
+
+## Из чего сделана таблица
+
+```html
+<table>
+  <caption>Что входит и сколько стоит</caption>
+  <thead>
+    <tr>
+      <th scope="col">Позиция</th>
+      <th scope="col">Что входит</th>
+      <th scope="col">Цена</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Консультация</th>
+      <td>Час разговора о документах</td>
+      <td>0 000 ₽</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+- `<caption>` — подпись: о чём таблица. Идёт первой;
+- `<thead>` и `<tbody>` — шапка и тело. Есть ещё `<tfoot>` для итогов;
+- `<tr>` — строка;
+- `<th>` — ячейка-заголовок, `<td>` — ячейка с данными;
+- `scope="col"` говорит, что заголовок относится к столбцу, `scope="row"` — что к строке.
+
+Объединять ячейки (`colspan`, `rowspan`) можно, но для людей с программой чтения с экрана сложные таблицы мучительны. Если без объединения никак, возможно, это две таблицы.
+
+## Что слышит диктор
+
+Именно `th` и `scope` делают таблицу понятной тому, кто её слушает. Когда фокус чтения встаёт на ячейку, программа называет вместе с ней заголовки столбца и строки. Переключайте вид таблицы на схеме и выбирайте ячейки.
+
+<TableReader />
+
+<details>
+<summary>Проверьте себя: зачем в таблице th, если можно просто сделать ячейку жирной?</summary>
+
+Жирный шрифт видят только глаза. Элемент th с scope сообщает программе, что это заголовок и к чему он относится.
+
+</details>
+
+## Таблица или карточки
+
+Не всё, что похоже на список, надо делать таблицей. Выбирайте так:
+
+- **таблица** — когда данные однородны и их надо сравнивать: цены по тарифам, расписание по дням;
+- **карточки или список** — когда пункты самостоятельны и у каждого свой текст: описание услуги, отзыв, сотрудник.
+
+Поэтому на нашей странице услуги живут и в карточках (рассказ), и в таблице цен (сравнение). Это не дублирование: разные способы прочитать одно и то же.
+
+С телефоном таблицы дружат плохо: колонки не помещаются. Лекарство такое: обернуть таблицу в блок с горизонтальной прокруткой, а не уменьшать шрифт и не превращать таблицу в картинку. Как именно, вы узнаете в части про CSS.
+
+## Практика
+
+Добавьте на страницу таблицу цен или условий. Ваши данные уже на странице в карточках; перенесите из них название, описание и цену. Если вы работаете над проектом без цен (клуб, мероприятие, сервис по подписке), сделайте таблицу «Режим работы» или «Расписание»: столбцы «День» и «Время» тоже настоящие данные.
+
+Эта версия остаётся в эпохе 2005 года: таблицы данных были и тогда, и в них уже писали `th` и `caption`, хотя многие забывали.
+
+## Что было не так с 2005 годом
+
+Таблицы данных и таблицы раскладки смешивались до неразличимости: на странице их бывало по десять. Тот, кто хотел вставить настоящую таблицу, часто попадал в ловушку: её тоже вкладывали в ячейку раскладки. И `th` с `scope` в то время встречались редко: их ставили те, кто думал о доступности, а таких авторов было мало. Сегодня таблица в настоящем смысле жива, а раскладка таблицами нет.
