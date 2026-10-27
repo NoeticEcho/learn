@@ -1,0 +1,803 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/03-wordpress-upkeep',
+		part: 8,
+		order: 3,
+		title: 'Что ломается у WordPress и сколько он на самом деле стоит',
+		summary: 'Вы научитесь честно считать цену владения CMS (обновления, взломы, зависимость от плагинов, хостинг) и сможете сказать, когда WordPress уместен, а когда станет обузой. Это страница «что было не так» для эпохи 3, и вы составите план обслуживания своего сайта.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'server',
+					label: 'обновление 6.x',
+					caption: 'Пятница, вечер',
+					say: [
+						{ text: 'Нажму «обновить всё».' },
+						{ who: 'Сайт', text: 'Белый экран. Удачных выходных.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'копия + проверка',
+					caption: 'Копия',
+					say: 'Копия, которую ни разу не восстанавливали, это не копия, а надежда.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'sheet',
+					label: 'ответственный: ___',
+					caption: 'План',
+					say: 'Кто обновляет, как часто и что копируется: запишите, пока сайт работает.'
+				}
+			]
+		},
+		minutes: 15,
+		teaches: ['cms-wordpress-maintenance', 'cms-cms-history'],
+		requires: ['cms-wordpress-themes-plugins'],
+		practice: {
+			id: 'cms-upkeep-plan',
+			title: 'План обслуживания и сравнение систем',
+			task: 'Составьте план обслуживания сайта вашего проекта на CMS. 1) В таблице для каждой из четырёх задач впишите, кто делает (конкретный человек или роль), как часто и сколько часов в месяц это займёт (число). 2) Впишите общее число часов в месяц. 3) Опишите резервную копию: что копируется, где хранится и как проверяется. 4) Назовите не меньше двух рисков плагина, который обслуживает главное действие вашего проекта (форма, запись, оплата). 5) В таблице сравнения для WordPress, Drupal и Joomla впишите, как у них с обновлениями и подходят ли они вам. 6) В выводе скажите: оставить WordPress, взять другое или отказаться от CMS. Все «…» нужно заменить.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="upkeep">
+      <h2>План обслуживания сайта на CMS<\/h2>
+      <table id="tasks">
+        <tr><th>Задача<\/th><th>Кто делает<\/th><th>Как часто<\/th><th>Часов в месяц<\/th><\/tr>
+        <tr class="task"><td>Обновление ядра CMS<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+        <tr class="task"><td>Обновление плагинов и темы<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+        <tr class="task"><td>Резервная копия и проверка восстановления<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+        <tr class="task"><td>Проверка работы формы заявки<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+      <\/table>
+      <p>Всего часов в месяц: <span id="hours-total">…<\/span><\/p>
+      <p>Резервная копия: что копируется, где хранится, как проверяется: <span id="backup">…<\/span><\/p>
+
+      <h3>Риски плагинов для главного действия проекта «{{mainAction.label}}»<\/h3>
+      <ul id="risks">
+        <li class="risk">…<\/li>
+        <li class="risk">…<\/li>
+      <\/ul>
+
+      <h3>Сравнение для моего проекта<\/h3>
+      <table id="compare">
+        <tr><th>Система<\/th><th>Обновления и поддержка<\/th><th>Подходит ли мне<\/th><\/tr>
+        <tr class="cms"><td>WordPress<\/td><td class="upd">…<\/td><td class="fit">…<\/td><\/tr>
+        <tr class="cms"><td>Drupal<\/td><td class="upd">…<\/td><td class="fit">…<\/td><\/tr>
+        <tr class="cms"><td>Joomla<\/td><td class="upd">…<\/td><td class="fit">…<\/td><\/tr>
+      <\/table>
+      <p>Вывод: <span id="verdict">…<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="upkeep">
+      <h2>План обслуживания сайта на CMS<\/h2>
+      <table id="tasks">
+        <tr><th>Задача<\/th><th>Кто делает<\/th><th>Как часто<\/th><th>Часов в месяц<\/th><\/tr>
+        <tr class="task"><td>Обновление ядра CMS<\/td><td class="who">владелец или подрядчик по договору<\/td><td class="freq">раз в месяц<\/td><td class="hours">0.5<\/td><\/tr>
+        <tr class="task"><td>Обновление плагинов и темы<\/td><td class="who">подрядчик по договору<\/td><td class="freq">раз в неделю<\/td><td class="hours">1<\/td><\/tr>
+        <tr class="task"><td>Резервная копия и проверка восстановления<\/td><td class="who">хостинг делает копию, подрядчик проверяет<\/td><td class="freq">раз в квартал проверка<\/td><td class="hours">0.5<\/td><\/tr>
+        <tr class="task"><td>Проверка работы формы заявки<\/td><td class="who">владелец<\/td><td class="freq">раз в неделю<\/td><td class="hours">0.25<\/td><\/tr>
+      <\/table>
+      <p>Всего часов в месяц: <span id="hours-total">2.25<\/span><\/p>
+      <p>Резервная копия: что копируется, где хранится, как проверяется: <span id="backup">копируются файлы и база каждую ночь, копии лежат на другом сервере, раз в квартал пробуем восстановить сайт на тестовом адресе<\/span><\/p>
+
+      <h3>Риски плагинов для главного действия проекта «{{mainAction.label}}»<\/h3>
+      <ul id="risks">
+        <li class="risk">плагин формы заявки уязвим или не обновлён, и через него можно подсунуть вредоносный код или получить поток спама<\/li>
+        <li class="risk">обновление плагина формы ломает отправку заявок, и несколько дней заявки теряются, а мы об этом не знаем<\/li>
+        <li class="risk">автор плагина перестаёт его поддерживать, и форму придётся заменить в срочном порядке<\/li>
+      <\/ul>
+
+      <h3>Сравнение для моего проекта<\/h3>
+      <table id="compare">
+        <tr><th>Система<\/th><th>Обновления и поддержка<\/th><th>Подходит ли мне<\/th><\/tr>
+        <tr class="cms"><td>WordPress<\/td><td class="upd">частые обновления, много плагинов, нужна дисциплина и ответственный<\/td><td class="fit">подходит: форма и страницы простые, редактор знаком<\/td><\/tr>
+        <tr class="cms"><td>Drupal<\/td><td class="upd">обновления строже и серьёзнее, нужен опытный разработчик<\/td><td class="fit">избыточно: проект небольшой, сложной модели прав нет<\/td><\/tr>
+        <tr class="cms"><td>Joomla<\/td><td class="upd">обновления есть, сообщество меньше<\/td><td class="fit">нет явных преимуществ перед WordPress<\/td><\/tr>
+      <\/table>
+      <p>Вывод: <span id="verdict">оставить WordPress: проект простой, ответственный и подрядчик назначены, а обслуживание займёт около двух часов в месяц<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'upkeep-exists', kind: 'exists', selector: '#upkeep' },
+				{ id: 'no-blanks', kind: 'text', selector: '#upkeep', matches: '^[^…]*$' },
+				{ id: 'owner-named', kind: 'text', selector: '#tasks td.who', matches: 'владел|я |подрядчик|редактор|разработчик|хостинг|агентств|админ|сотрудник' },
+				{ id: 'frequency', kind: 'text', selector: '#tasks td.freq', matches: 'раз|недел|месяц|квартал|ежед|год' },
+				{ id: 'hours', kind: 'text', selector: '#tasks td.hours', matches: '^\\s*\\d+(?:[.,]\\d+)?\\s*$' },
+				{ id: 'hours-total', kind: 'text', selector: '#hours-total', matches: '^\\s*\\d+(?:[.,]\\d+)?' },
+				{ id: 'backup-where', kind: 'text', selector: '#backup', matches: '(?=[\\s\\S]*копи)(?=[\\s\\S]*(?:хран|лежат|сервер|облак|диск|отдельн))' },
+				{ id: 'risks', kind: 'count', selector: '#risks li.risk', min: 2 },
+				{ id: 'risks-plugin', kind: 'text', selector: '#risks', matches: 'плагин' },
+				{ id: 'compare-rows', kind: 'count', selector: '#compare tr.cms', min: 3 },
+				{
+					id: 'verdict',
+					kind: 'text',
+					selector: '#verdict',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:остав|взять|перей|отказ|без CMS|Drupal|Joomla|WordPress))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'Из чего складывается цена владения сайтом на WordPress?',
+				options: [
+					'Хостинг и домен',
+					'Платные темы и плагины',
+					'Время (или оплата специалиста) на обновления, копии и проверки',
+					'Плата за каждого посетителя'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: платить за них придётся каждый год.',
+					'Да: многие хорошие плагины и темы платные, причём по подписке.',
+					'Да: самая недооценённая часть. Сайт, за которым не следят, рано или поздно ломается или взламывается.',
+					'Нет: за посетителей ничего платить не нужно, расти придётся только хостингу.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Через что чаще всего взламывают сайты на WordPress?',
+				options: ['Через устаревшие плагины и темы с известными уязвимостями', 'Через сам язык PHP', 'Через браузер редактора'],
+				answer: 0,
+				why: [
+					'Да. Ядро WordPress обновляется внимательно, а плагины пишут тысячи разных авторов, и дыры в них появляются чаще и закрываются не всеми вовремя.',
+					'Нет: PHP сам по себе не главная причина.',
+					'Нет: браузер редактора к этому отношения не имеет.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Почему резервную копию надо хотя бы раз проверить восстановлением?',
+				options: [
+					'Копию можно сделать «пустой» или повреждённой, и узнаешь об этом, только когда она понадобится',
+					'Чтобы хостинг не отключил сайт',
+					'Закон требует проверять копии каждый месяц'
+				],
+				answer: 0,
+				why: [
+					'Да. Копия, которую никогда не восстанавливали, это надежда, а не копия. Проверка занимает час и показывает, что именно сохраняется.',
+					'Нет: к хостингу это не относится.',
+					'Нет: такого общего требования нет, это вопрос здравого смысла.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'На сайте стоят автообновления плагинов. Какую ловушку они оставляют?',
+				options: [
+					'Обновление может сломать сайт, и вы узнаете об этом не сразу, поэтому нужны копии и проверка работы формы',
+					'Автообновления отключают защиту сайта',
+					'Автообновления можно включить только на платном тарифе'
+				],
+				answer: 0,
+				why: [
+					'Да. Автообновления закрывают дыры быстро, но редкий конфликт случается без вашего участия. Поэтому копия и еженедельная проверка формы остаются обязательными.',
+					'Нет: наоборот, они защищают, закрывая известные дыры без промедления.',
+					'Нет: это настройка самого WordPress, а не тарифа.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините систему с тем, где она чаще всего встречается сегодня',
+				pairs: [
+					['WordPress', 'небольшие и средние сайты, блоги, магазины, сайты услуг'],
+					['Drupal', 'большие порталы со сложной структурой содержания и правами (вузы, организации)'],
+					['Joomla', 'небольшие сайты, основанные на этой системе давно; доля сокращается'],
+					['Сайт без CMS', 'когда содержание меняется раз в полгода и хватит файлов']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Содержание проекта меняется раз в полгода, правит один разработчик. Что разумно?',
+				options: [
+					'Подумать, нужна ли CMS вообще: хватит статического сайта из файлов, у которого нечего взламывать',
+					'Всё равно поставить WordPress со сложной темой',
+					'Поставить как можно больше плагинов'
+				],
+				answer: 0,
+				why: [
+					'Да. Чем реже правки, тем слабее довод в пользу CMS, а цена владения от этого не уменьшается. Этот вывод мы разовьём в уроках про генераторы сайтов.',
+					'Нет: вы получите обслуживание (обновления, копии) без выгоды.',
+					'Нет: каждый плагин увеличивает работу и риск.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-upkeep-cost',
+				front: 'Из чего складывается цена владения сайтом на CMS?',
+				back: 'Хостинг и домен, платные темы и плагины, а главное время (или деньги специалиста) на обновления, копии, проверки и починку после сбоев.'
+			},
+			{
+				id: 'cms-upkeep-attack',
+				front: 'Через что чаще всего взламывают WordPress?',
+				back: 'Через устаревшие плагины и темы: их пишут тысячи авторов, дыры появляются чаще, чем в ядре, и закрываются не у всех. Помогают обновления, минимум плагинов и отказ от «взломанных» плагинов из сомнительных источников.'
+			},
+			{
+				id: 'cms-upkeep-backup',
+				front: 'Что должно быть у резервной копии?',
+				back: 'Файлы и база, хранение вне сервера, где лежит сайт, и проверка восстановлением. Непроверенная копия это надежда.'
+			},
+			{
+				id: 'cms-history-drupal-joomla',
+				front: 'Что такое Drupal и Joomla сегодня?',
+				back: 'Две старые открытые CMS на PHP. Drupal (с 2001) сильнее на сложном содержании, правах и многоязычности и требует опытной команды. Joomla (с 2005, ответвление Mambo) для небольших сайтов, её доля падает.'
+			},
+			{
+				id: 'cms-upkeep-when',
+				front: 'Когда CMS становится обузой?',
+				back: 'Когда содержание меняется редко, а обслуживание (обновления, копии, защита) стоит больше, чем выгода от админки. Тогда хватит статического сайта.'
+			}
+		],
+		sources: [
+			{
+				title: 'WordPress Advanced Administration: Hardening WordPress',
+				url: 'https://developer.wordpress.org/advanced-administration/security/hardening/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'WordPress Advanced Administration: Backups',
+				url: 'https://developer.wordpress.org/advanced-administration/security/backup/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Drupal.org: About Drupal', url: 'https://www.drupal.org/about', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Joomla!: About Joomla', url: 'https://www.joomla.org/about-joomla.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Сайт на CMS это не покупка, а обязательство. Давайте посчитаем, сколько времени оно займёт у вашего проекта, и честно решим, нужна ли вам эта CMS.',
+			hints: [
+				'«Кто делает» это конкретный человек или роль: владелец, подрядчик. «Нет никого» не ответ: сайт без ответственного ломается первым.',
+				'В часах пишите число: 0.5 или 1. Если плагинов много, времени больше; ориентируйтесь на схему выше.',
+				'В рисках подумайте про плагин, который принимает заявки или записи: что будет, если он устареет, сломается после обновления или его перестанут поддерживать.'
+			],
+			mistakes: {
+				'upkeep-exists': 'Блок с планом исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				'owner-named': 'В колонке «Кто делает» должен быть человек или роль: владелец, подрядчик, редактор.',
+				frequency: 'В колонке «Как часто» напишите частоту: например, «раз в неделю».',
+				hours: 'В колонке «Часов в месяц» нужно число: например, 0.5.',
+				'hours-total': 'В строке с общим числом часов нужно число.',
+				'backup-where': 'Опишите копию: что копируется и где хранится.',
+				risks: 'Нужно не меньше двух рисков, каждый в своём пункте списка.',
+				'risks-plugin': 'Риски должны быть про плагины: упомяните слово «плагин» и что с ним может случиться.',
+				'compare-rows': 'В таблице сравнения должны остаться три строки: WordPress, Drupal и Joomla.',
+				verdict: 'В выводе скажите: оставить WordPress, взять другое или отказаться от CMS, и почему.'
+			},
+			outro: 'Теперь вы знаете, сколько стоит CMS в обслуживании. Дальше посмотрим на российский рынок: конструкторы вроде Tilda и систему «1С-Битрикс».'
+		},
+		say: { WordPress: 'вордпресс', Drupal: 'друпал', Joomla: 'джумла', PHP: 'пи-эйч-пи', CMS: 'си-эм-эс' }
+	};
+</script>
+
+<script>
+	import WpYear from '../../diagrams/WpYear.svelte';
+</script>
+
+## Цена владения: не только цена установки
+
+Сайт на CMS кажется бесплатным: программа открытая, тема и плагины скачиваются. Но стоимость складывается из нескольких частей, и большая из них не деньги, а **время**:
+
+- **хостинг и домен**: платят каждый год;
+- **платные темы и плагины**: хорошие часто идут по подписке;
+- **обновления**: ядро, тема, плагины, а ещё версия PHP на хостинге;
+- **резервные копии** и проверка того, что они работают;
+- **защита**: сайт на самой популярной CMS это самая частая цель роботов-взломщиков;
+- **починка**: после неудачного обновления или конфликта плагинов.
+
+Подвигайте схему «Год жизни сайта» ниже: на ней семь событий, которые случаются почти у каждого сайта, и их цена при разных настройках.
+
+<WpYear />
+
+## Что нужно обновлять и как
+
+WordPress обновляется часто. Ядро выпускает **малые обновления** безопасности (с 2013 года они ставятся сами) и **крупные** версии несколько раз в год (их лучше проверять перед установкой). Темы и плагины обновляются отдельно и по своему расписанию; автообновление для них появилось в версии 5.5 (2020), и включается по желанию. Ещё одна «обновляемая» вещь это версия **PHP** на хостинге: старые версии со временем снимают с поддержки, и тема с плагинами должны на новой работать.
+
+Два правила: **обновления ставят по плану**, а не когда сайт сломался; и **перед крупным обновлением есть свежая копия**.
+
+## Безопасность
+
+Большинство взломов WordPress происходит не через ядро, а через **плагины и темы**: их пишут тысячи разных авторов, дыры в них появляются чаще, а закрывают их не все и не сразу. Типичный сценарий: в плагине форм нашли уязвимость, автор выпустил исправление через день, а на вашем сайте плагин обновили через месяц. За этот месяц роботы просканировали интернет и нашли ваш сайт.
+
+Что помогает, и ничего экзотического:
+
+- держать ядро, темы и плагины **обновлёнными**;
+- ставить **минимум плагинов** и удалять неиспользуемые вместе с темами, а не просто выключать;
+- **не использовать «взломанные» платные плагины** из сомнительных источников: в них часто спрятан вредоносный код;
+- двухфакторный вход в админку и сильные пароли, ограничение числа попыток входа;
+- разные права: у редактора нет прав администратора;
+- резервные копии **вне** этого сервера (подробнее о копиях и мониторинге в части 9).
+
+Общая памятка есть в официальной инструкции по укреплению WordPress (в источниках).
+
+## Копии: надежда, а не копия
+
+Резервная копия это **файлы и база данных** сайта, хранящиеся **отдельно** от самого сайта. Если копия лежит на том же сервере, то при его потере или взломе пропадёт и она. Старое правило «3-2-1»: три копии, на двух разных носителях, одна из них в другом месте. И главное: **копию проверяют восстановлением**. Копия, которую ни разу не разворачивали, может оказаться пустой или неполной, и вы узнаете об этом в худший день.
+
+<details>
+<summary>Проверьте себя: почему сайт после конфликта плагинов без копии восстанавливать дольше?</summary>
+
+Без копии нужно собирать сайт заново: ставить CMS, тему, плагины, переносить содержание и настройки. Копия возвращает всё за полчаса.
+
+</details>
+
+## Drupal и Joomla: кто они сегодня
+
+В 2000-х за звание главной CMS боролись три системы, и когда вы выбираете WordPress, полезно знать двух других.
+
+**Drupal** появился в 2001 году (Дрис Бёйтарт, Dries Buytaert, начинал его как небольшую доску сообщений для друзей). Он сильнее всего там, где **сложная структура содержания**: много типов записей и связей, тонкие роли и права, много языков, большие порталы и сайты организаций. Взамен он требует опытного разработчика и работы над настройкой: новичку трудно. На нём работают сайты многих университетов и государственных организаций.
+
+**Joomla** (2005) вышла из ответвления от системы Mambo. Её называют золотой серединой: проще Drupal, мощнее старых блоговых систем. Сегодня её доля сокращается: по данным Web Almanac, обе системы, Drupal и Joomla, год за годом теряют долю, пока WordPress, Wix и Squarespace растут.
+
+Какой вывод из этого сделать. Для небольшого сайта услуг сложностей Drupal не нужно: вы заплатите ими за возможности, которыми не воспользуетесь. Joomla вам почти ничем не лучше WordPress, а специалистов по ней меньше. Поэтому в нашем списке для небольшого проекта победа остаётся у WordPress, если вообще нужна CMS. А нужна ли, решает не вкус, а ответ на два вопроса из урока 1: кто правит и как часто.
+
+## Практика
+
+Вы в эпохе 2010 года, и сайт работает. Теперь составьте то, что редко составляют вовремя: план обслуживания. Кто обновляет, как часто, что копируется и сколько это займёт времени. Назовите риски плагина, который принимает заявки или записи вашего проекта. В таблице сравните WordPress с Drupal и Joomla для вашего случая и сделайте вывод.
+
+## Что было не так с 2010 годом
+
+Сайты 2010 года часто ставили и забывали. Автообновлений не было (малые обновления безопасности ядра стали ставиться сами с 2013 года), плагинов ставили десятки, а копии лежали в той же папке, что и сайт. Результатом стали тысячи взломанных сайтов, которые рассылали спам и вирусы. Сегодня инструменты стали лучше, но привычка «поставил и забыл» осталась, и она по-прежнему самая дорогая.

@@ -1,0 +1,776 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/01-what-is-cms',
+		part: 8,
+		order: 1,
+		title: 'Что такое CMS и зачем она нужна',
+		summary: 'Вы объясните, чем сайт на HTML-файлах отличается от сайта на CMS, назовёте три слоя (содержание, шаблон, код) и опишете модель контента своего проекта: какие бывают «сущности» (услуга, статья, человек, отзыв) и какие у них поля. После урока у вас есть таблица типов содержания с редакторами и частотой правок.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser-1996',
+					label: 'цена: 3000',
+					caption: 'Сайт из файлов',
+					say: [
+						{ text: 'Цена изменилась. Правлю страницу номер… семь из двенадцати.' },
+						{ who: 'Сайт', text: 'Остальные пять я не трогал.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'услуга: цена',
+					caption: 'Поле',
+					say: 'Услуга это запись с полями. Цена лежит в одном поле, а карточка, страница и список её только показывают.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'editor',
+					label: 'сохранить',
+					caption: 'CMS',
+					say: 'Одно поле, одна правка, цена обновилась везде. Редактору не нужен разработчик.'
+				}
+			]
+		},
+		minutes: 15,
+		teaches: ['cms-what-is-cms', 'cms-content-model'],
+		requires: ['server-static-vs-dynamic', 'data-relational-model', 'start-project-brief'],
+		practice: {
+			id: 'cms-content-model-table',
+			title: 'Модель контента вашего проекта',
+			task: 'Заполните таблицу типов содержания. Первая строка (услуги или товары из items) почти готова: допишите, кто их правит и как часто. В остальных строках впишите: люди (people), подтверждения (proofs) и страницы-разделы. Для каждого: название типа, поля через запятую, кто правит (владелец, редактор или разработчик) и как часто (например, «раз в месяц»). Если в вашем проекте нет людей или подтверждений, замените строку своим типом (например, «Отзыв», «Событие»). Во второй таблице для каждого раздела вашего сайта впишите, какие типы он выводит. Если у сайта несколько языков, поля с текстами сделайте на каждом языке (например, title_ru и title_en). Все «…» нужно заменить.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="cms-model">
+      <h2>Модель контента проекта<\/h2>
+      <p>Типы содержания: у каждого свои поля, свой редактор и своя частота правок.<\/p>
+      <table id="model">
+        <tr><th>Тип<\/th><th>Поля (через запятую)<\/th><th>Кто правит<\/th><th>Как часто<\/th><\/tr>
+        <tr class="type items"><td class="name">Услуга или товар (items)<\/td><td class="fields">title, text, price<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+        <tr class="type people"><td class="name">…<\/td><td class="fields">…<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+        <tr class="type proofs"><td class="name">…<\/td><td class="fields">…<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+        <tr class="type pages"><td class="name">…<\/td><td class="fields">…<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+      <\/table>
+
+      <h3>Какие типы выводит каждый раздел сайта<\/h3>
+      <table id="sections-map">
+        <tr><th>Раздел<\/th><th>Какие типы содержания выводит<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="types">…<\/td><\/tr>
+        {{/each}}
+      <\/table>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>Пара предложений о разделе.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Телефон<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="cms-model">
+      <h2>Модель контента проекта<\/h2>
+      <p>Типы содержания: у каждого свои поля, свой редактор и своя частота правок.<\/p>
+      <table id="model">
+        <tr><th>Тип<\/th><th>Поля (через запятую)<\/th><th>Кто правит<\/th><th>Как часто<\/th><\/tr>
+        <tr class="type items"><td class="name">Услуга или товар (items)<\/td><td class="fields">title_ru, title_en, text_ru, text_en, price, фото<\/td><td class="owner">владелец<\/td><td class="freq">раз в месяц<\/td><\/tr>
+        <tr class="type people"><td class="name">Человек<\/td><td class="fields">name, role, bio_ru, bio_en, фото<\/td><td class="owner">владелец<\/td><td class="freq">раз в полгода<\/td><\/tr>
+        <tr class="type proofs"><td class="name">Подтверждение<\/td><td class="fields">title_ru, title_en, номер, дата, скан<\/td><td class="owner">редактор<\/td><td class="freq">раз в год<\/td><\/tr>
+        <tr class="type pages"><td class="name">Страница-раздел<\/td><td class="fields">title_ru, title_en, текст_ru, текст_en<\/td><td class="owner">редактор<\/td><td class="freq">раз в неделю<\/td><\/tr>
+      <\/table>
+
+      <h3>Какие типы выводит каждый раздел сайта<\/h3>
+      <table id="sections-map">
+        <tr><th>Раздел<\/th><th>Какие типы содержания выводит<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="types">страница-раздел; услуги и подтверждения, если раздел о них<\/td><\/tr>
+        {{/each}}
+      <\/table>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'model-exists', kind: 'exists', selector: '#cms-model' },
+				{ id: 'no-blanks', kind: 'text', selector: '#cms-model', matches: '^[^…]*$' },
+				{ id: 'types', kind: 'count', selector: '#model tr.type', min: 4 },
+				{ id: 'fields-listed', kind: 'text', selector: '#model td.fields', matches: ',' },
+				{ id: 'owner-named', kind: 'text', selector: '#model td.owner', matches: 'владел|редактор|разработчик' },
+				{ id: 'freq-named', kind: 'text', selector: '#model td.freq', matches: 'раз|ежедн|редк|част|недел|месяц|год|квартал|полгода' },
+				{ id: 'section-per-row', kind: 'count', selector: '#sections-map tr.sec', min: { brief: 'sections' } },
+				{ id: 'sections-named', kind: 'field', selector: '#sections-map tr.sec', field: 'sections' },
+				{
+					id: 'multilingual',
+					kind: 'text',
+					selector: '#model td.fields',
+					matches: '_en|_ru|на каждом языке|перевод|\\(en\\)',
+					when: { brief: 'languages', contains: 'en' }
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Соедините слой сайта с тем, что в нём лежит',
+				pairs: [
+					['Содержание', 'тексты, цены, фотографии, названия'],
+					['Шаблон', 'общая шапка, подвал и то, как выглядит карточка услуги'],
+					['Код', 'работа сайта: показать страницу, принять заявку, проверить доступ']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Чем сайт на CMS удобнее сайта из HTML-файлов для человека, который меняет цены?',
+				options: [
+					'Он правит содержание в админке, и ему не нужно знать HTML и выкладывать файлы',
+					'Сайт на CMS не требует хостинга',
+					'У сайта на CMS нет шаблонов'
+				],
+				answer: 0,
+				why: [
+					'Да. CMS отделяет содержание от оформления и кода, поэтому редактору нужна только форма в админке.',
+					'Нет: CMS нужен сервер и база, как и любой динамический сайт.',
+					'Нет: шаблоны у CMS есть, и общая шапка как раз лежит в одном месте.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что значит «моделировать содержание, а не страницы»?',
+				options: [
+					'Описать, какие бывают «вещи» (услуга, человек, отзыв) и какие у них поля, а страницы собирать из них',
+					'Нарисовать макет каждой страницы',
+					'Написать все тексты заранее'
+				],
+				answer: 0,
+				why: [
+					'Да. Услуга описана один раз, а карточка, страница и список показывают её поля. Меняется поле, и меняется всё.',
+					'Нет: макет это оформление, а модель описывает содержание.',
+					'Нет: модель про устройство данных, а не про готовые тексты.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что обычно входит в CMS?',
+				options: [
+					'Админка для правки содержания',
+					'Хранилище содержания (база или файлы)',
+					'Роли: кто что может менять',
+					'Готовые тексты для вашего сайта'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: именно из-за админки CMS и берут.',
+					'Да: содержание где-то лежит, чаще всего в базе.',
+					'Да: владелец, редактор и разработчик видят в админке разное.',
+					'Нет: тексты вам придётся написать самим.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Сайт на русском и английском. Как лучше устроить поле «название услуги»?',
+				options: [
+					'Поле на каждый язык (title_ru, title_en) или перевод одной записи, связанный с оригиналом',
+					'Одно поле, в которое вписать оба названия через слэш',
+					'Два отдельных сайта без связи между ними'
+				],
+				answer: 0,
+				why: [
+					'Да. Так видно, что это один и тот же объект на разных языках, и шаблон выберет нужное.',
+					'Нет: потом это не разделить, и шаблон не сможет показать одно название.',
+					'Нет: потеряется связь, и цену придётся менять в двух местах.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте шаги построения модели контента по порядку',
+				items: [
+					'Выписать, какие «вещи» показывает сайт: услуги, люди, подтверждения',
+					'Для каждой решить, какие у неё поля и какого они типа',
+					'Назначить, кто и как часто её правит',
+					'Решить, какие типы выводит каждый раздел сайта'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-what',
+				front: 'Что такое CMS?',
+				back: 'Система управления содержимым: админка, хранилище (обычно база), шаблоны, роли и публикация. Она отделяет содержание от оформления и кода, поэтому редактору не нужен разработчик.'
+			},
+			{
+				id: 'cms-layers',
+				front: 'Три слоя сайта',
+				back: 'Содержание (тексты, цены, фото), шаблон (шапка, подвал, вид карточки), код (что сайт делает). В сайте из файлов они перемешаны, в CMS разделены.'
+			},
+			{
+				id: 'cms-model-def',
+				front: 'Что такое модель контента?',
+				back: 'Описание типов содержания (услуга, человек, отзыв), их полей и связей. Моделируют содержание, а не страницы: страницы собираются из записей.'
+			},
+			{
+				id: 'cms-model-lang',
+				front: 'Как хранить тексты на нескольких языках?',
+				back: 'Поле на каждый язык (title_ru, title_en) или перевод записи, связанный с оригиналом. Так видно, что это один объект, и цену или фото не придётся менять дважды.'
+			},
+			{
+				id: 'cms-who-edits',
+				front: 'Какие два вопроса определяют выбор CMS?',
+				back: 'Кто правит содержание (владелец, редактор, разработчик) и как часто. От ответов зависит, нужна ли удобная админка, или хватит файлов.'
+			}
+		],
+		sources: [
+			{ title: 'MDN: Глоссарий, CMS', url: 'https://developer.mozilla.org/en-US/docs/Glossary/CMS', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{
+				title: 'Система управления содержимым (Википедия)',
+				url: 'https://ru.wikipedia.org/wiki/Система_управления_содержимым',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'ru'
+			},
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Мы описываем содержание вашего сайта: из каких «вещей» оно состоит и кто их правит. Сам сайт пока не меняется, это проект.',
+			hints: [
+				'Тип это вид «вещи», у которой много экземпляров: услуга, человек, подтверждение. Поля это то, что у неё есть: название, текст, цена, фото.',
+				'Для «кто правит» хватит трёх слов: владелец, редактор, разработчик. Для «как часто»: раз в неделю, раз в месяц, раз в год.',
+				'Во второй таблице у каждого раздела напишите, какие типы он показывает: раздел «Услуги» показывает услуги, раздел «Обо мне» человека.'
+			],
+			mistakes: {
+				'model-exists': 'Блок с моделью исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				types: 'В таблице должно быть не меньше четырёх типов (четыре строки).',
+				'fields-listed': 'Поля пишите через запятую: например, title, text, price.',
+				'owner-named': 'В колонке «Кто правит» напишите: владелец, редактор или разработчик.',
+				'freq-named': 'В колонке «Как часто» напишите частоту: например, «раз в месяц».',
+				'section-per-row': 'Во второй таблице нужна строка на каждый раздел вашего сайта. Не удаляйте их.',
+				'sections-named': 'Названия разделов в таблице должны совпадать с брифом.',
+				multilingual: 'У сайта несколько языков, а полей на каждый язык нет. Сделайте title_ru и title_en или напишите «перевод записи».'
+			},
+			outro: 'Теперь у проекта есть модель контента. В следующих уроках мы посмотрим, какие бывают системы, в которых она живёт, начиная с самой популярной: WordPress.'
+		},
+		say: { CMS: 'си-эм-эс', HTML: 'эйч-ти-эм-эл', FTP: 'эф-ти-пи', WordPress: 'вордпресс' }
+	};
+</script>
+
+<script>
+	import ThreeLayers from '../../diagrams/ThreeLayers.svelte';
+</script>
+
+## Сайт, который надо править каждую неделю
+
+Сайт из HTML-файлов хорош, пока его не нужно править. Но владелец меняет цены, добавляет услуги, пишет новости. У сайта пятьдесят страниц, и на каждой скопирована шапка. Поменялся телефон, значит открываем пятьдесят файлов. Цена услуги написана на странице услуги, на главной и в прайс-листе: забыли один, и на сайте две цены. А человек, который меняет цены, не обязан знать HTML. Так возникла потребность в **CMS**.
+
+## Три слоя
+
+Любой сайт состоит из трёх слоёв, и от того, как они разделены, зависит всё остальное. Подвигайте ползунок в схеме: на трёх ступенях видно, где лежит каждый слой и что нужно сделать, чтобы поменять цену одной услуги.
+
+<ThreeLayers />
+
+- **Содержание**: тексты, цены, фотографии, названия, то, ради чего приходят.
+- **Шаблон**: как содержание выглядит и где стоит. Общая шапка, подвал, вид карточки услуги.
+- **Код**: что сайт делает. Найти нужную запись, показать страницу, принять заявку, проверить, кто вошёл.
+
+В сайте из файлов все три слоя перемешаны в одном HTML. В CMS они **разделены**: содержание живёт в базе и правится в админке, шаблон один на все страницы, код написан один раз.
+
+## Что такое CMS
+
+**CMS** (content management system, система управления содержимым) это программа, которая даёт править содержание сайта людям, не знающим HTML. Обычно в неё входят:
+
+- **админка**: страница для правки, вход по паролю;
+- **хранилище** содержания (чаще всего база данных, как в части 7, а бывает и набор файлов);
+- **шаблоны**: оформление, написанное один раз;
+- **роли**: владелец видит всё, редактор правит тексты, но не трогает настройки;
+- **медиатека** для картинок и файлов;
+- **версии и публикация**: черновик, предпросмотр, откат.
+
+Сайт на CMS это динамический сайт в смысле части 6: страница собирается по запросу из содержания в базе и шаблона (или заранее, как в уроке про генераторы, но об этом позже). CMS на свете очень много, и в части 8 мы разберём главные виды: WordPress, конструкторы вроде Tilda, «Битрикс», генераторы статических сайтов и «безголовые» CMS.
+
+## Модель контента
+
+Сердце любой CMS это **модель контента**: описание того, какие бывают «вещи» и что у них есть. Каждая «вещь» это **тип**, а то, что у неё есть, **поля**.
+
+| Тип | Поля | Кто правит |
+|---|---|---|
+| Услуга | название, описание, цена, фото | владелец |
+| Человек | имя, должность, биография, фото | владелец |
+| Подтверждение | название, номер, дата, скан | редактор |
+
+Принцип, который стоит запомнить: **моделируйте содержание, а не страницы**. Не «страница про услугу межевания», а «услуга» с полями. Тогда одна запись показывается в нескольких местах: карточка на главной, отдельная страница, список в разделе, позже строка в поисковой выдаче. Меняется поле, и меняется всё. А ещё структурированное содержание понимают поисковые машины и ИИ (об этом в части 13).
+
+Что входит в описание поля:
+
+- **тип данных**: строка, длинный текст, число, дата, картинка, да/нет, **ссылка на запись другого типа** (у услуги есть «ведущий»);
+- **обязательность**: можно ли оставить поле пустым;
+- **языки**: если сайт на нескольких языках, поле повторяют на каждый (`title_ru`, `title_en`) или делают перевод записи, связанный с оригиналом.
+
+Ошибка, которую делают все: свалить всё в одно поле «Текст» с редактором, где форматируют как попало. Через год в нём лежат и цена, и условия, и телефон, и ничего нельзя найти или переиспользовать. Цена должна быть полем.
+
+<details>
+<summary>Проверьте себя: почему цену лучше сделать отдельным полем, а не частью текста?</summary>
+
+Из отдельного поля её можно показать в карточке, на странице, в списке и в разметке для поисковиков, а менять придётся один раз. Спрятанную в тексте цену приходится искать и править глазами в каждом месте.
+
+</details>
+
+## Кто правит и как часто
+
+Выбор CMS почти целиком определяют два вопроса. **Кто** правит содержание: владелец без технических знаний, редактор, разработчик? И **как часто**: каждый день, раз в месяц, раз в год? Если сайт правят раз в полгода и делает это разработчик, CMS может оказаться лишней: хватит файлов. Если новости пишут каждый день несколько человек, без CMS не обойтись. Вы запишете оба ответа для своих типов прямо в практике.
+
+## Практика
+
+Вы в эпохе 2010 года: сайты на CMS перестали быть редкостью, и владельцы малого бизнеса впервые правят их сами. Начните с модели контента.
+
+В странице таблица типов содержания. Первая строка (услуги или товары) почти готова. Допишите остальные: людей, подтверждения, страницы-разделы (или свои типы), для каждого поля, кто и как часто его правит. Во второй таблице для каждого раздела вашего сайта укажите, какие типы содержания он выводит.
+
+## Что было не так раньше
+
+Сайты 2000-х начинались с файлов, а общую шапку подтягивали «включениями» (SSI, Dreamweaver-шаблоны). Это был первый шаг к разделению слоёв, но правка по-прежнему требовала мастера по сайтам: каждая правка стоила денег и ждала недели. CMS отдали правку в руки владельцев. Цена оказалась другой: сайт стал программой, которую нужно обновлять и защищать (об этом урок 3).

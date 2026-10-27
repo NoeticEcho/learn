@@ -1,0 +1,796 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '08-cms/02-wordpress',
+		part: 8,
+		order: 2,
+		title: 'WordPress: тема, плагины и эпоха 2010 года',
+		summary: 'Вы разберёте, как устроен WordPress: записи и страницы, тема, плагины, меню. И соберёте в песочнице сайт эпохи 2010 года для своего проекта, понимая, что именно решает тема, а что плагин.',
+		comic: {
+			panels: [
+				{
+					mood: 'explain',
+					prop: 'browser',
+					label: 'header.php',
+					caption: 'Тема',
+					say: 'Тема решает, как всё выглядит: шапка, меню, цикл записей, боковая колонка, подвал.'
+				},
+				{
+					mood: 'hmm',
+					side: 'right',
+					prop: 'network',
+					label: 'плагины: 23',
+					caption: 'Через год',
+					say: [
+						{ text: 'Сайт тормозит.' },
+						{ who: 'Плагины', text: 'Мы все полезные!' }
+					]
+				},
+				{
+					mood: 'cheer',
+					prop: 'cards',
+					label: '4 плагина',
+					caption: 'Правило',
+					say: 'Минимум плагинов, и у каждого причина. Каждый это чужой код, который надо обновлять.'
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-wordpress-themes-plugins'],
+		requires: ['cms-what-is-cms', 'cms-content-model', 'html-semantic-elements', 'css-box-model'],
+		practice: {
+			id: 'cms-wordpress-plan',
+			title: 'Сайт на WordPress для вашего проекта',
+			task: 'Перед вами тема в духе WordPress 2010 года. 1) Слоган сайта (в шапке) сейчас «…»: напишите его. 2) Постройте меню: в списке меню только «Главная»; добавьте по пункту на каждый раздел вашего брифа. 3) На главной над списком записей добавьте кнопку главного действия: ссылка с классом button и текстом из брифа. 4) В плане под страницей для каждого раздела скажите, станет он страницей или рубрикой и есть ли он в меню. 5) Перечислите плагины: не меньше двух и не больше пяти, у каждого название и причина. 6) Скажите, какой плагин обслуживает главное действие и где он выведен. 7) Скажите, как тон проекта отражён в названии и слогане. Все «…» нужно заменить.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <div id="page">
+      <header id="branding">
+        <h1 id="site-title"><a href="#">{{name}}<\/a><\/h1>
+        <p id="site-description">…<\/p>
+        <nav id="access">
+          <ul id="menu">
+            <li><a href="#">Главная<\/a><\/li>
+          <\/ul>
+        <\/nav>
+      <\/header>
+
+      <div id="main">
+        <div id="content">
+          {{#each items}}<article class="post">
+            <h2 class="entry-title">{{title}}<\/h2>
+            <div class="entry-meta">Рубрика: услуги<\/div>
+            <p>{{text}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+        <aside id="sidebar">
+          <div class="widget"><h3>Поиск<\/h3><p>Строка поиска по сайту<\/p><\/div>
+          <div class="widget"><h3>Рубрики<\/h3><ul>{{#each sections}}<li>{{.}}<\/li>{{/each}}<\/ul><\/div>
+          <div class="widget"><h3>Контакты<\/h3><p>{{phone}}<br>{{email}}<\/p><\/div>
+        <\/aside>
+      <\/div>
+
+      <footer id="colophon"><p>{{name}}, {{city}}. Сайт работает на WordPress.<\/p><\/footer>
+    <\/div>
+
+    <section data-scaffold id="wp-plan">
+      <h2>План сайта на WordPress<\/h2>
+
+      <h3>Что станет страницей, а что рубрикой<\/h3>
+      <table id="map">
+        <tr><th>Раздел<\/th><th>Страница или рубрика<\/th><th>Есть в меню?<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="kind">…<\/td><td class="menu">…<\/td><\/tr>
+        {{/each}}
+      <\/table>
+
+      <h3>Плагины: не больше пяти, у каждого причина<\/h3>
+      <ul id="plugins">
+        <li class="plugin"><span class="name">…<\/span>: <span class="why">…<\/span><\/li>
+        <li class="plugin"><span class="name">…<\/span>: <span class="why">…<\/span><\/li>
+      <\/ul>
+
+      <p id="action">Главное действие «{{mainAction.label}}» обслуживает: <span id="action-by">…<\/span>. Выведено на: <span id="action-where">…<\/span><\/p>
+      <p>Как тон проекта отражён в названии и слогане: <span id="tone-note">…<\/span><\/p>
+    <\/section>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: тема в духе WordPress 2010 года */
+
+body {
+  margin: 0;
+  padding: 1rem 0;
+  font: 1rem/1.6 Georgia, "Times New Roman", serif;
+  color: #333333;
+  background-color: #e4e4e4;
+}
+
+#page {
+  width: 90%;
+  max-width: 58rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+}
+
+#branding {
+  padding: 1rem 1.5rem 0;
+  border-bottom: 4px solid #21759b;
+}
+
+#site-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+#site-title a {
+  color: #21759b;
+  text-decoration: none;
+}
+
+#site-description {
+  margin: 0 0 0.75rem;
+  color: #777777;
+  font-style: italic;
+}
+
+#access {
+  background-color: #f2f2f2;
+  border-top: 1px solid #dddddd;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem;
+}
+
+#access ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+#access li {
+  float: left;
+}
+
+#access a {
+  display: block;
+  padding: 0.6rem 1rem;
+  color: #333333;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#main {
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+#content {
+  float: left;
+  width: 66%;
+}
+
+#sidebar {
+  float: right;
+  width: 28%;
+  font: 0.9rem/1.5 Arial, Helvetica, sans-serif;
+}
+
+.post {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted #cccccc;
+}
+
+.entry-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+}
+
+.entry-meta {
+  margin-bottom: 0.5rem;
+  color: #888888;
+  font: 0.8rem Arial, Helvetica, sans-serif;
+}
+
+.widget {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background-color: #f6f6f6;
+}
+
+.widget h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.widget ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+a {
+  color: #21759b;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #21759b;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#colophon {
+  clear: both;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #cccccc;
+  color: #777777;
+  font: 0.85rem Arial, Helvetica, sans-serif;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <div id="page">
+      <header id="branding">
+        <h1 id="site-title"><a href="#">{{name}}<\/a><\/h1>
+        <p id="site-description">{{who}}<\/p>
+        <nav id="access">
+          <ul id="menu">
+            <li><a href="#">Главная<\/a><\/li>
+            {{#each sections}}<li><a href="#">{{.}}<\/a><\/li>
+            {{/each}}
+          <\/ul>
+        <\/nav>
+      <\/header>
+
+      <div id="main">
+        <div id="content">
+          <p><a class="button" href="#zayavka">{{mainAction.label}}<\/a><\/p>
+          {{#each items}}<article class="post">
+            <h2 class="entry-title">{{title}}<\/h2>
+            <div class="entry-meta">Рубрика: услуги<\/div>
+            <p>{{text}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+        <aside id="sidebar">
+          <div class="widget"><h3>Поиск<\/h3><p>Строка поиска по сайту<\/p><\/div>
+          <div class="widget"><h3>Рубрики<\/h3><ul>{{#each sections}}<li>{{.}}<\/li>{{/each}}<\/ul><\/div>
+          <div class="widget"><h3>Контакты<\/h3><p>{{phone}}<br>{{email}}<\/p><\/div>
+        <\/aside>
+      <\/div>
+
+      <footer id="colophon"><p>{{name}}, {{city}}. Сайт работает на WordPress.<\/p><\/footer>
+    <\/div>
+
+    <section data-scaffold id="wp-plan">
+      <h2>План сайта на WordPress<\/h2>
+
+      <h3>Что станет страницей, а что рубрикой<\/h3>
+      <table id="map">
+        <tr><th>Раздел<\/th><th>Страница или рубрика<\/th><th>Есть в меню?<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="kind">страница<\/td><td class="menu">да<\/td><\/tr>
+        {{/each}}
+      <\/table>
+
+      <h3>Плагины: не больше пяти, у каждого причина<\/h3>
+      <ul id="plugins">
+        <li class="plugin"><span class="name">Форма обратной связи<\/span>: <span class="why">принимает заявки с главной и пересылает на почту владельца<\/span><\/li>
+        <li class="plugin"><span class="name">SEO-плагин<\/span>: <span class="why">задаёт заголовки и описания страниц для поисковиков<\/span><\/li>
+        <li class="plugin"><span class="name">Кэширование<\/span>: <span class="why">отдаёт готовые страницы, чтобы сайт открывался быстро<\/span><\/li>
+        <li class="plugin"><span class="name">Резервные копии<\/span>: <span class="why">каждую ночь сохраняет сайт и базу отдельно от сервера<\/span><\/li>
+      <\/ul>
+
+      <p id="action">Главное действие «{{mainAction.label}}» обслуживает: <span id="action-by">плагин формы обратной связи<\/span>. Выведено на: <span id="action-where">главной странице, кнопкой над списком записей<\/span><\/p>
+      <p>Как тон проекта отражён в названии и слогане: <span id="tone-note">название и слоган короткие и спокойные, без громких слов, в том же тоне, что и сам проект<\/span><\/p>
+    <\/section>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: тема в духе WordPress 2010 года */
+
+body {
+  margin: 0;
+  padding: 1rem 0;
+  font: 1rem/1.6 Georgia, "Times New Roman", serif;
+  color: #333333;
+  background-color: #e4e4e4;
+}
+
+#page {
+  width: 90%;
+  max-width: 58rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+}
+
+#branding {
+  padding: 1rem 1.5rem 0;
+  border-bottom: 4px solid #21759b;
+}
+
+#site-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+#site-title a {
+  color: #21759b;
+  text-decoration: none;
+}
+
+#site-description {
+  margin: 0 0 0.75rem;
+  color: #777777;
+  font-style: italic;
+}
+
+#access {
+  background-color: #f2f2f2;
+  border-top: 1px solid #dddddd;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem;
+}
+
+#access ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+#access li {
+  float: left;
+}
+
+#access a {
+  display: block;
+  padding: 0.6rem 1rem;
+  color: #333333;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#main {
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+#content {
+  float: left;
+  width: 66%;
+}
+
+#sidebar {
+  float: right;
+  width: 28%;
+  font: 0.9rem/1.5 Arial, Helvetica, sans-serif;
+}
+
+.post {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted #cccccc;
+}
+
+.entry-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+}
+
+.entry-meta {
+  margin-bottom: 0.5rem;
+  color: #888888;
+  font: 0.8rem Arial, Helvetica, sans-serif;
+}
+
+.widget {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background-color: #f6f6f6;
+}
+
+.widget h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.widget ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+a {
+  color: #21759b;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #21759b;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#colophon {
+  clear: both;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #cccccc;
+  color: #777777;
+  font: 0.85rem Arial, Helvetica, sans-serif;
+}
+
+/* Оформление упражнения (блоки с data-scaffold). В сайт оно не попадает. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'plan-exists', kind: 'exists', selector: '#wp-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#wp-plan', matches: '^[^…]*$' },
+				{ id: 'tagline', kind: 'text', selector: '#site-description', matches: '\\S{3,}' },
+				{ id: 'menu-sections', kind: 'field', selector: '#menu a', field: 'sections' },
+				{ id: 'action-button', kind: 'field', selector: '#content a.button', field: 'mainAction.label' },
+				{ id: 'sections-planned', kind: 'count', selector: '#map tr.sec', min: { brief: 'sections' } },
+				{ id: 'kind-named', kind: 'text', selector: '#map td.kind', matches: 'страниц|рубрик' },
+				{ id: 'in-menu', kind: 'text', selector: '#map td.menu', matches: '^\\s*(?:[Дд]а|[Нн]ет)' },
+				{ id: 'plugins-count', kind: 'count', selector: '#plugins li.plugin', min: 2, max: 5 },
+				{ id: 'plugins-reasons', kind: 'text', selector: '#plugins li.plugin .why', matches: '\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'action-plugin', kind: 'text', selector: '#action-by', matches: 'плагин|блок|форм|кнопк|виджет' },
+				{ id: 'action-where', kind: 'text', selector: '#action-where', matches: 'главн|страниц|боков|подвал|меню|шапк' },
+				{ id: 'tone-note', kind: 'text', selector: '#tone-note', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Чем в WordPress страница отличается от записи?',
+				options: [
+					'Запись привязана ко времени и входит в ленту (новость, статья), а страница это отдельный постоянный раздел («О нас», «Контакты»)',
+					'Страница хранится в файле, а запись в базе',
+					'Запись нельзя редактировать'
+				],
+				answer: 0,
+				why: [
+					'Да. Записи идут лентой по датам и ложатся в рубрики и метки, страницы стоят сами по себе и собираются в иерархию.',
+					'Нет: и то и другое хранится в базе.',
+					'Нет: правятся они одинаково.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините область страницы с файлом темы, который её рисует',
+				pairs: [
+					['Шапка и меню', 'header.php'],
+					['Цикл записей на главной', 'index.php'],
+					['Боковая колонка с виджетами', 'sidebar.php'],
+					['Подвал', 'footer.php']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Нужно добавить форму заявки. Это работа темы или плагина?',
+				options: [
+					'Плагина: форма это возможность, а не оформление, и она должна пережить смену темы',
+					'Темы: форму надо вшить в header.php',
+					'Ядра WordPress: форма в нём уже есть'
+				],
+				answer: 0,
+				why: [
+					'Да. Тема отвечает за вид, плагин за возможности. Если форму вшить в тему, при смене темы она пропадёт.',
+					'Нет: тогда форма привязана к теме и не переживёт её замену.',
+					'Нет: в ядре WordPress формы заявок нет, но для этого есть плагины.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Как плагины встраиваются в работу WordPress?',
+				options: [
+					'Через хуки: в нужных местах ядро и тема говорят «здесь можно что-то добавить или изменить», и плагин цепляется',
+					'Плагины заменяют файлы ядра',
+					'Плагины запускаются на компьютере редактора'
+				],
+				answer: 0,
+				why: [
+					'Да. Хуки бывают двух видов: «действия» (сделай что-то в этом месте) и «фильтры» (измени вот это перед показом).',
+					'Нет: правка ядра сломалась бы при первом же обновлении.',
+					'Нет: плагины это серверный код.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Почему WordPress стал самой распространённой CMS?',
+				options: [
+					'Работает на самом дешёвом хостинге с PHP и MySQL',
+					'У него огромный выбор тем и плагинов',
+					'Он открытый и бесплатный, а умеющих им пользоваться много',
+					'Он защищён от взлома лучше всех систем'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: простая установка на любой хостинг была его козырем с самого начала.',
+					'Да: возможности добавляют готовыми плагинами, а не программируют.',
+					'Да: открытая лицензия и большое сообщество упрощают поиск помощи.',
+					'Нет: из-за распространённости и числа плагинов WordPress как раз часто атакуют (об этом следующий урок).'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Сколько плагинов стоит ставить на небольшой сайт?',
+				options: [
+					'Как можно меньше: каждый это чужой код, который надо обновлять и который может замедлить или сломать сайт',
+					'Как можно больше: тогда у сайта больше возможностей',
+					'Ровно двадцать'
+				],
+				answer: 0,
+				why: [
+					'Да. Заведите короткий список (форма, SEO, кэш, резервные копии) и у каждого запишите причину.',
+					'Нет: каждый плагин увеличивает работу по обновлению и поверхность для взлома.',
+					'Нет: правильного числа в двадцать не существует.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-wp-origin',
+				front: 'Откуда взялся WordPress и что он такое?',
+				back: 'Появился в 2003 году как система для блогов (Мэтт Малленвег и Майк Литтл, на основе b2/cafelog). Открытая CMS на PHP и MySQL. Версия 3.0 (июнь 2010) добавила собственные типы записей и меню, и из блога он стал CMS.'
+			},
+			{
+				id: 'cms-wp-post-page',
+				front: 'Запись и страница в WordPress',
+				back: 'Запись идёт лентой по датам, лежит в рубриках и метках (новости, статьи). Страница это отдельный постоянный раздел («О нас», «Контакты»).'
+			},
+			{
+				id: 'cms-wp-theme',
+				front: 'Что решает тема и из чего она состоит?',
+				back: 'Тема решает, как выглядит сайт. Это набор шаблонов PHP (header.php, index.php, sidebar.php, footer.php, single.php, page.php) и style.css. Данные в них подставляет «цикл записей».'
+			},
+			{
+				id: 'cms-wp-plugin',
+				front: 'Что делает плагин и как он встраивается?',
+				back: 'Добавляет возможности (форма, SEO, кэш, копии), цепляясь к хукам: действиям и фильтрам. Форму или SEO пишут плагином, чтобы они пережили смену темы.'
+			},
+			{
+				id: 'cms-wp-rule',
+				front: 'Какое правило для плагинов?',
+				back: 'Минимум, и у каждого записана причина. Каждый плагин это чужой код с обновлениями, влияющий на скорость и безопасность.'
+			}
+		],
+		sources: [
+			{
+				title: 'WordPress Developer Resources: Theme Handbook, Getting Started',
+				url: 'https://developer.wordpress.org/themes/getting-started/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'WordPress: Template Hierarchy',
+				url: 'https://developer.wordpress.org/themes/basics/template-hierarchy/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'WordPress Plugin Handbook: Hooks',
+				url: 'https://developer.wordpress.org/plugins/hooks/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'WordPress.org: History', url: 'https://wordpress.org/about/history/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Вы в 2010 году: сайт будет жить на WordPress. Перед вами его тема. Допишем слоган, меню и план: что станет страницей, какие плагины нужны и зачем.',
+			hints: [
+				'Меню это список ul с id menu. Добавьте li со ссылкой для каждого раздела вашего брифа, как «Главная» в образце.',
+				'Кнопка главного действия это ссылка с классом button и текстом из брифа. Вставьте её в блок content, над списком записей.',
+				'В списке плагинов у каждого две части: название и причина. Подумайте о форме заявки, SEO, кэше и резервных копиях. Больше пяти не нужно.'
+			],
+			mistakes: {
+				'plan-exists': 'Блок с планом исчез. Он был в странице, верните его.',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своим текстом.',
+				tagline: 'Слоган сайта в шапке пока пустой. Напишите короткую фразу вместо «…».',
+				'menu-sections': 'В меню нет всех разделов брифа. Добавьте li со ссылкой на каждый.',
+				'action-button': 'На главной нет кнопки главного действия. Добавьте в content ссылку с классом button и текстом действия.',
+				'sections-planned': 'В плане должна быть строка на каждый раздел. Не удаляйте строки.',
+				'kind-named': 'Для каждого раздела напишите: страница или рубрика.',
+				'in-menu': 'В колонке «Есть в меню?» напишите «да» или «нет».',
+				'plugins-count': 'Плагинов должно быть не меньше двух и не больше пяти.',
+				'plugins-reasons': 'У каждого плагина запишите причину хотя бы в несколько слов.',
+				'action-plugin': 'Скажите, какой плагин или блок обслуживает главное действие.',
+				'action-where': 'Скажите, где выведено главное действие: например, на главной странице.',
+				'tone-note': 'Опишите в нескольких словах, как тон проекта отражён в названии и слогане.'
+			},
+			outro: 'У вас есть сайт на WordPress в бумажном виде, и в нём всего четыре плагина. В следующем уроке посмотрим, сколько стоит его содержать.'
+		},
+		say: { WordPress: 'вордпресс', PHP: 'пи-эйч-пи', MySQL: 'май-эс-кью-эль', SEO: 'эс-и-оу', GPL: 'джи-пи-эль' }
+	};
+</script>
+
+<script>
+	import WpAnatomy from '../../diagrams/WpAnatomy.svelte';
+</script>
+
+## Откуда взялся WordPress
+
+В 2003 году Мэтт Малленвег и Майк Литтл взяли заброшенную систему для ведения блогов b2/cafelog и продолжили её как свободную программу. Так появился **WordPress**: открытая CMS на PHP и MySQL. Сначала он умел вести блог. Большой скачок случился в версии 3.0 (июнь 2010 года): в ней появились собственные типы записей (теперь в нём можно завести «услугу» или «человека», как в модели контента из урока 1) и меню, и из блога он превратился в CMS для любых сайтов. В 2010 году вы бы собирали сайт именно так.
+
+Сегодня на нём работает больше трети сайтов, определивших свою CMS (по данным HTTP Archive Web Almanac 2024), и это в разы больше, чем у любой следующей системы.
+
+## Записи, страницы, рубрики
+
+Две главные вещи в WordPress:
+
+- **Запись** (post) привязана ко времени: новость, статья, заметка. Записи идут лентой, от свежих к старым, и ложатся в **рубрики** (категории) и **метки**.
+- **Страница** (page) это отдельный постоянный раздел: «О нас», «Контакты», «Услуги». Страницы собираются в иерархию (у «Услуг» могут быть подстраницы), и по времени не идут.
+
+Вопрос «что станет страницей, а что записью» вы решите для каждого раздела в практике. Для услуг обычно создают свой **тип записей**: тогда у них свои поля и отдельный раздел в админке.
+
+## Тема: как сайт выглядит
+
+**Тема** это набор шаблонов, которые решают, как выглядит сайт. Классическая тема это папка файлов PHP и CSS:
+
+- `style.css`: оформление (и название темы в комментарии вверху);
+- `header.php`, `footer.php`, `sidebar.php`: шапка, подвал, боковая колонка;
+- `index.php`: основной шаблон; `single.php` для одной записи, `page.php` для страницы. Набор правил, какой шаблон WordPress выберет для какого адреса, называется **иерархией шаблонов**;
+- `functions.php`: настройки темы и подключения.
+
+Внутри шаблонов работает **цикл** (The Loop): «для каждой записи, которую надо показать, выведи заголовок, дату и текст». Именно он подставляет содержание из базы в оформление темы. Нажмите на области в схеме, и увидите, какой файл за какую отвечает.
+
+<WpAnatomy />
+
+Темы меняют, не трогая содержание: записи и страницы остаются в базе, меняется лишь одежда. С 2022 года (версия 5.9) появились и «блочные» темы, которые настраиваются в визуальном редакторе сайта без правки PHP. Классические темы при этом по-прежнему очень распространены.
+
+## Плагины: что сайт умеет
+
+**Плагин** добавляет возможности: форма заявки, оптимизация под поиск (SEO), кэширование, резервные копии, магазин, галерея. Работают они через **хуки**: в нужных местах ядро и тема говорят «здесь можно что-то добавить или изменить» (хук-действие) или «вот значение, измените его перед показом» (хук-фильтр). Плагин цепляется к такому месту, и ничего в ядре править не нужно.
+
+Из этого правило, которое отделяет тему от плагина: **вид это тема, возможности это плагин**. Форму вшить в тему можно, но при смене темы она пропадёт. А форма-плагин остаётся.
+
+Плагинов в каталоге десятки тысяч. Искушение поставить побольше понятно, но у каждого плагина есть цена: это **чужой код**, который нужно обновлять, который может замедлить сайт, конфликтовать с другим плагином или оказаться дырой. Разумный набор небольшого сайта: форма заявки, SEO, кэш, резервные копии. Всё. О цене чужого кода следующий урок.
+
+<details>
+<summary>Проверьте себя: форма заявки это работа темы или плагина?</summary>
+
+Плагина. Форма это возможность, а не оформление. Если вшить её в тему, при смене темы она исчезнет.
+
+</details>
+
+## Редактор и блоки
+
+Классический редактор был похож на Word. С конца 2018 года (версия 5.0) в WordPress работает **блочный редактор** (его называли Gutenberg): страница собирается из блоков (абзац, картинка, колонки, кнопка), и их можно переставлять. Блоки добавляют и плагины. Для редактора это удобно: каждый кусок страницы виден отдельно.
+
+## Почему WordPress победил
+
+Не потому, что он лучше всех. Причин несколько, и они сложились друг с другом: он **работает на самом дешёвом хостинге** с PHP и MySQL (установка за пять минут); он **открытый и бесплатный** (лицензия GPL), и вокруг него выросло огромное сообщество; для него **тысячи готовых тем и плагинов**, поэтому большую часть задач решают настройкой, а не программированием; **специалистов много**, и найти помощь легко. Эти же причины и цена: из-за распространённости WordPress атакуют чаще остальных.
+
+Не путайте два «WordPress». **WordPress.org** это сама программа, которую вы ставите на свой хостинг. **WordPress.com** это услуга, где её для вас запускает компания Automattic за плату, с ограничениями на плагины на дешёвых тарифах.
+
+## Практика
+
+Вы в эпохе 2010 года: бизнес заказывает сайт на WordPress, и вы выбираете тему. Перед вами тема в духе той эпохи: ширина, боковая колонка, серый фон. Допишите слоган, постройте меню из разделов своего брифа, выведите кнопку главного действия и составьте план: что станет страницей, какие плагины нужны, какой из них обслуживает главное действие.
+
+## Что было не так
+
+Тема 2010 года фиксированной ширины с плавающей раскладкой плохо смотрится на телефоне (этому посвящена часть про адаптивность), а набор плагинов, собранный «на вырост», превращается в обузу. Об этом следующий урок.
