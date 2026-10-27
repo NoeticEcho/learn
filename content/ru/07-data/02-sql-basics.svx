@@ -6,6 +6,35 @@
 		order: 2,
 		title: 'SQL: читаем и пишем данные',
 		summary: 'Вы пишете запросы SELECT, INSERT, UPDATE и DELETE и понимаете, что делает каждое слово. После урока вы создаёте таблицу своих услуг, добавляете в неё строки и получаете нужные данные: отобранные, упорядоченные и посчитанные.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'editor',
+					label: 'DELETE FROM items;',
+					caption: 'Без WHERE',
+					say: [
+						{ text: 'Хотел удалить одну услугу.' },
+						{ who: 'База', text: 'Удалила все. Ты не сказал, какую.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'flowchart',
+					label: 'FROM|WHERE|GROUP BY|SELECT',
+					caption: 'Порядок',
+					say: 'Пишут сверху вниз, а выполняется иначе: сначала таблица, потом отбор строк, потом подсчёт.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'lock',
+					label: 'параметр $1',
+					caption: 'Инъекция',
+					say: 'Команду и слова посетителя отправляй раздельно, и слово не станет командой.'
+				}
+			]
+		},
 		minutes: 35,
 		teaches: ['data-sql-select', 'data-sql-write'],
 		requires: ['data-relational-model'],
@@ -2265,99 +2294,31 @@ input {
 `
 			},
 			checks: [
-				{
-					id: 'work-exists',
-					kind: 'exists',
-					selector: '#sql-work'
-				},
-				{
-					id: 'no-blanks',
-					kind: 'text',
-					selector: '#sql-work',
-					matches: '^[^…]*$'
-				},
-				{
-					id: 'create-table',
-					kind: 'text',
-					selector: '#q-create',
-					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+[Ii][Tt][Ee][Mm][Ss]'
-				},
-				{
-					id: 'primary-key',
-					kind: 'text',
-					selector: '#q-create',
-					matches: '[Pp][Rr][Ii][Mm][Aa][Rr][Yy]\\s+[Kk][Ee][Yy]'
-				},
+				{ id: 'work-exists', kind: 'exists', selector: '#sql-work' },
+				{ id: 'no-blanks', kind: 'text', selector: '#sql-work', matches: '^[^…]*$' },
+				{ id: 'create-table', kind: 'text', selector: '#q-create', matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+[Ii][Tt][Ee][Mm][Ss]' },
+				{ id: 'primary-key', kind: 'text', selector: '#q-create', matches: '[Pp][Rr][Ii][Mm][Aa][Rr][Yy]\\s+[Kk][Ee][Yy]' },
 				{
 					id: 'column-types',
 					kind: 'text',
 					selector: '#q-create',
 					matches: '(?:[Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Ii][Nn][Tt]|[Ss][Ee][Rr][Ii][Aa][Ll])[\\s\\S]*(?:[Tt][Ee][Xx][Tt]|[Vv][Aa][Rr][Cc][Hh][Aa][Rr])[\\s\\S]*(?:[Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Nn][Uu][Mm][Ee][Rr][Ii][Cc]|[Ii][Nn][Tt])'
 				},
-				{
-					id: 'five-rows',
-					kind: 'text',
-					selector: '#q-insert',
-					matches: '[Vv][Aa][Ll][Uu][Ee][Ss](?:\\n[ \\t]*\\([^\\n]*){5}'
-				},
-				{
-					id: 'rows-from-brief',
-					kind: 'field',
-					selector: '#q-insert',
-					field: 'items[].title',
-					min: 1,
-					when: {
-						brief: 'items[].title'
-					}
-				},
-				{
-					id: 'select-where',
-					kind: 'text',
-					selector: '#q-select',
-					matches: '[Ss][Ee][Ll][Ee][Cc][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee]'
-				},
-				{
-					id: 'select-order',
-					kind: 'text',
-					selector: '#q-select',
-					matches: '[Oo][Rr][Dd][Ee][Rr]\\s+[Bb][Yy]'
-				},
-				{
-					id: 'select-limit',
-					kind: 'text',
-					selector: '#q-select',
-					matches: '[Ll][Ii][Mm][Ii][Tt]\\s+\\d+'
-				},
-				{
-					id: 'group-by',
-					kind: 'text',
-					selector: '#q-group',
-					matches: '[Gg][Rr][Oo][Uu][Pp]\\s+[Bb][Yy]'
-				},
-				{
-					id: 'group-count',
-					kind: 'text',
-					selector: '#q-group',
-					matches: '[Cc][Oo][Uu][Nn][Tt]\\('
-				},
-				{
-					id: 'update-where',
-					kind: 'text',
-					selector: '#q-update',
-					matches: '[Uu][Pp][Dd][Aa][Tt][Ee]\\s+\\w+\\s+[Ss][Ee][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee]'
-				},
+				{ id: 'five-rows', kind: 'text', selector: '#q-insert', matches: '[Vv][Aa][Ll][Uu][Ee][Ss](?:\\n[ \\t]*\\([^\\n]*){5}' },
+				{ id: 'rows-from-brief', kind: 'field', selector: '#q-insert', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'select-where', kind: 'text', selector: '#q-select', matches: '[Ss][Ee][Ll][Ee][Cc][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee]' },
+				{ id: 'select-order', kind: 'text', selector: '#q-select', matches: '[Oo][Rr][Dd][Ee][Rr]\\s+[Bb][Yy]' },
+				{ id: 'select-limit', kind: 'text', selector: '#q-select', matches: '[Ll][Ii][Mm][Ii][Tt]\\s+\\d+' },
+				{ id: 'group-by', kind: 'text', selector: '#q-group', matches: '[Gg][Rr][Oo][Uu][Pp]\\s+[Bb][Yy]' },
+				{ id: 'group-count', kind: 'text', selector: '#q-group', matches: '[Cc][Oo][Uu][Nn][Tt]\\(' },
+				{ id: 'update-where', kind: 'text', selector: '#q-update', matches: '[Uu][Pp][Dd][Aa][Tt][Ee]\\s+\\w+\\s+[Ss][Ee][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee]' },
 				{
 					id: 'delete-where',
 					kind: 'text',
 					selector: '#q-delete',
 					matches: '[Dd][Ee][Ll][Ee][Tt][Ee]\\s+[Ff][Rr][Oo][Mm]\\s+\\w+[\\s\\S]*[Ww][Hh][Ee][Rr][Ee]'
 				},
-				{
-					id: 'danger-named',
-					kind: 'text',
-					selector: '#danger',
-					matches: '[Ww][Hh][Ee][Rr][Ee]|услови|все строки|всей таблиц|все записи'
-				}
+				{ id: 'danger-named', kind: 'text', selector: '#danger', matches: '[Ww][Hh][Ee][Rr][Ee]|услови|все строки|всей таблиц|все записи' }
 			]
 		},
 		quiz: [
@@ -2493,27 +2454,9 @@ input {
 				kind: 'docs',
 				lang: 'ru'
 			},
-			{
-				title: 'PostgreSQL: Queries',
-				url: 'https://www.postgresql.org/docs/current/queries.html',
-				licence: 'proprietary-link',
-				kind: 'docs',
-				lang: 'en'
-			},
-			{
-				title: 'SQLBolt: интерактивные упражнения по SQL',
-				url: 'https://sqlbolt.com/',
-				licence: 'link-only',
-				kind: 'course',
-				lang: 'en'
-			},
-			{
-				title: 'PGlite: настоящий Postgres в браузере',
-				url: 'https://pglite.dev/',
-				licence: 'proprietary-link',
-				kind: 'docs',
-				lang: 'en'
-			},
+			{ title: 'PostgreSQL: Queries', url: 'https://www.postgresql.org/docs/current/queries.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'SQLBolt: интерактивные упражнения по SQL', url: 'https://sqlbolt.com/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'PGlite: настоящий Postgres в браузере', url: 'https://pglite.dev/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
 			{
 				title: 'OWASP: SQL Injection Prevention Cheat Sheet',
 				url: 'https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html',

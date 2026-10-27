@@ -6,6 +6,35 @@
 		order: 3,
 		title: 'Связи между таблицами: JOIN и нормализация',
 		summary: 'Вы разносите данные по таблицам так, чтобы каждый факт хранился один раз, и собираете их обратно соединениями. После урока вы читаете запрос с JOIN, понимаете, чем INNER отличается от LEFT, и знаете, где нормализацию нарушают намеренно.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'sheet',
+					label: 'одна таблица',
+					caption: 'Цена в трёх строках',
+					say: 'Цена изменилась. Правлю: раз, два… третью забыл. Теперь в базе две цены.'
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'ключ → строка',
+					caption: 'Один раз',
+					say: 'Каждый факт хранится один раз, а остальные места ссылаются на него по ключу.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'network',
+					label: 'LEFT JOIN',
+					caption: 'Без пары',
+					say: [
+						{ text: 'А где услуги без категории?' },
+						{ who: 'LEFT JOIN', text: 'Вот они. Справа у них NULL.' }
+					]
+				}
+			]
+		},
 		minutes: 30,
 		teaches: ['data-sql-join', 'data-normalization'],
 		requires: ['data-sql-select'],
@@ -2267,97 +2296,25 @@ input {
 `
 			},
 			checks: [
-				{
-					id: 'work-exists',
-					kind: 'exists',
-					selector: '#sql-work'
-				},
-				{
-					id: 'no-blanks',
-					kind: 'text',
-					selector: '#sql-work',
-					matches: '^[^…]*$'
-				},
+				{ id: 'work-exists', kind: 'exists', selector: '#sql-work' },
+				{ id: 'no-blanks', kind: 'text', selector: '#sql-work', matches: '^[^…]*$' },
 				{
 					id: 'separate-tables',
 					kind: 'text',
 					selector: '#q-tables',
 					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+[Cc][Aa][Tt][Ee][Gg][Oo][Rr][Ii][Ee][Ss][\\s\\S]*[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+[Pp][Ee][Oo][Pp][Ll][Ee]'
 				},
-				{
-					id: 'fk-category',
-					kind: 'text',
-					selector: '#q-tables',
-					matches: '[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s+categories'
-				},
-				{
-					id: 'fk-person',
-					kind: 'text',
-					selector: '#q-tables',
-					matches: '[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s+people'
-				},
-				{
-					id: 'no-repeated-names',
-					kind: 'text',
-					selector: '#q-tables',
-					matches: '^(?![\\s\\S]*(?:category|категория)\\s+(?:text|varchar))[\\s\\S]*$'
-				},
-				{
-					id: 'items-from-brief',
-					kind: 'field',
-					selector: '#q-data',
-					field: 'items[].title',
-					min: 1,
-					when: {
-						brief: 'items[].title'
-					}
-				},
-				{
-					id: 'people-from-brief',
-					kind: 'field',
-					selector: '#q-data',
-					field: 'people[].name',
-					min: 1,
-					when: {
-						brief: 'people[].name'
-					}
-				},
-				{
-					id: 'null-category',
-					kind: 'text',
-					selector: '#q-data',
-					matches: '[Nn][Uu][Ll][Ll]'
-				},
-				{
-					id: 'join-category',
-					kind: 'text',
-					selector: '#q-join',
-					matches: '[Jj][Oo][Ii][Nn]\\s+categories[\\s\\S]*[Oo][Nn]\\s+[\\s\\S]*='
-				},
-				{
-					id: 'join-person',
-					kind: 'text',
-					selector: '#q-join',
-					matches: '[Jj][Oo][Ii][Nn]\\s+people[\\s\\S]*[Oo][Nn]\\s+[\\s\\S]*='
-				},
-				{
-					id: 'left-join',
-					kind: 'text',
-					selector: '#q-left',
-					matches: '[Ll][Ee][Ff][Tt]\\s+[Jj][Oo][Ii][Nn]'
-				},
-				{
-					id: 'is-null',
-					kind: 'text',
-					selector: '#q-left',
-					matches: '[Ii][Ss]\\s+[Nn][Uu][Ll][Ll]'
-				},
-				{
-					id: 'denorm-why',
-					kind: 'text',
-					selector: '#denorm',
-					matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'
-				}
+				{ id: 'fk-category', kind: 'text', selector: '#q-tables', matches: '[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s+categories' },
+				{ id: 'fk-person', kind: 'text', selector: '#q-tables', matches: '[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s+people' },
+				{ id: 'no-repeated-names', kind: 'text', selector: '#q-tables', matches: '^(?![\\s\\S]*(?:category|категория)\\s+(?:text|varchar))[\\s\\S]*$' },
+				{ id: 'items-from-brief', kind: 'field', selector: '#q-data', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'people-from-brief', kind: 'field', selector: '#q-data', field: 'people[].name', min: 1, when: { brief: 'people[].name' } },
+				{ id: 'null-category', kind: 'text', selector: '#q-data', matches: '[Nn][Uu][Ll][Ll]' },
+				{ id: 'join-category', kind: 'text', selector: '#q-join', matches: '[Jj][Oo][Ii][Nn]\\s+categories[\\s\\S]*[Oo][Nn]\\s+[\\s\\S]*=' },
+				{ id: 'join-person', kind: 'text', selector: '#q-join', matches: '[Jj][Oo][Ii][Nn]\\s+people[\\s\\S]*[Oo][Nn]\\s+[\\s\\S]*=' },
+				{ id: 'left-join', kind: 'text', selector: '#q-left', matches: '[Ll][Ee][Ff][Tt]\\s+[Jj][Oo][Ii][Nn]' },
+				{ id: 'is-null', kind: 'text', selector: '#q-left', matches: '[Ii][Ss]\\s+[Nn][Uu][Ll][Ll]' },
+				{ id: 'denorm-why', kind: 'text', selector: '#denorm', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' }
 			]
 		},
 		quiz: [
@@ -2497,13 +2454,7 @@ input {
 				kind: 'course',
 				lang: 'en'
 			},
-			{
-				title: 'Нормальная форма (Википедия)',
-				url: 'https://ru.wikipedia.org/wiki/Нормальная_форма',
-				licence: 'CC-BY-SA',
-				kind: 'article',
-				lang: 'ru'
-			},
+			{ title: 'Нормальная форма (Википедия)', url: 'https://ru.wikipedia.org/wiki/Нормальная_форма', licence: 'CC-BY-SA', kind: 'article', lang: 'ru' },
 			{
 				title: 'Database normalization (Wikipedia)',
 				url: 'https://en.wikipedia.org/wiki/Database_normalization',
@@ -2538,16 +2489,7 @@ input {
 			},
 			outro: 'Теперь ваши данные хранятся без повторов и собираются запросом. Дальше поговорим о том, почему запрос бывает медленным и что с этим делает индекс.'
 		},
-		say: {
-			JOIN: 'джойн',
-			INNER: 'иннер',
-			LEFT: 'лефт',
-			RIGHT: 'райт',
-			NULL: 'нал',
-			REFERENCES: 'референсес',
-			SQL: 'эс-ку-эль',
-			ON: 'он'
-		}
+		say: { JOIN: 'джойн', INNER: 'иннер', LEFT: 'лефт', RIGHT: 'райт', NULL: 'нал', REFERENCES: 'референсес', SQL: 'эс-ку-эль', ON: 'он' }
 	};
 </script>
 
