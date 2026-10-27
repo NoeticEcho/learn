@@ -2,6 +2,15 @@
 <html lang="ru" data-theme="ink">
 	<head>
 		<meta charset="utf-8" />
+		<!--
+			Nothing reaches a third party unless the person asks (spec §4.1, §9): the model APIs only
+			for their own key, the video hosts only behind a click. A srcdoc preview inherits this
+			policy, so frame-src also stops a practice page from navigating its frame to another site;
+			scripts stay 'unsafe-inline' because the preview runs the person's inline code, and its
+			own stricter policy (sandbox.ts) blocks its network.
+		-->
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self'; connect-src 'self' https://api.anthropic.com https://api.openai.com https://openrouter.ai; frame-src 'self' https://www.youtube-nocookie.com https://vkvideo.ru https://vk.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+		<meta name="referrer" content="no-referrer" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="dark light" />
 		<script>

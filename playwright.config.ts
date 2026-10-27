@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
 	webServer: {
-		command: 'npm run build && npx vite preview --port 4173 --strictPort',
+		command: 'VITE_TEST_ROUTES=1 npm run build && npx vite preview --port 4173 --strictPort',
 		port: 4173,
 		reuseExistingServer: !process.env.CI,
 		timeout: 240_000
