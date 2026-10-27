@@ -12,7 +12,8 @@
 	let { ids, chooser = false }: { ids: string[]; chooser?: boolean } = $props();
 
 	const list = $derived(ids.map((id) => SYSTEMS.find((s) => s.id === id)).filter((s): s is System => !!s));
-	let pick = $state(ids[0]);
+	let picked = $state<string | null>(null);
+	const pick = $derived(picked ?? ids[0]);
 	const cur = $derived(list.find((s) => s.id === pick) ?? list[0]);
 
 	const needs = [
@@ -36,7 +37,7 @@
 
 	<div class="dg-ctl" role="tablist" aria-label="Системы">
 		{#each list as s (s.id)}
-			<button type="button" role="tab" aria-selected={pick === s.id} onclick={() => (pick = s.id)}>{s.name}</button>
+			<button type="button" role="tab" aria-selected={pick === s.id} onclick={() => (picked = s.id)}>{s.name}</button>
 		{/each}
 	</div>
 

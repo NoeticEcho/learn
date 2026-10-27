@@ -1,0 +1,447 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	const colour = '^\\s*(#[0-9a-fA-F]{6}|var\\(--[a-z0-9-]+\\))\\s*$';
+	const length = '^\\s*\\d+(\\.\\d+)?(px|rem)\\s*$';
+	const aliased = (target) => `^\\s*(var\\(--${target}\\)|#[0-9a-fA-F]{6})\\s*$`;
+	const ofRoot = (id, prop, matches) => ({ id, kind: 'style', selector: ':root', prop, matches });
+	const dtcg = (id, re) => ({ id, kind: 'text', selector: '#tokens', matches: re });
+
+	export const metadata = {
+		id: '04-design/11-tokens-dtcg',
+		part: 4,
+		order: 11,
+		title: 'Дизайн-токены: имена вместо чисел',
+		summary:
+			'Вы научитесь хранить цвета, отступы и радиусы как именованные решения в три слоя (базовые, смысловые, компонентные) и записывать их в формате W3C DTCG. После урока у вашей страницы есть файл токенов и те же токены в CSS-переменных, и одна смена базового цвета меняет всю страницу.',
+		minutes: 30,
+		teaches: ['design-tokens', 'design-dtcg-format'],
+		requires: ['design-ds-product-and-headless', 'design-colour-system', 'design-type-scale', 'css-custom-properties'],
+		practice: {
+			id: 'design-tokens',
+			title: 'Ваши токены: файл DTCG и CSS-переменные в три слоя',
+			task: 'Соберите набор токенов своего проекта. 1) Допишите файл токенов (блок script с id tokens, это JSON по формату DTCG): у него три слоя. Базовые: color.accent.600 (уже есть), color.neutral.50 и color.neutral.900, space.2 и space.4, radius.md. Смысловые: semantic.action, semantic.surface и semantic.text ссылаются на базовые через фигурные скобки. Компонентные: component.button.bg и component.button.fg ссылаются на смысловые. У значений есть $value, у групп или значений $type. 2) В styles.css повторите те же токены переменными на :root в тех же трёх слоях: --color-accent-600, --color-neutral-50, --color-neutral-900, --space-2, --space-4, --radius-md, затем --action, --surface, --text, затем --button-bg и --button-fg. 3) Тёмная тема это блок с data-theme="dark" и только переопределённый смысловой слой: --surface и --text.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <section class="demo" data-theme="dark">
+        <h2>Та же кнопка в тёмной теме</h2>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      </section>
+
+      <script type="application/json" id="tokens" data-scaffold>
+{
+  "color": {
+    "$type": "color",
+    "accent": { "600": { "$value": "#0b5cad" } }
+  }
+}
+      <\/script>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: токены и вид. Слои: базовые, смысловые, компонентные. */
+:root {
+  --color-accent-600: #0b5cad;
+}
+body {
+  font-family: system-ui, sans-serif;
+  background: #faf9f7;
+  color: #1c1b19;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #0b5cad;
+  color: #faf9f7;
+  text-decoration: none;
+}
+.demo {
+  padding: 1rem;
+  background: #1c1b19;
+  color: #faf9f7;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <section class="demo" data-theme="dark">
+        <h2>Та же кнопка в тёмной теме</h2>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      </section>
+
+      <script type="application/json" id="tokens" data-scaffold>
+{
+  "color": {
+    "$type": "color",
+    "accent": { "600": { "$value": "#0b5cad" } },
+    "neutral": { "50": { "$value": "#faf9f7" }, "900": { "$value": "#1c1b19" } }
+  },
+  "space": {
+    "$type": "dimension",
+    "2": { "$value": "8px" },
+    "4": { "$value": "16px" }
+  },
+  "radius": {
+    "$type": "dimension",
+    "md": { "$value": "8px" }
+  },
+  "semantic": {
+    "$type": "color",
+    "action": { "$value": "{color.accent.600}" },
+    "surface": { "$value": "{color.neutral.50}" },
+    "text": { "$value": "{color.neutral.900}" }
+  },
+  "component": {
+    "button": {
+      "bg": { "$type": "color", "$value": "{semantic.action}" },
+      "fg": { "$type": "color", "$value": "{semantic.surface}" }
+    }
+  }
+}
+      <\/script>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: токены и вид. Слои: базовые, смысловые, компонентные. */
+:root {
+  /* базовые */
+  --color-accent-600: #0b5cad;
+  --color-neutral-50: #faf9f7;
+  --color-neutral-900: #1c1b19;
+  --space-2: 8px;
+  --space-4: 16px;
+  --radius-md: 8px;
+  /* смысловые */
+  --action: var(--color-accent-600);
+  --surface: var(--color-neutral-50);
+  --text: var(--color-neutral-900);
+  /* компонентные */
+  --button-bg: var(--action);
+  --button-fg: var(--surface);
+}
+[data-theme="dark"] {
+  --surface: var(--color-neutral-900);
+  --text: var(--color-neutral-50);
+}
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--button-bg);
+  color: var(--button-fg);
+  text-decoration: none;
+}
+.demo {
+  padding: 1rem;
+  background: var(--surface);
+  color: var(--text);
+}
+`
+			},
+			checks: [
+				{ id: 'tokens-block', kind: 'exists', selector: 'script#tokens[type="application/json"]' },
+				dtcg('dtcg-value', '"\\$value"'),
+				dtcg('dtcg-type', '"\\$type"'),
+				dtcg('three-layers', '^(?=[\\s\\S]*"color"\\s*:)(?=[\\s\\S]*"semantic"\\s*:)(?=[\\s\\S]*"component"\\s*:)'),
+				dtcg('base-set', '^(?=[\\s\\S]*"neutral")(?=[\\s\\S]*"space")(?=[\\s\\S]*"radius")'),
+				dtcg('ref-semantic', '"\\{color\\.[a-z0-9.-]+\\}"'),
+				dtcg('ref-component', '"\\{semantic\\.[a-z0-9.-]+\\}"'),
+				ofRoot('css-accent', '--color-accent-600', colour),
+				ofRoot('css-neutral-50', '--color-neutral-50', colour),
+				ofRoot('css-neutral-900', '--color-neutral-900', colour),
+				ofRoot('css-space-2', '--space-2', length),
+				ofRoot('css-space-4', '--space-4', length),
+				ofRoot('css-radius', '--radius-md', length),
+				ofRoot('css-action', '--action', aliased('color-accent-600')),
+				ofRoot('css-surface', '--surface', aliased('color-neutral-50')),
+				ofRoot('css-text', '--text', aliased('color-neutral-900')),
+				ofRoot('css-button-bg', '--button-bg', aliased('action')),
+				ofRoot('css-button-fg', '--button-fg', aliased('surface')),
+				{ id: 'dark-surface', kind: 'style', selector: '[data-theme="dark"]', prop: '--surface', matches: '^\\s*(var\\(--color-neutral-900\\)|#[0-9a-fA-F]{6})\\s*$' },
+				{ id: 'dark-text', kind: 'style', selector: '[data-theme="dark"]', prop: '--text', matches: '^\\s*(var\\(--color-neutral-50\\)|#[0-9a-fA-F]{6})\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Расставьте три слоя токенов от самого нижнего к самому верхнему',
+				items: ['Базовые: сырые значения (color.accent.600 равно #0b5cad)', 'Смысловые: роли (semantic.action ссылается на базовый)', 'Компонентные: значения для детали (component.button.bg ссылается на смысловой)']
+			},
+			{
+				type: 'single',
+				prompt: 'Чем токен отличается от обычной CSS-переменной?',
+				options: [
+					'Переменная это механизм хранения; токен это именованное решение с договорённостью, кто и как его меняет, и оно хранится независимо от платформы',
+					'Токены работают только в Figma',
+					'Ничем: это одно и то же слово'
+				],
+				answer: 0,
+				why: [
+					'Да. Из файла токенов получают и CSS-переменные, и значения для Figma, и код для приложений. Переменная это лишь один из способов их выдать.',
+					'Нет: токены хранят вне какого-либо инструмента, в файле.',
+					'Нет: разница в том, что токен это общий договор, а не просто имя.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что верно о формате DTCG?',
+				options: [
+					'У токена обязательно есть $value',
+					'Тип записывают в $type (его можно задать на всю группу)',
+					'Ссылку на другой токен пишут в фигурных скобках, например {color.accent.600}',
+					'Файл обязан называться style.css'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: $value это обязательная часть токена.',
+					'Да: $type не обязателен, он может наследоваться от группы.',
+					'Да: так токен ссылается на значение другого.',
+					'Нет: это JSON, обычно с расширением .tokens.json.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Вы меняете базовый токен color.accent.600. Что произойдёт, если все ссылки сделаны правильно?',
+				options: [
+					'Изменятся все смысловые и компонентные токены, которые на него ссылаются, и вся страница',
+					'Ничего: меняется только сам базовый токен',
+					'Придётся править каждую кнопку вручную'
+				],
+				answer: 0,
+				why: [
+					'Да. В этом и смысл слоёв: правка внизу доходит наверх по цепочке ссылок.',
+					'Нет: ссылки именно для того, чтобы изменение расходилось по цепочке.',
+					'Нет: токены избавляют от ручных правок.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Как делают тёмную тему на токенах?',
+				options: [
+					'Переопределяют только смысловой слой: surface и text ссылаются на другие базовые значения; компоненты не трогают',
+					'Копируют все стили в новый файл',
+					'Меняют каждую кнопку отдельно'
+				],
+				answer: 0,
+				why: [
+					'Да. Компоненты ссылаются на роли, а не на цвета, поэтому смена ролей перекрашивает всё.',
+					'Нет: копии расходятся и теряются.',
+					'Нет: это именно то, от чего токены нас избавляют.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините имя токена с его слоем',
+				pairs: [
+					['color.accent.600', 'базовый: сырое значение'],
+					['semantic.action', 'смысловой: роль цвета'],
+					['component.button.bg', 'компонентный: значение для детали']
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-token-what', front: 'Что такое дизайн-токен?', back: 'Именованное дизайн-решение, независимое от платформы: из файла токенов получают CSS-переменные, значения для Figma и код для приложений.' },
+			{ id: 'design-token-layers', front: 'Три слоя токенов?', back: 'Базовые (сырые значения), смысловые (роли: action, surface, text), компонентные (button.bg). Каждый слой ссылается на нижний.' },
+			{ id: 'design-token-dtcg', front: 'Как выглядит токен в DTCG?', back: 'JSON с обязательным $value и необязательным $type; ссылка на другой токен в фигурных скобках: {color.accent.600}. Стабильная версия формата вышла в октябре 2025 года (2025.10).' },
+			{ id: 'design-token-theme', front: 'Как менять тему через токены?', back: 'Переопределить только смысловой слой: surface и text берут другие базовые значения. Компоненты ссылаются на роли и перекрашиваются сами.' },
+			{ id: 'design-token-naming', front: 'Как называть токены?', back: 'По роли и месту, а не по виду: color.text.primary, а не color.dark-grey. Тогда значение можно сменить, а имя останется верным.' }
+		],
+		sources: [
+			{ title: 'Design Tokens Community Group (W3C Community Group)', url: 'https://www.designtokens.org/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Design Tokens Format Module (DTCG)', url: 'https://www.designtokens.org/tr/drafts/format/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Style Dictionary: документация', url: 'https://styledictionary.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Using CSS custom properties (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Tailwind CSS: Theme variables', url: 'https://tailwindcss.com/docs/theme', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Atlassian Design System: Design tokens', url: 'https://atlassian.design/foundations/tokens/', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [{ title: 'Что такое дизайн-токены? Зачем их использовать в интерфейсах? (Nexfield Academy)', url: 'https://www.youtube.com/watch?v=XvVHVdhdRP8', licence: 'proprietary-link', kind: 'video', lang: 'ru' }],
+		guide: {
+			intro: 'Сейчас у вас в файле токенов один токен. Достроим его до трёх слоёв и повторим в CSS: так страница начнёт перекрашиваться одним изменением.',
+			hints: [
+				'В блоке script#tokens добавьте группы space, radius, semantic и component. Смысловые значения пишите ссылками: "{color.accent.600}". Компонентные ссылаются на смысловые: "{semantic.action}".',
+				'В styles.css на :root сначала базовые значения, потом смысловые: --action: var(--color-accent-600), потом компонентные: --button-bg: var(--action).',
+				'Для тёмной темы напишите блок [data-theme="dark"] и в нём только --surface и --text с другими базовыми значениями.'
+			],
+			mistakes: {
+				'tokens-block': 'Блок с токенами должен остаться: script type="application/json" id="tokens".',
+				'dtcg-value': 'У токенов должен быть $value. Это обязательная часть формата.',
+				'dtcg-type': 'Нужен $type: например "$type": "color" на группе.',
+				'three-layers': 'В файле должны быть три слоя: color (базовые), semantic (смысловые) и component (компонентные).',
+				'base-set': 'Среди базовых токенов должны быть нейтральные цвета (neutral), space и radius.',
+				'ref-semantic': 'Смысловые токены должны ссылаться на базовые, например "{color.accent.600}".',
+				'ref-component': 'Компонентные токены должны ссылаться на смысловые, например "{semantic.action}".',
+				'css-accent': 'На :root нужна --color-accent-600 цветом в hex.',
+				'css-neutral-50': 'На :root нужна --color-neutral-50 цветом в hex.',
+				'css-neutral-900': 'На :root нужна --color-neutral-900 цветом в hex.',
+				'css-space-2': 'На :root нужна --space-2 в px или rem.',
+				'css-space-4': 'На :root нужна --space-4 в px или rem.',
+				'css-radius': 'На :root нужна --radius-md в px или rem.',
+				'css-action': 'Смысловой токен --action должен ссылаться на базовый: var(--color-accent-600).',
+				'css-surface': 'Смысловой токен --surface должен ссылаться на var(--color-neutral-50).',
+				'css-text': 'Смысловой токен --text должен ссылаться на var(--color-neutral-900).',
+				'css-button-bg': 'Компонентный токен --button-bg должен ссылаться на смысловой: var(--action).',
+				'css-button-fg': 'Компонентный токен --button-fg должен ссылаться на смысловой: var(--surface).',
+				'dark-surface': 'В блоке [data-theme="dark"] переопределите --surface на var(--color-neutral-900).',
+				'dark-text': 'В блоке [data-theme="dark"] переопределите --text на var(--color-neutral-50).'
+			},
+			outro: 'Теперь вид вашей страницы живёт в именах. Поменяйте --color-accent-600 и посмотрите, как перекрасится кнопка в обеих темах.'
+		},
+		say: { DTCG: 'ди-ти-си-джи', JSON: 'джейсон', CSS: 'си-эс-эс', W3C: 'дабл-ю-три-си', Figma: 'фигма', hex: 'хекс', accent: 'аксент', neutral: 'нейтрал', semantic: 'семантик', component: 'компонент', space: 'спейс', radius: 'рэйдиус', button: 'баттон', Atlassian: 'атлассиан', Dictionary: 'дикшинари' }
+	};
+</script>
+
+<script>
+	import TokenEditor from '../../diagrams/TokenEditor.svelte';
+</script>
+
+## Имя вместо числа
+
+Слова «этот синий» на странице значат одно, а в голове у разработчика другое. Один пишет `#0b5cad`, другой `#0c5cae`, третий «чуть темнее». Вместо этого можно один раз решить: «это цвет действия», дать решению **имя**, и везде ссылаться на имя. Именованное дизайн-решение называется **дизайн-токеном**.
+
+Токен это не то же самое, что CSS-переменная. Переменная это механизм: способ хранить значение на странице. Токен это договорённость: у решения есть имя, значение, смысл и хозяин, а хранится оно **независимо от платформы**. Из одного файла токенов получают и CSS-переменные для сайта, и переменные для Figma, и значения для приложения на телефоне. Поэтому две системы, где всё названо токенами, можно привести к одному виду, не переписывая вручную.
+
+<details>
+<summary>Проверьте себя: чем токен отличается от CSS-переменной?</summary>
+
+Переменная это способ хранения на странице. Токен это именованное решение, хранящееся независимо от платформы: из него получают переменные для сайта, Figma и приложений.
+
+</details>
+
+## Три слоя
+
+Если называть токены просто по цвету («синий-600»), смены темы вы не переживёте: кнопка так и останется синей. Поэтому токены складывают в **три слоя**, и каждый ссылается на нижний.
+
+1. **Базовые (primitive).** Сырые значения: `color.accent.600` равно `#0b5cad`, `space.4` равно 16 пикселей. Это «палитра» и «линейка». Базовые токены называют по виду.
+2. **Смысловые (semantic, их ещё называют alias).** Роли: `semantic.action` (цвет главного действия), `semantic.surface` (фон), `semantic.text` (цвет текста). Они **ссылаются** на базовые и называются по роли.
+3. **Компонентные.** Значения для конкретной детали: `component.button.bg` (фон кнопки) ссылается на `semantic.action`.
+
+Почему именно так? Сменить базовый цвет акцента: изменится смысловой токен, который на него ссылается, а за ним все компоненты, которые ссылаются на смысловой. Сменить тему: у смысловых токенов `surface` и `text` заменяют ссылку на другие базовые значения, а компоненты вообще не трогают, потому что они ссылаются на роли, а не на цвета.
+
+Поиграйте: измените базовый цвет, выберите другую ступень для действия и переключите тему. Слева файл токенов, справа цепочка ссылок и результат.
+
+<TokenEditor />
+
+В реальных системах то же самое. В Material Design 3 три слоя называются *reference*, *system* и *component*. В Fluent 2 это глобальные токены и алиасы. У Atlassian имя состоит из свойства, роли и состояния: `color.text.accent.red`.
+
+<details>
+<summary>Проверьте себя: как поменять тему, не трогая компоненты?</summary>
+
+Переопределить смысловой слой: `surface` и `text` ссылаются на другие базовые значения. Компоненты ссылаются на роли и перекрашиваются сами.
+
+</details>
+
+## Как называть токены
+
+Правила, которые помогают не запутаться:
+
+- **Смысловые и компонентные по роли, базовые по виду.** Не `color.dark-grey`, а `color.text.primary`: тёмно-серый можно заменить, а роль останется.
+- **Иерархия слева направо:** от общего к частному: `color` → `text` → `primary`.
+- **Состояния отдельным словом:** `hover`, `pressed`, `disabled`.
+- **Шкала в числах** для базовых ступеней (50, 100, … 900) и отступов (`space.2`, `space.4`).
+- **Не прячьте смысл в числе.** Имя `space.4` лучше, чем `space.16`: если шаг поменяется, имя не станет ложью.
+
+## Формат W3C DTCG
+
+Чтобы файл токенов понимали все инструменты, у него есть общий формат. Его разрабатывает **W3C Design Tokens Community Group**, сообщество разработчиков, дизайнеров и производителей инструментов. В октябре 2025 года вышла первая стабильная версия формата (2025.10).
+
+Файл это JSON. Расширение по рекомендации `.tokens.json`. Структура такая:
+
+- **Токен**: объект со свойством `$value` (обязательно), необязательными `$type` (тип) и `$description` (пояснение).
+- **Группа**: объект без `$value`, в котором лежат токены и вложенные группы. Тип можно задать на группе, тогда он наследуется.
+- **Ссылка** на другой токен: значение в фигурных скобках, например `"{color.accent.600}"`.
+- Типы: `color`, `dimension`, `fontFamily`, `fontWeight`, `duration`, `cubicBezier`, `number` и составные (`shadow`, `border`, `typography` и другие).
+
+```json
+{
+  "color": {
+    "$type": "color",
+    "accent": { "600": { "$value": "#0b5cad" } }
+  },
+  "semantic": {
+    "$type": "color",
+    "action": { "$value": "{color.accent.600}" }
+  }
+}
+```
+
+Оговорка про запись значений. В ранних черновиках цвет писали строкой (`"#0b5cad"`), а размер строкой (`"16px"`). Стабильная версия 2025.10 описывает цвет объектом с цветовым пространством и компонентами (`colorSpace`, `components`, необязательно `hex`), а размер и время объектом из числа и единицы: `{ "value": 16, "unit": "px" }`. Много файлов и инструментов всё ещё используют краткую запись, поэтому вы встретите обе. В практике мы пользуемся краткой записью, чтобы не считать компоненты цвета руками.
+
+Из файла токенов программа вроде Style Dictionary делает выходные файлы под каждую платформу: CSS-переменные, значения для iOS и Android. Вам для маленького сайта хватит написать переменные вручную, повторив структуру файла.
+
+## Токены в CSS
+
+В CSS слои повторяют структуру файла: сначала базовые, потом смысловые через `var()`, потом компонентные.
+
+```css
+:root {
+  --color-accent-600: #0b5cad;
+  --action: var(--color-accent-600);
+  --button-bg: var(--action);
+}
+[data-theme="dark"] {
+  --surface: var(--color-neutral-900);
+}
+```
+
+Теперь любое правило ссылается на `var(--button-bg)`, а не на цвет. Если в CSS где-то остался «сырой» цвет вне блока переменных, это значит, что токен пропущен: проверьте это сами поиском по файлу.
+
+<details>
+<summary>Проверьте себя: что обязательно у токена в формате DTCG?</summary>
+
+Свойство `$value`. Тип `$type` необязателен, он может наследоваться от группы.
+
+</details>
+
+## Практика
+
+Соберите токены вашего проекта в двух видах. Сначала допишите файл в формате DTCG (он лежит прямо на странице как блок `script` с типом `application/json`; на готовом сайте его не будет, он помечен `data-scaffold`). Потом повторите те же токены переменными в `styles.css` и сделайте тёмную тему, переопределив только смысловой слой.
+
+Когда проверки пройдут, поменяйте `--color-accent-600` и посмотрите, как перекрасились обе кнопки. Если одна осталась прежней, значит, где-то остался «сырой» цвет.
+
+## Что было не так с 2014 годом
+
+В 2014 году переменных в CSS не было: цвета повторяли в двадцати местах, а для «переменных» пользовались препроцессорами вроде Sass и Less, которые подставляли значения до того, как страница попадала в браузер. Нативные CSS-переменные появились в браузерах в 2016–2017 годах. А единого формата токенов не было вообще, и каждая система придумывала свой.
