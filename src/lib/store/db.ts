@@ -35,18 +35,29 @@ const MIGRATIONS: ((db: IDBPDatabase<LearnDB>) => void)[] = [
 	}
 ];
 
-export function openDb(name = 'learn'): Promise<Db> {
-	return openDB<LearnDB>(name, MIGRATIONS.length, {
+/**
+ * `onBlocking` runs when a newer release, open in another tab, wants to upgrade the schema. This
+ * connection is closed first, because an open one blocks that upgrade forever: the new tab's
+ * openDb never resolves and its pages never learn what the person has done. The app reloads the
+ * old tab, which then opens the upgraded database with the new code.
+ */
+export function openDb(name = 'learn', opts: { onBlocking?: () => void } = {}): Promise<Db> {
+	const opening = openDB<LearnDB>(name, MIGRATIONS.length, {
 		upgrade(db, old) {
 			for (let v = old; v < MIGRATIONS.length; v++) MIGRATIONS[v](db);
+		},
+		blocking() {
+			opening.then((db) => db.close());
+			opts.onBlocking?.();
 		}
 	});
+	return opening;
 }
 
 let shared: Promise<Db> | undefined;
 
 /** The app's one database, opened on first use in the browser. */
 export function db(): Promise<Db> {
-	shared ??= openDb();
+	shared ??= openDb('learn', { onBlocking: () => location.reload() });
 	return shared;
 }

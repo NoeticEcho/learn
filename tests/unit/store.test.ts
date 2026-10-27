@@ -70,3 +70,21 @@ describe('store', () => {
 		expect(preview(data).counts.lessons).toBe(2);
 	});
 });
+
+describe('a newer schema in another tab', () => {
+	it('is not blocked forever by this tab’s open connection', async () => {
+		const { openDB } = await import('idb');
+		const name = `upgrade${n++}`;
+		let told = 0;
+		const old = await openDb(name, { onBlocking: () => told++ });
+		await progress.markDone(old, 'kept', 1);
+		// what the next release's openDb will do: a higher version, with this tab still open
+		const next = await Promise.race([
+			openDB(name, 2),
+			new Promise<null>((r) => setTimeout(() => r(null), 1000))
+		]);
+		expect(next, 'the upgrade waited on this tab').not.toBeNull();
+		expect(told).toBe(1);
+		expect(await next!.get('lessons', 'kept')).toMatchObject({ status: 'done' });
+	});
+});
