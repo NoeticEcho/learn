@@ -11,10 +11,17 @@ import type { PracticeFiles } from '#lib/content/schema.ts';
 
 const content = loadContent();
 
+// One window for the whole file, its document rewritten per run: every `new JSDOM` leaves about 2 MB behind that
+// not even window.close() frees, so a window per run (1200 runs, and growing with every lesson)
+// outgrew Node's default heap and the worker died with SIGABRT.
+const win = new JSDOM('').window;
+
 function run(files: PracticeFiles, checks: Parameters<typeof evaluate>[2], persona: Record<string, unknown>) {
 	const rendered = Object.fromEntries(Object.entries(files).map(([k, v]) => [k, render(v ?? '', persona)])) as PracticeFiles;
-	const dom = new JSDOM(buildSrcdoc(rendered, checks, persona));
-	return evaluate(dom.window.document, dom.window as unknown as Window, checks, facts(checks, persona));
+	win.document.open();
+	win.document.write(buildSrcdoc(rendered, checks, persona));
+	win.document.close();
+	return evaluate(win.document, win as unknown as Window, checks, facts(checks, persona));
 }
 
 describe('content', () => {
