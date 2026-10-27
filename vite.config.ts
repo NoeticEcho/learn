@@ -1,12 +1,18 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
-import { mdsvex } from 'mdsvex';
+import { mdsvex, code_highlighter } from 'mdsvex';
 import { svelteTesting } from '@testing-library/svelte/vite';
 
 // The site's path on its host. `$app/paths` makes links relative while prerendering, so code
 // that needs an absolute address (canonical, Open Graph, the sitemap) reads this instead.
 const base = (process.env.BASE_PATH ?? '/learn') as '' | `/${string}`;
+
+// A lesson's code block scrolls sideways on a narrow screen, so it must take keyboard focus to be
+// scrolled without a mouse (WCAG 2.1.1, axe scrollable-region-focusable: serious on 30 lessons in the
+// QA pass of 28.10.2026). mdsvex's own highlighter, with tabindex on its <pre>.
+const highlighter: typeof code_highlighter = async (...args) =>
+	(await code_highlighter(...args)).replace(/^<pre class=/, '<pre tabindex="0" class=');
 
 // SvelteKit 3 takes its configuration here, in the Vite plugin; there is no svelte.config.js.
 export default defineConfig({
@@ -18,7 +24,7 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 			extensions: ['.svelte', '.svx'],
-			preprocess: [mdsvex({ extensions: ['.svx'] })],
+			preprocess: [mdsvex({ extensions: ['.svx'], highlight: { highlighter } })],
 			adapter: adapter({ pages: 'build', assets: 'build', fallback: '404.html', strict: true }),
 			paths: { base },
 			prerender: { handleHttpError: 'fail' },

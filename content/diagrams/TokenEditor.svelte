@@ -79,7 +79,7 @@
 	</div>
 
 	<div class="cols">
-		<pre class="dg-box dg-mono json" aria-label="Файл токенов в формате DTCG">{json}</pre>
+		<pre class="dg-box dg-mono json" tabindex="0" role="region" aria-label="Файл токенов в формате DTCG">{json}</pre>
 		<div>
 			<div class="preview" style="background:{semantic['semantic.surface'].val};color:{semantic['semantic.text'].val}">
 				<p style="margin:0 0 .6rem;font-weight:600">Карточка проекта</p>

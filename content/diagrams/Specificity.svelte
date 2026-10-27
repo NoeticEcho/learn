@@ -130,7 +130,7 @@
 	</div>
 	<p class="dg-out" aria-live="polite">
 		{#if winner}
-			Ссылка будет цвета: <strong style="color: {colours[winner.r.value]}">{winner.r.value}</strong> (правило {winner.order + 1}: <span class="dg-mono">{winner.r.selector}</span>).
+			Ссылка будет цвета: <strong class="swatch" style="color: {colours[winner.r.value]}">{winner.r.value}</strong> (правило {winner.order + 1}: <span class="dg-mono">{winner.r.selector}</span>).
 		{:else}
 			Ни одно правило не подходит, и ссылка останется цвета по умолчанию.
 		{/if}
@@ -139,6 +139,12 @@
 </figure>
 
 <style>
+	/* the link colours are the demo's own, dark enough for Paper; on Ink they sit on a light chip, so they hold 4.5:1 in both themes */
+	.swatch {
+		padding: 0 0.25em;
+		background: #fbfaf6;
+		border-radius: 2px;
+	}
 	.wrap {
 		overflow-x: auto;
 	}

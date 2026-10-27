@@ -51,8 +51,9 @@
 			<li class:has={!!files}>
 				<h2>{t(`era.${era}.name`)}</h2>
 				{#if files}
+					<!-- A picture of the site, not a page to use: inert, so its links and fields take no focus (axe frame-focusable-content). -->
 					<div class="thumb">
-						<iframe sandbox="allow-scripts" loading="lazy" title={t('gallery.preview', { year: t(`era.${era}.name`) })} srcdoc={srcdoc(files)} tabindex="-1"></iframe>
+						<iframe sandbox="allow-scripts" loading="lazy" title={t('gallery.preview', { year: t(`era.${era}.name`) })} srcdoc={srcdoc(files)} tabindex="-1" inert></iframe>
 					</div>
 					<button type="button" class="secondary" onclick={() => save(era)}>{t('gallery.download')}</button>
 				{:else if data.starts[era]}
