@@ -69,6 +69,53 @@ The person's gallery shows all eight versions side by side, each with what chang
 and why. Each era also has a «what was wrong with it» page: what aged badly, and
 what is still right.
 
+### 3.1a The prologue: «Прибытие поезда»
+
+Martin, 27.10: the time machine should land like the Lumière brothers' *Arrival of a
+Train*, magic for people far from IT and AI. So the course opens with a prologue of
+60–90 seconds, before any lesson:
+
+1. The person answers three questions: who they are or what their idea is, for whom, and what they want visitors to do.
+2. Their own site then assembles itself in front of them, era by era, each era morphing into the next:
+   1. 1991: monospace text and links on grey;
+   2. 1996: tables, a tiled background, a visitor counter;
+   3. 2000: Flash-style intro and splash;
+   4. 2005: «web 2.0» gloss;
+   5. 2014: flat and responsive, reflowing as the frame narrows to a phone;
+   6. 2025: an AI builder streaming it in;
+   7. the last frame: Искин asking the next question of the interview.
+3. The same words carry through every era. Only the era changes them.
+4. It ends with «Сейчас вы сделаете это сами».
+
+Design rules:
+- **No video:** the prologue is the app's own components, driven by the person's three answers.
+- **Sound is opt-in.**
+- **Under `prefers-reduced-motion`** it is a still filmstrip of the eras with a «следующая эпоха» button.
+- **The finale closes the loop:** the course's last chapter (Искин) replays the prologue, now as something the person can do themself.
+
+### 3.1b One textbook, anyone's project
+
+Martin, 27.10: the textbook should be universal, so that different people practise
+on their own ideas for sites and web apps. The practice is therefore organised
+around **the person's project**, not around one fixed site:
+
+- **The default project** is the expert's site in §3.2, so a person who has no idea yet still has a full, coherent practice.
+- **At the prologue, or any time later,** the person can:
+  - choose another starting template: a portfolio, a small shop, a café or salon, a community or NGO, an event, a SaaS landing page with an app;
+  - or describe their own idea in a brief.
+- **The brief is structured:**
+  - who and what;
+  - for whom;
+  - the visitor's main action;
+  - sections;
+  - content items (services or products, people, proofs, contacts);
+  - languages;
+  - the tone.
+
+  Every practice step reads the brief, and every check is written against its structure (§3.2), so it passes for any project.
+- **Steps that need a specific element** (a form, a price list, documents) ask for it from the brief, or offer a sensible default for that kind of project.
+- **The capstone (part 16) and the Искин chapter** use the same brief, so the person ends where the prologue promised: their own idea, built.
+
 ### 3.2 The practice persona
 
 A **fictional** land-law specialist: a cadastral engineer and forensic expert with
