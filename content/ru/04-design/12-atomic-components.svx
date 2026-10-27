@@ -1,0 +1,424 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '04-design/12-atomic-components',
+		part: 4,
+		order: 12,
+		title: 'Атомарный дизайн: атомы, молекулы, компоненты и их состояния',
+		summary:
+			'Вы научитесь раскладывать любую страницу на повторяемые части и называть их, а затем описывать каждый компонент вместе с состояниями (обычное, наведение, фокус, нажатие, недоступно, загрузка, ошибка). После урока вы собираете страницу из своих деталей, а не рисуете каждую заново.',
+		minutes: 30,
+		teaches: ['design-atomic-design', 'design-component'],
+		requires: ['design-tokens', 'html-semantic-elements'],
+		practice: {
+			id: 'design-card-component',
+			title: 'Карточка и кнопка как компоненты с состояниями',
+			task: 'Оформите две детали как компоненты. 1) Карточка .card: одна и та же деталь для каждого пункта вашего проекта (и один образец-карточка уже на странице): в styles.css видимая рамка (не тоньше 1 пикселя), скругление и внутренние отступы. 2) Кнопка .btn в трёх состояниях, показанных рядом: обычная; недоступная (атрибут disabled) с прозрачностью от 0.2 до 0.7 и курсором not-allowed; в загрузке (aria-busy="true") с курсором progress. 3) Кроме того, опишите правилами :hover, :focus-visible и :active (проверка не умеет их увидеть: нажмите Tab и проверьте глазами). 4) В записке назовите по одному атому, молекуле и организму вашей страницы. Все «…» нужно заменить.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+
+      <section id="cards">
+        <h2>Карточки</h2>
+        <div class="cards">
+          <article class="card"><h3>Название</h3><p>Короткое описание образца.</p></article>
+          {{#each items}}<article class="card"><h3>{{title}}</h3><p>{{text}}</p></article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="states">
+        <h2>Состояния кнопки</h2>
+        <p>
+          <a class="btn" href="#contacts">{{mainAction.label}}</a>
+          <button class="btn" disabled>{{mainAction.label}}</button>
+          <button class="btn" aria-busy="true">Отправляем…</button>
+        </p>
+      </section>
+
+      <aside class="note" data-scaffold id="components">
+        <h2>Мои компоненты</h2>
+        <ul>
+          <li>Атом: <span class="atom">…</span></li>
+          <li>Молекула: <span class="molecule">…</span></li>
+          <li>Организм: <span class="organism">…</span></li>
+        </ul>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: токены и компоненты */
+:root {
+  --accent: #0b5cad;
+  --on-accent: #ffffff;
+  --space-2: 8px;
+  --space-4: 16px;
+  --radius: 8px;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  text-decoration: none;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+
+      <section id="cards">
+        <h2>Карточки</h2>
+        <div class="cards">
+          <article class="card"><h3>Название</h3><p>Короткое описание образца.</p></article>
+          {{#each items}}<article class="card"><h3>{{title}}</h3><p>{{text}}</p></article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="states">
+        <h2>Состояния кнопки</h2>
+        <p>
+          <a class="btn" href="#contacts">{{mainAction.label}}</a>
+          <button class="btn" disabled>{{mainAction.label}}</button>
+          <button class="btn" aria-busy="true">Отправляем…</button>
+        </p>
+      </section>
+
+      <aside class="note" data-scaffold id="components">
+        <h2>Мои компоненты</h2>
+        <ul>
+          <li>Атом: <span class="atom">кнопка</span></li>
+          <li>Молекула: <span class="molecule">карточка пункта: заголовок, описание, ссылка</span></li>
+          <li>Организм: <span class="organism">секция с сеткой карточек</span></li>
+        </ul>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: токены и компоненты */
+:root {
+  --accent: #0b5cad;
+  --on-accent: #ffffff;
+  --space-2: 8px;
+  --space-4: 16px;
+  --radius: 8px;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.card {
+  padding: var(--space-4);
+  border: 1px solid #d9d5ce;
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+.card h3 {
+  margin: 0 0 var(--space-2);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover {
+  filter: brightness(1.15);
+}
+.btn:focus-visible {
+  outline: 3px solid #ffdd00;
+  outline-offset: 2px;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn[aria-busy="true"] {
+  opacity: 0.8;
+  cursor: progress;
+}
+`
+			},
+			checks: [
+				{ id: 'cards', kind: 'count', selector: 'article.card', min: { brief: 'items' } },
+				{ id: 'card-sample', kind: 'count', selector: 'article.card', min: 1 },
+				{ id: 'card-border', kind: 'style', selector: '.card', prop: 'border-top-width', matches: '^[1-9]\\d*(\\.\\d+)?px$' },
+				{ id: 'card-radius', kind: 'style', selector: '.card', prop: 'border-radius', matches: '^(var\\(--radius\\)|[1-9]\\d*(\\.\\d+)?(px|rem))$' },
+				{ id: 'btn-three', kind: 'count', selector: '#states .btn', min: 3 },
+				{ id: 'btn-disabled-opacity', kind: 'style', selector: '.btn[disabled]', prop: 'opacity', matches: '^0?\\.[2-7]\\d*$' },
+				{ id: 'btn-disabled-cursor', kind: 'style', selector: '.btn[disabled]', prop: 'cursor', equals: 'not-allowed' },
+				{ id: 'btn-busy-cursor', kind: 'style', selector: '.btn[aria-busy="true"]', prop: 'cursor', equals: 'progress' },
+				{ id: 'atom', kind: 'text', selector: '#components .atom', matches: '\\S{3,}' },
+				{ id: 'molecule', kind: 'text', selector: '#components .molecule', matches: '\\S{3,}' },
+				{ id: 'organism', kind: 'text', selector: '#components .organism', matches: '\\S{3,}' },
+				{ id: 'no-blanks', kind: 'text', selector: '#components', matches: '^[^…]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Расставьте уровни атомарного дизайна от самого малого к самому большому',
+				items: ['Атомы', 'Молекулы', 'Организмы', 'Шаблоны', 'Страницы']
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините уровень с примером',
+				pairs: [
+					['Атом', 'кнопка, метка, поле, заголовок'],
+					['Молекула', 'карточка пункта: заголовок, описание и ссылка'],
+					['Организм', 'шапка с меню или секция с сеткой карточек'],
+					['Шаблон', 'скелет страницы без настоящих слов']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Какие состояния нужны кнопке?',
+				options: ['Обычное и наведение', 'Фокус от клавиатуры (видимый)', 'Нажатие и недоступно', 'Только обычное: остальное лишнее'],
+				answer: [0, 1, 2],
+				why: ['Да: наведение подсказывает, что кнопка живая.', 'Да: без видимого фокуса клавиатурный пользователь теряется (WCAG 2.4.7).', 'Да: нажатие подтверждает действие, а «недоступно» объясняет, что сейчас нельзя.', 'Нет: без состояний кнопка «мёртвая».']
+			},
+			{
+				type: 'single',
+				prompt: 'Зачем делать карточку одним компонентом, а не копировать разметку?',
+				options: [
+					'Чтобы изменение в одном месте меняло все карточки сразу',
+					'Чтобы страница была короче',
+					'Чтобы поисковик находил её лучше'
+				],
+				answer: 0,
+				why: [
+					'Да. Копии расходятся: через месяц каждая карточка выглядит чуть по-своему.',
+					'Нет: размер страницы вторичен.',
+					'Нет: на поиск это не влияет.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Почему нельзя убирать контур фокуса (outline: none) «для красоты»?',
+				options: [
+					'Человек, который ходит по странице клавишей Tab, перестанет видеть, где он находится',
+					'Это сломает страницу',
+					'Браузер этого не позволяет'
+				],
+				answer: 0,
+				why: [
+					'Да. Если контур мешает, не убирайте его, а замените своим заметным (outline на :focus-visible).',
+					'Нет: страница работает, но недоступна клавиатуре.',
+					'Нет: браузер позволяет, и многие страницы так ломают доступность.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что такое BEM, придуманный в Яндексе?',
+				options: [
+					'Способ называть классы: блок, элемент, модификатор (например card, card__title, card--featured)',
+					'Язык для описания токенов',
+					'Библиотека компонентов для React'
+				],
+				answer: 0,
+				why: [
+					'Да. По имени класса видно, что это за компонент и какая его часть. Подход придумали в Яндексе, и он давно используется по всему миру.',
+					'Нет: токены описываются в формате DTCG.',
+					'Нет: BEM это договорённость об именах, а не библиотека.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-atomic-levels', front: 'Пять уровней атомарного дизайна?', back: 'Атомы (кнопка, метка), молекулы (карточка пункта), организмы (шапка, секция с карточками), шаблоны (скелет без слов), страницы (шаблон с настоящим содержимым). Автор: Брэд Фрост.' },
+			{ id: 'design-component-states', front: 'Какие состояния у компонента?', back: 'Обычное, наведение, фокус (видимый), нажатие, недоступно, загрузка, ошибка, выбрано. Состояния описывают заранее, а не придумывают по ходу.' },
+			{ id: 'design-component-focus', front: 'Что нельзя делать с фокусом?', back: 'Убирать контур (outline: none) без замены: клавиатурный пользователь теряется. Заменяйте своим заметным на :focus-visible.' },
+			{ id: 'design-component-one', front: 'Зачем компонент в одном месте?', back: 'Изменение правила меняет все экземпляры сразу. Копии разметки расходятся, и вид теряет цельность.' },
+			{ id: 'design-bem', front: 'Что такое BEM?', back: 'Блок__элемент--модификатор: card, card__title, card--featured. По имени класса видно компонент и его часть. Придуман в Яндексе.' }
+		],
+		sources: [
+			{ title: 'Atomic Design (Brad Frost), книга онлайн', url: 'https://atomicdesign.bradfrost.com/', licence: 'link-only', kind: 'book', lang: 'en' },
+			{ title: 'Storybook: документация', url: 'https://storybook.js.org/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Understanding: Focus Visible, WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: ':focus-visible (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'БЭМ (Википедия)', url: 'https://ru.wikipedia.org/wiki/БЭМ', licence: 'CC-BY-SA', kind: 'article', lang: 'ru' },
+			{ title: 'Design Systems 101: компоненты и паттерны (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/design-systems-101/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [{ title: 'Атомарный дизайн за 5 минут (Kris Anfalova)', url: 'https://www.youtube.com/watch?v=2T0-wLAT4m4', licence: 'proprietary-link', kind: 'video', lang: 'ru' }],
+		guide: {
+			intro: 'Сейчас карточка и кнопка у вас без оформления. Сделаем их компонентами: одно правило на карточку и пять состояний у кнопки.',
+			hints: [
+				'У .card нужны padding, border: 1px solid #d9d5ce и border-radius: var(--radius). Тогда все карточки на странице оформятся одним правилом.',
+				'Для кнопок: .btn[disabled] получает opacity: 0.5 и cursor: not-allowed, .btn[aria-busy="true"] получает cursor: progress.',
+				'Состояния :hover, :focus-visible и :active тоже опишите, хотя проверка их не видит. Потом нажмите Tab и убедитесь, что фокус заметен. В записке назовите по одному атому, молекуле и организму.'
+			],
+			mistakes: {
+				cards: 'Карточек article.card должно быть не меньше, чем пунктов в вашем проекте.',
+				'card-sample': 'Должна быть хотя бы одна карточка article.card.',
+				'card-border': 'У карточки нужна видимая рамка: border: 1px solid #d9d5ce.',
+				'card-radius': 'У карточки нужно скругление: border-radius, например var(--radius).',
+				'btn-three': 'В блоке состояний нужны три кнопки .btn: обычная, недоступная и в загрузке.',
+				'btn-disabled-opacity': 'Недоступная кнопка должна быть бледнее: opacity от 0.2 до 0.7.',
+				'btn-disabled-cursor': 'У недоступной кнопки курсор должен быть not-allowed.',
+				'btn-busy-cursor': 'У кнопки в загрузке (aria-busy="true") курсор должен быть progress.',
+				atom: 'Назовите один атом вашей страницы, например «кнопка».',
+				molecule: 'Назовите одну молекулу вашей страницы, например «карточка пункта».',
+				organism: 'Назовите один организм вашей страницы, например «секция с карточками».',
+				'no-blanks': 'Где-то осталось многоточие «…». Замените его своими словами.'
+			},
+			outro: 'Теперь у вас есть карточка и кнопка как настоящие компоненты, с состояниями. Остальные детали делайте так же: сначала названия, потом состояния.'
+		},
+		say: { BEM: 'бэм', CSS: 'си-эс-эс', WCAG: 'вкаг', Tab: 'таб', Storybook: 'сторибук', outline: 'аутлайн', disabled: 'дисэйблд', Brad: 'брэд', Frost: 'фрост', hover: 'ховер', focus: 'фокус', active: 'эктив', aria: 'ария', busy: 'бизи' }
+	};
+</script>
+
+<script>
+	import AtomicBreakdown from '../../diagrams/AtomicBreakdown.svelte';
+</script>
+
+## Страница из деталей
+
+Откройте любой сайт и посмотрите на него «прищурившись»: он окажется собранным из повторяющихся деталей. Кнопки одной формы, карточки одного вида, заголовки в одном стиле. Если эти детали названы и описаны, страницу можно собирать, а не рисовать с нуля каждый раз.
+
+Эту мысль в 2013 году сформулировал Брэд Фрост (Brad Frost) и назвал её **атомарным дизайном**, по аналогии с химией: из атомов складываются молекулы, из молекул организмы. У него пять уровней.
+
+1. **Атомы.** Дальше не разобрать, не потеряв смысл: заголовок, абзац, ссылка, кнопка, метка, поле.
+2. **Молекулы.** Несколько атомов, работающих как одно целое: карточка пункта (заголовок, описание, ссылка), поле с подписью и подсказкой.
+3. **Организмы.** Самостоятельная часть страницы из молекул и атомов: шапка с меню, секция с сеткой карточек, подвал.
+4. **Шаблоны.** Скелет страницы из организмов, без настоящих слов. Так видно структуру отдельно от содержимого.
+5. **Страницы.** Шаблон с настоящим содержимым вашего проекта. Здесь выясняется, подходят ли детали к жизни: длинные названия, отсутствие картинки, пустой раздел.
+
+Выберите уровень на схеме: нужные части обведены. А ниже на той же схеме состояния кнопки, о них мы поговорим через минуту.
+
+<AtomicBreakdown />
+
+Не стоит принимать уровни слишком буквально. Иногда непонятно, молекула это или организм, и это нормально: главное, что у детали есть **название** и вы знаете, где она живёт. Польза атомарного дизайна не в таксономии, а в привычке думать частями.
+
+<details>
+<summary>Проверьте себя: чем молекула отличается от организма?</summary>
+
+Молекула это несколько атомов, работающих вместе (карточка). Организм самостоятельная часть страницы из молекул и атомов (секция с карточками, шапка).
+
+</details>
+
+## Что такое компонент
+
+**Компонент** это деталь интерфейса с названием, составом и правилами. У настоящего компонента описаны:
+
+- **название** и назначение: что это и когда его брать;
+- **анатомия:** из каких частей состоит (у карточки это рамка, заголовок, описание, ссылка);
+- **варианты:** основной и второстепенный, большой и малый;
+- **состояния:** как выглядит в каждый момент (ниже);
+- **содержимое:** сколько слов вмещает, что будет при пустом поле;
+- **доступность:** как с ним работать клавиатурой и диктору;
+- **токены:** какие значения оно использует (цвет, отступ, радиус).
+
+Такая карточка из шести-семи строк уже система. Именно её вы найдёте на страницах компонентов в Material, GOV.UK, Carbon и других системах: анатомия, варианты, состояния, правила, код.
+
+## Состояния: самое забываемое
+
+Новички рисуют компонент в одном состоянии, а потом код встречает остальные и разработчик придумывает их по ходу. Поэтому список состояний выписывают заранее.
+
+- **Обычное.** Состояние покоя.
+- **Наведение (hover).** Подсказывает, что деталь нажимается. На телефоне наведения нет, поэтому смысл не должен держаться только на нём.
+- **Фокус (focus).** Видно, когда на деталь перешли клавишей Tab. **Убирать контур фокуса нельзя**: без него клавиатурный пользователь не видит, где он. Если контур по умолчанию не нравится, замените своим заметным правилом `:focus-visible`: он включается только при управлении клавиатурой.
+- **Нажатие (active).** Короткая реакция, пока кнопка нажата.
+- **Недоступно (disabled).** Действие сейчас невозможно. Объясните рядом почему: серая кнопка без пояснения раздражает.
+- **Загрузка (busy).** Идёт работа. Подпись меняется («Отправляем…»), а повторное нажатие блокируется.
+- **Ошибка, выбрано, пусто:** по смыслу компонента.
+
+```css
+.btn:hover { filter: brightness(1.15); }
+.btn:focus-visible { outline: 3px solid #ffdd00; outline-offset: 2px; }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn[aria-busy="true"] { cursor: progress; }
+```
+
+Проверка не умеет «навести» мышь или «нажать» Tab, поэтому статичные состояния (недоступно, загрузка) она проверяет, а наведение, фокус и нажатие остаются на вашей совести. Нажмите Tab на предпросмотре и посмотрите, виден ли фокус.
+
+<details>
+<summary>Проверьте себя: почему нельзя убрать контур фокуса?</summary>
+
+Человек, который ходит по странице клавишей Tab, перестанет видеть, где находится. Если контур мешает, замените его своим заметным.
+
+</details>
+
+## Компонент в одном месте
+
+Правило компонента живёт в одном месте, и любое изменение меняет все его экземпляры. Если вы скопировали разметку карточки в пять мест и поправили стиль у каждой, через месяц у вас пять разных карточек.
+
+Чтобы названия классов не путались, договариваются об именах. Известный способ, **БЭМ** (блок, элемент, модификатор), придумали в Яндексе: `card` это блок, `card__title` его элемент, `card--featured` его вариант. По имени класса видно, что это за деталь и какая её часть.
+
+Командам, у которых компонентов много, нужна витрина: страница, где все они показаны в каждом состоянии. Популярный инструмент для этого называется **Storybook**. Для вашего маленького проекта такой витриной служит обычная страница «Состояния» на сайте, какую вы делаете в практике.
+
+## Практика
+
+Оформите две детали вашего проекта как компоненты. Карточка пункта: одно правило на все карточки. Кнопка: три состояния рядом, обычная, недоступная и в загрузке. Остальные состояния опишите правилами и проверьте руками.
+
+И запишите в «Мои компоненты» по одному примеру на каждом из трёх уровней, чтобы привыкнуть называть части.
+
+## Что было не так с 2014 годом
+
+В 2014 году кнопки и карточки часто рисовали картинками или делали отдельным правилом на каждую страницу. Состояния (кроме наведения) забывали, а контур фокуса убирали, потому что он «портил вид». Привычка описывать состояния заранее пришла вместе с дизайн-системами.
