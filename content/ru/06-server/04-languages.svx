@@ -1,0 +1,741 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '06-server/04-languages',
+		part: 6,
+		order: 4,
+		title: 'Почему у каждого языка своя ниша',
+		summary: 'PHP, Python, Ruby, Java, C#, Go, JavaScript (Node), Elixir и Rust не конкуренты в одном ринге: у каждого свой опыт и своя сильная сторона. После урока вы выбираете язык под задачу, а не по моде, и учитываете российский рынок специалистов.',
+		minutes: 30,
+		teaches: ['server-language-niches'],
+		requires: ['server-cgi', 'server-app-server'],
+		practice: {
+			id: 'server-language-choice',
+			title: 'Какой язык взять для вашего проекта',
+			task: 'Взвесьте три языка по шести критериям и выберите один. 1) В таблице три строки tr class="lang": в первой клетке название языка (PHP, Python, Go, Node.js, Elixir и так далее), в следующих шести оценки от 1 до 5 (5 это лучше: быстрый старт, высокая скорость, много параллельности, богатая экосистема, легко найти людей в России, низкий порог входа), в последней сумма. 2) В абзаце «Выбор» назовите язык и объясните выбор фактами про ваш проект: назовите один из ваших разделов и функцию (форма, список, вход). 3) В абзаце «Специалисты» напишите, где вы искали бы людей. 4) В абзаце «Пересмотрю выбор, если» назовите ситуацию, которая изменила бы решение. Все «…» нужно заменить.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="language-choice">
+      <h2>Выбор языка для сервера</h2>
+      <table>
+        <tr><th>Язык</th><th>Скорость старта</th><th>Скорость работы</th><th>Параллельность</th><th>Экосистема</th><th>Найм в России</th><th>Порог входа</th><th>Итого</th></tr>
+        <tr class="lang"><td class="name">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="total">…</td></tr>
+        <tr class="lang"><td class="name">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="total">…</td></tr>
+        <tr class="lang"><td class="name">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="total">…</td></tr>
+      </table>
+      <p id="choice">Выбор: …</p>
+      <p id="hiring">Специалисты: …</p>
+      <p id="revisit">Пересмотрю выбор, если: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="language-choice">
+      <h2>Выбор языка для сервера</h2>
+      <table>
+        <tr><th>Язык</th><th>Скорость старта</th><th>Скорость работы</th><th>Параллельность</th><th>Экосистема</th><th>Найм в России</th><th>Порог входа</th><th>Итого</th></tr>
+        <tr class="lang"><td class="name">PHP</td><td class="score">5</td><td class="score">3</td><td class="score">2</td><td class="score">5</td><td class="score">5</td><td class="score">4</td><td class="total">24</td></tr>
+        <tr class="lang"><td class="name">Python (Django)</td><td class="score">4</td><td class="score">3</td><td class="score">3</td><td class="score">5</td><td class="score">4</td><td class="score">5</td><td class="total">24</td></tr>
+        <tr class="lang"><td class="name">Go</td><td class="score">3</td><td class="score">5</td><td class="score">5</td><td class="score">3</td><td class="score">3</td><td class="score">3</td><td class="total">22</td></tr>
+      </table>
+      <p id="choice">Выбор: PHP. У проекта есть раздел «{{sections.0}}», страницы с текстами и одна форма заявки, а значит, динамики немного, живых соединений нет, и главное — готовность хостинга и специалистов. Скорость выполнения здесь не решает.</p>
+      <p id="hiring">Специалисты: разработчиков на PHP легко найти на hh.ru и в сообществах фрилансеров, а настроить WordPress или Битрикс под проект может студия или частный мастер.</p>
+      <p id="revisit">Пересмотрю выбор, если появятся долгие соединения (чат, живые уведомления) или большой поток запросов: тогда присмотрюсь к Go, Node.js или Elixir.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'choice-section',
+					kind: 'exists',
+					selector: '#language-choice'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#language-choice',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'three-languages',
+					kind: 'count',
+					selector: '#language-choice tr.lang',
+					min: 3
+				},
+				{
+					id: 'language-names',
+					kind: 'text',
+					selector: '#language-choice td.name',
+					matches: 'PHP|Python|Ruby|Java|C#|Go|JavaScript|Node|Elixir|Rust|Kotlin'
+				},
+				{
+					id: 'scores',
+					kind: 'text',
+					selector: '#language-choice td.score',
+					matches: '^\\s*[1-5]\\s*$'
+				},
+				{
+					id: 'totals',
+					kind: 'text',
+					selector: '#language-choice td.total',
+					matches: '^\\s*\\d{1,2}\\s*$'
+				},
+				{
+					id: 'choice-reasoned',
+					kind: 'text',
+					selector: '#choice',
+					matches: '^(?=[\\s\\S]*(?:PHP|Python|Ruby|Java|C#|Go|JavaScript|Node|Elixir|Rust|Kotlin))(?=[\\s\\S]*(?:потому|так как|поскольку|ведь|значит))'
+				},
+				{
+					id: 'choice-uses-brief',
+					kind: 'field',
+					selector: '#choice',
+					field: 'sections',
+					min: 1
+				},
+				{
+					id: 'hiring',
+					kind: 'text',
+					selector: '#hiring',
+					matches: 'найти|найм|hh\\.ru|[Хх]абр|сообществ|фриланс|студи|вакан'
+				},
+				{
+					id: 'revisit',
+					kind: 'text',
+					selector: '#revisit',
+					matches: '^(?=[\\s\\S]*(?:если|когда|при))(?=[\\s\\S]*\\S{4,})'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Вам нужен сайт-визитка, и вы выбираете WordPress. Какой язык «в комплекте»?',
+				options: ['PHP', 'Rust', 'Elixir'],
+				answer: 0,
+				why: [
+					'Да. WordPress написан на PHP, как и Drupal, Joomla и 1С-Битрикс. Выбирая движок, вы выбираете и язык.',
+					'Нет: на Rust ни одного из популярных движков для сайтов-визиток нет.',
+					'Нет: Elixir выбирают для других задач: чатов, потоков событий.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините язык с его типичной нишей',
+				pairs: [
+					['PHP', 'сайты на движках и недорогой хостинг'],
+					['Python', 'быстрая разработка, данные и нейросети, фреймворк Django'],
+					[
+						'Go',
+						'простые быстрые сервисы с множеством одновременных запросов'
+					],
+					['Elixir', 'чаты и потоки событий: тысячи соединений на одной машине'],
+					['Rust', 'там, где важны предельная скорость и безопасность памяти']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что стоит учесть при выборе языка для проекта?',
+				options: [
+					'Что проект должен делать (формы, чат, вычисления)',
+					'Кого можно нанять и как быстро',
+					'Где проект будет жить (какой хостинг умеет этот язык)',
+					'Какой язык сейчас на слуху'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: задача определяет требования к скорости, параллельности и устройству сервера.',
+					'Да: язык, на котором некому писать, обойдётся дороже любого другого.',
+					'Да: дешёвый хостинг часто умеет только PHP, а для других языков нужен свой сервер.',
+					'Нет: мода быстро проходит, а проект остаётся.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Rust быстрее PHP. Почему для сайта-визитки его почти никто не берёт?',
+				options: [
+					'Скорость выполнения не узкое место визитки, а высокий порог входа и мало готовых движков дорого обходятся',
+					'Rust не умеет работать по сети',
+					'Rust запрещён на хостингах'
+				],
+				answer: 0,
+				why: [
+					'Да. Узкое место обычного сайта: сеть, база и разработка, а не скорость языка. Платить сложностью за ненужную скорость невыгодно.',
+					'Нет: умеет, и на нём пишут быстрые сетевые сервисы.',
+					'Нет: запрета нет, он просто реже предустановлен на дешёвом хостинге.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Чем объясняют выбор Elixir для чатов и систем уведомлений?',
+				options: [
+					'Он работает на виртуальной машине Erlang, созданной для телефонных систем: очень много лёгких параллельных процессов и устойчивость к сбоям',
+					'Он самый распространённый язык в мире',
+					'Он выполняется прямо в браузере'
+				],
+				answer: 0,
+				why: [
+					'Да. Erlang придумали в Ericsson для телефонных станций, где миллионы звонков идут одновременно и не должны обрываться. Elixir (2011) даёт современный язык поверх той же машины.',
+					'Нет: он нишевый, и специалистов по нему мало, особенно в России.',
+					'Нет: в браузере выполняется JavaScript.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что означает «порог входа» в таблице, где 5 — лучшая оценка?',
+				options: [
+					'5: начать легко, мало знаний и инструментов нужно сразу',
+					'5: язык очень сложный',
+					'5: язык самый быстрый'
+				],
+				answer: 0,
+				why: [
+					'Да. Мы условились, что большее число всегда лучше для проекта. Для порога входа это означает «низкий», то есть легко начать.',
+					'Нет: тогда пятёрка была бы плохой оценкой, а в таблице все критерии устроены одинаково.',
+					'Нет: скорость выполнения это отдельный столбец.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-niche-php',
+				front: 'Где живёт PHP и почему?',
+				back: 'Сайты на движках: WordPress, Битрикс, Drupal, Laravel. Дешёвый хостинг, модель «запрос — процесс», огромная экосистема и множество специалистов. Слабее там, где нужны долгие соединения.'
+			},
+			{
+				id: 'server-niche-python-ruby',
+				front: 'Чем известны Python и Ruby на сервере?',
+				back: 'Python (Django, Flask, FastAPI): быстрая разработка, данные и нейросети. Ruby (Rails, 2004): скорость создания продуктов, «соглашения вместо настроек». Оба медленнее Go или Java, но для большинства сайтов хватает.'
+			},
+			{
+				id: 'server-niche-jvm',
+				front: 'Где используют Java и C#?',
+				back: 'Корпоративные системы, банки, большие порталы. Строгая типизация, зрелые фреймворки (Spring, .NET), много специалистов. Высокий порог входа и тяжёлый старт проекта.'
+			},
+			{
+				id: 'server-niche-go-node',
+				front: 'Чем хороши Go и Node.js?',
+				back: 'Go (Google, 2009): простота, скорость, лёгкая параллельность, на нём написаны Docker и Kubernetes. Node.js (2009): один язык на сервере и в браузере, огромная экосистема npm, быстрые прототипы и живые соединения.'
+			},
+			{
+				id: 'server-niche-elixir-rust',
+				front: 'Для чего берут Elixir и Rust?',
+				back: 'Elixir (на Erlang VM): чаты, потоки событий, устойчивость, но мало специалистов. Rust: максимальная скорость и безопасность памяти для сервисов, где это важно, но высокий порог входа.'
+			}
+		],
+		sources: [
+			{
+				title: 'Stack Overflow Developer Survey 2025: Technology',
+				url: 'https://survey.stackoverflow.co/2025/technology',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'W3Techs: Server-side programming languages',
+				url: 'https://w3techs.com/technologies/overview/programming_language',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Go: Documentation',
+				url: 'https://go.dev/doc/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Elixir: Introduction',
+				url: 'https://elixir-lang.org/getting-started/introduction.html',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Node.js: About Node.js',
+				url: 'https://nodejs.org/en/about',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'The Rust Programming Language (книга)',
+				url: 'https://doc.rust-lang.org/book/',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Здесь нет правильного ответа, но есть обоснованный. Оцените три языка по шести критериям, выберите один и объясните выбор тем, что нужно вашему проекту.',
+			hints: [
+				'Выберите три языка из списка, например PHP, Python и Go или Node.js. Названия впишите в первую колонку строк.',
+				'Оценки от 1 до 5, где 5 лучше для проекта. Сложите шесть чисел в последней колонке.',
+				'В абзаце «Выбор» назовите язык и опирайтесь на проект: «у меня раздел …, форма, список …, значит …». Слова «потому что» помогут.',
+				'Специалистов ищут на hh.ru, в сообществах, у студий и фрилансеров. А пересмотреть выбор стоит, например, если появится чат или резко вырастет нагрузка.'
+			],
+			mistakes: {
+				'choice-section': 'Блок «Выбор языка» (section id="language-choice") пропал. Верните его.',
+				'no-blanks': 'Остались многоточия «…». Замените каждое.',
+				'three-languages': 'В таблице нужно не меньше трёх строк с классом lang.',
+				'language-names': 'В первой колонке нужно название языка: PHP, Python, Go, Node.js, Elixir и так далее.',
+				scores: 'Оценки это числа от 1 до 5.',
+				totals: 'В последней колонке напишите сумму чисел: целое число.',
+				'choice-reasoned': 'В абзаце «Выбор» назовите язык и объясните: «потому что…», «так как…».',
+				'choice-uses-brief': 'Объясняя выбор, назовите один из разделов вашего проекта: опираться надо на ваш проект, а не на вкус.',
+				hiring: 'В абзаце «Специалисты» скажите, где вы искали бы людей: hh.ru, сообщества, студии, фрилансеры.',
+				revisit: 'Назовите ситуацию, при которой выбор надо пересмотреть: «если…», «когда…».'
+			},
+			outro: 'Выбор сделан по фактам вашего проекта, а не по моде, и вы знаете, при каких условиях его стоит пересмотреть. Именно так решает опытный разработчик.'
+		},
+		say: {
+			PHP: 'пи-эйч-пи',
+			Python: 'пайтон',
+			Ruby: 'руби',
+			Java: 'джава',
+			'C#': 'си-шарп',
+			Go: 'гоу',
+			Node: 'ноуд',
+			'Node.js': 'ноуд-джей-эс',
+			Elixir: 'эликсир',
+			Rust: 'раст',
+			Django: 'джанго',
+			Rails: 'рэйлс',
+			Laravel: 'ларавель',
+			Erlang: 'эрланг',
+			Kubernetes: 'кубернетес',
+			Docker: 'докер',
+			Ericsson: 'эрикссон',
+			Spring: 'спринг',
+			Phoenix: 'феникс',
+			npm: 'эн-пи-эм',
+			hh: 'эйч-эйч'
+		}
+	};
+</script>
+
+<script>
+	import LanguageRadar from '../../diagrams/LanguageRadar.svelte';
+</script>
+
+## «На чём писать сервер?»
+
+Самый частый вопрос новичка и заказчика, и самый частый неправильный ответ: «на самом лучшем». Лучшего языка для сервера нет, как нет лучшего инструмента вообще: молоток не лучше отвёртки. У каждого языка свой возраст, свои создатели, свои задачи, ради которых он делался, и своя экосистема. Выбор языка это выбор не между «хорошим» и «плохим», а между разными компромиссами.
+
+Поэтому полезно знать, зачем каждый язык появился. Ниже девять: те, на которых действительно пишут серверы сегодня.
+
+## Девять языков и то, зачем они нужны
+
+**PHP** (1995) создавался именно для веба и поныне делает это лучше многих. На нём WordPress, 1С-Битрикс, Drupal, MediaWiki (движок Википедии), Laravel. Его козыри: дешёвый хостинг везде, модель «запрос — процесс», огромное число специалистов и готовых решений. Слабое место: долгие соединения (чат), а язык несёт груз ранних ошибок.
+
+**Python** (1991) читается почти как английский и поэтому быстро учится и быстро пишется. Для веба у него Django (на нём построен Instagram), Flask и FastAPI. Главная сила: данные, аналитика и нейросети, которые почти все пишутся на Python, поэтому, когда сайту нужен ИИ, он рядом. Медленнее многих, но для большинства сайтов скорость языка не узкое место.
+
+**Ruby** (1995) прославился фреймворком Rails (2004), который научил мир создавать веб-продукты за недели с помощью принципа «соглашения вместо настроек». На Rails сделаны GitHub, Shopify, Basecamp. Сегодня он менее модный и в России специалистов мало, но для быстрого запуска продукта по-прежнему хорош.
+
+**Java** (1995) и **C#** (2000, Microsoft) стали языками больших корпораций: строгая типизация, зрелые платформы (Spring, .NET), высокая надёжность и множество специалистов. Банки, страховые, крупные порталы часто стоят на них. Цена: высокий порог входа и тяжёлый старт проекта; для сайта-визитки это пушка по воробьям.
+
+**Go** (Google, 2009) создавался для серверной работы: простой язык, который быстро компилируется, быстро работает и без труда делает много дел одновременно. На нём написаны Docker и Kubernetes. Хорош для сервисов, которым важны скорость и простота эксплуатации.
+
+**JavaScript на сервере**, то есть **Node.js** (2009), позволяет писать и страницу, и сервер на одном языке и пользоваться огромным реестром пакетов npm. Хорош для прототипов, для живых соединений (чатов, уведомлений) и когда команда уже пишет на JavaScript.
+
+**Elixir** (2011, Хосе Валим) работает на виртуальной машине Erlang, которую придумали в 1980-е в компании Ericsson для телефонных станций. Там миллионы звонков идут одновременно, и сбой одного не должен оборвать другие. От предков Elixir унаследовал огромное число лёгких параллельных процессов и устойчивость к ошибкам. На нём пишут чаты, системы уведомлений и потоки событий (так устроен сервис сообщений Discord). Платой стали небольшое сообщество и мало специалистов, особенно в России.
+
+**Rust** (Mozilla, 2010) выбирают, когда нужны предельная скорость и безопасная работа с памятью: на нём пишут отдельные высоконагруженные части систем (в Cloudflare и Discord). Порог входа самый высокий из девяти, и для обычного сайта это почти всегда избыточно.
+
+## Как это сравнить
+
+Для сравнения удобно взять **шесть критериев**:
+
+1. **Скорость старта проекта**: как быстро можно получить работающий сайт.
+2. **Скорость работы**: сколько запросов обработает одна машина.
+3. **Параллельность**: удобно ли держать множество одновременных соединений.
+4. **Экосистема**: сколько готовых библиотек, движков и ответов на вопросы.
+5. **Найм в России**: легко ли найти людей и сколько они стоят.
+6. **Порог входа**: насколько трудно начать. Договоримся, что чем легче, тем выше оценка, чтобы пятёрка везде означала «хорошо для проекта».
+
+Выберите два языка и посмотрите на их «радар». Оценки здесь суждения автора, а не замеры, но по форме многоугольника видно, чем языки отличаются:
+
+<LanguageRadar />
+
+<details>
+<summary>Проверьте себя: почему у Rust самая высокая скорость работы, а для сайта-визитки его почти не берут?</summary>
+
+Скорость языка не узкое место визитки. Узкие места там: сеть, база данных и время разработки. А высокий порог входа и мало готовых движков делают Rust дорогим выбором там, где его скорость не нужна.
+
+</details>
+
+## Как выбирать
+
+Три правила, которые отсекают большинство плохих решений.
+
+1. **Начинайте с задачи, а не с языка.** Сайт на движке, магазин, чат, сервис с вычислениями требуют разного. Для сайтов на WordPress или Битрикс вопрос решён заранее: это PHP. Для чата с тысячами соединений скорее Node.js, Go или Elixir.
+2. **Считайте людей.** Через год сайту понадобится кто-то, кто его поправит. Язык, на котором в вашем городе пишут сотни людей, дешевле языка с десятком специалистов, даже если второй технически лучше. На российском рынке это ощутимо: PHP, Python, Java и JavaScript легко найти, Elixir и Rust трудно.
+3. **Выбирайте скучное, когда можете.** Скорость языка редко решает судьбу сайта. Решает то, как быстро вы запустились, как легко поддерживать и можно ли найти помощь. А скучное, проверенное и широко распространённое хороший выбор.
+
+И запомните: язык не вечен. Проект можно начать на одном и перенести часть на другой, когда задача изменится. Поэтому в практике просят не только выбрать, но и назвать ситуацию, при которой выбор надо пересмотреть.
+
+## Практика
+
+Вы на сайте эпохи 2022 года: серверов уже не покупают, берут по подписке, а язык выбирают под задачу. Возьмите три языка из списка и взвесьте их по шести критериям для вашего проекта. Оценки можете взять из радара, а можете поставить свои: ваш проект может сдвинуть вес критериев. Сумму посчитайте сами.
+
+Потом выберите один и объясните выбор. Не «мне нравится», а «у проекта вот такой раздел, вот такая форма, значит нужно вот что». Скажите, где искали бы специалистов, и назовите ситуацию, которая изменила бы решение. Это три предложения, и они стоят больше самой таблицы.
+
+## Что было не так раньше
+
+В 2000-е выбирали языком, а не задачей. «Мы Java-компания» значило, что и визитку из пяти страниц делали на тяжёлой корпоративной платформе. «Мы на Ruby» означало восхищение скоростью разработки и недоумение, зачем тогда нужны другие. К 2010-м выросло поколение разработчиков, для которых язык стал вопросом принадлежности, и споры о нём напоминали споры о футбольных клубах.
+
+Сегодня зрелый подход скромнее: язык это инструмент, выбранный под задачу, а новые языки (Go, Rust, Elixir) заняли свои ниши, не вытеснив старые. PHP, о смерти которого объявляют с 2000-х годов, до сих пор отдаёт значительную долю сайтов в мире (цифру по месяцам публикует W3Techs, ссылка ниже).
