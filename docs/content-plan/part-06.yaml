@@ -1,0 +1,443 @@
+part: 6
+slug: server
+title: Сервер и языки
+era: null
+summary: Что делает веб-сервер, чем статика отличается от динамики, как путь от CGI к PHP и серверам приложений объясняет,
+  почему у каждого языка своя ниша, и как работают API, вебхуки и вход пользователя.
+concepts:
+- id: server.web-server
+  title: Веб-сервер
+- id: server.reverse-proxy
+  title: Обратный прокси
+- id: server.static-vs-dynamic
+  title: Статика и динамика
+- id: server.cgi
+  title: CGI
+- id: server.php-model
+  title: 'Модель PHP: запрос — процесс'
+- id: server.app-server
+  title: Сервер приложений
+- id: server.language-niches
+  title: Ниши языков серверной разработки
+- id: server.rest
+  title: REST
+- id: server.openapi
+  title: Описание API (OpenAPI)
+- id: server.graphql
+  title: GraphQL
+- id: server.webhooks
+  title: Вебхуки
+- id: server.sessions-and-cookies
+  title: Сессии и cookie
+- id: server.authentication
+  title: Аутентификация
+- id: server.authorization
+  title: Авторизация и роли
+- id: server.oauth
+  title: OAuth и вход через сторонние сервисы
+- id: server.passkeys
+  title: Пасскеи
+- id: server.stack-choice
+  title: Выбор стека под проект
+lessons:
+- id: 06-server/01-web-server
+  order: 1
+  title: 'Что такое веб-сервер: Apache, nginx и Caddy'
+  summary: 'Зачем: вы понимаете, что происходит между браузером и файлом на диске: сервер принимает соединение, разбирает
+    запрос, находит ответ и отправляет его. После урока вы читаете короткий конфиг nginx или Caddy, знаете, что такое обратный
+    прокси, и можете объяснить, чем три сервера отличаются.'
+  minutes: 25
+  teaches:
+  - server.web-server
+  - server.reverse-proxy
+  requires:
+  - net.http-request-response
+  - net.url-anatomy
+  - net.dns-resolution
+  diagram: 'Путь запроса: браузер → DNS → сервер → конфиг (location, root, proxy_pass) → файл или приложение; можно менять
+    правила в простом конфиге и видеть, какой ответ и какой статус получит запрос по выбранному URL.'
+  practice: 'Эпоха 1 (1996): представить, что страницы проекта из sections лежат в папке на сервере; написать конфиг, который
+    отдаёт главную страницу, отдельную страницу на каждую секцию, красивый ответ 404 и перенаправление со старого адреса на
+    новый.'
+  checks:
+  - Каждая секция из sections открывается по своему адресу, а адрес главной страницы отдаёт файл index.
+  - Несуществующий адрес возвращает статус 404 и страницу ошибки, а не главную.
+  - Перенаправление со старого адреса сделано статусом 301 на новый, а не страницей-заглушкой.
+  - Объяснено, какую роль играет выбранный сервер и зачем его ставят перед приложением (если приложение есть).
+  sources:
+  - title: 'MDN: What is a web server?'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_web_server
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'nginx: Beginner''s Guide'
+    url: https://nginx.org/en/docs/beginners_guide.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Caddy Documentation
+    url: https://caddyserver.com/docs/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Apache HTTP Server: Getting Started'
+    url: https://httpd.apache.org/docs/current/getting-started.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'W3Techs: Web servers usage statistics'
+    url: https://w3techs.com/technologies/overview/web_server
+    licence: link-only
+    kind: article
+    lang: en
+  videos:
+  - title: Apache vs Nginx. Что выбрать? Сравнение двух популярных HTTP серверов
+    url: https://www.youtube.com/watch?v=rQABD6kTP7g
+    lang: ru
+- id: 06-server/02-static-dynamic
+  order: 2
+  title: Статика и динамика
+  summary: 'Зачем: вы отличаете страницу, которая лежит готовым файлом, от страницы, которую сервер собирает под каждый запрос,
+    и понимаете цену каждого подхода: скорость, стоимость, безопасность, возможности. После урока вы решите, где проекту хватит
+    статики, а где нужен сервер.'
+  minutes: 20
+  teaches:
+  - server.static-vs-dynamic
+  requires:
+  - server.web-server
+  - html.document-structure
+  diagram: 'Два конвейера рядом: статический (файл → кэш → браузер) и динамический (запрос → код → база → HTML → браузер);
+    бегунок «число посетителей» показывает, где какой растёт по времени ответа и стоимости.'
+  practice: 'Эпоха 3 (2010, WordPress): разметить функции проекта из брифа (sections, items, форма в contacts, вход для людей)
+    как статические или динамические и записать для каждой, зачем нужен сервер, а где достаточно файла.'
+  checks:
+  - Каждая секция из sections и каждый вид items отнесены к статике или динамике с причиной.
+  - Форма обратной связи по contacts отмечена как требующая серверной части или сервиса-посредника.
+  - Есть вывод, нужна ли проекту база данных, с доводом.
+  - Упомянуты кэширование и то, что делает динамическую страницу быстрее.
+  sources:
+  - title: 'MDN: Introduction to the server side'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Introduction
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'MDN: Static sites and dynamic sites (client-server overview)'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Jamstack.org: What is Jamstack?'
+    url: https://jamstack.org/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'web.dev: HTTP caching'
+    url: https://web.dev/articles/http-cache
+    licence: CC-BY
+    kind: article
+    lang: en
+  videos: []
+- id: 06-server/03-cgi-php-app-servers
+  order: 3
+  title: От CGI к PHP и серверам приложений
+  summary: 'Зачем: вы понимаете эволюцию серверного кода: CGI запускал программу на каждый запрос, PHP встроил код в страницу,
+    а серверы приложений держат программу живой и общаются с nginx. После урока вы объясните, почему WordPress и 1С-Битрикс
+    на PHP, а чат или игра — на Node.js или Elixir.'
+  minutes: 25
+  teaches:
+  - server.cgi
+  - server.php-model
+  - server.app-server
+  requires:
+  - server.static-vs-dynamic
+  - net.http-request-response
+  diagram: 'Три анимации запроса: CGI (процесс запускается и умирает), PHP-FPM (пул воркеров, каждый запрос — чистый старт),
+    сервер приложений (одна живая программа с общей памятью); счётчик времени запроса и памяти.'
+  practice: 'Эпоха 3 (2010, WordPress): на шаблоне проекта (kind из брифа) описать одним предложением, как запрос на страницу
+    из sections проходит через PHP или сервер приложений до базы данных и обратно, и найти, где его можно ускорить кэшем.'
+  checks:
+  - 'Путь запроса описан по шагам: сервер, обработчик, база, ответ.'
+  - Названо различие модели «процесс на запрос» и «живое приложение» и сказано, что из этого выбрано для проекта.
+  - Указано место для кэша и что в нём хранится.
+  - Упомянуто, почему для проекта выбранной kind подходит или не подходит PHP-хостинг.
+  sources:
+  - title: 'RFC 3875: The Common Gateway Interface (CGI) 1.1'
+    url: https://www.rfc-editor.org/rfc/rfc3875
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: 'PHP: Руководство. Введение'
+    url: https://www.php.net/manual/ru/introduction.php
+    licence: CC-BY
+    kind: docs
+    lang: ru
+  - title: 'PHP-FPM: описание'
+    url: https://www.php.net/manual/ru/install.fpm.php
+    licence: CC-BY
+    kind: docs
+    lang: ru
+  - title: 'W3Techs: Server-side programming languages'
+    url: https://w3techs.com/technologies/overview/programming_language
+    licence: link-only
+    kind: article
+    lang: en
+  - title: WSGI / ASGI в документации Django
+    url: https://docs.djangoproject.com/en/stable/howto/deployment/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []
+- id: 06-server/04-languages
+  order: 4
+  title: Почему у каждого языка своя ниша
+  summary: 'Зачем: вы понимаете, чем PHP, Python, Ruby, Java, C#, Go, JavaScript (Node), Elixir и Rust отличаются для сервера,
+    и знаете, у кого какая сильная сторона: быстрая сборка, экосистема, параллельность, надёжность, скорость, найм. Вы можете
+    выбрать язык под задачу, а не по моде, и учесть российский рынок.'
+  minutes: 30
+  teaches:
+  - server.language-niches
+  requires:
+  - server.cgi
+  - server.app-server
+  diagram: Радар-сравнение по осям «скорость старта проекта», «скорость выполнения», «параллельность», «экосистема», «найм
+    в России», «порог входа»; клик по языку показывает типичный проект и известные примеры (WordPress, Instagram, Spotify,
+    Discord, Mail.ru и др.).
+  practice: 'Эпоха 6 (2022): для проекта из брифа (kind и список функций) взвесить три языка из списка по шести критериям
+    и выбрать один, с оговоркой, при каких условиях выбор поменялся бы.'
+  checks:
+  - Сравнение охватывает минимум три языка и опирается на шесть названных критериев.
+  - Выбор объяснён на фактах про функции проекта (sections, items, languages), а не на предпочтениях.
+  - Указано, каких специалистов можно найти и как.
+  - Названа ситуация, при которой выбор нужно пересмотреть.
+  sources:
+  - title: 'Stack Overflow Developer Survey 2025: Technology'
+    url: https://survey.stackoverflow.co/2025/technology
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'W3Techs: Server-side programming languages'
+    url: https://w3techs.com/technologies/overview/programming_language
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'Go: Documentation'
+    url: https://go.dev/doc/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Elixir: Introduction'
+    url: https://elixir-lang.org/getting-started/introduction.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Node.js: About Node.js'
+    url: https://nodejs.org/en/about
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: The Rust Programming Language (книга)
+    url: https://doc.rust-lang.org/book/
+    licence: proprietary-link
+    kind: book
+    lang: en
+  videos: []
+- id: 06-server/05-rest-api
+  order: 5
+  title: 'API и REST: как программы разговаривают друг с другом'
+  summary: 'Зачем: вы читаете и проектируете простой HTTP API: ресурсы, методы GET/POST/PUT/DELETE, коды ответа, формат JSON,
+    версии и ошибки. После урока вы опишете API своего проекта по OpenAPI и проверите запросы из браузера и из терминала.'
+  minutes: 30
+  teaches:
+  - server.rest
+  - server.openapi
+  requires:
+  - net.http-request-response
+  - js.fetch
+  - js.json
+  diagram: 'Тренажёр запросов: выбираешь метод и путь, видишь запрос и ответ с кодом; нарушение правил (GET, который меняет
+    данные) подсвечивается; рядом отображается соответствующий фрагмент файла OpenAPI.'
+  practice: 'Эпоха 6 (2022): описать в файле OpenAPI API для items брифа: список, один пункт, создание заявки из contacts;
+    указать формат ошибок и статусы.'
+  checks:
+  - Для items есть адреса-существительные во множественном числе, а не глаголы.
+  - GET не меняет данные, создание заявки идёт методом POST и возвращает 201 или 202.
+  - Описаны формат ошибки и минимум три статуса (200, 400, 404).
+  - Для заявки из contacts перечислены обязательные поля и сказано, что персональные данные принимаются только по HTTPS.
+  sources:
+  - title: 'Fielding: Architectural Styles and the Design of Network-based Software Architectures, глава 5 (REST)'
+    url: https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm
+    licence: proprietary-link
+    kind: book
+    lang: en
+  - title: 'RFC 9110: HTTP Semantics'
+    url: https://www.rfc-editor.org/rfc/rfc9110
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: OpenAPI Specification
+    url: https://spec.openapis.org/oas/latest.html
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: 'MDN: HTTP request methods'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'MDN: HTTP response status codes'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos:
+  - title: REST API простыми словами
+    url: https://www.youtube.com/watch?v=EaFr0wYaxxM
+    lang: ru
+- id: 06-server/06-graphql-webhooks
+  order: 6
+  title: GraphQL и вебхуки
+  summary: 'Зачем: вы знаете, чем GraphQL отличается от REST (клиент сам выбирает поля) и зачем нужны вебхуки (сервис сам
+    сообщает вам о событии). После урока вы подключите уведомление о заявке или оплате к Telegram-боту и проверите подпись
+    входящего запроса.'
+  minutes: 25
+  teaches:
+  - server.graphql
+  - server.webhooks
+  requires:
+  - server.rest
+  diagram: 'Две панели: слева запрос GraphQL с выбором полей, справа ответ меняется; ниже схема вебхука: событие → POST на
+    ваш адрес → проверка подписи → повтор при ошибке, с таймлайном повторов.'
+  practice: 'Эпоха 6 (2022): настроить так, чтобы заявка из формы contacts отправляла вебхук в Telegram-бота или в почту владельцу;
+    описать, как проверяется подпись и что происходит, если приёмник недоступен.'
+  checks:
+  - Заявка с формы доходит до владельца проекта через вебхук, и указан канал (Telegram или почта).
+  - Входящий вебхук проверяется по секрету или подписи, а секрет не лежит в публичном коде.
+  - 'Описано поведение при повторной доставке: обработка идемпотентна.'
+  - Объяснено, в каком случае для данных items удобнее GraphQL, а в каком — REST.
+  sources:
+  - title: 'GraphQL: Introduction to GraphQL'
+    url: https://graphql.org/learn/
+    licence: CC-BY
+    kind: docs
+    lang: en
+  - title: 'Telegram Bot API: setWebhook'
+    url: https://core.telegram.org/bots/api#setwebhook
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Stripe: Webhooks'
+    url: https://docs.stripe.com/webhooks
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'GitHub Docs: Validating webhook deliveries'
+    url: https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
+    licence: CC-BY
+    kind: docs
+    lang: en
+  videos: []
+- id: 06-server/07-authentication
+  order: 7
+  title: Аутентификация простыми словами
+  summary: 'Зачем: вы объясняете, чем отличаются «кто вы» (аутентификация) и «что вам можно» (авторизация), как работают сессии,
+    cookie, токены JWT, вход через сторонний сервис (OAuth, Яндекс ID, VK ID) и пасскеи. После урока вы выберете безопасный
+    способ входа для проекта и не станете хранить пароли открытым текстом.'
+  minutes: 30
+  teaches:
+  - server.sessions-and-cookies
+  - server.authentication
+  - server.authorization
+  - server.oauth
+  - server.passkeys
+  requires:
+  - server.rest
+  - net.tls
+  diagram: 'Четыре сценария входа бок о бок (пароль и сессия, JWT, OAuth через Яндекс ID, пасскей): шаги ходят между браузером,
+    сервером и провайдером; кнопка «украсть» показывает, что украли бы в каждом случае.'
+  practice: 'Эпоха 6 (2022): определить по брифу, нужен ли вход вообще (people, items, закрытая часть), выбрать способ и описать
+    роли (посетитель, владелец, редактор); если вход не нужен, обосновать.'
+  checks:
+  - Есть ответ, нужен ли вход, с причиной, связанной с главным действием (mainAction) и аудиторией (forWhom).
+  - Перечислены роли и что каждой можно.
+  - Пароли не хранятся открытым текстом, названа схема хэширования или вход без пароля.
+  - Вход через стороннего провайдера или SMS отмечен как обработка персональных данных (ссылка на 152-ФЗ).
+  sources:
+  - title: 'MDN: HTTP authentication'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'OWASP Cheat Sheet: Authentication'
+    url: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'OWASP Cheat Sheet: Session Management'
+    url: https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'OAuth 2.0: описание и спецификации'
+    url: https://oauth.net/2/
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: 'passkeys.dev: пасскеи для разработчиков'
+    url: https://passkeys.dev/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Яндекс ID: документация для разработчиков'
+    url: https://yandex.ru/dev/id/doc/ru/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos:
+  - title: 'Аутентификация в веб-приложениях: JWT и сессии'
+    url: https://www.youtube.com/watch?v=w8ENQfaYIT8
+    lang: ru
+- id: 06-server/08-stack-choice
+  order: 8
+  title: Собираем стек под проект
+  summary: 'Зачем: вы соединяете всё из части в один выбор: сервер, язык, API, вход и вебхуки под конкретный проект, с учётом
+    российского рынка (PHP-хостинги, 1С-Битрикс и WordPress, Яндекс Облако, VK Cloud, бесплатные ограничения иностранных сервисов).
+    После урока у вас есть схема сервера проекта и список рисков.'
+  minutes: 20
+  teaches:
+  - server.stack-choice
+  requires:
+  - server.language-niches
+  - server.rest
+  - server.authentication
+  - server.webhooks
+  diagram: 'Конструктор схемы: из палитры блоков (сервер, приложение, база, хранилище, почта, вебхук, вход) собираешь схему
+    проекта; система подсказывает лишние и пропущенные блоки по брифу и показывает ориентировочную стоимость в месяц.'
+  practice: 'Эпоха 6 (2022): по полям брифа kind, mainAction, items, languages и contacts собрать схему серверной части на
+    одной странице: что статика, что динамика, какой язык, какое API, как приходят заявки, что хранится и где.'
+  checks:
+  - На схеме есть главное действие (mainAction) и путь данных от посетителя до владельца.
+  - Для каждого блока выбран конкретный инструмент или написано, что не нужен.
+  - Упомянуто, где физически хранятся персональные данные граждан РФ и почему это важно.
+  - Есть три риска и план на случай отказа хотя бы одного блока.
+  sources:
+  - title: Федеральный закон от 27.07.2006 № 152-ФЗ «О персональных данных»
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: spec
+    lang: ru
+  - title: 'Yandex Cloud: документация'
+    url: https://yandex.cloud/ru/docs
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: '1С-Битрикс: документация для разработчиков'
+    url: https://dev.1c-bitrix.ru/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: Stack Overflow Developer Survey 2025
+    url: https://survey.stackoverflow.co/2025/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  videos: []

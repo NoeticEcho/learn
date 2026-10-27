@@ -1,0 +1,348 @@
+part: 14
+slug: metrics
+title: Метрики и поведение
+era: null
+summary: 'Как понять, что происходит с посетителями: что двигает клики и удержание, как определяются отказы в Метрике и GA4,
+  как мерить конверсию, ставить A/B-тесты без ошибок, смотреть тепловые карты и записи сессий этично и настроить Метрику для
+  своего сайта.'
+concepts:
+- id: metrics.attention-behaviour
+  title: 'Внимание и поведение: что двигает клики и удержание'
+- id: metrics.counter-setup
+  title: Установка счётчика Яндекс Метрики
+- id: metrics.visits-events
+  title: Визиты, просмотры и события
+- id: metrics.bounce-definitions
+  title: 'Отказы: определения в Метрике и GA4'
+- id: metrics.time-scroll-ctr
+  title: Время на странице, глубина прокрутки, CTR
+- id: metrics.conversion-basics
+  title: Конверсия и микроконверсии
+- id: metrics.funnels
+  title: Воронки
+- id: metrics.cohorts-retention
+  title: Когорты и удержание
+- id: metrics.ab-tests
+  title: A/B-тесты и их ловушки
+- id: metrics.heatmaps-replay
+  title: Тепловые карты и записи сессий
+- id: metrics.analytics-ethics
+  title: Этика и приватность аналитики
+- id: metrics.heart
+  title: HEART и метрика North Star
+- id: metrics.dashboard
+  title: Панель показателей проекта
+lessons:
+- id: 14-metrics/01-behaviour
+  order: 1
+  title: Что двигает клики и удержание
+  summary: 'Зачем: понять, как посетитель читает экран, где кончается внимание и почему он кликает или уходит, чтобы ставить
+    гипотезы, а не гадать. После урока человек формулирует три гипотезы для своих страниц.'
+  minutes: 20
+  teaches:
+  - metrics.attention-behaviour
+  requires:
+  - texts.screen-reading
+  - design.visual-hierarchy
+  - copy.fogg
+  diagram: 'Тепловая карта внимания на макете страницы: человек двигает блок призыва выше и ниже сгиба, и распределение внимания
+    по данным NN/g перерисовывается; гипотеза записывается в формате «если… то… потому что…».'
+  practice: 'Эпоха 4: для страницы с brief.mainAction записать три гипотезы по шаблону «если изменить X, то Y вырастет, потому
+    что Z» (расположение призыва, заголовок, форма) и указать, какой показатель их проверит.'
+  checks:
+  - Три гипотезы в формате «если… то… потому что…».
+  - Каждая гипотеза относится к brief.mainAction или разделу из brief.sections.
+  - У каждой указан показатель проверки.
+  - 'Гипотезы можно проверить за разумный срок: хватает ли трафика.'
+  sources:
+  - title: 'NN/g: Scrolling and Attention'
+    url: https://www.nngroup.com/articles/scrolling-and-attention/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'NN/g: How long do users stay on web pages?'
+    url: https://www.nngroup.com/articles/how-long-do-users-stay-on-web-pages/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Wikipedia: Bounce rate'
+    url: https://en.wikipedia.org/wiki/Bounce_rate
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 14-metrics/02-metrika-setup
+  order: 2
+  title: Настройка Яндекс Метрики для сайта
+  summary: 'Зачем: правильно поставить счётчик, не нарушив закон о персональных данных, и сразу настроить цели под главное
+    действие. После урока на сайте работает счётчик, и первая цель отслеживает brief.mainAction.'
+  minutes: 25
+  teaches:
+  - metrics.counter-setup
+  - metrics.visits-events
+  requires:
+  - js.events
+  - html.head-meta
+  - net.http-status-headers
+  - server.webhooks
+  diagram: 'Живая панель Метрики на макете сайта: человек вставляет код счётчика, нажимает кнопки на странице, и поток событий
+    (визиты, просмотры, цели) идёт в таблицу; переключатель «Вебвизор вкл/выкл» показывает, что собирается.'
+  practice: 'Эпоха 4/5: установить код счётчика на все страницы, настроить цель по JavaScript-событию «brief.mainAction» (отправка
+    формы, клик по телефону, запись), проверить в режиме отладки, что цель срабатывает один раз. Для Tilda или WordPress указать,
+    где вставляется код. Добавить в политику обработки данных сведения о Метрике.'
+  checks:
+  - Счётчик стоит на всех страницах, и код не продублирован.
+  - Создана цель, соответствующая brief.mainAction, и она срабатывает один раз за действие.
+  - Для сайта на конструкторе указано, куда вставлять код (Tilda, Битрикс, WordPress).
+  - В политике обработки данных упомянута Метрика и перечислены собираемые данные.
+  sources:
+  - title: 'Яндекс Метрика: быстрый старт'
+    url: https://yandex.ru/support/metrica/ru/quick-start
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Яндекс Метрика: инициализация счётчика'
+    url: https://yandex.ru/support/metrica/ru/code/counter-initialize
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Роскомнадзор: Портал персональных данных'
+    url: https://pd.rkn.gov.ru/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos:
+  - title: Настройка целей в Яндекс Метрике (Митяев Маркетинг)
+    url: https://www.youtube.com/watch?v=0KLkh1hA5_g
+    lang: ru
+- id: 14-metrics/03-engagement-metrics
+  order: 3
+  title: 'Отказы, время, прокрутка и CTR: что и как считается'
+  summary: 'Зачем: не обманываться цифрами: понять, как считается отказ в Метрике (меньше 15 секунд и один просмотр, без события
+    «неотказ») и как в GA4 (визит без вовлечённости), что значат время на странице и глубина прокрутки. После урока человек
+    знает, какой показатель выбрать для страницы и каким цифрам не верить.'
+  minutes: 20
+  teaches:
+  - metrics.bounce-definitions
+  - metrics.time-scroll-ctr
+  requires:
+  - metrics.counter-setup
+  - metrics.visits-events
+  diagram: 'Два счётчика на одну и ту же сессию: «Метрика» и «GA4». Человек двигает бегунки (время на странице, число просмотров,
+    событие) и видит, где один считает отказом, а другой нет; шкала глубины прокрутки с порогами 25/50/75/100.'
+  practice: 'Эпоха 4: для одностраничного или длинного сайта (brief.sections) выбрать показатель, который заменит «отказы»
+    (достижение цели, глубина прокрутки, событие «неотказ»), и записать, почему. Настроить событие «неотказ» для страницы,
+    где посетитель выполняет brief.mainAction без перехода.'
+  checks:
+  - Назван показатель вместо «отказов» и объяснена причина.
+  - Объяснено различие определений Метрики и GA4 одним предложением.
+  - Для страницы с brief.mainAction задано условие, при котором визит не считается отказом.
+  - Указаны пороги глубины прокрутки и страницы, где они нужны.
+  sources:
+  - title: 'Яндекс Директ: что такое отказы в Яндекс Метрике'
+    url: https://direct.yandex.ru/base/articles/chto-takoe-otkazy-v-yandeks-metrike
+    licence: proprietary-link
+    kind: article
+    lang: ru
+  - title: 'Google Analytics: [GA4] Engagement rate and bounce rate'
+    url: https://support.google.com/analytics/answer/12195621
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Wikipedia: Bounce rate'
+    url: https://en.wikipedia.org/wiki/Bounce_rate
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: 'NN/g: How long do users stay on web pages?'
+    url: https://www.nngroup.com/articles/how-long-do-users-stay-on-web-pages/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Яндекс Метрика: карта скроллинга'
+    url: https://yandex.ru/support/metrica/behavior/scroll-map.html
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos: []
+- id: 14-metrics/04-conversion-cohorts
+  order: 4
+  title: Конверсия, воронки, когорты и удержание
+  summary: 'Зачем: измерять не посещаемость, а результат: сколько из пришедших сделали главное действие, где теряются на пути
+    и возвращаются ли. После урока человек строит воронку и считает конверсию и когортное удержание на примере.'
+  minutes: 25
+  teaches:
+  - metrics.conversion-basics
+  - metrics.funnels
+  - metrics.cohorts-retention
+  requires:
+  - metrics.bounce-definitions
+  - copy.funnel
+  - data.sql-select
+  diagram: 'Воронка с шагами из brief.sections и таблица когорт по неделям: человек правит конверсию шага и видит, как меняется
+    итог и удержание; SQL-запрос на PGlite считает то же самое из учебной таблицы событий.'
+  practice: 'Эпоха 6: описать воронку «пришёл → увидел предложение → нажал → заполнил → отправил» по brief.mainAction, поставить
+    микроконверсии (клик по контакту, прокрутка до brief.proofs, скачивание документа) и посчитать на учебных данных конверсию
+    каждого шага и недельное удержание.'
+  checks:
+  - Воронка начинается с источника и заканчивается brief.mainAction.
+  - Есть минимум две микроконверсии из brief.sections или brief.contacts.
+  - Конверсия рассчитана на каждом шаге и указан самый слабый шаг.
+  - Таблица удержания по неделям посчитана на данных.
+  sources:
+  - title: 'Яндекс Метрика: быстрый старт'
+    url: https://yandex.ru/support/metrica/ru/quick-start
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Google Analytics: [GA4] Engagement rate and bounce rate'
+    url: https://support.google.com/analytics/answer/12195621
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Rodden, Hutchinson, Fu (Google): Measuring the user experience on a large scale (HEART)'
+    url: https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'NN/g: How long do users stay on web pages?'
+    url: https://www.nngroup.com/articles/how-long-do-users-stay-on-web-pages/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  videos: []
+- id: 14-metrics/05-ab-tests
+  order: 5
+  title: A/B-тесты и их ловушки
+  summary: 'Зачем: проверять изменения экспериментом и не принимать шум за эффект: размер выборки, подглядывание, множественные
+    сравнения, сезонность. После урока человек планирует один тест для своей гипотезы и знает, когда лучше не тестировать
+    вовсе.'
+  minutes: 25
+  teaches:
+  - metrics.ab-tests
+  requires:
+  - metrics.attention-behaviour
+  - metrics.conversion-basics
+  diagram: 'Симулятор теста: два варианта с реальной конверсией, неизвестной человеку; он выбирает размер выборки и момент
+    остановки, а ловушка «подглядывание» показывает долю ложных побед при частых остановках.'
+  practice: 'Эпоха 7: взять гипотезу из первого урока и составить план A/B-теста: метрика, минимальный интересный эффект,
+    ожидаемая выборка (по калькулятору), срок, что не меняем во время теста. Для малого трафика предложить вместо теста последовательные
+    изменения или качественное исследование.'
+  checks:
+  - План содержит одну главную метрику, связанную с brief.mainAction.
+  - Указаны выборка и срок до начала теста, а не «пока не станет видно».
+  - Названы две ловушки и способ избежать каждой.
+  - Для малого трафика предложена альтернатива.
+  sources:
+  - title: 'Evan Miller: How not to run an A/B test'
+    url: https://www.evanmiller.org/how-not-to-run-an-ab-test.html
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Wikipedia: A/B testing'
+    url: https://en.wikipedia.org/wiki/A/B_testing
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: 'NN/g: How long do users stay on web pages?'
+    url: https://www.nngroup.com/articles/how-long-do-users-stay-on-web-pages/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  videos: []
+- id: 14-metrics/06-heatmaps-replay
+  order: 6
+  title: 'Тепловые карты и запись сессий: польза и этика'
+  summary: 'Зачем: пользоваться Вебвизором, картами кликов и прокрутки (Метрика, Clarity), не нарушая приватность: маскирование
+    форм, согласие, сроки хранения. После урока человек составляет правила записи сессий для своего сайта.'
+  minutes: 20
+  teaches:
+  - metrics.heatmaps-replay
+  - metrics.analytics-ethics
+  requires:
+  - metrics.counter-setup
+  - data.privacy-by-design
+  diagram: 'Запись сессии учебного сайта: человек включает маскирование полей и видит, как исчезают введённые данные; карта
+    кликов и прокрутки с переключателем «десктоп / телефон».'
+  practice: 'Эпоха 7: включить Вебвизор или Clarity только на страницах из brief.sections, где нет ввода данных, или замаскировать
+    поля; записать правила: что собирается, сколько хранится, кто видит, как об этом сказано в политике (brief.languages).
+    Для регулируемых профессий исключить страницы с описанием дела клиента.'
+  checks:
+  - Вебвизор или Clarity включён только на указанных страницах из brief.sections.
+  - Формы и поля с персональными данными замаскированы.
+  - Указан срок хранения записей и круг лиц с доступом.
+  - Политика обработки данных на языке из brief.languages сообщает о записи сессий.
+  sources:
+  - title: 'Яндекс Метрика: Вебвизор'
+    url: https://metrika.yandex.ru/support/metrica/ru/general/counter-webvisor
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Яндекс Метрика: карта скроллинга'
+    url: https://yandex.ru/support/metrica/behavior/scroll-map.html
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: Microsoft Clarity documentation (heatmaps, recordings, masking, consent)
+    url: https://learn.microsoft.com/en-us/clarity/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Web Almanac 2024: Privacy'
+    url: https://almanac.httparchive.org/en/2024/privacy
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos:
+  - title: ВЕБВИЗОР. Зачем нужен и как пользоваться? (Вадим Муравьев)
+    url: https://www.youtube.com/watch?v=7pD5u9f8WgA
+    lang: ru
+- id: 14-metrics/07-heart-dashboard
+  order: 7
+  title: HEART, North Star и панель показателей проекта
+  summary: 'Зачем: выбрать немного метрик, которые говорят о здоровье проекта, и собрать из них панель. После урока человек
+    имеет North Star и таблицу HEART (счастье, вовлечённость, принятие, удержание, успех задач) для своего проекта.'
+  minutes: 20
+  teaches:
+  - metrics.heart
+  - metrics.dashboard
+  requires:
+  - metrics.conversion-basics
+  - metrics.cohorts-retention
+  - copy.north-star
+  diagram: 'Матрица HEART × (цель, сигнал, метрика): человек заполняет клетки для выбранного шаблона проекта, и панель собирается
+    из выбранных метрик; сравнение «тщеславные против рабочих метрик».'
+  practice: 'Эпоха 8 (бриф и интервью, из которого строится сайт): заполнить таблицу HEART для brief.who, выбрать North Star,
+    связанный с brief.mainAction, и описать панель из пяти показателей с источником данных (Метрика, CRM, опрос).'
+  checks:
+  - Заполнены все пять измерений HEART для проекта из brief.
+  - North Star отражает ценность для brief.forWhom, а не число посещений.
+  - В панели не более пяти показателей, у каждого есть источник.
+  - Для каждого показателя указано решение, которое он поддерживает.
+  sources:
+  - title: 'Rodden, Hutchinson, Fu (Google): Measuring the user experience on a large scale (HEART)'
+    url: https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Яндекс Метрика: быстрый старт'
+    url: https://yandex.ru/support/metrica/ru/quick-start
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Google Analytics: [GA4] Engagement rate and bounce rate'
+    url: https://support.google.com/analytics/answer/12195621
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []

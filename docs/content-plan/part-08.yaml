@@ -1,0 +1,416 @@
+part: 8
+slug: cms
+title: CMS, генераторы и Jamstack
+era: null
+summary: 'От админки с темой и плагинами к Markdown-файлам и безголовой CMS: человек понимает, где живёт контент сайта, кто
+  его правит и как выбрать инструмент под свой проект.'
+concepts:
+- id: cms.what-is-cms
+  title: Что такое CMS
+- id: cms.content-model
+  title: 'Модель контента: типы, поля, связи'
+- id: cms.wordpress-themes-plugins
+  title: 'WordPress: тема, плагины, записи и страницы'
+- id: cms.wordpress-maintenance
+  title: Обновления, безопасность и цена владения WordPress
+- id: cms.cms-history
+  title: 'История CMS: Drupal, Joomla и их место сегодня'
+- id: cms.tilda
+  title: 'Конструктор Tilda: блоки, Zero Block, ограничения'
+- id: cms.bitrix
+  title: '1С-Битрикс: сайт, магазин и интеграция с 1С'
+- id: cms.markdown-frontmatter
+  title: Markdown и front matter
+- id: cms.static-site-generator
+  title: 'Генератор статических сайтов: шаблоны, сборка, вывод в HTML'
+- id: cms.ssg-landscape
+  title: 'Jekyll, Hugo, Eleventy, Astro, SvelteKit: чем отличаются'
+- id: cms.headless
+  title: 'Headless CMS: контент как API'
+- id: cms.headless-landscape
+  title: 'Strapi, Directus, Sanity, Contentful, Decap: самохостинг, облако, Git'
+- id: cms.jamstack
+  title: 'Jamstack: предсборка, CDN, API'
+- id: cms.build-webhook-rebuild
+  title: 'Сборка по вебхуку: правка в CMS → новый сайт'
+- id: cms.choosing-stack
+  title: Как выбрать CMS или генератор под проект
+lessons:
+- id: 08-cms/01-what-is-cms
+  order: 1
+  title: Что такое CMS и зачем она нужна
+  summary: 'Зачем: после урока вы объясните, чем сайт на HTML-файлах отличается от сайта на CMS, назовёте три слоя (контент,
+    шаблон, код) и опишете модель контента своего проекта — какие бывают «сущности» (услуга, статья, человек, отзыв) и какие
+    у них поля.'
+  minutes: 15
+  teaches:
+  - cms.what-is-cms
+  - cms.content-model
+  requires:
+  - server.static-vs-dynamic
+  - data.relational-model
+  - start.project-brief
+  diagram: 'Три слоя сайта: ползунок «кто правит» (разработчик / редактор / клиент) двигает контент, шаблон и код между «файлы
+    на диске» и «база + админка»; рядом показывается, где лежит каждая правка.'
+  practice: 'Эпоха 3 (2010). Из поля brief «items» (услуги, товары, люди, доказательства) и «sections» человек строит таблицу
+    модели контента: тип → поля → кто и как часто правит. Для проекта без услуг (портфолио, мероприятие) предлагаются типы
+    по умолчанию для этого вида проекта.'
+  checks:
+  - Каждый пункт из brief.items отнесён к типу контента с названием и списком полей.
+  - У каждого типа указано, кто его правит (владелец, редактор, разработчик).
+  - Для каждой секции из brief.sections указано, какие типы контента она выводит.
+  - Есть хотя бы одно поле, повторяющееся на нескольких языках, если в brief.languages больше одного языка.
+  sources:
+  - title: 'MDN: Glossary — CMS'
+    url: https://developer.mozilla.org/en-US/docs/Glossary/CMS
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Википедия: Система управления содержимым'
+    url: https://ru.wikipedia.org/wiki/Система_управления_содержимым
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  - title: 'HTTP Archive Web Almanac 2024: CMS'
+    url: https://almanac.httparchive.org/en/2024/cms
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 08-cms/02-wordpress
+  order: 2
+  title: 'WordPress: тема, плагины и эпоха 2010 года'
+  summary: 'Зачем: вы разберёте, как устроен WordPress — записи и страницы, тема, плагины, меню, — и соберёте на бумаге (а
+    в редакторе приложения в песочнице) сайт эпохи 2010 года для своего проекта, понимая, что именно тема решает, а что плагин.'
+  minutes: 20
+  teaches:
+  - cms.wordpress-themes-plugins
+  requires:
+  - cms.what-is-cms
+  - cms.content-model
+  - html.semantic-elements
+  - css.box-model
+  diagram: 'Схема страницы WordPress: щёлкаешь по областям (шапка, цикл записей, боковая колонка, подвал) и видишь, какой
+    файл темы за них отвечает (header.php, index.php, sidebar.php, footer.php) и какой плагин может вмешаться.'
+  practice: 'Эпоха 3 (2010). Человек выбирает в песочнице стартовую тему-шаблон и раскладывает материалы из brief: что станет
+    страницей, что записью, что пунктом меню (из brief.sections), какие плагины нужны (форма из brief.mainAction, SEO, кэш)
+    — и зачем каждый.'
+  checks:
+  - Каждая секция из brief.sections стала страницей или рубрикой, есть меню, в котором она видна.
+  - Для главного действия посетителя (brief.mainAction) выбран плагин или блок, и он выведен на главной.
+  - Список плагинов короткий (не больше пяти) и для каждого записана причина.
+  - Тон из brief.tone отражён в заголовке сайта и слогане.
+  sources:
+  - title: 'WordPress Developer Resources: Theme Handbook — Getting Started'
+    url: https://developer.wordpress.org/themes/getting-started/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: WordPress.org Documentation
+    url: https://wordpress.org/documentation/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'HTTP Archive Web Almanac 2024: CMS (доля WordPress)'
+    url: https://almanac.httparchive.org/en/2024/cms
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 08-cms/03-wordpress-upkeep
+  order: 3
+  title: Что ломается у WordPress и сколько он на самом деле стоит
+  summary: 'Зачем: вы научитесь честно считать цену владения CMS — обновления, взломы, зависимость от плагинов, хостинг —
+    и сможете сказать, когда WordPress уместен, а когда он станет обузой. Это страница «что было не так» для эпохи 3.'
+  minutes: 15
+  teaches:
+  - cms.wordpress-maintenance
+  - cms.cms-history
+  requires:
+  - cms.wordpress-themes-plugins
+  diagram: 'Лента «год жизни сайта на WordPress»: ползунок времени показывает выход обновлений ядра, уязвимости плагинов и
+    прогрессирующую потерю совместимости темы; кнопка «обновить» чинит одно и ломает другое.'
+  practice: 'Эпоха 3 (2010). Человек составляет план обслуживания для своего проекта: кто обновляет, как часто, что копируется
+    (связка с резервным копированием из части 9), сколько времени в месяц это займёт при его brief.items и brief.mainAction.
+    Сравнивает с Drupal и Joomla по тому же плану в одной таблице.'
+  checks:
+  - В плане есть ответственный человек и периодичность обновлений.
+  - Указано, что делается резервная копия и где она хранится.
+  - Названы минимум два риска, связанных с плагинами нужного brief.mainAction.
+  - 'В таблице сравнения для проекта есть вывод: оставить WordPress, взять другое или отказаться от CMS.'
+  sources:
+  - title: 'WordPress Advanced Administration: Hardening WordPress'
+    url: https://developer.wordpress.org/advanced-administration/security/hardening/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Drupal.org: About Drupal'
+    url: https://www.drupal.org/about
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Joomla!: About Joomla'
+    url: https://www.joomla.org/about-joomla.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'HTTP Archive Web Almanac 2024: CMS'
+    url: https://almanac.httparchive.org/en/2024/cms
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 08-cms/04-tilda-bitrix
+  order: 4
+  title: 'Tilda и 1С-Битрикс: российский рынок сайтов'
+  summary: 'Зачем: вы поймёте, почему в России половина лендингов живёт на Tilda, а магазины и корпоративные порталы — на
+    «1С-Битрикс», чем это отличается от WordPress, и сможете решить, что подходит вашему проекту по бюджету, поддержке и интеграциям
+    (оплата, 1С, CRM, Метрика).'
+  minutes: 20
+  teaches:
+  - cms.tilda
+  - cms.bitrix
+  requires:
+  - cms.what-is-cms
+  - cms.content-model
+  - html.forms
+  diagram: 'Сравнение «три пути»: Tilda / Битрикс / WordPress. Бегунки «бюджет», «нужна интеграция с 1С», «кто правит», «нужен
+    магазин» подсвечивают подходящее; под каждым — типичные ограничения (экспорт кода, лицензия, хостинг).'
+  practice: 'Эпоха 3 (2010, как современная альтернатива WordPress). Человек собирает таблицу решения для своего проекта:
+    по brief.items (товары или услуги), brief.mainAction (оплата, заявка, запись) и brief.languages выбирает Tilda, Битрикс
+    или WordPress, указывает, где будет жить форма заявки и куда пойдут персональные данные (связка с 152-ФЗ).'
+  checks:
+  - Выбор платформы обоснован двумя полями brief (например, items и mainAction), а не вкусом.
+  - Указано, где хранятся данные заявок и какую страницу согласия на обработку персональных данных нужно вывести.
+  - 'Названа стоимость владения за год: платформа, хостинг, домен, поддержка.'
+  - 'Описан способ выйти с платформы: что можно экспортировать.'
+  sources:
+  - title: Tilda Education
+    url: https://tilda.education/
+    licence: proprietary-link
+    kind: course
+    lang: ru
+  - title: 'Tilda: справочный центр'
+    url: https://help-ru.tilda.cc/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: '1С-Битрикс: Школа разработчиков и документация'
+    url: https://dev.1c-bitrix.ru/learning/
+    licence: proprietary-link
+    kind: course
+    lang: ru
+  - title: 'HTTP Archive Web Almanac 2024: CMS'
+    url: https://almanac.httparchive.org/en/2024/cms
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 08-cms/05-static-generators
+  order: 5
+  title: Генераторы статических сайтов и Markdown
+  summary: 'Зачем: вы напишете страницы в Markdown с front matter, увидите, как генератор превращает их и шаблон в обычный
+    HTML, и сможете выбрать между Jekyll, Hugo, Eleventy, Astro и SvelteKit по задаче — это эпоха 5 (2019) вашего сайта.'
+  minutes: 25
+  teaches:
+  - cms.markdown-frontmatter
+  - cms.static-site-generator
+  - cms.ssg-landscape
+  requires:
+  - cms.what-is-cms
+  - html.semantic-elements
+  - css.responsive
+  - net.http-request-response
+  diagram: 'Конвейер сборки: слева файл Markdown с front matter, в середине шаблон и «ручки» (layout, коллекция), справа готовый
+    HTML. Правится любая строка — страница пересобирается в панели рядом; переключатель имитирует Jekyll / Eleventy / Astro
+    (одни входные данные, разные шаблоны).'
+  practice: 'Эпоха 5 (2019). Человек переносит содержимое своего brief в проект генератора в песочнице: по одной странице
+    Markdown на каждую секцию из brief.sections, коллекция из brief.items (услуги, товары, люди), общий шаблон с шапкой и
+    подвалом, язык по brief.languages.'
+  checks:
+  - Для каждой секции из brief.sections есть Markdown-файл с заголовком и описанием в front matter.
+  - Элементы из brief.items лежат в коллекции и выводятся списком через шаблон, а не вставлены вручную.
+  - Шапка и подвал заданы в одном месте и общие для всех страниц.
+  - Собранный HTML содержит атрибут lang, соответствующий brief.languages.
+  sources:
+  - title: 'Markdown Guide: Basic Syntax'
+    url: https://www.markdownguide.org/basic-syntax/
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'CommonMark: Markdown cheat-sheet'
+    url: https://commonmark.org/help/
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Jekyll Docs
+    url: https://jekyllrb.com/docs/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Hugo: Introduction'
+    url: https://gohugo.io/about/introduction/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Eleventy Docs
+    url: https://www.11ty.dev/docs/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Astro Docs: начало работы'
+    url: https://docs.astro.build/ru/getting-started/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos: []
+- id: 08-cms/06-headless
+  order: 6
+  title: 'Headless CMS: когда контент отделён от сайта'
+  summary: 'Зачем: вы поймёте, почему «безголовая» CMS даёт редактору удобную админку, а разработчику — свободу выбирать сайт,
+    и сможете сравнить Strapi, Directus, Sanity, Contentful и Decap по модели размещения (свой сервер, облако, Git) и цене.'
+  minutes: 20
+  teaches:
+  - cms.headless
+  - cms.headless-landscape
+  requires:
+  - cms.content-model
+  - cms.static-site-generator
+  - server.rest
+  - js.fetch
+  diagram: 'Три колонки «где хранится»: файлы в Git (Decap), база на своём сервере (Strapi, Directus), облако (Sanity, Contentful).
+    Редактор вносит правку — стрелки показывают путь контента к API, к сборщику и к сайту.'
+  practice: 'Эпоха 6 (2022). Человек переносит модель контента из урока 1 в headless-CMS (в песочнице — упрощённая админка
+    на Decap-подобной схеме): создаёт типы из brief.items, вносит по одному примеру и получает JSON; затем пишет запрос на
+    выборку для страницы секции из brief.sections.'
+  checks:
+  - Для каждого типа из brief.items описаны поля, и в JSON они видны под теми же именами.
+  - Поля для языков из brief.languages заданы отдельно либо как перевод одного элемента.
+  - Страница секции получает данные запросом (fetch или при сборке), а не копирует текст.
+  - Выбран вариант размещения (Git, свой сервер или облако) с короткой причиной, привязанной к бюджету и данным проекта.
+  sources:
+  - title: Strapi Docs
+    url: https://docs.strapi.io/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Directus Docs
+    url: https://directus.io/docs
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Sanity Docs
+    url: https://www.sanity.io/docs
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Decap CMS Docs: Intro'
+    url: https://decapcms.org/docs/intro/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Svelte: SvelteKit Introduction'
+    url: https://svelte.dev/docs/kit/introduction
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos:
+  - title: JAMstack — генерация статических сайтов в 2k19, Валентин Гиль
+    url: https://www.youtube.com/watch?v=JEYrIGLLIl0
+    lang: ru
+- id: 08-cms/07-jamstack-deploy
+  order: 7
+  title: 'Jamstack: сборка, CDN и вебхук'
+  summary: 'Зачем: вы настроите схему «правка в CMS → вебхук → сборка → выкладка на CDN» для своего сайта, поймёте, что в
+    такой схеме быстро и безопасно, а что требует отдельных сервисов (формы, поиск, оплата, личный кабинет) — эпоха 6 (2022).
+    (CDN здесь — коротко; подробно — в части 9.)'
+  minutes: 20
+  teaches:
+  - cms.jamstack
+  - cms.build-webhook-rebuild
+  requires:
+  - cms.headless
+  - cms.static-site-generator
+  diagram: 'Живая схема релиза: нажимаешь «Опубликовать» в админке — пакет путешествует по цепочке (вебхук, сборка, загрузка
+    на CDN, сброс кэша), на каждом этапе его можно «сломать» и увидеть, что видит посетитель. Ползунок — размер сайта и время
+    сборки.'
+  practice: 'Эпоха 6 (2022). Человек строит схему выкладки для своего проекта: откуда берётся контент, кто запускает сборку,
+    куда уходит готовый сайт; подключает внешний сервис для главного действия посетителя (brief.mainAction — форма, запись,
+    оплата) и отмечает, куда попадут персональные данные.'
+  checks:
+  - 'В схеме названы четыре шага: источник контента, сборка, выкладка, раздача.'
+  - Главное действие посетителя (brief.mainAction) реализовано через внешний сервис или функцию, а не через серверный код
+    сайта.
+  - Указано, где лежат персональные данные посетителей и что нужно для хранения в России.
+  - Назван способ откатить неудачную публикацию.
+  sources:
+  - title: Jamstack.org
+    url: https://jamstack.org/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Cloudflare Pages: документация'
+    url: https://developers.cloudflare.com/pages/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'web.dev: Content delivery networks (CDN)'
+    url: https://web.dev/articles/content-delivery-networks
+    licence: CC-BY
+    kind: article
+    lang: en
+  - title: 'HTTP Archive Web Almanac 2024: CMS'
+    url: https://almanac.httparchive.org/en/2024/cms
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 08-cms/08-choosing
+  order: 8
+  title: 'Как выбрать: дерево решений для вашего проекта'
+  summary: 'Зачем: вы получите рабочий метод выбора между конструктором, WordPress, Битрикс, генератором и headless — по пяти
+    вопросам про ваш brief — и защитите выбор перед заказчиком или самим собой; выбранное сохранится как основа для следующих
+    частей.'
+  minutes: 15
+  teaches:
+  - cms.choosing-stack
+  requires:
+  - cms.wordpress-maintenance
+  - cms.tilda
+  - cms.bitrix
+  - cms.ssg-landscape
+  - cms.jamstack
+  diagram: 'Интерактивное дерево решений: пять вопросов (кто правит, как часто, нужен ли магазин или личный кабинет, бюджет,
+    языки) — ответы подсвечивают путь к рекомендации; можно сравнить свой путь с путями других шаблонных проектов (портфолио,
+    кафе, SaaS).'
+  practice: 'Эпоха 6 (2022) с взглядом назад. Человек заполняет карточку решения: проект, редактор, частота правок, главное
+    действие (brief.mainAction), языки, бюджет → выбранный стек и два отвергнутых варианта с причинами; карточка сохраняется
+    в галерее рядом с версиями эпох 3, 5 и 6.'
+  checks:
+  - В карточке названы редактор контента и частота правок, и выбор согласован с ними.
+  - Для brief.mainAction указано, что именно его обслуживает.
+  - Два отвергнутых варианта имеют причины, не совпадающие друг с другом.
+  - Учтено число языков из brief.languages и способ их хранения.
+  - Есть строка «когда пересмотрю решение» — условие, при котором выбор поменяется.
+  sources:
+  - title: 'HTTP Archive Web Almanac 2024: CMS'
+    url: https://almanac.httparchive.org/en/2024/cms
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: Jamstack.org
+    url: https://jamstack.org/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Tilda: справочный центр'
+    url: https://help-ru.tilda.cc/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: WordPress.org Documentation
+    url: https://wordpress.org/documentation/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []

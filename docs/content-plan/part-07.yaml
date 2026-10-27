@@ -1,0 +1,390 @@
+part: 7
+slug: data
+title: Данные
+era: null
+summary: Что такое база данных, как работают реляционные базы и SQL (практика на настоящем Postgres в браузере), зачем нужны
+  индексы и транзакции, когда подходят документные, ключ-значение, графовые и векторные базы, как устроен поиск и что такое
+  приватность по замыслу.
+concepts:
+- id: data.what-is-database
+  title: База данных
+- id: data.relational-model
+  title: 'Реляционная модель: таблицы, ключи, связи'
+- id: data.sql-select
+  title: 'SQL: выборка'
+- id: data.sql-write
+  title: 'SQL: вставка, изменение, удаление'
+- id: data.sql-join
+  title: Соединения таблиц
+- id: data.normalization
+  title: Нормализация
+- id: data.index
+  title: Индексы
+- id: data.transaction
+  title: Транзакции и ACID
+- id: data.document-db
+  title: Документные базы
+- id: data.key-value
+  title: Ключ-значение
+- id: data.graph-db
+  title: Графовые базы
+- id: data.vector-db
+  title: Векторные базы и эмбеддинги
+- id: data.choose-database
+  title: Как выбрать базу данных
+- id: data.full-text-search
+  title: Полнотекстовый поиск
+- id: data.privacy-by-design
+  title: Приватность по замыслу
+- id: data.data-localisation
+  title: Локализация персональных данных
+lessons:
+- id: 07-data/01-what-is-a-database
+  order: 1
+  title: Что такое база данных и зачем она сайту
+  summary: 'Зачем: вы понимаете, чем база данных лучше файла и таблицы Excel (одновременный доступ, целостность, быстрый поиск,
+    права), и разбираете данные своего проекта на «сущности» и связи между ними. После урока вы нарисуете схему данных для
+    брифа.'
+  minutes: 20
+  teaches:
+  - data.what-is-database
+  - data.relational-model
+  requires:
+  - server.static-vs-dynamic
+  - js.json
+  diagram: Один и тот же список заказов в файле JSON, в таблице и в базе; двое «редакторов» одновременно меняют запись, и
+    видно, как файл портит данные, а база их сериализует.
+  practice: 'Эпоха 3 (2010, WordPress): по полям брифа items, people, proofs и contacts выделить сущности и связи на схеме
+    (прямоугольники и стрелки), указать для каждой ключ и несколько полей.'
+  checks:
+  - На схеме есть минимум три сущности, соответствующие items, people или proofs, и связи между ними.
+  - У каждой сущности есть уникальный идентификатор.
+  - Заявки из contacts вынесены в отдельную сущность, а не в поле другой.
+  - Отмечено, какие поля — персональные данные.
+  sources:
+  - title: 'PostgreSQL Documentation: Tutorial'
+    url: https://www.postgresql.org/docs/current/tutorial.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Postgres Pro: Документация PostgreSQL (русская)'
+    url: https://postgrespro.ru/docs/postgresql/current/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'SQLite: Appropriate Uses For SQLite'
+    url: https://www.sqlite.org/whentouse.html
+    licence: PD
+    kind: docs
+    lang: en
+  - title: 'Википедия: Реляционная модель данных'
+    url: https://ru.wikipedia.org/wiki/Реляционная_модель_данных
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  - title: 'CMU 15-445: Introduction to Database Systems'
+    url: https://15445.courses.cs.cmu.edu/
+    licence: link-only
+    kind: course
+    lang: en
+  videos: []
+- id: 07-data/02-sql-basics
+  order: 2
+  title: 'SQL: читаем и пишем данные (Postgres в браузере)'
+  summary: 'Зачем: вы пишете запросы SELECT, INSERT, UPDATE и DELETE на настоящем PostgreSQL, который работает прямо в браузере
+    (PGlite), и понимаете, что делает каждое слово запроса. После урока вы получите нужные данные из таблиц своего проекта.'
+  minutes: 35
+  teaches:
+  - data.sql-select
+  - data.sql-write
+  requires:
+  - data.relational-model
+  diagram: 'SQL-песочница на PGlite: таблицы слева, запрос в центре, результат справа; подсветка выполнения по шагам FROM
+    → WHERE → GROUP BY → SELECT → ORDER BY → LIMIT.'
+  practice: 'Эпоха 3 (2010): создать таблицу items по полям брифа, вставить минимум пять строк, написать запросы: все пункты,
+    отобранные по условию, отсортированные, посчитанные по категориям; изменить одну запись и удалить другую.'
+  checks:
+  - Таблица items создана с первичным ключом и типами столбцов, подходящими данным брифа.
+  - Запросы возвращают пункты, отобранные по условию, отсортированные и ограниченные LIMIT.
+  - Есть запрос с GROUP BY и подсчётом пунктов по категориям.
+  - UPDATE и DELETE написаны с условием WHERE; запрос без WHERE отмечен как опасный.
+  sources:
+  - title: 'PGlite: Postgres в браузере'
+    url: https://pglite.dev/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'PostgreSQL: SQL Syntax'
+    url: https://www.postgresql.org/docs/current/sql-syntax.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'SQLBolt: Learn SQL with simple interactive exercises'
+    url: https://sqlbolt.com/
+    licence: link-only
+    kind: course
+    lang: en
+  - title: 'Postgres Pro: Учебник по SQL'
+    url: https://postgrespro.ru/docs/postgresql/current/tutorial-sql
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'MDN: Server-side website programming — работа с базами'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Website_security
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos:
+  - title: Вся база SQL для начинающих за 1 час
+    url: https://www.youtube.com/watch?v=5sG9kmXYsKU
+    lang: ru
+- id: 07-data/03-joins-normalization
+  order: 3
+  title: 'Связи между таблицами: JOIN и нормализация'
+  summary: 'Зачем: вы разносите данные по таблицам так, чтобы каждый факт хранился один раз, и собираете их обратно соединениями.
+    После урока вы читаете запрос с JOIN, понимаете, чем INNER отличается от LEFT, и видите, где нормализация мешает и когда
+    её нарушают намеренно.'
+  minutes: 30
+  teaches:
+  - data.sql-join
+  - data.normalization
+  requires:
+  - data.sql-select
+  diagram: 'Диаграммы JOIN на живых таблицах: перетаскиваешь строки, видишь, какие попадают в INNER, LEFT, RIGHT; рядом таблица
+    с дублями данных и пошаговое приведение к 1НФ, 2НФ, 3НФ.'
+  practice: 'Эпоха 3 (2010): добавить в БД проекта таблицы categories и people (из брифа) и связи между ними и items; написать
+    запрос, показывающий пункты вместе с категорией и ответственным человеком, и запрос по пунктам без категории.'
+  checks:
+  - Категория и человек хранятся отдельными таблицами и связаны внешними ключами с items.
+  - Один JOIN выводит пункты вместе с названием категории, а LEFT JOIN находит пункты без категории.
+  - В схеме нет повторяющихся строк-значений (например, названия категории в каждой строке).
+  - Указан случай, где данные намеренно продублированы для скорости, и сказано почему.
+  sources:
+  - title: 'PostgreSQL: Joins Between Tables'
+    url: https://www.postgresql.org/docs/current/tutorial-join.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'PostgreSQL: Foreign Keys'
+    url: https://www.postgresql.org/docs/current/tutorial-fk.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'SQLBolt: Multi-table queries with JOINs'
+    url: https://sqlbolt.com/lesson/select_queries_with_joins
+    licence: link-only
+    kind: course
+    lang: en
+  - title: 'Википедия: Нормальная форма'
+    url: https://ru.wikipedia.org/wiki/Нормальная_форма
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  videos: []
+- id: 07-data/04-indexes-transactions
+  order: 4
+  title: Индексы и транзакции
+  summary: 'Зачем: вы понимаете, почему запрос медленный и как индекс его ускоряет, и что делает транзакция, когда два человека
+    одновременно покупают последний билет. После урока вы читаете EXPLAIN простых запросов и знаете, что значит ACID.'
+  minutes: 30
+  teaches:
+  - data.index
+  - data.transaction
+  requires:
+  - data.sql-join
+  - data.sql-write
+  diagram: 'Таблица на миллион строк: полный просмотр против поиска по индексу (B-дерево), счётчик прочитанных страниц; вторая
+    панель: два клиента, одна запись, с транзакцией и без неё.'
+  practice: 'Эпоха 6 (2022): для запроса по items брифа (поиск по категории и сортировка по дате) сгенерировать тысячу строк,
+    измерить время до и после индекса и оформить заявку из contacts транзакцией из двух шагов (заявка и уведомление).'
+  checks:
+  - Время запроса измерено до и после индекса, и индекс создан по тем столбцам, которые участвуют в условии.
+  - В выводе EXPLAIN показано различие просмотра всей таблицы и использования индекса.
+  - 'Заявка и её уведомление записываются одной транзакцией: при сбое откатываются обе записи.'
+  - Объяснено, какую цену платит запись за каждый лишний индекс.
+  sources:
+  - title: 'PostgreSQL: Indexes'
+    url: https://www.postgresql.org/docs/current/indexes.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'PostgreSQL: Transactions (tutorial)'
+    url: https://www.postgresql.org/docs/current/tutorial-transactions.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Use The Index, Luke!
+    url: https://use-the-index-luke.com/
+    licence: link-only
+    kind: book
+    lang: en
+  - title: 'Postgres Pro: Индексы'
+    url: https://postgrespro.ru/docs/postgresql/current/indexes
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'PostgreSQL: Using EXPLAIN'
+    url: https://www.postgresql.org/docs/current/using-explain.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos:
+  - title: Что такое SQL-индексы за 10 минут
+    url: https://www.youtube.com/watch?v=LpEwssOYRKA
+    lang: ru
+- id: 07-data/05-nosql
+  order: 5
+  title: 'Документные, ключ-значение и графовые базы: когда, а когда не стоит'
+  summary: 'Зачем: вы понимаете, какую задачу решает каждая «не-реляционная» база (MongoDB, Redis, Neo4j) и когда реляционной
+    достаточно. После урока вы можете выбрать модель данных под функцию проекта и не гнаться за модой.'
+  minutes: 25
+  teaches:
+  - data.document-db
+  - data.key-value
+  - data.graph-db
+  - data.choose-database
+  requires:
+  - data.relational-model
+  - data.index
+  diagram: 'Одни и те же данные брифа в четырёх представлениях: таблицы, документ JSON, пары ключ-значение, граф; для запросов
+    («все пункты категории», «кто связан с кем», «сессия по токену») подсвечивается, где ответ быстрее.'
+  practice: 'Эпоха 6 (2022, headless): для каждой функции проекта из брифа (каталог items, сессии, связи people между собой,
+    быстрый счётчик посетителей) выбрать тип базы или обосновать, что хватит одной реляционной.'
+  checks:
+  - Для каждой названной функции указан тип хранилища и причина.
+  - Минимум в одном случае выбрана реляционная база там, где соблазнял другой вариант, и это объяснено.
+  - 'Названа цена: что теряется при выборе нереляционной базы (связи, транзакции, привычные инструменты).'
+  - Указано, где хранятся данные и кто может их читать.
+  sources:
+  - title: 'MongoDB Docs: Data modeling'
+    url: https://www.mongodb.com/docs/manual/data-modeling/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Redis Docs: Data types'
+    url: https://redis.io/docs/latest/develop/data-types/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Neo4j: Graph database concepts'
+    url: https://neo4j.com/docs/getting-started/appendix/graphdb-concepts/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'PostgreSQL: JSON Types'
+    url: https://www.postgresql.org/docs/current/datatype-json.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Википедия: NoSQL'
+    url: https://ru.wikipedia.org/wiki/NoSQL
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  videos:
+  - title: 'NoSQL простым языком: что это и зачем нужно?'
+    url: https://www.youtube.com/watch?v=IBzTDkYNB7I
+    lang: ru
+- id: 07-data/06-vector-search
+  order: 6
+  title: 'Поиск: полнотекстовый и векторный'
+  summary: 'Зачем: вы понимаете, как сайт ищет по смыслу и по словам: токены, индекс, ранжирование, эмбеддинги и ближайшие
+    соседи. После урока вы выберете между поиском внутри Postgres, отдельным движком (Meilisearch, Elasticsearch) и векторной
+    базой, и поймёте, как ИИ-ответы используют ваши данные (RAG).'
+  minutes: 30
+  teaches:
+  - data.full-text-search
+  - data.vector-db
+  requires:
+  - data.index
+  - data.choose-database
+  diagram: 'Поисковая строка по данным брифа: переключатель «по словам / по смыслу»; показаны токены, лемматизация и вес слов
+    у первого режима, и точки в пространстве эмбеддингов с кругом ближайших соседей у второго.'
+  practice: 'Эпоха 6 (2022): добавить в БД проекта поиск по items и proofs брифа: сначала полнотекстовый в PGlite (tsvector,
+    русская конфигурация), затем описать, при каких условиях потребовался бы векторный и что туда пошло бы.'
+  checks:
+  - Поиск находит пункты по другой форме слова (русская морфология), например «услуга» и «услуги».
+  - Результаты упорядочены по релевантности, а не по порядку записей.
+  - Описано, когда полнотекстового поиска хватит, а когда нужен векторный.
+  - Для векторного варианта названо, какие тексты отправляются стороннему сервису и нужно ли согласие.
+  sources:
+  - title: 'PostgreSQL: Full Text Search'
+    url: https://www.postgresql.org/docs/current/textsearch.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'pgvector: векторный поиск для Postgres'
+    url: https://github.com/pgvector/pgvector
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Meilisearch: документация'
+    url: https://www.meilisearch.com/docs
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Elasticsearch: Full-text search'
+    url: https://www.elastic.co/docs/solutions/search/full-text
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Postgres Pro: Полнотекстовый поиск'
+    url: https://postgrespro.ru/docs/postgresql/current/textsearch
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos:
+  - title: 'Векторные базы данных: самое понятное объяснение'
+    url: https://www.youtube.com/watch?v=H1EyiGPZwwc
+    lang: ru
+- id: 07-data/07-privacy-by-design
+  order: 7
+  title: 'Приватность по замыслу: что хранить и где'
+  summary: 'Зачем: вы закладываете защиту данных в схему базы, а не прикручиваете потом: собираете минимум, ставите сроки
+    хранения, разделяете персональное и обычное, шифруете и логируете доступ. После урока вы знаете, чего требуют 152-ФЗ (включая
+    хранение данных граждан РФ на серверах в России) и GDPR, и можете перечислить, какие данные проекта подпадают под закон.'
+  minutes: 30
+  teaches:
+  - data.privacy-by-design
+  - data.data-localisation
+  requires:
+  - data.transaction
+  - data.sql-write
+  - server.authentication
+  diagram: 'Реестр данных проекта: перетаскиваешь поля формы в корзины «нужно», «можно не собирать», «персональные», «специальные»;
+    рядом счётчик «срок хранения» и карта «где лежит копия» с предупреждением при иностранном хостинге.'
+  practice: 'Эпоха 6 (2022): по полям брифа (contacts, people, proofs, заявки) составить реестр: какие данные, зачем, где,
+    сколько хранить, кто имеет доступ; отметить то, что можно не собирать, и добавить в схему поле «согласие» с датой.'
+  checks:
+  - В реестре каждое поле формы связано с целью, и лишние поля убраны.
+  - Для каждой категории данных указан срок хранения и условие удаления.
+  - Персональные данные отделены от остальных и помечены в схеме.
+  - Указано место хранения и сказано, что первичная запись данных граждан РФ идёт на сервер в России.
+  - Согласие хранится с датой и версией текста, а не только галочкой.
+  sources:
+  - title: Федеральный закон № 152-ФЗ «О персональных данных»
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: spec
+    lang: ru
+  - title: 'Роскомнадзор: портал персональных данных'
+    url: https://pd.rkn.gov.ru/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'GDPR, статья 25: Data protection by design and by default'
+    url: https://gdpr-info.eu/art-25-gdpr/
+    licence: link-only
+    kind: spec
+    lang: en
+  - title: 'Википедия: Privacy by design (семь принципов Кавукян)'
+    url: https://en.wikipedia.org/wiki/Privacy_by_design
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: 'OWASP Cheat Sheet: Database Security'
+    url: https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos: []

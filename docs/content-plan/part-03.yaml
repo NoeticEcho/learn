@@ -1,0 +1,467 @@
+part: 3
+slug: css
+title: CSS
+era: null
+summary: 'Оформление страницы: от отдельного файла стилей и float-раскладок 2005 года до flexbox, grid, адаптивности, контейнерных
+  запросов и современных возможностей языка.'
+concepts:
+- id: css.selectors
+  title: Селекторы
+- id: css.cascade
+  title: Каскад, наследование и порядок правил
+- id: css.specificity
+  title: Специфичность
+- id: css.separate-stylesheets
+  title: 'Отдельный файл стилей: разделение содержимого и оформления'
+- id: css.box-model
+  title: Блочная модель
+- id: css.units
+  title: 'Единицы измерения: px, rem, em, %, vw'
+- id: css.floats-legacy
+  title: Float-раскладка и «святой Грааль»
+- id: css.typography
+  title: 'Типографика: шрифты, интерлиньяж, мера строки'
+- id: css.web-fonts
+  title: Веб-шрифты
+- id: css.color
+  title: 'Цвет: hex, rgb, hsl, oklch'
+- id: css.contrast
+  title: Контраст и читаемость
+- id: css.flexbox
+  title: Flexbox
+- id: css.grid
+  title: Grid
+- id: css.responsive
+  title: Адаптивная вёрстка и mobile first
+- id: css.media-queries
+  title: Медиазапросы
+- id: css.container-queries
+  title: Контейнерные запросы
+- id: css.custom-properties
+  title: Пользовательские свойства (переменные)
+- id: css.nesting
+  title: Вложенность в CSS
+- id: css.has-selector
+  title: Селектор :has()
+- id: css.cascade-layers
+  title: Слои каскада @layer
+- id: css.transitions-animations
+  title: Переходы и анимации
+- id: css.reduced-motion
+  title: Уважение к prefers-reduced-motion
+lessons:
+- id: 03-css/01-selectors-cascade
+  order: 1
+  title: 'Селекторы и каскад: страница 2005 года'
+  summary: 'Зачем: вы отделите оформление от содержимого и поймёте, почему «моё правило не работает». После урока вы подключаете
+    файл стилей, выбираете нужные элементы и предсказываете, какое из двух правил победит.'
+  minutes: 30
+  teaches:
+  - css.selectors
+  - css.cascade
+  - css.specificity
+  - css.separate-stylesheets
+  requires:
+  - html.semantic-elements
+  - html.tags-attributes
+  diagram: 'Калькулятор специфичности: человек пишет несколько правил для одного элемента, схема подсвечивает победителя и
+    показывает счёт (id, классы, теги), порядок и источник; перетаскивание правил меняет результат.'
+  practice: 'Человек выносит оформление из HTML в отдельный файл стилей и избавляется от тегов font и атрибутов оформления.
+    Цвета и шрифт выбираются по полю tone (строгий, тёплый, дерзкий и т. п.). Эпоха: 2 (2005), веб 2.0: CSS в отдельном файле.'
+  checks:
+  - Страница подключает внешний файл стилей, а в разметке нет тегов font и атрибутов bgcolor
+  - Оформление заголовков, меню и карточек задано классами, а не id
+  - Нет правил с !important, кроме объяснённых в комментарии
+  - Человек правильно предсказал победителя в трёх парах конфликтующих правил
+  sources:
+  - title: Getting started with CSS
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Getting_started
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Basic CSS selectors
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Basic_selectors
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Handling conflicts
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Handling_conflicts
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Specificity (web.dev)
+    url: https://web.dev/learn/css/specificity
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Cascading HTML Style Sheets — A Proposal (Хокон Ли, 1994)
+    url: https://www.w3.org/People/howcome/p/cascade.html
+    licence: link-only
+    kind: article
+    lang: en
+  - title: Устройство CSS (MDN)
+    url: https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Styling_basics
+    licence: CC-BY-SA
+    kind: course
+    lang: ru
+  videos: []
+- id: 03-css/02-box-model-units
+  order: 2
+  title: Блочная модель, единицы и float-раскладка
+  summary: 'Зачем: у каждого элемента есть содержимое, отступы, рамка и поля, и половина «странностей» вёрстки возникает из-за
+    них. После урока вы считаете размеры блока, выбираете между px, rem и %, и можете прочитать старую float-раскладку и объяснить,
+    почему её заменили.'
+  minutes: 30
+  teaches:
+  - css.box-model
+  - css.units
+  - css.floats-legacy
+  requires:
+  - css.cascade
+  diagram: 'Интерактивная блочная модель: ползунки content, padding, border, margin и переключатель box-sizing; рядом блок
+    рисуется настоящими размерами, а общая ширина пересчитывается.'
+  practice: 'Человек выстраивает страницу в две колонки (основное и боковая панель с contacts) на float и clearfix, как делали
+    в 2005-м, задаёт отступы блочной моделью с border-box и размеры в rem. Эпоха: 2 (2005), раскладка на float.'
+  checks:
+  - 'Для всех элементов задан box-sizing: border-box'
+  - Две колонки стоят рядом при ширине 1000 px, а подвал не заезжает под них
+  - Размеры текста и отступов заданы в относительных единицах, а не в px
+  - Человек правильно посчитал полную ширину блока в трёх примерах
+  sources:
+  - title: The box model
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Box_model
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: CSS values and units
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Values_and_units
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Floats
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Floats
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Box Model (web.dev)
+    url: https://web.dev/learn/css/box-model
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: In Search of the Holy Grail (A List Apart, 2006)
+    url: https://alistapart.com/article/holygrail/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: CSS Zen Garden
+    url: https://csszengarden.com/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  videos: []
+- id: 03-css/03-typography-color
+  order: 3
+  title: Типографика и цвет
+  summary: 'Зачем: большая часть страницы — текст, и от шрифта, размера, межстрочного интервала и цвета зависит, будут ли
+    читать. После урока вы подбираете шрифт и мерку строки, задаёте цвета в современных форматах и проверяете контраст по
+    WCAG.'
+  minutes: 30
+  teaches:
+  - css.typography
+  - css.web-fonts
+  - css.color
+  - css.contrast
+  requires:
+  - css.units
+  - css.cascade
+  diagram: 'Лаборатория текста: ползунки размера, интерлиньяжа и ширины колонки, подсчёт знаков в строке; рядом палитра с
+    автоматическим расчётом контраста пары «текст — фон» и пометкой, проходит ли пара AA и AAA.'
+  practice: 'Человек подбирает шрифт (системный или веб-шрифт с поддержкой кириллицы), размер основного текста, интерлиньяж
+    и две-три цветовые роли по полю tone. Контраст основного и вспомогательного текста проверяется. Эпоха: 2 (2005), веб 2.0:
+    глянец и плотные цвета; затем упрощение.'
+  checks:
+  - Размер основного текста не меньше 16 px, интерлиньяж от 1.4
+  - Ширина колонки с текстом ограничена примерно 45–80 знаками
+  - Контраст основного текста и фона не ниже 4.5:1, крупного не ниже 3:1
+  - Шрифт содержит кириллицу, и подключён с запасным шрифтом и font-display
+  sources:
+  - title: Fundamental text and font styling
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Fundamentals
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Web fonts
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Web_fonts
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Color (web.dev)
+    url: https://web.dev/learn/css/color
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Understanding SC 1.4.3 Contrast (Minimum)
+    url: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+    licence: link-only
+    kind: spec
+    lang: en
+  - title: CSS Color Module Level 4
+    url: https://www.w3.org/TR/css-color-4/
+    licence: link-only
+    kind: spec
+    lang: en
+  - title: Ководство Артемия Лебедева
+    url: https://www.artlebedev.ru/kovodstvo/sections/
+    licence: proprietary-link
+    kind: book
+    lang: ru
+  videos: []
+- id: 03-css/04-flexbox
+  order: 4
+  title: 'Flexbox: выстраиваем в ряд и в столбец'
+  summary: 'Зачем: большинство меню, рядов карточек и шапок строятся на flex. После урока вы выравниваете элементы по двум
+    осям, распределяете место и делаете меню, которое переносится на узком экране.'
+  minutes: 25
+  teaches:
+  - css.flexbox
+  requires:
+  - css.box-model
+  - css.floats-legacy
+  diagram: 'Площадка flexbox: переключатели flex-direction, justify-content, align-items, flex-wrap и gap меняют положение
+    блоков, а оси подписаны; рядом код, который можно редактировать.'
+  practice: 'Человек делает шапку с логотипом (title) и меню из sections, ряд карточек из items и строку контактов из contacts
+    на flexbox. Float из предыдущего урока удаляется. Эпоха: 4 (2014), адаптивная вёрстка.'
+  checks:
+  - 'Меню и карточки получают display: flex или inline-flex, а float не используется'
+  - При ширине 360 px элементы меню переносятся на следующую строку и не вылезают за экран
+  - Между карточками задан gap, а не внешние отступы последнего элемента
+  - Человек правильно назвал главную и поперечную ось в трёх примерах
+  sources:
+  - title: Flexbox
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Basic concepts of flexbox
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Basic_concepts_of_flexbox
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Flexbox (web.dev)
+    url: https://web.dev/learn/css/flexbox
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: CSS Flexible Box Layout Module Level 1
+    url: https://www.w3.org/TR/css-flexbox-1/
+    licence: link-only
+    kind: spec
+    lang: en
+  - title: Flexbox Froggy
+    url: https://flexboxfroggy.com/
+    licence: proprietary-link
+    kind: course
+    lang: en
+  videos: []
+- id: 03-css/05-grid
+  order: 5
+  title: 'Grid: двумерная сетка'
+  summary: 'Зачем: когда нужны и строки, и столбцы, flexbox становится неудобным, а grid решает задачу одним правилом. После
+    урока вы строите макет страницы и адаптивную сетку карточек, которая сама подбирает число столбцов.'
+  minutes: 30
+  teaches:
+  - css.grid
+  requires:
+  - css.flexbox
+  diagram: 'Редактор сетки: человек тянет границы столбцов и строк, называет области (header, main, aside, footer) и размещает
+    в них блоки; режим «показать линии» рисует нумерованные линии сетки.'
+  practice: 'Человек размечает макет страницы областями grid и делает сетку карточек из items с repeat(auto-fit, minmax()).
+    Каждая карточка берёт заголовок и описание из своего пункта. Эпоха: 4 (2014), сетка вместо ручных ширин.'
+  checks:
+  - Макет страницы использует grid-template-areas или явные колонки
+  - Сетка карточек перестраивается от одного до трёх столбцов без медиазапросов
+  - Карточки одного ряда имеют одинаковую высоту, и между ними задан gap
+  - Человек правильно определил, где лучше flexbox, а где grid, в четырёх примерах
+  sources:
+  - title: CSS grid layout
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Grids
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Basic concepts of grid layout
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout/Basic_concepts_of_grid_layout
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Grid (web.dev)
+    url: https://web.dev/learn/css/grid
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Grid Garden
+    url: https://cssgridgarden.com/
+    licence: proprietary-link
+    kind: course
+    lang: en
+  videos: []
+- id: 03-css/06-responsive
+  order: 6
+  title: 'Адаптивность: медиазапросы и контейнерные запросы'
+  summary: 'Зачем: сайт открывают на телефоне, ноутбуке и большом мониторе, а ваши посетители чаще всего на телефоне. После
+    урока вы делаете mobile first, ставите точки перелома по содержимому и используете контейнерные запросы, чтобы компонент
+    подстраивался под своё место.'
+  minutes: 30
+  teaches:
+  - css.responsive
+  - css.media-queries
+  - css.container-queries
+  requires:
+  - css.grid
+  - html.head-meta
+  diagram: 'Рамка, которую можно сужать от 1280 до 320 px: страница перестраивается, на шкале отмечаются сработавшие точки
+    перелома; переключатель «медиазапрос / контейнерный запрос» показывает, как одна карточка ведёт себя в узкой боковой колонке.'
+  practice: 'Человек переписывает стили своей страницы mobile first: сначала одна колонка, затем один-два медиазапроса. Карточка
+    из items получает контейнерный запрос, чтобы в узкой колонке была вертикальной, а в широкой горизонтальной. Эпоха: 4 (2014),
+    респонсив и mobile first.'
+  checks:
+  - В head есть viewport, и при ширине 320 px нет горизонтальной прокрутки
+  - Основные стили написаны для узкого экрана, а min-width добавляют правила для широкого
+  - Кнопка действия из mainAction видна без прокрутки на экране 360 × 640
+  - Карточка меняет раскладку по container-type, а не только по ширине окна
+  sources:
+  - title: Responsive design
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_design
+    licence: CC-BY-SA
+    kind: course
+    lang: en
+  - title: Using media queries
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: CSS container queries
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Container queries (web.dev)
+    url: https://web.dev/learn/css/container-queries
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Learn Responsive Design (web.dev)
+    url: https://web.dev/learn/design
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Responsive Web Design (Итан Маркотт, A List Apart, 2010)
+    url: https://alistapart.com/article/responsive-web-design/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  videos: []
+- id: 03-css/07-modern-css
+  order: 7
+  title: 'Современный CSS: переменные, вложенность, :has() и слои'
+  summary: 'Зачем: сегодняшний CSS умеет то, ради чего раньше брали препроцессоры и скрипты. После урока вы собираете токены
+    в переменные, пишете вложенные правила, подсвечиваете форму с ошибкой через :has() и упорядочиваете стили слоями.'
+  minutes: 30
+  teaches:
+  - css.custom-properties
+  - css.nesting
+  - css.has-selector
+  - css.cascade-layers
+  requires:
+  - css.specificity
+  - css.color
+  - css.container-queries
+  diagram: 'Переключатель тем: переменные цвета, отступа и радиуса меняются ползунками и сразу перекрашивают страницу; вторая
+    вкладка показывает порядок слоёв @layer и то, как слой побеждает специфичность.'
+  practice: 'Человек выносит цвета, размеры и шрифты из своего CSS в переменные на :root, делает тёмную тему через переменные,
+    вкладывает правила карточки и объявляет слои reset, base, components, utilities. Эпоха: не привязана к одной эпохе; результат
+    показывается как «CSS 2025».'
+  checks:
+  - Все цвета и основные отступы заданы через var(--…), а значения объявлены на :root один раз
+  - Есть тёмная тема, переключаемая переменными или prefers-color-scheme
+  - Стили разложены хотя бы по трём слоям, порядок которых объявлен в начале файла
+  - Хотя бы одно правило использует :has() для реального состояния, например формы с невалидным полем
+  sources:
+  - title: Using CSS custom properties (variables)
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables/Using_CSS_custom_properties
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: CSS nesting
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: :has() CSS pseudo-class
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/:has
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: '@layer'
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/@layer
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Learn CSS (web.dev)
+    url: https://web.dev/learn/css
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: CSS — Дока
+    url: https://doka.guide/css/
+    licence: link-only
+    kind: docs
+    lang: ru
+  videos: []
+- id: 03-css/08-motion
+  order: 8
+  title: Анимация и движение с уважением к людям
+  summary: 'Зачем: небольшое движение показывает, что произошло, а лишнее мешает и даже вредит людям с вестибулярными нарушениями.
+    После урока вы делаете плавные переходы и анимацию появления и учитываете настройку «уменьшить движение».'
+  minutes: 20
+  teaches:
+  - css.transitions-animations
+  - css.reduced-motion
+  requires:
+  - css.custom-properties
+  - html.a11y-basics
+  diagram: Редактор кривой перехода и ключевых кадров рядом с переключателем «уменьшить движение»; включённый режим показывает,
+    как те же элементы появляются без перемещения и мерцания.
+  practice: 'Человек добавляет переход состояния для кнопки действия (mainAction) и анимацию появления карточек из items,
+    затем отключает всё лишнее при prefers-reduced-motion: reduce. Эпоха: 7 (2025) как вишенка; обе версии, с движением и
+    без, сохраняются в галерее.'
+  checks:
+  - Анимируются только transform и opacity
+  - 'Есть блок @media (prefers-reduced-motion: reduce), отключающий перемещение и повторяющуюся анимацию'
+  - Нет мерцания чаще трёх раз в секунду, а автозапускаемое движение дольше пяти секунд можно остановить
+  sources:
+  - title: Using CSS animations
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Using CSS transitions
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions/Using_CSS_transitions
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: prefers-reduced-motion
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: Animations (web.dev)
+    url: https://web.dev/learn/css/animations
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Understanding SC 2.3.3 Animation from Interactions
+    url: https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html
+    licence: link-only
+    kind: spec
+    lang: en
+  videos: []

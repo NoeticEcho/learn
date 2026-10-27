@@ -1,0 +1,471 @@
+part: 4
+slug: design
+title: Дизайн и дизайн-системы
+era: null
+summary: Как выглядел веб с 1991 года, что устарело и почему, как читать и строить дизайн-систему (токены, атомы, компоненты),
+  как передавать дизайн в код и как не делать страницу, которая выглядит как сгенерированная ИИ.
+concepts:
+- id: design.history-of-web-design
+  title: История веб-дизайна
+- id: design.outdated-vs-modern
+  title: Устаревшее и современное
+- id: design.visual-hierarchy
+  title: Визуальная иерархия
+- id: design.grid-and-whitespace
+  title: Сетка и пустое место
+- id: design.type-scale
+  title: Типографская шкала
+- id: design.colour-system
+  title: Цветовая система
+- id: design.contrast
+  title: Контраст и читаемость цвета
+- id: design.design-system
+  title: Дизайн-система
+- id: design.reading-a-design-system
+  title: Как читать чужую дизайн-систему
+- id: design.tokens
+  title: Дизайн-токены
+- id: design.dtcg-format
+  title: Формат токенов W3C DTCG
+- id: design.atomic-design
+  title: Атомарный дизайн
+- id: design.component
+  title: Компонент и его состояния
+- id: design.design-to-code
+  title: От макета к коду
+- id: design.handoff
+  title: Передача макета разработчику
+- id: design.ai-tells
+  title: Приметы страницы, сделанной ИИ
+- id: design.own-system
+  title: Своя маленькая дизайн-система
+lessons:
+- id: 04-design/01-history
+  order: 1
+  title: 'Тридцать лет веб-дизайна: от серого фона до стекла'
+  summary: 'Зачем: вы узнаёте эпохи веб-дизайна по виду страницы (таблицы и распорки, Flash и заставки, скевоморфизм, плоский
+    дизайн, Material, «стекло», неоморфизм, брутализм) и понимаете, какая причина — технология, мода или экран — породила
+    каждую. После урока вы сможете по скриншоту назвать эпоху и объяснить, что в ней устарело, а что осталось верным.'
+  minutes: 20
+  teaches:
+  - design.history-of-web-design
+  requires:
+  - css.box-model
+  - net.internet-history
+  diagram: 'Слайдер «сравни эпохи»: одна и та же карточка из брифа человека (название, главное действие, три пункта) перерисовывается
+    в 1996, 2000, 2008, 2013, 2018, 2022 и 2025; рядом подпись, какая технология или экран это сделали возможным.'
+  practice: 'Эпоха 1 (1996, таблицы) и эпоха 2 (2005): взять поля брифа title, mainAction и items и оформить первый экран
+    двумя способами — табличной вёрсткой с цветным фоном и затем CSS с шапкой и колонкой; записать в одну строку, что стало
+    лучше и что потерялось.'
+  checks:
+  - На первом экране есть название проекта (title) и главное действие (mainAction), оформленное как заметная ссылка или кнопка.
+  - В версии 1996 года вёрстка сделана таблицей, в версии 2005 года таблиц для макета нет, стили вынесены в отдельный CSS.
+  - Каждый пункт из items показан в обеих версиях.
+  - Рядом с каждой версией есть подпись с эпохой и одним устаревшим и одним уцелевшим приёмом.
+  sources:
+  - title: 'Web Design Museum: история веб-дизайна по годам'
+    url: https://www.webdesignmuseum.org/
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'Википедия: Веб-дизайн'
+    url: https://ru.wikipedia.org/wiki/Веб-дизайн
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  - title: 'Википедия: Skeuomorph'
+    url: https://en.wikipedia.org/wiki/Skeuomorph
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: 'Nielsen Norman Group: Flat design — an excellent idea or a bad trend?'
+    url: https://www.nngroup.com/articles/flat-design/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Brutalist Websites: галерея брутализма в вебе'
+    url: https://brutalistwebsites.com/
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'Википедия: Neumorphism'
+    url: https://en.wikipedia.org/wiki/Neumorphism
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos:
+  - title: История веб-дизайна
+    url: https://www.youtube.com/watch?v=cQdlS_3e8PE
+    lang: ru
+- id: 04-design/02-hierarchy-grid-type
+  order: 2
+  title: Иерархия, сетка, пустое место и шкала шрифтов
+  summary: 'Зачем: вы можете сделать так, чтобы глаз посетителя шёл туда, куда нужно вам: к главному действию. Вы поймёте,
+    чем размер, вес, цвет и отступ управляют вниманием, как сетка выравнивает страницу и как выбрать шкалу размеров шрифта,
+    а не гадать каждый раз.'
+  minutes: 20
+  teaches:
+  - design.visual-hierarchy
+  - design.grid-and-whitespace
+  - design.type-scale
+  requires:
+  - css.typography
+  - css.grid
+  - css.custom-properties
+  diagram: 'Страница-макет с ползунками: размер заголовка, интерлиньяж, отступ между секциями, колонки сетки; рядом тепловая
+    карта «куда сначала смотрит глаз» и подсветка текущей ступени типографской шкалы (коэффициент 1.2 / 1.25 / 1.333).'
+  practice: 'Эпоха 4 (2014, адаптивная): взять sections и mainAction из брифа и построить страницу с тремя уровнями иерархии,
+    сеткой в 12 колонок (или 4 на телефоне) и шкалой шрифтов на CSS-переменных; главное действие должно быть самым заметным
+    элементом первого экрана.'
+  checks:
+  - Размеры шрифта заданы через переменные шкалы, а не разрозненными числами, и их не меньше пяти ступеней.
+  - У каждой секции из sections есть заголовок на одном и том же уровне, а заголовок страницы крупнее заголовков секций.
+  - Главное действие (mainAction) визуально выделено сильнее остальных ссылок и кнопок.
+  - Ширина строки основного текста не превышает примерно 75 знаков.
+  - Отступы между секциями кратны одному базовому шагу.
+  sources:
+  - title: 'NN/g: Visual Hierarchy in UX'
+    url: https://www.nngroup.com/articles/visual-hierarchy-ux-definition/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: web.dev Learn Design
+    url: https://web.dev/learn/design/
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: 'web.dev Learn CSS: Spacing'
+    url: https://web.dev/learn/css/spacing
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Practical Typography (Мэтью Баттерик)
+    url: https://practicaltypography.com/
+    licence: link-only
+    kind: book
+    lang: en
+  - title: 'Modular Scale: калькулятор типографской шкалы'
+    url: https://www.modularscale.com/
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'MDN: Макеты на основе сетки (CSS Grid)'
+    url: https://developer.mozilla.org/ru/docs/Web/CSS/CSS_grid_layout
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  videos: []
+- id: 04-design/03-colour-contrast
+  order: 3
+  title: Цветовая система и контраст
+  summary: 'Зачем: вы соберёте палитру, которая выглядит цельно и читается людьми со слабым зрением, и проверите контраст
+    по числам, а не на глаз. Вы узнаете, чем OKLCH удобнее HEX, как строятся ступени серого и акцента и почему светлая и тёмная
+    темы — не просто инверсия.'
+  minutes: 20
+  teaches:
+  - design.colour-system
+  - design.contrast
+  requires:
+  - css.color
+  - css.custom-properties
+  diagram: 'Палитра-конструктор: один акцентный оттенок превращается в ряд из 10 ступеней в OKLCH; для каждой пары «текст
+    на фоне» показано число контраста WCAG и значок «AA / AAA / не проходит»; переключатель светлой и тёмной тем.'
+  practice: 'Эпоха 4 (2014): выбрать цвет по tone из брифа (серьёзный, тёплый, технический), построить акцент и нейтральные
+    ступени переменными, сделать светлую и тёмную тему; проверить, что основной текст и текст кнопки главного действия проходят
+    AA.'
+  checks:
+  - Цвета заданы переменными на :root, а не разбросаны по правилам.
+  - Основной текст имеет контраст не ниже 4.5:1 с фоном, крупный текст и значки — не ниже 3:1.
+  - Кнопка главного действия (mainAction) проходит проверку контраста в обеих темах.
+  - Есть тёмная тема через prefers-color-scheme, и у body задан явный фон.
+  - 'Смысл не передан одним только цветом: у ошибок и ссылок есть ещё и текстовый или графический признак.'
+  sources:
+  - title: 'W3C: Understanding Contrast (Minimum), WCAG 2.2'
+    url: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: 'MDN: Color contrast'
+    url: https://developer.mozilla.org/en-US/docs/Web/Accessibility/Guides/Understanding_WCAG/Perceivable/Color_contrast
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'web.dev Learn CSS: Color'
+    url: https://web.dev/learn/css/color
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: 'Evil Martians: OKLCH in CSS — why quit RGB/HSL'
+    url: https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'MDN: oklch()'
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos: []
+- id: 04-design/04-design-systems-tour
+  order: 4
+  title: Что такое дизайн-система и как читать чужие
+  summary: 'Зачем: вы понимаете, из чего состоит дизайн-система (принципы, токены, компоненты, правила, код) и можете за двадцать
+    минут разобраться в любой: Material 3, Apple HIG, Fluent, IBM Carbon, Atlassian, Shopify Polaris, GOV.UK, GitHub Primer,
+    Radix и shadcn/ui, Tailwind, Gravity UI. После урока вы выберете, у кого что заимствовать для своего проекта.'
+  minutes: 25
+  teaches:
+  - design.design-system
+  - design.reading-a-design-system
+  requires:
+  - design.visual-hierarchy
+  - design.colour-system
+  - css.custom-properties
+  diagram: 'Таблица-сравнитель: в строках десять систем, в столбцах «философия», «токены», «компоненты», «доступность», «лицензия»;
+    клик по системе открывает мини-карточку с её кнопкой, полем ввода и палитрой, нарисованными одним и тем же компонентом.'
+  practice: 'Эпоха 4 (2014): по tone и kind проекта из брифа выбрать две системы-образца, выписать из каждой три решения (радиус
+    скругления, шаг отступов, состояние фокуса) и применить их к форме или кнопке главного действия на своей странице.'
+  checks:
+  - В заметке названы две выбранные системы и объяснено, чем выбор связан с tone и аудиторией (forWhom) проекта.
+  - Для каждой системы выписаны три конкретных решения с числами или названиями токенов.
+  - На странице главное действие (mainAction) оформлено по правилам хотя бы одной из выбранных систем и имеет видимое состояние
+    фокуса.
+  - Указано, чем система годится или не годится для языка и аудитории проекта (languages).
+  sources:
+  - title: 'NN/g: Design Systems 101'
+    url: https://www.nngroup.com/articles/design-systems-101/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: Material Design 3
+    url: https://m3.material.io/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Apple Human Interface Guidelines
+    url: https://developer.apple.com/design/human-interface-guidelines/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: GOV.UK Design System
+    url: https://design-system.service.gov.uk/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: IBM Carbon Design System
+    url: https://carbondesignsystem.com/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Gravity UI (дизайн-система Яндекса, открытая)
+    url: https://gravity-ui.com/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos:
+  - title: Что такое дизайн-система? Зачем нужна и из чего состоит?
+    url: https://www.youtube.com/watch?v=IU32UI_phrc
+    lang: ru
+- id: 04-design/05-tokens
+  order: 5
+  title: 'Дизайн-токены: имена вместо чисел'
+  summary: 'Зачем: вы научитесь хранить цвета, отступы, радиусы и тени как именованные значения, из которых собирается и CSS,
+    и макет, и приложение. После урока вы напишете файл токенов в формате W3C DTCG, разделите токены на базовые, смысловые
+    и компонентные и подключите их к странице через CSS-переменные.'
+  minutes: 20
+  teaches:
+  - design.tokens
+  - design.dtcg-format
+  requires:
+  - css.custom-properties
+  - design.colour-system
+  - design.type-scale
+  diagram: 'Редактор токенов: слева JSON в формате DTCG, справа живая страница; изменение базового токена (color.blue.600)
+    каскадом меняет смысловой (color.action) и компонентный (button.bg); переключатель темы подменяет слой смысловых токенов.'
+  practice: 'Эпоха 4 (2014): выделить из своей страницы цвета, шкалу шрифтов и отступы в файл tokens.json по DTCG, сгенерировать
+    из него :root с переменными в трёх слоях (базовые, смысловые, компонентные).'
+  checks:
+  - В tokens.json у каждого токена есть $value и $type, а ссылки на другие токены записаны через фигурные скобки.
+  - 'Есть три слоя: базовые значения, смысловые имена (например, action, surface, text) и хотя бы один компонентный токен.'
+  - В CSS нет «сырых» цветов вне блока переменных.
+  - Смена одного базового токена меняет вид всех мест, где он используется, включая кнопку главного действия (mainAction).
+  sources:
+  - title: Design Tokens Community Group (W3C Community Group)
+    url: https://www.designtokens.org/
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: Design Tokens Format Module (DTCG)
+    url: https://www.designtokens.org/tr/drafts/format/
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  - title: 'Style Dictionary: документация'
+    url: https://styledictionary.com/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'MDN: Using CSS custom properties'
+    url: https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Tailwind CSS: Theme variables'
+    url: https://tailwindcss.com/docs/theme
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos:
+  - title: Что такое дизайн-токены? Зачем их использовать в интерфейсах?
+    url: https://www.youtube.com/watch?v=XvVHVdhdRP8
+    lang: ru
+- id: 04-design/06-atomic-components
+  order: 6
+  title: 'Атомарный дизайн: атомы, молекулы, компоненты'
+  summary: 'Зачем: вы раскладываете любую страницу на повторяемые части и называете их, а затем описываете каждый компонент
+    вместе с состояниями (обычное, наведение, фокус, нажатие, ошибка, недоступно, загрузка). После урока вы сможете собрать
+    из своих частей страницу, а не рисовать каждую заново.'
+  minutes: 20
+  teaches:
+  - design.atomic-design
+  - design.component
+  requires:
+  - design.tokens
+  - html.semantic-elements
+  diagram: 'Разбор страницы на уровни Брэда Фроста: нажимаешь на кнопку, она разбирается на атом (кнопка) → молекулу (поле
+    + кнопка) → организм (шапка) → шаблон → страницу; у каждого компонента переключатель состояний.'
+  practice: 'Эпоха 4 (2014): из sections и items брифа выделить атомы (кнопка, ссылка, метка), молекулу (карточка пункта из
+    items) и организм (секция); оформить карточку как один компонент с четырьмя состояниями.'
+  checks:
+  - 'Карточка для пунктов items — это один повторяемый компонент: изменение его стиля в одном месте меняет все карточки.'
+  - 'У кнопки главного действия (mainAction) есть различимые состояния: обычное, наведение, фокус и недоступно.'
+  - В списке компонентов есть хотя бы по одному атому, молекуле и организму с названиями.
+  - Компоненты используют токены, а не собственные числа.
+  sources:
+  - title: 'Brad Frost: Atomic Design (книга онлайн)'
+    url: https://atomicdesign.bradfrost.com/
+    licence: link-only
+    kind: book
+    lang: en
+  - title: 'Storybook: документация'
+    url: https://storybook.js.org/docs
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'NN/g: Design Systems 101 (компоненты и паттерны)'
+    url: https://www.nngroup.com/articles/design-systems-101/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'shadcn/ui: компоненты как открытый код'
+    url: https://ui.shadcn.com/docs
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Radix Primitives: доступные безстилевые компоненты'
+    url: https://www.radix-ui.com/primitives
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos:
+  - title: Атомарный дизайн за 5 минут
+    url: https://www.youtube.com/watch?v=2T0-wLAT4m4
+    lang: ru
+- id: 04-design/07-design-to-code
+  order: 7
+  title: 'От макета к коду: Figma, передача и Claude Design'
+  summary: 'Зачем: вы понимаете, как дизайнер работает в Figma (фреймы, автолейаут, компоненты, переменные) и что именно нужно
+    разработчику при передаче. После урока вы подготовите макет так, чтобы его можно было сверстать без вопросов, и сможете
+    сравнить ручную вёрстку с вёрсткой по макету, сгенерированной ИИ-инструментом.'
+  minutes: 20
+  teaches:
+  - design.design-to-code
+  - design.handoff
+  requires:
+  - design.tokens
+  - design.component
+  diagram: 'Макет и код рядом: клик по элементу макета подсвечивает свойства (отступы, токены, размеры) и соответствующую
+    строку CSS; переключатель показывает, чем автолейаут похож на flex, а переменные Figma — на CSS-переменные.'
+  practice: 'Эпоха 7 (2025, ИИ-конструктор): собрать на бумаге или в Figma один экран из sections и mainAction брифа с названными
+    слоями и переменными, затем дать его ИИ-инструменту как задание на вёрстку и отметить расхождения с токенами.'
+  checks:
+  - Макет экрана содержит все sections брифа, главное действие (mainAction) и использует названные цвета и размеры, а не случайные.
+  - В списке расхождений указано не меньше трёх мест, где сгенерированный код не совпал с токенами или состояниями.
+  - Для картинок и значков указано, что отдаётся векторами, а что растром, и в каких размерах.
+  - Описано, как макет ведёт себя на узком экране.
+  sources:
+  - title: Figma Help Center
+    url: https://help.figma.com/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Figma: Variables guide'
+    url: https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Figma: Dev Mode'
+    url: https://www.figma.com/dev-mode/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'MDN: Flexbox'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Penpot: открытый аналог Figma'
+    url: https://penpot.app/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []
+- id: 04-design/08-ai-tells-and-quiz
+  order: 8
+  title: Приметы страницы, сделанной ИИ, и квиз «старое или современное»
+  summary: 'Зачем: вы видите, какие приёмы выдают шаблонную страницу, сделанную нейросетью (фиолетовый градиент, одинаковые
+    карточки с иконками, пустые лозунги, шрифт по умолчанию), и умеете их избегать. В конце вы оцениваете пары «устаревшее
+    и современное» сами и собираете мини-систему для своего проекта.'
+  minutes: 25
+  teaches:
+  - design.ai-tells
+  - design.outdated-vs-modern
+  - design.own-system
+  requires:
+  - design.design-system
+  - design.tokens
+  - design.component
+  - design.history-of-web-design
+  diagram: 'Квиз-оценщик: две версии одного блока рядом, человек ставит «современнее» и «устарело», затем видит разбор по
+    критериям (иерархия, контраст, плотность, движение); во второй части — чек-лист примет ИИ-страницы, по которому оценивается
+    страница из эпохи 7.'
+  practice: 'Эпоха 7 (2025, ИИ-конструктор): сгенерировать главную страницу по брифу ИИ-конструктором, отметить минимум пять
+    примет шаблонности и переписать их: конкретные слова из proofs и people вместо лозунгов, свои токены вместо градиента
+    по умолчанию.'
+  checks:
+  - В отчёте не меньше пяти отмеченных примет шаблонности с указанием места на странице.
+  - Заголовок и подзаголовок главного экрана говорят о конкретном проекте (title, forWhom), а не о «инновационных решениях».
+  - В исправленной версии использованы реальные пункты из proofs или people, а не придуманные цифры.
+  - Палитра и шрифты взяты из токенов проекта и не совпадают с настройками по умолчанию конструктора.
+  - Результат проходит проверку контраста и имеет видимый фокус.
+  sources:
+  - title: 'Anthropic: Improving frontend design through Skills'
+    url: https://claude.com/blog/improving-frontend-design-through-skills
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'NN/g: Dark Patterns / обманные интерфейсы'
+    url: https://www.nngroup.com/articles/deceptive-patterns/
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'Awwwards: что считается хорошим дизайном (оценка сайтов)'
+    url: https://www.awwwards.com/about-evaluation/
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'web.dev Learn Design: Visual design'
+    url: https://web.dev/learn/design/
+    licence: CC-BY
+    kind: course
+    lang: en
+  videos: []

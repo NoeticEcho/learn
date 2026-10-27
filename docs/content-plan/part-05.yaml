@@ -1,0 +1,417 @@
+part: 5
+slug: js
+title: JavaScript
+era: null
+summary: 'Как заставить страницу реагировать: значения и функции, DOM, события, запросы к серверу и JSON, модули, зачем нужны
+  фреймворки, компонент на Svelte и прогрессивное улучшение.'
+concepts:
+- id: js.values-and-types
+  title: Значения и типы
+- id: js.functions
+  title: Функции и область видимости
+- id: js.arrays-and-objects
+  title: Массивы и объекты
+- id: js.dom
+  title: 'DOM: дерево страницы из JavaScript'
+- id: js.events
+  title: События и их всплытие
+- id: js.async
+  title: 'Асинхронность: промисы и async/await'
+- id: js.fetch
+  title: fetch и запросы к серверу
+- id: js.json
+  title: JSON
+- id: js.modules
+  title: Модули ES
+- id: js.tooling
+  title: npm и сборка в общих чертах
+- id: js.why-frameworks
+  title: Зачем нужны фреймворки
+- id: js.reactivity
+  title: Реактивность
+- id: js.svelte-component
+  title: Компонент на Svelte
+- id: js.progressive-enhancement
+  title: Прогрессивное улучшение
+- id: js.error-handling
+  title: Обработка ошибок и отказов
+lessons:
+- id: 05-js/01-values-functions
+  order: 1
+  title: Значения, функции, массивы и объекты
+  summary: 'Зачем: вы читаете и пишете короткие программы на JavaScript: храните данные брифа в переменных, объектах и массивах
+    и превращаете их функциями в другие данные. После урока вы можете объяснить, что такое тип, область видимости и стрелочная
+    функция, и пользоваться консолью браузера.'
+  minutes: 25
+  teaches:
+  - js.values-and-types
+  - js.functions
+  - js.arrays-and-objects
+  requires:
+  - html.document-structure
+  - net.rendering-pipeline
+  diagram: 'Песочница-консоль: слева код, справа значения с типами; шаги выполнения подсвечивают, какая переменная в какой
+    области видимости живёт, а map/filter показаны как конвейер карточек.'
+  practice: 'Эпоха 2 (2005): записать items брифа массивом объектов {название, описание, цена или ссылка}, написать функции,
+    которые возвращают список названий, отфильтровывают по условию и считают количество; показать результат в консоли.'
+  checks:
+  - Данные items заданы массивом объектов, а не отдельными переменными.
+  - Есть функция, возвращающая из items только названия, и она не изменяет исходный массив.
+  - Есть функция, которая отбирает пункты по условию, например по ключу цены или категории.
+  - Код запускается без ошибок в консоли и не использует var.
+  sources:
+  - title: 'MDN: Руководство по JavaScript'
+    url: https://developer.mozilla.org/ru/docs/Web/JavaScript/Guide
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'MDN: Основы JavaScript'
+    url: https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Scripting
+    licence: CC-BY-SA
+    kind: course
+    lang: ru
+  - title: Современный учебник JavaScript (learn.javascript.ru)
+    url: https://learn.javascript.ru/
+    licence: link-only
+    kind: course
+    lang: ru
+  - title: Eloquent JavaScript (Марейн Хавербеке)
+    url: https://eloquentjavascript.net/
+    licence: link-only
+    kind: book
+    lang: en
+  - title: ECMAScript Language Specification
+    url: https://tc39.es/ecma262/
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  videos: []
+- id: 05-js/02-dom
+  order: 2
+  title: 'DOM: страница как дерево, которое можно менять'
+  summary: 'Зачем: вы находите элементы страницы, читаете и меняете их текст, атрибуты и классы и создаёте новые из данных.
+    После урока вы построите список карточек из массива items одной функцией и поймёте, почему innerHTML с чужим текстом опасен.'
+  minutes: 25
+  teaches:
+  - js.dom
+  requires:
+  - js.arrays-and-objects
+  - html.semantic-elements
+  diagram: 'Двухпанельный просмотр: код HTML и дерево DOM; запрос querySelector подсвечивает найденные узлы, создание элемента
+    показывает, как он вставляется в дерево, а вставка строки через innerHTML и через textContent показана рядом.'
+  practice: 'Эпоха 4 (2014): вывести items брифа в секцию страницы функцией render(items), создающей карточки через createElement
+    и textContent; добавить счётчик показанных пунктов.'
+  checks:
+  - Секция страницы наполняется из массива items кодом, а не набрана вручную.
+  - Текст из данных вставляется через textContent или аналог, а не через innerHTML.
+  - Если items пуст, пользователь видит понятное сообщение.
+  - Карточки остаются размеченными семантическими тегами (список или article), а не набором div.
+  sources:
+  - title: 'MDN: Введение в DOM'
+    url: https://developer.mozilla.org/ru/docs/Web/API/Document_Object_Model/Introduction
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'MDN: Document.querySelector'
+    url: https://developer.mozilla.org/ru/docs/Web/API/Document/querySelector
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: DOM Standard (WHATWG)
+    url: https://dom.spec.whatwg.org/
+    licence: CC-BY
+    kind: spec
+    lang: en
+  - title: 'learn.javascript.ru: Документ'
+    url: https://learn.javascript.ru/document
+    licence: link-only
+    kind: course
+    lang: ru
+  videos: []
+- id: 05-js/03-events
+  order: 3
+  title: 'События: реакция на клики, ввод и клавиши'
+  summary: 'Зачем: вы делаете страницу интерактивной: открываете меню, проверяете форму, фильтруете список по клику. Вы поймёте,
+    как событие всплывает по дереву, зачем делегирование и как не сломать клавиатурное управление.'
+  minutes: 25
+  teaches:
+  - js.events
+  requires:
+  - js.dom
+  - html.forms
+  diagram: 'Дерево элементов, по которому летит событие: фазы погружения и всплытия, остановка, preventDefault; ползунок скорости
+    и счётчик слушателей при делегировании.'
+  practice: 'Эпоха 4 (2014): добавить фильтр по категориям для items и переключаемое меню sections; всё должно работать с
+    клавиатуры (Tab, Enter, Esc) и оставаться доступным без мыши.'
+  checks:
+  - Фильтр меняет показанные пункты items без перезагрузки страницы.
+  - Меню sections управляется кнопкой с aria-expanded, а не ссылкой-заглушкой.
+  - Все действия доступны с клавиатуры и показывают видимый фокус.
+  - Обработчики навешены на общий родитель (делегирование), а не на каждую карточку отдельно.
+  sources:
+  - title: 'MDN: Введение в события'
+    url: https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Scripting/Events
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'MDN: EventTarget.addEventListener'
+    url: https://developer.mozilla.org/ru/docs/Web/API/EventTarget/addEventListener
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'learn.javascript.ru: Введение в браузерные события'
+    url: https://learn.javascript.ru/events
+    licence: link-only
+    kind: course
+    lang: ru
+  - title: 'W3C WAI: ARIA Authoring Practices Guide'
+    url: https://www.w3.org/WAI/ARIA/apg/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos:
+  - title: 'Уроки JavaScript для начинающих: события и обработчик событий'
+    url: https://www.youtube.com/watch?v=Tw-_axj7Jis
+    lang: ru
+- id: 05-js/04-async-fetch-json
+  order: 4
+  title: Асинхронность, fetch и JSON
+  summary: 'Зачем: вы получаете данные с сервера без перезагрузки страницы и показываете их, вместе с состояниями «загрузка»
+    и «ошибка». После урока вы читаете и пишете JSON, понимаете промисы и async/await и видите в панели «Сеть» свой запрос.'
+  minutes: 30
+  teaches:
+  - js.async
+  - js.fetch
+  - js.json
+  - js.error-handling
+  requires:
+  - js.events
+  - net.http-request-response
+  diagram: 'Диаграмма времени: основной поток, очередь событий и запрос на сервер; кнопка «ответ идёт 3 секунды» показывает,
+    что страница не зависает, а промис переходит из pending в fulfilled или rejected.'
+  practice: 'Эпоха 4 (2014): вынести items брифа в файл items.json, загрузить его через fetch при открытии страницы, показать
+    состояния загрузки и ошибки, а для контактов (contacts) отправить форму обратной связи через fetch на тестовый адрес.'
+  checks:
+  - Данные items загружаются из JSON-файла, а не лежат в коде.
+  - При ошибке сети или статусе вне 200–299 пользователь видит понятное сообщение и может повторить попытку.
+  - Во время загрузки показывается индикатор, а потом он убирается в любом исходе.
+  - Форма обратной связи не отправляется дважды при повторном клике и сообщает результат экранному диктору (aria-live).
+  sources:
+  - title: 'MDN: Использование Fetch'
+    url: https://developer.mozilla.org/ru/docs/Web/API/Fetch_API/Using_Fetch
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'MDN: Работа с JSON'
+    url: https://developer.mozilla.org/ru/docs/Learn_web_development/Core/Scripting/JSON
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'MDN: Асинхронный JavaScript'
+    url: https://developer.mozilla.org/ru/docs/Learn_web_development/Extensions/Async_JS
+    licence: CC-BY-SA
+    kind: docs
+    lang: ru
+  - title: 'learn.javascript.ru: Промисы, async/await'
+    url: https://learn.javascript.ru/async
+    licence: link-only
+    kind: course
+    lang: ru
+  - title: 'RFC 8259: The JSON Data Interchange Format'
+    url: https://www.rfc-editor.org/rfc/rfc8259
+    licence: proprietary-link
+    kind: spec
+    lang: en
+  videos:
+  - title: Изучаем Fetch API за 6 минут
+    url: https://www.youtube.com/watch?v=cuEtnrL9-H0
+    lang: ru
+- id: 05-js/05-modules-tooling
+  order: 5
+  title: Модули, npm и сборка
+  summary: 'Зачем: вы разбиваете код на файлы с помощью модулей ES, подключаете чужие пакеты через npm и понимаете, что делают
+    сборщик и «бандл». После урока вы читаете package.json и объясняете, почему нужно беречь зависимости.'
+  minutes: 25
+  teaches:
+  - js.modules
+  - js.tooling
+  requires:
+  - js.fetch
+  - net.url-anatomy
+  diagram: 'Граф зависимостей проекта: файлы-узлы, стрелки import; кнопка «собрать» превращает граф в один файл, показывает
+    размер до и после минификации и отмечает неиспользуемый код (tree shaking).'
+  practice: 'Эпоха 5 (2019, генератор статического сайта): разложить код страницы брифа на модули (данные items, функция render,
+    форма contacts), подключить их через type=module и убедиться, что страница работает без сборки.'
+  checks:
+  - Код разбит минимум на три файла-модуля, связанных import и export.
+  - Скрипт подключён с type=module, и страница работает при открытии через локальный сервер.
+  - Данные брифа (items, contacts) лежат в отдельном модуле или JSON, а не внутри функций отрисовки.
+  - Указано, какие внешние пакеты нужны и сколько они весят, или написано, что не нужны.
+  sources:
+  - title: 'MDN: JavaScript modules'
+    url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'learn.javascript.ru: Модули'
+    url: https://learn.javascript.ru/modules
+    licence: link-only
+    kind: course
+    lang: ru
+  - title: 'npm Docs: About packages and modules'
+    url: https://docs.npmjs.com/about-packages-and-modules
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Vite: Getting Started'
+    url: https://vite.dev/guide/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'web.dev: Reduce JavaScript payloads with tree shaking'
+    url: https://web.dev/articles/reduce-javascript-payloads-with-tree-shaking
+    licence: CC-BY
+    kind: article
+    lang: en
+  videos: []
+- id: 05-js/06-why-frameworks
+  order: 6
+  title: Зачем нужны фреймворки
+  summary: 'Зачем: вы видите, на каких задачах ручной код с DOM начинает ломаться (синхронизация данных и экрана, повторяющиеся
+    компоненты, состояние), и как фреймворки (React, Vue, Svelte, Angular) решают их. После урока вы можете спокойно ответить
+    «а нужен ли мне фреймворк вообще».'
+  minutes: 25
+  teaches:
+  - js.why-frameworks
+  - js.reactivity
+  requires:
+  - js.dom
+  - js.events
+  - js.modules
+  diagram: 'Один и тот же список с фильтром и счётчиком, написанный тремя способами: ручной DOM, шаблонные строки и реактивный
+    компонент; ползунок «число правил в проекте» показывает, где растёт число ошибок синхронизации.'
+  practice: 'Эпоха 5 (2019): из текущей страницы брифа выбрать три места, где состояние (выбранная категория, число пунктов,
+    раскрытое меню) приходится синхронизировать вручную, и записать, что в каждом было бы проще при реактивном подходе.'
+  checks:
+  - Названы минимум три места, где состояние и вид страницы надо согласовывать вручную.
+  - Для каждого места указано, что изменилось бы при реактивном подходе.
+  - 'Есть вывод для проекта: нужен фреймворк или нет, с учётом sections и items брифа.'
+  - Упомянут вес JavaScript и влияние на скорость первой загрузки.
+  sources:
+  - title: 'React: Thinking in React'
+    url: https://react.dev/learn/thinking-in-react
+    licence: CC-BY
+    kind: docs
+    lang: en
+  - title: 'Vue.js: Introduction'
+    url: https://vuejs.org/guide/introduction.html
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Svelte: Overview'
+    url: https://svelte.dev/docs/svelte/overview
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'MDN: Introduction to client-side frameworks'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Frameworks_libraries/Introduction
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'HTTP Archive Web Almanac: JavaScript'
+    url: https://almanac.httparchive.org/en/2024/javascript
+    licence: link-only
+    kind: article
+    lang: en
+  videos: []
+- id: 05-js/07-svelte-component
+  order: 7
+  title: Компонент на Svelte
+  summary: 'Зачем: вы пишете свой первый компонент: карточку с состоянием и событием, и используете его в списке. После урока
+    вы читаете файл .svelte, понимаете руны $state, $derived и $props и можете перенести блок страницы брифа в компонент.'
+  minutes: 30
+  teaches:
+  - js.svelte-component
+  requires:
+  - js.reactivity
+  - js.modules
+  - design.component
+  diagram: 'Живой редактор Svelte: слева код компонента, справа результат; под ним панель «что обновится», где видно, какой
+    узел DOM пересчитался при изменении $state.'
+  practice: 'Эпоха 5 (2019, статический сайт): превратить секцию items брифа в компонент ItemCard и список ItemList с фильтром
+    по категориям; собрать страницу с помощью SvelteKit или Vite и сравнить размер с ручной версией.'
+  checks:
+  - Карточка items — отдельный компонент, получающий данные через props.
+  - Фильтр хранится в $state, а список — в $derived от него.
+  - Страница работает и при отключённом JavaScript хотя бы как список без фильтра, либо явно отмечено, что нет, и почему.
+  - Названы размер и время загрузки вручную и в компоненте.
+  sources:
+  - title: 'Svelte: Introduction to runes'
+    url: https://svelte.dev/docs/svelte/what-are-runes
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Svelte Tutorial
+    url: https://svelte.dev/tutorial/svelte/welcome-to-svelte
+    licence: proprietary-link
+    kind: course
+    lang: en
+  - title: 'SvelteKit: Introduction'
+    url: https://svelte.dev/docs/kit/introduction
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'MDN: Getting started with Svelte'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Frameworks_libraries/Svelte_getting_started
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos:
+  - title: 'Svelte 5 за 40 минут: руны'
+    url: https://www.youtube.com/watch?v=XXVPeF7EDvY
+    lang: ru
+- id: 05-js/08-progressive-enhancement
+  order: 8
+  title: Прогрессивное улучшение
+  summary: 'Зачем: вы строите страницу так, чтобы основная задача посетителя решалась и без JavaScript, на слабом телефоне
+    и при сбое скрипта, а скрипт делает её лучше. После урока вы делите функции вашего проекта на обязательные и улучшающие
+    и проверяете страницу с отключённым скриптом.'
+  minutes: 20
+  teaches:
+  - js.progressive-enhancement
+  requires:
+  - js.fetch
+  - js.events
+  - html.forms
+  diagram: 'Переключатель условий: JS выключен, медленная сеть, сбой скрипта, старый браузер; на странице-макете видно, что
+    остаётся работать при каждой, а что нет.'
+  practice: 'Эпоха 5 (2019) и далее: проверить страницу брифа с отключённым JavaScript, убедиться, что главное действие (mainAction)
+    и контакты (contacts) работают как обычные ссылки и форма, затем добавить скрипт как улучшение (проверка на лету, отправка
+    без перезагрузки).'
+  checks:
+  - С отключённым JavaScript видны все sections, items и контакты (contacts).
+  - 'Главное действие (mainAction) работает без скрипта: ссылка или форма с обычной отправкой.'
+  - Скрипт добавляет возможности, а не заменяет собой разметку; при ошибке скрипта страница остаётся читаемой.
+  - Составлен список «обязательное» и «улучшение» минимум из пяти функций.
+  sources:
+  - title: 'GOV.UK Service Manual: Building a resilient frontend using progressive enhancement'
+    url: https://www.gov.uk/service-manual/technology/using-progressive-enhancement
+    licence: proprietary-link
+    kind: article
+    lang: en
+  - title: 'MDN: Progressive enhancement'
+    url: https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'web.dev Learn HTML: Forms'
+    url: https://web.dev/learn/forms
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: Inclusive Components (Хайдон Пикеринг)
+    url: https://inclusive-components.design/
+    licence: link-only
+    kind: book
+    lang: en
+  videos: []

@@ -1,0 +1,432 @@
+part: 15
+slug: quality
+title: Качество и право
+era: null
+summary: 'Что отличает готовый сайт от черновика: скорость (Core Web Vitals), доступность (WCAG 2.2), безопасность (OWASP),
+  персональные данные по 152-ФЗ, cookie, авторские права, реклама и этика профессии, и предзапусковый чек-лист.'
+concepts:
+- id: quality.core-web-vitals
+  title: 'Core Web Vitals: LCP, INP, CLS'
+- id: quality.performance-budget
+  title: Бюджет производительности
+- id: quality.wcag22
+  title: 'WCAG 2.2: принципы и критерии'
+- id: quality.a11y-law
+  title: Доступность и закон
+- id: quality.owasp-basics
+  title: 'OWASP: основы безопасности сайта'
+- id: quality.forms-spam-security
+  title: Безопасность форм и спам
+- id: quality.security-headers
+  title: Заголовки безопасности и HTTPS
+- id: quality.152fz
+  title: '152-ФЗ: персональные данные, согласие, оператор'
+- id: quality.privacy-notice
+  title: Политика и уведомление об обработке
+- id: quality.cookies
+  title: Cookie и трекеры
+- id: quality.copyright-images
+  title: Авторское право и изображения
+- id: quality.ad-law-ethics
+  title: Закон о рекламе и этика адвокатов и экспертов
+- id: quality.prelaunch-checklist
+  title: Предзапусковый чек-лист
+lessons:
+- id: 15-quality/01-performance
+  order: 1
+  title: 'Скорость: Core Web Vitals'
+  summary: 'Зачем: измерить и ускорить сайт по трём показателям: LCP (загрузка главного), INP (отклик) и CLS (скачки макета).
+    После урока человек находит главную причину медленной загрузки и исправляет её.'
+  minutes: 25
+  teaches:
+  - quality.core-web-vitals
+  - quality.performance-budget
+  requires:
+  - net.rendering-pipeline
+  - html.images
+  - css.responsive
+  - js.events
+  - infra.cdn
+  diagram: 'Водопад загрузки учебной страницы: человек сжимает изображение, откладывает скрипт, добавляет размеры картинке,
+    и три индикатора LCP/INP/CLS меняют цвет по порогам 2,5 с, 200 мс, 0,1.'
+  practice: 'Эпоха 5: найти LCP-элемент главной страницы (изображение или заголовок из brief.sections), довести LCP до зелёной
+    зоны на медленной сети в песочнице, задать размеры всем изображениям, и записать бюджет: не больше N килобайт на страницу.
+    Для конструктора указать, какие настройки сжимают изображения.'
+  checks:
+  - Определён LCP-элемент главной страницы.
+  - Всем изображениям заданы ширина и высота, макет не прыгает.
+  - Записан бюджет в килобайтах и числе запросов.
+  - Изображения подобраны под размер экрана (srcset или эквивалент).
+  - Для brief.languages шрифты загружаются без блокировки (swap) и с нужными начертаниями.
+  sources:
+  - title: 'web.dev: Web Vitals'
+    url: https://web.dev/articles/vitals
+    licence: CC-BY
+    kind: article
+    lang: en
+  - title: 'web.dev: Optimize Largest Contentful Paint'
+    url: https://web.dev/articles/optimize-lcp
+    licence: CC-BY
+    kind: article
+    lang: en
+  - title: 'web.dev: Interaction to Next Paint (INP)'
+    url: https://web.dev/articles/inp
+    licence: CC-BY
+    kind: article
+    lang: en
+  - title: 'Web Almanac 2024: SEO'
+    url: https://almanac.httparchive.org/en/2024/seo
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 15-quality/02-accessibility
+  order: 2
+  title: 'Доступность: WCAG 2.2 и закон'
+  summary: 'Зачем: сделать сайт пригодным для людей с нарушениями зрения, моторики и слуха и понимать юридический контекст
+    в России и мире. После урока человек проходит чек-лист WCAG 2.2 уровня AA для своего сайта.'
+  minutes: 25
+  teaches:
+  - quality.wcag22
+  - quality.a11y-law
+  requires:
+  - html.a11y-basics
+  - css.contrast
+  - design.contrast
+  diagram: 'Три режима одной страницы: «обычный», «только клавиатура» и «скринридер» (читается порядок): человек чинит контраст,
+    фокус, подписи форм, и счётчик критериев WCAG 2.2 AA растёт.'
+  practice: 'Эпоха 4: проверить сайт на критерии WCAG 2.2 AA: контраст, фокус, размер цели касания, подписи полей из brief.contacts,
+    альтернативы изображений из brief.proofs, язык страницы для каждого значения brief.languages. Записать три найденных проблемы
+    и исправления.'
+  checks:
+  - У каждой формы есть подписанные поля и понятные сообщения об ошибках.
+  - Контраст текста не ниже 4,5:1, у крупного не ниже 3:1.
+  - Весь сайт проходится клавиатурой и фокус виден.
+  - Атрибут lang соответствует каждому языку из brief.languages.
+  - Изображения-доказательства имеют осмысленное alt.
+  sources:
+  - title: 'web.dev: Learn Accessibility'
+    url: https://web.dev/learn/accessibility
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: 'W3C: Web Content Accessibility Guidelines (WCAG) 2.2'
+    url: https://www.w3.org/TR/WCAG22/
+    licence: link-only
+    kind: spec
+    lang: en
+  - title: 'W3C WAI: What''s new in WCAG 2.2'
+    url: https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/
+    licence: link-only
+    kind: article
+    lang: en
+  - title: 'Web Almanac 2024: Accessibility'
+    url: https://almanac.httparchive.org/en/2024/accessibility
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: 'GOV.UK Service Manual: Making your service accessible'
+    url: https://www.gov.uk/service-manual/helping-people-to-use-your-service/making-your-service-accessible-an-introduction
+    licence: proprietary-link
+    kind: article
+    lang: en
+  videos: []
+- id: 15-quality/03-security
+  order: 3
+  title: 'Безопасность: основы OWASP, формы и спам'
+  summary: 'Зачем: закрыть самые частые дыры: инъекции, XSS, слабые пароли, открытые секреты, спам в формах. После урока человек
+    проверяет свой сайт и форму и настраивает заголовки безопасности.'
+  minutes: 25
+  teaches:
+  - quality.owasp-basics
+  - quality.forms-spam-security
+  - quality.security-headers
+  requires:
+  - server.authentication
+  - html.forms
+  - net.tls
+  - data.sql-select
+  - infra.ci-cd
+  diagram: 'Форма обратной связи под атакой: человек включает проверку на сервере, экранирование, CSP, ограничение частоты
+    и скрытую ловушку для ботов, и лента попыток показывает, что пропускается; шкала HTTP Observatory.'
+  practice: 'Эпоха 6: для формы из brief.mainAction (заявка, запись) добавить серверную валидацию, honeypot-поле, ограничение
+    частоты и сообщение без раскрытия данных; настроить CSP и HTTPS-заголовки и прогнать сайт через HTTP Observatory. Секреты
+    вынести из кода.'
+  checks:
+  - Ввод валидируется на сервере, а не только в браузере.
+  - В форме есть защита от спама без обязательной капчи с чужим трекингом.
+  - Заданы Content-Security-Policy и HSTS.
+  - В репозитории нет ключей и паролей.
+  - Результат проверки заголовков записан.
+  sources:
+  - title: OWASP Top 10
+    url: https://top10.owasp.org/
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: OWASP Cheat Sheet Series
+    url: https://cheatsheetseries.owasp.org/
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'MDN: Content Security Policy (CSP)'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'MDN: Using HTTP cookies'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'MDN HTTP Observatory: HTTP header security test'
+    url: https://developer.mozilla.org/en-US/observatory
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Web Almanac 2024: Security'
+    url: https://almanac.httparchive.org/en/2024/security
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  videos: []
+- id: 15-quality/04-152fz
+  order: 4
+  title: '152-ФЗ: персональные данные, согласие, политика'
+  summary: 'Зачем: понять, что любая форма делает владельца сайта оператором персональных данных, и выполнить минимум: цель,
+    основание, согласие, политика на сайте, уведомление Роскомнадзора, хранение в России. После урока человек готовит набор
+    документов для своего сайта.'
+  minutes: 30
+  teaches:
+  - quality.152fz
+  - quality.privacy-notice
+  requires:
+  - html.forms
+  - data.privacy-by-design
+  - infra.data-localisation-ru
+  - quality.forms-spam-security
+  diagram: 'Карта данных сайта: человек отмечает, где собираются данные (форма, Метрика, чат, запись), и для каждого выбирает
+    цель, основание и срок; при хранении за границей сервис подсвечивает риск локализации; итог превращается в черновик политики.'
+  practice: 'Эпоха 3/6: составить перечень данных из brief.contacts и форм brief.mainAction, для каждого поля цель, основание,
+    срок хранения; добавить отдельное согласие и ссылку на политику рядом с формой, указать оператора (brief.who), место хранения
+    и сервисы, которым передаются данные. Решить, нужно ли подавать уведомление. Для нескольких языков (brief.languages) указать,
+    какой текст имеет юридическую силу.'
+  checks:
+  - Для каждого поля формы указаны цель обработки и срок хранения.
+  - Согласие отдельное и непредзаполненное, рядом с кнопкой отправки.
+  - Политика обработки опубликована и доступна с каждой страницы с формой.
+  - Указано место хранения данных граждан РФ.
+  - Перечислены сторонние сервисы, получающие данные (Метрика, почта, CRM, мессенджеры).
+  sources:
+  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Роскомнадзор: Портал персональных данных'
+    url: https://pd.rkn.gov.ru/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Web Almanac 2024: Privacy'
+    url: https://almanac.httparchive.org/en/2024/privacy
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: 'MDN: Using HTTP cookies'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos: []
+- id: 15-quality/05-cookies
+  order: 5
+  title: Cookie, трекеры и согласие
+  summary: 'Зачем: понимать, какие cookie ставит сайт, какие из них нужны и как честно спросить согласие там, где это нужно,
+    в России и по правилам ЕС для посетителей оттуда. После урока человек составляет таблицу cookie и баннер, которые не подталкивают
+    к «принять всё».'
+  minutes: 20
+  teaches:
+  - quality.cookies
+  requires:
+  - quality.152fz
+  - metrics.counter-setup
+  - net.http-status-headers
+  diagram: 'Инспектор cookie: страница ставит cookie по очереди (сессия, язык, Метрика, чат, карты), человек классифицирует
+    их, а баннер собирается из результата; индикатор тёмных паттернов оценивает «принять» и «отклонить» по равному весу.'
+  practice: 'Эпоха 6: инвентаризовать cookie и локальное хранилище проекта, разбить на необходимые и аналитические, составить
+    таблицу (имя, цель, срок, кто ставит) и баннер с равноценными кнопками. Подключать аналитику после согласия для brief.languages-аудиторий,
+    где это требуется.'
+  checks:
+  - Таблица содержит имя, цель, срок и владельца для каждой cookie.
+  - Необходимые cookie не требуют согласия, аналитические отделены.
+  - Кнопки «принять» и «отклонить» равнозначны по виду и месту.
+  - Метрика и другие трекеры не запускаются до решения, если оно требуется.
+  sources:
+  - title: 'MDN: Using HTTP cookies'
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Web Almanac 2024: Privacy'
+    url: https://almanac.httparchive.org/en/2024/privacy
+    licence: CC-BY-SA
+    kind: article
+    lang: en
+  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: Microsoft Clarity documentation (heatmaps, recordings, masking, consent)
+    url: https://learn.microsoft.com/en-us/clarity/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []
+- id: 15-quality/06-copyright
+  order: 6
+  title: Авторское право и изображения
+  summary: 'Зачем: не нарушать чужие права и защитить свои: лицензии на фото, шрифты и тексты, лицензии Creative Commons,
+    ГК РФ часть 4. После урока человек делает реестр материалов сайта с лицензиями и указанием авторства.'
+  minutes: 20
+  teaches:
+  - quality.copyright-images
+  requires:
+  - html.images
+  - texts.expert-text
+  diagram: 'Игра «можно ли использовать»: для десяти материалов (фото, шрифт, иконка, цитата, карта) человек выбирает лицензию
+    и условия, а реестр заполняется строками.'
+  practice: 'Эпоха 5: составить реестр всех изображений, шрифтов, иконок и текстов проекта (brief.items, brief.people, brief.proofs):
+    источник, автор, лицензия, ссылка, условия. Заменить материалы без подтверждённого права. Для фото людей из brief.people
+    получить письменное согласие.'
+  checks:
+  - Реестр содержит источник, автора, лицензию и ссылку для каждого материала.
+  - Нет материалов без права использования.
+  - Для лицензий с указанием авторства оно размещено.
+  - Для фото людей из brief.people есть согласие.
+  - Указана лицензия собственного контента сайта.
+  sources:
+  - title: Гражданский кодекс РФ, часть 4 (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_64629/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Creative Commons: Sharing openly, sharing globally'
+    url: https://creativecommons.org/share-your-work/cclicenses/
+    licence: CC-BY
+    kind: docs
+    lang: en
+  - title: 'Creative Commons: CC BY-SA 4.0 (русский)'
+    url: https://creativecommons.org/licenses/by-sa/4.0/deed.ru
+    licence: CC-BY
+    kind: docs
+    lang: ru
+  videos: []
+- id: 15-quality/07-ad-law-ethics
+  order: 7
+  title: Закон о рекламе и этика адвокатов и экспертов
+  summary: 'Зачем: проверить тексты сайта на соответствие закону о рекламе и профессиональной этике: что считается рекламой,
+    какие утверждения запрещены, что можно указать об адвокате или эксперте. После урока человек пересматривает свои тексты
+    по списку рисков.'
+  minutes: 25
+  teaches:
+  - quality.ad-law-ethics
+  requires:
+  - story.expert-ethics
+  - growth.ad-labelling
+  - texts.expert-text
+  diagram: 'Лента фраз с сайта: человек отмечает, какие из них нарушают закон о рекламе или этику (гарантия результата, «лучший»,
+    отзывы, сравнения), и объяснение показывает норму; затем он переписывает фразу без нарушения.'
+  practice: 'Эпоха 7: пройти по всем текстам сайта из brief.sections, отметить утверждения, которые нельзя подтвердить (brief.proofs)
+    или которые запрещены правилами профессии (brief.who), и переписать. Для адвоката учесть Кодекс профессиональной этики;
+    для других профессий найти свои требования.'
+  checks:
+  - Все превосходные степени либо подтверждены в brief.proofs, либо удалены.
+  - Нет гарантий результата и обещаний выигрыша.
+  - Отзывы или результаты дел указаны только если допускаются профессией.
+  - Для каждого утверждения указан источник или нормативный документ.
+  sources:
+  - title: Федеральный закон «О рекламе» 38-ФЗ (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_58968/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'КонсультантПлюс: Кодекс профессиональной этики адвоката (подборка)'
+    url: https://www.consultant.ru/law/podborki/kodeks_professionalnoj_jetiki_advokata/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Адвокатская газета: «Критерии допустимости. К вопросу о правомерности рекламы адвокатской деятельности»'
+    url: https://www.advgazeta.ru/arhivnye-zapisi/kriterii-dopustimosti/
+    licence: proprietary-link
+    kind: article
+    lang: ru
+  - title: 'Яндекс Директ: как работает обязательная маркировка рекламы в интернете'
+    url: https://direct.yandex.ru/base/articles/markirovka-reklamy-v-internete
+    licence: proprietary-link
+    kind: article
+    lang: ru
+  videos: []
+- id: 15-quality/08-prelaunch
+  order: 8
+  title: Предзапусковый чек-лист
+  summary: 'Зачем: собрать в один список всё, что проверяется перед запуском: скорость, доступность, безопасность, право,
+    SEO, аналитику, резервные копии и откат. После урока человек пройдёт чек-лист по собственному сайту и получает отчёт «готов
+    / не готов».'
+  minutes: 25
+  teaches:
+  - quality.prelaunch-checklist
+  requires:
+  - quality.core-web-vitals
+  - quality.wcag22
+  - quality.security-headers
+  - quality.152fz
+  - quality.cookies
+  - quality.copyright-images
+  - quality.ad-law-ethics
+  - growth.technical-seo
+  - infra.backups
+  diagram: 'Панель запуска: 30 пунктов в шести группах, каждый открывает мини-проверку на живом превью сайта человека; итоговая
+    шкала готовности и список блокирующих ошибок.'
+  practice: 'Эпоха 8: пройти чек-лист по сайту проекта, записать для каждого блока «зелёный / жёлтый / красный» и план исправлений;
+    проверить, что brief.mainAction выполняется на телефоне и без JavaScript там, где это возможно; убедиться в наличии резервной
+    копии и способа откатить публикацию.'
+  checks:
+  - Пройдены все шесть блоков чек-листа с отметкой по каждому.
+  - Красные пункты имеют срок и ответственного.
+  - brief.mainAction проверен на телефоне.
+  - Есть резервная копия и описан откат.
+  - Контакты из brief.contacts работают и совпадают во всех местах.
+  sources:
+  - title: 'web.dev: Web Vitals'
+    url: https://web.dev/articles/vitals
+    licence: CC-BY
+    kind: article
+    lang: en
+  - title: 'web.dev: Learn Accessibility'
+    url: https://web.dev/learn/accessibility
+    licence: CC-BY
+    kind: course
+    lang: en
+  - title: OWASP Cheat Sheet Series
+    url: https://cheatsheetseries.owasp.org/
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'MDN HTTP Observatory: HTTP header security test'
+    url: https://developer.mozilla.org/en-US/observatory
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Google Search Central: SEO Starter Guide'
+    url: https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+    licence: CC-BY
+    kind: docs
+    lang: en
+  - title: Федеральный закон «О персональных данных» 152-ФЗ (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos: []

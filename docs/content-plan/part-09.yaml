@@ -1,0 +1,403 @@
+part: 9
+slug: infra
+title: Инфраструктура
+era: null
+summary: 'Где живёт сайт и как он попадает к посетителю: хостинг, домен и DNS, сертификат, CDN, serverless, контейнеры, CI/CD,
+  резервные копии и российские требования к хранению данных.'
+concepts:
+- id: infra.hosting-types
+  title: 'Виды хостинга: shared, VPS, облако'
+- id: infra.hosting-choice
+  title: Как выбрать хостинг под проект и бюджет
+- id: infra.dns-in-practice
+  title: 'Домен и DNS на практике: A, AAAA, CNAME, MX, TXT, TTL'
+- id: infra.email-dns
+  title: 'Почта домена: MX, SPF, DKIM, DMARC'
+- id: infra.tls-certificates
+  title: Сертификаты TLS и Let's Encrypt
+- id: infra.cdn
+  title: 'CDN: кэш у границы сети'
+- id: infra.serverless-edge
+  title: Serverless и edge-функции
+- id: infra.containers
+  title: 'Контейнеры и Docker: образ, контейнер, том'
+- id: infra.dockerfile-compose
+  title: Dockerfile и Compose
+- id: infra.kubernetes
+  title: Kubernetes простыми словами
+- id: infra.when-not-k8s
+  title: Когда оркестратор не нужен
+- id: infra.ci-cd
+  title: 'CI/CD: проверка и выкладка по коммиту'
+- id: infra.backups
+  title: 'Резервные копии: 3-2-1 и проверка восстановления'
+- id: infra.monitoring
+  title: 'Мониторинг и алерты: доступность, ошибки, метрики'
+- id: infra.data-localisation-ru
+  title: Локализация данных и российские провайдеры
+lessons:
+- id: 09-infra/01-hosting
+  order: 1
+  title: 'Где живёт сайт: от виртуального хостинга до облака'
+  summary: 'Зачем: вы различите shared-хостинг, VPS, выделенный сервер, облако и статический хостинг, сможете оценить цену
+    и трудозатраты каждого и выбрать место для своего сайта (эпоха 3 — хостинг и FTP, эпоха 6 — деплой на CDN).'
+  minutes: 15
+  teaches:
+  - infra.hosting-types
+  - infra.hosting-choice
+  requires:
+  - net.http-request-response
+  - server.web-server
+  - server.static-vs-dynamic
+  - cms.choosing-stack
+  diagram: 'Лестница абстракции: ступени shared → VPS → выделенный → облако → статический хостинг. Ползунки «трафик» и «ваше
+    время» сдвигают цену и ответственность; на каждой ступени подсвечивается, что обслуживаете вы, а что провайдер.'
+  practice: 'Эпоха 3 (2010) и эпоха 6 (2022). Человек выбирает размещение для своего проекта по стеку, выбранному в части
+    8: заполняет карточку «где живёт сайт» (тип, провайдер, регион дата-центра, цена в год, кто отвечает за обновления) для
+    brief.mainAction и числа посетителей.'
+  checks:
+  - Тип хостинга согласован с выбранным в части 8 стеком (генератор — статический хостинг, WordPress — shared или VPS).
+  - Указан регион дата-центра и причина выбора.
+  - Есть цена в год и расшифровка, что в неё входит.
+  - Названо, кто в вашем проекте отвечает за обновления сервера.
+  sources:
+  - title: 'MDN: What is a web server?'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_web_server
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Википедия: Хостинг'
+    url: https://ru.wikipedia.org/wiki/Хостинг
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  - title: 'Yandex Cloud: документация (обзор)'
+    url: https://yandex.cloud/ru/docs/overview/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: Timeweb Cloud
+    url: https://timeweb.cloud/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos: []
+- id: 09-infra/02-domain-dns
+  order: 2
+  title: Домен и DNS на практике
+  summary: 'Зачем: вы настроите записи A, CNAME, MX и TXT для своего домена в учебной панели, поймёте TTL и задержку при переносе,
+    сможете перенести сайт на другой хостинг без простоя и настроить почту на домене с SPF, DKIM и DMARC.'
+  minutes: 20
+  teaches:
+  - infra.dns-in-practice
+  - infra.email-dns
+  requires:
+  - net.dns-resolution
+  - net.domain-names
+  - infra.hosting-types
+  diagram: 'Панель DNS-зоны с живым «резолвером»: правишь запись и TTL, симулятор показывает, кто из посетителей видит старый
+    адрес, кто новый; отдельная вкладка проверяет письмо с домена (SPF/DKIM/DMARC) на попадание в спам.'
+  practice: 'Эпоха 3 (2010) → эпоха 6 (2022). Человек пишет зону для своего домена: адрес сайта, www, почта и подтверждение
+    владения (TXT), затем план переезда на другой хостинг с понижением TTL заранее. Язык и поддомены — по brief.languages.'
+  checks:
+  - Зона содержит запись для корневого домена и для www, обе ведут на один сайт.
+  - Для каждого языка из brief.languages решено, поддомен это, каталог или отдельный домен, и запись для него есть.
+  - TTL перед переездом понижен и возвращён после, порядок шагов верный.
+  - Для почты на домене есть MX, SPF и DMARC.
+  - Домен принадлежит регистратору, для .ru указан учёт требований к данным администратора.
+  sources:
+  - title: 'MDN: What is a domain name?'
+    url: https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_domain_name
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'Cloudflare Pages: документация (подключение домена)'
+    url: https://developers.cloudflare.com/pages/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: Timeweb Cloud
+    url: https://timeweb.cloud/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos: []
+- id: 09-infra/03-tls
+  order: 3
+  title: 'HTTPS на практике: сертификаты и Let''s Encrypt'
+  summary: 'Зачем: вы поймёте, что именно подтверждает сертификат, как Let''s Encrypt выдаёт его бесплатно и обновляет сам,
+    и сможете включить HTTPS на своём сайте и исправить типичные ошибки (смешанное содержимое, истёкший срок).'
+  minutes: 15
+  teaches:
+  - infra.tls-certificates
+  requires:
+  - net.tls
+  - net.http-request-response
+  - infra.dns-in-practice
+  diagram: 'Рукопожатие: пошаговая анимация запроса сертификата через ACME (вызов по HTTP или DNS), с кнопкой «сломать»: сертификат
+    истёк, домен не совпадает, цепочка неполная — браузер показывает, что увидит посетитель.'
+  practice: Эпоха 6 (2022). Человек в песочнице включает HTTPS для адреса своего проекта, перенаправляет http на https, проверяет,
+    что все ссылки на картинки и скрипты на странице безопасные; решает, нужен ли сертификат для поддоменов из brief.languages.
+  checks:
+  - Адрес сайта открывается по https, а http перенаправляется на него.
+  - Нет ресурсов, загружаемых по http.
+  - Для каждого поддомена, нужного по brief.languages, сертификат есть или есть wildcard.
+  - Описано, как обновляется сертификат и что происходит при ошибке обновления.
+  sources:
+  - title: 'Let''s Encrypt: How It Works'
+    url: https://letsencrypt.org/how-it-works/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Let''s Encrypt: Documentation'
+    url: https://letsencrypt.org/docs/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'MDN: Transport Layer Security'
+    url: https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  videos: []
+- id: 09-infra/04-cdn-edge
+  order: 4
+  title: CDN, serverless и edge
+  summary: 'Зачем: вы поймёте, как CDN приближает сайт к посетителю и как кэшировать страницу, а как — нет; узнаете, что такое
+    функция без сервера и когда на границе сети стоит запустить небольшой код (форма, редирект, проверка), и применить это
+    к главному действию вашего проекта.'
+  minutes: 20
+  teaches:
+  - infra.cdn
+  - infra.serverless-edge
+  requires:
+  - net.http-status-headers
+  - net.http-request-response
+  - infra.hosting-types
+  diagram: 'Карта мира с посетителями и точками присутствия CDN: щёлкаешь по городу — видишь путь запроса, попадание или промах
+    в кэше и время ответа; переключатель «статика / функция на границе» показывает, где выполняется код.'
+  practice: 'Эпоха 6 (2022). Человек для страниц своего проекта (brief.sections) решает, что кэшируется (картинки, CSS, HTML),
+    на какой срок, а для brief.mainAction (форма, запись, расчёт) описывает функцию: что принимает, что отвечает, куда пишет;
+    учитывает посетителей из регионов, указанных в brief.'
+  checks:
+  - Для статических ресурсов указан срок кэша, для HTML — отдельное решение.
+  - Есть способ сбросить кэш после публикации.
+  - Функция для brief.mainAction проверяет входные данные и не хранит секреты в коде страницы.
+  - Указан регион работы функции и причина, если принимаются персональные данные.
+  sources:
+  - title: 'MDN: Glossary — CDN'
+    url: https://developer.mozilla.org/en-US/docs/Glossary/CDN
+    licence: CC-BY-SA
+    kind: docs
+    lang: en
+  - title: 'web.dev: Content delivery networks (CDN)'
+    url: https://web.dev/articles/content-delivery-networks
+    licence: CC-BY
+    kind: article
+    lang: en
+  - title: 'Cloudflare Workers: документация'
+    url: https://developers.cloudflare.com/workers/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Cloudflare Pages: документация'
+    url: https://developers.cloudflare.com/pages/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []
+- id: 09-infra/05-docker
+  order: 5
+  title: Контейнеры и Docker
+  summary: 'Зачем: вы поймёте, что такое образ и контейнер (по аналогии с транспортным контейнером), запустите веб-сервер
+    с вашим сайтом в симуляторе Docker и сможете описать сборку сайта в Dockerfile и Compose.'
+  minutes: 25
+  teaches:
+  - infra.containers
+  - infra.dockerfile-compose
+  requires:
+  - server.web-server
+  - infra.hosting-types
+  - cms.static-site-generator
+  diagram: 'Симулятор терминала Docker в браузере: команды build, run, ps, logs, stop; слева слои образа складываются, справа
+    контейнеры запускаются и останавливаются; аналогия «контейнер на судне» подсвечивает изоляцию.'
+  practice: Эпоха 6 (2022). Человек в симуляторе пишет Dockerfile, который берёт собранный сайт (страницы по brief.sections)
+    и отдаёт его веб-сервером, затем Compose-файл с сайтом и, если нужно для brief.mainAction, с небольшой базой или функцией.
+  checks:
+  - Dockerfile копирует собранные файлы и открывает порт, на котором отвечает сервер.
+  - Секреты (ключи, пароли) вынесены в переменные окружения, не записаны в образ.
+  - Данные, которые не должны теряться (база заявок из brief.mainAction), лежат на томе.
+  - Контейнер запускается в симуляторе, а команда ps показывает его работающим.
+  sources:
+  - title: 'Docker Docs: What is Docker? (overview)'
+    url: https://docs.docker.com/get-started/docker-overview/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Docker Docs: Get started'
+    url: https://docs.docker.com/get-started/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Википедия: Docker'
+    url: https://ru.wikipedia.org/wiki/Docker
+    licence: CC-BY-SA
+    kind: article
+    lang: ru
+  - title: The Twelve-Factor App (на русском)
+    url: https://12factor.net/ru/
+    licence: proprietary-link
+    kind: article
+    lang: ru
+  videos:
+  - title: 'Введение в Docker: контейнеры, изоляция и первые шаги (OTUS)'
+    url: https://www.youtube.com/watch?v=w0Q3jVKzvQQ
+    lang: ru
+  - title: 'Уроки Docker для начинающих / #1'
+    url: https://www.youtube.com/watch?v=dNS61T4MmlM
+    lang: ru
+- id: 09-infra/06-kubernetes
+  order: 6
+  title: Kubernetes простыми словами — и когда он не нужен
+  summary: 'Зачем: вы поймёте, что делает оркестратор (держит нужное число копий, перезапускает упавшее, обновляет без простоя),
+    узнаете слова pod, deployment, service, ingress, и сможете честно ответить, нужен ли он вашему проекту — почти всегда
+    нет.'
+  minutes: 15
+  teaches:
+  - infra.kubernetes
+  - infra.when-not-k8s
+  requires:
+  - infra.containers
+  - infra.hosting-choice
+  diagram: 'Диспетчер аэропорта: узлы — взлётные полосы, контейнеры — самолёты; кнопки «упал узел», «пришёл поток посетителей»,
+    «выкатить новую версию» — оркестратор пересаживает и размножает контейнеры. Ползунок «размер проекта» показывает точку,
+    где ручное управление дешевле.'
+  practice: 'Эпоха 6 (2022). Человек оценивает свой проект: число посетителей, число сервисов, допустимый простой (из brief.mainAction),
+    команда — и пишет вывод «оркестратор нужен / не нужен» с планом: статический хостинг, один VPS с Compose или управляемый
+    кластер.'
+  checks:
+  - Вывод опирается на число сервисов и допустимый простой, указанные человеком.
+  - Назван минимум один дешёвый вариант без Kubernetes для этого проекта.
+  - Указано, кто будет эксплуатировать кластер, если выбран он.
+  - Названы три понятия Kubernetes в применении к проекту (например, что здесь pod, что service).
+  sources:
+  - title: 'Kubernetes: Overview'
+    url: https://kubernetes.io/docs/concepts/overview/
+    licence: CC-BY
+    kind: docs
+    lang: en
+  - title: 'Kubernetes: Что такое Kubernetes?'
+    url: https://kubernetes.io/ru/docs/concepts/overview/what-is-kubernetes/
+    licence: CC-BY
+    kind: docs
+    lang: ru
+  - title: 'Yandex Cloud: документация (обзор)'
+    url: https://yandex.cloud/ru/docs/overview/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos:
+  - title: 'Kubernetes простыми словами для каждого: что это такое и зачем он нужен'
+    url: https://www.youtube.com/watch?v=axjJBEaiXrQ
+    lang: ru
+  - title: 'ITSumma / Евгений Потапов: зачем и когда бизнесу нужен Kubernetes?'
+    url: https://www.youtube.com/watch?v=ONKQozT023o
+    lang: ru
+- id: 09-infra/07-ci-cd
+  order: 7
+  title: 'CI/CD: выкладка по коммиту'
+  summary: 'Зачем: вы опишете конвейер, который при каждом изменении проверяет сайт, собирает его и выкладывает на хостинг,
+    и поймёте, как откатить плохую версию; это превращает «залить по FTP» эпохи 3 в безопасный релиз эпохи 6.'
+  minutes: 20
+  teaches:
+  - infra.ci-cd
+  requires:
+  - cms.build-webhook-rebuild
+  - infra.dockerfile-compose
+  - infra.hosting-types
+  diagram: 'Конвейер из станций: коммит → проверки → сборка → предпросмотр → выкладка; по клику любую станцию «заклинивает»
+    (ссылка битая, тест красный), видно, что дальше не идёт и что уведомление придёт в чат.'
+  practice: 'Эпоха 6 (2022). Человек пишет файл конвейера для своего проекта (в песочнице): шаги проверки ссылок и валидации
+    HTML, сборки по brief.sections и выкладки; добавляет шаг, который проверяет наличие страницы согласия на обработку данных,
+    если в brief есть форма.'
+  checks:
+  - Конвейер запускается на каждое изменение в основной ветке.
+  - Выкладка идёт только после успешных проверок.
+  - Секреты хранятся в настройках сервиса, а не в репозитории.
+  - Для каждой страницы секции из brief.sections проверяется, что она собирается.
+  - 'Описан откат: как вернуть предыдущую версию.'
+  sources:
+  - title: 'GitHub Docs: Understanding GitHub Actions'
+    url: https://docs.github.com/en/actions/about-github-actions/understanding-github-actions
+    licence: CC-BY
+    kind: docs
+    lang: en
+  - title: 'GitLab Docs: CI/CD'
+    url: https://docs.gitlab.com/ci/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: The Twelve-Factor App (на русском)
+    url: https://12factor.net/ru/
+    licence: proprietary-link
+    kind: article
+    lang: ru
+  - title: 'Cloudflare Pages: документация'
+    url: https://developers.cloudflare.com/pages/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  videos: []
+- id: 09-infra/08-backups-monitoring-ru
+  order: 8
+  title: Копии, мониторинг и российские требования к данным
+  summary: 'Зачем: вы составите план «что если сайт упал или данные потеряны» — резервные копии по правилу 3-2-1, проверка
+    восстановления, мониторинг доступности — и поймёте, какие данные посетителей по закону должны храниться в России и как
+    выбирать провайдера.'
+  minutes: 25
+  teaches:
+  - infra.backups
+  - infra.monitoring
+  - infra.data-localisation-ru
+  requires:
+  - infra.hosting-types
+  - infra.ci-cd
+  - data.privacy-by-design
+  diagram: 'Таймлайн инцидента: ползунок времени от «сайт упал» до «восстановлен»; сравнивается план с копией на том же сервере,
+    копия в другом регионе и без копии; рядом график доступности с алертом.'
+  practice: 'Эпоха 6 (2022). Человек составляет паспорт эксплуатации своего проекта: что копируется (файлы, база, содержимое
+    CMS), как часто и куда, проверка восстановления; что мониторится и кому приходит алерт; где хранятся персональные данные
+    из форм brief.mainAction и какого провайдера он выбирает для них.'
+  checks:
+  - Копии лежат минимум в двух разных местах, одно — вне основного сервера.
+  - Указана периодичность и срок хранения копий и дата проверки восстановления.
+  - Мониторинг проверяет главную страницу и страницу действия из brief.mainAction.
+  - Определено, кому приходит алерт и как быстро нужно ответить.
+  - Хранение первичной записи персональных данных граждан РФ указано в российском дата-центре, провайдер назван.
+  sources:
+  - title: 'Prometheus: Overview'
+    url: https://prometheus.io/docs/introduction/overview/
+    licence: proprietary-link
+    kind: docs
+    lang: en
+  - title: 'Google SRE Book: Monitoring Distributed Systems'
+    url: https://sre.google/sre-book/monitoring-distributed-systems/
+    licence: link-only
+    kind: book
+    lang: en
+  - title: Федеральный закон № 152-ФЗ «О персональных данных» (КонсультантПлюс)
+    url: https://www.consultant.ru/document/cons_doc_LAW_61801/
+    licence: proprietary-link
+    kind: spec
+    lang: ru
+  - title: 'Роскомнадзор: портал персональных данных'
+    url: https://pd.rkn.gov.ru/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  - title: 'Yandex Cloud: документация (обзор)'
+    url: https://yandex.cloud/ru/docs/overview/
+    licence: proprietary-link
+    kind: docs
+    lang: ru
+  videos: []
