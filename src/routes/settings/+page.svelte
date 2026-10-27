@@ -65,15 +65,21 @@
 		} else setTheme(v);
 	}
 
-	let saveTimer: ReturnType<typeof setTimeout> | undefined;
+	// One timer per field: a single shared one dropped a field's last edit when the person moved on
+	// to the next field within the debounce.
+	const saveTimers = new Map<string, ReturnType<typeof setTimeout>>();
 	function saveField(field: string, value: string) {
 		own[field] = value;
-		clearTimeout(saveTimer);
-		saveTimer = setTimeout(async () => {
-			const { db, progress } = await import('#lib/learner.ts');
-			await progress.setPersona(await db(), field, value.trim());
-			projectNote = t('settings.saved');
-		}, 400);
+		clearTimeout(saveTimers.get(field));
+		saveTimers.set(
+			field,
+			setTimeout(async () => {
+				saveTimers.delete(field);
+				const { db, progress } = await import('#lib/learner.ts');
+				await progress.setPersona(await db(), field, value.trim());
+				projectNote = t('settings.saved');
+			}, 400)
+		);
 	}
 
 	async function saveKind(k: Kind) {
@@ -83,8 +89,13 @@
 		projectNote = t('settings.saved');
 	}
 
+	/** «Вернуть пример» erases what the person typed, so it asks first. */
+	let resetting = $state(false);
 	async function resetProject() {
-		const { db, progress } = await import('#lib/learner.ts');
+		resetting = false;
+		for (const timer of saveTimers.values()) clearTimeout(timer);
+		saveTimers.clear();
+		const { db } = await import('#lib/learner.ts');
 		const d = await db();
 		await d.clear('persona');
 		own = Object.fromEntries(EDITABLE.map(({ key }) => [key, '']));
@@ -221,7 +232,15 @@
 			{/each}
 		</div>
 		<div class="row">
-			<button type="button" class="quiet" onclick={resetProject}>{t('settings.project.reset')}</button>
+			{#if resetting}
+				<span class="ask" role="alert">
+					{t('settings.project.reset.confirm')}
+					<button type="button" class="secondary" onclick={resetProject}>{t('settings.project.reset.yes')}</button>
+					<button type="button" class="quiet" onclick={() => (resetting = false)}>{t('practice.cancel')}</button>
+				</span>
+			{:else}
+				<button type="button" class="quiet" onclick={() => (resetting = true)}>{t('settings.project.reset')}</button>
+			{/if}
 			{#if projectNote}<span class="status" role="status">{projectNote}</span>{/if}
 		</div>
 	</section>
@@ -357,6 +376,14 @@
 	.file {
 		display: grid;
 		gap: var(--space-2);
+	}
+	.ask {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-3);
+		color: var(--text-body);
+		font-size: var(--text-body-sm);
 	}
 	.preview {
 		max-width: var(--measure);
