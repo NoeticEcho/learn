@@ -1,0 +1,1153 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/06-why-frameworks',
+		part: 5,
+		order: 6,
+		title: 'Зачем нужны фреймворки',
+		summary: 'Ручной код с DOM работает, пока на странице немного мест, которые надо согласовывать. После урока вы видите, где он начинает ломаться, понимаете, что решают React, Vue, Svelte и Angular и чего это стоит посетителю, и можете спокойно ответить «а нужен ли мне фреймворк вообще».',
+		minutes: 25,
+		teaches: ['js-why-frameworks', 'js-reactivity'],
+		requires: ['js-dom', 'js-events', 'js-modules'],
+		practice: {
+			id: 'js-framework-notes',
+			title: 'Нужен ли фреймворку вашему проекту: разбор своей страницы',
+			task: 'Найдите на странице три места, где вид и состояние приходится согласовывать вручную (в скриптах выше они есть: счётчик, быстрый переход, меню, поиск), и заполните таблицу «Где страница согласуется вручную»: что с чем согласуется, как это сделано сейчас и как было бы при реактивном подходе. Каждая клетка это живая фраза, а не «…». Затем напишите вывод для вашего проекта (абзац «Вывод»): нужен ли ему фреймворк или не нужен, с учётом числа разделов и пунктов из брифа (запишите эти числа). И в последнем абзаце назовите вес ваших скриптов в килобайтах (приблизительно, по вкладке «Сеть» или по размеру файла) и то, как он влияет на первую загрузку.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="framework-notes">
+      <h2>Где страница согласуется вручную</h2>
+      <table>
+        <tr><th>Что с чем надо согласовать</th><th>Как это сделано сейчас</th><th>Как проще при реактивном подходе</th></tr>
+        <tr class="sync"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="sync"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="sync"><td>…</td><td>…</td><td>…</td></tr>
+      </table>
+      <h3>Вывод для моего проекта</h3>
+      <p id="verdict">…</p>
+      <p id="js-weight">…</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="framework-notes">
+      <h2>Где страница согласуется вручную</h2>
+      <table>
+        <tr><th>Что с чем надо согласовать</th><th>Как это сделано сейчас</th><th>Как проще при реактивном подходе</th></tr>
+        <tr class="sync"><td>Список карточек и счётчик «Показано: N из M»</td><td>В обработчике поиска я сам пересчитываю shown и записываю текст счётчика, и ещё раз записываю его после загрузки с сервера: два места, которые легко рассинхронизировать.</td><td>Счётчик объявлен как значение, вычисляемое из списка и запроса, поэтому он обновляется сам, где бы ни менялся список.</td></tr>
+        <tr class="sync"><td>Список карточек и быстрый переход</td><td>Быстрый переход построен один раз при открытии страницы, и после загрузки списка с сервера в нём нет нового пункта.</td><td>Карточки и ссылки рисуются из одного массива, а значит разойтись не могут.</td></tr>
+        <tr class="sync"><td>Кнопка меню и список разделов</td><td>Атрибут aria-expanded и свойство hidden меняются двумя командами в setMenu. Забуду одну, и диктор сообщит посетителю неправду.</td><td>Есть одно состояние open, а aria-expanded и hidden выводятся из него и меняются вместе.</td></tr>
+      </table>
+      <h3>Вывод для моего проекта</h3>
+      <p id="verdict">Для моего проекта (5 разделов и 4 пункта) фреймворк пока не нужен: согласовывать вручную приходится 3 места, и они укладываются в сотню строк. Пересмотрю, если пунктов станет заметно больше или появится личный кабинет с общим состоянием.</p>
+      <p id="js-weight">Мои скрипты весят около 6 кБ, поэтому первая загрузка почти не замедлена. Фреймворк добавил бы к ним ещё десятки килобайт, которые телефону пришлось бы скачать и разобрать до первого показа.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'notes-section',
+					kind: 'exists',
+					selector: '#framework-notes'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#framework-notes',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'three-places',
+					kind: 'count',
+					selector: '#framework-notes tr.sync',
+					min: 3
+				},
+				{
+					id: 'verdict-decides',
+					kind: 'text',
+					selector: '#verdict',
+					matches: '[Нн]ужен|[Нн]ужны|[Нн]ужна'
+				},
+				{
+					id: 'verdict-numbers',
+					kind: 'text',
+					selector: '#verdict',
+					matches: '\\d'
+				},
+				{
+					id: 'weight-number',
+					kind: 'text',
+					selector: '#js-weight',
+					matches: '\\d+\\s*(?:кБ|КБ|кб|kB|KB|Кб)'
+				},
+				{
+					id: 'weight-first-load',
+					kind: 'text',
+					selector: '#js-weight',
+					matches: 'загрузк|скорост|телефон'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что такое реактивность в интерфейсе?',
+				options: [
+					'Вид страницы выводится из состояния: вы меняете данные, а нужные части экрана обновляются сами',
+					'Страница реагирует на клики быстрее обычного',
+					'Скрипт выполняется в отдельном потоке'
+				],
+				answer: 0,
+				why: [
+					'Да. Вместо «найди этот элемент и перепиши его текст» вы пишете «этот текст равен вот этому значению». Остальное делает фреймворк, и забыть обновить одно из мест уже нельзя.',
+					'Нет: скорость тут ни при чём, речь о способе связи данных и экрана.',
+					'Нет: JavaScript в браузере остаётся однопоточным, реактивность этого не меняет.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините фреймворк с его особенностью',
+				pairs: [
+					['React', 'компоненты и JSX, выпущен Facebook в 2013 году'],
+					['Vue', 'шаблоны и реактивные данные, автор Эван Ю, 2014 год'],
+					[
+						'Svelte',
+						'компилятор: превращает компоненты в точечный обычный JavaScript'
+					],
+					[
+						'Angular',
+						'полный каркас от Google на TypeScript, со своей структурой проекта'
+					]
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Для каких сайтов фреймворк, скорее всего, лишний?',
+				options: [
+					'Сайт-визитка с формой и парой интерактивных блоков',
+					'Лендинг с меню, поиском и отправкой заявки',
+					'Личный кабинет с десятками экранов и общим состоянием',
+					'Редактор, где несколько человек правят документ одновременно'
+				],
+				answer: [0, 1],
+				why: [
+					'Да: интерактива немного, ручной код короче, чем фреймворк и сборка вместе взятые.',
+					'Да: несколько мест согласования легко удержать в голове, а страница остаётся лёгкой.',
+					'Нет: десятки экранов с общим состоянием это то, ради чего фреймворки придуманы.',
+					'Нет: синхронизация многих частей экрана с меняющимися данными как раз тот случай, где ручной код тонет.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что посетитель «платит» за фреймворк в первую очередь?',
+				options: [
+					'Вес JavaScript, который надо скачать, разобрать и выполнить, особенно на слабом телефоне',
+					'Ничего: код выполняет сервер',
+					'Только деньги за лицензию'
+				],
+				answer: 0,
+				why: [
+					'Да. Килобайт скрипта дороже килобайта картинки, потому что его ещё предстоит разобрать и запустить, а пока он не отработал, страница может быть «мёртвой». Поэтому фреймворк берут, когда он экономит больше, чем стоит.',
+					'Нет: в браузере выполняется код страницы, и фреймворк приезжает вместе с ней. (Бывает рендеринг на сервере, но скрипт всё равно доезжает до браузера.)',
+					'Нет: основные фреймворки бесплатны. Цена в весе и в сложности проекта.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Какая ситуация первой «ломает» ручную работу с DOM?',
+				options: [
+					'Одно и то же значение показано в нескольких местах, и каждое надо обновить при любом изменении',
+					'Страница стала длиннее трёх экранов',
+					'На странице появился второй абзац'
+				],
+				answer: 0,
+				why: [
+					'Да. Пока место одно, обновить его легко. Когда их пять, а правил, которые меняют значение, три, число комбинаций растёт, и где-нибудь обязательно забудут. Это и есть ошибка синхронизации.',
+					'Нет: длина страницы сама по себе ничего не ломает.',
+					'Нет: статичный текст ручного кода не касается.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-why-fw',
+				front: 'Какую задачу решают фреймворки?',
+				back: 'Согласование данных и экрана: вы описываете, как выглядит интерфейс при данном состоянии, а фреймворк сам обновляет нужные части. Плюс компоненты, маршруты и сборка в комплекте.'
+			},
+			{
+				id: 'js-reactivity',
+				front: 'Что такое реактивность?',
+				back: 'Вид выводится из состояния: изменили значение, и всё, что от него зависит, обновилось само. Не надо помнить каждое место, где значение показано.'
+			},
+			{
+				id: 'js-fw-cost',
+				front: 'Чем фреймворк платит посетитель?',
+				back: 'Весом JavaScript: его надо скачать, разобрать и выполнить, а пока он не отработал, страница может быть не интерактивной. На слабом телефоне это заметно.'
+			},
+			{
+				id: 'js-fw-landscape',
+				front: 'Назовите главные фреймворки и их идею',
+				back: 'React: компоненты и JSX (2013). Vue: шаблоны и реактивность (2014). Svelte: компилятор вместо тяжёлой библиотеки. Angular: полный каркас на TypeScript от Google. Next.js, Nuxt, SvelteKit и Astro: надстройки с маршрутами и серверным рендерингом.'
+			},
+			{
+				id: 'js-fw-need',
+				front: 'Как решить, нужен ли фреймворк?',
+				back: 'Посчитать, сколько мест на странице надо согласовывать и как часто. Мало мест и немного интерактива: хватит чистого JavaScript. Много экранов, общее состояние, длинные списки: фреймворк.'
+			}
+		],
+		sources: [
+			{
+				title: 'React: Thinking in React',
+				url: 'https://react.dev/learn/thinking-in-react',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Vue.js: Introduction',
+				url: 'https://vuejs.org/guide/introduction.html',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Svelte: Overview',
+				url: 'https://svelte.dev/docs/svelte/overview',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: Introduction to client-side frameworks',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Frameworks_libraries/Introduction',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'HTTP Archive Web Almanac: JavaScript',
+				url: 'https://almanac.httparchive.org/en/2024/javascript',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'В этом уроке вы кода не пишете, а смотрите на собственную страницу глазами человека, которому её поддерживать. Найдите три места, где страницу приходится «сшивать» вручную, и честно решите, нужен ли ей фреймворк.',
+			hints: [
+				'Три места подскажет ваш код. Счётчик «Показано: N из M» пишется и в обработчике поиска, и после загрузки. Быстрый переход строится один раз. Кнопка меню меняет и hidden, и aria-expanded.',
+				'Для каждой строки напишите: что с чем согласуется (две вещи на странице), как это сделано сейчас (одной-двумя фразами по вашему скрипту) и как было бы проще при реактивном подходе.',
+				'Вывод начните со слов «Нужен» или «Не нужен» и сразу дайте числа из брифа: сколько у вас разделов и пунктов и сколько мест согласования.',
+				'Вес скриптов прикиньте по вкладке «Сеть» (колонка размера) или по размеру файлов. Напишите число в кБ и фразу про первую загрузку на медленном телефоне.'
+			],
+			mistakes: {
+				'notes-section': 'Блок «Где страница согласуется вручную» (section id="framework-notes") пропал. Верните его.',
+				'no-blanks': 'В таблице и в абзацах осталось многоточие «…». Замените каждое осмысленной фразой.',
+				'three-places': 'В таблице нужно не меньше трёх строк с классом sync: три места ручного согласования.',
+				'verdict-decides': 'В выводе нужно прямо сказать: «нужен» или «не нужен» фреймворк вашему проекту.',
+				'verdict-numbers': 'Вывод должен опираться на числа из брифа: сколько разделов, сколько пунктов, сколько мест согласования.',
+				'weight-number': 'Назовите вес ваших скриптов числом и единицей: например «около 6 кБ».',
+				'weight-first-load': 'Напишите, как вес скриптов влияет на первую загрузку страницы, особенно на телефоне.'
+			},
+			outro: 'Вы получили то, что умеет делать хороший разработчик: не «берём фреймворк, потому что все берут», а «вот три места, вот цена, вот решение». К этому ответу можно вернуться, когда сайт вырастет.'
+		},
+		say: {
+			React: 'риэкт',
+			Vue: 'вью',
+			Svelte: 'свелт',
+			Angular: 'энгуляр',
+			JSX: 'джей-эс-икс',
+			TypeScript: 'тайпскрипт',
+			'Next.js': 'некст-джей-эс',
+			Nuxt: 'накст',
+			SvelteKit: 'свелт-кит',
+			Astro: 'астро',
+			jQuery: 'джей-квери',
+			Facebook: 'фейсбук'
+		}
+	};
+</script>
+
+<script>
+	import SyncDemo from '../../diagrams/SyncDemo.svelte';
+</script>
+
+## Когда ручной код начинает сыпаться
+
+За четыре урока вы написали для своей страницы немало: сводку, быстрый переход, меню, поиск, загрузку списка. Каждый кусок работал. Но заметили ли вы, как в уроке про fetch в быстром переходе не оказалось нового пункта? Скрипт построил его при открытии страницы, а потом список поменялся, и никто об этом не сообщил.
+
+Это и есть главная трудность интерфейсов. Состояние (какие пункты, что введено в поиск, открыто ли меню) живёт в одном месте, а показано оно в нескольких: в списке, в счётчике, в ссылках, в атрибуте `aria-expanded`. Каждый раз, когда состояние меняется, надо обновить все места, которые его показывают. Пока их два, это легко. Когда их пять, а способов поменять состояние три, число сочетаний растёт, и где-нибудь обязательно забывают. Получается страница, которая показывает «3 пункта» в счётчике и пять карточек в списке.
+
+В ручном коде это выглядит так:
+
+```js
+function addItem(item) {
+  items.push(item);
+  list.append(makeCard(item));            // 1: список
+  counter.textContent = items.length;     // 2: счётчик
+  badge.textContent = items.length;       // 3: значок в меню
+  quickNav.append(makeLink(item));        // 4: быстрый переход
+  // …и ничего не напомнит, если забыть пятое
+}
+```
+
+## Что придумали вместо
+
+Идея, к которой пришли разные команды, одна: **вид выводится из состояния**. Вы не пишете «найди счётчик и перепиши его», а объявляете: «счётчик равен длине списка». Всё остальное берёт на себя библиотека: когда список меняется, она сама находит, что надо обновить. Такой подход называют **реактивностью**.
+
+Рядом с ним почти всегда идёт вторая идея: **компонент**. Кусок интерфейса (карточка, меню, форма) оформляется как самостоятельная единица со своими данными, разметкой и оформлением, и из таких кусков собирается страница. Вы видели это в уроке про дизайн-системы, а здесь она становится кодом.
+
+Вместе с ними фреймворки обычно приносят маршрутизацию (какая страница по какому адресу), управление общим состоянием, сборку и готовую экосистему плагинов и компонентов.
+
+## Кто есть кто
+
+Фреймворков много, и они отличаются способом реализации той же идеи.
+
+- **React** (Facebook, 2013) описывает интерфейс функциями-компонентами и записью JSX, похожей на HTML внутри JavaScript. Идея: вы всякий раз «рисуете» интерфейс заново, а библиотека сравнивает с прежним (так называемый виртуальный DOM) и меняет только отличия. Сегодня самый распространённый.
+- **Vue** (Эван Ю, 2014) любит шаблоны, близкие к HTML, и реактивные данные. Его считают самым мягким для входа.
+- **Angular** (Google; первый AngularJS в 2010, полностью переписан в 2016) полный каркас на TypeScript с собственной структурой проекта. Часто встречается в больших корпоративных системах.
+- **Svelte** (Рич Харрис, 2016) решает ту же задачу иначе: это компилятор. Он разбирает ваш компонент во время сборки и порождает минимальный обычный JavaScript, который обновляет нужные узлы напрямую, а тяжёлой библиотеки в браузере почти нет. Сам этот учебник написан на Svelte 5.
+- Над ними стоят **мета-фреймворки**: Next.js (над React), Nuxt (над Vue), SvelteKit (над Svelte), Astro. Они добавляют маршруты, отрисовку на сервере и выдачу готового HTML, о чём мы поговорим в части про генераторы сайтов и Jamstack.
+
+Вокруг фреймворков в 2016 году появилось выражение «усталость от JavaScript»: новые инструменты выходили быстрее, чем люди успевали их выучить. Полезно помнить, что у всех у них один и тот же корень: вид выводится из состояния.
+
+## Посмотрите, где растёт сложность
+
+Один и тот же счётчик пунктов показан в нескольких местах страницы. Выберите, сколько мест от него зависит, и добавляйте пункты. Сравните ручной вариант, в котором программист должен помнить каждое место, и реактивный, где число выводится из состояния:
+
+<SyncDemo />
+
+<details>
+<summary>Проверьте себя: что такое ошибка синхронизации?</summary>
+
+Ситуация, когда состояние поменялось, а одно из мест, которые его показывают, об этом не узнало: например, счётчик говорит «3», а карточек на экране пять.
+
+</details>
+
+## Цена
+
+Фреймворк не бесплатен, и платит за него не только разработчик, но и посетитель.
+
+- **Вес.** Библиотека и ваш код приезжают в браузер как JavaScript. Килобайт скрипта «дороже» килобайта картинки: картинку надо только показать, а скрипт сначала скачать, потом разобрать, потом выполнить. Пока он не выполнился, страница может быть красивой, но мёртвой: кнопки не нажимаются.
+- **Слабые устройства.** Телефон за пятнадцать тысяч рублей разбирает тот же скрипт в разы дольше вашего ноутбука. Отчёт Web Almanac из источников показывает, сколько JavaScript обычно весят страницы.
+- **Сложность.** Сборка, зависимости, обновления версий, способы хранить состояние: это отдельная работа, которая должна себя окупать.
+- **Поисковики и первый показ.** Страница, целиком рисуемая скриптом, пуста, пока скрипт не отработал. Современные поисковики это умеют, но дороже и хуже. Поэтому мета-фреймворки отдают готовый HTML сразу и «оживляют» его скриптом позже.
+
+## Когда фреймворк нужен, а когда нет
+
+Честные критерии, которые можно применить к любому проекту.
+
+**Скорее не нужен:** сайт-визитка, лендинг, блог, страница услуг: интерактива немного (меню, форма, поиск), мест согласования три-четыре, и всё помещается в голове. Чистый JavaScript плюс несколько модулей оставят страницу лёгкой.
+
+**Скорее нужен:** личный кабинет, магазин с корзиной, редактор, панель с графиками, всё, где много экранов, общее состояние и данные меняются сами. Здесь ручной код тонет в синхронизации, а фреймворк окупается.
+
+И третье, самое важное: решение можно пересмотреть. Начать на чистом JavaScript и перейти на фреймворк, когда место согласования десятое, нормальный путь.
+
+## Практика
+
+Вы на сайте эпохи 2019 года, где фреймворки уже давно общепринятые. Но давайте разберём не вообще, а свою страницу: сколько на ней мест, которые согласуются вручную, и нужен ли ей фреймворк.
+
+Таблица состоит из трёх колонок: **что с чем согласуется**, **как это сделано сейчас** и **как было бы при реактивном подходе**. Минимум три строки: всё, что вы писали в прошлых уроках, подойдёт. Дальше вывод: «нужен» или «не нужен», с числами из вашего брифа (сколько разделов, сколько пунктов). И вес ваших скриптов: подсчитайте приблизительно по вкладке «Сеть» или по размеру кода.
+
+Ответ «не нужен» тоже правильный и часто верный. Важнее, что он обоснован вашей страницей.
+
+## Что было не так раньше
+
+Когда фреймворков не было, всё писали вручную, а потом на jQuery, и большие страницы превращались в «спагетти»: десятки обработчиков, которые меняют друг другу элементы, и никто не помнит, что от чего зависит. В 2010 году появились первые каркасы (Backbone, AngularJS), потом React с идеей «интерфейс есть функция от состояния». Но и у новой эпохи был перегиб: сайт-визитку на пять страниц собирали на тяжёлом одностраничном приложении, которое на слабом телефоне открывалось десятки секунд, а поисковики видели пустую страницу.
+
+Верным осталось главное: вид выводится из состояния, а интерфейс собирается из компонентов. А лишнее — это тяжёлый инструмент там, где хватило бы лёгкого.

@@ -1,0 +1,1315 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/07-svelte-component',
+		part: 5,
+		order: 7,
+		title: 'Компонент на Svelte',
+		summary: 'Компонент — кусок интерфейса со своими данными, разметкой и оформлением. После урока вы читаете файл .svelte, понимаете руны $state, $derived и $props и переносите блок страницы в компонент: карточку и список с поиском.',
+		minutes: 30,
+		teaches: ['js-svelte-component'],
+		requires: ['js-reactivity', 'js-modules'],
+		practice: {
+			id: 'js-svelte-components',
+			title: 'Карточка и список вашего проекта как компоненты',
+			task: 'Песочница не собирает Svelte, поэтому компоненты вы пишете текстом, в полях блока «Компоненты страницы», как если бы они лежали в файлах. Заполните все «…». 1) ItemCard.svelte: получает item через let { item } = $props(), хранит в $state, раскрыт ли блок «Подробнее», выводит {item.title}, {item.price}, а по кнопке с aria-expanded показывает {item.text}. 2) ItemList.svelte: импортирует ItemCard, получает items через $props, хранит запрос в $state, а показанный список считает через $derived; поле поиска связано через bind:value; карточки выводит {#each … as item (item.title)} и на пустой список показывает сообщение через {:else}. 3) App.svelte: массив items с вашими пунктами из брифа и строка <ItemList {items} />. 4) Подсчитайте строки кода: вручную (ваши скрипты на странице) и в компонентах. 5) В абзаце про JavaScript напишите, что увидит посетитель без скрипта. Компоненты можно проверить в песочнице svelte.dev/playground.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="components">
+      <h2>Компоненты страницы</h2>
+      <p>Файл <code>ItemCard.svelte</code>: одна карточка.</p>
+      <textarea data-file="ItemCard.svelte" rows="14" cols="70" spellcheck="false">…<\/textarea>
+      <p>Файл <code>ItemList.svelte</code>: список с поиском.</p>
+      <textarea data-file="ItemList.svelte" rows="16" cols="70" spellcheck="false">…<\/textarea>
+      <p>Файл <code>App.svelte</code>: данные и сборка страницы.</p>
+      <textarea data-file="App.svelte" rows="10" cols="70" spellcheck="false">…<\/textarea>
+      <p id="lines">Строк кода: вручную …, в компонентах ….</p>
+      <p id="nojs">Без JavaScript: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="components">
+      <h2>Компоненты страницы</h2>
+      <p>Файл <code>ItemCard.svelte</code>: одна карточка.</p>
+      <textarea data-file="ItemCard.svelte" rows="14" cols="70" spellcheck="false"><script>
+  let { item } = $props();
+  let open = $state(false);
+<\/script>
+
+<article class="card">
+  <h3>{item.title}</h3>
+  <p class="price">{item.price}</p>
+  <button type="button" aria-expanded={open} onclick={() => (open = !open)}>Подробнее</button>
+  {#if open}
+    <p>{item.text}</p>
+  {/if}
+</article><\/textarea>
+      <p>Файл <code>ItemList.svelte</code>: список с поиском.</p>
+      <textarea data-file="ItemList.svelte" rows="16" cols="70" spellcheck="false"><script>
+  import ItemCard from './ItemCard.svelte';
+
+  let { items } = $props();
+  let query = $state('');
+  let shown = $derived(
+    items.filter((item) => item.title.toLowerCase().includes(query.trim().toLowerCase()))
+  );
+<\/script>
+
+<label>Найти в списке <input type="search" bind:value={query}></label>
+<p role="status">Показано: {shown.length} из {items.length}</p>
+
+<div class="cards">
+  {#each shown as item (item.title)}
+    <ItemCard {item} />
+  {:else}
+    <p>Ничего не нашлось.</p>
+  {/each}
+</div><\/textarea>
+      <p>Файл <code>App.svelte</code>: данные и сборка страницы.</p>
+      <textarea data-file="App.svelte" rows="10" cols="70" spellcheck="false"><script>
+  import ItemList from './ItemList.svelte';
+
+  const items = [
+    {{#each items}}{ title: '{{title}}', text: '{{text}}', price: '{{price}}' },
+    {{/each}}
+  ];
+<\/script>
+
+<ItemList {items} /><\/textarea>
+      <p id="lines">Строк кода: вручную 140, в компонентах 45.</p>
+      <p id="nojs">Без JavaScript: в проекте на SvelteKit список отрисуется на сервере и будет виден без поиска; в проекте на одном Vite пока не загрузится скрипт, страница пуста.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'components-section',
+					kind: 'exists',
+					selector: '#components'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#components',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'card-props',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: 'let\\s*\\{\\s*item\\s*\\}\\s*=\\s*\\$props\\(\\)'
+				},
+				{
+					id: 'card-state',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: '\\$state\\('
+				},
+				{
+					id: 'card-shows-data',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: '\\{item\\.title\\}[\\s\\S]*\\{item\\.text\\}|\\{item\\.text\\}[\\s\\S]*\\{item\\.title\\}'
+				},
+				{
+					id: 'card-button',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: '<button[^>]*aria-expanded[^>]*onclick|<button[^>]*onclick[^>]*aria-expanded'
+				},
+				{
+					id: 'no-raw-html',
+					kind: 'text',
+					selector: '#components',
+					matches: '^(?![\\s\\S]*\\{@html)'
+				},
+				{
+					id: 'list-imports-card',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: 'import\\s+ItemCard\\s+from\\s*[\'"]\\./ItemCard\\.svelte[\'"]'
+				},
+				{
+					id: 'list-state-derived',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '^(?=[\\s\\S]*\\$state\\()(?=[\\s\\S]*\\$derived)'
+				},
+				{
+					id: 'list-props',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '\\$props\\(\\)'
+				},
+				{
+					id: 'list-each',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '\\{#each\\s+\\w+\\s+as\\s+\\w+\\s*\\([^)]+\\)\\s*\\}'
+				},
+				{
+					id: 'list-empty',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '\\{:else\\}'
+				},
+				{
+					id: 'list-bind',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: 'bind:value'
+				},
+				{
+					id: 'list-uses-card',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '<ItemCard\\b'
+				},
+				{
+					id: 'app-imports-list',
+					kind: 'text',
+					selector: '#components textarea[data-file="App.svelte"]',
+					matches: 'import\\s+ItemList\\s+from\\s*[\'"]\\./ItemList\\.svelte[\'"]'
+				},
+				{
+					id: 'app-passes-items',
+					kind: 'text',
+					selector: '#components textarea[data-file="App.svelte"]',
+					matches: '<ItemList\\s+(?:\\{items\\}|items=\\{items\\})'
+				},
+				{
+					id: 'app-own-items',
+					kind: 'field',
+					selector: '#components textarea[data-file="App.svelte"]',
+					field: 'items[].title',
+					min: 2,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'lines-counted',
+					kind: 'text',
+					selector: '#lines',
+					matches: '\\d+\\D+\\d+'
+				},
+				{
+					id: 'nojs-answer',
+					kind: 'text',
+					selector: '#nojs',
+					matches: '[Бб]ез\\s+(?:JavaScript|скрипта)|отключ'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что делает строка let count = $state(0) в компоненте Svelte 5?',
+				options: [
+					'Объявляет реактивное состояние: когда count меняется, всё, что его показывает, обновляется само',
+					'Создаёт константу, которую нельзя менять',
+					'Запрашивает данные у сервера'
+				],
+				answer: 0,
+				why: [
+					'Да. $state это руна: слово, которое компилятор Svelte понимает особым образом. Присвоили count = count + 1, и в DOM поменялись только те узлы, что зависят от count.',
+					'Нет: для неизменяемого значения есть const. Смысл $state как раз в том, что значение меняется.',
+					'Нет: данные запрашивает fetch, а $state только хранит значение и следит за его изменением.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините руну с её смыслом',
+				pairs: [
+					['$state', 'значение, изменение которого обновляет экран'],
+					['$derived', 'значение, которое само пересчитывается из других'],
+					['$props', 'данные, которые компонент получает от родителя'],
+					[
+						'$effect',
+						'побочное действие после изменения, например запись в localStorage'
+					]
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Как передать пункт списка из ItemList в дочерний компонент ItemCard?',
+				options: [
+					'Через пропсы: в родителе <ItemCard {item} />, в потомке let { item } = $props()',
+					'Через глобальную переменную window.item',
+					'Через innerHTML: родитель вставляет разметку потомка строкой'
+				],
+				answer: 0,
+				why: [
+					'Да. Свойства компонента называют пропсами (props). Данные идут от родителя к потомку одним направлением, и понятно, откуда что берётся.',
+					'Нет: глобальные переменные ломают независимость компонентов, а в Svelte для этого есть пропсы.',
+					'Нет: так вы лишились бы реактивности и открыли дверь для XSS.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что делает Svelte на этапе сборки?',
+				options: [
+					'Превращает компонент в обычный JavaScript, который напрямую меняет нужные узлы',
+					'Ограничивает стили компонента его собственной разметкой',
+					'Отправляет посетителю компилятор, который собирает страницу на лету',
+					'Убирает неиспользуемые CSS-правила'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Да: в этом главное отличие Svelte, сборка делает работу, которую другие фреймворки делают в браузере.',
+					'Да: стили из <style> в компоненте по умолчанию относятся только к нему.',
+					'Нет: наоборот, компилятор работает у разработчика, а в браузер едет уже готовый код.',
+					'Да: правила, которым нет соответствия в разметке компонента, из результата удаляются.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Зачем в {#each shown as item (item.title)} указан ключ в скобках?',
+				options: [
+					'Чтобы Svelte знал, какой элемент какому пункту соответствует, когда список фильтруется или переставляется',
+					'Чтобы пункты нельзя было удалить',
+					'Это обязательный синтаксис без смысла'
+				],
+				answer: 0,
+				why: [
+					'Да. По ключу Svelte сопоставляет прежние элементы с новыми пунктами: оставшиеся не пересоздаются, и сохраняют своё состояние, например раскрытость «Подробнее».',
+					'Нет: ключ ничего не защищает.',
+					'Нет: без ключа список работает, но при перестановках состояния могут «переехать» на чужие карточки.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Чем {@html text} отличается от обычной вставки {text}?',
+				options: [
+					'{@html} разбирает строку как разметку, как innerHTML, поэтому для чужого текста опасен; {text} вставляет безопасный текст',
+					'{@html} быстрее и всегда лучше',
+					'Они одинаковы'
+				],
+				answer: 0,
+				why: [
+					'Да. Обычная вставка {text} превращается в textContent, и теги в строке остаются буквами. {@html} вставляет строку как разметку: используйте её только для кода, который целиком написали вы.',
+					'Нет: он не лучше, а опаснее.',
+					'Нет: разница принципиальная, это та же разница, что между textContent и innerHTML.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-svelte-runes',
+				front: 'Какие руны есть в Svelte 5 и что они делают?',
+				back: '$state: реактивное значение. $derived: значение, вычисляемое из других. $props: данные от родителя. $effect: побочное действие после изменения. Это слова, которые понимает компилятор.'
+			},
+			{
+				id: 'js-svelte-props',
+				front: 'Как компоненты обмениваются данными?',
+				back: 'Родитель передаёт данные потомку через пропсы (<Card {item} />), потомок берёт их через $props(). Данные идут вниз, а события обработчиками вверх.'
+			},
+			{
+				id: 'js-svelte-each',
+				front: 'Как вывести список в Svelte и зачем ключ?',
+				back: '{#each items as item (item.id)} … {:else} пусто {/each}. Ключ в скобках помогает Svelte сопоставить элементы с пунктами при фильтре и перестановке.'
+			},
+			{
+				id: 'js-svelte-compile',
+				front: 'Чем Svelte отличается от React и Vue?',
+				back: 'Это компилятор: на сборке он превращает компонент в обычный JavaScript, который меняет нужные узлы напрямую; в браузер не едет тяжёлая библиотека и нет виртуального DOM.'
+			},
+			{
+				id: 'js-svelte-kit',
+				front: 'Что такое SvelteKit?',
+				back: 'Мета-фреймворк над Svelte: маршруты по папкам, серверная отрисовка и подготовка страниц заранее, сборка на Vite. Этот учебник построен на нём.'
+			}
+		],
+		sources: [
+			{
+				title: 'Svelte: Introduction to runes',
+				url: 'https://svelte.dev/docs/svelte/what-are-runes',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Svelte Tutorial',
+				url: 'https://svelte.dev/tutorial/svelte/welcome-to-svelte',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'SvelteKit: Introduction',
+				url: 'https://svelte.dev/docs/kit/introduction',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: Getting started with Svelte',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Frameworks_libraries/Svelte_getting_started',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'Svelte 5 за 40 минут: руны (PurpleSchool, Антон Ларичев)',
+				url: 'https://www.youtube.com/watch?v=XXVPeF7EDvY',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'ru'
+			}
+		],
+		guide: {
+			intro: 'Теперь ваш список станет компонентом. Три файла: карточка, список с поиском и сборка. Код в блоках текстовый, поэтому проверьте его в песочнице Svelte, если хотите увидеть живьём.',
+			hints: [
+				'ItemCard.svelte начните с <script>: let { item } = $props(); let open = $state(false);. Ниже разметка: article, в нём {item.title}, {item.price} и кнопка с aria-expanded={open} и onclick={() => (open = !open)}.',
+				'ItemList.svelte: import ItemCard from "./ItemCard.svelte"; let { items } = $props(); let query = $state(""); let shown = $derived(items.filter(…)). В разметке <input bind:value={query}>, а список через {#each shown as item (item.title)} … {:else} … {/each}.',
+				'App.svelte: import ItemList from "./ItemList.svelte"; const items = [ { title: "…", text: "…", price: "…" }, … ]; и внизу <ItemList {items} />.',
+				'Строки считайте по-честному: сколько в ваших скриптах на странице и сколько в трёх компонентах. А про отключённый JavaScript напишите, что покажет посетителю простой проект Vite и что SvelteKit с серверным рендерингом.'
+			],
+			mistakes: {
+				'components-section': 'Блок «Компоненты страницы» (section id="components") пропал. Верните его.',
+				'no-blanks': 'Остались многоточия «…». Заполните каждое поле кодом или текстом.',
+				'card-props': 'В ItemCard данные берутся так: let { item } = $props();.',
+				'card-state': 'В ItemCard нужно состояние раскрытия: let open = $state(false);.',
+				'card-shows-data': 'Карточка должна выводить {item.title} и, по кнопке, {item.text}.',
+				'card-button': 'Кнопка раскрытия должна иметь aria-expanded и onclick: <button type="button" aria-expanded={open} onclick={…}>.',
+				'no-raw-html': 'Уберите {@html …}: данные выводите обычной вставкой {…}, она безопасна.',
+				'list-imports-card': 'ItemList должен импортировать карточку: import ItemCard from "./ItemCard.svelte".',
+				'list-state-derived': 'В ItemList запрос хранится в $state, а показанный список считается через $derived.',
+				'list-props': 'ItemList получает список от родителя: let { items } = $props();.',
+				'list-each': 'Список выводится так: {#each shown as item (item.title)} … {/each}, с ключом в скобках.',
+				'list-empty': 'На пустой список нужна ветка {:else} с сообщением для посетителя.',
+				'list-bind': 'Поле поиска связывается с состоянием через bind:value={query}.',
+				'list-uses-card': 'В списке надо использовать карточку: <ItemCard {item} />.',
+				'app-imports-list': 'App должен импортировать список: import ItemList from "./ItemList.svelte".',
+				'app-passes-items': 'App передаёт данные списку: <ItemList {items} />.',
+				'app-own-items': 'В App.svelte должны быть ваши пункты из брифа: хотя бы два названия записаны так же, как в брифе.',
+				'lines-counted': 'В абзаце «Строк кода» нужны два числа: сколько вручную и сколько в компонентах.',
+				'nojs-answer': 'В последнем абзаце напишите, что увидит посетитель без JavaScript.'
+			},
+			outro: 'Вы собрали интерфейс из трёх маленьких кусков, и каждый понятен сам по себе. Поменяйте пункт в App.svelte, и обновится всё, что от него зависит, без единой строки «найди и перепиши».'
+		},
+		say: {
+			Svelte: 'свелт',
+			SvelteKit: 'свелт-кит',
+			Vite: 'вит',
+			props: 'пропс',
+			Props: 'пропс',
+			rune: 'руна',
+			runes: 'руны',
+			state: 'стейт',
+			derived: 'дерайвд',
+			effect: 'эффект',
+			each: 'ич',
+			playground: 'плейграунд',
+			localStorage: 'локал-сторидж'
+		}
+	};
+</script>
+
+<script>
+	import RunesDemo from '../../diagrams/RunesDemo.svelte';
+</script>
+
+## Файл, в котором живёт кусок интерфейса
+
+В прошлом уроке вы увидели, что фреймворки предлагают две идеи: вид выводится из состояния и интерфейс собирается из компонентов. Теперь посмотрим на то, как это выглядит в **Svelte**. Выбор не случайный: этот учебник сам написан на Svelte 5, и каждая схема на его страницах это такой же компонент.
+
+Компонент Svelte лежит в файле с расширением `.svelte` и состоит из трёх частей, которые вы уже знаете: код (`<script>`), разметка (обычный HTML с несколькими добавками) и оформление (`<style>`, необязательно). Вот карточка предложения целиком:
+
+```html
+<script>
+  let { item } = $props();
+  let open = $state(false);
+</script>
+
+<article class="card">
+  <h3>{item.title}</h3>
+  <p class="price">{item.price}</p>
+  <button type="button" aria-expanded={open} onclick={() => (open = !open)}>Подробнее</button>
+  {#if open}
+    <p>{item.text}</p>
+  {/if}
+</article>
+```
+
+Ничего необычного для человека, написавшего HTML. Необычны три вещи: слова со знаком доллара, фигурные скобки в разметке и то, что страница после нажатия кнопки меняется, хотя мы ни разу не написали «найди элемент и переключи». Разберём по порядку.
+
+## Руны: слова, которые понимает компилятор
+
+Слова со знаком доллара называются **рунами**. Это особые слова Svelte 5: компилятор видит их и превращает обычный код в реактивный.
+
+- **`$props()`** принимает данные от родителя. Запись `let { item } = $props()` читается так: «мне передадут свойство `item`». Родитель пишет `<ItemCard {item} />`. Данные идут вниз, от родителя к потомку.
+- **`$state(значение)`** объявляет **состояние**: значение, изменение которого обновляет экран. `let open = $state(false)`: пока `open` ложно, блок с описанием не показан. Нажали кнопку, написали `open = !open`, и Svelte сам показал блок. Заметьте: это обычное присваивание, никаких `setOpen`.
+- **`$derived(выражение)`** объявляет значение, которое **вычисляется** из других и пересчитывается само. Если у вас есть `query` (что введено в поиск) и список `items`, то `let shown = $derived(items.filter(...))` будет всегда отвечать текущему запросу.
+- **`$effect(() => ...)`** запускает побочное действие после того, как состояние изменилось, например записать значение в `localStorage`. Берите его в последнюю очередь: большинство задач решаются тремя первыми рунами.
+
+Вот список с поиском: он получает все пункты, хранит запрос и показывает отфильтрованное.
+
+```html
+<script>
+  import ItemCard from './ItemCard.svelte';
+
+  let { items } = $props();
+  let query = $state('');
+  let shown = $derived(
+    items.filter((item) => item.title.toLowerCase().includes(query.trim().toLowerCase()))
+  );
+</script>
+
+<label>Найти в списке <input type="search" bind:value={query}></label>
+<p role="status">Показано: {shown.length} из {items.length}</p>
+
+<div class="cards">
+  {#each shown as item (item.title)}
+    <ItemCard {item} />
+  {:else}
+    <p>Ничего не нашлось.</p>
+  {/each}
+</div>
+```
+
+Сравните с уроком про события: там вы вручную ловили `input`, перебирали карточки, писали `card.hidden` и отдельно обновляли счётчик. Здесь счётчик, список и пустой экран выведены из двух значений: `items` и `query`. Забыть обновить что-то нельзя.
+
+## Фигурные скобки и блоки
+
+В разметке фигурные скобки значат «здесь JavaScript»:
+
+- **`{выражение}`** вставляет значение. Это **текст**, а не разметка: теги в строке остаются буквами, как у `textContent`. Поэтому `{item.title}` безопасен для чужих данных. Опасна только запись `{@html строка}`, которая вставляет разметку, как `innerHTML`: ей пользуются лишь для кода, написанного целиком вами;
+- **`{#if условие} ... {:else} ... {/if}`** показывает блок по условию;
+- **`{#each список as элемент (ключ)} ... {:else} ... {/each}`** повторяет блок для каждого элемента списка. **Ключ** в скобках помогает Svelte понять, какая карточка какому пункту принадлежит, когда список фильтруют или переставляют, и не потерять состояние (например, раскрытость «Подробнее»). Ветка `{:else}` показывается на пустой список: готовое «ничего не нашлось»;
+- **`onclick={функция}`** вешает обработчик, а **`bind:value={query}`** связывает поле с состоянием в обе стороны: набрали в поле, и `query` изменился; поменяли `query`, и поле показывает новое.
+
+Ещё одна вещь, которую легко не заметить: стили в `<style>` компонента по умолчанию относятся **только к нему**. Карточка не испортит оформление остальной страницы, а правило, к которому ничего не подходит, из результата выбросят.
+
+## Что на самом деле происходит
+
+Браузер не знает, что такое Svelte. Во время сборки **компилятор** превращает каждый `.svelte` в обычный JavaScript: для каждого места, где `{item.title}` зависит от состояния, он пишет короткую команду «если это значение изменилось, поменять вот этот текстовый узел». Поэтому в браузер почти не едет библиотека-посредник и нет сравнения «старого и нового» дерева, как в React: обновляется ровно то, что зависит от изменившегося.
+
+Проверьте это сами. Справа живой компонент на тех же рунах, а под ним журнал: что именно в дереве страницы поменялось после каждого вашего действия.
+
+<RunesDemo />
+
+<details>
+<summary>Проверьте себя: чем $derived отличается от $state?</summary>
+
+`$state` хранит значение, которое вы меняете сами. `$derived` вычисляется из других значений и пересчитывается автоматически, присваивать его вручную не нужно.
+
+</details>
+
+## Как запустить у себя
+
+В нашей песочнице компоненты не собираются: для этого нужен компилятор. Есть два простых способа попробовать.
+
+- Откройте **svelte.dev/playground**, вставьте в него файлы `App.svelte`, `ItemList.svelte` и `ItemCard.svelte` из практики, и вы увидите страницу сразу.
+- Создайте проект командой `npx sv create моё-приложение` (понадобится Node.js). Она поставит **SvelteKit**, то есть Svelte вместе с маршрутами по папкам, подготовкой страниц на сервере и сборщиком Vite. Дальше `npm install` и `npm run dev`.
+
+Различие, о котором стоит знать заранее: в простом проекте на одном Svelte и Vite страница пуста, пока не загрузится скрипт. В SvelteKit же страница отрисовывается на сервере и приходит в браузер готовым HTML, а скрипт потом её «оживляет». Для посетителя без скрипта разница огромная, и об этом следующий урок.
+
+## Практика
+
+Вы на сайте эпохи 2019 года. Перенесите блок предложений в компоненты: карточку `ItemCard`, список с поиском `ItemList` и точку сборки `App`. Код пишется текстом в полях блока «Компоненты страницы»: внутри них можно использовать знак `<` как есть.
+
+Проверки читают текст ваших компонентов: есть ли `$props`, `$state`, `$derived`, ключ в `{#each}` и ветка `{:else}`. Работают ли они, лучше проверить в песочнице Svelte. Заодно честно посчитайте, сколько строк кода понадобилось вручную (ваши четыре скрипта на странице) и в компонентах, и напишите, что увидит посетитель, у которого JavaScript не загрузился. Это очень полезная мысль для следующего урока.
+
+## Что было не так раньше
+
+До пятой версии Svelte писали иначе: состояние объявлялось обычным `let`, а реактивность подразумевалась (спецсимвол `$:` для вычисляемых значений и особые правила присваивания). Это было коротко, но магия иногда подводила: она работала только внутри компонента и не переходила в обычные файлы, а новичку было трудно понять, почему присваивание в одном месте реактивно, а в другом нет. В 2024 году вышел Svelte 5 с рунами: те же возможности, но запись явная.
+
+Идея, что вид выводится из состояния, а изменения распространяются по цепочке зависимостей (её называют **сигналами**), в 2020-е годы пришла почти во все фреймворки: в Solid, Preact, Angular, в Vue (там это `ref`). Выучив её на Svelte, вы легко прочтёте остальные.

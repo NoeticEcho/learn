@@ -319,46 +319,59 @@ lessons:
     kind: spec
     lang: en
   videos: []
-- id: 05-js/05-modules-tooling
+- id: 05-javascript/05-modules-tooling
   order: 5
   title: Модули, npm и сборка
-  summary: 'Зачем: вы разбиваете код на файлы с помощью модулей ES, подключаете чужие пакеты через npm и понимаете, что
-    делают сборщик и «бандл». После урока вы читаете package.json и объясняете, почему нужно беречь зависимости.'
+  summary: Один длинный скрипт быстро превращается в кашу. После урока вы разбиваете код на файлы с помощью модулей ES,
+    читаете package.json, понимаете, что делает сборщик и зачем беречь зависимости.
   minutes: 25
   teaches:
-  - js.modules
-  - js.tooling
+  - js-modules
+  - js-tooling
   requires:
-  - js.fetch
-  - net.url-anatomy
-  diagram: 'Граф зависимостей проекта: файлы-узлы, стрелки import; кнопка «собрать» превращает граф в один файл,
-    показывает размер до и после минификации и отмечает неиспользуемый код (tree shaking).'
-  practice: 'Эпоха 5 (2019, генератор статического сайта): разложить код страницы брифа на модули (данные items, функция
-    render, форма contacts), подключить их через type=module и убедиться, что страница работает без сборки.'
+  - js-fetch
+  - net-url-anatomy
+  diagram: 'content/diagrams/ModuleGraph.svelte: «Граф модулей и сборка»'
+  practice: 'Разложите код вашего сайта на модули. Песочница не умеет подключать несколько файлов, поэтому модули вы
+    напишете текстом, в блоках pre, как если бы они лежали в файлах. Заполните все «…» в блоке «Модули страницы». 1)
+    data.js: export const items = […], с вашими пунктами из брифа (название, текст, цена). 2) render.js: импортируйте
+    items из ./data.js (расширение .js обязательно) и экспортируйте функцию renderCards(container), которая строит
+    карточки через createElement и textContent. 3) main.js: импортируйте items и renderCards и вызовите их. 4)
+    package.json: name и "type": "module". 5) В абзаце «Внешние пакеты» напишите, какие внешние пакеты нужны и сколько
+    они весят, или что они не нужны. Внутри pre знак < пишется как &lt;. Проверять модули придётся у себя: сохраните
+    файлы, запустите локальный сервер (в уроке написано, как). Эпоха: 5.'
   checks:
-  - Код разбит минимум на три файла-модуля, связанных import и export.
-  - Скрипт подключён с type=module, и страница работает при открытии через локальный сервер.
-  - Данные брифа (items, contacts) лежат в отдельном модуле или JSON, а не внутри функций отрисовки.
-  - Указано, какие внешние пакеты нужны и сколько они весят, или написано, что не нужны.
+  - 'Блок «Модули страницы» (section id="modules") пропал. Верните его: в нём вы пишете модули.'
+  - В блоке модулей ещё остались многоточия «…». Замените каждое кодом или текстом.
+  - 'В data.js данные надо отдать другим файлам: export const items = […].'
+  - 'В data.js должны быть ваши пункты из брифа: хотя бы два названия записаны так же, как в брифе.'
+  - 'В render.js первой строкой нужен импорт: import { items } from "./data.js". Расширение .js обязательно.'
+  - 'render.js должен экспортировать функцию: export function renderCards(container) { … }.'
+  - В renderCards карточки строят через createElement и textContent. innerHTML для данных не нужен.
+  - 'В main.js нужны два импорта: из "./render.js" и из "./data.js".'
+  - 'main.js должен вызвать функцию: renderCards(…).'
+  - 'В package.json нужно имя: "name": "moy-sait".'
+  - 'В package.json нужно "type": "module": так Node и сборщики понимают, что файлы это модули.'
+  - В абзаце «Внешние пакеты» напишите, что пакеты не нужны, или назовите их и укажите вес в килобайтах.
   sources:
-  - title: 'MDN: JavaScript modules'
+  - title: JavaScript modules (MDN)
     url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
     licence: CC-BY-SA
     kind: docs
     lang: en
-  - title: 'learn.javascript.ru: Модули'
+  - title: Модули (learn.javascript.ru)
     url: https://learn.javascript.ru/modules
     licence: link-only
     kind: course
     lang: ru
   - title: 'npm Docs: About packages and modules'
     url: https://docs.npmjs.com/about-packages-and-modules
-    licence: proprietary-link
+    licence: link-only
     kind: docs
     lang: en
   - title: 'Vite: Getting Started'
     url: https://vite.dev/guide/
-    licence: proprietary-link
+    licence: link-only
     kind: docs
     lang: en
   - title: 'web.dev: Reduce JavaScript payloads with tree shaking'
@@ -367,30 +380,36 @@ lessons:
     kind: article
     lang: en
   videos: []
-- id: 05-js/06-why-frameworks
+- id: 05-javascript/06-why-frameworks
   order: 6
   title: Зачем нужны фреймворки
-  summary: 'Зачем: вы видите, на каких задачах ручной код с DOM начинает ломаться (синхронизация данных и экрана,
-    повторяющиеся компоненты, состояние), и как фреймворки (React, Vue, Svelte, Angular) решают их. После урока вы
-    можете спокойно ответить «а нужен ли мне фреймворк вообще».'
+  summary: Ручной код с DOM работает, пока на странице немного мест, которые надо согласовывать. После урока вы видите,
+    где он начинает ломаться, понимаете, что решают React, Vue, Svelte и Angular и чего это стоит посетителю, и можете
+    спокойно ответить «а нужен ли мне фреймворк вообще».
   minutes: 25
   teaches:
-  - js.why-frameworks
-  - js.reactivity
+  - js-why-frameworks
+  - js-reactivity
   requires:
-  - js.dom
-  - js.events
-  - js.modules
-  diagram: 'Один и тот же список с фильтром и счётчиком, написанный тремя способами: ручной DOM, шаблонные строки и
-    реактивный компонент; ползунок «число правил в проекте» показывает, где растёт число ошибок синхронизации.'
-  practice: 'Эпоха 5 (2019): из текущей страницы брифа выбрать три места, где состояние (выбранная категория, число
-    пунктов, раскрытое меню) приходится синхронизировать вручную, и записать, что в каждом было бы проще при реактивном
-    подходе.'
+  - js-dom
+  - js-events
+  - js-modules
+  diagram: 'content/diagrams/SyncDemo.svelte: «Где растёт сложность»'
+  practice: 'Нужен ли фреймворку вашему проекту: разбор своей страницы. Найдите на странице три места, где вид и состояние
+    приходится согласовывать вручную (в скриптах выше они есть: счётчик, быстрый переход, меню, поиск), и заполните
+    таблицу «Где страница согласуется вручную»: что с чем согласуется, как это сделано сейчас и как было бы при
+    реактивном подходе. Каждая клетка это живая фраза, а не «…». Затем напишите вывод для вашего проекта (абзац
+    «Вывод»): нужен ли ему фреймворк или не нужен, с учётом числа разделов и пунктов из брифа (запишите эти числа). И в
+    последнем абзаце назовите вес ваших скриптов в килобайтах (приблизительно, по вкладке «Сеть» или по размеру файла) и
+    то, как он влияет на первую загрузку. Эпоха: 5.'
   checks:
-  - Названы минимум три места, где состояние и вид страницы надо согласовывать вручную.
-  - Для каждого места указано, что изменилось бы при реактивном подходе.
-  - 'Есть вывод для проекта: нужен фреймворк или нет, с учётом sections и items брифа.'
-  - Упомянут вес JavaScript и влияние на скорость первой загрузки.
+  - Блок «Где страница согласуется вручную» (section id="framework-notes") пропал. Верните его.
+  - В таблице и в абзацах осталось многоточие «…». Замените каждое осмысленной фразой.
+  - 'В таблице нужно не меньше трёх строк с классом sync: три места ручного согласования.'
+  - 'В выводе нужно прямо сказать: «нужен» или «не нужен» фреймворк вашему проекту.'
+  - 'Вывод должен опираться на числа из брифа: сколько разделов, сколько пунктов, сколько мест согласования.'
+  - 'Назовите вес ваших скриптов числом и единицей: например «около 6 кБ».'
+  - Напишите, как вес скриптов влияет на первую загрузку страницы, особенно на телефоне.
   sources:
   - title: 'React: Thinking in React'
     url: https://react.dev/learn/thinking-in-react
@@ -399,12 +418,12 @@ lessons:
     lang: en
   - title: 'Vue.js: Introduction'
     url: https://vuejs.org/guide/introduction.html
-    licence: proprietary-link
+    licence: link-only
     kind: docs
     lang: en
   - title: 'Svelte: Overview'
     url: https://svelte.dev/docs/svelte/overview
-    licence: proprietary-link
+    licence: link-only
     kind: docs
     lang: en
   - title: 'MDN: Introduction to client-side frameworks'
@@ -418,42 +437,61 @@ lessons:
     kind: article
     lang: en
   videos: []
-- id: 05-js/07-svelte-component
+- id: 05-javascript/07-svelte-component
   order: 7
   title: Компонент на Svelte
-  summary: 'Зачем: вы пишете свой первый компонент: карточку с состоянием и событием, и используете его в списке. После
-    урока вы читаете файл .svelte, понимаете руны $state, $derived и $props и можете перенести блок страницы брифа в
-    компонент.'
+  summary: 'Компонент — кусок интерфейса со своими данными, разметкой и оформлением. После урока вы читаете файл .svelte,
+    понимаете руны $state, $derived и $props и переносите блок страницы в компонент: карточку и список с поиском.'
   minutes: 30
   teaches:
-  - js.svelte-component
+  - js-svelte-component
   requires:
-  - js.reactivity
-  - js.modules
-  - design.component
-  diagram: 'Живой редактор Svelte: слева код компонента, справа результат; под ним панель «что обновится», где видно,
-    какой узел DOM пересчитался при изменении $state.'
-  practice: 'Эпоха 5 (2019, статический сайт): превратить секцию items брифа в компонент ItemCard и список ItemList с
-    фильтром по категориям; собрать страницу с помощью SvelteKit или Vite и сравнить размер с ручной версией.'
+  - js-reactivity
+  - js-modules
+  diagram: 'content/diagrams/RunesDemo.svelte: «Что обновилось»'
+  practice: 'Карточка и список вашего проекта как компоненты. Песочница не собирает Svelte, поэтому компоненты вы пишете
+    текстом, в полях блока «Компоненты страницы», как если бы они лежали в файлах. Заполните все «…». 1)
+    ItemCard.svelte: получает item через let { item } = $props(), хранит в $state, раскрыт ли блок «Подробнее», выводит
+    {item.title}, {item.price}, а по кнопке с aria-expanded показывает {item.text}. 2) ItemList.svelte: импортирует
+    ItemCard, получает items через $props, хранит запрос в $state, а показанный список считает через $derived; поле
+    поиска связано через bind:value; карточки выводит {#each … as item (item.title)} и на пустой список показывает
+    сообщение через {:else}. 3) App.svelte: массив items с вашими пунктами из брифа и строка <ItemList {items} />. 4)
+    Подсчитайте строки кода: вручную (ваши скрипты на странице) и в компонентах. 5) В абзаце про JavaScript напишите,
+    что увидит посетитель без скрипта. Компоненты можно проверить в песочнице svelte.dev/playground. Эпоха: 5.'
   checks:
-  - Карточка items — отдельный компонент, получающий данные через props.
-  - Фильтр хранится в $state, а список — в $derived от него.
-  - Страница работает и при отключённом JavaScript хотя бы как список без фильтра, либо явно отмечено, что нет, и почему.
-  - Названы размер и время загрузки вручную и в компоненте.
+  - Блок «Компоненты страницы» (section id="components") пропал. Верните его.
+  - Остались многоточия «…». Заполните каждое поле кодом или текстом.
+  - 'В ItemCard данные берутся так: let { item } = $props();.'
+  - 'В ItemCard нужно состояние раскрытия: let open = $state(false);.'
+  - Карточка должна выводить {item.title} и, по кнопке, {item.text}.
+  - 'Кнопка раскрытия должна иметь aria-expanded и onclick: <button type="button" aria-expanded={open} onclick={…}>.'
+  - 'Уберите {@html …}: данные выводите обычной вставкой {…}, она безопасна.'
+  - 'ItemList должен импортировать карточку: import ItemCard from "./ItemCard.svelte".'
+  - В ItemList запрос хранится в $state, а показанный список считается через $derived.
+  - 'ItemList получает список от родителя: let { items } = $props();.'
+  - 'Список выводится так: {#each shown as item (item.title)} … {/each}, с ключом в скобках.'
+  - На пустой список нужна ветка {:else} с сообщением для посетителя.
+  - Поле поиска связывается с состоянием через bind:value={query}.
+  - 'В списке надо использовать карточку: <ItemCard {item} />.'
+  - 'App должен импортировать список: import ItemList from "./ItemList.svelte".'
+  - 'App передаёт данные списку: <ItemList {items} />.'
+  - 'В App.svelte должны быть ваши пункты из брифа: хотя бы два названия записаны так же, как в брифе.'
+  - 'В абзаце «Строк кода» нужны два числа: сколько вручную и сколько в компонентах.'
+  - В последнем абзаце напишите, что увидит посетитель без JavaScript.
   sources:
   - title: 'Svelte: Introduction to runes'
     url: https://svelte.dev/docs/svelte/what-are-runes
-    licence: proprietary-link
+    licence: link-only
     kind: docs
     lang: en
   - title: Svelte Tutorial
     url: https://svelte.dev/tutorial/svelte/welcome-to-svelte
-    licence: proprietary-link
+    licence: link-only
     kind: course
     lang: en
   - title: 'SvelteKit: Introduction'
     url: https://svelte.dev/docs/kit/introduction
-    licence: proprietary-link
+    licence: link-only
     kind: docs
     lang: en
   - title: 'MDN: Getting started with Svelte'
@@ -462,36 +500,60 @@ lessons:
     kind: docs
     lang: en
   videos:
-  - title: 'Svelte 5 за 40 минут: руны'
+  - title: 'Svelte 5 за 40 минут: руны (PurpleSchool, Антон Ларичев)'
     url: https://www.youtube.com/watch?v=XXVPeF7EDvY
+    licence: proprietary-link
+    kind: video
     lang: ru
-- id: 05-js/08-progressive-enhancement
+- id: 05-javascript/08-progressive-enhancement
   order: 8
   title: Прогрессивное улучшение
-  summary: 'Зачем: вы строите страницу так, чтобы основная задача посетителя решалась и без JavaScript, на слабом телефоне
-    и при сбое скрипта, а скрипт делает её лучше. После урока вы делите функции вашего проекта на обязательные и
-    улучшающие и проверяете страницу с отключённым скриптом.'
+  summary: 'Скрипт не всегда доезжает до посетителя: слабая сеть, сбой, блокировщик, старый браузер. После урока вы
+    строите страницу так, чтобы главное работало и без JavaScript, а скрипт делал её лучше, и проверяете это с
+    выключенным скриптом.'
   minutes: 20
   teaches:
-  - js.progressive-enhancement
+  - js-progressive-enhancement
   requires:
-  - js.fetch
-  - js.events
-  - html.forms
-  diagram: 'Переключатель условий: JS выключен, медленная сеть, сбой скрипта, старый браузер; на странице-макете видно,
-    что остаётся работать при каждой, а что нет.'
-  practice: 'Эпоха 5 (2019) и далее: проверить страницу брифа с отключённым JavaScript, убедиться, что главное действие
-    (mainAction) и контакты (contacts) работают как обычные ссылки и форма, затем добавить скрипт как улучшение
-    (проверка на лету, отправка без перезагрузки).'
+  - js-fetch
+  - js-events
+  - html-forms
+  diagram: 'content/diagrams/EnhanceMatrix.svelte: «Что остаётся без скрипта»'
+  practice: 'Страница, которая работает и без скрипта. Сделайте страницу устойчивой. 1) Заполните таблицу «Что
+    обязательно, а что улучшение»: не меньше пяти функций, у каждой слово «обязательная» или «улучшение» и что видит
+    посетитель без JavaScript. 2) Сделайте обязательное независимым от скрипта: добавьте блок <aside id="contacts"> с
+    адресом из брифа и ссылками tel: и mailto: (телефон и почта из брифа), а после шапки вставьте <noscript> с абзацем,
+    что страница работает и без JavaScript. Форма заявки остаётся с action и method, а главное действие подписано
+    словами из брифа. 3) Поиск без скрипта бесполезен, поэтому скройте его в разметке (атрибут hidden у form#search), а
+    показывать будет скрипт. 4) Добавьте пятый скрипт <script type="module" id="enhance-code">: он показывает форму
+    поиска (search.hidden = false) и проверяет телефон на лету: слушатель input на поле #f-phone, aria-invalid и
+    сообщение в <span id="phone-hint" role="status"> после поля. Оба действия обёрнуты в проверку «элемент есть» (if).
+    Проверьте без скрипта: у себя, в инструментах разработчика, выключите JavaScript и обновите страницу. Эпоха: 5.'
   checks:
-  - С отключённым JavaScript видны все sections, items и контакты (contacts).
-  - 'Главное действие (mainAction) работает без скрипта: ссылка или форма с обычной отправкой.'
-  - Скрипт добавляет возможности, а не заменяет собой разметку; при ошибке скрипта страница остаётся читаемой.
-  - Составлен список «обязательное» и «улучшение» минимум из пяти функций.
+  - Блок «Что обязательно, а что улучшение» (section id="enhancement-plan") пропал. Верните его.
+  - В таблице остались многоточия «…». Заполните каждую клетку.
+  - В таблице нужно не меньше пяти строк с классом feature.
+  - 'Во второй колонке должны встречаться оба слова: «обязательная» и «улучшение»: вы делите функции на два класса.'
+  - В main нужен блок <aside id="contacts"> с контактами.
+  - 'Телефон должен быть ссылкой: <a href="tel:+7…">.'
+  - 'Почта должна быть ссылкой: <a href="mailto:…">.'
+  - Адрес из брифа должен быть показан в блоке контактов.
+  - 'Добавьте <noscript> с абзацем: что страница работает и без JavaScript.'
+  - 'Главное действие должно быть подписано словами из брифа: на ссылке-кнопке или на кнопке формы.'
+  - 'У формы должен остаться method="post": без скрипта она отправляется обычным способом.'
+  - У формы должен остаться action с адресом, начинающимся с «/».
+  - 'Форму поиска надо скрыть в разметке: <form id="search" … hidden>. Показывать её будет скрипт.'
+  - 'После поля телефона нужен <span id="phone-hint" role="status">: туда скрипт пишет подсказку.'
+  - 'Не нашёл пятый скрипт: <script type="module" id="enhance-code">.'
+  - У скрипта нужен атрибут type="module".
+  - 'Скрипт должен показать форму поиска: search.hidden = false, где search это document.querySelector("#search").'
+  - Для проверки на лету нужен слушатель input на поле телефона и атрибут aria-invalid.
+  - 'Обернуть действия в проверку «элемент есть»: if (search) { … } и if (phone && hint) { … }. Если элемента нет,
+    скрипт молча пропускает улучшение.'
   sources:
   - title: 'GOV.UK Service Manual: Building a resilient frontend using progressive enhancement'
     url: https://www.gov.uk/service-manual/technology/using-progressive-enhancement
-    licence: proprietary-link
+    licence: link-only
     kind: article
     lang: en
   - title: 'MDN: Progressive enhancement'

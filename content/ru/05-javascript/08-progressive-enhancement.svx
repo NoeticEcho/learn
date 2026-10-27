@@ -1,0 +1,1268 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/08-progressive-enhancement',
+		part: 5,
+		order: 8,
+		title: 'Прогрессивное улучшение',
+		summary: 'Скрипт не всегда доезжает до посетителя: слабая сеть, сбой, блокировщик, старый браузер. После урока вы строите страницу так, чтобы главное работало и без JavaScript, а скрипт делал её лучше, и проверяете это с выключенным скриптом.',
+		minutes: 20,
+		teaches: ['js-progressive-enhancement'],
+		requires: ['js-fetch', 'js-events', 'html-forms'],
+		practice: {
+			id: 'js-progressive-page',
+			title: 'Страница, которая работает и без скрипта',
+			task: 'Сделайте страницу устойчивой. 1) Заполните таблицу «Что обязательно, а что улучшение»: не меньше пяти функций, у каждой слово «обязательная» или «улучшение» и что видит посетитель без JavaScript. 2) Сделайте обязательное независимым от скрипта: добавьте блок <aside id="contacts"> с адресом из брифа и ссылками tel: и mailto: (телефон и почта из брифа), а после шапки вставьте <noscript> с абзацем, что страница работает и без JavaScript. Форма заявки остаётся с action и method, а главное действие подписано словами из брифа. 3) Поиск без скрипта бесполезен, поэтому скройте его в разметке (атрибут hidden у form#search), а показывать будет скрипт. 4) Добавьте пятый скрипт <script type="module" id="enhance-code">: он показывает форму поиска (search.hidden = false) и проверяет телефон на лету: слушатель input на поле #f-phone, aria-invalid и сообщение в <span id="phone-hint" role="status"> после поля. Оба действия обёрнуты в проверку «элемент есть» (if). Проверьте без скрипта: у себя, в инструментах разработчика, выключите JavaScript и обновите страницу.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="enhancement-plan">
+      <h2>Что обязательно, а что улучшение</h2>
+      <table>
+        <tr><th>Функция</th><th>Обязательная или улучшение</th><th>Что видит посетитель без JavaScript</th></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+      </table>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+    <noscript>
+      <p>В вашем браузере выключен JavaScript. Страница работает и так: список, разделы, контакты и форма заявки доступны, не работают только поиск и меню.</p>
+    </noscript>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям" hidden>
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint">
+            <span id="phone-hint" role="status"></span>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+
+      <aside id="contacts">
+        <h2>Связаться</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </main>
+
+
+    <section data-scaffold id="enhancement-plan">
+      <h2>Что обязательно, а что улучшение</h2>
+      <table>
+        <tr><th>Функция</th><th>Обязательная или улучшение</th><th>Что видит посетитель без JavaScript</th></tr>
+        <tr class="feature"><td>Список предложений</td><td>обязательная</td><td>Все карточки лежат в разметке и видны сразу.</td></tr>
+        <tr class="feature"><td>Главное действие: форма заявки</td><td>обязательная</td><td>Форма отправляется обычным способом: страница перезагружается, заявка уходит на сервер.</td></tr>
+        <tr class="feature"><td>Контакты</td><td>обязательная</td><td>Телефон и почта работают как ссылки tel: и mailto:.</td></tr>
+        <tr class="feature"><td>Меню-кнопка</td><td>улучшение</td><td>Список разделов виден всегда, кнопки нет: она появляется только вместе со скриптом.</td></tr>
+        <tr class="feature"><td>Поиск по списку</td><td>улучшение</td><td>Поля поиска нет: без скрипта оно бесполезно, поэтому его показывает скрипт.</td></tr>
+        <tr class="feature"><td>Проверка телефона на лету</td><td>улучшение</td><td>Браузер проверяет поле сам при отправке (required и type="tel").</td></tr>
+      </table>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+    <script type="module" id="enhance-code">
+      const search = document.querySelector('#search');
+      const phone = document.querySelector('#f-phone');
+      const hint = document.querySelector('#phone-hint');
+
+      // Поиск без скрипта бесполезен, поэтому в разметке он скрыт, а показывает его скрипт.
+      if (search) {
+        search.hidden = false;
+      }
+
+      // Проверка телефона на лету: улучшение поверх проверки браузера.
+      if (phone && hint) {
+        phone.addEventListener('input', () => {
+          const digits = phone.value.replace(/\\D/g, '');
+          const ok = phone.value === '' || digits.length >= 10;
+          phone.setAttribute('aria-invalid', String(!ok));
+          hint.textContent = ok ? '' : ' Телефон: не меньше десяти цифр, например +7 000 000-00-00.';
+        });
+      }
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			checks: [
+				{
+					id: 'plan-section',
+					kind: 'exists',
+					selector: '#enhancement-plan'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#enhancement-plan',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'five-features',
+					kind: 'count',
+					selector: '#enhancement-plan tr.feature',
+					min: 5
+				},
+				{
+					id: 'must-and-enhance',
+					kind: 'text',
+					selector: '#enhancement-plan',
+					matches: '^(?=[\\s\\S]*обязательн)(?=[\\s\\S]*улучшени)'
+				},
+				{
+					id: 'contacts-block',
+					kind: 'exists',
+					selector: 'main #contacts'
+				},
+				{
+					id: 'tel-link',
+					kind: 'attr',
+					selector: '#contacts a[href^="tel:"]',
+					name: 'href',
+					matches: '^tel:',
+					when: {
+						brief: 'contacts.phone'
+					}
+				},
+				{
+					id: 'mail-link',
+					kind: 'attr',
+					selector: '#contacts a[href^="mailto:"]',
+					name: 'href',
+					matches: '^mailto:',
+					when: {
+						brief: 'contacts.email'
+					}
+				},
+				{
+					id: 'address-shown',
+					kind: 'field',
+					selector: '#contacts',
+					field: 'contacts.address',
+					when: {
+						brief: 'contacts.address'
+					}
+				},
+				{
+					id: 'noscript-note',
+					kind: 'text',
+					selector: 'noscript',
+					matches: '\\S'
+				},
+				{
+					id: 'main-action-label',
+					kind: 'field',
+					selector: 'a.button, #request-form button[type="submit"]',
+					field: 'mainAction.label'
+				},
+				{
+					id: 'form-native',
+					kind: 'attr',
+					selector: '#request-form',
+					name: 'method',
+					matches: '^(?:post|POST)$'
+				},
+				{
+					id: 'form-action',
+					kind: 'attr',
+					selector: '#request-form',
+					name: 'action',
+					matches: '^/'
+				},
+				{
+					id: 'search-hidden',
+					kind: 'attr',
+					selector: 'form#search',
+					name: 'hidden'
+				},
+				{
+					id: 'phone-status',
+					kind: 'exists',
+					selector: '#phone-hint[role="status"], #phone-hint[aria-live]'
+				},
+				{
+					id: 'enhance-code-exists',
+					kind: 'exists',
+					selector: 'script#enhance-code'
+				},
+				{
+					id: 'is-module',
+					kind: 'attr',
+					selector: '#enhance-code',
+					name: 'type',
+					matches: '^module$'
+				},
+				{
+					id: 'reveals-search',
+					kind: 'text',
+					selector: '#enhance-code',
+					matches: '#search[\\s\\S]*\\.hidden\\s*=\\s*false'
+				},
+				{
+					id: 'live-validation',
+					kind: 'text',
+					selector: '#enhance-code',
+					matches: '^(?=[\\s\\S]*addEventListener\\(\\s*[\'"]input[\'"])(?=[\\s\\S]*aria-invalid)'
+				},
+				{
+					id: 'guarded',
+					kind: 'text',
+					selector: '#enhance-code',
+					matches: 'if\\s*\\(\\s*\\w+\\s*&&\\s*\\w+|if\\s*\\(\\s*\\w+\\s*\\)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Что такое прогрессивное улучшение?',
+				options: [
+					'Страница сначала строится так, чтобы главное работало на чистом HTML, а JavaScript добавляет удобства поверх',
+					'Постепенное обновление сайта раз в год',
+					'Загрузка страницы по частям, пока скрипт не готов'
+				],
+				answer: 0,
+				why: [
+					'Да. Базовый слой HTML работает у всех: и на слабом телефоне, и когда скрипт не загрузился. Каждый следующий слой (CSS, потом JavaScript) только улучшает то, что и так работает.',
+					'Нет: речь не о релизах, а о порядке слоёв при построении страницы.',
+					'Нет: так работает ленивая загрузка, а это другое.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Почему у посетителя JavaScript может не работать?',
+				options: [
+					'Сеть медленная, и скрипт ещё не загрузился',
+					'В скрипте ошибка, и он остановился',
+					'Блокировщик или корпоративный фильтр убрал скрипт',
+					'У посетителя нет денег'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: на слабой связи страница видна задолго до того, как приедет и отработает скрипт.',
+					'Да: одна ошибка в начале, и всё остальное не выполнится.',
+					'Да: и такое бывает часто.',
+					'Нет, но по такой логике нельзя строить страницу: скрипты ничего не стоят, дело в доставке и выполнении.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что из перечисленного на сайте должно быть обязательным, то есть работать без JavaScript?',
+				options: [
+					'Список предложений в разметке',
+					'Отправка формы заявки обычным способом',
+					'Ссылки tel: и mailto: в контактах',
+					'Подсветка поля при наборе'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: это содержание, ради которого пришли.',
+					'Да: главное действие не должно зависеть от скрипта.',
+					'Да: контакты это ссылки, и им скрипт не нужен.',
+					'Нет: это удобство, а не необходимость, обычный браузер проверит поле и сам.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Кнопка меню в разметке стоит с атрибутом hidden, а скрипт её показывает. Зачем так?',
+				options: [
+					'Без скрипта кнопка ничего бы не делала, поэтому её не должно быть, а список разделов остаётся виден',
+					'Чтобы кнопку не нашли поисковики',
+					'Чтобы страница быстрее грузилась'
+				],
+				answer: 0,
+				why: [
+					'Да. Кнопка-пустышка хуже её отсутствия. Скрипт, который умеет работать с меню, сам создаёт условие для кнопки: показывает её и прячет список.',
+					'Нет: к поисковикам это отношения не имеет.',
+					'Нет: на скорость это не влияет.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте слои страницы от основы к улучшению',
+				items: [
+					'HTML: содержание, ссылки и формы',
+					'CSS: оформление и раскладка',
+					'JavaScript: удобства и интерактивность'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Для чего нужен тег noscript?',
+				options: [
+					'Чтобы показать сообщение или запасной вариант тем, у кого скрипты выключены',
+					'Чтобы запретить скриптам работать',
+					'Чтобы ускорить выполнение скрипта'
+				],
+				answer: 0,
+				why: [
+					'Да. Содержимое noscript показывается только если JavaScript выключен. Используйте его для понятных сообщений, а не для требований «включите, иначе ничего не увидите».',
+					'Нет: он ничего не запрещает.',
+					'Нет: к скорости отношения не имеет.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-pe-what',
+				front: 'Что такое прогрессивное улучшение?',
+				back: 'Подход: сначала страница работает на чистом HTML (содержание, ссылки, формы), затем CSS делает её красивой, затем JavaScript добавляет удобства. Главное доходит до всех.'
+			},
+			{
+				id: 'js-pe-why',
+				front: 'Почему нельзя рассчитывать, что скрипт будет всегда?',
+				back: 'Он может не успеть загрузиться (слабая сеть), упасть с ошибкой, быть заблокирован или не поддерживаться старым браузером. Страница, построенная на нём, в этих случаях пуста.'
+			},
+			{
+				id: 'js-pe-pattern',
+				front: 'Как оформляют элемент, который нужен только со скриптом?',
+				back: 'В разметке его скрывают (hidden) или не пишут вовсе, а скрипт его показывает или создаёт. Так без скрипта нет «кнопок-пустышек».'
+			},
+			{
+				id: 'js-pe-test',
+				front: 'Как проверить страницу без JavaScript?',
+				back: 'Выключить JavaScript в инструментах разработчика (в Chrome: Ctrl+Shift+P, «Disable JavaScript»), замедлить сеть во вкладке «Сеть» и посмотреть исходный HTML. Основное должно работать.'
+			},
+			{
+				id: 'js-pe-ssr',
+				front: 'Как прогрессивное улучшение связано с серверной отрисовкой?',
+				back: 'Мета-фреймворки (SvelteKit, Next.js, Astro) отдают готовый HTML и «оживляют» его скриптом позже: тот же принцип, автоматизированный.'
+			}
+		],
+		sources: [
+			{
+				title: 'GOV.UK Service Manual: Building a resilient frontend using progressive enhancement',
+				url: 'https://www.gov.uk/service-manual/technology/using-progressive-enhancement',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: Progressive enhancement',
+				url: 'https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'web.dev Learn HTML: Forms',
+				url: 'https://web.dev/learn/forms',
+				licence: 'CC-BY',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Inclusive Components (Хайдон Пикеринг)',
+				url: 'https://inclusive-components.design/',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Здесь вы проверите, что страница не рассыпается без скрипта, и исправите то, что рассыпается. Сначала составьте честный список «обязательное и улучшение», потом поправьте разметку и скрипт под него.',
+			hints: [
+				'Заполните таблицу: пять-шесть функций вашей страницы (список, форма заявки, контакты, меню, поиск, проверка телефона). Во второй колонке слово «обязательная» или «улучшение», в третьей: что видно без JavaScript.',
+				'Блок контактов: <aside id="contacts"> с адресом и ссылками <a href="tel:…"> и <a href="mailto:…">. И <noscript><p>…</p></noscript> сразу после шапки.',
+				'Поиск: в разметке <form id="search" … hidden>. А в скрипте #enhance-code: const search = document.querySelector("#search"); if (search) { search.hidden = false; }.',
+				'Проверка телефона: поле #f-phone, а после него <span id="phone-hint" role="status"></span>. В скрипте if (phone && hint) { phone.addEventListener("input", …) } и внутри aria-invalid и текст подсказки.'
+			],
+			mistakes: {
+				'plan-section': 'Блок «Что обязательно, а что улучшение» (section id="enhancement-plan") пропал. Верните его.',
+				'no-blanks': 'В таблице остались многоточия «…». Заполните каждую клетку.',
+				'five-features': 'В таблице нужно не меньше пяти строк с классом feature.',
+				'must-and-enhance': 'Во второй колонке должны встречаться оба слова: «обязательная» и «улучшение»: вы делите функции на два класса.',
+				'contacts-block': 'В main нужен блок <aside id="contacts"> с контактами.',
+				'tel-link': 'Телефон должен быть ссылкой: <a href="tel:+7…">.',
+				'mail-link': 'Почта должна быть ссылкой: <a href="mailto:…">.',
+				'address-shown': 'Адрес из брифа должен быть показан в блоке контактов.',
+				'noscript-note': 'Добавьте <noscript> с абзацем: что страница работает и без JavaScript.',
+				'main-action-label': 'Главное действие должно быть подписано словами из брифа: на ссылке-кнопке или на кнопке формы.',
+				'form-native': 'У формы должен остаться method="post": без скрипта она отправляется обычным способом.',
+				'form-action': 'У формы должен остаться action с адресом, начинающимся с «/».',
+				'search-hidden': 'Форму поиска надо скрыть в разметке: <form id="search" … hidden>. Показывать её будет скрипт.',
+				'phone-status': 'После поля телефона нужен <span id="phone-hint" role="status">: туда скрипт пишет подсказку.',
+				'enhance-code-exists': 'Не нашёл пятый скрипт: <script type="module" id="enhance-code">.',
+				'is-module': 'У скрипта нужен атрибут type="module".',
+				'reveals-search': 'Скрипт должен показать форму поиска: search.hidden = false, где search это document.querySelector("#search").',
+				'live-validation': 'Для проверки на лету нужен слушатель input на поле телефона и атрибут aria-invalid.',
+				guarded: 'Обернуть действия в проверку «элемент есть»: if (search) { … } и if (phone && hint) { … }. Если элемента нет, скрипт молча пропускает улучшение.'
+			},
+			outro: 'Теперь у вашей страницы два режима: основной, в котором работает всё нужное, и улучшенный. Попробуйте выключить JavaScript в инструментах разработчика: страница станет проще, но не сломается.'
+		},
+		say: {
+			noscript: 'ноускрипт',
+			hidden: 'хидден',
+			aria: 'ария',
+			'aria-invalid': 'ария-инвалид',
+			GOV: 'гов',
+			tel: 'тэл',
+			mailto: 'мэйлту',
+			JavaScript: 'джаваскрипт',
+			SvelteKit: 'свелт-кит',
+			'Next.js': 'некст-джей-эс',
+			Astro: 'астро'
+		}
+	};
+</script>
+
+<script>
+	import EnhanceMatrix from '../../diagrams/EnhanceMatrix.svelte';
+</script>
+
+## Скрипт может не приехать
+
+Всю часть мы учились писать скрипты, и пора задать неприятный вопрос: а если скрипт не сработает? Не у вас: у посетителя. Причин больше, чем кажется:
+
+- **сеть слабая**, и страница уже видна, а скрипт ещё качается (на метро и в деревне это обычная ситуация);
+- **в скрипте ошибка**, например у посетителя старый браузер без нужной функции, и всё, что ниже ошибки, не выполнится;
+- **блокировщик** или корпоративный фильтр убрал скрипт целиком;
+- **поисковый робот или программа чтения** вообще не выполняют скрипты, или выполняют не сразу;
+- скрипт отключили сознательно.
+
+Если страница построена так, что без скрипта она пуста, то в любом из этих случаев посетитель видит ничего. Если же она построена так, что без скрипта она проще, но полезна, то он видит главное. Эту идею называют **прогрессивным улучшением** (progressive enhancement), и в государственных сервисах Великобритании (GOV.UK) её сделали правилом.
+
+## Слои
+
+Страница строится слоями, и каждый следующий слой только улучшает предыдущий:
+
+1. **HTML**: содержание, ссылки и формы. Этот слой работает везде. Список предложений лежит в разметке, форма заявки отправляется обычным способом, телефон это ссылка `tel:`.
+2. **CSS**: оформление и раскладка. Если стили не загрузились, страница некрасива, но читается.
+3. **JavaScript**: удобства. Меню сворачивается, поиск фильтрует, телефон проверяется на лету, форма отправляется без перезагрузки.
+
+Всё, что вы делали в предыдущих уроках, можно разделить на «обязательное» и «улучшение», и разделение это очень практичное. Ссылка на форму заявки и сама форма: обязательное. Проверка телефона при вводе: улучшение (без неё браузер проверит поле сам при отправке, потому что в разметке есть `required` и `type="tel"`).
+
+Вот приёмы, которые из этого следуют.
+
+- **Форма с `action` и `method`.** Без скрипта браузер отправит её сам. Скрипт, который перехватывает отправку (`preventDefault`, как в уроке про fetch), делает то же самое лучше: без перезагрузки и с понятным сообщением. Но ломаться он не может: если он не загрузился, форма остаётся рабочей.
+- **Элементы, нужные только скрипту, прячет разметка, а показывает скрипт.** Кнопка меню без скрипта ничего не делает, поэтому в разметке она скрыта (`hidden`), а скрипт её показывает и заодно прячет список. Поле поиска без скрипта бесполезно, поэтому оно тоже скрыто в разметке и появляется со скриптом. Так не бывает «кнопок-пустышек».
+- **Скрипт проверяет, что нужные ему элементы есть**: `if (search) { ... }`. Если разметка изменилась, он молча пропустит улучшение, а не упадёт с ошибкой и не потащит за собой остальные.
+- **Тег `<noscript>`** показывает запасное содержимое, когда скрипты отключены. Пишите в нём спокойный текст («Страница работает и без JavaScript, не работает только поиск»), а не требование «включите, иначе ничего не увидите».
+
+Посмотрите на двух похожих посетителей. В одной версии страница построена как улучшение, в другой на одном скрипте: выберите условия и посмотрите, что остаётся у посетителя.
+
+<EnhanceMatrix />
+
+<details>
+<summary>Проверьте себя: почему кнопка меню в разметке скрыта, а не видна всегда?</summary>
+
+Без скрипта она ничего бы не делала. Кнопка-пустышка хуже, чем её отсутствие, поэтому скрипт сам показывает её, когда готов ей управлять.
+
+</details>
+
+## Как проверить
+
+Три способа, все на вашем компьютере, ни одного специального инструмента.
+
+1. **Выключите JavaScript.** В Chrome откройте инструменты разработчика (F12), нажмите Ctrl+Shift+P (на Mac Cmd+Shift+P), начните печатать «Disable JavaScript» и выберите команду. Обновите страницу. В Firefox то же делается через настройку `javascript.enabled` на странице `about:config`.
+2. **Замедлите сеть.** Вкладка «Сеть», список «Без ограничений», выберите «Медленный 3G» (или похожее) и обновите страницу. Вы увидите, что видно посетителю в первые секунды.
+3. **Посмотрите исходный HTML** (Ctrl+U): то, что в нём есть, видят и роботы, и посетители без скрипта. Если списка предложений в нём нет, у поисковика его тоже нет.
+
+## Фреймворки и прогрессивное улучшение
+
+Мы уже видели, что простой проект на Svelte или React без дополнительных мер отдаёт пустую страницу, пока скрипт не загрузится. Мета-фреймворки (SvelteKit, Next.js, Astro) решают это: на сервере они подготавливают готовый HTML, и браузер получает страницу сразу, а скрипт потом «оживляет» её. Это тот же принцип, который вы применили вручную, только автоматизированный. Разговор об этом продолжится в частях про генераторы сайтов и Jamstack.
+
+## Практика
+
+Вы на сайте эпохи 2019 года. Страница, которую вы строили, многое делает скриптом. Пройдите по ней глазами недоверчивого посетителя: что будет, если скрипты не заработают?
+
+Составьте таблицу «обязательное и улучшение»: пять-шесть функций вашей страницы и для каждой, что видно без скрипта. Потом поправьте страницу под неё: добавьте блок контактов со ссылками `tel:` и `mailto:`, `<noscript>`, скройте поиск в разметке и покажите его скриптом, добавьте проверку телефона на лету. Все улучшения оберните проверкой «элемент есть».
+
+В конце проверьте по-настоящему: выключите JavaScript в инструментах разработчика на скачанном сайте или на любой своей странице и посмотрите, что осталось. Наш предпросмотр запускает скрипты всегда, поэтому эту проверку приходится делать у себя.
+
+## Что было не так раньше
+
+В 2010-е годы появилась мода на «одностраничные приложения», которые целиком собираются скриптом: HTML приходил пустым, а всё остальное рисовал JavaScript. Сайты-визитки открывались на слабых телефонах по десять секунд, а поисковики какое-то время видели пустой экран. До этого, в эпоху «изящной деградации» (graceful degradation), страницу строили в расчёте на самые новые браузеры и добавляли запасные варианты для старых, и почти всегда о них забывали. А ссылки с адресом `javascript:void(0)` и табличка «включите JavaScript» на пустой странице были нормой.
+
+Верным осталось одно: начинайте с того, что должно дойти до каждого, и добавляйте остальное сверху. Это одновременно доступнее, быстрее и надёжнее.

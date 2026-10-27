@@ -1,0 +1,1249 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '05-javascript/05-modules-tooling',
+		part: 5,
+		order: 5,
+		title: 'Модули, npm и сборка',
+		summary: 'Один длинный скрипт быстро превращается в кашу. После урока вы разбиваете код на файлы с помощью модулей ES, читаете package.json, понимаете, что делает сборщик и зачем беречь зависимости.',
+		minutes: 25,
+		teaches: ['js-modules', 'js-tooling'],
+		requires: ['js-fetch', 'net-url-anatomy'],
+		practice: {
+			id: 'js-modules-plan',
+			title: 'Разложите код вашего сайта на модули',
+			task: 'Песочница не умеет подключать несколько файлов, поэтому модули вы напишете текстом, в блоках pre, как если бы они лежали в файлах. Заполните все «…» в блоке «Модули страницы». 1) data.js: export const items = […], с вашими пунктами из брифа (название, текст, цена). 2) render.js: импортируйте items из ./data.js (расширение .js обязательно) и экспортируйте функцию renderCards(container), которая строит карточки через createElement и textContent. 3) main.js: импортируйте items и renderCards и вызовите их. 4) package.json: name и "type": "module". 5) В абзаце «Внешние пакеты» напишите, какие внешние пакеты нужны и сколько они весят, или что они не нужны. Внутри pre знак < пишется как &lt;. Проверять модули придётся у себя: сохраните файлы, запустите локальный сервер (в уроке написано, как).',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="modules">
+      <h2>Модули страницы</h2>
+      <p>Файл <code>data.js</code>: данные из брифа.</p>
+      <pre data-file="data.js">…<\/pre>
+      <p>Файл <code>render.js</code>: рисует карточки.</p>
+      <pre data-file="render.js">…<\/pre>
+      <p>Файл <code>main.js</code>: собирает всё вместе.</p>
+      <pre data-file="main.js">…<\/pre>
+      <p>Файл <code>package.json</code>.</p>
+      <pre data-file="package.json">…<\/pre>
+      <p id="deps">Внешние пакеты: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Разделы сайта">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Разделы</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>Пара предложений о разделе.</p>
+      </section>
+
+      <section id="offer">
+        <h2>Что мы предлагаем</h2>
+        <nav id="quick" aria-label="Быстрый переход по предложениям"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Поиск по предложениям">
+          <label for="q">Найти в списке</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Ничего не нашлось. Попробуйте другое слово.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Повторить</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="zayavka">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/zayavka" method="post">
+          <p>
+            <label for="f-name">Как к вам обращаться</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Телефон</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="modules">
+      <h2>Модули страницы</h2>
+      <p>Файл <code>data.js</code>: данные из брифа.</p>
+      <pre data-file="data.js">// data.js: данные страницы лежат отдельно от кода, который их рисует.
+export const items = [
+        {{#each items}}{ title: '{{title}}', text: '{{text}}', price: '{{price}}' },
+        {{/each}}
+];<\/pre>
+      <p>Файл <code>render.js</code>: рисует карточки.</p>
+      <pre data-file="render.js">// render.js: берёт данные и строит карточки. Ничего не знает о том, откуда страница запущена.
+import { items } from './data.js';
+
+export function renderCards(container) {
+  const cards = items.map((item) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    const title = document.createElement('h3');
+    title.textContent = item.title;
+    const text = document.createElement('p');
+    text.textContent = item.text;
+    card.append(title, text);
+    return card;
+  });
+  container.replaceChildren(...cards);
+}<\/pre>
+      <p>Файл <code>main.js</code>: собирает всё вместе.</p>
+      <pre data-file="main.js">// main.js: точка входа. Подключается из страницы одной строкой: тег script с type="module" и src="main.js".
+import { items } from './data.js';
+import { renderCards } from './render.js';
+
+const container = document.querySelector('#offer .cards');
+renderCards(container);
+document.querySelector('#offer-count').textContent = 'Предложений: ' + items.length;<\/pre>
+      <p>Файл <code>package.json</code>.</p>
+      <pre data-file="package.json">{
+  "name": "moy-sait",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}<\/pre>
+      <p id="deps">Внешние пакеты: не нужны, всё написано на чистом JavaScript.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // Данные брифа: пункты списка. Пока они лежат здесь,
+      // в уроке про fetch мы вынесем их в отдельный файл.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Только названия. map делает новый массив, items не меняется.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Только пункты, у которых указана цена.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // Сколько пунктов в списке.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Всего позиций: ' + countOf(items) +
+        ', с ценой: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // Страница уже разобрана: модуль выполняется после неё.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'Пока в списке нет ни одного предложения.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Предложений: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Меню: без скрипта список виден всегда, со скриптом он прячется за кнопку.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Поиск: один обработчик на форме ловит ввод в её полях (всплытие).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Карточки ищем в момент события: список мог измениться.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Показано: ' + shown + ' из ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Имитация сервера: какая сейчас связь</legend>
+      <label><input type="radio" name="net" value="ok" checked> всё хорошо</label>
+      <label><input type="radio" name="net" value="slow"> медленно, три секунды</label>
+      <label><input type="radio" name="net" value="offline"> обрыв связи</label>
+      <label><input type="radio" name="net" value="error500"> сервер сломался (500)</label>
+      <label><input type="radio" name="net" value="missing404"> файла нет (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // ИМИТАЦИЯ СЕРВЕРА. Песочница не пускает настоящие запросы, поэтому fetch
+      // на этой странице подменён: он отвечает так, как выбрано выше.
+      // На настоящем сайте этого блока нет, а адреса ведут на ваш сервер.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'Сервер сломался' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Не найдено' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'Новый пункт с сервера', text: 'Его нет в разметке: он пришёл из items.json.', price: '' }]);
+        }
+        if (path === '/zayavka' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Не найдено' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Из данных сервера собираем карточки: текст только через textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Предложений: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Загружаем свежий список…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Не удалось обновить список, показан сохранённый. Проверьте связь и повторите.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // Форма: без скрипта она отправляется обычным способом, со скриптом без перезагрузки.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Отправляем…';
+        try {
+          const response = await fetch('/zayavka', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('Сервер ответил кодом ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Заявка принята, её номер ' + result.id + '. Мы свяжемся с вами.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'Заявка не отправилась. Данные остались в форме: попробуйте ещё раз или позвоните.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: страница после части про CSS, в сокращённом виде */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'modules-section',
+					kind: 'exists',
+					selector: '#modules'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#modules',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'data-exports',
+					kind: 'text',
+					selector: '#modules pre[data-file="data.js"]',
+					matches: 'export\\s+(?:const|let|default)\\s'
+				},
+				{
+					id: 'data-own-items',
+					kind: 'field',
+					selector: '#modules pre[data-file="data.js"]',
+					field: 'items[].title',
+					min: 2,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'render-imports-data',
+					kind: 'text',
+					selector: '#modules pre[data-file="render.js"]',
+					matches: 'import\\s*\\{[^}]+\\}\\s*from\\s*[\'"]\\./data\\.js[\'"]'
+				},
+				{
+					id: 'render-exports',
+					kind: 'text',
+					selector: '#modules pre[data-file="render.js"]',
+					matches: 'export\\s+(?:function|const|default)\\s'
+				},
+				{
+					id: 'render-safe',
+					kind: 'text',
+					selector: '#modules pre[data-file="render.js"]',
+					matches: '^(?=[\\s\\S]*createElement\\()(?=[\\s\\S]*textContent)(?![\\s\\S]*\\.innerHTML\\s*\\+?=)'
+				},
+				{
+					id: 'main-imports',
+					kind: 'text',
+					selector: '#modules pre[data-file="main.js"]',
+					matches: '^(?=[\\s\\S]*import[^;]*from\\s*[\'"]\\./render\\.js[\'"])(?=[\\s\\S]*import[^;]*from\\s*[\'"]\\./data\\.js[\'"])'
+				},
+				{
+					id: 'main-calls',
+					kind: 'text',
+					selector: '#modules pre[data-file="main.js"]',
+					matches: 'renderCards\\('
+				},
+				{
+					id: 'package-name',
+					kind: 'text',
+					selector: '#modules pre[data-file="package.json"]',
+					matches: '"name"\\s*:\\s*"[^"]+"'
+				},
+				{
+					id: 'package-module',
+					kind: 'text',
+					selector: '#modules pre[data-file="package.json"]',
+					matches: '"type"\\s*:\\s*"module"'
+				},
+				{
+					id: 'deps-note',
+					kind: 'text',
+					selector: '#deps',
+					matches: '(?:не нужн|нет |[Кк][Бб]|[Kk][Bb])'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Вы сохранили index.html с модулем на компьютер и открыли его двойным щелчком (адрес file://…). Скрипт не работает. Почему?',
+				options: [
+					'Браузер не загружает модули с file://: страницу с модулями открывают через локальный сервер',
+					'Модули работают только в Chrome',
+					'В файле забыли написать var'
+				],
+				answer: 0,
+				why: [
+					'Да. По соображениям безопасности браузеры не отдают модульным скриптам файлы с file://. Достаточно любого локального сервера: npx serve . или python3 -m http.server.',
+					'Нет: модули работают во всех современных браузерах.',
+					'Нет: var в современном коде как раз не нужен, и к модулям он отношения не имеет.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините понятие с тем, что это',
+				pairs: [
+					['export', 'открывает значение модуля для других файлов'],
+					['import', 'берёт значение из другого файла'],
+					['package.json', 'паспорт проекта: имя, скрипты, зависимости'],
+					['node_modules', 'папка, куда npm складывает скачанные пакеты'],
+					['сборщик (bundler)', 'собирает модули в файлы для браузера и уменьшает их']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Что означает версия ^1.4.2 в зависимостях?',
+				options: [
+					'Подойдёт любая 1.x.y не ниже 1.4.2, но не версия 2',
+					'Только ровно 1.4.2',
+					'Любая версия выше 1.4.2, в том числе 2.0'
+				],
+				answer: 0,
+				why: [
+					'Да. Значок ^ разрешает обновления, которые по договорённости (semver) не ломают совместимость: исправления и новые возможности. Новый мажор (2.0.0) может сломать, и он под ^ не подпадает.',
+					'Нет: для точной версии пишут 1.4.2 без значка.',
+					'Нет: в версии 2.0 совместимость уже могла сломаться, поэтому ^ её не берёт.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что обычно делает сборщик?',
+				options: [
+					'Собирает граф import в один или несколько файлов',
+					'Минифицирует код: убирает пробелы и сокращает имена',
+					'Выбрасывает то, что не используется (tree shaking)',
+					'Сам пишет вместо вас код приложения'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Да: он идёт по import и собирает всё, что нужно странице.',
+					'Да: минификация уменьшает файл в разы.',
+					'Да: если вы импортировали одну функцию из большой библиотеки, в файл попадёт только она.',
+					'Нет: код приложения пишете вы.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте путь кода от вашей папки до браузера посетителя',
+				items: [
+					'Исходные модули с import и export',
+					'Сборщик строит граф зависимостей',
+					'Код минифицируется, лишнее выбрасывается',
+					'Готовые файлы кладут на хостинг',
+					'Браузер посетителя скачивает и выполняет их'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Зачем беречь зависимости, ведь пакет подключается одной строкой?',
+				options: [
+					'Каждый пакет это чужой код: он прибавляет вес, требует обновлений и может оказаться уязвимым или исчезнуть',
+					'Пакеты запрещены в коммерческих проектах',
+					'Чем больше пакетов, тем быстрее сайт'
+				],
+				answer: 0,
+				why: [
+					'Да. В 2016 году разработчик удалил из npm крошечный пакет left-pad, и в мире сломались тысячи сборок. А вес пакетов складывается в ту страницу, которую грузит ваш посетитель. Пакет оправдан, если экономит больше, чем стоит.',
+					'Нет: большинство пакетов открыты и свободны для использования. Вопрос в цене владения, а не в запрете.',
+					'Нет: наоборот, скачивание и разбор чужого кода замедляют загрузку.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-module-syntax',
+				front: 'Как устроены модули ES?',
+				back: 'Файл экспортирует значения (export), другой берёт их (import { a } from "./x.js"). У модуля своя область видимости, он выполняется один раз и после разбора страницы. Подключается через <script type="module">.'
+			},
+			{
+				id: 'js-npm',
+				front: 'Что такое npm и package.json?',
+				back: 'npm: менеджер пакетов и реестр чужого кода. package.json: паспорт проекта с именем, скриптами и списком зависимостей; сами пакеты скачиваются в node_modules.'
+			},
+			{
+				id: 'js-semver',
+				front: 'Что значат числа версии 2.5.1 и значок ^?',
+				back: 'Мажор.минор.исправление. Мажор меняют при поломке совместимости, минор при новых возможностях, исправление при починке. ^2.5.1 разрешает обновления до 3.0.0, не включая его.'
+			},
+			{
+				id: 'js-bundler',
+				front: 'Что делает сборщик и нужен ли он всегда?',
+				back: 'Собирает граф import в файлы, минифицирует, выбрасывает лишнее, переводит TypeScript и JSX. Для маленького сайта на чистых модулях он не обязателен; нужен, когда появляются пакеты, TypeScript или фреймворк.'
+			},
+			{
+				id: 'js-dependency-cost',
+				front: 'Какую цену имеет каждая зависимость?',
+				back: 'Вес для посетителя, обновления и уязвимости, зависимость от чужих решений (левый пакет может исчезнуть или измениться). Подключайте, если пакет экономит больше, чем стоит.'
+			}
+		],
+		sources: [
+			{
+				title: 'JavaScript modules (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Модули (learn.javascript.ru)',
+				url: 'https://learn.javascript.ru/modules',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'ru'
+			},
+			{
+				title: 'npm Docs: About packages and modules',
+				url: 'https://docs.npmjs.com/about-packages-and-modules',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Vite: Getting Started',
+				url: 'https://vite.dev/guide/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'web.dev: Reduce JavaScript payloads with tree shaking',
+				url: 'https://web.dev/articles/reduce-javascript-payloads-with-tree-shaking',
+				licence: 'CC-BY',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Здесь вы разложите код сайта по файлам. Файлов в песочнице нет, поэтому каждый «файл» это блок pre с кодом. Пишите так, будто он лежит на диске, и потом проверьте на своём компьютере.',
+			hints: [
+				'В блоке data.js: export const items = [ { title: "…", text: "…", price: "…" }, … ]; Поставьте свои пункты из брифа.',
+				'В render.js первая строка: import { items } from "./data.js"; (с расширением .js: браузер не угадывает его). Потом export function renderCards(container) { … } и внутри createElement, textContent и container.replaceChildren(...cards).',
+				'В main.js два импорта: import { items } from "./data.js" и import { renderCards } from "./render.js", а потом вызов renderCards(document.querySelector("#offer .cards")).',
+				'В package.json нужно "name": "…" и "type": "module". А в абзаце про пакеты напишите «не нужны» или перечислите и укажите вес в килобайтах.'
+			],
+			mistakes: {
+				'modules-section': 'Блок «Модули страницы» (section id="modules") пропал. Верните его: в нём вы пишете модули.',
+				'no-blanks': 'В блоке модулей ещё остались многоточия «…». Замените каждое кодом или текстом.',
+				'data-exports': 'В data.js данные надо отдать другим файлам: export const items = […].',
+				'data-own-items': 'В data.js должны быть ваши пункты из брифа: хотя бы два названия записаны так же, как в брифе.',
+				'render-imports-data': 'В render.js первой строкой нужен импорт: import { items } from "./data.js". Расширение .js обязательно.',
+				'render-exports': 'render.js должен экспортировать функцию: export function renderCards(container) { … }.',
+				'render-safe': 'В renderCards карточки строят через createElement и textContent. innerHTML для данных не нужен.',
+				'main-imports': 'В main.js нужны два импорта: из "./render.js" и из "./data.js".',
+				'main-calls': 'main.js должен вызвать функцию: renderCards(…).',
+				'package-name': 'В package.json нужно имя: "name": "moy-sait".',
+				'package-module': 'В package.json нужно "type": "module": так Node и сборщики понимают, что файлы это модули.',
+				'deps-note': 'В абзаце «Внешние пакеты» напишите, что пакеты не нужны, или назовите их и укажите вес в килобайтах.'
+			},
+			outro: 'Теперь у кода есть структура: данные отдельно, рисование отдельно, запуск отдельно. Сохраните эти файлы у себя, запустите локальный сервер и откройте страницу: она должна работать так же.'
+		},
+		say: {
+			npm: 'эн-пи-эм',
+			package: 'пэкидж',
+			json: 'джейсон',
+			export: 'экспорт',
+			import: 'импорт',
+			Vite: 'вит',
+			bundler: 'бандлер',
+			semver: 'семвер',
+			node_modules: 'ноуд-модьюлз',
+			webpack: 'вебпак',
+			Rollup: 'роллап',
+			esbuild: 'эс-билд',
+			TypeScript: 'тайпскрипт',
+			'left-pad': 'лефт-пэд'
+		}
+	};
+</script>
+
+<script>
+	import ModuleGraph from '../../diagrams/ModuleGraph.svelte';
+</script>
+
+## Когда скрипт перестаёт помещаться в голове
+
+На вашей странице уже четыре скрипта: сводка, быстрый переход, меню с поиском, загрузка данных. Они лежат подряд внутри одного HTML-файла, и это ещё терпимо. Теперь представьте сайт на двадцати страницах и сорока скриптах. Какой из них объявил переменную `items`? Какой от какого зависит? Что сломается, если поменять порядок тегов `<script>`? В начале 2000-х сайты так и жили: один огромный файл или десяток файлов, подключённых в строгом порядке, а у всех скриптов общее пространство имён. Достаточно было двум файлам назвать переменную одинаково, чтобы один тихо затёр другой.
+
+Нужен способ сказать про каждый файл: вот что он **отдаёт** остальным, вот что он **берёт** у других, а всё остальное остаётся его личным делом. Такие файлы называются **модулями**.
+
+## Как к этому шли
+
+Решений было несколько. Сначала код заворачивали в функцию, которая тут же вызывала сама себя, и получали личную область видимости (приём называли IIFE). В 2009 году в серверном JavaScript, который называется Node.js, появилась система модулей CommonJS с командой `require`, а для браузеров придумали AMD и другие. А чтобы всё это работало в браузере, появились **сборщики**: Browserify и webpack (2011–2012), Rollup, Parcel, а потом esbuild и Vite. В 2015 году сам язык получил собственные модули, **модули ES**, и к 2018 году их понимали все основные браузеры. С тех пор для маленьких сайтов сборщик нужен не всегда.
+
+## Модули ES
+
+Файл-модуль выставляет наружу то, что помечено словом `export`, а остальное остаётся внутри:
+
+```js
+// data.js
+export const items = [ /* … */ ];
+```
+
+Другой файл берёт нужное через `import`:
+
+```js
+// render.js
+import { items } from './data.js';
+
+export function renderCards(container) { /* … */ }
+```
+
+Подключают главный файл одной строкой, и браузер сам пойдёт по цепочке импортов:
+
+```html
+<script type="module" src="main.js"></script>
+```
+
+Правила, о которые спотыкаются в первый раз:
+
+- путь начинается с `./` или `../`, и **расширение `.js` пишется обязательно**: браузер не угадывает, что вы имели в виду;
+- каждый модуль выполняется **один раз**, сколько бы файлов его ни импортировало, и у него своя область видимости, так что `items` из одного модуля не конфликтует с `items` из другого;
+- модуль выполняется после разбора страницы, как со скриптом `type="module"` в наших уроках;
+- нужен сервер: если открыть страницу двойным щелчком (адрес `file://`), браузер не позволит модулям загрузить друг друга. Любой локальный сервер подойдёт, например `npx serve .` или `python3 -m http.server`.
+
+Есть и **динамический импорт**, `import('./big.js')` с промисом на выходе: он загружает модуль, только когда он понадобился, например код редактора, открывающегося по кнопке.
+
+Непривычно выглядит другое: запись `import x from 'lodash'`, без `./`, в браузере сама по себе не работает. Браузер не знает, где искать пакет по имени. Для этого нужен либо сборщик, который найдёт пакет в `node_modules` и положит его в бандл, либо карта импортов (`importmap`), где вы сами пропишете адрес.
+
+<details>
+<summary>Проверьте себя: почему страница с модулями не работает, если открыть её двойным щелчком?</summary>
+
+Браузер не отдаёт модулям файлы по адресу `file://`. Страницу надо открыть через локальный сервер.
+
+</details>
+
+## npm: чужой код за одну команду
+
+Чтобы не писать всё самому, разработчики делятся кодом через **пакеты**. Главный склад пакетов называется npm (его же так называют и программа для установки). Любой проект начинается с файла `package.json`, паспорта проекта:
+
+```json
+{
+  "name": "moy-sait",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "npx serve ." },
+  "dependencies": { "dates-lib": "^1.4.2" }
+}
+```
+
+В нём имя проекта, пометка `"type": "module"` (файлы считаются модулями), команды в `scripts` (запускаются как `npm run start`) и список **зависимостей**. Команда `npm install` скачает их в папку `node_modules`, а файл `package-lock.json` запишет точные версии, чтобы у вас и у коллеги всё совпало.
+
+Версии записывают по договорённости **semver**: три числа `мажор.минор.исправление`. Исправление чинит ошибки, минор добавляет возможности без поломок, а мажор ломает совместимость. Значок `^` в `^1.4.2` разрешает обновляться внутри мажорной версии: `1.5.0` подойдёт, а `2.0.0` нет.
+
+## Сборщик
+
+**Сборщик** (bundler) идёт по цепочке `import`, собирает всё, что нужно странице, в один или несколько файлов и делает с ними полезные вещи: уменьшает (**минификация**: убирает пробелы и сокращает имена), выбрасывает то, что никто не использовал (**tree shaking**, «встряхивание дерева»), переводит TypeScript, JSX и другие форматы в обычный JavaScript и держит локальный сервер с обновлением страницы при каждой правке. Сегодня самый популярный в новых проектах Vite, а под капотом многих сборщиков лежит esbuild. Попробуйте на схеме: подключите большой пакет и посмотрите, что делает с ним каждая из двух операций:
+
+<ModuleGraph />
+
+Нужен ли сборщик вашему сайту? Для маленького сайта на чистых модулях без внешних пакетов нет: браузер справится сам, а HTTP/2 давно снял прежнюю проблему «много маленьких файлов». Сборщик становится нужен, когда вы подключаете пакеты из npm, пишете на TypeScript или берёте фреймворк (об этом в следующих уроках).
+
+## У каждой зависимости есть цена
+
+Пакет подключается одной строкой, и поэтому подключают много. Но каждый пакет это:
+
+- **вес** на странице, который скачает посетитель, в том числе на слабом телефоне;
+- **чужой код**, который надо обновлять и в котором находят уязвимости (команда `npm audit` сообщает об известных);
+- **зависимость от чужих решений**. В марте 2016 года автор крошечного пакета left-pad (одиннадцать строк, дополняющих строку пробелами) удалил его из реестра, и по всему миру сломались тысячи сборок, потому что на него опирались другие пакеты. А в 2018 году в популярный пакет event-stream через новую зависимость попал вредоносный код. Это не повод бояться npm, а повод спросить себя перед каждой установкой: сколько этот пакет экономит и сколько стоит?
+
+Хорошее правило: пакет оправдан, если заменяет много работы и его нет смысла писать самим (например, разбор дат с часовыми поясами). Три строки, которые легко написать самому, пакетом не подключают.
+
+## Практика
+
+Вы на сайте эпохи 2019 года. Скрипты разрослись, пора раскладывать по файлам. Песочница не умеет подключать несколько файлов, поэтому модули вы напишете **текстом**, как будто они лежат в файлах: в блоках `pre` с названиями `data.js`, `render.js`, `main.js` и `package.json`. Внутри `pre` знак `<` пишется как `&lt;`, остальной код без изменений.
+
+Потом сделайте то, что в песочнице нельзя, и проверьте у себя. Создайте на компьютере папку, положите в неё `index.html` с тегом `<script type="module" src="main.js"></script>` и три файла из блоков. Запустите в этой папке `npx serve .` (понадобится Node.js) или `python3 -m http.server` и откройте показанный адрес. Если в консоли красная ошибка, прочитайте её: чаще всего это забытое `.js` в пути или `file://` вместо адреса сервера.
+
+В конце напишите, какие внешние пакеты нужны проекту и сколько они весят. Для вашего сайта, вероятно, никаких: всё сделано на чистом JavaScript. Это тоже ответ, и хороший.
+
+## Что было не так раньше
+
+Скрипты склеивали вручную или командами сборки (Grunt, Gulp), общие имена хранили в одном глобальном объекте (`window.MyApp = {}`), порядок тегов `<script>` был частью программы, и никто не знал точно, какой файл от какого зависит. Для каждого плагина jQuery надо было помнить, что он требует jQuery раньше себя. Сегодня эти зависимости записаны в самом коде, в строках `import`, и их видят и люди, и сборщик, и редактор.
+
+Что осталось верным: делить код по ответственности и держать данные отдельно от того, что их рисует. А пакет из реестра по-прежнему подключают осторожно: то, что удобно сегодня, может оказаться проблемой завтра.
