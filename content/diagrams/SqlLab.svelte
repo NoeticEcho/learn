@@ -25,7 +25,7 @@
 	const rowsFor = (names: string[]): Row[] =>
 		names.map((title, i) => ({ id: i + 1, title, price: [3000, 12000, 1500, 800, 5000, 2000][i % 6], category: i % 2 === 0 ? 'основная' : 'дополнительная' }));
 
-	let db = createDb();
+	let db: any = createDb();
 	let tick = $state(0);
 	function reset(names: string[]) {
 		db = createDb();
@@ -49,15 +49,18 @@
 		{ name: 'UPDATE без WHERE', sql: 'UPDATE items\nSET price = 0' }
 	];
 	let sql = $state(presets[1].sql);
-	let out = $state<ReturnType<typeof run> | null>(null);
+	let out = $state<any>(null);
 
 	function exec() {
 		out = run(db, sql);
 		tick++;
 	}
-	const table = $derived((tick, (db.tables.items?.rows ?? []).map((r: Row) => ({ ...r }))));
-	const last = $derived(out?.results.at(-1));
-	const sel = $derived(last && last.kind === 'select' ? last : null);
+	const table = $derived.by(() => {
+		tick;
+		return ((db.tables.items?.rows ?? []) as Row[]).map((r) => ({ ...r }));
+	});
+	const last: any = $derived(out?.results.at(-1));
+	const sel: any = $derived(last && last.kind === 'select' ? last : null);
 
 	const has = (re: RegExp) => re.test(sql);
 	const stages = $derived(
