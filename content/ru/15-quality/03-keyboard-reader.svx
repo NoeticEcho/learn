@@ -1,0 +1,424 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. */
+	export const metadata = {
+		id: '15-quality/03-keyboard-reader',
+		part: 15,
+		order: 3,
+		title: 'Клавиатура и диктор: имя, роль, состояние',
+		summary:
+			'Человек с диктором не видит страницу, а слушает её дерево: у каждого элемента есть имя, роль и состояние. После урока вы понимаете, как браузер собирает это дерево, делаете кнопку меню, окно и навигацию, с которыми справляются клавиатура и диктор, и умеете за пять минут проверить свою страницу NVDA или VoiceOver.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'cards',
+					label: '<div onclick>',
+					caption: 'Не кнопка',
+					say: [
+						{ text: 'Нажимаю Tab. Тишина.' },
+						{ who: 'div', text: 'Я кнопка! Мышью.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'lock',
+					label: 'имя · роль · состояние',
+					caption: 'Дерево',
+					say: 'Диктор слышит три вещи: как называется, что это и в каком оно состоянии.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'crt',
+					label: 'button',
+					caption: 'Нативное',
+					say: 'Кнопка из button уже умеет всё это. Остаётся назвать.'
+				}
+			]
+		},
+		teaches: ['quality-keyboard-screen-reader'],
+		requires: ['quality-wcag22', 'html-forms', 'js-events'],
+		practice: {
+			id: 'a11y-reader-pass',
+			title: 'Меню, окно и навигация для клавиатуры и диктора',
+			task: 'На странице «кнопки» сделаны из div и работают только мышью. Перепишите разметку так, чтобы она работала клавиатурой и диктором. 1) Шапка, навигация, основное и подвал: элементы header, nav, main, footer; у nav своё имя (aria-label), у текущего пункта aria-current="page". 2) Заголовок страницы h1 с названием проекта из брифа. 3) Кнопка меню: button с id="menu-toggle", aria-expanded="false" и aria-controls="menu"; в навигации ссылки a со всеми разделами из брифа. 4) Кнопка главного действия: button с id="open-d", aria-haspopup="dialog" и текстом действия из брифа. 5) Окно: dialog с id="d", aria-labelledby и заголовком h2 с текстом действия, внутри кнопка «Закрыть». 6) Кнопка-значок поиска: button с aria-label и svg с aria-hidden="true". 7) Место для сообщений: role="status". 8) Не оставляйте div с onclick и role="button". В заметке напишите, что скажет диктор на кнопке меню (роль и состояние) и на окне. Все «…» нужно заменить.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; color: #1d2430; background: #fff; line-height: 1.5; }
+      .header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: 0.75rem 1rem; background: #eef1f6; }
+      .menu-btn, .btn { cursor: pointer; padding: 0.6rem 1rem; background: #0b3d91; color: #fff; border: 0; font: inherit; }
+      .nav-link { padding: 0.4rem 0; }
+      .content { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      .title { font-size: 2rem; font-weight: bold; }
+      .footer { padding: 1rem; background: #eef1f6; }
+      dialog { padding: 1.5rem; border: 2px solid #1d2430; }
+    <\/style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">{{name}}</div>
+      <div class="menu-btn" id="menu-toggle">Меню</div>
+      <div class="nav" id="menu" hidden>
+        {{#each sections}}<div class="nav-link">{{.}}</div>
+        {{/each}}
+      </div>
+      <div class="search" onclick="alert('Поиск')"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="8" cy="8" r="6" fill="none" stroke="#1d2430" stroke-width="2"></circle><path d="M13 13l5 5" stroke="#1d2430" stroke-width="2"></path></svg></div>
+    </div>
+    <div class="content">
+      <div class="title">{{title}}</div>
+      <div class="text">{{who}}</div>
+      <div class="btn" id="open-d">{{mainAction.label}}</div>
+      <div class="modal" id="d" hidden>
+        <div class="modal-title">{{mainAction.label}}</div>
+        <div class="btn" id="close-d">Закрыть</div>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+    <div class="footer">{{name}}, {{city}}</div>
+
+    <aside data-scaffold id="reader-note">
+      <h2>Что скажет диктор</h2>
+      <p>На кнопке меню: <span id="say-menu">…</span></p>
+      <p>На окне: <span id="say-dialog">…</span></p>
+    </aside>
+
+    <script type="module" id="ui-js">
+      const toggle = document.getElementById('menu-toggle');
+      const menu = document.getElementById('menu');
+      toggle?.addEventListener('click', () => {
+        const opening = menu.hidden;
+        menu.hidden = !opening;
+        toggle.setAttribute('aria-expanded', String(opening));
+      });
+      const dlg = document.getElementById('d');
+      document.getElementById('open-d')?.addEventListener('click', () => dlg.showModal?.());
+      document.getElementById('close-d')?.addEventListener('click', () => dlg.close?.());
+    <\/script>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; color: #1d2430; background: #fff; line-height: 1.5; }
+      header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: 0.75rem 1rem; background: #eef1f6; }
+      button { cursor: pointer; min-height: 44px; padding: 0.6rem 1rem; background: #0b3d91; color: #fff; border: 0; font: inherit; }
+      button.search { background: none; color: inherit; min-width: 44px; }
+      nav a { display: inline-block; padding: 0.4rem 0.5rem; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      footer { padding: 1rem; background: #eef1f6; }
+      dialog { padding: 1.5rem; border: 2px solid #1d2430; }
+      :focus-visible { outline: 3px solid #0b3d91; outline-offset: 2px; }
+    <\/style>
+  </head>
+  <body>
+    <header>
+      <p class="logo">{{name}}</p>
+      <button type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Меню</button>
+      <nav id="menu" aria-label="Разделы сайта" hidden>
+        {{#each sections}}<a href="#main">{{.}}</a>
+        {{/each}}
+        <a href="#main" aria-current="page">Главная</a>
+      </nav>
+      <button type="button" class="search" aria-label="Поиск"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20"><circle cx="8" cy="8" r="6" fill="none" stroke="#1d2430" stroke-width="2"></circle><path d="M13 13l5 5" stroke="#1d2430" stroke-width="2"></path></svg></button>
+    </header>
+    <main id="main">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <button type="button" id="open-d" aria-haspopup="dialog">{{mainAction.label}}</button>
+      <dialog id="d" aria-labelledby="d-title">
+        <h2 id="d-title">{{mainAction.label}}</h2>
+        <button type="button" id="close-d">Закрыть</button>
+      </dialog>
+      <p id="status" role="status"></p>
+    </main>
+    <footer>{{name}}, {{city}}</footer>
+
+    <aside data-scaffold id="reader-note">
+      <h2>Что скажет диктор</h2>
+      <p>На кнопке меню: <span id="say-menu">«Меню, кнопка, свёрнуто»</span></p>
+      <p>На окне: <span id="say-dialog">«Название действия, диалог»</span></p>
+    </aside>
+
+    <script type="module" id="ui-js">
+      const toggle = document.getElementById('menu-toggle');
+      const menu = document.getElementById('menu');
+      toggle?.addEventListener('click', () => {
+        const opening = menu.hidden;
+        menu.hidden = !opening;
+        toggle.setAttribute('aria-expanded', String(opening));
+      });
+      const dlg = document.getElementById('d');
+      document.getElementById('open-d')?.addEventListener('click', () => dlg.showModal?.());
+      document.getElementById('close-d')?.addEventListener('click', () => dlg.close?.());
+    <\/script>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'landmarks', kind: 'count', selector: 'header, nav, main, footer', min: 4 },
+				{ id: 'nav-name', kind: 'exists', selector: 'nav[aria-label]' },
+				{ id: 'nav-current', kind: 'exists', selector: 'nav a[aria-current="page"]' },
+				{ id: 'h1', kind: 'field', selector: 'h1', field: 'title' },
+				{ id: 'menu-btn', kind: 'exists', selector: 'button#menu-toggle[aria-expanded][aria-controls="menu"]' },
+				{ id: 'nav-links', kind: 'field', selector: 'nav a', field: 'sections' },
+				{ id: 'open-btn', kind: 'field', selector: 'button#open-d[aria-haspopup="dialog"]', field: 'mainAction.label' },
+				{ id: 'dialog', kind: 'exists', selector: 'dialog#d[aria-labelledby]' },
+				{ id: 'dialog-title', kind: 'field', selector: 'dialog h2', field: 'mainAction.label' },
+				{ id: 'dialog-close', kind: 'text', selector: 'dialog button', matches: 'Закрыть' },
+				{ id: 'icon-name', kind: 'exists', selector: 'button[aria-label] svg[aria-hidden="true"]' },
+				{ id: 'status', kind: 'exists', selector: '[role="status"], [role="alert"], [aria-live]' },
+				{ id: 'no-fake', kind: 'count', selector: 'div[onclick], span[onclick], [role="button"]', max: 0 },
+				{ id: 'say-menu', kind: 'text', selector: '#say-menu', matches: '(?=[\\s\\S]*[Кк]нопк)(?=[\\s\\S]*(свёрнут|развёрнут|раскрыт|закрыт|открыт))' },
+				{ id: 'say-dialog', kind: 'text', selector: '#say-dialog', matches: '[Дд]иалог|[Оо]кно' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Какой элемент получит фокус клавишей Tab и нажмётся по Enter без единой строки скрипта?',
+				options: ['button', 'div с onclick', 'span с role="button"'],
+				answer: 0,
+				why: [
+					'Да. Нативная кнопка уже в порядке табуляции, нажимается Enter и Пробелом, и диктор называет её кнопкой.',
+					'Нет: div не получает фокус, и Enter на нём не работает. Это работает только мышью.',
+					'Нет: role меняет только то, что слышит диктор, но не добавляет поведения.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Что даёт полю ввода имя, которое услышит диктор?',
+				options: [
+					'label с атрибутом for, указывающим на id поля',
+					'aria-label на самом поле',
+					'Только placeholder внутри поля',
+					'Атрибут class со словом «phone»'
+				],
+				answer: [0, 1],
+				why: [
+					'Да: лучший вариант, потому что подпись видна всем и щелчок по ней ставит фокус в поле.',
+					'Да: даст имя диктору, но зрячий подписи не увидит; подходит там, где видимая подпись невозможна (поле поиска с кнопкой).',
+					'Нет: placeholder исчезает при вводе, и не все программы надёжно используют его как имя.',
+					'Нет: класс нужен стилям, диктор его не читает.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Соедините атрибут с тем, что он сообщает диктору',
+				pairs: [
+					['aria-expanded', 'раскрыт ли блок, управляемый этим элементом'],
+					['aria-current="page"', 'это ссылка на текущую страницу'],
+					['aria-describedby', 'какой текст дополнительно описывает элемент (подсказка)'],
+					['role="status"', 'в этом месте появляются сообщения, их нужно озвучить без смены фокуса']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'На ссылке или кнопке стоит aria-hidden="true", но она остаётся на странице и доступна по Tab. Что произойдёт?',
+				options: [
+					'Клавиатурный фокус дойдёт до неё, а диктор о ней промолчит: человек окажется на «пустом» месте',
+					'Она исчезнет и для глаз, и для клавиатуры',
+					'Ничего: атрибут действует только на поиск'
+				],
+				answer: 0,
+				why: [
+					'Да. aria-hidden скрывает элемент только от вспомогательных программ, но не убирает его из порядка фокуса. Поэтому им скрывают лишь декоративное и никогда не фокусируемое.',
+					'Нет: для глаз и для клавиатуры ничего не меняется.',
+					'Нет: это атрибут для дерева доступности, поисковики тут ни при чём.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Расставьте по порядку, как должно вести себя модальное окно',
+				items: [
+					'Человек нажимает кнопку, окно открывается',
+					'Фокус переходит внутрь окна, на его заголовок или первый элемент',
+					'Пока окно открыто, Tab ходит только внутри него, остальная страница недоступна',
+					'Esc или кнопка «Закрыть» закрывает окно',
+					'Фокус возвращается на кнопку, открывшую окно'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Напишите кнопку «Меню», которая сообщает, что управляемый блок с id="menu" пока свёрнут',
+				starter: '',
+				checks: [
+					{ id: 'btn', kind: 'exists', selector: 'button[aria-expanded="false"][aria-controls="menu"]' },
+					{ id: 'text', kind: 'text', selector: 'button', matches: 'Меню' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-reader-tree',
+				front: 'Что слышит человек с диктором?',
+				back: 'Не картинку, а дерево доступности: у каждого элемента имя, роль и состояние (например «Меню, кнопка, свёрнуто»). Браузер строит его из разметки.'
+			},
+			{
+				id: 'quality-reader-native',
+				front: 'Почему нативные элементы лучше самодельных?',
+				back: 'button, a, input, label и dialog уже получают фокус, управляются клавишами и сообщают роль. У div с onclick этого нет, и ARIA лишь меняет озвучивание, но не добавляет поведения.'
+			},
+			{
+				id: 'quality-reader-dialog',
+				front: 'Что должно делать модальное окно?',
+				back: 'Перенести фокус внутрь, не выпускать Tab наружу, закрываться по Esc, вернуть фокус на кнопку. Нативный dialog с showModal() делает это сам.'
+			},
+			{
+				id: 'quality-reader-status',
+				front: 'Как объявить сообщение, не двигая фокус?',
+				back: 'Контейнер с role="status" (вежливо) или role="alert" (срочно) заранее лежит в странице, а потом в него вставляют текст. Диктор прочтёт его сам.'
+			},
+			{
+				id: 'quality-reader-test',
+				front: 'Пятиминутная проверка диктором?',
+				back: 'Включить NVDA или VoiceOver. Пройти по заголовкам (клавиша H), областям (D), полям (F). Выполнить главное действие, не глядя в экран: слышно ли, что это и что произошло.'
+			}
+		],
+		sources: [
+			{ title: 'ARIA Authoring Practices Guide (W3C WAI)', url: 'https://www.w3.org/WAI/ARIA/apg/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'APG: Modal Dialog pattern', url: 'https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'APG: Disclosure pattern', url: 'https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: '<dialog> (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'ARIA live regions (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Manual Screen Reader Testing (WebAIM)', url: 'https://webaim.org/articles/screenreader_testing/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Screen Reader User Survey #11 (WebAIM, 2026)', url: 'https://webaim.org/projects/screenreadersurvey11/', licence: 'link-only', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Сейчас вы замените «кнопки из div» настоящими. Всё, что вы поменяете, уже умеет клавиатура и понимает диктор.',
+			hints: [
+				'Основа: header, nav, main, footer. Меню: <button id="menu-toggle" aria-expanded="false" aria-controls="menu">Меню</button>, а nav получает id="menu" и aria-label.',
+				'Окно: <dialog id="d" aria-labelledby="d-title"><h2 id="d-title">…</h2><button id="close-d">Закрыть</button></dialog>. Кнопка открытия: <button id="open-d" aria-haspopup="dialog">.',
+				'Кнопка-значок: <button aria-label="Поиск"><svg aria-hidden="true">…</svg></button>. Сообщения: <p id="status" role="status"></p>.',
+				'Скрипт в конце страницы уже подключён: он ищет элементы по id, поэтому id менять нельзя.'
+			],
+			mistakes: {
+				landmarks: 'Нужны элементы header, nav, main и footer вместо div.',
+				'nav-name': 'У nav должно быть имя: aria-label="Разделы сайта".',
+				'nav-current': 'Текущему пункту навигации добавьте aria-current="page".',
+				h1: 'Название проекта из брифа нужно в h1.',
+				'menu-btn': 'Кнопка меню: button с id="menu-toggle", aria-expanded="false" и aria-controls="menu".',
+				'nav-links': 'В nav должны быть ссылки a со всеми разделами из брифа.',
+				'open-btn': 'Кнопка главного действия: button с id="open-d", aria-haspopup="dialog" и текстом действия из брифа.',
+				dialog: 'Нужен элемент dialog с id="d" и aria-labelledby.',
+				'dialog-title': 'В dialog должен быть заголовок h2 с названием действия из брифа.',
+				'dialog-close': 'В окне нужна кнопка «Закрыть».',
+				'icon-name': 'Кнопка-значок: aria-label у button и aria-hidden="true" у svg.',
+				status: 'Добавьте место для сообщений с role="status".',
+				'no-fake': 'Остался div или span с onclick или role="button". Замените на нативные элементы.',
+				'say-menu': 'Напишите, что скажет диктор на кнопке меню: роль «кнопка» и состояние (свёрнуто).',
+				'say-dialog': 'Напишите, что скажет диктор на окне: название и слово «диалог».'
+			},
+			outro: 'Теперь меню и окно работают без мыши, а диктор знает, что это за элементы. Дальше стоит хотя бы раз пройти страницу NVDA или VoiceOver: слух выдаст то, чего не выдаст глаз.'
+		},
+		say: { NVDA: 'эн-ви-ди-эй', JAWS: 'джаус', VoiceOver: 'войс-овер', TalkBack: 'ток-бэк', ARIA: 'ария', aria: 'ария', dialog: 'диалог', Tab: 'таб', Esc: 'эскейп', Enter: 'энтер', landmark: 'лэндмарк', live: 'лайв', WebAIM: 'веб-эйм', APG: 'эй-пи-джи' }
+	};
+</script>
+
+<script>
+	import AccName from '../../diagrams/AccName.svelte';
+</script>
+
+## Страница, которую слушают
+
+Человек, который не видит экран, не «слушает картинку». Он слушает **дерево доступности**: параллельное дерево, которое браузер строит из вашей разметки специально для вспомогательных программ. В нём у каждого элемента есть три вещи:
+
+- **имя** (name): как он называется. У кнопки «Меню», у поля «Телефон», у картинки её альтернативный текст;
+- **роль** (role): что это такое. Ссылка, кнопка, заголовок, поле, список, навигация;
+- **состояние** (state): в каком он положении. Раскрыто, нажато, выбрано, текущая страница, ошибка.
+
+Диктор (программа чтения с экрана) собирает из них фразу вроде «Меню, кнопка, свёрнуто». Значительная часть доступности интерфейса состоит в том, чтобы эта фраза была верной.
+
+Откуда браузер берёт имя, роль и состояние? Роль и поведение он берёт из **самого элемента**: `button` это кнопка, `a` с `href` это ссылка, `h2` это заголовок второго уровня. Имя собирается по порядку из нескольких мест: `aria-labelledby`, `aria-label`, затем содержимое или связанная подпись (`label` для поля, `alt` для картинки), и в самую последнюю очередь `title`. Состояние берётся из атрибутов (`checked`, `disabled`, `aria-expanded`, `aria-current`).
+
+Вывод, который вы уже знаете из первого урока про ARIA: **нативный элемент даёт все три сразу**, а `div` не даёт ни одного. Поэтому чаще всего достаточно выбрать правильный элемент и дать ему имя.
+
+## Как слушают страницу
+
+Диктором пользуются иначе, чем читают глазами. По опросу WebAIM (одиннадцатый, лето 2026 года; ответили около 1800 человек) на длинной странице чаще всего начинают с заголовков: так сказали около двух третей. Поэтому в режиме просмотра клавиши быстрой навигации перепрыгивают между однотипными элементами: **H** к следующему заголовку, **D** к следующей области, **F** к следующему полю формы, **K** к ссылке, **B** к кнопке. Диктор может показать и список всех заголовков, всех областей, всех ссылок.
+
+Из этого следует то, что вы делаете руками:
+
+- **Заголовки** выстроены по порядку, h1 один, и по ним можно понять страницу, как по оглавлению.
+- **Области** (landmarks) отмечены тем, что вы знаете как смысловые элементы: `header`, `nav`, `main`, `aside`, `footer`. Если навигаций две, у каждой своё имя в `aria-label`: «Разделы сайта», «Подвал».
+- **Ссылки** понятны вне контекста. «Подробнее» в списке из десяти ссылок звучит десять раз одинаково; пишите «Подробнее об услуге: межевание».
+- **Поля** подписаны. Без подписи диктор скажет «поле ввода», и человек не знает, что вводить.
+
+Диктор, кстати, разный: по тому же опросу на компьютере чаще всего используют JAWS (платная) и NVDA (бесплатная), в телефонах это VoiceOver у iPhone и TalkBack у Android. Слова у каждой программы немного различаются, а смысл тот же.
+
+<details>
+<summary>Проверьте себя: из чего диктор складывает «Меню, кнопка, свёрнуто»?</summary>
+
+Имя «Меню» берётся из содержимого кнопки, роль «кнопка» от самого элемента button, состояние «свёрнуто» от атрибута aria-expanded="false".
+
+</details>
+
+## Клавиатура: порядок, фокус и управление
+
+Фокус и порядок вы знаете из первого прохода. Что нужно добавить для сложных элементов.
+
+- **Tab** переходит между элементами, **Shift+Tab** назад. Внутри составных элементов (набор переключателей, вкладки, меню) между пунктами ходят **стрелки**, а Tab проходит всю группу целиком. Для самодельных виджетов это нужно программировать; руководство ARIA Authoring Practices Guide описывает ожидаемое поведение каждого.
+- **Enter** нажимает ссылку и кнопку, **Пробел** нажимает кнопку и ставит флажок, **Esc** закрывает окно, всплывающее меню или подсказку.
+- **Раскрывающиеся блоки** проще всего делать кнопкой с `aria-expanded` и `aria-controls`: диктор объявит «свёрнуто» или «развёрнуто». Такой шаблон называют *disclosure*, и им стоит заменять самодельные «меню» с ролью `menu`, которая обещает больше, чем сделано.
+- **Окна.** Модальное окно должно: переносить фокус внутрь, не выпускать Tab наружу, закрываться по Esc и возвращать фокус на кнопку, которая его открыла. Нативный элемент `dialog` с методом `showModal()` всё это делает сам; достаточно дать ему имя через `aria-labelledby`.
+
+<details>
+<summary>Проверьте себя: что делает элемент dialog после showModal() для клавиатуры?</summary>
+
+Переносит фокус внутрь, делает остальную страницу недоступной, закрывается по Esc и возвращает фокус на кнопку, открывшую окно.
+
+</details>
+
+## Сообщения: что менялось на странице
+
+Страница меняется без перезагрузки: появилась ошибка, добавился товар в корзину, прошла отправка. Зрячий это замечает, а диктор не знает, куда смотреть. Решение: **живые области** (live regions). Контейнер с `role="status"` (вежливо: прочитать, когда диктор освободится) или `role="alert"` (срочно, прерывая чтение) лежит в странице заранее, а потом в него вставляют текст. Диктор прочтёт вставленное сам, фокус не двигается.
+
+Два правила. Контейнер должен существовать **до** вставки текста, иначе многие программы не объявят. И не объявляйте всё подряд: десять сообщений за секунду делают страницу невыносимой.
+
+## Скрытое: кто что видит
+
+- `display: none` и атрибут `hidden` убирают элемент **и для глаз, и для диктора, и для клавиатуры**. Так скрывают то, что действительно не нужно (закрытое меню).
+- `aria-hidden="true"` убирает элемент **только для диктора**; фокус до него по-прежнему дойдёт. Им скрывают декоративное (иконку рядом с текстом), и **никогда** не ставят на то, что можно сфокусировать.
+- Класс «только для диктора» (текст сдвинут за край экрана, но остаётся в дереве) нужен для подписи иконке без слов. Часто проще атрибут `aria-label`.
+
+Схема ниже: три элемента, каждый написан несколькими способами. Смотрите, доходит ли до него Tab, работает ли Enter и что говорит диктор.
+
+<AccName />
+
+## Проверка за пять минут
+
+Включите диктор: NVDA для Windows бесплатен, в macOS VoiceOver включается сочетанием Command+F5. Затем:
+
+1. Закройте глаза или отвернитесь от монитора (или погасите экран).
+2. Клавишей H пройдите по заголовкам: складывается ли оглавление?
+3. Клавишей D пройдите по областям: есть ли навигация и основное?
+4. Дойдите до формы клавишей F. Услышали ли вы подпись каждого поля?
+5. Выполните главное действие из брифа (запись, заказ). Дошли? Услышали ли результат?
+
+Не получилось что-то из пунктов, значит, это приоритет для исправления. Для первого раза не нужно знать все команды: достаточно этих пяти клавиш.
+
+## Практика
+
+Вы остаётесь в эпохе 2014 года. На странице меню и окно сделаны из div, и работают они только мышью. Перепишите их нативными элементами и запишите в заметке, что скажет диктор. Скрипт внизу уже подключён: он ищет элементы по `id` и переключает `aria-expanded`.
+
+Проверка смотрит на разметку: на области, имена, состояния и отсутствие самодельных кнопок. Услышать результат проверка не может: после урока включите диктор и пройдите страницу своим пятиминутным сценарием.
+
+## Что было не так раньше
+
+В эпоху jQuery меню делали из `div` и `span` с обработчиками кликов, а окна из полупрозрачных слоёв, и всё это хорошо выглядело на картинке. Для диктора такие страницы были набором безымянных блоков, а клавиатурой по ним нельзя было пройти. Появился ARIA, чтобы описать то, чего нет в HTML. Сейчас большинство того, ради чего его придумали, появилось в самом HTML: `button`, `dialog`, `details`, `search`. Правило осталось прежним: сначала нативный элемент, и лишь потом ARIA.
