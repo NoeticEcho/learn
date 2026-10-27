@@ -31,6 +31,25 @@ One YAML file per part, as the shape in spec §3.3–3.4 needs it. Each file has
 - **mdsvex gotcha.** In a lesson's metadata, a `</pre>`, `</style>` or `</textarea>` inside a template literal ends the markdown HTML block that begins at `<script module>`; the rest of the metadata is then read as markdown and smartypants turns `...` into `…`. Write `<\/pre>` (the same as for `</script>`). Use ```html, not ```svelte, for Svelte code: the svelte grammar logs «failed to load language css».
 - **Diagrams** key an `{#each}` by index when the items come from the person's brief: two items with the same title make a duplicate key and break the page.
 
+## Определение (the definition, 27.10.2026)
+
+Every lesson opens with a **definition**: the quotable one- or two-sentence answer to «что такое <тема урока>?». It is the first thing on the lesson page, under the header and before the theory, and it is what the outside world quotes: the page's meta description (the search snippet), the `description` of its structured data (`LearningResource`), its line in `llms.txt`, and the caption a share sends. It is written in the metadata, beside `summary`, and validated by `content:check` (`Definition` in `src/lib/content/schema.ts`):
+
+```js
+title: 'DNS: от резолвера до корня и обратно',
+definition: 'DNS — распределённая система, которая переводит имя сайта, например example.ru, в IP-адрес сервера. Ответы хранятся в кэшах на срок TTL из записи.',
+summary: 'Вы поймёте, как имя превращается в адрес, …',
+```
+
+- **50 to 160 characters**, one or two sentences, ending with a period: a search engine shows about 160 characters, and an answer engine quotes a sentence, not a paragraph.
+- **Define the topic, not the lesson.** Start with the term and a dash: «HTML — язык разметки, …», «Инфостиль — …». A lesson about two or three things defines the main one and names the rest in the same or the second sentence.
+- **It is read quoted alone, out of the lesson**, so: no «вы» (the check refuses it), no «В этом уроке…», nothing that needs the page around it to make sense.
+- **Accurate as the lesson is.** Take it from the lesson's own text; no date, number or claim the lesson does not support. When a fact had to be compressed to fit, the lesson still says it in full.
+- Plain text: no Markdown, no tags (a tag's name as a word is fine: `<a>`, `fetch`), «ёлочки», ё where it belongs.
+- **`summary` is a different thing**: «Зачем», addressed to the learner, what they can do after the lesson. It stays, and it is what a link preview shows under the title (`og:description`); the definition is what a search result shows.
+
+Write the definition after the lesson's text, from it. A good test: would it be a correct answer if someone asked a search engine «что такое …» and got only this sentence?
+
 ## Комикс (the comic rail, 27.10.2026)
 
 Every lesson carries a short comic: two to four panels in which Эхо carries the lesson's one idea, a joke or a picture that makes it stick. On a screen 1100 px and wider it is the rail beside the theory, sticky while the theory scrolls; narrower, it is a strip under the lesson's header that scrolls sideways. It is written in the lesson's metadata, beside `summary`, and validated by `content:check` (`Comic` in `src/lib/content/schema.ts`; the kit is `src/lib/comic/kit.ts`).
