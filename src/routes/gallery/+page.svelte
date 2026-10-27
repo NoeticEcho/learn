@@ -1,11 +1,14 @@
 <!--
 	The gallery (spec §3.1, §4.6): the person's site in each era, as live thumbnails. Each is the
 	same sandbox as the practice preview (allow-scripts only, the network blocked), loaded lazily.
+	An era's site is its furthest practice step with saved work (progress.eraSites). The lessons'
+	scaffolding (`data-scaffold`, scaffold.ts) is left out of the thumbnail and the zip.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
 	import { buildSrcdoc } from '#lib/practice/sandbox.ts';
+	import { withoutScaffold } from '#lib/practice/scaffold.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -16,7 +19,10 @@
 
 	onMount(async () => {
 		const { db, progress, persona } = await import('#lib/learner.ts');
-		sites = await progress.eraSites(await db(), data.steps);
+		const all = await progress.eraSites(await db(), data.steps);
+		sites = Object.fromEntries(
+			Object.entries(all).map(([era, { files, legacy }]) => [era, { ...files, 'index.html': withoutScaffold(files['index.html'] ?? '', { legacy }) }])
+		);
 		title = (await persona()).name;
 	});
 

@@ -121,11 +121,13 @@ test('two lessons of one era keep their own pages, and the gallery shows the fur
 	const editor = page.locator('.cm-content').first();
 	await expect(editor).toContainText('brief-card');
 	await expect(editor).not.toContainText('Верстак: моя правка');
-	await writeEditor(page, '<h1>Бриф: моя правка</h1>');
+	await writeEditor(page, '<h1>Бриф: моя правка</h1><aside class="note" data-scaffold><p>Заметка урока</p></aside>');
 	await page.waitForTimeout(600);
 	await page.goto('./lesson/00-start/03-workbench/');
 	await expect(page.locator('.cm-content').first()).toContainText('Верстак: моя правка');
 	await page.goto('./gallery/');
 	const thumb = page.frameLocator('iframe').first();
 	await expect(thumb.locator('h1')).toHaveText('Бриф: моя правка');
+	// the lesson's scaffolding is not part of the person's site
+	await expect(thumb.locator('body')).not.toContainText('Заметка урока');
 });

@@ -65,14 +65,17 @@ export async function legacyFiles(db: Db, era: number): Promise<Files | undefine
  * steps before it, so the furthest one is the most complete site. An era with no saved step
  * shows its page from schema 1, if there is one.
  */
-export async function eraSites(db: Db, steps: { id: string; era: number }[]): Promise<Record<number, Files>> {
+export type EraSite = { files: Files; /** a schema-1 page, from before step keys */ legacy: boolean };
+
+export async function eraSites(db: Db, steps: { id: string; era: number }[]): Promise<Record<number, EraSite>> {
 	const { steps: saved, legacy } = await practice(db);
-	const out: Record<number, Files> = { ...legacy };
+	const out: Record<number, EraSite> = {};
+	for (const [era, files] of Object.entries(legacy)) out[Number(era)] = { files, legacy: true };
 	const seen = new Set<number>();
 	for (const s of [...steps].reverse()) {
 		if (seen.has(s.era) || !saved[s.id]) continue;
 		seen.add(s.era);
-		out[s.era] = saved[s.id];
+		out[s.era] = { files: saved[s.id], legacy: false };
 	}
 	return out;
 }

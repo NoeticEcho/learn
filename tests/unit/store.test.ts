@@ -41,17 +41,17 @@ describe('store', () => {
 		await progress.saveFile(db, 'a', 'index.html', '<p>a, edited later</p>');
 		await progress.saveFile(db, 'c', 'index.html', '<p>c</p>');
 		expect(await progress.eraSites(db, steps)).toEqual({
-			1: { 'index.html': '<p>b</p>', 'styles.css': 'p{}' },
-			3: { 'index.html': '<p>c</p>' }
+			1: { files: { 'index.html': '<p>b</p>', 'styles.css': 'p{}' }, legacy: false },
+			3: { files: { 'index.html': '<p>c</p>' }, legacy: false }
 		});
 	});
 	it('a page from before step keys is the era’s site until a step of that era is saved', async () => {
 		const db = await fresh();
 		await db.put('practice', '<p>old</p>', 'era:2:index.html');
 		expect(await progress.legacyFiles(db, 2)).toEqual({ 'index.html': '<p>old</p>' });
-		expect(await progress.eraSites(db, [{ id: 'x', era: 2 }])).toEqual({ 2: { 'index.html': '<p>old</p>' } });
+		expect(await progress.eraSites(db, [{ id: 'x', era: 2 }])).toEqual({ 2: { files: { 'index.html': '<p>old</p>' }, legacy: true } });
 		await progress.saveFile(db, 'x', 'index.html', '<p>new</p>');
-		expect((await progress.eraSites(db, [{ id: 'x', era: 2 }]))[2]).toEqual({ 'index.html': '<p>new</p>' });
+		expect((await progress.eraSites(db, [{ id: 'x', era: 2 }]))[2]).toEqual({ files: { 'index.html': '<p>new</p>' }, legacy: false });
 		expect(await progress.legacyFiles(db, 2)).toEqual({ 'index.html': '<p>old</p>' });
 	});
 	it('round-trips through export and import into a fresh db', async () => {
