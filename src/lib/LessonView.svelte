@@ -14,6 +14,9 @@
 	import Guide from '#lib/guide/Guide.svelte';
 	import VideoFacade from '#lib/VideoFacade.svelte';
 	import Comic from '#lib/comic/Comic.svelte';
+	import Share from '#lib/share/Share.svelte';
+	import { lessonText } from '#lib/share/targets.ts';
+	import { at } from '#lib/seo/site.ts';
 	import type { GuideEvent } from '#lib/guide/script.ts';
 	import type { ModelConfig } from '#lib/guide/model.ts';
 	import type { CheckResult } from '#lib/practice/checks.ts';
@@ -21,6 +24,8 @@
 
 	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null };
 	let { lesson, part, concepts: taught, index, body: Body }: Props = $props();
+
+	const share = $derived({ url: at.lesson(lesson.id), title: lesson.title, text: lessonText(lesson.title, lesson.definition, t('app.title')) });
 
 	let Practice = $state<Component<any> | null>(null);
 	let persona = $state<Persona | null>(null);
@@ -168,11 +173,13 @@
 		<h1>{lesson.title}</h1>
 		<p class="why"><span class="visually-hidden">{t('lesson.why')}: </span>{lesson.summary}</p>
 		<p class="minutes">{t('lesson.minutes', { n: lesson.minutes, minutes: pl(lesson.minutes, 'minute.forms') })}</p>
+		<div class="share-head"><Share {...share} /></div>
 	</header>
 
 	<div class={['container theory', lesson.comic && 'has-comic']}>
 		{#if lesson.comic}<Comic comic={lesson.comic} {era} />{/if}
 		<div class="prose">
+			<p class="definition">{lesson.definition}</p>
 			{#if Body}<Body />{/if}
 		</div>
 	</div>
@@ -248,6 +255,7 @@
 		{:else}
 			<button type="button" class="primary" onclick={finish}>{t('lesson.finish')}</button>
 		{/if}
+		<div class="share-end"><Share {...share} /></div>
 	</section>
 </article>
 
@@ -286,6 +294,24 @@
 		margin: 0;
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);
+	}
+	.share-head {
+		margin-top: var(--space-2);
+	}
+	.share-end {
+		margin-top: var(--space-7);
+		padding-top: var(--space-5);
+		border-top: var(--line) solid var(--border-hairline);
+	}
+	/* The definition the lesson opens with (docs/content-plan/README.md, «Определение»): the
+	   sentence a reader, a search engine or an answer engine quotes. */
+	.definition {
+		font-family: var(--font-serif);
+		font-size: var(--text-body-lg);
+		line-height: var(--lh-body-lg);
+		color: var(--text-primary);
+		padding-left: var(--space-4);
+		border-left: 2px solid var(--accent-measure);
 	}
 	/* The comic: a strip under the header on narrow screens, the rail beside the theory on wide
 	   ones. The text column keeps its measure; the rail sits a gutter after it, not at the edge. */
