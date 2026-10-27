@@ -36,15 +36,15 @@
 	<p class="year" aria-hidden="true">{s.year}</p>
 	<div class="cols" aria-live="polite">
 		<section aria-label="Веб">
-			<h4>Веб</h4>
+			<div class="dh">Веб</div>
 			<p>{s.web}</p>
 		</section>
 		<section aria-label="Браузеры">
-			<h4>Браузеры</h4>
+			<div class="dh">Браузеры</div>
 			<p>{s.browsers}</p>
 		</section>
 		<section aria-label="Рунет">
-			<h4>Рунет</h4>
+			<div class="dh">Рунет</div>
 			<p>{s.runet}</p>
 		</section>
 	</div>
@@ -67,7 +67,7 @@
 		border-top: 2px solid var(--border-rule);
 		padding-top: var(--space-2);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

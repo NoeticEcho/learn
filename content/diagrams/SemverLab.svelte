@@ -54,7 +54,7 @@
 		</div>
 	{/if}
 	{#if log.length}
-		<h4>Список изменений</h4>
+		<div class="dh">Список изменений</div>
 		<ol class="log" reversed>
 			{#each log as l, i (i)}
 				<li><code class="dg-mono">{l.v}</code> · {l.text} <span class="small">· {kindName[l.kind]}</span></li>
@@ -85,7 +85,7 @@
 	.dg-box p {
 		margin: 0 0 var(--space-2);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

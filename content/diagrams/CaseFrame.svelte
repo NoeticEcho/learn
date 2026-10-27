@@ -34,7 +34,7 @@
 <figure class="dg">
 	<figcaption>До и после, и чего в кейсе нельзя</figcaption>
 
-	<h4>До и после</h4>
+	<div class="dh">До и после</div>
 	<label class="dg-ctl">
 		От «до» к «после»
 		<input type="range" min="0" max="100" step="1" bind:value={pos} />
@@ -47,7 +47,7 @@
 	{/each}
 	<p class="dg-out">Числа придуманы. В настоящем кейсе называйте только то, что измерили, а если не измеряли, скажите об этом.</p>
 
-	<h4>Что нельзя оставлять</h4>
+	<div class="dh">Что нельзя оставлять</div>
 	<label class="area">Текст кейса (можно заменить своим)
 		<textarea rows="4" bind:value={text}></textarea>
 	</label>
@@ -62,7 +62,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

@@ -34,13 +34,13 @@
 	</div>
 	<div class="two">
 		<section aria-label="Статическая страница">
-			<h4>Статика: файл, часто из кэша</h4>
+			<div class="dh">Статика: файл, часто из кэша</div>
 			<p class="flow">запрос → <b>файл</b> → ответ</p>
 			<div class="bar"><span class="fill" style="width:{pct(staticMs)}%"></span></div>
 			<p class="num">≈ {staticMs} мс · серверов: 0 (раздаёт хостинг или CDN) · ≈ {rub.static} ₽ в месяц сверх хостинга</p>
 		</section>
 		<section aria-label="Динамическая страница">
-			<h4>Динамика: код и база</h4>
+			<div class="dh">Динамика: код и база</div>
 			<p class="flow">запрос → код → <b>база</b> → HTML → ответ</p>
 			<div class="bar"><span class="fill dyn" style="width:{pct(dynamicMs)}%"></span></div>
 			<p class="num">на одном сервере ≈ {dynamicMs} мс · чтобы держать нагрузку без очереди, нужно серверов: {servers} (≈ {rub.dynamic.toLocaleString('ru-RU')} ₽ в месяц)</p>
@@ -60,7 +60,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

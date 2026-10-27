@@ -74,7 +74,7 @@
 		<strong>1.25–1.333</strong> универсальны, <strong>1.5 и выше</strong> дают эффектные заголовки, но мелкие ступени растут слишком быстро.
 	</p>
 
-	<h4>Текучий размер: clamp()</h4>
+	<div class="dh">Текучий размер: clamp()</div>
 	<p class="dg-out">Размер заголовка плавно растёт от телефона к широкому экрану, не выходя за пределы. Меняйте границы и «ширину экрана».</p>
 	<div class="grid2">
 		<label>Наименьший: {minPx} px <input type="range" min="20" max="48" step="2" bind:value={minPx} /></label>
@@ -87,7 +87,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

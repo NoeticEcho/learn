@@ -58,13 +58,13 @@
 
 	<div class="rank">
 		<div>
-			<h4>По ICE</h4>
+			<div class="dh">По ICE</div>
 			<ol>
 				{#each byIce as k (k)}<li>{ideas[k].name}: <strong>{ice(ideas[k])}</strong></li>{/each}
 			</ol>
 		</div>
 		<div>
-			<h4>По RICE</h4>
+			<div class="dh">По RICE</div>
 			<ol>
 				{#each byRice as k (k)}<li>{ideas[k].name}: <strong>{rice(ideas[k])}</strong></li>{/each}
 			</ol>
@@ -126,7 +126,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		color: var(--text-primary);
 		font-weight: var(--weight-medium);

@@ -119,11 +119,11 @@
 			</div>
 		</div>
 		<div>
-			<h4>Запрос</h4>
+			<div class="dh">Запрос</div>
 			<pre class="dg-box dg-mono">{prompt}</pre>
 		</div>
 	</div>
-	<h4>Что получится (модель)</h4>
+	<div class="dh">Что получится (модель)</div>
 	<ul class="res" aria-live="polite">
 		{#each result as r, i (i)}<li class:tell={r.tell}>{r.text}{r.tell ? ' (примета шаблона)' : ''}</li>{/each}
 	</ul>
@@ -149,7 +149,7 @@
 		overflow-wrap: anywhere;
 		min-height: 8rem;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-3) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

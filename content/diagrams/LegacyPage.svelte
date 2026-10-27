@@ -58,7 +58,7 @@
 			Окно достаточно широкое, и страница выглядит как задумано. Сузьте окно: таблица задана шириной в 600 пикселей и сжиматься не умеет.
 		{/if}
 	</p>
-	<h4>Что «слышит» программа чтения с экрана</h4>
+	<div class="dh">Что «слышит» программа чтения с экрана</div>
 	<ol class="dg-box read">
 		{#each reading as r, i (i)}
 			<li><strong>{cells[i]}.</strong> {r}</li>
@@ -79,7 +79,7 @@
 		height: 15rem;
 		border: 0;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

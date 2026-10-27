@@ -26,14 +26,14 @@
 <figure class="dg">
 	<figcaption>Три мелочи, на которых ломаются «английские» компоненты</figcaption>
 
-	<h4>1. Слово после числа: три формы, а не две</h4>
+	<div class="dh">1. Слово после числа: три формы, а не две</div>
 	<label class="dg-ctl">
 		Число: {n}
 		<input type="range" min="0" max="30" step="1" bind:value={n} />
 	</label>
 	<p class="out"><strong>{n} {forms[cat]}</strong> <span class="small">(категория Intl.PluralRules: «{catRu[cat]}»)</span></p>
 
-	<h4>2. Цена и дата</h4>
+	<div class="dh">2. Цена и дата</div>
 	<label class="dg-ctl">
 		Цена: {price}
 		<input type="range" min="0" max="250000" step="500" bind:value={price} />
@@ -41,7 +41,7 @@
 	<p class="out"><strong>{money}</strong> <span class="small">· пробелы внутри числа неразрывные, на схеме показаны как «␣»: {showNbsp(money)}</span></p>
 	<p class="out"><strong>{dateLong}</strong> <span class="small">· коротко: {dateShort}</span></p>
 
-	<h4>3. Подпись длиннее английской</h4>
+	<div class="dh">3. Подпись длиннее английской</div>
 	<div class="dg-ctl">
 		<label><input type="checkbox" bind:checked={fixed} /> Кнопка жёстко шириной 9rem</label>
 	</div>
@@ -56,7 +56,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

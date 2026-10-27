@@ -39,11 +39,11 @@
 	</div>
 	<div class="previews">
 		<div>
-			<h4>Вкладка браузера</h4>
+			<div class="dh">Вкладка браузера</div>
 			<p class="tab">{cut(title, 24)}</p>
 		</div>
 		<div>
-			<h4>Поисковая выдача</h4>
+			<div class="dh">Поисковая выдача</div>
 			<div class="serp">
 				<p class="url">zarechye.example</p>
 				<p class="t">{cut(title, 60)}</p>
@@ -52,7 +52,7 @@
 			<p class="note">Длина: title {title.length} (около 60 видно), description {description.length} (около 155–160).</p>
 		</div>
 		<div>
-			<h4>Ссылка в мессенджере</h4>
+			<div class="dh">Ссылка в мессенджере</div>
 			<div class="card">
 				<div class="img">{absolute ? 'картинка' : 'нет картинки'}</div>
 				<p class="url">zarechye.example</p>
@@ -89,7 +89,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);
@@ -131,7 +131,7 @@
 		height: 5rem;
 		margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) var(--space-2);
 		background: var(--border-hairline);
-		color: var(--text-secondary);
+		color: var(--text-primary);
 	}
 	.note {
 		margin-top: var(--space-2);

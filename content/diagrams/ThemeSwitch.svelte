@@ -44,7 +44,7 @@
 		<pre class="dg-box dg-mono">{code}</pre>
 		<div class="preview" style="{vars} --radius: {radius}px; --space: {space}rem">
 			<div class="card">
-				<h4>Карточка услуги</h4>
+				<div class="dh">Карточка услуги</div>
 				<p>Цвет, отступ и скругление берутся из переменных через <code>var()</code>.</p>
 				<a href="#top" class="btn" onclick={(e) => e.preventDefault()}>Записаться</a>
 			</div>
@@ -52,7 +52,7 @@
 	</div>
 	<p class="dg-out">Чтобы сделать тему тёмной, мы не переписали ни одно правило карточки, а только поменяли значения переменных в одном месте.</p>
 
-	<h4 class="sub">Слои: что сильнее</h4>
+	<div class="dh sub">Слои: что сильнее</div>
 	<div class="wrap">
 		<table>
 			<thead><tr><th scope="col">Селектор</th><th scope="col">Специфичность</th><th scope="col">color</th><th scope="col">Слой</th></tr></thead>
@@ -117,7 +117,7 @@
 		background: var(--color-surface);
 		border-radius: var(--radius);
 	}
-	.card h4,
+	.card .dh,
 	.card p {
 		margin: 0 0 0.5rem;
 		font-family: var(--font-sans);

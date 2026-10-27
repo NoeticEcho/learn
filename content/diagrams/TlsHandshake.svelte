@@ -77,7 +77,7 @@
 		<p class="dg-out">В HTTP нет рукопожатия: браузер сразу отправляет запрос. Он идёт открытым текстом через Wi-Fi, роутеры и серверы провайдера.</p>
 	{/if}
 
-	<h4>Что на проводе у подслушивающего</h4>
+	<div class="dh">Что на проводе у подслушивающего</div>
 	<pre class="dg-box dg-mono" aria-live="polite">{#if eavesdrop === null}{secure ? (stopped ? 'Соединение остановлено: данные не отправлены.' : 'Пока ничего: данные ещё не отправлены.') : ''}{:else}{eavesdrop}{/if}</pre>
 	{#if !secure}<p class="dg-out"><strong>Читается всё:</strong> и адрес, и имя, и телефон. Тот, кто сидит на пути, может ещё и изменить ответ, например вставить в страницу рекламу.</p>{/if}
 </figure>
@@ -112,7 +112,7 @@
 	.eve span {
 		font-weight: var(--weight-medium);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

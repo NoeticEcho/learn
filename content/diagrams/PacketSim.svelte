@@ -72,7 +72,7 @@
 		<button type="button" onclick={resend(0)}>Без потерь</button>
 	</div>
 
-	<h4>Отправитель режет текст на пронумерованные пакеты (нажмите на пакет)</h4>
+	<div class="dh">Отправитель режет текст на пронумерованные пакеты (нажмите на пакет)</div>
 	<ol class="pk">
 		{#each chunks as c, i (i)}
 			<li><button type="button" class:on={pick === i} aria-pressed={pick === i} onclick={() => (pick = i)}><b>№{i + 1}</b> {c}</button></li>
@@ -83,7 +83,7 @@
 	</p>
 	<p class="legend">203.0.113.7 и 198.51.100.20 это адреса узлов (так принято писать примеры). Число после двоеточия это порт: порт 443 принимает защищённый веб-трафик (HTTPS), а порт отправителя выбирает ваш компьютер.</p>
 
-	<h4>Круг {k + 1} из {rounds.length}</h4>
+	<div class="dh">Круг {k + 1} из {rounds.length}</div>
 	<div class="dg-ctl">
 		<button type="button" disabled={k === 0} onclick={() => (view = k - 1)}>Предыдущий круг</button>
 		<button type="button" disabled={k >= rounds.length - 1} onclick={() => (view = k + 1)}>Следующий круг</button>
@@ -102,7 +102,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

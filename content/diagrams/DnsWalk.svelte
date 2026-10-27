@@ -77,7 +77,7 @@
 		<p class="dg-out">Дальше браузер подключается к 203.0.113.10 (это уже TCP, урок 3). Чем больше в кэше, тем быстрее первый шаг: корневой сервер спрашивают редко.</p>
 	{/if}
 
-	<h4>Сколько живёт старый ответ (TTL)</h4>
+	<div class="dh">Сколько живёт старый ответ (TTL)</div>
 	<p class="dg-out">Вы сменили адрес сайта. Резолверы по всему миру запомнили старый ответ в разное время и держат его, пока не истечёт TTL.</p>
 	<div class="dg-ctl" role="group" aria-label="TTL записи">
 		{#each ttls as v (v)}
@@ -98,7 +98,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

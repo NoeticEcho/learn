@@ -40,7 +40,7 @@
 
 	<div class="two">
 		<section aria-label="Ручной код">
-			<h4>Вручную: строк обновления {places}</h4>
+			<div class="dh">Вручную: строк обновления {places}</div>
 			<pre class="dg-box dg-mono">{#each Array.from({ length: places }, (_, i) => i) as i (i)}{names[i]}.textContent = items.length;{forget && i === places - 1 ? '   // забыли' : ''}
 {/each}</pre>
 			<div class="chips" aria-live="polite">
@@ -51,7 +51,7 @@
 			<p class="verdict" class:bad={stale > 0}>{stale > 0 ? `Устарело мест: ${stale}. Страница противоречит сама себе.` : 'Все места совпадают, пока ничего не забыто.'}</p>
 		</section>
 		<section aria-label="Реактивный код">
-			<h4>Реактивно: объявлено одно значение</h4>
+			<div class="dh">Реактивно: объявлено одно значение</div>
 			<pre class="dg-box dg-mono">let items = $state(3);
 {#each Array.from({ length: places }, (_, i) => i) as i (i)}{names[i]}: {'{items}'}
 {/each}</pre>
@@ -71,7 +71,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

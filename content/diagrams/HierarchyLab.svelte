@@ -83,7 +83,7 @@
 		<div class="grid" style="gap:{gap}px;margin-top:{gap}px;grid-template-columns:repeat({cols},1fr)">
 			{#each brief.sections as s, k (k)}
 				<div class="card">
-					<h4>{s}</h4>
+					<div class="dh">{s}</div>
 					<p>Несколько строк обычного текста раздела.</p>
 				</div>
 			{/each}
@@ -169,7 +169,7 @@
 		padding: var(--space-3);
 		border-top: 2px solid #d9d5ce;
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-1);
 		font-size: 1rem;
 		color: #1c1b19;

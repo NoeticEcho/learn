@@ -46,14 +46,14 @@
 
 	<div class="two">
 		<div class="dg-box">
-			<h4>Что делает посетитель</h4>
+			<div class="dh">Что делает посетитель</div>
 			<p>Страница: {titles[page]}</p>
 			<ul>
 				{#each typed as t (t.label)}<li>{t.label}: {t.text}</li>{/each}
 			</ul>
 		</div>
 		<div class="dg-box" class:bad={leaked}>
-			<h4>Что видно в записи</h4>
+			<div class="dh">Что видно в записи</div>
 			{#if blocked}
 				<p>Ничего: {recording ? 'эта страница исключена из записи' : 'запись выключена'}.</p>
 			{:else}
@@ -84,7 +84,7 @@
 		gap: var(--space-3);
 		margin-bottom: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

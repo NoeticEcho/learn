@@ -80,8 +80,9 @@
 		font-size: 0.78rem;
 		color: var(--text-secondary);
 	}
+	/* Not faded with opacity: that took the text below AA. A dashed edge says «skippable». */
 	.layer.skip {
-		opacity: 0.55;
+		border-style: dashed;
 	}
 	.layer.need {
 		border-color: var(--border-brass) !important;

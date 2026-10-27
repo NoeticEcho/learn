@@ -70,12 +70,12 @@
 		<input type="range" min="0" max="2" step="1" bind:value={at} aria-valuetext={cur.name} />
 	</label>
 	<div class="cols" aria-live="polite">
-		<div class="col files"><h4>Файлы на диске</h4>
+		<div class="col files"><div class="dh">Файлы на диске</div>
 			{#each cur.layers.filter((l) => l.where === 'files') as l (l.name)}
 				<div class="layer"><strong>{l.name}</strong><span>{l.note}</span></div>
 			{/each}
 		</div>
-		<div class="col db"><h4>База и админка</h4>
+		<div class="col db"><div class="dh">База и админка</div>
 			{#each cur.layers.filter((l) => l.where === 'db') as l (l.name)}
 				<div class="layer on"><strong>{l.name}</strong><span>{l.note}</span></div>
 			{:else}
@@ -110,7 +110,7 @@
 		border: var(--line) solid var(--border-hairline);
 		background: var(--surface-canvas);
 	}
-	.col h4 {
+	.col .dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		font-size: var(--text-body);

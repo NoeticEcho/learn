@@ -150,7 +150,7 @@
 	<p class="dg-out">Работает копий: <strong>{pods.filter((p) => p.ready).length}</strong> из {desired}. Версии: {[...new Set(pods.map((p) => 'v' + p.ver))].join(', ') || 'нет'}.</p>
 	<ol class="log" aria-live="polite">{#each log as l, i (i)}<li>{l}</li>{/each}</ol>
 
-	<h4>А вам он нужен?</h4>
+	<div class="dh">А вам он нужен?</div>
 	<div class="dg-ctl">
 		<label>Сервисов в проекте: <input type="range" min="1" max="30" bind:value={services} /> <strong>{services}</strong></label>
 		<label>Простой допустим:
@@ -203,7 +203,7 @@
 		color: var(--text-secondary);
 		margin: 0;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

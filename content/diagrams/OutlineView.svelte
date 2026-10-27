@@ -95,7 +95,7 @@
 			<textarea bind:value={html} rows="14" spellcheck="false"></textarea>
 		</label>
 		<div>
-			<h4>Ориентиры</h4>
+			<div class="dh">Ориентиры</div>
 			{#if parsed.lands.length}
 				<ul class="dg-box dg-mono tree">
 					{#each parsed.lands as l, i (i)}
@@ -105,7 +105,7 @@
 			{:else}
 				<p class="dg-box">Ни одного ориентира. Диктор может только читать всё подряд сверху вниз.</p>
 			{/if}
-			<h4>Заголовки</h4>
+			<div class="dh">Заголовки</div>
 			{#if parsed.heads.length}
 				<ul class="dg-box dg-mono tree">
 					{#each parsed.heads as h, i (i)}
@@ -149,7 +149,7 @@
 		resize: vertical;
 		min-width: 0;
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

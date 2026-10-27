@@ -144,13 +144,13 @@
 		<pre class="dg-box dg-mono token"><span class="h">{header}</span>.<span class="p">{sentPayload}</span>.<span class="s">{genuine}</span></pre>
 		<div class="two">
 			<section aria-label="Содержимое токена">
-				<h4>Вторая часть, расшифрованная любым желающим</h4>
+				<div class="dh">Вторая часть, расшифрованная любым желающим</div>
 				<pre class="dg-box dg-mono">{decoded}</pre>
 			</section>
 			<section aria-label="Проверка на сервере" aria-live="polite">
-				<h4>Что делает сервер</h4>
+				<div class="dh">Что делает сервер</div>
 				<label class="chk"><input type="checkbox" bind:checked={editMode} /> злоумышленник заменил роль в токене на</label>
-				<select bind:value={role} disabled={!editMode}>
+				<select bind:value={role} disabled={!editMode} aria-label="Роль в подменённом токене">
 					<option value="visitor">visitor</option>
 					<option value="admin">admin</option>
 				</select>
@@ -195,7 +195,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

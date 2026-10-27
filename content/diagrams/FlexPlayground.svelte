@@ -28,15 +28,15 @@
 	<figcaption>Главная и поперечная оси</figcaption>
 	<div class="grid">
 		<div>
-			<h4>flex-direction</h4>
+			<div class="dh">flex-direction</div>
 			<div class="dg-ctl" role="group" aria-label="flex-direction">
 				{#each dirs as v (v)}<button type="button" aria-pressed={direction === v} onclick={() => (direction = v)}>{v}</button>{/each}
 			</div>
-			<h4>justify-content (по главной оси)</h4>
+			<div class="dh">justify-content (по главной оси)</div>
 			<div class="dg-ctl" role="group" aria-label="justify-content">
 				{#each justs as v (v)}<button type="button" aria-pressed={justify === v} onclick={() => (justify = v)}>{v}</button>{/each}
 			</div>
-			<h4>align-items (по поперечной оси)</h4>
+			<div class="dh">align-items (по поперечной оси)</div>
 			<div class="dg-ctl" role="group" aria-label="align-items">
 				{#each aligns as v (v)}<button type="button" aria-pressed={align === v} onclick={() => (align = v)}>{v}</button>{/each}
 			</div>
@@ -70,7 +70,7 @@
 		gap: var(--space-4);
 		align-items: start;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-2) 0 var(--space-1);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

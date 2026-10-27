@@ -59,11 +59,11 @@
 	</div>
 	<div class="two">
 		<div>
-			<h4>Что хорошо</h4>
+			<div class="dh">Что хорошо</div>
 			<ul>{#each cur.plus as p, i (i)}<li>{p}</li>{/each}</ul>
 		</div>
 		<div>
-			<h4>Чем платим</h4>
+			<div class="dh">Чем платим</div>
 			<ul>{#each cur.minus as p, i (i)}<li>{p}</li>{/each}</ul>
 		</div>
 	</div>
@@ -100,7 +100,7 @@
 		grid-template-columns: 1fr 1fr;
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

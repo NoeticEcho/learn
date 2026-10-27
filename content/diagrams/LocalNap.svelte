@@ -39,13 +39,13 @@
 	<figcaption>Одни и те же сведения в двух местах</figcaption>
 	<div class="cols">
 		<div class="dg-box">
-			<h4>На сайте</h4>
+			<div class="dh">На сайте</div>
 			{#each fields as f (f.k)}
 				<label>{f.label} <input type="text" bind:value={site[f.k]} /></label>
 			{/each}
 		</div>
 		<div class="dg-box">
-			<h4>В карточке организации</h4>
+			<div class="dh">В карточке организации</div>
 			{#each fields as f (f.k)}
 				<label>{f.label} <input type="text" bind:value={card[f.k]} /></label>
 			{/each}
@@ -58,7 +58,7 @@
 	</ul>
 	<p class="dg-out" aria-live="polite">Совпадает {agree} из 3. Знаки препинания и регистр не считаются, а «+7» и «8» считаются разными записями, пока вы не приведёте их к одному виду.</p>
 
-	<h4 class="sub">Кто выше в поиске «рядом» (учебная модель)</h4>
+	<div class="dh sub">Кто выше в поиске «рядом» (учебная модель)</div>
 	<div class="dg-ctl">
 		<label>Подходит запросу: {relevance}<input type="range" min="1" max="5" bind:value={relevance} /></label>
 		<label>Близость к человеку: {distance}<input type="range" min="1" max="5" bind:value={distance} /></label>
@@ -78,12 +78,12 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);
 	}
-	h4.sub {
+	.dh.sub {
 		margin-top: var(--space-5);
 	}
 	label {

@@ -31,7 +31,7 @@
 	<div class="three">
 		{#each models as m (m.id)}
 			<section class="dg-box" aria-label={m.name}>
-				<h4>{m.name}</h4>
+				<div class="dh">{m.name}</div>
 				<p class="line"><b>Каждый запрос:</b> {m.startup}.</p>
 				<p class="line"><b>После ответа:</b> {m.memory}.</p>
 				<p class="counter">Счётчик в коде (<code>$visits++</code>): <strong>{counter(m)}</strong></p>
@@ -52,7 +52,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
 		gap: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		color: var(--text-primary);

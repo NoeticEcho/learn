@@ -73,7 +73,7 @@
 
 	<div class="lanes">
 		<div class="dg-box">
-			<h4>Страница (основной поток)</h4>
+			<div class="dh">Страница (основной поток)</div>
 			<p>
 				<button type="button" onclick={() => (clicks += 1)} disabled={frozen}>Нажми меня: {clicks}</button>
 			</p>
@@ -84,11 +84,11 @@
 			</p>
 		</div>
 		<div class="dg-box">
-			<h4>Сеть и сервер</h4>
+			<div class="dh">Сеть и сервер</div>
 			<p class="dg-mono">{phase === 'idle' ? 'тишина' : phase === 'pending' ? `ждём ответа… ${seconds} из 3 с` : finished === 'offline' ? 'связь оборвалась' : finished === 'notfound' ? 'ответ 404' : 'ответ 200'}</p>
 		</div>
 		<div class="dg-box">
-			<h4>Промис</h4>
+			<div class="dh">Промис</div>
 			<p class="dg-mono pill {promise}">{promise || 'ещё не создан'}</p>
 		</div>
 	</div>
@@ -101,7 +101,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
 		gap: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

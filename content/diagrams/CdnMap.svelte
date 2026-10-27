@@ -100,7 +100,7 @@
 	<div class="bar" aria-hidden="true"><span style="width: {Math.min(100, (shown / maxMs) * 100)}%"></span></div>
 	<p class="dg-out">Модель: свет в кабеле проходит около 200 км за миллисекунду, реальный путь длиннее прямой в полтора раза, и для начала страницы нужно три «туда и обратно». Все остальные запросы страницы тоже выигрывают.</p>
 
-	<h4>Опубликовали новую версию</h4>
+	<div class="dh">Опубликовали новую версию</div>
 	<div class="dg-ctl">
 		<label>Что кэшируем
 			<select bind:value={pol}>{#each policies as o (o.id)}<option value={o.id}>{o.label}</option>{/each}</select>
@@ -115,7 +115,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

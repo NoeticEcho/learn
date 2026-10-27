@@ -71,7 +71,7 @@
 	<figcaption>Компонент и то, что в нём обновилось</figcaption>
 	<div class="two">
 		<section aria-label="Код компонента">
-			<h4>Код</h4>
+			<div class="dh">Код</div>
 			<pre class="dg-box dg-mono">let query = $state('');
 let shown = $derived(
   items.filter((i) =&gt; i.title.includes(query))
@@ -84,7 +84,7 @@ let shown = $derived(
 &#123;/each&#125;</pre>
 		</section>
 		<section aria-label="Работающий компонент">
-			<h4>Живой результат</h4>
+			<div class="dh">Живой результат</div>
 			<div class="demo dg-box" bind:this={area}>
 				<label>Найти <input type="search" bind:value={query} /></label>
 				<p>Показано: {shown.length} из {items.length}</p>
@@ -103,7 +103,7 @@ let shown = $derived(
 		</section>
 	</div>
 	<div class="logbox">
-		<h4>Что изменилось в дереве страницы: всего {total}</h4>
+		<div class="dh">Что изменилось в дереве страницы: всего {total}</div>
 		<ol class="dg-box log" aria-live="polite">
 			{#each log as line, i (i + line)}<li>{line}</li>{:else}<li class="muted">пока ничего: введите слово или нажмите «Подробнее»</li>{/each}
 		</ol>
@@ -117,7 +117,7 @@ let shown = $derived(
 		grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

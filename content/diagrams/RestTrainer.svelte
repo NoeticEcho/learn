@@ -43,19 +43,19 @@
 	</div>
 	<div class="two">
 		<section aria-label="Запрос">
-			<h4>Запрос</h4>
+			<div class="dh">Запрос</div>
 			<pre class="dg-box dg-mono">{cur.method} {cur.path} HTTP/1.1
 Host: example.ru{cur.body ? '\nContent-Type: application/json\n\n' + cur.body : ''}</pre>
 		</section>
 		<section aria-label="Ответ" aria-live="polite">
-			<h4>Ответ</h4>
+			<div class="dh">Ответ</div>
 			<pre class="dg-box dg-mono" class:bad={!cur.ok}>{cur.status}
 {cur.json}</pre>
 		</section>
 	</div>
 	<p class="dg-out" aria-live="polite"><strong>{cur.ok ? 'По правилам.' : 'Нарушение правил.'}</strong> {cur.note}</p>
 	<section aria-label="Фрагмент OpenAPI">
-		<h4>Как это записано в файле OpenAPI</h4>
+		<div class="dh">Как это записано в файле OpenAPI</div>
 		<pre class="dg-box dg-mono">{cur.spec}</pre>
 	</section>
 </figure>
@@ -67,7 +67,7 @@ Host: example.ru{cur.body ? '\nContent-Type: application/json\n\n' + cur.body : 
 		gap: var(--space-4);
 		margin-top: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

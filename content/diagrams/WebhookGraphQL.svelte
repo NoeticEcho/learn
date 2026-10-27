@@ -75,11 +75,11 @@
 		</fieldset>
 		<div class="two">
 			<section aria-label="Запрос GraphQL">
-				<h4>POST /graphql: запрос</h4>
+				<div class="dh">POST /graphql: запрос</div>
 				<pre class="dg-box dg-mono">{query}</pre>
 			</section>
 			<section aria-label="Ответ GraphQL" aria-live="polite">
-				<h4>Ответ: только выбранное ({bytes(small)} байт)</h4>
+				<div class="dh">Ответ: только выбранное ({bytes(small)} байт)</div>
 				<pre class="dg-box dg-mono">{JSON.stringify({ data: { items: picked } }, null, 1)}</pre>
 			</section>
 		</div>
@@ -99,18 +99,18 @@
 		<label class="chk"><input type="checkbox" bind:checked={tampered} /> по дороге в тело дописали один символ</label>
 		<div class="two">
 			<section aria-label="Сервис">
-				<h4>Сервис подписывает тело</h4>
+				<div class="dh">Сервис подписывает тело</div>
 				<pre class="dg-box dg-mono">X-Signature: {sig.slice(0, 32)}…</pre>
 			</section>
 			<section aria-label="Приёмник" aria-live="polite">
-				<h4>Приёмник считает подпись по тому, что получил</h4>
+				<div class="dh">Приёмник считает подпись по тому, что получил</div>
 				<pre class="dg-box dg-mono">ожидает:  {received.slice(0, 32)}…
 пришло:   {sig.slice(0, 32)}…</pre>
 				<p class="verdict" class:bad={!accepted}><strong>{accepted ? '200: принято' : '401: отклонено, подпись не сошлась'}.</strong> {accepted ? 'Тело дошло без изменений, и отправитель знает секрет.' : 'Либо тело изменили, либо запрос прислал тот, кто секрета не знает.'}</p>
 			</section>
 		</div>
 
-		<h4 class="spaced">А если ответ не дошёл вовремя</h4>
+		<div class="dh spaced">А если ответ не дошёл вовремя</div>
 		<div class="dg-ctl">
 			<label><input type="checkbox" bind:checked={down} /> приёмник обработал событие, но ответ не дошёл вовремя</label>
 			<label><input type="checkbox" bind:checked={remember} /> обработчик запоминает id событий</label>
@@ -142,13 +142,13 @@
 		gap: var(--space-4);
 		margin-bottom: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);
 	}
-	h4.spaced {
+	.dh.spaced {
 		margin-top: var(--space-4);
 	}
 	pre {

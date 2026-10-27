@@ -106,7 +106,7 @@
 		</table>
 	</div>
 
-	<h4>Панель из пяти показателей</h4>
+	<div class="dh">Панель из пяти показателей</div>
 	<p class="dg-out">Выберите не больше пяти. Какие из них будут вести к решениям?</p>
 	<ul class="pool">
 		{#each pool as p, i (i)}
@@ -142,7 +142,7 @@
 		text-decoration: line-through;
 		text-decoration-thickness: 1px;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

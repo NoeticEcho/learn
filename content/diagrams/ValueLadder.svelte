@@ -65,7 +65,7 @@
 	</ol>
 	<p class="dg-out" aria-live="polite">Всего на 1000 посетителей: <strong>{fmt(total)} ₽</strong>, то есть <strong>{fmt(Math.round(total / visitors))} ₽</strong> на посетителя. Допродажу берёт часть купивших основное, облегчённый вариант часть отказавшихся (доли в модели условные).</p>
 
-	<h4>Что может подпортить каждую ступень</h4>
+	<div class="dh">Что может подпортить каждую ступень</div>
 	<p class="dg-out">Отметьте приём, и страница назовёт честную замену и норму закона. Деньги модель не меняет намеренно: что эти приёмы стоят доверия, посчитать честно нельзя.</p>
 	<ul class="tricks">
 		{#each tricks as t (t.id)}
@@ -117,7 +117,7 @@
 		background: var(--surface-canvas);
 		border: var(--line) solid var(--border-rule);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		color: var(--text-primary);
 		font-weight: var(--weight-medium);

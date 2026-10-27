@@ -69,11 +69,11 @@
 		</div>
 		<div class="two">
 			<section aria-label="Код">
-				<h4>Код</h4>
+				<div class="dh">Код</div>
 				<pre class="dg-box dg-mono">{current.code}</pre>
 			</section>
 			<section aria-label="Результат" aria-live="polite">
-				<h4>Результат</h4>
+				<div class="dh">Результат</div>
 				<pre class="dg-box dg-mono res" class:err={current.type === 'ошибка'}>{current.result}</pre>
 			</section>
 		</div>
@@ -90,16 +90,16 @@
 		</div>
 		<div class="two">
 			<section aria-label="Код конвейера">
-				<h4>Код</h4>
+				<div class="dh">Код</div>
 				<pre class="dg-box dg-mono">{code}</pre>
 			</section>
 			<section aria-label="Результат конвейера" aria-live="polite">
-				<h4>Что получилось</h4>
+				<div class="dh">Что получилось</div>
 				<pre class="dg-box dg-mono res">{typeof afterJoin === 'string' ? show(afterJoin) : afterJoin.length ? '[\n  ' + afterJoin.map(show).join(',\n  ') + '\n]' : '[]'}</pre>
 			</section>
 		</div>
 		<section aria-label="Исходный список">
-			<h4>А исходный список items после этого</h4>
+			<div class="dh">А исходный список items после этого</div>
 			<pre class="dg-box dg-mono">[{items.length ? '\n  ' + items.map(show).join(',\n  ') + '\n' : ''}]</pre>
 		</section>
 		<p class="dg-out"><strong>Исходный массив остался как был.</strong> map и filter каждый раз делают новый массив, а старый не трогают. Поэтому их можно соединять в цепочку, не боясь что-нибудь испортить.</p>
@@ -113,7 +113,7 @@
 		gap: var(--space-4);
 		margin: var(--space-3) 0;
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

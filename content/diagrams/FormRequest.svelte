@@ -61,11 +61,11 @@
 			<button type="submit">Отправить (не уйдёт)</button>
 		</form>
 		<div>
-			<h4>Запрос, который построит браузер</h4>
+			<div class="dh">Запрос, который построит браузер</div>
 			<pre class="dg-box dg-mono">{request}</pre>
 		</div>
 	</div>
-	<h4>Что говорит проверка в браузере</h4>
+	<div class="dh">Что говорит проверка в браузере</div>
 	{#if messages.length}
 		<ul class="msgs" aria-live="polite">
 			{#each messages as m (m)}<li>{m}</li>{/each}
@@ -106,7 +106,7 @@
 	.chk {
 		display: flex;
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

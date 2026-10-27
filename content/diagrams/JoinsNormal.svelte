@@ -104,7 +104,7 @@
 		</div>
 		<div class="three">
 			<div>
-				<h4>items (услуги)</h4>
+				<div class="dh">items (услуги)</div>
 				<table class="t" aria-label="Таблица items">
 					<thead><tr><th>id</th><th>title</th><th>category_id</th></tr></thead>
 					<tbody>
@@ -115,7 +115,7 @@
 				</table>
 			</div>
 			<div>
-				<h4>categories</h4>
+				<div class="dh">categories</div>
 				<table class="t" aria-label="Таблица categories">
 					<thead><tr><th>id</th><th>name</th></tr></thead>
 					<tbody>
@@ -126,7 +126,7 @@
 				</table>
 			</div>
 			<div>
-				<h4>Результат: {joined.length} стр.</h4>
+				<div class="dh">Результат: {joined.length} стр.</div>
 				<table class="t" aria-label="Результат соединения" aria-live="polite">
 					<thead><tr><th>title</th><th>name</th></tr></thead>
 					<tbody>
@@ -165,7 +165,7 @@
 		{:else}
 			<div class="four">
 				<div>
-					<h4>clients</h4>
+					<div class="dh">clients</div>
 					<table class="t" aria-label="Таблица clients">
 						<thead><tr><th>id</th><th>name</th><th>phone</th></tr></thead>
 						<tbody>
@@ -177,7 +177,7 @@
 					</table>
 				</div>
 				<div>
-					<h4>items</h4>
+					<div class="dh">items</div>
 					<table class="t" aria-label="Таблица items после разбиения">
 						<thead><tr><th>id</th><th>title</th><th>price</th><th>category_id</th></tr></thead>
 						<tbody>
@@ -188,7 +188,7 @@
 					</table>
 				</div>
 				<div>
-					<h4>categories</h4>
+					<div class="dh">categories</div>
 					<table class="t" aria-label="Таблица categories после разбиения">
 						<thead><tr><th>id</th><th>name</th></tr></thead>
 						<tbody>
@@ -198,7 +198,7 @@
 					</table>
 				</div>
 				<div>
-					<h4>orders</h4>
+					<div class="dh">orders</div>
 					<table class="t" aria-label="Таблица orders после разбиения">
 						<thead><tr><th>id</th><th>client_id</th><th>item_id</th></tr></thead>
 						<tbody>
@@ -231,7 +231,7 @@
 		gap: var(--space-3);
 		margin-bottom: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		font-size: var(--text-body);

@@ -61,7 +61,7 @@
 	{:else}
 		<div class="cols">
 			<div>
-				<h4>Боли клиента</h4>
+				<div class="dh">Боли клиента</div>
 				<ol class="pains">
 					{#each pains as p, i (i)}
 						<li class:open={link[i] === null}>
@@ -78,7 +78,7 @@
 				</ol>
 			</div>
 			<div>
-				<h4>Обезболивающие вашего предложения</h4>
+				<div class="dh">Обезболивающие вашего предложения</div>
 				<ul class="rel">
 					{#each relievers as r, j (j)}
 						<li class:used={link.includes(j)}>{r}</li>
@@ -138,7 +138,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-weight: var(--weight-medium);
 		color: var(--text-primary);

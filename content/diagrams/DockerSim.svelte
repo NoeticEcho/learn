@@ -222,14 +222,14 @@
 			<label class="area">Dockerfile
 				<textarea bind:value={dockerfile} rows="9" spellcheck="false" class="dg-mono"></textarea>
 			</label>
-			<h4>Образы (слои)</h4>
+			<div class="dh">Образы (слои)</div>
 			{#each images as im (im.name)}
 				<div class="dg-box">
 					<p><strong>{im.name}</strong> <span class="dim">~{im.size} МБ</span>{#if im.secrets} <span class="warn">секрет в образе</span>{/if}</p>
 					<ol class="layers">{#each im.layers as l, i (i)}<li class="dg-mono">{l}</li>{/each}</ol>
 				</div>
 			{:else}<p class="dim">Образов нет. Соберите: <span class="dg-mono">docker build -t site .</span></p>{/each}
-			<h4>Контейнеры</h4>
+			<div class="dh">Контейнеры</div>
 			{#each containers as c (c.id)}
 				<div class="dg-box"><p><strong>{c.name}</strong> из <span class="dg-mono">{c.image}</span>: <span class:up={c.status === 'running'}>{c.status === 'running' ? 'работает' : 'остановлен'}</span>{c.ports.length ? `, порты ${c.ports.join(', ')}` : ', порт не опубликован'}{c.volumes.length ? `, том ${c.volumes.join(', ')}` : ''}</p></div>
 			{:else}<p class="dim">Контейнеров нет.</p>{/each}
@@ -282,7 +282,7 @@
 		white-space: pre-wrap;
 		margin-bottom: var(--space-2);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-3) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

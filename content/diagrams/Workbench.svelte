@@ -49,7 +49,7 @@
 	</div>
 	<div class="three">
 		<section aria-label="Файл index.html">
-			<h4>Файл</h4>
+			<div class="dh">Файл</div>
 			<ol class="dg-mono code">
 				{#each lines as l, i (i)}
 					<li class:hot={l.id && sel === l.id}>
@@ -59,7 +59,7 @@
 			</ol>
 		</section>
 		<section aria-label="Предпросмотр">
-			<h4>Предпросмотр</h4>
+			<div class="dh">Предпросмотр</div>
 			<div class="page">
 				<button type="button" class="h1" class:hot={sel === 'h1'} onclick={() => pick('h1')}>
 					{title}{#if broken}<span class="swallow"> {who}</span>{/if}
@@ -70,7 +70,7 @@
 			</div>
 		</section>
 		<section aria-label="Дерево элементов">
-			<h4>Дерево элементов</h4>
+			<div class="dh">Дерево элементов</div>
 			<ul class="tree dg-mono">
 				<li>html lang="ru"</li>
 				<li class="l1">body</li>
@@ -98,7 +98,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

@@ -62,7 +62,7 @@
 				</div>
 			{/each}
 		</dl>
-		<h4>Хост читается справа налево</h4>
+		<div class="dh">Хост читается справа налево</div>
 		<ol class="levels">
 			{#each labels as l, i (i)}
 				<li style="padding-left: {i * 1.25}rem"><span class="dg-mono">{i === 0 ? '.' : ''}{l}</span> <span class="note">{levelName(i, labels.length)}</span></li>
@@ -156,7 +156,7 @@
 	.note {
 		color: var(--text-secondary);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

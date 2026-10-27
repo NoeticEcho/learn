@@ -71,7 +71,7 @@
 	</div>
 	<p class="dg-out" aria-live="polite">Строка {measure} знаков: <strong>{verdict}</strong>. Интерлиньяж: {leading < 1.3 ? 'тесновато, строки слипаются' : leading > 1.8 ? 'слишком свободно, текст рассыпается' : 'хорошо: примерно от 1,4 до 1,7'}.</p>
 
-	<h4>Контраст текста и фона</h4>
+	<div class="dh">Контраст текста и фона</div>
 	<div class="ctl">
 		<label>Цвет текста <input type="text" bind:value={fg} spellcheck="false" aria-label="Цвет текста" size="9" /></label>
 		<label>Цвет фона <input type="text" bind:value={bg} spellcheck="false" aria-label="Цвет фона" size="9" /></label>
@@ -113,7 +113,7 @@
 		margin: 0;
 		color: #1f2a33;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-3);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

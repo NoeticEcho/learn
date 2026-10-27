@@ -131,7 +131,7 @@
 		{/if}
 	</div>
 
-	<h4>Что задерживает первую отрисовку</h4>
+	<div class="dh">Что задерживает первую отрисовку</div>
 	<div class="dg-ctl" role="group" aria-label="Скрипт">
 		<span>Скрипт в head:</span>
 		{#each [['none', 'нет'], ['sync', 'обычный'], ['defer', 'с атрибутом defer']] as [v, l] (v)}
@@ -201,7 +201,7 @@
 		border: var(--line) solid var(--border-hairline);
 		background: #fff;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

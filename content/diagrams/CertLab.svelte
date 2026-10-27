@@ -73,7 +73,7 @@
 	</ol>
 	{#if langs.includes('en')}<p class="dg-out">В вашем брифе два языка. Если английская версия в каталоге <span class="dg-mono">/en/</span>, отдельный сертификат не нужен. Если на поддомене <span class="dg-mono">en.{domain}</span>, он должен быть среди имён сертификата или под wildcard.</p>{/if}
 
-	<h4>Что сломалось</h4>
+	<div class="dh">Что сломалось</div>
 	<div class="dg-ctl" role="group" aria-label="Поломка">
 		{#each Object.entries(faults) as [k, v] (k)}
 			<button type="button" aria-pressed={fault === k} onclick={() => (fault = k as typeof fault)}>{v.label}</button>
@@ -95,7 +95,7 @@
 		margin-bottom: var(--space-2);
 		max-width: var(--measure);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

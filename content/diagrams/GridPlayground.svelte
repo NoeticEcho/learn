@@ -49,7 +49,7 @@
 		{/if}
 	</p>
 
-	<h4>Макет страницы по областям</h4>
+	<div class="dh">Макет страницы по областям</div>
 	<div class="dg-ctl" role="group" aria-label="Макет">
 		{#each Object.entries(layouts) as [k, v] (k)}<button type="button" aria-pressed={layout === k} onclick={() => (layout = k as keyof typeof layouts)}>{v.name}</button>{/each}
 	</div>
@@ -67,7 +67,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);
@@ -102,7 +102,7 @@
 	}
 	.a {
 		grid-area: aside;
-		background: #3f8f5a;
+		background: #2f7a4a;
 	}
 	.f {
 		grid-area: footer;

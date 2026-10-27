@@ -39,7 +39,7 @@
 	<form class="form" novalidate onsubmit={submit} aria-label="Пример формы">
 		{#if sent && mode === 'gov'}
 			<div class="summary" role="alert" tabindex="-1" bind:this={summary}>
-				<h4>Есть ошибки</h4>
+				<div class="dh">Есть ошибки</div>
 				<ul>
 					<li><a href="#fp-name" onclick={(e) => go('fp-name', e)}>Укажите, как к вам обращаться</a></li>
 					<li><a href="#fp-mail" onclick={(e) => go('fp-mail', e)}>Введите адрес почты, например name@example.ru</a></li>
@@ -120,7 +120,7 @@
 		padding: var(--space-3);
 		border: 4px solid #a31515;
 	}
-	.summary h4 {
+	.summary .dh {
 		margin: 0 0 var(--space-2);
 		color: #a31515;
 	}

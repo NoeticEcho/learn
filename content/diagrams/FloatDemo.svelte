@@ -59,6 +59,7 @@
 		padding: var(--space-2) var(--space-3);
 		font-size: 0.85rem;
 		box-sizing: border-box;
+		color: var(--text-primary);
 	}
 	.a {
 		background: color-mix(in srgb, #3b7fd1 35%, transparent);
@@ -77,6 +78,7 @@
 	.foot {
 		padding: var(--space-2) var(--space-3);
 		background: color-mix(in srgb, #d9822b 35%, transparent);
+		color: var(--text-primary);
 		font-size: 0.85rem;
 	}
 	.foot.clear {

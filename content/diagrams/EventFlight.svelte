@@ -103,7 +103,7 @@
 		</div>
 		<div class="two">
 			<section aria-label="Обработчик на каждой карточке">
-				<h4>Обработчик на каждой карточке: {perCard.filter((c) => c.own).length}</h4>
+				<div class="dh">Обработчик на каждой карточке: {perCard.filter((c) => c.own).length}</div>
 				<div class="row">
 					{#each perCard as c (c.id)}
 						<button type="button" class="sq" class:on={c.picked} class:late={!c.own} onclick={() => clickPer(c)} aria-pressed={c.picked} aria-label="Карточка {c.id}{c.own ? '' : ', добавлена скриптом, обработчика нет'}">{c.id}</button>
@@ -112,7 +112,7 @@
 				<p class="hint">{perCard.some((c) => !c.own) ? 'Новая карточка (пунктир) не реагирует: на ней нет обработчика, его надо было навесить при создании.' : 'Нажмите на карточки: каждая отвечает своим обработчиком.'}</p>
 			</section>
 			<section aria-label="Один обработчик на контейнере">
-				<h4>Один обработчик на контейнере: 1</h4>
+				<div class="dh">Один обработчик на контейнере: 1</div>
 				<div class="row">
 					{#each delegated as c (c.id)}
 						<button type="button" class="sq" class:on={c.picked} onclick={() => clickDelegated(c)} aria-pressed={c.picked} aria-label="Карточка {c.id}">{c.id}</button>
@@ -155,7 +155,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

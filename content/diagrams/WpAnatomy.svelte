@@ -47,7 +47,7 @@
 		<button type="button" class="ft" aria-pressed={sel === 'footer'} onclick={() => (sel = 'footer')}>Подвал</button>
 	</div>
 	<div class="info" aria-live="polite">
-		<h4>{cur.title}</h4>
+		<div class="dh">{cur.title}</div>
 		<p class="dg-out"><strong>Рисует файл темы:</strong> <span class="dg-mono">{cur.file}</span></p>
 		<p class="dg-out"><strong>Редактор меняет:</strong> {cur.editor}</p>
 		<p class="dg-out"><strong>Плагин может:</strong> {cur.plugin}</p>
@@ -84,7 +84,7 @@
 		border: var(--line) solid var(--border-hairline);
 		background: var(--surface-canvas);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

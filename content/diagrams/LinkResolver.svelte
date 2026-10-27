@@ -59,7 +59,7 @@
 		{#if info.full}<br />Браузер откроет: <span class="dg-mono">{info.full}</span>{/if}
 	</p>
 
-	<h4>Какую картинку выберет браузер</h4>
+	<div class="dh">Какую картинку выберет браузер</div>
 	<p class="dg-out">
 		Одна картинка лежит на сервере в четырёх размерах: 480, 800, 1200 и 2000 пикселей по ширине. Атрибут <span class="dg-mono">srcset</span> перечисляет их, а браузер сам выбирает нужный для вашего экрана.
 	</p>
@@ -93,7 +93,7 @@
 		font-family: var(--font-mono);
 		max-width: 100%;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

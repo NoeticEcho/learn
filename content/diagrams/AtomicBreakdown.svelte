@@ -59,7 +59,7 @@
 			<span class="atom link">{t('Меню')}</span>
 		</div>
 		<div class="org section">
-			<h4 class="atom">{t('Что мы делаем')}</h4>
+			<div class="dh atom">{t('Что мы делаем')}</div>
 			<div class="grid">
 				{#each brief.items as it, k (k)}
 					<div class="mol card">
@@ -76,7 +76,7 @@
 	</div>
 	<p class="dg-out" aria-live="polite"><strong>{cur.name}.</strong> {cur.text}</p>
 
-	<h4 class="sub">Состояния одной кнопки</h4>
+	<div class="dh sub">Состояния одной кнопки</div>
 	<div class="dg-ctl" role="group" aria-label="Состояние кнопки">
 		{#each states as s (s.id)}
 			<button type="button" aria-pressed={st === s.id} onclick={() => (st = s.id)}>{s.name}</button>
@@ -125,7 +125,7 @@
 		border: 1px solid #d9d5ce;
 		background: #fff;
 	}
-	h4.atom {
+	.dh.atom {
 		margin: 0;
 		font-size: 1rem;
 	}

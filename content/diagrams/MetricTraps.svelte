@@ -61,7 +61,7 @@
 		<div class="two">
 			{#each weeks as w (w.name)}
 				<div class="dg-box">
-					<h4>{w.name}</h4>
+					<div class="dh">{w.name}</div>
 					{#if bySegment}
 						<ul>
 							{#each w.seg as s (s.n)}<li>{s.n}: {s.c} из {s.v}, конверсия <strong>{pct(s.c, s.v)}</strong></li>{/each}
@@ -106,7 +106,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 		gap: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

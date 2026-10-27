@@ -29,7 +29,7 @@
 	</div>
 
 	{#if view === 'raw'}
-		<h4>Среднее время до первого ответа, часов</h4>
+		<div class="dh">Среднее время до первого ответа, часов</div>
 		<ul class="bars">
 			{#each data as d (d.year)}
 				<li><span class="lab">{d.year}</span><span class="bar" style="width: {(d.hours / max) * 100}%"></span><span class="val">{d.hours}</span></li>
@@ -37,7 +37,7 @@
 		</ul>
 		<p class="dg-out">Всё на месте, но читатель сам должен понять, что здесь главное. Заголовок называет оси, а не мысль.</p>
 	{:else if view === 'conclusion'}
-		<h4>Первый ответ клиенту приходит в 12 раз быстрее, чем четыре года назад</h4>
+		<div class="dh">Первый ответ клиенту приходит в 12 раз быстрее, чем четыре года назад</div>
 		<ul class="bars">
 			{#each data as d, i (d.year)}
 				<li>
@@ -49,7 +49,7 @@
 		</ul>
 		<p class="dg-out">Заголовок говорит вывод. Цветом выделены две полосы, которые сравниваются: 48 часов и 4 часа. Остальное серое. Подписи прямо у полос, ничего искать не надо.</p>
 	{:else}
-		<h4>Как сокращался срок ответа</h4>
+		<div class="dh">Как сокращался срок ответа</div>
 		<ul class="bars">
 			{#each data.slice(0, step) as d, i (d.year)}
 				<li>
@@ -70,7 +70,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-3);
 		font-family: var(--font-serif);
 		font-size: var(--text-body-lg);

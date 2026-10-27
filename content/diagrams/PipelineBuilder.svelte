@@ -134,28 +134,28 @@
 	<p class="dg-out"><strong>Модель здесь не запускается.</strong> Каждый этап собирает выход по написанному правилу из вашего брифа: так страница работает без сети и бесплатно. Настоящее здесь устройство конвейера: что входит в этап, что выходит и в каком формате, и как проверка (обычный код, а не ещё одна модель) отказывает, когда выход нарушил договор.</p>
 
 	<section class="st">
-		<h4>1. Бриф: что уходит модели</h4>
+		<div class="dh">1. Бриф: что уходит модели</div>
 		<label class="dg-ctl"><input type="checkbox" bind:checked={sendContacts} /> Отправить телефон и почту (не нужно)</label>
 		<pre class="dg-box dg-mono">{stage1}</pre>
 		<p class="gate" class:ok={gate1.ok} aria-live="polite"><strong>{gate1.ok ? 'Проверка пройдена.' : 'Проверка не пройдена.'}</strong> {gate1.why} Примерно {tokens(stage1)} токенов на входе.</p>
 	</section>
 
 	<section class="st">
-		<h4>2. Структура (JSON)</h4>
+		<div class="dh">2. Структура (JSON)</div>
 		<label class="dg-ctl"><input type="checkbox" bind:checked={err2} /> Ошибка модели: добавила лишние разделы</label>
 		<pre class="dg-box dg-mono">{stage2}</pre>
 		<p class="gate" class:ok={gate2.ok} aria-live="polite"><strong>{gate2.ok ? 'Проверка пройдена.' : 'Проверка не пройдена.'}</strong> {gate2.why}</p>
 	</section>
 
 	<section class="st">
-		<h4>3. Тексты по разделам</h4>
+		<div class="dh">3. Тексты по разделам</div>
 		<label class="dg-ctl"><input type="checkbox" bind:checked={err3} /> Ошибка модели: выдумала цифры и формулы</label>
 		<ul class="copy">{#each stage3 as s, i (i)}<li><strong>{s.title}.</strong> {s.text}</li>{/each}</ul>
 		<p class="gate" class:ok={gate3.ok} aria-live="polite"><strong>{gate3.ok ? 'Проверка пройдена.' : 'Проверка не пройдена.'}</strong> {gate3.why}</p>
 	</section>
 
 	<section class="st">
-		<h4>4. Код</h4>
+		<div class="dh">4. Код</div>
 		<label class="dg-ctl"><input type="checkbox" bind:checked={err4} /> Ошибка модели: чужой скрипт, картинка без alt, «кнопка» из div</label>
 		<!-- svelte-ignore a11y_no_noninteractive_tabindex: a scrollable region must be reachable by keyboard -->
 		<pre class="dg-box dg-mono code" tabindex="0" aria-label="Код страницы">{stage4}</pre>
@@ -171,7 +171,7 @@
 		padding-bottom: var(--space-3);
 		border-bottom: var(--line) solid var(--border-hairline);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-size: var(--text-body);
 		color: var(--text-primary);

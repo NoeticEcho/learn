@@ -106,12 +106,12 @@
 
 	<div class="ramp" role="img" aria-label="Одиннадцать ступеней акцентного цвета">
 		{#each ramp as r (r.s)}
-			<div class="sw" style="background:{r.hex};color:{lum(r.lin) > 0.35 ? '#111' : '#fff'}"><span>{r.s}</span></div>
+			<div class="sw" style="background:{r.hex};color:{lum(r.lin) > 0.179 ? '#000' : '#fff'}"><span>{r.s}</span></div>
 		{/each}
 	</div>
 	<div class="ramp" role="img" aria-label="Одиннадцать ступеней нейтрального цвета">
 		{#each neutral as r (r.s)}
-			<div class="sw" style="background:{r.hex};color:{lum(r.lin) > 0.35 ? '#111' : '#fff'}"><span>{r.s}</span></div>
+			<div class="sw" style="background:{r.hex};color:{lum(r.lin) > 0.179 ? '#000' : '#fff'}"><span>{r.s}</span></div>
 		{/each}
 	</div>
 

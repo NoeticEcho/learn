@@ -51,11 +51,11 @@
 		</div>
 		<div class="insp">
 			<p class="layer">Слой: <code class="dg-mono">{cur.layer}</code></p>
-			<h4>В макете</h4>
+			<div class="dh">В макете</div>
 			<ul>
 				{#each cur.figma as f, k (k)}<li>{f}</li>{/each}
 			</ul>
-			<h4>В коде</h4>
+			<div class="dh">В коде</div>
 			<pre class="dg-box dg-mono">{cur.css}</pre>
 		</div>
 	</div>
@@ -136,7 +136,7 @@
 		outline: 2px dashed #1d6fe0;
 		outline-offset: 2px;
 	}
-	.insp h4 {
+	.insp .dh {
 		margin: var(--space-3) 0 var(--space-1);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

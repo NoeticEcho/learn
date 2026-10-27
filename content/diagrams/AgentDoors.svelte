@@ -99,7 +99,7 @@
 		<label><input type="checkbox" bind:checked={leaksContacts} /> Ответы инструмента могут содержать телефон и почту владельца</label>
 		<label><input type="checkbox" bind:checked={poisoned} /> В описании инструмента спрятана чужая инструкция</label>
 	</div>
-	<h4>Что произошло</h4>
+	<div class="dh">Что произошло</div>
 	<ol class="log" aria-live="polite">
 		{#each log as l, i (i)}<li class:warn={l.warn}><span class="dg-mono">{l.call}</span> {l.result}</li>{/each}
 	</ol>
@@ -119,7 +119,7 @@
 		text-align: left;
 		vertical-align: top;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

@@ -81,7 +81,7 @@
 		<p><strong>{result.ok ? 'Данные вернутся.' : 'Данные не вернутся.'}</strong> {result.text}</p>
 	</div>
 
-	<h4>Когда вы узнаете об аварии</h4>
+	<div class="dh">Когда вы узнаете об аварии</div>
 	<div class="dg-ctl">
 		<label>Проверка каждые
 			<select bind:value={check}><option value={1}>1 минуту</option><option value={5}>5 минут</option><option value={30}>30 минут</option><option value={0}>вообще нет (узнаете от посетителя)</option></select>
@@ -100,7 +100,7 @@
 </figure>
 
 <style>
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

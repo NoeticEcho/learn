@@ -55,7 +55,7 @@
 	<div class="people">
 		{#each result as r (r.v.name)}
 			<div class="dg-box">
-				<h4>{r.v.name}</h4>
+				<div class="dh">{r.v.name}</div>
 				<p class="story">{r.v.story}</p>
 				<ol>
 					{#each r.lines as l, i (i)}
@@ -84,7 +84,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 		gap: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0;
 		font-family: var(--font-serif);
 		color: var(--text-primary);

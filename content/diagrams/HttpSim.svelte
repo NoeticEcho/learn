@@ -59,7 +59,7 @@
 
 	<div class="two">
 		<section aria-label="Запрос">
-			<h4>Запрос браузера</h4>
+			<div class="dh">Запрос браузера</div>
 			<pre class="dg-box dg-mono">{method} {path} HTTP/1.1
 Host: www.example.ru
 Accept: text/html
@@ -67,7 +67,7 @@ Accept-Language: ru
 User-Agent: Mozilla/5.0 …</pre>
 		</section>
 		<section aria-label="Ответ" aria-live="polite">
-			<h4>Ответ сервера</h4>
+			<div class="dh">Ответ сервера</div>
 			<pre class="dg-box dg-mono">HTTP/1.1 <span class="st {group}">{res.status} {res.text}</span>
 {#each res.headers as [k, v] (k)}{k}: {v}
 {/each}
@@ -87,7 +87,7 @@ User-Agent: Mozilla/5.0 …</pre>
 		gap: var(--space-4);
 		margin-top: var(--space-3);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-sans);
 		font-size: var(--text-body-sm);

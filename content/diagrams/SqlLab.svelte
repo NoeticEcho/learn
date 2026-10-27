@@ -89,7 +89,7 @@
 
 	<div class="grid">
 		<div>
-			<h4>Таблица items</h4>
+			<div class="dh">Таблица items</div>
 			<div class="scroll" tabindex="0" role="region" aria-label="Таблица, прокручивается по горизонтали">
 				<table class="t" aria-label="Таблица items">
 					<thead><tr><th>id</th><th>title</th><th>price</th><th>category</th></tr></thead>
@@ -136,7 +136,7 @@
 	</div>
 
 	{#if stages.length}
-		<h4>В каком порядке выполняется SELECT</h4>
+		<div class="dh">В каком порядке выполняется SELECT</div>
 		<ol class="stages">
 			{#each stages as s (s.name)}
 				<li class:off={!s.on}><span class="dg-mono">{s.name}</span>{#if s.on && s.n !== null}<span class="n">{s.n}</span>{:else}<span class="n">нет</span>{/if}</li>
@@ -155,7 +155,7 @@
 		gap: var(--space-4);
 		margin: var(--space-3) 0;
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		font-size: var(--text-body);

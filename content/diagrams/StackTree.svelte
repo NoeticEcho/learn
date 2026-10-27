@@ -94,7 +94,7 @@
 		</fieldset>
 	</div>
 	<div class="res" aria-live="polite">
-		<h4>Подходит: {info[pick].name}</h4>
+		<div class="dh">Подходит: {info[pick].name}</div>
 		<p class="dg-out"><strong>Почему:</strong> {info[pick].why}.</p>
 		<p class="dg-out"><strong>Цена:</strong> {info[pick].cost}.</p>
 		<p class="dg-out"><strong>Где ломается:</strong> {info[pick].breaks}.</p>
@@ -127,7 +127,7 @@
 		padding: var(--space-3);
 		border: var(--line) solid var(--accent-measure);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

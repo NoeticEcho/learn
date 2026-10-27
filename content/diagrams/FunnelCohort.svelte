@@ -47,7 +47,7 @@
 		Общая конверсия: <strong>{overall.toFixed(1).replace('.', ',')}%</strong> ({counts[4]} из 2000). Слабее всего шаг «{names[weakest + 1].toLowerCase()}»: туда доходит {rates[weakest]}% тех, кто был на предыдущем.
 	</p>
 
-	<h4>Когорты по неделям</h4>
+	<div class="dh">Когорты по неделям</div>
 	<div class="wrap">
 		<table>
 			<thead>
@@ -99,7 +99,7 @@
 		align-items: center;
 		color: var(--text-secondary);
 	}
-	h4 {
+	.dh {
 		margin: var(--space-5) 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);

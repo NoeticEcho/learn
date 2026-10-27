@@ -109,12 +109,12 @@
 		<label class="field">Что ввёл посетитель <input class="dg-mono" type="text" bind:value={input} spellcheck="false" autocomplete="off" /></label>
 		<div class="two">
 			<section aria-label="Через textContent">
-				<h4>box.textContent = строка</h4>
+				<div class="dh">box.textContent = строка</div>
 				<pre class="dg-box dg-mono">текст «{input}»</pre>
 				<p class="ok"><strong>Безопасно.</strong> Одна строка текста; на странице она появится буквами.</p>
 			</section>
 			<section aria-label="Через innerHTML" aria-live="polite">
-				<h4>box.innerHTML = строка</h4>
+				<div class="dh">box.innerHTML = строка</div>
 				<pre class="dg-box dg-mono">{injected.nodes.join('\n')}</pre>
 				{#if injected.handlers.length}
 					<p class="bad"><strong>Опасно.</strong> В разметке есть обработчик: {injected.handlers.join(', ')}. На настоящей странице браузер создал бы элемент и выполнил этот код.</p>
@@ -168,7 +168,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 		gap: var(--space-4);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-mono);
 		font-size: var(--text-body-sm);

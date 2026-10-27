@@ -35,12 +35,12 @@
 
 	<div class="two">
 		<div class="dg-box" class:hit={ymBounce}>
-			<h4>Яндекс Метрика</h4>
+			<div class="dh">Яндекс Метрика</div>
 			<p><strong>{ymBounce ? 'Отказ' : 'Не отказ'}</strong></p>
 			<p>Отказ, если сразу: не больше одного просмотра, короче 15 секунд и нет «неотказа».</p>
 		</div>
 		<div class="dg-box" class:hit={!ga4Engaged}>
-			<h4>GA4</h4>
+			<div class="dh">GA4</div>
 			<p><strong>{ga4Engaged ? 'Вовлечённый сеанс' : 'Невовлечённый: считается отказом'}</strong></p>
 			<p>Вовлечённый, если дольше 10 секунд, или есть ключевое событие, или два просмотра и больше.</p>
 		</div>
@@ -53,7 +53,7 @@
 		{/if}
 	</p>
 
-	<h4 class="sub">Глубина прокрутки</h4>
+	<div class="dh sub">Глубина прокрутки</div>
 	<label>Дошёл до: <strong>{scroll}%</strong><input type="range" min="0" max="100" step="5" bind:value={scroll} /></label>
 	<ul class="thr">
 		{#each thresholds as t (t)}<li class:got={scroll >= t}>{t}%: {scroll >= t ? 'достигнут' : 'нет'}</li>{/each}
@@ -87,12 +87,12 @@
 	.dg-box.hit {
 		border-color: var(--border-brass);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);
 	}
-	h4.sub {
+	.dh.sub {
 		margin-top: var(--space-5);
 	}
 	.thr {

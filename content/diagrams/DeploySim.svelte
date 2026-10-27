@@ -116,7 +116,7 @@
 	</ol>
 	<p class="dg-out" aria-live="polite">Отмечено шагов: <strong>{count} из {cur.steps.length}</strong>.{count === cur.steps.length ? ' Осталось открыть сайт с телефона по мобильной сети и убедиться, что главное действие проекта работает.' : ''}</p>
 
-	<h4>Что-то не так</h4>
+	<div class="dh">Что-то не так</div>
 	<label class="dg-ctl">Симптом
 		<select bind:value={sym}>{#each symptoms as x (x.id)}<option value={x.id}>{x.label}</option>{/each}</select>
 	</label>
@@ -146,7 +146,7 @@
 		color: var(--text-secondary);
 		font-size: 0.92em;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-4) 0 var(--space-2);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

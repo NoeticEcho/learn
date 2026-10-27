@@ -87,8 +87,8 @@
 				<p class="why">{v.why}</p>
 				<p class="meta">{v.s.example}. Порядок цены: {v.s.cost}.</p>
 				<div class="two">
-					<div class="dg-box"><h4>Вы обслуживаете</h4><ul>{#each v.s.you as x, j (j)}<li>{x}</li>{/each}</ul></div>
-					<div class="dg-box"><h4>Провайдер</h4><ul>{#each v.s.provider as x, j (j)}<li>{x}</li>{/each}</ul></div>
+					<div class="dg-box"><div class="dh">Вы обслуживаете</div><ul>{#each v.s.you as x, j (j)}<li>{x}</li>{/each}</ul></div>
+					<div class="dg-box"><div class="dh">Провайдер</div><ul>{#each v.s.provider as x, j (j)}<li>{x}</li>{/each}</ul></div>
 				</div>
 			</li>
 		{/each}
@@ -136,7 +136,7 @@
 		gap: var(--space-2);
 		margin-top: var(--space-2);
 	}
-	h4 {
+	.dh {
 		margin: 0 0 var(--space-1);
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);

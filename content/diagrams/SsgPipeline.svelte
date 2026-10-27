@@ -100,7 +100,7 @@ description: Что мы делаем и сколько это стоит
 		<summary>Показать HTML, который получился</summary>
 		<pre class="dg-box dg-mono">{html}</pre>
 	</details>
-	<h4>Тот же цикл в разных инструментах</h4>
+	<div class="dh">Тот же цикл в разных инструментах</div>
 	<div class="dg-ctl" role="group" aria-label="Инструмент">
 		{#each syntaxes as s, i (i)}<button type="button" aria-pressed={syn === i} onclick={() => (syn = i)}>{s.name}</button>{/each}
 	</div>
@@ -139,7 +139,7 @@ description: Что мы делаем и сколько это стоит
 		margin: 0 0 var(--space-3);
 		overflow-x: auto;
 	}
-	h4 {
+	.dh {
 		margin: var(--space-3) 0 var(--space-2);
 		font-family: var(--font-serif);
 		color: var(--text-primary);
