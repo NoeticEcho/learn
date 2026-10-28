@@ -1,0 +1,812 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/03-wordpress-upkeep.svx. */
+	export const metadata = {
+		id: '08-cms/03-wordpress-upkeep',
+		part: 8,
+		order: 3,
+		title: 'What breaks in WordPress, and what it really costs',
+		definition: 'The cost of owning a CMS is everything a site costs after installation: hosting, paid themes and plugins, updates, backups, protection from attacks and repairs.',
+		summary:
+			'You’ll learn to count the cost of owning a CMS honestly (updates, break-ins, reliance on plugins, hosting) and to say when WordPress fits and when it becomes a burden. This is the “what was wrong” page for era 3, and you’ll write an upkeep plan for your own site.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'server',
+					label: 'update 6.x',
+					caption: 'Friday evening',
+					say: [
+						{ text: 'I’ll just click “update all”.' },
+						{ who: 'Site', text: 'White screen. Have a good weekend.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'copy + restore test',
+					caption: 'A backup',
+					say: 'A backup nobody has ever restored is not a backup. It is a hope.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'sheet',
+					label: 'owner: ___',
+					caption: 'The plan',
+					say: 'Who updates, how often, what gets copied: write it down while the site still works.'
+				}
+			]
+		},
+		minutes: 15,
+		teaches: ['cms-wordpress-maintenance', 'cms-cms-history'],
+		requires: ['cms-wordpress-themes-plugins'],
+		practice: {
+			id: 'cms-upkeep-plan',
+			title: 'An upkeep plan and a comparison of systems',
+			task: 'Write an upkeep plan for your project’s site on a CMS. 1) In the table, for each of the four tasks write who does it (a specific person or role), how often, and how many hours a month it takes (a number). 2) Write the total hours a month. 3) Describe the backup: what is copied, where it is kept and how it is tested. 4) Name at least two risks of the plugin that serves your project’s main action (a form, a booking, a payment). 5) In the comparison table, for WordPress, Drupal and Joomla write how their updates are and whether they suit you. 6) In the verdict, say whether to keep WordPress, take something else or give up on a CMS. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="upkeep">
+      <h2>Upkeep plan for a CMS site<\/h2>
+      <table id="tasks">
+        <tr><th>Task<\/th><th>Who does it<\/th><th>How often<\/th><th>Hours a month<\/th><\/tr>
+        <tr class="task"><td>Updating the CMS core<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+        <tr class="task"><td>Updating plugins and the theme<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+        <tr class="task"><td>Backup and a restore test<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+        <tr class="task"><td>Checking that the enquiry form works<\/td><td class="who">…<\/td><td class="freq">…<\/td><td class="hours">…<\/td><\/tr>
+      <\/table>
+      <p>Total hours a month: <span id="hours-total">…<\/span><\/p>
+      <p>Backup: what is copied, where it is stored, how it is tested: <span id="backup">…<\/span><\/p>
+
+      <h3>Plugin risks for the project’s main action, “{{mainAction.label}}”<\/h3>
+      <ul id="risks">
+        <li class="risk">…<\/li>
+        <li class="risk">…<\/li>
+      <\/ul>
+
+      <h3>The comparison for my project<\/h3>
+      <table id="compare">
+        <tr><th>System<\/th><th>Updates and support<\/th><th>Does it fit me?<\/th><\/tr>
+        <tr class="cms"><td>WordPress<\/td><td class="upd">…<\/td><td class="fit">…<\/td><\/tr>
+        <tr class="cms"><td>Drupal<\/td><td class="upd">…<\/td><td class="fit">…<\/td><\/tr>
+        <tr class="cms"><td>Joomla<\/td><td class="upd">…<\/td><td class="fit">…<\/td><\/tr>
+      <\/table>
+      <p>Verdict: <span id="verdict">…<\/span><\/p>
+    <\/section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not end up in the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="upkeep">
+      <h2>Upkeep plan for a CMS site<\/h2>
+      <table id="tasks">
+        <tr><th>Task<\/th><th>Who does it<\/th><th>How often<\/th><th>Hours a month<\/th><\/tr>
+        <tr class="task"><td>Updating the CMS core<\/td><td class="who">the owner, or a contractor under a retainer<\/td><td class="freq">once a month<\/td><td class="hours">0.5<\/td><\/tr>
+        <tr class="task"><td>Updating plugins and the theme<\/td><td class="who">a contractor under a retainer<\/td><td class="freq">once a week<\/td><td class="hours">1<\/td><\/tr>
+        <tr class="task"><td>Backup and a restore test<\/td><td class="who">the host makes the copy, a contractor tests it<\/td><td class="freq">a restore test once a quarter<\/td><td class="hours">0.5<\/td><\/tr>
+        <tr class="task"><td>Checking that the enquiry form works<\/td><td class="who">the owner<\/td><td class="freq">once a week<\/td><td class="hours">0.25<\/td><\/tr>
+      <\/table>
+      <p>Total hours a month: <span id="hours-total">2.25<\/span><\/p>
+      <p>Backup: what is copied, where it is stored, how it is tested: <span id="backup">the files and the database are copied every night, the copies are stored on another server, and once a quarter we try to restore the site at a test address<\/span><\/p>
+
+      <h3>Plugin risks for the project’s main action, “{{mainAction.label}}”<\/h3>
+      <ul id="risks">
+        <li class="risk">the form plugin is vulnerable or out of date, and through it someone can plant malicious code or flood us with spam<\/li>
+        <li class="risk">an update of the form plugin breaks sending, and enquiries are lost for days before we notice<\/li>
+        <li class="risk">the plugin’s author stops maintaining it, and the form has to be replaced in a hurry<\/li>
+      <\/ul>
+
+      <h3>The comparison for my project<\/h3>
+      <table id="compare">
+        <tr><th>System<\/th><th>Updates and support<\/th><th>Does it fit me?<\/th><\/tr>
+        <tr class="cms"><td>WordPress<\/td><td class="upd">frequent updates and many plugins; it needs discipline and one person in charge<\/td><td class="fit">fits: the form and the pages are simple, and the editor is familiar<\/td><\/tr>
+        <tr class="cms"><td>Drupal<\/td><td class="upd">updates are stricter and weightier, and it needs an experienced developer<\/td><td class="fit">overkill: the project is small and has no complicated permissions<\/td><\/tr>
+        <tr class="cms"><td>Joomla<\/td><td class="upd">updates exist, but the community is smaller<\/td><td class="fit">no clear advantage over WordPress<\/td><\/tr>
+      <\/table>
+      <p>Verdict: <span id="verdict">keep WordPress: the project is simple, a person in charge and a contractor are named, and upkeep will take about two hours a month<\/span><\/p>
+    <\/section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not end up in the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'upkeep-exists', kind: 'exists', selector: '#upkeep' },
+				{ id: 'no-blanks', kind: 'text', selector: '#upkeep', matches: '^[^…]*$' },
+				{ id: 'owner-named', kind: 'text', selector: '#tasks td.who', matches: '[Oo]wner|\\bI\\b|\\bme\\b|[Cc]ontractor|[Ee]ditor|[Dd]eveloper|[Hh]ost|[Aa]gency|[Aa]dmin|[Ss]taff|[Ff]reelanc|[Tt]eam|[Mm]anager' },
+				{ id: 'frequency', kind: 'text', selector: '#tasks td.freq', matches: '[Oo]nce|[Ww]eek|[Mm]onth|[Qq]uarter|[Dd]aily|[Yy]ear|[Ee]very|[Aa]nnual' },
+				{ id: 'hours', kind: 'text', selector: '#tasks td.hours', matches: '^\\s*\\d+(?:[.,]\\d+)?\\s*$' },
+				{ id: 'hours-total', kind: 'text', selector: '#hours-total', matches: '^\\s*\\d+(?:[.,]\\d+)?' },
+				{ id: 'backup-where', kind: 'text', selector: '#backup', matches: '(?=[\\s\\S]*(?:[Cc]op|[Bb]ackup))(?=[\\s\\S]*(?:stor|kept|keep|server|cloud|disk|separate|off-?site|elsewhere))' },
+				{ id: 'risks', kind: 'count', selector: '#risks li.risk', min: 2 },
+				{ id: 'risks-plugin', kind: 'text', selector: '#risks', matches: '[Pp]lugin' },
+				{ id: 'compare-rows', kind: 'count', selector: '#compare tr.cms', min: 3 },
+				{
+					id: 'verdict',
+					kind: 'text',
+					selector: '#verdict',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[Kk]eep|[Ss]tay|[Ss]witch|[Mm]ove|[Dd]rop|[Gg]ive up|[Ss]kip|[Rr]eplace|without a CMS|no CMS|Drupal|Joomla|WordPress))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'What does the cost of owning a WordPress site add up from?',
+				options: [
+					'Hosting and a domain name',
+					'Paid themes and plugins',
+					'Time (or a specialist’s fee) for updates, backups and checks',
+					'A fee for every visitor'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: they are paid for every year.',
+					'Yes: many good plugins and themes are paid, and often by subscription.',
+					'Yes: this is the most underrated part. A site nobody looks after sooner or later breaks or gets hacked.',
+					'No: visitors cost nothing in themselves. Only the hosting may need to grow.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What are WordPress sites most often broken into through?',
+				options: ['Out-of-date plugins and themes with known vulnerabilities', 'The PHP language itself', 'The editor’s browser'],
+				answer: 0,
+				why: [
+					'Yes. The WordPress core is updated carefully, while plugins are written by thousands of different authors, so holes in them appear more often and not everyone closes them in time.',
+					'No: PHP itself is not the main cause.',
+					'No: the editor’s browser has nothing to do with it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why should a backup be tested by restoring it at least once?',
+				options: [
+					'A copy can come out empty or damaged, and you find out only when you need it',
+					'So that the host doesn’t switch the site off',
+					'The law requires copies to be tested every month'
+				],
+				answer: 0,
+				why: [
+					'Yes. A copy that has never been restored is a hope, not a copy. The test takes an hour and shows what is really saved.',
+					'No: the host has nothing to do with it.',
+					'No: there is no such general requirement. It is a matter of common sense.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A site has automatic plugin updates switched on. What trap do they leave?',
+				options: [
+					'An update can break the site and you won’t learn of it at once, so you need backups and a weekly check of the form',
+					'Automatic updates switch off the site’s protection',
+					'Automatic updates can only be switched on with a paid plan'
+				],
+				answer: 0,
+				why: [
+					'Yes. Automatic updates close holes quickly, but a rare conflict happens without you. That is why a backup and a weekly check of the form stay mandatory.',
+					'No: on the contrary, they protect, closing known holes without delay.',
+					'No: it is a setting of WordPress itself, not of a plan.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each system to where it is most often found today',
+				pairs: [
+					['WordPress', 'small and medium sites, blogs, shops, service sites'],
+					['Drupal', 'big portals with complicated content and permissions (universities, organizations)'],
+					['Joomla', 'small sites built on it long ago; its share is shrinking'],
+					['No CMS', 'when the content changes twice a year and files are enough']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A project’s content changes twice a year, and one developer edits it. What is sensible?',
+				options: [
+					'Ask whether a CMS is needed at all: a static site made of files is enough, and it has nothing to hack',
+					'Install WordPress with a complicated theme anyway',
+					'Install as many plugins as possible'
+				],
+				answer: 0,
+				why: [
+					'Yes. The less often the edits, the weaker the case for a CMS, while the cost of owning it doesn’t shrink. We’ll develop this in the lessons on site generators.',
+					'No: you get the upkeep (updates, backups) without the benefit.',
+					'No: every plugin adds work and risk.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-upkeep-cost',
+				front: 'What does the cost of owning a CMS site add up from?',
+				back: 'Hosting and a domain, paid themes and plugins and, above all, time (or a specialist’s fee) for updates, backups, checks and repairs after failures.'
+			},
+			{
+				id: 'cms-upkeep-attack',
+				front: 'What are WordPress sites most often broken into through?',
+				back: 'Out-of-date plugins and themes. Thousands of authors write them, holes appear more often than in the core, and not everyone closes them. What helps: updates, as few plugins as possible, and no “nulled” paid plugins from dubious sources.'
+			},
+			{
+				id: 'cms-upkeep-backup',
+				front: 'What should a backup have?',
+				back: 'The files and the database, storage away from the server the site runs on, and a restore test. An untested backup is a hope.'
+			},
+			{
+				id: 'cms-history-drupal-joomla',
+				front: 'What are Drupal and Joomla today?',
+				back: 'Two older open source PHP CMSs. Drupal (since 2001) is stronger for complicated content, permissions and many languages, and needs an experienced team. Joomla (since 2005, a fork of Mambo) is for small sites, and its share is falling.'
+			},
+			{
+				id: 'cms-upkeep-when',
+				front: 'When does a CMS become a burden?',
+				back: 'When the content changes rarely and the upkeep (updates, backups, protection) costs more than the admin panel is worth. Then a static site is enough.'
+			}
+		],
+		sources: [
+			{
+				title: 'WordPress Advanced Administration: Hardening WordPress',
+				url: 'https://developer.wordpress.org/advanced-administration/security/hardening/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'WordPress Advanced Administration: Backups',
+				url: 'https://developer.wordpress.org/advanced-administration/security/backup/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'WordPress.org Documentation: Configuring automatic background updates',
+				url: 'https://wordpress.org/documentation/article/configuring-automatic-background-updates/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Drupal.org: About Drupal', url: 'https://www.drupal.org/about', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Joomla!: About Joomla', url: 'https://www.joomla.org/about-joomla.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A site on a CMS is not a purchase but a commitment. Let’s count how much time it will take for your project, and decide honestly whether you need this CMS.',
+			hints: [
+				'“Who does it” is a specific person or role: the owner, a contractor. “Nobody” is not an answer: a site with no one in charge is the first to break.',
+				'In hours, write a number: 0.5 or 1. The more plugins, the more time; use the diagram above as a guide.',
+				'For the risks, think of the plugin that takes enquiries or bookings: what happens if it goes out of date, breaks after an update or stops being maintained.'
+			],
+			mistakes: {
+				'upkeep-exists': 'The upkeep block has gone. It was in the page, so bring it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				'owner-named': 'The “Who does it” column needs a person or a role: the owner, a contractor, an editor.',
+				frequency: 'In the “How often” column write a frequency, for example “once a week”.',
+				hours: 'The “Hours a month” column needs a number, for example 0.5.',
+				'hours-total': 'The line with the total hours needs a number.',
+				'backup-where': 'Describe the backup: what is copied and where it is stored.',
+				risks: 'You need at least two risks, each in its own list item.',
+				'risks-plugin': 'The risks should be about plugins: use the word “plugin” and say what can happen to it.',
+				'compare-rows': 'The comparison table must keep three rows: WordPress, Drupal and Joomla.',
+				verdict: 'In the verdict say whether to keep WordPress, take something else or give up on a CMS, and why.'
+			},
+			outro: 'Now you know what a CMS costs to keep. Next we’ll look at the website builders and the all-in-one platforms that many people choose instead.'
+		},
+		say: { WordPress: 'WordPress', Drupal: 'Droopal', Joomla: 'Joomla', PHP: 'P H P', CMS: 'C M S', MX: 'M X' }
+	};
+</script>
+
+<script>
+	import WpYear from '../../diagrams/WpYear.svelte';
+</script>
+
+## The cost of owning: more than the price of installing
+
+A site on a CMS seems free: the software is open source, and themes and plugins can be downloaded. But the cost has several parts, and the biggest is not money but **time**:
+
+- **hosting and a domain**: paid every year (unless you use a hosted service such as WordPress.com, which bundles hosting and does much of the upkeep for a monthly fee);
+- **paid themes and plugins**: the good ones are often sold by subscription;
+- **updates**: the core, the theme, the plugins, and the version of PHP on the host;
+- **backups**, and checking that they work;
+- **protection**: a site on the most popular CMS is the most common target of attacking robots;
+- **repairs**: after a failed update or a conflict between plugins.
+
+Move the “A year in the life of a WordPress site” diagram below: it shows seven events that happen to almost every site, and what they cost under different settings.
+
+<WpYear />
+
+## What needs updating, and how
+
+WordPress is updated often. The core ships **minor releases** with security fixes (they install themselves, as they have since 2013) and **major versions** a few times a year (it is better to test these before installing). Themes and plugins are updated separately, on their own schedules. Automatic updates for them arrived in version 5.5 (2020) and are optional. One more thing that needs “updating” is the **PHP** version on the host: old versions are retired in time, and your theme and plugins must work on the new one.
+
+Two rules. **Updates are installed on a plan**, not when the site has already broken. And **there is a fresh backup before any major update**.
+
+## Security
+
+Most WordPress break-ins don’t happen through the core but through **plugins and themes**. Thousands of different authors write them, holes in them appear more often, and not everyone closes them, or closes them quickly. A typical scenario: a vulnerability is found in a forms plugin, the author ships a fix the next day, and on your site the plugin is updated a month later. In that month the robots have scanned the internet and found your site.
+
+What helps, and none of it is exotic:
+
+- keep the core, themes and plugins **up to date**;
+- install **as few plugins as possible**, and delete the unused ones along with unused themes instead of just switching them off;
+- **don’t use “nulled” paid plugins** from dubious sources: malicious code is often hidden in them;
+- use two-factor login for the admin area and strong passwords, and limit login attempts;
+- give people different permissions: an editor doesn’t need administrator rights;
+- keep backups **away from** this server (more on backups and monitoring in part 9).
+
+There is a general checklist in WordPress’s own hardening guide (see the sources).
+
+## Backups: a hope, not a backup
+
+A backup is the **files and the database** of the site, kept **separately** from the site itself. If the copy lies on the same server, it is lost along with the server when the server fails or is hacked. There is an old “3-2-1” rule: three copies, on two different kinds of storage, one of them in another place. And the key point: **a backup is tested by restoring it**. A copy that has never been unpacked may turn out empty or incomplete, and you’ll find that out on the worst day.
+
+<details>
+<summary>Check yourself: why does restoring a site after a plugin conflict take longer without a backup?</summary>
+
+Without a copy the site has to be built again: install the CMS, the theme and the plugins, and move the content and settings over. A backup brings everything back in half an hour.
+
+</details>
+
+## Drupal and Joomla: who they are today
+
+In the 2000s three systems fought to be the main CMS, and when you choose WordPress it helps to know the other two.
+
+**Drupal** appeared in 2001 (Dries Buytaert started it as a small message board for his friends). It is strongest where the **content is complicated**: many types of entries and relations, fine-grained roles and permissions, many languages, big portals and organizations’ sites. In return it needs an experienced developer and work on configuration, so a beginner finds it hard. Many universities’ and government organizations’ sites run on it.
+
+**Joomla** (2005) came out of a fork of a system called Mambo. It is often called the golden mean: simpler than Drupal, more powerful than the old blogging systems. Today its share is shrinking: according to the Web Almanac, both Drupal and Joomla have lost share over the years, while WordPress and hosted builders such as Wix and Squarespace have grown.
+
+What to take from this. A small service site doesn’t need Drupal’s complexity: you’d pay for it with features you’ll never use. Joomla is hardly better than WordPress for you, and there are fewer people who know it. So on our list, for a small project, WordPress still wins, if a CMS is needed at all. And whether one is needed is decided not by taste but by two questions from lesson 1: who edits, and how often.
+
+## Practice
+
+You are in the era of 2010, and the site is working. Now write what is rarely written in time: an upkeep plan. Who updates, how often, what is copied and how much time it all takes. Name the risks of the plugin that takes your project’s enquiries or bookings. In the table, compare WordPress with Drupal and Joomla for your case, and give a verdict.
+
+## What was wrong with 2010
+
+Sites of 2010 were often installed and forgotten. There were no automatic updates (minor core security updates began installing themselves only in 2013), dozens of plugins were installed, and backups lay in the same folder as the site. The result was thousands of hacked sites that sent out spam and viruses. Today the tools are better, but the habit of “install and forget” is still with us, and it is still the most expensive one.

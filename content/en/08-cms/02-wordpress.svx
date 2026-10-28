@@ -1,0 +1,782 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/02-wordpress.svx. */
+	export const metadata = {
+		id: '08-cms/02-wordpress',
+		part: 8,
+		order: 2,
+		title: 'WordPress: themes, plugins and the era of 2010',
+		definition: 'WordPress is an open-source CMS in PHP and MySQL. A theme decides how a site looks, plugins what it can do; since version 3.0 (2010) it can build any site.',
+		summary:
+			'You’ll see how WordPress is put together: posts and pages, a theme, plugins and menus. And you’ll plan a 2010-era site for your own project, knowing what a theme decides and what a plugin does.',
+		comic: {
+			panels: [
+				{
+					mood: 'explain',
+					prop: 'browser',
+					label: 'header.php',
+					caption: 'The theme',
+					say: 'The theme decides how everything looks: the header, the menu, the loop of posts, the sidebar, the footer.'
+				},
+				{
+					mood: 'hmm',
+					side: 'right',
+					prop: 'network',
+					label: 'plugins: 23',
+					caption: 'A year later',
+					say: [
+						{ text: 'The site is slow.' },
+						{ who: 'Plugins', text: 'But we are all useful!' }
+					]
+				},
+				{
+					mood: 'cheer',
+					prop: 'cards',
+					label: '4 plugins',
+					caption: 'The rule',
+					say: 'As few plugins as possible, each with a reason. Every one is someone else’s code that has to be kept up to date.'
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-wordpress-themes-plugins'],
+		requires: ['cms-what-is-cms', 'cms-content-model', 'html-semantic-elements', 'css-box-model'],
+		practice: {
+			id: 'cms-wordpress-plan',
+			title: 'A WordPress site for your project',
+			task: 'In front of you is a theme in the spirit of WordPress in 2010. 1) The site’s tagline (in the header) is “…” for now: write it. 2) Build the menu: the menu list holds only “Home”; add one item for each section of your brief. 3) On the home page, above the list of posts, add a button for the main action: a link with the class button and the text from the brief. 4) In the plan under the page, say for each section whether it will be a page or a category and whether it is in the menu. 5) List the plugins: at least two and at most five, each with a name and a reason. 6) Say which plugin serves the main action and where it is shown. 7) Say how the project’s tone shows in the name and the tagline. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <div id="page">
+      <header id="branding">
+        <h1 id="site-title"><a href="#">{{name}}<\/a><\/h1>
+        <p id="site-description">…<\/p>
+        <nav id="access">
+          <ul id="menu">
+            <li><a href="#">Home<\/a><\/li>
+          <\/ul>
+        <\/nav>
+      <\/header>
+
+      <div id="main">
+        <div id="content">
+          {{#each items}}<article class="post">
+            <h2 class="entry-title">{{title}}<\/h2>
+            <div class="entry-meta">Category: services<\/div>
+            <p>{{text}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+        <aside id="sidebar">
+          <div class="widget"><h3>Search<\/h3><p>A search box for the site<\/p><\/div>
+          <div class="widget"><h3>Categories<\/h3><ul>{{#each sections}}<li>{{.}}<\/li>{{/each}}<\/ul><\/div>
+          <div class="widget"><h3>Contact<\/h3><p>{{phone}}<br>{{email}}<\/p><\/div>
+        <\/aside>
+      <\/div>
+
+      <footer id="colophon"><p>{{name}}, {{city}}. Powered by WordPress.<\/p><\/footer>
+    <\/div>
+
+    <section data-scaffold id="wp-plan">
+      <h2>The WordPress site plan<\/h2>
+
+      <h3>What becomes a page and what a category<\/h3>
+      <table id="map">
+        <tr><th>Section<\/th><th>Page or category<\/th><th>In the menu?<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="kind">…<\/td><td class="menu">…<\/td><\/tr>
+        {{/each}}
+      <\/table>
+
+      <h3>Plugins: five at most, each with a reason<\/h3>
+      <ul id="plugins">
+        <li class="plugin"><span class="name">…<\/span>: <span class="why">…<\/span><\/li>
+        <li class="plugin"><span class="name">…<\/span>: <span class="why">…<\/span><\/li>
+      <\/ul>
+
+      <p id="action">The main action “{{mainAction.label}}” is served by: <span id="action-by">…<\/span>. It is shown on: <span id="action-where">…<\/span><\/p>
+      <p>How the project’s tone shows in the name and the tagline: <span id="tone-note">…<\/span><\/p>
+    <\/section>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: a theme in the spirit of WordPress in 2010 */
+
+body {
+  margin: 0;
+  padding: 1rem 0;
+  font: 1rem/1.6 Georgia, "Times New Roman", serif;
+  color: #333333;
+  background-color: #e4e4e4;
+}
+
+#page {
+  width: 90%;
+  max-width: 58rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+}
+
+#branding {
+  padding: 1rem 1.5rem 0;
+  border-bottom: 4px solid #21759b;
+}
+
+#site-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+#site-title a {
+  color: #21759b;
+  text-decoration: none;
+}
+
+#site-description {
+  margin: 0 0 0.75rem;
+  color: #777777;
+  font-style: italic;
+}
+
+#access {
+  background-color: #f2f2f2;
+  border-top: 1px solid #dddddd;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem;
+}
+
+#access ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+#access li {
+  float: left;
+}
+
+#access a {
+  display: block;
+  padding: 0.6rem 1rem;
+  color: #333333;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#main {
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+#content {
+  float: left;
+  width: 66%;
+}
+
+#sidebar {
+  float: right;
+  width: 28%;
+  font: 0.9rem/1.5 Arial, Helvetica, sans-serif;
+}
+
+.post {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted #cccccc;
+}
+
+.entry-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+}
+
+.entry-meta {
+  margin-bottom: 0.5rem;
+  color: #888888;
+  font: 0.8rem Arial, Helvetica, sans-serif;
+}
+
+.widget {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background-color: #f6f6f6;
+}
+
+.widget h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.widget ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+a {
+  color: #21759b;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #21759b;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#colophon {
+  clear: both;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #cccccc;
+  color: #777777;
+  font: 0.85rem Arial, Helvetica, sans-serif;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <div id="page">
+      <header id="branding">
+        <h1 id="site-title"><a href="#">{{name}}<\/a><\/h1>
+        <p id="site-description">{{who}}<\/p>
+        <nav id="access">
+          <ul id="menu">
+            <li><a href="#">Home<\/a><\/li>
+            {{#each sections}}<li><a href="#">{{.}}<\/a><\/li>
+            {{/each}}
+          <\/ul>
+        <\/nav>
+      <\/header>
+
+      <div id="main">
+        <div id="content">
+          <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+          {{#each items}}<article class="post">
+            <h2 class="entry-title">{{title}}<\/h2>
+            <div class="entry-meta">Category: services<\/div>
+            <p>{{text}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+        <aside id="sidebar">
+          <div class="widget"><h3>Search<\/h3><p>A search box for the site<\/p><\/div>
+          <div class="widget"><h3>Categories<\/h3><ul>{{#each sections}}<li>{{.}}<\/li>{{/each}}<\/ul><\/div>
+          <div class="widget"><h3>Contact<\/h3><p>{{phone}}<br>{{email}}<\/p><\/div>
+        <\/aside>
+      <\/div>
+
+      <footer id="colophon"><p>{{name}}, {{city}}. Powered by WordPress.<\/p><\/footer>
+    <\/div>
+
+    <section data-scaffold id="wp-plan">
+      <h2>The WordPress site plan<\/h2>
+
+      <h3>What becomes a page and what a category<\/h3>
+      <table id="map">
+        <tr><th>Section<\/th><th>Page or category<\/th><th>In the menu?<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="kind">page<\/td><td class="menu">yes<\/td><\/tr>
+        {{/each}}
+      <\/table>
+
+      <h3>Plugins: five at most, each with a reason<\/h3>
+      <ul id="plugins">
+        <li class="plugin"><span class="name">Contact form<\/span>: <span class="why">takes enquiries from the home page and sends them to the owner’s email<\/span><\/li>
+        <li class="plugin"><span class="name">SEO plugin<\/span>: <span class="why">sets titles and descriptions of pages for search engines<\/span><\/li>
+        <li class="plugin"><span class="name">Caching<\/span>: <span class="why">serves ready-made pages so the site opens fast<\/span><\/li>
+        <li class="plugin"><span class="name">Backups<\/span>: <span class="why">saves the site and the database every night, away from the server<\/span><\/li>
+      <\/ul>
+
+      <p id="action">The main action “{{mainAction.label}}” is served by: <span id="action-by">the contact form plugin<\/span>. It is shown on: <span id="action-where">the home page, as a button above the list of posts<\/span><\/p>
+      <p>How the project’s tone shows in the name and the tagline: <span id="tone-note">the name and tagline are short and calm, with no loud words, in the same tone as the project itself<\/span><\/p>
+    <\/section>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: a theme in the spirit of WordPress in 2010 */
+
+body {
+  margin: 0;
+  padding: 1rem 0;
+  font: 1rem/1.6 Georgia, "Times New Roman", serif;
+  color: #333333;
+  background-color: #e4e4e4;
+}
+
+#page {
+  width: 90%;
+  max-width: 58rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+}
+
+#branding {
+  padding: 1rem 1.5rem 0;
+  border-bottom: 4px solid #21759b;
+}
+
+#site-title {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+#site-title a {
+  color: #21759b;
+  text-decoration: none;
+}
+
+#site-description {
+  margin: 0 0 0.75rem;
+  color: #777777;
+  font-style: italic;
+}
+
+#access {
+  background-color: #f2f2f2;
+  border-top: 1px solid #dddddd;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem;
+}
+
+#access ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+#access li {
+  float: left;
+}
+
+#access a {
+  display: block;
+  padding: 0.6rem 1rem;
+  color: #333333;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#main {
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+#content {
+  float: left;
+  width: 66%;
+}
+
+#sidebar {
+  float: right;
+  width: 28%;
+  font: 0.9rem/1.5 Arial, Helvetica, sans-serif;
+}
+
+.post {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted #cccccc;
+}
+
+.entry-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+}
+
+.entry-meta {
+  margin-bottom: 0.5rem;
+  color: #888888;
+  font: 0.8rem Arial, Helvetica, sans-serif;
+}
+
+.widget {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background-color: #f6f6f6;
+}
+
+.widget h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.widget ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+a {
+  color: #21759b;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #21759b;
+  text-decoration: none;
+  font: 0.95rem Arial, Helvetica, sans-serif;
+}
+
+#colophon {
+  clear: both;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #cccccc;
+  color: #777777;
+  font: 0.85rem Arial, Helvetica, sans-serif;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'plan-exists', kind: 'exists', selector: '#wp-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#wp-plan', matches: '^[^…]*$' },
+				{ id: 'tagline', kind: 'text', selector: '#site-description', matches: '\\S{3,}' },
+				{ id: 'menu-sections', kind: 'field', selector: '#menu a', field: 'sections' },
+				{ id: 'action-button', kind: 'field', selector: '#content a.button', field: 'mainAction.label' },
+				{ id: 'sections-planned', kind: 'count', selector: '#map tr.sec', min: { brief: 'sections' } },
+				{ id: 'kind-named', kind: 'text', selector: '#map td.kind', matches: '[Pp]age|[Cc]ategor' },
+				{ id: 'in-menu', kind: 'text', selector: '#map td.menu', matches: '^\\s*(?:[Yy]es|[Nn]o)' },
+				{ id: 'plugins-count', kind: 'count', selector: '#plugins li.plugin', min: 2, max: 5 },
+				{ id: 'plugins-reasons', kind: 'text', selector: '#plugins li.plugin .why', matches: '\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'action-plugin', kind: 'text', selector: '#action-by', matches: '[Pp]lugin|[Bb]lock|[Ff]orm|[Bb]utton|[Ww]idget' },
+				{ id: 'action-where', kind: 'text', selector: '#action-where', matches: '[Hh]ome|[Pp]age|[Ss]idebar|[Ff]ooter|[Mm]enu|[Hh]eader' },
+				{ id: 'tone-note', kind: 'text', selector: '#tone-note', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does a page differ from a post in WordPress?',
+				options: [
+					'A post is tied to time and joins a feed (news, an article), while a page is a separate permanent section (“About”, “Contact”)',
+					'A page is stored in a file and a post in the database',
+					'A post cannot be edited'
+				],
+				answer: 0,
+				why: [
+					'Yes. Posts run as a feed by date and go into categories and tags, while pages stand alone and form a hierarchy.',
+					'No: both are stored in the database.',
+					'No: both are edited in the same way.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each area of a page to the theme file that draws it',
+				pairs: [
+					['Header and menu', 'header.php'],
+					['The loop of posts on the home page', 'index.php'],
+					['The sidebar with widgets', 'sidebar.php'],
+					['The footer', 'footer.php']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You need to add an enquiry form. Is that the theme’s job or a plugin’s?',
+				options: [
+					'A plugin’s: a form is a capability, not design, and it should survive a change of theme',
+					'The theme’s: the form has to be built into header.php',
+					'The WordPress core’s: it already has a form'
+				],
+				answer: 0,
+				why: [
+					'Yes. A theme is responsible for looks and a plugin for capabilities. If the form is built into the theme, it disappears when the theme changes.',
+					'No: then the form is tied to the theme and will not survive replacing it.',
+					'No: the core has no enquiry form, but there are plugins for that.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do plugins fit into the way WordPress works?',
+				options: [
+					'Through hooks: at the right places the core and the theme say “something can be added or changed here”, and a plugin attaches',
+					'Plugins replace files of the core',
+					'Plugins run on the editor’s computer'
+				],
+				answer: 0,
+				why: [
+					'Yes. There are two kinds of hook: “actions” (do something at this point) and “filters” (change this value before it is shown).',
+					'No: editing the core would break at the very next update.',
+					'No: plugins are server code.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Why did WordPress become the most widespread CMS?',
+				options: [
+					'It runs on the cheapest hosting with PHP and MySQL',
+					'It has a huge choice of themes and plugins',
+					'It is open source and free, and many people know how to use it',
+					'It is better protected against hacking than any other system'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: a simple install on almost any host was its trump card from the start.',
+					'Yes: capabilities are added with ready-made plugins instead of being programmed.',
+					'Yes: an open license and a big community make help easy to find.',
+					'No: because it is so widespread and has so many plugins, WordPress is attacked more often than most (the next lesson is about that).'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How many plugins should a small site have?',
+				options: [
+					'As few as possible: each is someone else’s code that has to be updated, and it can slow the site down or break it',
+					'As many as possible: then the site can do more',
+					'Exactly twenty'
+				],
+				answer: 0,
+				why: [
+					'Yes. Keep a short list (a form, SEO, a cache, backups) and write a reason beside each.',
+					'No: each plugin adds to the work of updating and to the surface for an attack.',
+					'No: there is no right number as high as twenty.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-wp-origin',
+				front: 'Where did WordPress come from, and what is it?',
+				back: 'It appeared in 2003 as blogging software (Matt Mullenweg and Mike Little, continuing b2/cafelog). An open-source CMS in PHP and MySQL. Version 3.0 (June 2010) added custom post types and menus, and it grew from a blog tool into a CMS.'
+			},
+			{
+				id: 'cms-wp-post-page',
+				front: 'A post and a page in WordPress',
+				back: 'A post runs in a feed by date and sits in categories and tags (news, articles). A page is a separate permanent section (“About”, “Contact”).'
+			},
+			{
+				id: 'cms-wp-theme',
+				front: 'What does a theme decide, and what is it made of?',
+				back: 'A theme decides how the site looks. It is a set of PHP templates (header.php, index.php, sidebar.php, footer.php, single.php, page.php) and style.css. The loop of posts puts the data into them.'
+			},
+			{
+				id: 'cms-wp-plugin',
+				front: 'What does a plugin do, and how does it fit in?',
+				back: 'It adds capabilities (a form, SEO, a cache, backups) by attaching to hooks: actions and filters. A form or SEO is written as a plugin so it survives a change of theme.'
+			},
+			{
+				id: 'cms-wp-rule',
+				front: 'What is the rule for plugins?',
+				back: 'As few as possible, each with a written reason. Every plugin is someone else’s code with updates, and it affects speed and security.'
+			}
+		],
+		sources: [
+			{ title: 'WordPress Developer Resources: Theme Handbook, Getting Started', url: 'https://developer.wordpress.org/themes/getting-started/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'WordPress: Template Hierarchy', url: 'https://developer.wordpress.org/themes/basics/template-hierarchy/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'WordPress Plugin Handbook: Hooks', url: 'https://developer.wordpress.org/plugins/hooks/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'WordPress.org: History', url: 'https://wordpress.org/about/history/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re in 2010: the site will live on WordPress. In front of you is its theme. Let’s write the tagline, the menu and a plan: what becomes a page, which plugins are needed and why.',
+			hints: [
+				'The menu is a ul list with the id menu. Add an li with a link for each section of your brief, like “Home” in the example.',
+				'The main action button is a link with the class button and the text from the brief. Put it in the content block, above the list of posts.',
+				'In the list of plugins each one has two parts: a name and a reason. Think of an enquiry form, SEO, a cache and backups. You do not need more than five.'
+			],
+			mistakes: {
+				'plan-exists': 'The plan block is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				tagline: 'The site’s tagline in the header is still empty. Write a short phrase in place of “…”.',
+				'menu-sections': 'The menu does not have all the sections of your brief. Add an li with a link for each.',
+				'action-button': 'There is no main action button on the home page. Add a link with the class button and the text of the action to content.',
+				'sections-planned': 'The plan should have a row for every section. Do not delete the rows.',
+				'kind-named': 'For each section write: page or category.',
+				'in-menu': 'In the “In the menu?” column write “yes” or “no”.',
+				'plugins-count': 'There should be at least two plugins and at most five.',
+				'plugins-reasons': 'Write a reason of at least a few words for each plugin.',
+				'action-plugin': 'Say which plugin or block serves the main action.',
+				'action-where': 'Say where the main action is shown: for example, on the home page.',
+				'tone-note': 'Describe in a few words how the project’s tone shows in the name and the tagline.'
+			},
+			outro: 'You have a WordPress site on paper, with only four plugins. In the next lesson we’ll see what it costs to keep it going.'
+		},
+		say: { WordPress: 'word press', PHP: 'P H P', MySQL: 'my S Q L', SEO: 'S E O', GPL: 'G P L', Mullenweg: 'mullen-wegg' }
+	};
+</script>
+
+<script>
+	import WpAnatomy from '../../diagrams/WpAnatomy.svelte';
+</script>
+
+## Where WordPress came from
+
+In 2003 Matt Mullenweg and Mike Little took b2/cafelog, an abandoned blogging system, and carried it on as free software. That is how **WordPress** began: an open-source CMS in PHP and MySQL. At first it could run a blog. The big leap came with version 3.0 (June 2010), which added custom post types (now you can create a “service” or a “person” in it, like the content model of lesson 1) and menus, and a blog tool turned into a CMS for any kind of site. In 2010 this is exactly how you would have built your site.
+
+Today WordPress runs more than a third of all websites measured (35.6% on mobile in 2024, by the HTTP Archive’s Web Almanac), which is more than ten times the share of the next system, Wix.
+
+## Posts, pages and categories
+
+The two main things in WordPress:
+
+- A **post** is tied to time: news, an article, a note. Posts run as a feed, from fresh to old, and go into **categories** and **tags**.
+- A **page** is a separate permanent section: “About”, “Contact”, “Services”. Pages form a hierarchy (“Services” can have subpages) and do not run by date.
+
+The question “what becomes a page, and what a post” you’ll answer for each section in the practice. For services people usually create a **post type** of their own: then they get fields of their own and a separate section in the admin screen.
+
+## The theme: how the site looks
+
+A **theme** is a set of templates that decide how the site looks. A classic theme is a folder of PHP and CSS files:
+
+- `style.css`: the styling (and the theme’s name, in a comment at the top);
+- `header.php`, `footer.php`, `sidebar.php`: the header, the footer, the sidebar;
+- `index.php`: the main template; `single.php` for one post, `page.php` for a page. The set of rules for which template WordPress picks for which address is called the **template hierarchy**;
+- `functions.php`: the theme’s settings and what it loads.
+
+Inside the templates works the **loop** (The Loop): “for each post that has to be shown, print the title, the date and the text”. It is what puts the content from the database into the theme’s design. Click the areas in the diagram to see which file is responsible for which.
+
+<WpAnatomy />
+
+Themes can be changed without touching the content: posts and pages stay in the database, and only the clothes change. Since 2022 (version 5.9) there are also “block” themes, set up in the visual site editor without editing PHP. Classic themes are still very common, though.
+
+## Plugins: what the site can do
+
+A **plugin** adds capabilities: an enquiry form, search engine optimization (SEO), caching, backups, a shop, a gallery. They work through **hooks**: at the right places the core and the theme say “something can be added or changed here” (an action hook) or “here is a value, change it before it is shown” (a filter hook). A plugin attaches to such a place, and nothing in the core needs to be edited.
+
+From this comes the rule that separates a theme from a plugin: **looks are the theme, capabilities are the plugin**. You can build a form into a theme, but when the theme is changed it is lost. A form that is a plugin stays.
+
+The directory holds tens of thousands of plugins. The temptation to install plenty is understandable, but every plugin has a price: it is **someone else’s code** that has to be updated, that may slow the site down, clash with another plugin or turn out to be a hole. A sensible set for a small site: an enquiry form, SEO, a cache, backups. That is all. The next lesson is about the price of other people’s code.
+
+<details>
+<summary>Check yourself: is an enquiry form the work of a theme or of a plugin?</summary>
+
+A plugin’s. A form is a capability, not design. If you build it into the theme, it vanishes when the theme is changed.
+
+</details>
+
+## The editor and blocks
+
+The classic editor looked like Word. Since the end of 2018 (version 5.0) WordPress has had a **block editor** (it was called Gutenberg): a page is put together from blocks (a paragraph, an image, columns, a button) that can be moved around. Plugins add blocks too. For an editor this is convenient: every piece of the page is visible on its own.
+
+## Why WordPress won
+
+Not because it is better than everything else. There are several reasons, and they worked together. It **runs on the cheapest hosting** with PHP and MySQL (an install takes five minutes). It is **open source and free** (the GPL license), and a huge community grew around it. It has **thousands of ready-made themes and plugins**, so most tasks are solved by setting things up, not by programming. And there are **many specialists**, so help is easy to find. The same reasons are the price: because it is so widespread, WordPress is attacked more often than the rest.
+
+Do not confuse the two “WordPress”es. **WordPress.org** is the software itself, which you install on your own hosting. **WordPress.com** is a service where the company Automattic runs it for you for a fee, with limits on plugins on the cheaper plans. Hosting companies also sell “managed WordPress” plans, where they install, update and back up the software for you.
+
+## Practice
+
+You are in the era of 2010: a business orders a site on WordPress, and you choose a theme. In front of you is a theme in the spirit of that era: a fixed width, a sidebar, a gray background. Write the tagline, build the menu from your brief’s sections, show the main action button and make a plan: what becomes a page, which plugins are needed, and which of them serves the main action.
+
+## What was wrong then
+
+A 2010 theme with a fixed width and a floated layout looks poor on a phone (the part on responsive design is about that), and a set of plugins gathered “for growth” turns into a burden. The next lesson is about that.

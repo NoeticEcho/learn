@@ -1,0 +1,774 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/01-what-is-cms.svx. */
+	export const metadata = {
+		id: '08-cms/01-what-is-cms',
+		part: 8,
+		order: 1,
+		title: 'What a CMS is, and why a site needs one',
+		definition: 'A CMS (content management system) is software for editing a site’s content without knowing HTML: an admin screen, storage, templates, roles and publishing.',
+		summary:
+			'You’ll explain how a site of HTML files differs from a site on a CMS, name the three layers (content, template, code) and describe your project’s content model: the kinds of “things” (a service, an article, a person, a review) and their fields. Afterwards you have a table of content types with their editors and how often each changes.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser-1996',
+					label: 'price: $3,000',
+					caption: 'A site of files',
+					say: [
+						{ text: 'The price changed. I’m fixing page seven of twelve.' },
+						{ who: 'Site', text: 'The other five I haven’t touched.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'service: price',
+					caption: 'A field',
+					say: 'A service is a record with fields. The price sits in one field, and the card, the page and the list only show it.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'editor',
+					label: 'save',
+					caption: 'A CMS',
+					say: 'One field, one edit, and the price is updated everywhere. The editor does not need a developer.'
+				}
+			]
+		},
+		minutes: 15,
+		teaches: ['cms-what-is-cms', 'cms-content-model'],
+		requires: ['server-static-vs-dynamic', 'data-relational-model', 'start-project-brief'],
+		practice: {
+			id: 'cms-content-model-table',
+			title: 'Your project’s content model',
+			task: 'Fill in the table of content types. The first row (the services or products from items) is almost done: add who edits them and how often. In the other rows, write: people (people), proofs (proofs) and section pages. For each give the name of the type, its fields separated by commas, who edits it (the owner, an editor or a developer) and how often (for example, “once a month”). If your project has no people or proofs, replace the row with a type of your own (for example, “Review” or “Event”). In the second table, for each section of your site write which types it shows. If the site has several languages, make the text fields per language (for example, title_en and title_es). Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="cms-model">
+      <h2>The project’s content model<\/h2>
+      <p>The types of content: each has its own fields, its own editor and its own frequency of edits.<\/p>
+      <table id="model">
+        <tr><th>Type<\/th><th>Fields (separated by commas)<\/th><th>Who edits<\/th><th>How often<\/th><\/tr>
+        <tr class="type items"><td class="name">Service or product (items)<\/td><td class="fields">title, text, price<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+        <tr class="type people"><td class="name">…<\/td><td class="fields">…<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+        <tr class="type proofs"><td class="name">…<\/td><td class="fields">…<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+        <tr class="type pages"><td class="name">…<\/td><td class="fields">…<\/td><td class="owner">…<\/td><td class="freq">…<\/td><\/tr>
+      <\/table>
+
+      <h3>Which types each section of the site shows<\/h3>
+      <table id="sections-map">
+        <tr><th>Section<\/th><th>The types of content it shows<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="types">…<\/td><\/tr>
+        {{/each}}
+      <\/table>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="cms-model">
+      <h2>The project’s content model<\/h2>
+      <p>The types of content: each has its own fields, its own editor and its own frequency of edits.<\/p>
+      <table id="model">
+        <tr><th>Type<\/th><th>Fields (separated by commas)<\/th><th>Who edits<\/th><th>How often<\/th><\/tr>
+        <tr class="type items"><td class="name">Service or product (items)<\/td><td class="fields">title_en, title_es, text_en, text_es, price, photo<\/td><td class="owner">owner<\/td><td class="freq">once a month<\/td><\/tr>
+        <tr class="type people"><td class="name">Person<\/td><td class="fields">name, role, bio_en, bio_es, photo<\/td><td class="owner">owner<\/td><td class="freq">once every six months<\/td><\/tr>
+        <tr class="type proofs"><td class="name">Proof<\/td><td class="fields">title_en, title_es, number, date, scan<\/td><td class="owner">editor<\/td><td class="freq">once a year<\/td><\/tr>
+        <tr class="type pages"><td class="name">Section page<\/td><td class="fields">title_en, title_es, text_en, text_es<\/td><td class="owner">editor<\/td><td class="freq">once a week<\/td><\/tr>
+      <\/table>
+
+      <h3>Which types each section of the site shows<\/h3>
+      <table id="sections-map">
+        <tr><th>Section<\/th><th>The types of content it shows<\/th><\/tr>
+        {{#each sections}}<tr class="sec"><td>{{.}}<\/td><td class="types">section page; services and proofs, if the section is about them<\/td><\/tr>
+        {{/each}}
+      <\/table>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'model-exists', kind: 'exists', selector: '#cms-model' },
+				{ id: 'no-blanks', kind: 'text', selector: '#cms-model', matches: '^[^…]*$' },
+				{ id: 'types', kind: 'count', selector: '#model tr.type', min: 4 },
+				{ id: 'fields-listed', kind: 'text', selector: '#model td.fields', matches: ',' },
+				{ id: 'owner-named', kind: 'text', selector: '#model td.owner', matches: '[Oo]wner|[Ee]ditor|[Dd]eveloper' },
+				{ id: 'freq-named', kind: 'text', selector: '#model td.freq', matches: '[Oo]nce|[Ee]very|[Dd]aily|[Rr]are|[Oo]ften|[Ff]requent|[Ww]eek|[Mm]onth|[Yy]ear|[Qq]uarter|[Hh]alf' },
+				{ id: 'section-per-row', kind: 'count', selector: '#sections-map tr.sec', min: { brief: 'sections' } },
+				{ id: 'sections-named', kind: 'field', selector: '#sections-map tr.sec', field: 'sections' },
+				{
+					id: 'multilingual',
+					kind: 'text',
+					selector: '#model td.fields',
+					matches: '_en|_ru|_es|_fr|_de|each language|every language|translat|\\([a-z]{2}\\)',
+					when: { brief: 'languages', contains: 'ru' }
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each layer of a site to what it holds',
+				pairs: [
+					['Content', 'text, prices, photos, names'],
+					['Template', 'the shared header and footer, and how a service card looks'],
+					['Code', 'what the site does: show a page, take a request, check access']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What makes a CMS site easier than a site of HTML files for someone who changes prices?',
+				options: [
+					'They edit the content in an admin screen and need neither HTML nor uploading files',
+					'A CMS site needs no hosting',
+					'A CMS site has no templates'
+				],
+				answer: 0,
+				why: [
+					'Yes. A CMS separates content from design and code, so an editor needs only a form in the admin screen.',
+					'No: a CMS needs a server and a database, like any dynamic site.',
+					'No: a CMS has templates, and the shared header lives in just one place.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does “model the content, not the pages” mean?',
+				options: [
+					'Describe the kinds of “things” (a service, a person, a review) and their fields, and build the pages from them',
+					'Draw a mock-up of every page',
+					'Write all the texts in advance'
+				],
+				answer: 0,
+				why: [
+					'Yes. A service is described once, and the card, the page and the list all show its fields. Change a field and everything changes.',
+					'No: a mock-up is design, and a model describes content.',
+					'No: a model is about how the data is arranged, not about finished texts.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does a CMS usually include?',
+				options: [
+					'An admin screen for editing content',
+					'Storage for the content (a database or files)',
+					'Roles: who can change what',
+					'Ready-made text for your site'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the admin screen is the very reason people choose a CMS.',
+					'Yes: the content has to live somewhere, most often in a database.',
+					'Yes: an owner, an editor and a developer see different things in the admin screen.',
+					'No: you will have to write the text yourself.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A site in English and Spanish. What is the best way to arrange the “service name” field?',
+				options: [
+					'A field for each language (title_en, title_es), or a translation of one record linked to the original',
+					'One field holding both names with a slash between them',
+					'Two separate sites with no link between them'
+				],
+				answer: 0,
+				why: [
+					'Yes. That shows it is the same object in different languages, and the template picks the right one.',
+					'No: you cannot pull them apart later, and the template cannot show just one name.',
+					'No: the link is lost, and you would have to change the price in two places.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of building a content model in order',
+				items: [
+					'List the “things” the site shows: services, people, proofs',
+					'For each, decide what fields it has and of what kind',
+					'Assign who edits it and how often',
+					'Decide which types each section of the site shows'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-what',
+				front: 'What is a CMS?',
+				back: 'A content management system: an admin screen, storage (usually a database), templates, roles and publishing. It separates content from design and code, so an editor does not need a developer.'
+			},
+			{
+				id: 'cms-layers',
+				front: 'The three layers of a site',
+				back: 'Content (text, prices, photos), template (header, footer, how a card looks) and code (what the site does). In a site of files they are mixed together; in a CMS they are separate.'
+			},
+			{
+				id: 'cms-model-def',
+				front: 'What is a content model?',
+				back: 'A description of the types of content (a service, a person, a review), their fields and their links. You model the content, not the pages: pages are built from records.'
+			},
+			{
+				id: 'cms-model-lang',
+				front: 'How do you store text in several languages?',
+				back: 'A field for each language (title_en, title_es), or a translation of the record linked to the original. That shows it is one object, and a price or a photo is not changed twice.'
+			},
+			{
+				id: 'cms-who-edits',
+				front: 'Which two questions decide the choice of a CMS?',
+				back: 'Who edits the content (the owner, an editor, a developer) and how often. The answers show whether you need a friendly admin screen or files are enough.'
+			}
+		],
+		sources: [
+			{ title: 'MDN: Glossary, CMS', url: 'https://developer.mozilla.org/en-US/docs/Glossary/CMS', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Content management system (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Content_management_system', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'HTTP Archive Web Almanac 2024: CMS', url: 'https://almanac.httparchive.org/en/2024/cms', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'We’re describing the content of your site: what “things” it is made of, and who edits them. The site itself does not change yet. This is a plan.',
+			hints: [
+				'A type is a kind of “thing” with many instances: a service, a person, a proof. Fields are what it has: a name, text, a price, a photo.',
+				'Three words are enough for “who edits”: owner, editor, developer. For “how often”: once a week, once a month, once a year.',
+				'In the second table, write for each section which types it shows: a “Services” section shows services, an “About me” section shows a person.'
+			],
+			mistakes: {
+				'model-exists': 'The model block is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				types: 'The table needs at least four types (four rows).',
+				'fields-listed': 'Write the fields separated by commas: for example, title, text, price.',
+				'owner-named': 'In the “Who edits” column write: owner, editor or developer.',
+				'freq-named': 'In the “How often” column write a frequency: for example, “once a month”.',
+				'section-per-row': 'The second table needs a row for each section of your site. Do not delete them.',
+				'sections-named': 'The section names in the table must match your brief.',
+				multilingual: 'The site has more than one language, but the fields are not per language. Make title_en and title_es, or write “translation of the record”.'
+			},
+			outro: 'Now your project has a content model. In the next lessons we’ll look at the kinds of systems it can live in, starting with the most popular: WordPress.'
+		},
+		say: { CMS: 'C M S', HTML: 'H T M L', FTP: 'F T P', WordPress: 'word press' }
+	};
+</script>
+
+<script>
+	import ThreeLayers from '../../diagrams/ThreeLayers.svelte';
+</script>
+
+## A site you have to edit every week
+
+A site of HTML files is fine until it needs editing. But an owner changes prices, adds services, writes news. The site has fifty pages, and the header is copied onto each. The phone number changes, so we open fifty files. A service’s price is written on its own page, on the home page and in the price list: forget one, and the site shows two prices. And the person who changes the prices does not have to know HTML. That is how the need for a **CMS** arose.
+
+## Three layers
+
+Every site is made of three layers, and how they are separated decides everything that follows. Move the slider in the diagram: at its three stages you can see where each layer lives and what it takes to change the price of one service.
+
+<ThreeLayers />
+
+- **Content**: text, prices, photos, names, the reason people come.
+- **Template**: how the content looks and where it stands. The shared header and footer, the look of a service card.
+- **Code**: what the site does. Find the right record, show a page, take a request, check who has logged in.
+
+In a site of files all three layers are mixed in one HTML. In a CMS they are **separate**: the content lives in a database and is edited in an admin screen, there is one template for all pages, and the code is written once.
+
+## What a CMS is
+
+A **CMS** (content management system) is a program that lets people who do not know HTML edit a site’s content. It usually includes:
+
+- an **admin screen**: a page for editing, behind a login;
+- **storage** for the content (most often a database, as in part 7, though it can be a set of files);
+- **templates**: the design, written once;
+- **roles**: the owner sees everything, an editor changes the text but not the settings;
+- a **media library** for images and files;
+- **versions and publishing**: a draft, a preview, a way back.
+
+A CMS site is a dynamic site in the sense of part 6: a page is put together on request from the content in the database and a template (or in advance, as in the lesson on generators, but that comes later). There are very many CMSs, and in part 8 we’ll go through the main kinds: WordPress, website builders such as Wix, Squarespace and Shopify, static site generators and “headless” CMSs.
+
+## The content model
+
+The heart of any CMS is the **content model**: a description of the kinds of “things” there are and what they have. Each kind of “thing” is a **type**, and what it has is its **fields**.
+
+| Type | Fields | Who edits |
+|---|---|---|
+| Service | name, description, price, photo | owner |
+| Person | name, job title, biography, photo | owner |
+| Proof | name, number, date, scan | editor |
+
+A principle worth remembering: **model the content, not the pages**. Not “the page about the boundary survey”, but a “service” with fields. Then one record is shown in several places: a card on the home page, a page of its own, a list in a section, later a line in the search results. Change a field and everything changes. Structured content is also something search engines and AI can understand (part 13 comes back to this).
+
+What goes into a field’s description:
+
+- the **data type**: a string, long text, a number, a date, an image, yes/no, or a **link to a record of another type** (a service has a “lead specialist”);
+- whether it is **required**: may the field be left empty;
+- **languages**: if the site has several, the field is repeated for each (`title_en`, `title_es`), or a translation of the record is made and linked to the original.
+
+A mistake everyone makes: pouring everything into one “Text” field with an editor where people format as they please. A year later it holds the price, the terms and the phone number, and nothing can be found or reused. A price should be a field.
+
+<details>
+<summary>Check yourself: why is it better to make the price a separate field than part of the text?</summary>
+
+From a separate field it can be shown in the card, on the page, in a list and in the markup for search engines, and it has to be changed only once. A price hidden in text has to be found and fixed by eye in every place.
+
+</details>
+
+## Who edits, and how often
+
+The choice of a CMS is almost entirely decided by two questions. **Who** edits the content: an owner with no technical knowledge, an editor, a developer? And **how often**: every day, once a month, once a year? If the site is edited twice a year and by a developer, a CMS may be more than you need: files are enough. If several people write news every day, you cannot do without one. You’ll write down both answers for your types right in the practice.
+
+## Practice
+
+You are in the era of 2010: sites on a CMS are no longer rare, and owners of small businesses edit them themselves for the first time. Start with the content model.
+
+The page has a table of content types. The first row (services or products) is almost done. Fill in the others: people, proofs, section pages (or types of your own), with the fields of each and who edits it and how often. In the second table, for each section of your site, say which content types it shows.
+
+## What was wrong before
+
+Sites of the 2000s began as files, and the shared header was pulled in with “includes” (server-side includes, Dreamweaver templates). That was a first step toward separating the layers, but editing still took a webmaster: every change cost money and waited for weeks. A CMS put editing into the owners’ hands. The price was different: the site became a program that has to be updated and protected (lesson 3 is about that).

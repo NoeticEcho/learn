@@ -1,0 +1,833 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/04-tilda-bitrix.svx. */
+	export const metadata = {
+		id: '08-cms/04-tilda-bitrix',
+		part: 8,
+		order: 4,
+		title: 'Website builders and store platforms, from Wix to Tilda',
+		definition: 'A website builder is a service where pages are put together from ready-made blocks and the site lives on the platform. Shopify adds a store.',
+		summary:
+			'You’ll see why website builders such as Wix, Squarespace and Webflow, and store platforms such as Shopify, exist beside WordPress, and how Russia’s Tilda and 1C-Bitrix fit the same picture. You decide what suits your project in budget, upkeep and integrations. Afterwards you have a reasoned choice with a cost estimate and a way out.',
+		comic: {
+			panels: [
+				{
+					mood: 'cheer',
+					prop: 'browser',
+					label: 'blocks',
+					caption: 'A builder',
+					say: [
+						{ text: 'A site in an evening, and I edit it myself.' },
+						{ who: 'Builder', text: 'Take the code with you if you leave? That depends on your plan.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'server',
+					label: 'orders + stock',
+					caption: 'A store platform',
+					say: 'The catalog, the checkout and the orders come in the box, for a monthly plan. In Russia, 1C-Bitrix adds a link to 1C.'
+				},
+				{
+					mood: 'hmm',
+					prop: 'cards',
+					label: 'budget, store, who edits',
+					caption: 'Choosing',
+					say: 'Not “what is trendy” but three questions: how much money, do you need a store, and who will edit?'
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-tilda', 'cms-bitrix'],
+		requires: ['cms-what-is-cms', 'cms-content-model', 'html-forms'],
+		practice: {
+			id: 'cms-tilda-bitrix-pick',
+			title: 'Choosing a platform for the project',
+			task: 'Fill in the decision table. 1) For each of the three platforms (a website builder such as Wix, Squarespace or Webflow, Shopify, and WordPress) write whether it fits your project (yes, no or maybe), and why. 2) Name your choice. 3) Justify it with two fields of the brief: in the reasoning write the name of the main action (in quotation marks, as in the brief) and, if the project has services or products, at least one of their names. 4) Say where enquiries and visitors’ data will be stored. 5) Say which page is needed next to the form because of personal data. 6) In the cost table write numbers in US dollars a year for the four items. 7) Describe how you could leave the platform and what you could take with you. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="pick">
+      <h2>The decision for the project: a website builder, Shopify or WordPress<\/h2>
+      <table id="options">
+        <tr><th>Platform<\/th><th>Does it fit? (yes, no, maybe)<\/th><th>Why<\/th><\/tr>
+        <tr class="opt"><td>A website builder (Wix, Squarespace, Webflow)<\/td><td class="fit">…<\/td><td class="why">…<\/td><\/tr>
+        <tr class="opt"><td>Shopify<\/td><td class="fit">…<\/td><td class="why">…<\/td><\/tr>
+        <tr class="opt"><td>WordPress<\/td><td class="fit">…<\/td><td class="why">…<\/td><\/tr>
+      <\/table>
+      <p>My choice: <span id="choice">…<\/span><\/p>
+      <p>The choice rests on fields of the brief (the main action “{{mainAction.label}}”, the services or products, the languages): <span id="reason">…<\/span><\/p>
+      <p>Where enquiries and visitors’ data will be stored: <span id="pd">…<\/span><\/p>
+      <p>Which page is needed next to the form because of personal data: <span id="consent">…<\/span><\/p>
+
+      <h3>What it costs a year (an estimate, in US dollars)<\/h3>
+      <table id="cost">
+        <tr><th>Item<\/th><th>Amount a year<\/th><th>Comment<\/th><\/tr>
+        <tr class="line"><td>Platform or license<\/td><td class="sum">…<\/td><td class="note">…<\/td><\/tr>
+        <tr class="line"><td>Hosting<\/td><td class="sum">…<\/td><td class="note">…<\/td><\/tr>
+        <tr class="line"><td>Domain<\/td><td class="sum">…<\/td><td class="note">…<\/td><\/tr>
+        <tr class="line"><td>Support and changes<\/td><td class="sum">…<\/td><td class="note">…<\/td><\/tr>
+      <\/table>
+      <p>How I can leave the platform, and what I can take with me: <span id="exit">…<\/span><\/p>
+    <\/section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not end up in the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="pick">
+      <h2>The decision for the project: a website builder, Shopify or WordPress<\/h2>
+      <table id="options">
+        <tr><th>Platform<\/th><th>Does it fit? (yes, no, maybe)<\/th><th>Why<\/th><\/tr>
+        <tr class="opt"><td>A website builder (Wix, Squarespace, Webflow)<\/td><td class="fit">yes<\/td><td class="why">a small site that the owner edits alone, and the enquiry form needs no server of my own<\/td><\/tr>
+        <tr class="opt"><td>Shopify<\/td><td class="fit">no<\/td><td class="why">overkill: there is no store or big catalog, and a plan plus apps costs more than it brings<\/td><\/tr>
+        <tr class="opt"><td>WordPress<\/td><td class="fit">maybe<\/td><td class="why">it fits, but I would have to watch the updates and the protection myself<\/td><\/tr>
+      <\/table>
+      <p>My choice: <span id="choice">A website builder (Squarespace)<\/span><\/p>
+      <p>The choice rests on fields of the brief (the main action “{{mainAction.label}}”, the services or products, the languages): <span id="reason">the main action, “{{mainAction.label}}”, is served by a form the platform provides, and the list of services is short (for example, “{{items.0.title}}”) and rarely changes, so a builder is faster and cheaper<\/span><\/p>
+      <p>Where enquiries and visitors’ data will be stored: <span id="pd">enquiries are stored on the platform’s servers and sent on to my email and a spreadsheet; the platform’s help pages must say in which region its servers are and what its data processing terms are<\/span><\/p>
+      <p>Which page is needed next to the form because of personal data: <span id="consent">a privacy notice about how the data is used, linked next to the form, and a consent checkbox where the law requires one<\/span><\/p>
+
+      <h3>What it costs a year (an estimate, in US dollars)<\/h3>
+      <table id="cost">
+        <tr><th>Item<\/th><th>Amount a year<\/th><th>Comment<\/th><\/tr>
+        <tr class="line"><td>Platform or license<\/td><td class="sum">240<\/td><td class="note">an annual plan that allows custom code and has no platform ads<\/td><\/tr>
+        <tr class="line"><td>Hosting<\/td><td class="sum">0<\/td><td class="note">included in the plan<\/td><\/tr>
+        <tr class="line"><td>Domain<\/td><td class="sum">15<\/td><td class="note">registration and renewal<\/td><\/tr>
+        <tr class="line"><td>Support and changes<\/td><td class="sum">300<\/td><td class="note">a few hours of a specialist a year<\/td><\/tr>
+      <\/table>
+      <p>How I can leave the platform, and what I can take with me: <span id="exit">on a paid plan I can export my text and images, and some builders export the site’s code too; the forms and the store have to be connected again elsewhere; the text and photos stay with me<\/span><\/p>
+    <\/section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not end up in the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'pick-exists', kind: 'exists', selector: '#pick' },
+				{ id: 'no-blanks', kind: 'text', selector: '#pick', matches: '^[^…]*$' },
+				{ id: 'options', kind: 'count', selector: '#options tr.opt', min: 3 },
+				{ id: 'fit-words', kind: 'text', selector: '#options td.fit', matches: '^\\s*(?:[Yy]es|[Nn]o|[Mm]aybe|[Pp]artly|[Ii]n part)' },
+				{ id: 'choice', kind: 'text', selector: '#choice', matches: 'Wix|Squarespace|Webflow|Shopify|WordPress|Tilda|Bitrix|[Bb]uilder' },
+				{ id: 'reason-action', kind: 'field', selector: '#reason', field: 'mainAction.label' },
+				{ id: 'reason-items', kind: 'field', selector: '#reason', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{
+					id: 'pd-where',
+					kind: 'text',
+					selector: '#pd',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:server|platform|host|cloud|region|data cent|email|CRM|spreadsheet|United States|EU\\b))'
+				},
+				{ id: 'consent-page', kind: 'text', selector: '#consent', matches: '[Cc]onsent|[Pp]rivacy|[Pp]olicy|[Nn]otice|[Pp]ersonal' },
+				{ id: 'cost-rows', kind: 'count', selector: '#cost tr.line', min: 4 },
+				{ id: 'cost-numbers', kind: 'text', selector: '#cost td.sum', matches: '^\\s*\\$?\\d[\\d,\\s]*\\s*$' },
+				{
+					id: 'exit-plan',
+					kind: 'text',
+					selector: '#exit',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[Ee]xport|[Dd]ownload|[Tt]ake|[Cc]opy|[Cc]ode|HTML|[Mm]ove|[Mm]igrat|[Kk]eep|[Rr]emain|[Ss]tay))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is a “block builder” such as Wix, Squarespace or Tilda?',
+				options: [
+					'A service where a site is put together in the browser from ready-made blocks (a cover, text, a form), with no programming',
+					'A program you install on your own server and write code for',
+					'A markup language for pages'
+				],
+				answer: 0,
+				why: [
+					'Yes. The blocks adapt to a phone on their own, and for anything unusual there is a free-layout tool (Tilda calls it Zero Block) where elements are dragged into place.',
+					'No: that describes a CMS such as WordPress or 1C-Bitrix.',
+					'No: the markup is HTML, and a builder only writes it for you.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Who needs a store platform’s link to accounting or stock software (in Russia, 1C-Bitrix’s exchange with 1C)?',
+				options: [
+					'Someone whose stock, prices and orders are kept in accounting software, and who needs the catalog and orders to flow to the site and back',
+					'Someone making a three-page brochure site',
+					'Everyone who has an enquiry form'
+				],
+				answer: 0,
+				why: [
+					'Yes. A store with a big catalog and no link to the books turns into typing every price and stock level twice.',
+					'No: a brochure site has no products and no stock, so it needs no exchange.',
+					'No: an enquiry form has nothing to do with accounting software.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Are “Bitrix24” and “1C-Bitrix: Site Manager” the same thing?',
+				options: [
+					'No: Site Manager is a CMS for sites and stores, while Bitrix24 is a separate product, a CRM and workspace for a company',
+					'Yes, they are two names for one program',
+					'No: Bitrix24 is an older version of the site system'
+				],
+				answer: 0,
+				why: [
+					'Yes. The names are alike and the jobs differ. When someone says “Bitrix”, ask which one. It is the same trap as WordPress.com and WordPress.org.',
+					'No: they are different products of one company.',
+					'No: Bitrix24 is not a version of the site system but a separate system.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is worth finding out about a builder before you build a site on it?',
+				options: [
+					'Whether the site’s code can be exported, and on which plan',
+					'Where enquiry data is stored and what the platform promises about protecting personal data',
+					'What happens to the site if you stop paying the subscription',
+					'What color the platform’s logo is'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: that decides whether you can ever leave.',
+					'Yes: as the site’s owner you answer for visitors’ personal data, while the platform stores it.',
+					'Yes: on a builder the site usually lives only as long as the subscription is paid.',
+					'No: it has nothing to do with the decision.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A three-screen landing page with an enquiry form, edited by the owner, on a small budget. What is most likely to fit?',
+				options: ['A builder such as Squarespace or Wix', 'A store platform with accounting links', 'A homemade engine written from scratch'],
+				answer: 0,
+				why: [
+					'Yes. A project like this is just what a builder is for: quick, cheap, with no server to look after.',
+					'No: a platform plan, apps and a developer are overkill for a landing page.',
+					'No: a homemade CMS is the most expensive of the options and rarely pays off (lesson 8 covers this).'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does WordPress differ from a builder in who is responsible for the upkeep?',
+				options: [
+					'With self-hosted WordPress the updates, protection and backups are yours, and a builder takes them on',
+					'They are the same',
+					'On a builder all the upkeep is yours, and on WordPress it is not'
+				],
+				answer: 0,
+				why: [
+					'Yes. This is the main trade: a builder takes away the chores and also the freedom (code, hosting, plugins). WordPress gives the freedom together with the chores.',
+					'No: the difference is large.',
+					'No: it is exactly the other way round.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-tilda-what',
+				front: 'What is a website builder, and what is a free-layout block?',
+				back: 'A service where pages are put together from ready-made blocks that adapt to a phone themselves (Wix, Squarespace, Webflow, Tilda). A free-layout block, such as Tilda’s Zero Block, places elements anywhere by dragging. It runs on a subscription, and plans differ in the number of pages, code export and access to an API.'
+			},
+			{
+				id: 'cms-tilda-limits',
+				front: 'What are the main limits of a builder?',
+				back: 'The site is tied to the platform and the plan, code export depends on the plan, forms and the store work through the platform’s services, and you can’t add server logic of your own. In return: a quick launch and no server to look after.'
+			},
+			{
+				id: 'cms-bitrix-what',
+				front: 'What is a store platform, and what is 1C-Bitrix?',
+				back: 'A store platform (Shopify) keeps the catalog, checkout, payments and orders in one service for a monthly plan. 1C-Bitrix is the Russian paid CMS for stores and company sites, whose strength is a ready exchange of goods, stock and orders with 1C. It needs hosting and a developer. Bitrix24 is another product, a CRM.'
+			},
+			{
+				id: 'cms-russia-pd',
+				front: 'What should you find out about a platform because of personal data?',
+				back: 'Where enquiries are stored (on its servers or yours), in which country those servers are, and how the platform protects them. Next to the form you need a privacy notice and, where the law asks for it, a separate consent.'
+			},
+			{
+				id: 'cms-exit',
+				front: 'Why think about leaving a platform in advance?',
+				back: 'Because a platform’s price, terms and availability can change. You find out beforehand what can be exported (code, text, images, enquiries) and what has to be done again.'
+			}
+		],
+		sources: [
+			{ title: 'Wix.com (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Wix.com', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Squarespace (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Squarespace', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Webflow (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Webflow', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Shopify (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Shopify', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Webflow University', url: 'https://university.webflow.com/', licence: 'proprietary-link', kind: 'course', lang: 'en' },
+			{ title: 'Squarespace Help Center', url: 'https://support.squarespace.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Shopify Help Center: plans', url: 'https://help.shopify.com/en/manual/your-account/plans', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Tilda Publishing', url: 'https://tilda.cc/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: '1C Company (Wikipedia)', url: 'https://en.wikipedia.org/wiki/1C_Company', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{
+				title: '1C-Bitrix: developer school and documentation',
+				url: 'https://dev.1c-bitrix.ru/learning/',
+				licence: 'proprietary-link',
+				kind: 'course',
+				lang: 'ru'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'You are choosing what the project’s site will live on. First three simple questions: how much money, do you need a store, and who will edit. The rest is in the table.',
+			hints: [
+				'For “Does it fit?” answer with the words “yes”, “no” or “maybe”, and in “Why” give a reason tied to your project.',
+				'In the reasoning name your project’s main action (it is in the brief) and at least one of your services or products. That shows the choice isn’t just taste.',
+				'Write the yearly cost in numbers, for example 240. If the platform includes hosting, say so: put 0 in the amount and a comment.'
+			],
+			mistakes: {
+				'pick-exists': 'The decision block has gone. It was in the page, so bring it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				options: 'The table must have three platforms. Don’t delete rows.',
+				'fit-words': 'In the “Does it fit?” column start with the words “yes”, “no” or “maybe”.',
+				choice: 'Name your choice: a builder (Wix, Squarespace, Webflow), Shopify or WordPress.',
+				'reason-action': 'The reasoning doesn’t include your project’s main action. Write its name as it is in the brief.',
+				'reason-items': 'The reasoning doesn’t include any of your services or products. Name at least one.',
+				'pd-where': 'Say more about where enquiries are stored: on the platform’s servers, on your host, in email.',
+				'consent-page': 'Say which page is needed: a privacy notice, and consent next to the form where the law asks for it.',
+				'cost-rows': 'The cost table must keep four rows.',
+				'cost-numbers': 'The “Amount a year” column should have only numbers, for example 240.',
+				'exit-plan': 'Describe what can be taken off the platform (code, text, images) and what has to be done again.'
+			},
+			outro: 'The choice is made, justified and priced. Next we take a very different path: a site made of text files, built by a program called a generator.'
+		},
+		say: {
+			Tilda: 'Tilda',
+			'Zero Block': 'Zero Block',
+			Wix: 'Wix',
+			Squarespace: 'Squarespace',
+			Webflow: 'Webflow',
+			Shopify: 'Shopify',
+			CRM: 'C R M',
+			API: 'A P I',
+			CMS: 'C M S',
+			HTML: 'H T M L',
+			CSS: 'C S S',
+			'1C': 'one C',
+			'1C-Bitrix': 'one C Bitrix'
+		}
+	};
+</script>
+
+<script>
+	import ThreeWays from '../../diagrams/ThreeWays.svelte';
+</script>
+
+## Why there are more than WordPress
+
+WordPress asks you to look after hosting, updates and security. Many people want the opposite: a site in an evening and nothing to maintain. Two kinds of product answer that, and both sit beside WordPress rather than replacing it:
+
+- **website builders**, such as Wix, Squarespace and Webflow, where you assemble pages from blocks in the browser and the company hosts the result;
+- **store platforms**, such as Shopify, where the catalog, the checkout, the payments and the orders come as one service.
+
+A third relative is **WordPress.com**, the hosted version of WordPress: the same editor and ecosystem, with the hosting and much of the upkeep done for you (more in lesson 2).
+
+Russia grew its own versions of both, and they are good examples of the same trade-offs: **Tilda** is a block builder, and **1C-Bitrix** is a paid CMS and store system that links to the accounting program 1C. We’ll meet them below, as the Russian market’s story.
+
+## Builders: a site made of blocks
+
+A **website builder** works in the browser. You pick ready-made blocks (a cover, a menu, text, a form, a gallery) and stack them into a page. The blocks adapt to a phone screen on their own, and the design looks good by default. For an unusual layout there is a free-form canvas where text, pictures, buttons and forms are dragged into place: Webflow is built around this idea, and Tilda calls its canvas **Zero Block**. Wix and Squarespace started in the mid 2000s as simple do-it-yourself tools. Webflow (2013) is aimed at designers who want something close to hand-written CSS without writing it.
+
+What you get: a site done in an evening, forms, analytics and payments built in, and no servers, updates or break-ins to worry about. The price of that comfort is its limits:
+
+- the site **lives on the platform** and on your subscription: it works while you pay;
+- **code export** depends on the builder and the plan. As of this writing, Webflow can export a site’s code on paid plans, though its form handling and CMS content then need replacing. Squarespace exports text content in a WordPress-format file. Wix has no real export of a finished site. These rules change, so read the current help pages before you commit;
+- you **can’t add server logic of your own** (a customer account, an unusual calculation), only what the platform offers or a marketplace app adds;
+- your data, including **visitors’ enquiries**, passes through the platform, and as the site’s owner you answer for it to your visitors (lesson 7).
+
+### The Russian case: Tilda
+
+**Tilda Publishing** is the Russian market’s best known block builder. It was created by the designer Nikita Obukhov and runs on a free plan plus paid subscriptions. The plans differ in the number of pages, the ability to export code and access to an API. It has the same trade-offs as the Western builders: fast launch and good defaults, against living on the platform. Its forms and payments connect to Russian services such as Yandex Metrica (an analytics counter, see part 14) and local payment systems.
+
+## Store platforms: Shopify, and 1C-Bitrix in Russia
+
+A store has needs a brochure site doesn’t: a catalog, stock levels, a cart, a checkout, payments, taxes, shipping and orders. **Shopify** (founded in Canada in 2006) sells all of that as one service for a monthly plan, with an app store for extras and a fee on payments unless you use its own payment service. A small store can be running in a day. The trade-off is the same as with builders: your store, checkout and customer data live on the platform. You can export products and customers, but the theme and the apps’ settings have to be rebuilt elsewhere.
+
+**1C-Bitrix: Site Manager** is the Russian counterpart in spirit, but a different kind of product: a paid CMS from the Russian company Bitrix, on which companies build corporate sites, online stores and portals. It comes with forms, a promotion (SEO) module, mailings and web analytics. Its main advantage is that it **can exchange data with 1C**, the accounting software that most Russian businesses use: the catalog, prices, stock and orders move between the books and the site in a ready format, with nothing typed twice. For a store with hundreds or thousands of products, that is the deciding argument. Western stores solve the same problem with accounting apps and APIs.
+
+Don’t confuse it with **Bitrix24**, a separate product of the same company, a CRM and workspace for a team. When someone says “Bitrix”, ask which one.
+
+The price: the license is paid (there are editions for different jobs), and you need hosting and a **developer who knows the system**. The upkeep is yours too: like any popular self-hosted CMS, it has vulnerabilities, and outdated installations are a frequent target. The lesson on what WordPress really costs (lesson 3) holds here as well.
+
+## Three paths side by side
+
+Answer a few questions about your project and see how the answers rank the three paths. The diagram adds up points by simple rules, and shows the typical limits of the winner.
+
+<ThreeWays />
+
+What to remember from the comparison:
+
+- **Who edits.** An owner with no technical skills? A builder. A team with a developer? WordPress, or a store platform.
+- **A store.** A small one fits all three; a big catalog with stock is a store platform’s job.
+- **Accounting software.** If the books must sync with the site, look at a store platform (in Russia, 1C-Bitrix) or custom work.
+- **Logic of your own.** If you need special functions, WordPress with plugins or code, not a builder.
+- **Budget.** A builder is cheap to start and paid forever. A store platform costs a plan plus fees and apps. For WordPress the cost is in the upkeep.
+
+<details>
+<summary>Check yourself: why must you think about leaving a builder in advance?</summary>
+
+Because the site lives on the platform and on your subscription, and code export depends on the plan and doesn’t always include forms and the store. If the terms or the price change, you need to know what you can take with you.
+
+</details>
+
+## Personal data in enquiries
+
+Whatever you choose, visitors’ enquiries are personal data, and you answer for them. The questions are always the same. **Where** is the data stored: on the platform’s servers (a builder), on your host (WordPress, Bitrix)? **In which country** are those servers, and what are the platform’s data processing terms? **Where does it go next:** an email, a spreadsheet, a CRM, each with its own responsibilities? Next to the form you need a **privacy notice** and, where the law asks for it, a separate **consent**.
+
+Which law applies depends on your visitors, not on your platform. For visitors in the European Union and the United Kingdom, the main rules are the GDPR and the UK GDPR. In the United States there is no single federal privacy law for this, but several states have their own, such as California’s CCPA as amended by the CPRA. Russia’s Federal Law 152-FZ is the stricter case: it requires the personal data of Russian citizens to be recorded and stored first on servers in Russia, which is why Russian site owners always ask a platform where its servers are. We’ll look at the rules properly in lesson 7 and in part 15.
+
+This is general information, not legal advice. Look for the answers in the platform’s help pages and its data processing terms, and ask a lawyer or your data protection authority, such as the European Data Protection Board’s national contact points or the California Privacy Protection Agency, rather than guessing.
+
+## A year’s cost, and the way out
+
+Count the cost of owning for a year from four lines: **the platform or license, hosting, the domain, and support and changes**. For a builder, hosting is in the plan; for WordPress it is yours; for a self-hosted system such as Bitrix there is a license on top. And think about **the way out** at once: what can you carry away if you have to leave? The text and pictures you always have. The code, the forms, the store and the enquiries can’t always be taken out, and you should find that out in advance, not when the platform changes its terms.
+
+## Practice
+
+You are in the era of 2010, and WordPress now has alternatives. You choose a platform for your project like a modern client. Fill in the decision table: whether each platform fits, what you chose and why (name the main action and your services), where the enquiries are kept, which page personal data requires, what it costs a year and how you could leave.
+
+## What was wrong before
+
+In 2010 the choice was simpler and riskier. Many businesses ordered a site from a studio on the studio’s own system: nice and quick, but when the studio closed or raised its price, the site could not be taken away. Builders and open source CMSs cure this, provided you asked in advance how to leave.
