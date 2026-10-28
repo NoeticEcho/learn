@@ -7,8 +7,62 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let brief = $state({ title: 'Ваш проект', action: 'Главное действие' });
+	// The diagram's words, one table per edition (docs/content-plan/README.md, «English edition»).
+	// The CSS next to each part is the same in both.
+	const W = pick({
+		ru: {
+			fallback: { title: 'Ваш проект', action: 'Главное действие' },
+			figma: {
+				card: ['Auto layout: вертикально', 'Отступы: space/4 (16)', 'Промежуток: space/2 (8)', 'Ширина: заполнить контейнер', 'Скругление: radius/md', 'Заливка: surface/raised'],
+				title: ['Текстовый стиль: heading/md', 'Цвет: text/primary', 'Ширина: по содержимому (hug)'],
+				button: ['Компонент: Button, вариант primary', 'Auto layout: горизонтально, по центру', 'Отступы: 0 / space/4, высота 44', 'Заливка: action/default', 'Текст: label/md, on-action']
+			} as Record<string, string[]>,
+			vocab: [
+				['Frame (кадр)', 'элемент блока: div, section'],
+				['Auto layout', 'display: flex (направление, gap, padding, выравнивание)'],
+				['Hug / Fill / Fixed', 'ширина по содержимому / flex: 1 или 100 % / число'],
+				['Component и variant', 'компонент: класс и модификатор (btn, btn--secondary)'],
+				['Variables (переменные), modes', 'CSS-переменные; режимы это темы ([data-theme])'],
+				['Constraints', 'позиционирование и поведение при изменении ширины'],
+				['Dev Mode', 'режим, где разработчику видны размеры, токены и код']
+			],
+			caption: 'Нажмите на деталь макета и посмотрите, что видит разработчик',
+			mock: 'Макет карточки',
+			layer: 'Слой:',
+			inDesign: 'В макете',
+			inCode: 'В коде',
+			vocabCaption: 'Словарь: инструмент дизайна и CSS',
+			head: ['В макете', 'В коде']
+		},
+		en: {
+			fallback: { title: 'Your project', action: 'Main action' },
+			figma: {
+				card: ['Auto layout: vertical', 'Padding: space/4 (16)', 'Gap: space/2 (8)', 'Width: fill container', 'Corner radius: radius/md', 'Fill: surface/raised'],
+				title: ['Text style: heading/md', 'Color: text/primary', 'Width: hug contents'],
+				button: ['Component: Button, variant primary', 'Auto layout: horizontal, centered', 'Padding: 0 / space/4, height 44', 'Fill: action/default', 'Text: label/md, on-action']
+			} as Record<string, string[]>,
+			vocab: [
+				['Frame', 'a block element: div, section'],
+				['Auto layout', 'display: flex (direction, gap, padding, alignment)'],
+				['Hug / Fill / Fixed', 'width by content / flex: 1 or 100% / a number'],
+				['Component and variant', 'a component: a class and a modifier (btn, btn--secondary)'],
+				['Variables, modes', 'CSS variables; modes are themes ([data-theme])'],
+				['Constraints', 'positioning and behavior when the width changes'],
+				['Dev Mode', 'a mode where a developer sees sizes, tokens and code']
+			],
+			caption: 'Click a part of the design and see what a developer sees',
+			mock: 'The design of a card',
+			layer: 'Layer:',
+			inDesign: 'In the design',
+			inCode: 'In the code',
+			vocabCaption: 'A glossary: the design tool and CSS',
+			head: ['In the design', 'In the code']
+		}
+	});
+
+	let brief = $state({ ...W.fallback });
 	onMount(async () => {
 		try {
 			const learner = await import('#lib/learner.ts');
@@ -21,28 +75,20 @@
 
 	type Part = { id: string; layer: string; figma: string[]; css: string };
 	const parts: Part[] = [
-		{ id: 'card', layer: 'Card', figma: ['Auto layout: вертикально', 'Отступы: space/4 (16)', 'Промежуток: space/2 (8)', 'Ширина: заполнить контейнер', 'Скругление: radius/md', 'Заливка: surface/raised'], css: '.card {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n  padding: var(--space-4);\n  border-radius: var(--radius-md);\n  background: var(--surface-raised);\n}' },
-		{ id: 'title', layer: 'Card/Title', figma: ['Текстовый стиль: heading/md', 'Цвет: text/primary', 'Ширина: по содержимому (hug)'], css: '.card__title {\n  font: var(--font-heading-md);\n  color: var(--text-primary);\n}' },
-		{ id: 'button', layer: 'Card/Action', figma: ['Компонент: Button, вариант primary', 'Auto layout: горизонтально, по центру', 'Отступы: 0 / space/4, высота 44', 'Заливка: action/default', 'Текст: label/md, on-action'], css: '.btn {\n  display: inline-flex;\n  align-items: center;\n  min-height: 44px;\n  padding: 0 var(--space-4);\n  background: var(--action);\n  color: var(--on-action);\n}' }
+		{ id: 'card', layer: 'Card', figma: W.figma.card, css: '.card {\n  display: flex;\n  flex-direction: column;\n  gap: var(--space-2);\n  padding: var(--space-4);\n  border-radius: var(--radius-md);\n  background: var(--surface-raised);\n}' },
+		{ id: 'title', layer: 'Card/Title', figma: W.figma.title, css: '.card__title {\n  font: var(--font-heading-md);\n  color: var(--text-primary);\n}' },
+		{ id: 'button', layer: 'Card/Action', figma: W.figma.button, css: '.btn {\n  display: inline-flex;\n  align-items: center;\n  min-height: 44px;\n  padding: 0 var(--space-4);\n  background: var(--action);\n  color: var(--on-action);\n}' }
 	];
 	let sel = $state('card');
 	const cur = $derived(parts.find((p) => p.id === sel)!);
 
-	const vocab = [
-		['Frame (кадр)', 'элемент блока: div, section'],
-		['Auto layout', 'display: flex (направление, gap, padding, выравнивание)'],
-		['Hug / Fill / Fixed', 'ширина по содержимому / flex: 1 или 100 % / число'],
-		['Component и variant', 'компонент: класс и модификатор (btn, btn--secondary)'],
-		['Variables (переменные), modes', 'CSS-переменные; режимы это темы ([data-theme])'],
-		['Constraints', 'позиционирование и поведение при изменении ширины'],
-		['Dev Mode', 'режим, где разработчику видны размеры, токены и код']
-	];
+	const vocab = W.vocab;
 </script>
 
 <figure class="dg">
-	<figcaption>Нажмите на деталь макета и посмотрите, что видит разработчик</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="cols">
-		<div class="canvas" role="group" aria-label="Макет карточки">
+		<div class="canvas" role="group" aria-label={W.mock}>
 			<div class="card" class:on={sel === 'card'}>
 				<button type="button" class="lbl" onclick={() => (sel = 'card')} aria-pressed={sel === 'card'}>Card</button>
 				<button type="button" class="part title" class:on={sel === 'title'} onclick={() => (sel = 'title')} aria-pressed={sel === 'title'}>{brief.title}</button>
@@ -50,19 +96,19 @@
 			</div>
 		</div>
 		<div class="insp">
-			<p class="layer">Слой: <code class="dg-mono">{cur.layer}</code></p>
-			<div class="dh">В макете</div>
+			<p class="layer">{W.layer} <code class="dg-mono">{cur.layer}</code></p>
+			<div class="dh">{W.inDesign}</div>
 			<ul>
 				{#each cur.figma as f, k (k)}<li>{f}</li>{/each}
 			</ul>
-			<div class="dh">В коде</div>
+			<div class="dh">{W.inCode}</div>
 			<pre class="dg-box dg-mono">{cur.css}</pre>
 		</div>
 	</div>
 
 	<table class="tbl">
-		<caption class="dg-out" style="text-align:left;margin:var(--space-4) 0 var(--space-2)">Словарь: инструмент дизайна и CSS</caption>
-		<thead><tr><th>В макете</th><th>В коде</th></tr></thead>
+		<caption class="dg-out" style="text-align:left;margin:var(--space-4) 0 var(--space-2)">{W.vocabCaption}</caption>
+		<thead><tr><th>{W.head[0]}</th><th>{W.head[1]}</th></tr></thead>
 		<tbody>
 			{#each vocab as [a, b] (a)}
 				<tr><td>{a}</td><td>{b}</td></tr>

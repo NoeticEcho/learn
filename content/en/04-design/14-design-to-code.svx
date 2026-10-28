@@ -1,0 +1,380 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/14-design-to-code.svx. */
+	export const metadata = {
+		id: '04-design/14-design-to-code',
+		part: 4,
+		order: 14,
+		title: 'From design to code: Figma, handoff and working with AI',
+		definition: 'Handoff is preparing a Figma design for building: named layers, components, variables instead of numbers, every state, and a narrow screen.',
+		summary:
+			'You’ll see how a designer works in Figma (frames, auto layout, components, variables) and what exactly a developer needs when a design is handed over. Afterwards you write a handoff specification for the first screen of your project that it can be built from without questions, an AI included.',
+		minutes: 30,
+		teaches: ['design-design-to-code', 'design-handoff'],
+		requires: ['design-tokens', 'design-component'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'Frame 482', caption: 'Handoff', say: 'A layer called “Frame 482” says nothing. Named layers such as Hero/Title speak, to a developer and to an AI.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'variable|token|CSS', say: 'A design variable becomes var(--action). A color from an eyedropper becomes a number nobody can find later.' },
+				{ mood: 'hint', prop: 'editor', label: 'AI-built markup', say: 'An AI builds fast but errs like a person: a number for a token, a lost focus, no narrow screen. Check.' }
+			]
+		},
+		practice: {
+			id: 'design-handoff-spec',
+			title: 'A handoff specification for the first screen',
+			task: 'Describe the first screen of your project so that it can be built without questions. 1) Frames: the widths for a phone, a tablet and a computer (numbers). 2) Layers: at least five names in the form “Block/Part” (for example Hero/Title). 3) Tokens: at least four, by the names of CSS variables (--space-4 and so on). 4) The states of the main action: at least four. 5) Assets: two rows of a table: what is delivered as vectors, what as raster, and the sizes. 6) What happens on a narrow screen. 7) After the markup has been built from the specification (by hand or with an AI tool), write in at least three mismatches with the tokens or the states. The description of the screen must hold all the sections of your project and the main action. Every “…” has to be replaced.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="spec">
+      <h2>The specification of the first screen</h2>
+      <p>The content of the screen, from the top down: <span id="content">{{#each sections}}{{.}}; {{/each}}</span> main action: {{mainAction.label}}.</p>
+
+      <h3>Frames</h3>
+      <ul>
+        <li class="frame">Phone, width …</li>
+        <li class="frame">Tablet, width …</li>
+        <li class="frame">Computer, width …</li>
+      </ul>
+
+      <h3>Layers (Block/Part)</h3>
+      <ul>
+        <li class="layer">…</li>
+        <li class="layer">…</li>
+        <li class="layer">…</li>
+        <li class="layer">…</li>
+        <li class="layer">…</li>
+      </ul>
+
+      <h3>Tokens</h3>
+      <ul>
+        <li class="token">…</li>
+        <li class="token">…</li>
+        <li class="token">…</li>
+        <li class="token">…</li>
+      </ul>
+
+      <h3>States of the main action</h3>
+      <ul>
+        <li class="state">…</li>
+        <li class="state">…</li>
+        <li class="state">…</li>
+        <li class="state">…</li>
+      </ul>
+
+      <h3>Assets</h3>
+      <table>
+        <tr><th>What</th><th>How it is delivered</th><th>Size</th></tr>
+        <tr class="asset"><td>…</td><td class="kind">…</td><td>…</td></tr>
+        <tr class="asset"><td>…</td><td class="kind">…</td><td>…</td></tr>
+      </table>
+
+      <h3>The narrow screen</h3>
+      <p id="narrow">…</p>
+
+      <h3>Mismatches after building</h3>
+      <ul>
+        <li class="mismatch">…</li>
+        <li class="mismatch">…</li>
+        <li class="mismatch">…</li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="spec">
+      <h2>The specification of the first screen</h2>
+      <p>The content of the screen, from the top down: <span id="content">{{#each sections}}{{.}}; {{/each}}</span> main action: {{mainAction.label}}.</p>
+
+      <h3>Frames</h3>
+      <ul>
+        <li class="frame">Phone, width 375</li>
+        <li class="frame">Tablet, width 768</li>
+        <li class="frame">Computer, width 1280</li>
+      </ul>
+
+      <h3>Layers (Block/Part)</h3>
+      <ul>
+        <li class="layer">Hero/Title</li>
+        <li class="layer">Hero/Lead</li>
+        <li class="layer">Hero/Action</li>
+        <li class="layer">Cards/Item</li>
+        <li class="layer">Footer/Contacts</li>
+      </ul>
+
+      <h3>Tokens</h3>
+      <ul>
+        <li class="token">--space-4: spacing between blocks</li>
+        <li class="token">--color-accent-600: the background of the main action</li>
+        <li class="token">--fs-3xl: the heading</li>
+        <li class="token">--radius-md: the corner radius of the cards and the button</li>
+      </ul>
+
+      <h3>States of the main action</h3>
+      <ul>
+        <li class="state">default</li>
+        <li class="state">hover: a lighter background</li>
+        <li class="state">focus: a yellow outline of 3 pixels</li>
+        <li class="state">disabled: 50% opacity</li>
+      </ul>
+
+      <h3>Assets</h3>
+      <table>
+        <tr><th>What</th><th>How it is delivered</th><th>Size</th></tr>
+        <tr class="asset"><td>Menu icons</td><td class="kind">as vectors, SVG</td><td>24 by 24</td></tr>
+        <tr class="asset"><td>The photo on the first screen</td><td class="kind">as raster, WebP</td><td>1200 and 2400 pixels wide</td></tr>
+      </table>
+
+      <h3>The narrow screen</h3>
+      <p id="narrow">Up to 600 pixels wide the cards go in one column, and the menu collapses into a button.</p>
+
+      <h3>Mismatches after building</h3>
+      <ul>
+        <li class="mismatch">17 pixels stands in place of --space-4</li>
+        <li class="mismatch">The main action has no focus state</li>
+        <li class="mismatch">The button color is not from a token but copied from the design</li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'frames', kind: 'count', selector: '#spec li.frame', min: 3 },
+				{ id: 'frame-widths', kind: 'text', selector: '#spec li.frame', matches: '\\d{3,4}' },
+				{ id: 'layers', kind: 'count', selector: '#spec li.layer', min: 5 },
+				{ id: 'layer-names', kind: 'text', selector: '#spec li.layer', matches: '^\\s*[A-Za-z]+\\s*/\\s*\\S+' },
+				{ id: 'tokens', kind: 'count', selector: '#spec li.token', min: 4 },
+				{ id: 'token-names', kind: 'text', selector: '#spec li.token', matches: '--[a-z][a-z0-9-]*' },
+				{ id: 'states', kind: 'count', selector: '#spec li.state', min: 4 },
+				{ id: 'assets', kind: 'count', selector: '#spec tr.asset', min: 2 },
+				{ id: 'asset-kinds', kind: 'text', selector: '#spec td.kind', matches: 'vector|raster|SVG|PNG|JPG|JPEG|WebP|AVIF' },
+				{ id: 'narrow', kind: 'text', selector: '#narrow', matches: '\\d{3}|column|collaps|stack' },
+				{ id: 'mismatches', kind: 'count', selector: '#spec li.mismatch', min: 3 },
+				{ id: 'sections', kind: 'field', selector: '#content', field: 'sections' },
+				{ id: 'action', kind: 'field', selector: '#spec', field: 'mainAction.label' },
+				{ id: 'no-blanks', kind: 'text', selector: '#spec', matches: '^[^…]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each Figma concept with what it corresponds to in the markup',
+				pairs: [
+					['Auto layout', 'display: flex with a direction, a gap and padding'],
+					['Variables and modes', 'CSS variables and themes'],
+					['A component with variants', 'a component and its modifiers in code'],
+					['Hug / Fill / Fixed', 'width by content, by container and by a number']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What should a design that is ready to hand to a developer have?',
+				options: ['Named layers and the components used', 'Variables instead of random colors and sizes', 'Every state of the components and a version for a narrow screen', 'Only a picture of all the screens in one file'],
+				answer: [0, 1, 2],
+				why: ['Yes: from the names a developer finds what is needed.', 'Yes: that way the values will match the tokens.', 'Yes: otherwise the states and the mobile version have to be invented.', 'No: a flat picture holds no sizes, states or values.']
+			},
+			{
+				type: 'single',
+				prompt: 'What does Dev Mode in Figma show a developer?',
+				options: [
+					'Sizes, layer properties, variables and code, plus a “ready for dev” status',
+					'Only colors',
+					'It turns a design into a finished site with no person involved'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is a developer’s workspace: they see values and code instead of guessing from a picture.',
+					'No: sizes, properties and variables are shown.',
+					'No: code from a design has to be checked and finished, and that is what the practice is about.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What should you remember when an AI tool makes code from a design?',
+				options: [
+					'Check whether it has replaced tokens with random numbers, and whether all the states and the narrow screen are there',
+					'Nothing: an AI is always exact',
+					'That an AI can’t read colors'
+				],
+				answer: 0,
+				why: [
+					'Yes. Typical mismatches: numbers instead of tokens, a forgotten focus, an unwritten mobile version. So the specification must be complete, and the result is checked.',
+					'No: an AI errs just like a person, only faster.',
+					'No: it reads colors, but may not know the rules of the system.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is delivered as vectors, and what as raster?',
+				options: [
+					'Icons and logos as vectors (SVG), photographs as raster (WebP, AVIF, JPEG) in several sizes',
+					'Everything as raster: it is simpler',
+					'Everything as vectors: the quality is better'
+				],
+				answer: 0,
+				why: [
+					'Yes. SVG stays sharp on any screen, while photos are needed in several sizes for different screens.',
+					'No: icons as raster blur on high-density screens.',
+					'No: a photograph can’t be handed over as a vector.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does Penpot differ from Figma?',
+				options: [
+					'It is an open-source design tool whose layouts use the same ideas as markup (flex, grid)',
+					'It is a text editor',
+					'It is a browser'
+				],
+				answer: 0,
+				why: [
+					'Yes. Penpot is open, and its flexible layouts are built over CSS Flexbox and Grid.',
+					'No: it is a graphic editor for designs.',
+					'No: it is a designer’s tool.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-code-autolayout', front: 'What is Figma’s auto layout like?', back: 'Like display: flex: a direction, a gap, padding, alignment. Hug, Fill and Fixed are width by content, by container and by a number.' },
+			{ id: 'design-code-variables', front: 'What are Figma variables?', back: 'Named values (colors, numbers) that can have modes: light and dark themes. They can become design tokens and CSS variables.' },
+			{ id: 'design-handoff-ready', front: 'What does “a design is ready for handoff” mean?', back: 'The layers are named, components and variables are used, every state and the narrow screen are shown, the assets are labeled (vector or raster, sizes), and the texts are real.' },
+			{ id: 'design-handoff-assets', front: 'What is vector, and what is raster?', back: 'Icons and logos as vectors (SVG): sharp everywhere. Photos as raster (WebP, AVIF, JPEG) in several sizes for different screens.' },
+			{ id: 'design-handoff-ai', front: 'What do you check in code that an AI made from a design?', back: 'Numbers instead of tokens, forgotten states (especially focus), a missing narrow screen, colors copied from the design and not taken from tokens.' }
+		],
+		sources: [
+			{ title: 'Figma: Guide to auto layout', url: 'https://help.figma.com/hc/en-us/articles/360040451373-Guide-to-auto-layout-in-Figma', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Figma: Guide to variables', url: 'https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Figma: Dev Mode', url: 'https://www.figma.com/dev-mode/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Penpot: flexible layouts', url: 'https://help.penpot.app/user-guide/designing/flexible-layouts/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Flexbox (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Learn Images (web.dev)', url: 'https://web.dev/learn/images', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'The provenance of design/ in this textbook’s repository: where the tokens come from', url: 'https://github.com/NoeticEcho/learn/blob/main/design/PROVENANCE.md', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Imagine you are handing the first screen to a developer who doesn’t know you. What do they need so as not to ask a single question? That is what we will write out.',
+			hints: [
+				'Frames: three widths: 375 (phone), 768 (tablet), 1280 (computer). Name layers “Block/Part”, for example Hero/Title and Cards/Item.',
+				'In the tokens write the names of the CSS variables from the earlier lessons: --space-4, --color-accent-600, --fs-3xl, --radius-md. For the assets say what is vector (icons, a logo) and what is raster (photos).',
+				'Fill in the “mismatches” after the markup is built: open the code you got and find a number in place of a token, a forgotten state, a missing mobile version.'
+			],
+			mistakes: {
+				frames: 'You need three frames: a phone, a tablet and a computer.',
+				'frame-widths': 'Each frame must have a width as a number, for example 375.',
+				layers: 'You need at least five layers, each in its own li with the class layer.',
+				'layer-names': 'Layers are named “Block/Part”, for example Hero/Title.',
+				tokens: 'You need at least four tokens.',
+				'token-names': 'Write tokens as the names of CSS variables: --space-4, --fs-3xl.',
+				states: 'You need at least four states of the main action.',
+				assets: 'The table of assets needs two rows.',
+				'asset-kinds': 'In the column “How it is delivered” write “vector” or SVG, or “raster” or WebP.',
+				narrow: 'Describe what happens on a narrow screen: for example, “up to 600 pixels the cards go in one column”.',
+				mismatches: 'You need at least three mismatches after building.',
+				sections: 'The description of the screen must hold all the project’s sections: they are filled in from your brief.',
+				action: 'The specification must hold your project’s main action.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.'
+			},
+			outro: 'You have a specification from which a screen can be built: by a person, by an AI, or by yourself in half a year. In the part on AI you will give it to a builder.'
+		},
+		say: { Figma: 'fig-ma', Penpot: 'pen-pot', Dev: 'dev', Mode: 'mode', Hug: 'hug', Fill: 'fill', Fixed: 'fixed', auto: 'auto', layout: 'layout', variables: 'variables', modes: 'modes', SVG: 'S V G', WebP: 'web P', AVIF: 'A V I F', JPEG: 'jay-peg', CSS: 'C S S', MCP: 'M C P', Flexbox: 'flex box', Grid: 'grid', Code: 'code', Connect: 'connect' }
+	};
+</script>
+
+<script>
+	import HandoffInspector from '../../diagrams/HandoffInspector.svelte';
+</script>
+
+## How a designer sees a page
+
+A designer works not in code but in a tool for designs. The most widespread is called **Figma**; there is an open alternative, **Penpot**. They share a principle: a canvas, frames on it, layers in the frames. It is good to know a few words of their vocabulary, because it is in these words that a design speaks to code.
+
+- **A frame.** A rectangle with content, a “screen” or a block. In code it corresponds to an element (`div`, `section`).
+- **Auto layout.** A frame that lays out its children in a row or a column, with a set gap and padding. It is almost exactly `display: flex` with `gap` and `padding`. Width has three modes: **Hug** (by content), **Fill** (take all the room, like `flex: 1`) and **Fixed** (a number).
+- **A component and variants.** A part that can be repeated; variants (a primary and a secondary button, a pressed and an ordinary one) are gathered into one component with “properties”. In code that is a component and its modifiers.
+- **Variables and modes.** Named values (colors, numbers) that can have several definitions by mode: for example a light and a dark theme. Figma itself says design tokens can be built on them.
+- **Dev Mode.** A developer’s workspace in Figma: they see sizes, layer properties, variables and code, and the designer can mark a design “ready for dev”.
+
+Click the parts of the design below: on the left is what the designer set, on the right the same meaning in CSS. Notice that everywhere there are **names of tokens**, not numbers.
+
+<HandoffInspector />
+
+<details>
+<summary>Check yourself: what does auto layout correspond to in markup?</summary>
+
+`display: flex`: a direction, a gap (`gap`), padding (`padding`) and alignment.
+
+</details>
+
+## What a developer needs: a design ready for handoff
+
+The handoff of a design (**handoff**) breaks where the designer is sure that “everything is obvious”. These are the things whose absence forces a developer to ask questions:
+
+1. **Named layers.** `Hero/Title`, `Hero/Action`, `Cards/Item`, not “Frame 482”. From the names a developer finds what is needed, and an AI tool gets meaningful names.
+2. **Components, not copies.** If a button is drawn ten times instead of taken from a component, there will be ten of them in code too.
+3. **Variables instead of random values.** A color taken from the variable `color/accent` turns into `var(--action)`. A color picked with an eyedropper turns into a number that nobody can find later.
+4. **Every state** of the main components: hover, focus, disabled, loading, error.
+5. **A narrow screen.** You don’t have to draw all the pages, but you must describe the behavior: what goes in one column, what hides, what turns into a menu button. Usually three frames are drawn: about 375, 768 and 1280 pixels.
+6. **Assets.** What is delivered as vectors (icons, a logo: SVG, sharp on any screen) and what as raster (photographs: WebP, AVIF or JPEG, in several sizes for different screens), and in what sizes.
+7. **Real text.** A design with “Lorem ipsum” hides problems: long headings, empty fields. Labels in other languages are usually longer than English ones.
+8. **Notes.** What happens on a press, the focus order, the text for `alt`.
+
+## How a design becomes code
+
+There are several ways, and all of them lean on tokens.
+
+- **By hand.** A developer looks at the design and writes the markup. The most reliable way for a small site.
+- **Through Dev Mode.** Code and sizes are taken from the design. With care: automatic code likes absolute sizes, which good markup shouldn’t have. Besides, Figma has Code Connect, which links a design’s component to the real component in code, so that new parts take the ready one.
+- **Through tokens.** Figma variables are exported to a tokens file (the DTCG format from the previous lesson), and a program such as Style Dictionary makes CSS from it. Then values stay in step without manual work. You learned more about the tokens file in the eleventh lesson.
+- **With the help of AI.** Figma offers an MCP server, through which an AI agent gets structured information about a design so as to make code from it. You will meet such tools in the part on AI.
+
+About this last way it is worth being honest: an AI builds markup from a design quickly, but **errs just as a person does**. Typical mismatches:
+- a number copied from the design stands in place of a token;
+- a state is forgotten (most often focus);
+- there is no version for a narrow screen;
+- the colors are “almost the same”, not taken from variables.
+
+So the task you give an AI is the same handoff specification: the fuller it is, the fewer the corrections. And the result is checked all the same: against the tokens, against the states, and on a narrow screen.
+
+## An example from this textbook
+
+The textbook itself has a design system, and it is arranged exactly like this. The `design/` folder of the repository holds the tokens: they weren’t written by hand but generated from a tokens file in the DTCG format that lives in the NoeticEcho project. Where they come from and what was changed is recorded in the file PROVENANCE.md (linked in the sources). Open `design/tokens.css`: you will see the same layers as in the last lesson. Base values such as `--ink-100` and `--paper-100`, semantic ones such as `--surface-canvas`, `--text-primary`, `--accent-command`, and comments where the designer decided something: for example, why the text color has a separate, lighter step than the fill color (because on a dark panel the original color failed the contrast check).
+
+This is just what you do in the practice: the decision is written in a file and in a name, not in the author’s head.
+
+<details>
+<summary>Check yourself: why does a developer like variables more than colors from an eyedropper?</summary>
+
+A variable turns into a token and changes in one place; a color picked with an eyedropper turns into a number that nobody can find later.
+
+</details>
+
+## Practice
+
+Write the handoff specification of your project’s first screen. Begin with the content: the sections and the main action are filled in from your brief. Then the frames, layers, tokens, states, assets and the narrow screen.
+
+Fill in the last section after the markup has been built from the specification. If you have no AI tool at hand, take any code (your own from the earlier lessons too) and find the mismatches with the specification: numbers instead of tokens, forgotten states, no narrow screen. The ability to find such mismatches is the skill we write all this for.
+
+## What was wrong with 2025
+
+In 2025 AI tools were already building markup from designs, but without a design system they took values “from the picture”: the code came out looking like the design and drifting from the tokens. The teams that gained were those whose design and code spoke one language of tokens, so the tools had something to keep to.
