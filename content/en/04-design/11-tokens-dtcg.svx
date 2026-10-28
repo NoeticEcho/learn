@@ -1,0 +1,461 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/11-tokens-dtcg.svx. */
+	const color = '^\\s*(#[0-9a-fA-F]{6}|var\\(--[a-z0-9-]+\\))\\s*$';
+	const length = '^\\s*\\d+(\\.\\d+)?(px|rem)\\s*$';
+	const aliased = (target) => `^\\s*(var\\(--${target}\\)|#[0-9a-fA-F]{6})\\s*$`;
+	const ofRoot = (id, prop, matches) => ({ id, kind: 'style', selector: ':root', prop, matches });
+	const dtcg = (id, re) => ({ id, kind: 'text', selector: '#tokens', matches: re });
+
+	export const metadata = {
+		id: '04-design/11-tokens-dtcg',
+		part: 4,
+		order: 11,
+		title: 'Design tokens: names instead of numbers',
+		definition: 'A design token is a named design decision, such as the main action’s color, kept apart from any platform. W3C’s DTCG is a shared JSON format for token files.',
+		summary:
+			'You’ll learn to keep colors, spacing and radii as named decisions in three layers (base, semantic, component) and to write them in the W3C DTCG format. Afterwards your page has a tokens file and the same tokens as CSS variables, and one change of a base color changes the whole page.',
+		minutes: 30,
+		teaches: ['design-tokens', 'design-dtcg-format'],
+		requires: ['design-ds-product-and-headless', 'design-colour-system', 'design-type-scale', 'css-custom-properties'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'editor', label: '#0b5cad  #0c5cae', say: 'One person writes #0b5cad, another #0c5cae, a third “a bit darker”. Decide once and name the decision: that is a token.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'tokens.json', say: 'A token is not a CSS variable. One file gives CSS for the site, Figma variables and values for a phone.' },
+				{ mood: 'hint', prop: 'flowchart', label: 'base|semantic|component', say: 'The button points to a role, the role to a base color. Change the base, and every button is recolored.' },
+				{ mood: 'cheer', side: 'right', prop: 'browser', label: 'dark theme', say: 'A theme changes in the semantic layer: surface and text point to other base colors. Components are untouched.' }
+			]
+		},
+		practice: {
+			id: 'design-tokens',
+			title: 'Your tokens: a DTCG file and CSS variables in three layers',
+			task: 'Build a set of tokens for your project. 1) Complete the tokens file (the script block with the id tokens, JSON in the DTCG format): it has three layers. Base: color.accent.600 (already there), color.neutral.50 and color.neutral.900, space.2 and space.4, radius.md. Semantic: semantic.action, semantic.surface and semantic.text refer to the base ones through curly braces. Component: component.button.bg and component.button.fg refer to the semantic ones. Values have $value, and groups or values have $type. 2) In styles.css repeat the same tokens as variables on :root in the same three layers: --color-accent-600, --color-neutral-50, --color-neutral-900, --space-2, --space-4, --radius-md, then --action, --surface, --text, then --button-bg and --button-fg. 3) The dark theme is a block with data-theme set to dark and only the semantic layer redefined: --surface and --text.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <section class="demo" data-theme="dark">
+        <h2>The same button in the dark theme</h2>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      </section>
+
+      <script type="application/json" id="tokens" data-scaffold>
+{
+  "color": {
+    "$type": "color",
+    "accent": { "600": { "$value": "#0b5cad" } }
+  }
+}
+      <\/script>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: tokens and the look. Layers: base, semantic, component. */
+:root {
+  --color-accent-600: #0b5cad;
+}
+body {
+  font-family: system-ui, sans-serif;
+  background: #faf9f7;
+  color: #1c1b19;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #0b5cad;
+  color: #faf9f7;
+  text-decoration: none;
+}
+.demo {
+  padding: 1rem;
+  background: #1c1b19;
+  color: #faf9f7;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <section class="demo" data-theme="dark">
+        <h2>The same button in the dark theme</h2>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      </section>
+
+      <script type="application/json" id="tokens" data-scaffold>
+{
+  "color": {
+    "$type": "color",
+    "accent": { "600": { "$value": "#0b5cad" } },
+    "neutral": { "50": { "$value": "#faf9f7" }, "900": { "$value": "#1c1b19" } }
+  },
+  "space": {
+    "$type": "dimension",
+    "2": { "$value": "8px" },
+    "4": { "$value": "16px" }
+  },
+  "radius": {
+    "$type": "dimension",
+    "md": { "$value": "8px" }
+  },
+  "semantic": {
+    "$type": "color",
+    "action": { "$value": "{color.accent.600}" },
+    "surface": { "$value": "{color.neutral.50}" },
+    "text": { "$value": "{color.neutral.900}" }
+  },
+  "component": {
+    "button": {
+      "bg": { "$type": "color", "$value": "{semantic.action}" },
+      "fg": { "$type": "color", "$value": "{semantic.surface}" }
+    }
+  }
+}
+      <\/script>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: tokens and the look. Layers: base, semantic, component. */
+:root {
+  /* base */
+  --color-accent-600: #0b5cad;
+  --color-neutral-50: #faf9f7;
+  --color-neutral-900: #1c1b19;
+  --space-2: 8px;
+  --space-4: 16px;
+  --radius-md: 8px;
+  /* semantic */
+  --action: var(--color-accent-600);
+  --surface: var(--color-neutral-50);
+  --text: var(--color-neutral-900);
+  /* component */
+  --button-bg: var(--action);
+  --button-fg: var(--surface);
+}
+[data-theme="dark"] {
+  --surface: var(--color-neutral-900);
+  --text: var(--color-neutral-50);
+}
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--button-bg);
+  color: var(--button-fg);
+  text-decoration: none;
+}
+.demo {
+  padding: 1rem;
+  background: var(--surface);
+  color: var(--text);
+}
+`
+			},
+			checks: [
+				{ id: 'tokens-block', kind: 'exists', selector: 'script#tokens[type="application/json"]' },
+				dtcg('dtcg-value', '"\\$value"'),
+				dtcg('dtcg-type', '"\\$type"'),
+				dtcg('three-layers', '^(?=[\\s\\S]*"color"\\s*:)(?=[\\s\\S]*"semantic"\\s*:)(?=[\\s\\S]*"component"\\s*:)'),
+				dtcg('base-set', '^(?=[\\s\\S]*"neutral")(?=[\\s\\S]*"space")(?=[\\s\\S]*"radius")'),
+				dtcg('ref-semantic', '"\\{color\\.[a-z0-9.-]+\\}"'),
+				dtcg('ref-component', '"\\{semantic\\.[a-z0-9.-]+\\}"'),
+				ofRoot('css-accent', '--color-accent-600', color),
+				ofRoot('css-neutral-50', '--color-neutral-50', color),
+				ofRoot('css-neutral-900', '--color-neutral-900', color),
+				ofRoot('css-space-2', '--space-2', length),
+				ofRoot('css-space-4', '--space-4', length),
+				ofRoot('css-radius', '--radius-md', length),
+				ofRoot('css-action', '--action', aliased('color-accent-600')),
+				ofRoot('css-surface', '--surface', aliased('color-neutral-50')),
+				ofRoot('css-text', '--text', aliased('color-neutral-900')),
+				ofRoot('css-button-bg', '--button-bg', aliased('action')),
+				ofRoot('css-button-fg', '--button-fg', aliased('surface')),
+				{ id: 'dark-surface', kind: 'style', selector: '[data-theme="dark"]', prop: '--surface', matches: '^\\s*(var\\(--color-neutral-900\\)|#[0-9a-fA-F]{6})\\s*$' },
+				{ id: 'dark-text', kind: 'style', selector: '[data-theme="dark"]', prop: '--text', matches: '^\\s*(var\\(--color-neutral-50\\)|#[0-9a-fA-F]{6})\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the three layers of tokens in order, from the lowest to the highest',
+				items: ['Base: raw values (color.accent.600 equals #0b5cad)', 'Semantic: roles (semantic.action refers to a base token)', 'Component: values for a part (component.button.bg refers to a semantic token)']
+			},
+			{
+				type: 'single',
+				prompt: 'How does a token differ from an ordinary CSS variable?',
+				options: [
+					'A variable is a mechanism for storing; a token is a named decision with an agreement about who changes it and how, and it is kept apart from any platform',
+					'Tokens work only in Figma',
+					'It doesn’t: they are the same word'
+				],
+				answer: 0,
+				why: [
+					'Yes. From a tokens file you get CSS variables, Figma values and code for apps. A variable is just one way of handing them out.',
+					'No: tokens are kept outside any tool, in a file.',
+					'No: the difference is that a token is a shared agreement, not just a name.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of the DTCG format?',
+				options: [
+					'A token must have a $value',
+					'The type is written in $type (it can be set for a whole group)',
+					'A reference to another token is written in curly braces, for example {color.accent.600}',
+					'The file must be named style.css'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: $value is the required part of a token.',
+					'Yes: $type is optional, and it can be inherited from the group.',
+					'Yes: that is how a token refers to the value of another.',
+					'No: it is JSON, usually with the extension .tokens.json.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You change the base token color.accent.600. What happens if all the references are made correctly?',
+				options: [
+					'Every semantic and component token that refers to it changes, and so does the whole page',
+					'Nothing: only the base token itself changes',
+					'You have to edit each button by hand'
+				],
+				answer: 0,
+				why: [
+					'Yes. That is the point of the layers: a change at the bottom reaches the top along the chain of references.',
+					'No: references exist exactly so that a change spreads along the chain.',
+					'No: tokens save you from editing by hand.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How is a dark theme made with tokens?',
+				options: [
+					'Only the semantic layer is redefined: surface and text refer to other base values; the components are not touched',
+					'All the styles are copied into a new file',
+					'Each button is changed separately'
+				],
+				answer: 0,
+				why: [
+					'Yes. Components refer to roles, not to colors, so changing the roles recolors everything.',
+					'No: copies drift apart and get lost.',
+					'No: this is exactly what tokens save us from.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each token name with its layer',
+				pairs: [
+					['color.accent.600', 'base: a raw value'],
+					['semantic.action', 'semantic: the role of a color'],
+					['component.button.bg', 'component: a value for a part']
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-token-what', front: 'What is a design token?', back: 'A named design decision kept apart from any platform: from a tokens file you get CSS variables, Figma values and code for apps.' },
+			{ id: 'design-token-layers', front: 'What are the three layers of tokens?', back: 'Base (raw values), semantic (roles: action, surface, text), component (button.bg). Each layer refers to the one below.' },
+			{ id: 'design-token-dtcg', front: 'What does a token look like in DTCG?', back: 'JSON with a required $value and an optional $type; a reference to another token goes in curly braces: {color.accent.600}. The first stable version of the format came out in October 2025 (2025.10).' },
+			{ id: 'design-token-theme', front: 'How do you change a theme through tokens?', back: 'Redefine only the semantic layer: surface and text take other base values. Components refer to roles and are recolored by themselves.' },
+			{ id: 'design-token-naming', front: 'How do you name tokens?', back: 'By role and place, not by look: color.text.primary, not color.dark-gray. Then the value can change and the name stays true.' }
+		],
+		sources: [
+			{ title: 'Design Tokens Community Group (W3C Community Group)', url: 'https://www.designtokens.org/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Design Tokens Format Module (DTCG)', url: 'https://www.designtokens.org/tr/drafts/format/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Style Dictionary: documentation', url: 'https://styledictionary.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Using CSS custom properties (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Tailwind CSS: Theme variables', url: 'https://tailwindcss.com/docs/theme', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Atlassian Design System: Design tokens', url: 'https://atlassian.design/foundations/tokens/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'This textbook’s tokens.css (repository)', url: 'https://github.com/NoeticEcho/learn/blob/main/design/tokens.css', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [{ title: 'Quick intro to Design Tokens (Penpot)', url: 'https://www.youtube.com/watch?v=yeF8GA44G5E', licence: 'proprietary-link', kind: 'video', lang: 'en' }],
+		guide: {
+			intro: 'Right now your tokens file holds one token. Let’s build it up to three layers and repeat it in CSS: that way the page will start recoloring with a single change.',
+			hints: [
+				'In the script#tokens block add the groups space, radius, semantic and component. Write the semantic values as references: “{color.accent.600}”. The component ones refer to the semantic ones: “{semantic.action}”.',
+				'In styles.css on :root put the base values first, then the semantic ones: --action: var(--color-accent-600), then the component ones: --button-bg: var(--action).',
+				'For the dark theme write a block with data-theme set to dark and put in it only --surface and --text, with other base values.'
+			],
+			mistakes: {
+				'tokens-block': 'The block with the tokens must stay: a script of type application/json with the id tokens.',
+				'dtcg-value': 'Tokens must have a $value. It is the required part of the format.',
+				'dtcg-type': 'You need a $type: for example “$type”: “color” on a group.',
+				'three-layers': 'The file must have three layers: color (base), semantic and component.',
+				'base-set': 'Among the base tokens there must be the neutral colors (neutral), space and radius.',
+				'ref-semantic': 'Semantic tokens must refer to base ones, for example “{color.accent.600}”.',
+				'ref-component': 'Component tokens must refer to semantic ones, for example “{semantic.action}”.',
+				'css-accent': ':root needs --color-accent-600 as a hex color.',
+				'css-neutral-50': ':root needs --color-neutral-50 as a hex color.',
+				'css-neutral-900': ':root needs --color-neutral-900 as a hex color.',
+				'css-space-2': ':root needs --space-2 in px or rem.',
+				'css-space-4': ':root needs --space-4 in px or rem.',
+				'css-radius': ':root needs --radius-md in px or rem.',
+				'css-action': 'The semantic token --action must refer to a base one: var(--color-accent-600).',
+				'css-surface': 'The semantic token --surface must refer to var(--color-neutral-50).',
+				'css-text': 'The semantic token --text must refer to var(--color-neutral-900).',
+				'css-button-bg': 'The component token --button-bg must refer to a semantic one: var(--action).',
+				'css-button-fg': 'The component token --button-fg must refer to a semantic one: var(--surface).',
+				'dark-surface': 'In the dark block redefine --surface as var(--color-neutral-900).',
+				'dark-text': 'In the dark block redefine --text as var(--color-neutral-50).'
+			},
+			outro: 'Now the look of your page lives in names. Change --color-accent-600 and watch the button recolor in both themes.'
+		},
+		say: { DTCG: 'D T C G', JSON: 'jay-son', CSS: 'C S S', W3C: 'W three C', Figma: 'fig-ma', hex: 'hex', accent: 'accent', neutral: 'neutral', semantic: 'semantic', component: 'component', space: 'space', radius: 'radius', button: 'button', Atlassian: 'at-lass-ee-an', Dictionary: 'dictionary' }
+	};
+</script>
+
+<script>
+	import TokenEditor from '../../diagrams/TokenEditor.svelte';
+</script>
+
+## A name instead of a number
+
+The words “this blue” mean one thing on a page and another in a developer’s head. One person writes `#0b5cad`, another `#0c5cae`, a third “a bit darker”. Instead you can decide once, “this is the color of the action”, give the decision a **name**, and refer to the name everywhere. A named design decision is called a **design token**.
+
+A token is not the same as a CSS variable. A variable is a mechanism: a way to store a value on a page. A token is an agreement: the decision has a name, a value, a meaning and an owner, and it is kept **independently of the platform**. From one tokens file you get CSS variables for the site, variables for Figma, and values for an app on a phone. So two systems where everything is named with tokens can be brought into one look without rewriting by hand.
+
+<details>
+<summary>Check yourself: how does a token differ from a CSS variable?</summary>
+
+A variable is a way of storing on a page. A token is a named decision kept independently of the platform: from it you get variables for the site, for Figma and for apps.
+
+</details>
+
+## Three layers
+
+If you name tokens simply by color (“blue-600”), you won’t survive a change of theme: the button will stay blue. So tokens are put in **three layers**, and each refers to the one below.
+
+1. **Base (primitive).** Raw values: `color.accent.600` equals `#0b5cad`, `space.4` equals 16 pixels. This is the “palette” and the “ruler”. Base tokens are named by look.
+2. **Semantic (also called alias).** Roles: `semantic.action` (the color of the main action), `semantic.surface` (the background), `semantic.text` (the color of text). They **refer** to base tokens and are named by role.
+3. **Component.** Values for a particular part: `component.button.bg` (the button’s background) refers to `semantic.action`.
+
+Why this way? Change the base accent color: the semantic token that refers to it changes, and after it every component that refers to the semantic one. Change the theme: for the semantic tokens `surface` and `text` you swap the reference to other base values, and don’t touch the components at all, because they refer to roles and not to colors.
+
+Play with it: change the base color, choose another step for the action and switch the theme. On the left is the tokens file, on the right the chain of references and the result.
+
+<TokenEditor />
+
+Real systems do the same. In Material Design 3 the three layers are called *reference*, *system* and *component*. In Fluent 2 they are global tokens and aliases. At Atlassian a name is made of a property, a role and a state: `color.text.accent.red`.
+
+<details>
+<summary>Check yourself: how do you change a theme without touching components?</summary>
+
+Redefine the semantic layer: `surface` and `text` refer to other base values. Components refer to roles and are recolored by themselves.
+
+</details>
+
+## How to name tokens
+
+Rules that help you not to get lost:
+
+- **Semantic and component tokens by role, base tokens by look.** Not `color.dark-gray` but `color.text.primary`: the dark gray can be replaced, and the role stays.
+- **A hierarchy from left to right,** from general to particular: `color`, then `text`, then `primary`.
+- **States as a separate word:** `hover`, `pressed`, `disabled`.
+- **A scale in numbers** for base steps (50, 100, … 900) and for spacing (`space.2`, `space.4`).
+- **Don’t hide meaning in a number.** The name `space.4` is better than `space.16`: if the step changes, the name doesn’t become a lie.
+
+## The W3C DTCG format
+
+So that every tool understands a tokens file, there is a common format. It is developed by the **W3C Design Tokens Community Group**, a community of developers, designers and tool makers. In October 2025 the first stable version of the format came out (2025.10).
+
+The file is JSON. The recommended extension is `.tokens.json`. The structure is:
+
+- **A token:** an object with a `$value` property (required) and optional `$type` (the type) and `$description` (an explanation).
+- **A group:** an object without `$value`, holding tokens and nested groups. A type can be set on a group, and then it is inherited.
+- **A reference** to another token: a value in curly braces, for example `"{color.accent.600}"`.
+- Types: `color`, `dimension`, `fontFamily`, `fontWeight`, `duration`, `cubicBezier`, `number` and composite ones (`shadow`, `border`, `typography` and others).
+
+```json
+{
+  "color": {
+    "$type": "color",
+    "accent": { "600": { "$value": "#0b5cad" } }
+  },
+  "semantic": {
+    "$type": "color",
+    "action": { "$value": "{color.accent.600}" }
+  }
+}
+```
+
+A caveat about how values are written. In early drafts a color was a string (`"#0b5cad"`) and a size was a string (`"16px"`). The stable version 2025.10 describes a color as an object with a color space and components (`colorSpace`, `components`, optionally `hex`), and a size or a time as an object of a number and a unit: `{ "value": 16, "unit": "px" }`. Many files and tools still use the short form, so you will meet both. In the practice we use the short form, so as not to work out color components by hand.
+
+From a tokens file a program such as Style Dictionary makes output files for each platform: CSS variables, values for iOS and Android. For a small site it is enough to write the variables by hand, repeating the structure of the file.
+
+## Tokens in CSS
+
+In CSS the layers repeat the structure of the file: first the base ones, then the semantic ones through `var()`, then the component ones.
+
+```css
+:root {
+  --color-accent-600: #0b5cad;
+  --action: var(--color-accent-600);
+  --button-bg: var(--action);
+}
+[data-theme="dark"] {
+  --surface: var(--color-neutral-900);
+}
+```
+
+Now every rule refers to `var(--button-bg)` and not to a color. If a “raw” color is left in the CSS somewhere outside the block of variables, a token has been missed: check that yourself by searching the file.
+
+<details>
+<summary>Check yourself: what is required of a token in the DTCG format?</summary>
+
+The `$value` property. The `$type` is optional, and it can be inherited from the group.
+
+</details>
+
+## A live example: this textbook’s tokens
+
+The textbook’s own tokens are arranged the same way. Open the file `design/tokens.css` in the repository: it wasn’t written by hand but derived from a tokens file in the DTCG format in the NoeticEcho project (where from and how is recorded in `design/PROVENANCE.md`). It has the same layers. Base values are named by look and step (`--ink-100`, `--paper-100`, `--brass-500`). Semantic ones are named by role (`--surface-canvas`, `--text-primary`, `--accent-command`) and refer to base ones through `var()`. And where the author decided something, a comment is left: for example, the text color has a separate, lighter step, because the original color failed the contrast check on a dark panel. The decision is written down in a name and in a file, not in the author’s head.
+
+## Practice
+
+Build your project’s tokens in two forms. First complete the file in the DTCG format (it sits right on the page as a `script` block of type `application/json`; it won’t be on the finished site, because it is marked `data-scaffold`). Then repeat the same tokens as variables in `styles.css` and make a dark theme by redefining only the semantic layer.
+
+When the checks pass, change `--color-accent-600` and watch how both buttons are recolored. If one stays as it was, a “raw” color is left somewhere.
+
+## What was wrong with 2014
+
+In 2014 there were almost no variables in CSS: colors were repeated in twenty places, and for “variables” people used preprocessors such as Sass and Less, which substituted the values before the page reached the browser. Native CSS variables had only just arrived in Firefox, and in all the main browsers they worked by 2017. And there was no common format for tokens at all: every system invented its own.

@@ -7,6 +7,37 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// The diagram's words, one table per edition (docs/content-plan/README.md, «English edition»).
+	const W = pick({
+		ru: {
+			caption: 'Три слоя токенов: изменение внизу доходит до самого верха',
+			base: 'Базовый цвет акцента (color.accent.600):',
+			which: 'Какую ступень акцента берёт semantic.action',
+			refersTo: 'semantic.action ссылается на:',
+			theme: 'Тема',
+			light: 'Светлая тема',
+			dark: 'Тёмная тема: меняется только слой semantic',
+			file: 'Файл токенов в формате DTCG',
+			card: 'Карточка проекта',
+			action: 'Главное действие',
+			chain: 'Цепочка ссылок и итоговое значение'
+		},
+		en: {
+			caption: 'Three layers of tokens: a change at the bottom reaches the very top',
+			base: 'Base accent color (color.accent.600):',
+			which: 'Which accent step semantic.action takes',
+			refersTo: 'semantic.action refers to:',
+			theme: 'Theme',
+			light: 'Light theme',
+			dark: 'Dark theme: only the semantic layer changes',
+			file: 'A tokens file in the DTCG format',
+			card: 'A project card',
+			action: 'Main action',
+			chain: 'The chain of references and the final value'
+		}
+	});
 
 	let accent = $state('#0b5cad');
 	let pickStep = $state<'500' | '600' | '700'>('600');
@@ -63,30 +94,30 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Три слоя токенов: изменение внизу доходит до самого верха</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="ctl">
-		<label>Базовый цвет акцента (color.accent.600): <input type="color" bind:value={accent} /> <code class="dg-mono">{accent}</code></label>
-		<div class="dg-ctl" role="group" aria-label="Какую ступень акцента берёт semantic.action" style="margin:0">
-			<span>semantic.action ссылается на:</span>
+		<label>{W.base} <input type="color" bind:value={accent} /> <code class="dg-mono">{accent}</code></label>
+		<div class="dg-ctl" role="group" aria-label={W.which} style="margin:0">
+			<span>{W.refersTo}</span>
 			{#each ['500', '600', '700'] as s (s)}
 				<button type="button" aria-pressed={pickStep === s} onclick={() => (pickStep = s as '500' | '600' | '700')}>color.accent.{s}</button>
 			{/each}
 		</div>
-		<div class="dg-ctl" role="group" aria-label="Тема" style="margin:0">
-			<button type="button" aria-pressed={!dark} onclick={() => (dark = false)}>Светлая тема</button>
-			<button type="button" aria-pressed={dark} onclick={() => (dark = true)}>Тёмная тема: меняется только слой semantic</button>
+		<div class="dg-ctl" role="group" aria-label={W.theme} style="margin:0">
+			<button type="button" aria-pressed={!dark} onclick={() => (dark = false)}>{W.light}</button>
+			<button type="button" aria-pressed={dark} onclick={() => (dark = true)}>{W.dark}</button>
 		</div>
 	</div>
 
 	<div class="cols">
-		<pre class="dg-box dg-mono json" tabindex="0" role="region" aria-label="Файл токенов в формате DTCG">{json}</pre>
+		<pre class="dg-box dg-mono json" tabindex="0" role="region" aria-label={W.file}>{json}</pre>
 		<div>
 			<div class="preview" style="background:{semantic['semantic.surface'].val};color:{semantic['semantic.text'].val}">
-				<p style="margin:0 0 .6rem;font-weight:600">Карточка проекта</p>
-				<span class="btn" style="background:{component['component.button.bg'].val};color:{component['component.button.fg'].val}">Главное действие</span>
+				<p style="margin:0 0 .6rem;font-weight:600">{W.card}</p>
+				<span class="btn" style="background:{component['component.button.bg'].val};color:{component['component.button.fg'].val}">{W.action}</span>
 			</div>
 			<table class="tbl">
-				<caption class="dg-out" style="text-align:left;margin:var(--space-3) 0 var(--space-2)">Цепочка ссылок и итоговое значение</caption>
+				<caption class="dg-out" style="text-align:left;margin:var(--space-3) 0 var(--space-2)">{W.chain}</caption>
 				<tbody>
 					{#each Object.entries(component) as [k, v] (k)}
 						<tr><td class="dg-mono">{k}</td><td class="dg-mono">→ {'{'}{v.ref}{'}'}</td><td class="dg-mono">{v.val}</td></tr>
