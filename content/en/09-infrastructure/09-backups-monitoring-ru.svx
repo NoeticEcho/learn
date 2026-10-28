@@ -1,0 +1,335 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/09-backups-monitoring-ru.svx: the Russian lesson ends on Russia’s localization rule, this one on the GDPR’s rules for transfers. This is general information, not legal advice. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const plan = (v) => `<section data-scaffold id="ops-passport">
+      <h2>The operations passport</h2>
+      <table>
+        <tr><th>What is copied</th><td id="b-what">${v.what}</td></tr>
+        <tr><th>How often</th><td id="b-freq">${v.freq}</td></tr>
+        <tr><th>How long copies are kept</th><td id="b-keep">${v.keep}</td></tr>
+        <tr><th>Where the copies lie</th><td id="b-where">${v.where}</td></tr>
+        <tr><th>When the restore was tested</th><td id="b-test">${v.test}</td></tr>
+        <tr><th>What monitoring watches</th><td id="m-what">${v.mwhat}</td></tr>
+        <tr><th>Who gets the alert</th><td id="m-who">${v.mwho}</td></tr>
+        <tr><th>How fast it has to be answered</th><td id="m-fast">${v.mfast}</td></tr>
+        <tr><th>Where personal data is kept</th><td id="r-where">${v.rwhere}</td></tr>
+        <tr><th>The provider for it</th><td id="r-provider">${v.rprov}</td></tr>
+      </table>
+      <p id="r-why">Why: ${v.rwhy}</p>
+    </section>`;
+
+	export const metadata = {
+		id: '09-infrastructure/09-backups-monitoring-ru',
+		part: 9,
+		order: 9,
+		title: 'Backups, monitoring and where personal data may be kept',
+		definition: 'The 3-2-1 rule is three copies of data on two different media, one of them off site. Monitoring reports a breakage before the visitors notice it.',
+		summary:
+			'Sooner or later something breaks. Afterwards you’ll write an operations passport for your own project: what is copied and where under the 3-2-1 rule, how the restore is tested, what monitoring watches, who gets the alert, and where visitors’ personal data is kept under the law, with the GDPR’s rules on transfers as the main example. The lesson is not a substitute for an attorney, but it shows what to ask one.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'disk + copy', caption: 'Friday, 11:40 pm', say: 'The disk died, and the copy was on the same disk. That is not a copy, but a second instance on the same risk.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: '3-2-1', say: 'Three copies, on two different media, one off site. And try opening one at least once.' },
+				{ mood: 'cheer', prop: 'lock', label: 'EU data, EU rules', caption: 'Visitors’ data', say: 'Privacy law follows the people, and so do the rules for sending data abroad. For the rest, ask an attorney.' }
+			]
+		},
+		minutes: 30,
+		teaches: ['infra-backups', 'infra-monitoring', 'infra-data-localisation-ru'],
+		requires: ['infra-hosting-types', 'infra-ci-cd', 'infra-deploy-own-site', 'data-data-localisation'],
+		practice: {
+			id: 'infra-ops-passport',
+			title: 'The operations passport of your project',
+			task: 'Fill in the operations passport. 1) Copies: what is copied (files, the database, the CMS content, requests), how often, how long they are kept, where they lie (in at least two different places, one of them off the main server) and when you last tested the restore, or when you will first. 2) Monitoring: what is watched (the home page and the page or function of the project’s main action, naming it in the words of the brief), who gets the alert and how fast it has to be answered. 3) Data: where the personal data from the form is kept (a region, thinking of the law that follows the visitors), which provider, and in the “Why” paragraph explain the choice with a reference to the GDPR or another privacy law. Every “…” has to be replaced.',
+			era: 6,
+			files: files({
+				scaffold: plan({ what: '…', freq: '…', keep: '…', where: '…', test: '…', mwhat: '…', mwho: '…', mfast: '…', rwhere: '…', rprov: '…', rwhy: '…' })
+			}),
+			solution: files({
+				scaffold: plan({
+					what: 'the site’s files (also in the repository), the database of requests and the receiver’s settings',
+					freq: 'the database every night, the files at every deploy',
+					keep: '7 daily, 4 weekly and 6 monthly copies (about half a year)',
+					where: 'on the receiver’s server and in outside cloud storage in another region, and one more copy on my own computer',
+					test: 'I’ll test the restore before launch and then every quarter: I unpack a copy on an empty server and open the requests',
+					mwhat: 'the home page and the page of the action “{{mainAction.label}}”: a check every five minutes sends a test request and waits for the answer',
+					mwho: 'to me by email and by text message; on vacation I hand access to a contractor',
+					mfast: 'within an hour during working hours; if the site is down for more than a day, I write to the visitors',
+					rwhere: 'in a database in a data center in the EU, because most of the visitors are in Europe and the US, and the form service states where it keeps the data',
+					rprov: 'a cloud provider with a data center in Frankfurt and a data processing agreement (for example Hetzner or AWS)',
+					rwhy: 'the form takes names and phone numbers, which is personal data under the GDPR, so I keep the first copy in a region I can name, I have a processing agreement with the provider, and the privacy policy says where the data goes.'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#ops-passport' },
+				{ id: 'no-blanks', kind: 'text', selector: '#ops-passport', matches: '^[^…]*$' },
+				{ id: 'what', kind: 'text', selector: '#b-what', matches: 'file|site|database|data|CMS|request|content|repository|setting' },
+				{ id: 'freq', kind: 'text', selector: '#b-freq', matches: 'every|daily|weekly|hourly|nightly|once|per|hour|day|week|\\d' },
+				{ id: 'keep', kind: 'text', selector: '#b-keep', matches: '\\d|day|week|month|year' },
+				{ id: 'where-two', kind: 'text', selector: '#b-where', matches: '^(?=[\\s\\S]*(?:server|hosting|disk|local|laptop|computer|cloud|S3|storage|repository|AWS|Backblaze|Hetzner|outside|external))(?=[\\s\\S]*(?:,|;| and | \\+))' },
+				{ id: 'where-offsite', kind: 'text', selector: '#b-where', matches: 'another|other|off site|off-site|outside|external|cloud|S3|remote|separate|different region|not on the same' },
+				{ id: 'test', kind: 'text', selector: '#b-test', matches: '\\d{1,2}[.\\-/]\\d{1,2}|\\d{4}|every|quarter|month|will test|tested|before launch|schedule' },
+				{ id: 'monitor-home', kind: 'text', selector: '#m-what', matches: 'home|main page|root|front page|/' },
+				{ id: 'monitor-action', kind: 'field', selector: '#m-what', field: 'mainAction.label' },
+				{ id: 'alert-who', kind: 'text', selector: '#m-who', matches: '\\bI\\b|\\bme\\b|\\bwe\\b|email|text|SMS|Slack|Telegram|chat|team|on-call|owner|contractor' },
+				{ id: 'alert-fast', kind: 'text', selector: '#m-fast', matches: 'minute|hour|day|\\d' },
+				{ id: 'pd-where', kind: 'text', selector: '#r-where', matches: 'EU|Europe|US\\b|United States|UK\\b|Ireland|Frankfurt|Germany|Virginia|region|data center|Canada' },
+				{ id: 'pd-provider', kind: 'text', selector: '#r-provider', matches: '[A-Za-z]{3,}' },
+				{ id: 'pd-law', kind: 'text', selector: '#r-why', matches: 'GDPR|CCPA|privacy|personal|data protection' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each term with the question it answers',
+				pairs: [
+					['RPO (the data loss you accept)', 'how much time of data you can lose: a copy once a day means up to a day'],
+					['RTO (the recovery time you accept)', 'how long the site may be down while you bring it back'],
+					['a restore test', 'whether you managed to rebuild the site from a copy on an empty machine'],
+					['uptime monitoring', 'whether you find out about an outage before the visitors do']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the 3-2-1 rule mean?',
+				options: [
+					'Three copies of data, on two different media or in two different places, one of them off the main site',
+					'Three servers, two data centers, one country',
+					'Three times a day, two days of keeping, one place'
+				],
+				answer: 0,
+				why: [
+					'Yes. That way you survive a broken disk, a fire or a break-in in one place, and your own mistake. Add a restore test to the rule: a copy that has never been opened is a hope.',
+					'No: the rule is about the number of copies and their independence, not about infrastructure.',
+					'No: how often and how long to keep are separate decisions.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A folder on the server is synchronized with a folder in the cloud: changes are copied automatically. Is that a backup?',
+				options: [
+					'No: a deletion and ransomware are copied too, while a backup keeps earlier versions',
+					'Yes: the data is in two places',
+					'Yes, if the sync is frequent'
+				],
+				answer: 0,
+				why: [
+					'Yes. Synchronization repeats the current state, mistakes included. A copy should keep earlier versions, so that you can go back to the day when everything was whole.',
+					'No: two places do not mean two versions. What is deleted in one disappears in the other.',
+					'No: a frequent sync copies a mistake faster.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is worth watching with monitoring for a small project?',
+				options: [
+					'Whether the home page opens, and whether the page or function of the main action works',
+					'The certificate’s expiry and the payment dates of the domain and the hosting',
+					'Free disk space on the server, if the server is yours',
+					'How many times a day a visitor blinked'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: you have to check what people come for. A live home page with a broken form isn’t visible without a second check.',
+					'Yes: an expired certificate and domain are the commonest causes of “sudden” outages.',
+					'Yes: running out of disk space stops the database and the web server.',
+					'No: that has nothing to do with the site’s availability.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A site sends visitors’ personal data to a service in another country. Under the GDPR, which statement is the most accurate?',
+				options: [
+					'Sending personal data out of the EU needs a legal basis for the transfer, such as an adequacy decision or standard contractual clauses, on top of the usual rules',
+					'The GDPR does not care where the data goes',
+					'The data must always stay inside the EU, whatever the case'
+				],
+				answer: 0,
+				why: [
+					'Yes. Chapter V of the GDPR (Articles 44 to 50) allows a transfer to a country outside the EU if the Commission has found its protection adequate (Article 45), or the sender adds safeguards such as standard contractual clauses (Article 46), or a narrow exception applies (Article 49). General information, not legal advice: for a real case ask an attorney or your supervisory authority.',
+					'No: Chapter V is entirely about where the data goes.',
+					'No: the GDPR does not require data to stay in the EU. It requires the same protection to travel with it. Russia’s localization rule is the strict case that does.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-backup-321',
+				front: 'The 3-2-1 rule',
+				back: 'Three copies, on two different media or places, one off the main site. Plus keeping earlier versions and a restore test: a copy that has never been opened is guaranteed by nothing.'
+			},
+			{
+				id: 'infra-rpo-rto',
+				front: 'RPO and RTO in plain words',
+				back: 'RPO: how much data you accept losing (a copy once a day means up to a day). RTO: how long the site may be down while you bring it back. They decide how often to copy and how fast to recover.'
+			},
+			{
+				id: 'infra-monitor-what',
+				front: 'What does monitoring watch on a small project?',
+				back: 'The home page and the action people come for; the certificate and the domain expiry; disk space. The alert goes to a specific person, and it is decided in advance how fast they answer.'
+			},
+			{
+				id: 'infra-sync-not-backup',
+				front: 'Why is synchronization not a backup?',
+				back: 'It repeats the current state: a deleted file and one encrypted by a virus are copied too. A backup keeps earlier versions you can go back to.'
+			},
+			{
+				id: 'infra-localisation',
+				front: 'What do rules on where data may go ask for?',
+				back: 'Under the GDPR (Chapter V) a transfer out of the EU needs a legal basis: an adequacy decision, safeguards such as standard clauses, or a narrow exception. Russia goes further: the first recording of its citizens’ data must be made in Russia (Article 18 of 152-FZ). For a real case ask an attorney.'
+			}
+		],
+		sources: [
+			{ title: 'Prometheus: Overview', url: 'https://prometheus.io/docs/introduction/overview/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Google SRE Book: Monitoring Distributed Systems', url: 'https://sre.google/sre-book/monitoring-distributed-systems/', licence: 'link-only', kind: 'book', lang: 'en' },
+			{ title: 'Backblaze: The 3-2-1 Backup Strategy', url: 'https://www.backblaze.com/blog/the-3-2-1-backup-strategy/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Backup (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Backup', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'GDPR, Chapter V: transfers of personal data to third countries (gdpr-info.eu)', url: 'https://gdpr-info.eu/chapter-5/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'European Commission: Adequacy decisions', url: 'https://commission.europa.eu/law/law-topic/data-protection/international-dimension-data-protection/adequacy-decisions_en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'UK ICO: International transfers', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The operations passport answers the question “what do we do when something breaks”. Fill it in now, while everything works.',
+			hints: [
+				'Copies: what (files, the database, requests), how often (daily), how long they are kept (for example 7 daily and 4 weekly), where (in two places, one off the server) and when you will test the restore.',
+				'Monitoring checks the home page and the project’s action: name it in the words of the brief. The alert goes to specific people, and an answer is due within a time agreed in advance.',
+				'Personal data from the form is kept in a region you can name: name the provider (for example Hetzner, AWS).',
+				'In “Why”, refer to the GDPR or another privacy law, and to the fact that the law follows the people the data is about.'
+			],
+			mistakes: {
+				plan: 'The block “The operations passport” (the section whose id is ops-passport) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				what: 'Say what is copied: files, the database, requests, settings.',
+				freq: 'Say how often it is copied: daily, hourly, at every deploy.',
+				keep: 'Say how long copies are kept: in days, weeks or months.',
+				'where-two': 'Copies should lie in at least two places: name both.',
+				'where-offsite': 'One of the copies should be off the main server: the cloud, another region, an external disk.',
+				test: 'Say when you tested the restore, or when you will first.',
+				'monitor-home': 'Monitoring should check the home page.',
+				'monitor-action': 'Monitoring should check the project’s action too: name it in the words of the brief.',
+				'alert-who': 'Say who gets the alert: you, a team, a contractor, and by which channel.',
+				'alert-fast': 'Say how fast it has to be answered: in minutes or hours.',
+				'pd-where': 'Say where the personal data is kept: a region or a country.',
+				'pd-provider': 'Name the provider where the data lies.',
+				'pd-law': 'In “Why”, refer to the GDPR, another privacy law, or personal data.'
+			},
+			outro: 'Now the project has a passport for trouble: copies, a watchman and an answer to “where does the data lie”. The part on infrastructure ends here: the site has a home, a name, a padlock, a fast route, packaging, a pipeline, an address on the network and insurance.'
+		},
+		say: {
+			RPO: 'R P O',
+			RTO: 'R T O',
+			SLA: 'S L A',
+			Telegram: 'telegram',
+			Prometheus: 'pro me thee us',
+			Grafana: 'gra fah na',
+			'Uptime Kuma': 'uptime kuma',
+			pg_dump: 'P G dump',
+			S3: 'S three',
+			'152-FZ': 'one fifty two F Z',
+			GDPR: 'G D P R',
+			Hetzner: 'hets ner'
+		}
+	};
+</script>
+
+<script>
+	import IncidentLab from '../../diagrams/IncidentLab.svelte';
+</script>
+
+## And if it all breaks
+
+Everything you built in this part will break one day: a disk will die, the domain’s payment will lapse, someone will delete a folder by accident, the host will be unavailable for a day. That isn’t pessimism but statistics. So the last lesson of the part is about three questions asked in advance, while everything works.
+
+1. **What comes back if the data is lost?** That is the copies.
+2. **Will I find out about an outage before the visitors do?** That is monitoring.
+3. **Where does other people’s data lie, and may it lie there?** That is the law on personal data.
+
+## Backups
+
+A copy is not a file next to the original. It exists for the case when the original is gone, and only what survived the outage was a copy.
+
+**The 3-2-1 rule.** Three copies of the data (the original and two backups), on two different media or in two different places, and one of the copies off the main site. Then you survive a broken disk, a fire or a break-in in one place, and your own mistake. A copy on the same disk as the original doesn’t count: both die with the disk.
+
+**Two figures to name.** **RPO**: how much data you accept losing. If a copy is made once a day, you lose up to a day, which is fine for a business-card site and not for a store. **RTO**: how long the site may be down while you bring it back. These two numbers decide how often to copy and how well prepared everything must be.
+
+**What to copy.** The files of a static site are in the repository, and a repository, especially with a copy under another owner, is itself a copy of the code. But it doesn’t hold what changes without you: the database of requests, the CMS content, files visitors uploaded, the receiver’s settings. A database is copied by a dump (PostgreSQL has the `pg_dump` command for it) or a disk snapshot, and files by ordinary copying.
+
+**Versions, not a mirror.** Syncing a folder with the cloud is not a copy: a mistake and ransomware are copied too. You need **earlier versions**: say, seven daily, four weekly and six monthly. Then you can go back to the day when everything was whole. Copies are best encrypted and kept so that an attacker who got to the server can’t delete them.
+
+**And the main thing: test the restore.** A copy that has never been unpacked is guaranteed by nothing: it may be empty, broken, or missing the right settings. At least once and then regularly (say, every quarter), unpack a copy in an empty place and make sure the site and the data are there. Write the date in the passport.
+
+Try the diagram: choose a disaster, a backup plan and a frequency, and see what comes back. The lower part of the diagram is about how quickly you learn of an outage.
+
+<IncidentLab />
+
+<details>
+<summary>Check yourself: why does a copy on the same server not protect against a break-in?</summary>
+
+Whoever got access to the server gets to the copy on it, and can delete or encrypt both. A copy should lie where access from the server is closed or limited.
+
+</details>
+
+## Monitoring: find out first
+
+**Monitoring** is a program that keeps checking that the site is all right, and writes to you if it isn’t. Without it, you learn of an outage from a visitor, or from requests having stopped coming.
+
+What to check.
+
+- **Availability from outside.** An outside service opens the home page every minute or every five minutes and waits for a 200 answer. There are free services of this kind, and open programs you install yourself (Uptime Kuma, for example), and UptimeRobot and Better Stack are well-known hosted ones. You have to check from outside: from inside the server everything can look fine while the data center is cut off from the world.
+- **What people come for.** The home page may open while the request form doesn’t work. A second check opens the page or function of your main action (for a form it may be a test request marked “test”) and waits for the right answer.
+- **The boring causes of outages:** the certificate’s expiry, the payment dates of the domain and the hosting, free disk space. They break sites more often than hackers do.
+- **Errors and load** inside the program: the error log, the number of requests, the response time. For big projects that is Prometheus with graphs, and clouds have monitoring of their own (CloudWatch at AWS and its equivalents). For a small site you can stop short of this for now.
+
+Three rules of a good alert. **The alert goes to a specific person** by a channel they read (email, a chat, a text message). **It is decided in advance how fast they must answer**: for a business-card site “within a working day”, for a store minutes. And **there are few alerts**: if monitoring writes every hour “something odd”, people stop reading it, and a real alert drowns in the noise.
+
+A useful scale. “99.9% availability” sounds like “almost always”, but it is about 43 minutes of downtime a month, and 99% is already about seven hours. When you promise or choose a provider, work out what this means for your project.
+
+<details>
+<summary>Check yourself: the home page opens, but the form doesn’t send. Will monitoring that checks only the home page notice?</summary>
+
+No. That is why a second check of the project’s main action is needed.
+
+</details>
+
+## Where personal data may go
+
+This section is general information, not legal advice. For a real project, ask an attorney, or the authority that supervises data protection where you live: your country’s data protection authority in the EU, the Information Commissioner’s Office (ICO) in the UK, and in the US the Federal Trade Commission or your state’s attorney general.
+
+You know the basic idea from the [lesson on privacy by design](../../07-data/07-privacy-by-design/): privacy law follows the people the data is about. The GDPR applies to a site anywhere in the world if it offers goods or services to people in the EU, or tracks their behavior (Article 3(2)), and the lesson on the GDPR covers the details of an operator’s duties. Here is the question for infrastructure: where will the data physically end up, and with whom?
+
+**The rules for sending data abroad.** The GDPR does not say that data must stay in the EU. It says that **the protection must travel with it**. Chapter V (Articles 44 to 50) lets personal data go to a country outside the EU in three main ways:
+
+- **An adequacy decision** (Article 45): the European Commission has found that the country’s protection is essentially equivalent. In October 2026 the Commission’s list includes, among others, the United Kingdom, Switzerland, Japan, Canada (commercial organizations), Korea, Brazil, and the United States for organizations that joined the EU-US Data Privacy Framework (a decision of 10 July 2023). That decision survived a challenge in the EU General Court in September 2025, and an appeal is pending, so such a framework can change. Check the Commission’s page for the current list.
+- **Safeguards** (Article 46): above all **standard contractual clauses**, a contract in a form the Commission has approved, that you and your provider sign. They usually come with a data processing agreement, which the major providers offer.
+- **Narrow exceptions** (Article 49), such as a person’s explicit consent to a particular transfer. They are meant for occasional cases, not for the everyday flow of a site’s data.
+
+The UK has the same structure under the UK GDPR, with its own tools (an international data transfer agreement and an addendum to the EU clauses). In the US there is no single federal privacy law, and a state law such as California’s CCPA regulates what a business does with personal data rather than which country the server stands in.
+
+**The strict case, for comparison.** Russia does something different and harder: under Article 18 of its law 152-FZ, the first recording, storing and retrieving of Russian citizens’ personal data must be done in databases located in Russia. Transfers abroad afterward follow separate rules. It is a localization rule, a requirement about where, while the GDPR’s is a requirement about protection. The two show the range of what a project may meet: if your visitors are in Russia, ask a Russian attorney before choosing a platform.
+
+**What follows for your site.**
+
+- A static site stores no visitor data by itself. The question starts where a form, a mailing list, a CRM, analytics or a chat sends it: find out where those services keep the data and who their sub-processors are.
+- **Backups are data too.** A copy of a database with names and phone numbers in a cloud bucket in another region is a transfer. Put the copies in a region you have thought about.
+- Choose the **region** of your database and your functions on purpose, and write it in the passport. Many providers let you pin data to a region.
+- The data has to be described in a privacy policy, and a form needs consent where the law asks for it ([the lesson on the policy and consent](../../15-quality/08-policy-consent/)).
+
+**How to choose a provider for data.** Ask: which legal entity is the provider, where exactly is the data center (a city or a region, not just “in the cloud”), do they sign a data processing agreement and standard clauses, where do the backups lie, who are the sub-processors, and can you take your data and leave. For a small site, clear terms matter more than loud certificates. For big systems there are further requirements for securing the systems that hold personal data: that is a specialist’s question.
+
+<details>
+<summary>Check yourself: a form on a static site sends a name and a phone number to a form service in another country. What is the risk?</summary>
+
+The data leaves the place whose law applies to it. If the people are in the EU, the transfer needs a legal basis such as an adequacy decision or standard clauses, and the policy has to say so. Choose a service that states where it keeps the data and signs the right agreements, or collect the data another way.
+
+</details>
+
+## Practice
+
+Fill in the operations passport. In the first part say what is copied, how often, how long it is kept, where it lies (at least two places, one off the server) and when you will test the restore. In the second say what monitoring watches (the home page and the project’s action, naming it in the words of the brief), who gets the alert and how fast it has to be answered. In the third say where the personal data from the form is kept and with which provider, and explain the choice.
+
+The check reads the text and doesn’t prove that copies and monitoring are set up. The real check is yours: write the date of the first restore in the passport and come back to it.
+
+## What was wrong before
+
+In 2010 a “backup” was most often an archive that the host made on the same server, and a site that lost its disk lost its copies too. “Monitoring” meant a customer’s call: “your site doesn’t open”. The rules for sending personal data abroad were then a matter of national laws and a few agreements, and in 2018 the GDPR made them one rulebook for the EU. Today all three questions are handled by tools, but they remain your responsibility: a tool doesn’t know what matters most to you.
