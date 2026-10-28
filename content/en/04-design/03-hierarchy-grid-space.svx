@@ -1,0 +1,367 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/03-hierarchy-grid-space.svx. */
+	export const metadata = {
+		id: '04-design/03-hierarchy-grid-space',
+		part: 4,
+		order: 3,
+		title: 'Hierarchy, grid and empty space',
+		definition: 'Visual hierarchy is the order in which the eye meets the elements of a page, set by size, weight, color and empty space. A grid aligns blocks to columns.',
+		summary:
+			'You’ll learn to lead a visitor’s eye to the main action with size, weight, color and spacing, not with words. Afterwards you can build a page with three levels of headings, a grid and a single spacing step, and test it by squinting.',
+		minutes: 25,
+		teaches: ['design-visual-hierarchy', 'design-grid-and-whitespace'],
+		requires: ['design-outdated-vs-modern', 'css-grid', 'css-typography', 'css-custom-properties'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'Buy Book Learn more', caption: 'Five bright buttons', say: 'If five buttons are equally bright, there is no main one. Chance will pick the accent: the biggest thing will stand out.' },
+				{ mood: 'hint', side: 'right', caption: 'The squint test', say: 'Squint. The details vanish and only blotches remain. What stands out most should be the main action.' },
+				{ mood: 'cheer', prop: 'browser', label: 'one accent', say: 'The main thing differs and the rest is quieter. A heading sits closer to its own text than to the last section.' }
+			]
+		},
+		practice: {
+			id: 'design-hierarchy-grid',
+			title: 'A page with hierarchy, a grid and a spacing step',
+			task: 'Build a page so that the eye goes to the main action. 1) Make the project name an h1 heading, and each section of your project a card with an h2 heading. 2) Make the main action a link with the class cta: exactly one on the page, a solid color and bold. All other links stay ordinary. 3) In styles.css define two values on :root: --space (the base spacing step, for example 8px) and --measure (the line width, for example 65ch). 4) Lay the cards out on a grid: .grid with display: grid and columns repeat(12, 1fr) (or repeat(4, 1fr) for a phone). Then squint at the preview: the action should be what stands out most.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="page">
+      <main>
+        <p>{{title}}</p>
+        <p>{{who}}</p>
+        <p><a href="#contacts">{{mainAction.label}}</a> <a href="#more">Read more</a></p>
+        <div class="grid">
+          {{#each sections}}<div class="card"><p>{{.}}</p></div>
+          {{/each}}
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="page">
+      <main>
+        <h1>{{title}}</h1>
+        <p class="lead">{{who}}</p>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a> <a href="#more">Read more</a></p>
+        <div class="grid">
+          {{#each sections}}<section class="card"><h2>{{.}}</h2><p>The text of this section goes here.</p></section>
+          {{/each}}
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+:root {
+  --space: 8px;
+  --measure: 65ch;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: calc(var(--space) * 3);
+}
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  margin: 0 0 var(--space);
+}
+h2 {
+  font-size: 1.25rem;
+  margin: 0 0 var(--space);
+}
+p {
+  max-width: var(--measure);
+}
+.cta {
+  display: inline-block;
+  background-color: #0b5cad;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: calc(var(--space) * 3);
+  margin-top: calc(var(--space) * 6);
+}
+.card {
+  grid-column: span 4;
+}
+`
+			},
+			checks: [
+				{ id: 'one-h1', kind: 'count', selector: 'h1', min: 1, max: 1 },
+				{ id: 'h1-title', kind: 'field', selector: 'h1', field: 'title' },
+				{ id: 'h2-sections', kind: 'field', selector: 'h2', field: 'sections' },
+				{ id: 'h2-count', kind: 'count', selector: 'h2', min: { brief: 'sections' } },
+				{ id: 'one-cta', kind: 'count', selector: 'a.cta', min: 1, max: 1 },
+				{ id: 'cta-label', kind: 'field', selector: 'a.cta', field: 'mainAction.label' },
+				{ id: 'cta-solid', kind: 'style', selector: 'a.cta', prop: 'background-color', matches: '^(#[0-9a-fA-F]{3,8}|rgb|hsl)' },
+				{ id: 'cta-bold', kind: 'style', selector: 'a.cta', prop: 'font-weight', matches: '^(bold|[6-9]00)$' },
+				{ id: 'token-space', kind: 'style', selector: ':root', prop: '--space', matches: '^\\s*\\d+(\\.\\d+)?(px|rem)\\s*$' },
+				{ id: 'token-measure', kind: 'style', selector: ':root', prop: '--measure', matches: '^\\s*\\d+(\\.\\d+)?ch\\s*$' },
+				{ id: 'grid', kind: 'style', selector: '.grid', prop: 'display', equals: 'grid' },
+				{ id: 'columns', kind: 'style', selector: '.grid', prop: 'grid-template-columns', matches: '^repeat\\(\\s*(4|12)\\s*,|^(\\S+\\s+){3}\\S+$|^(\\S+\\s+){11}\\S+$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'What can you use to steer a visitor’s attention on a page?',
+				options: ['The size of an element', 'Color and contrast', 'Empty space around it', 'The number of words in a paragraph, as the main tool'],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: people notice the big before the small.',
+					'Yes: a bright spot on a calm background is seen first.',
+					'Yes: an element with emptiness around it stands out without any decoration.',
+					'No: words serve meaning, but in the first seconds it is the look that steers attention.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the squint test check?',
+				options: [
+					'What stays noticeable when the details are blurred: that is, the real hierarchy of the page',
+					'How well the page works on a poor connection',
+					'Whether the spelling is right'
+				],
+				answer: 0,
+				why: [
+					'Yes. If, when blurred, the main thing is not what you wanted, the hierarchy is failing. Squinting is all the test takes.',
+					'No: this has nothing to do with speed.',
+					'No: the test is about hierarchy, not about the text.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each principle of perception (Gestalt) with what it means for a page',
+				pairs: [
+					['Proximity', 'elements that stand close together are seen as one group'],
+					['Similarity', 'elements styled the same are seen as the same kind of thing'],
+					['Alignment', 'elements on one line seem connected'],
+					['Contrast', 'an element that differs draws the eye first']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why make all spacing a multiple of one base step (for example 8 pixels)?',
+				options: [
+					'So that the page has an even rhythm, and you don’t have to invent a new number each time',
+					'Because the browser doesn’t understand other values',
+					'So that the page loads faster'
+				],
+				answer: 0,
+				why: [
+					'Yes. A limited set of values makes the look cohesive and speeds up decisions. Material, Carbon and Atlassian build their spacing on a base unit of 8 pixels (or 4 for the small things).',
+					'No: the browser understands any value.',
+					'No: this has no effect on speed.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How wide is a line of body text made?',
+				options: [
+					'About 45 to 75 characters (around 65): the eye doesn’t lose the start of the next line',
+					'The full width of a wide screen, the wider the better',
+					'No more than 20 characters'
+				],
+				answer: 0,
+				why: [
+					'Yes. In CSS this is convenient to set with the ch unit: max-width: 65ch.',
+					'No: a line that is too long is hard to read, because the eye gets lost on the way back.',
+					'No: a line that is too short breaks reading into scraps.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of working on a page’s hierarchy in order',
+				items: ['Decide which single action is the main one', 'Set two or three levels of headings by size', 'Group related things with empty space (proximity)', 'Squint and check what is still noticeable']
+			}
+		],
+		cards: [
+			{ id: 'design-hier-tools', front: 'What creates visual hierarchy?', back: 'Size, weight, color and contrast, position, and the empty space around. The main thing should differ, and the rest should be calmer.' },
+			{ id: 'design-hier-squint', front: 'What is the squint test?', back: 'Blur the page and look at what remains noticeable. That is the real hierarchy, and the main action should be what is left.' },
+			{ id: 'design-hier-proximity', front: 'What does proximity do?', back: 'The brain treats what stands close together as one group. So group with empty space first, and add borders and lines later.' },
+			{ id: 'design-hier-step', front: 'Why a base spacing step?', back: 'All spacing is a multiple of one number (8 or 4 pixels): the rhythm is even, there are fewer decisions, and the look is cohesive.' },
+			{ id: 'design-hier-measure', front: 'What line width is comfortable?', back: 'From 45 to 75 characters, around 65. In CSS: max-width: 65ch.' },
+			{ id: 'design-hier-grid', front: 'Why a 12-column grid?', back: '12 divides by 2, 3, 4 and 6, so almost any layout can be built from it. On a phone you usually take 4 columns.' }
+		],
+		sources: [
+			{ title: 'Visual Hierarchy in UX (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/visual-hierarchy-ux-definition/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Gestalt Principles: Proximity (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/gestalt-proximity/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Learn Design (web.dev)', url: 'https://web.dev/learn/design/', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Spacing (web.dev, Learn CSS)', url: 'https://web.dev/learn/css/spacing', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'CSS grid layout (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Line length (Practical Typography, Matthew Butterick)', url: 'https://practicaltypography.com/line-length.html', licence: 'link-only', kind: 'book', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now every element on the page is equally quiet, and the eye doesn’t know where to go. Let’s set the accents: one heading, one main call to action and a grid.',
+			hints: [
+				'Wrap the project name in h1, and in each card put the section name in h2. Only after that can you tune the sizes.',
+				'The main action is a link with the class cta. In styles.css give it a background-color, font-weight: 700 and white text. The “Read more” link must have no class.',
+				'At the top of styles.css write :root with --space: 8px and --measure: 65ch. Then .grid with display: grid and grid-template-columns: repeat(12, 1fr).'
+			],
+			mistakes: {
+				'one-h1': 'The page must have exactly one h1 heading: the project name.',
+				'h1-title': 'The h1 should hold your project’s name.',
+				'h2-sections': 'The h2 headings should hold the names of your project’s sections.',
+				'h2-count': 'Each section needs an h2 heading of its own.',
+				'one-cta': 'You need exactly one link with the class cta: the main action. The other links are ordinary.',
+				'cta-label': 'The cta link should name your project’s main action.',
+				'cta-solid': '.cta in styles.css needs a solid background: background-color.',
+				'cta-bold': 'Make the .cta text bold: font-weight: 700.',
+				'token-space': 'styles.css needs a variable --space on :root with a number in px or rem, for example --space: 8px.',
+				'token-measure': 'styles.css needs a variable --measure on :root in ch units, for example --measure: 65ch.',
+				grid: '.grid in styles.css needs display: grid.',
+				columns: '.grid needs columns: grid-template-columns: repeat(12, 1fr) (or repeat(4, 1fr)).'
+			},
+			outro: 'Now the page has a main thing, a secondary thing and a background. Squint at the preview: if the action stands out most, the hierarchy works.'
+		},
+		say: { CSS: 'C S S', rem: 'rem', px: 'pixels', ch: 'C H', squint: 'skwint', Material: 'material', Carbon: 'carbon', Atlassian: 'at-lass-ee-an', NN: 'N N', Gestalt: 'geh-shtalt' }
+	};
+</script>
+
+<script>
+	import HierarchyLab from '../../diagrams/HierarchyLab.svelte';
+</script>
+
+## Where a person will look
+
+A visitor doesn’t read a page, they scan it: in two or three seconds the eye picks out blotches and decides whether this is interesting. If you haven’t set the accents, chance will set them: whatever happens to be the biggest or brightest will stand out most. Setting them yourself is what it means to **build a visual hierarchy**: the order in which the eye meets the elements.
+
+What controls the order:
+
+- **size:** people notice the big before the small;
+- **weight and style:** bold is stronger than thin;
+- **color and contrast:** a bright spot on a calm background is seen first;
+- **position:** the top and the left edge (for text read left to right) are scanned first;
+- **empty space:** whatever has emptiness around it is highlighted without any decoration.
+
+The rule is simple: **the main thing should differ, and the rest should be quieter**. If a page has five equally bright buttons, there is no main one. That is why your brief has a single main action: it gets the strongest accent.
+
+Play with a layout of your project. Make the heading enormous and see what happens to the button. Then make the button stand out with color and size. And turn on “squint”: a blurred page shows the hierarchy in its pure form.
+
+<HierarchyLab />
+
+<details>
+<summary>Check yourself: what creates visual hierarchy?</summary>
+
+Size, weight, color and contrast, position, and the empty space around. The main thing differs, and the rest is calmer.
+
+</details>
+
+## The squint test
+
+This is the oldest and most honest way to check a hierarchy. Step back from the screen, squint, or blur the page. The details vanish, and blotches and masses remain. If the main action is what stands out most, all is well. If the picture in the header or the logo stands out more, the page is asking the visitor for something other than what you wanted.
+
+## Grouping: proximity and similarity
+
+The brain gathers what it sees into groups by itself. Almost all layout rests on this, and the rules are called the laws of **Gestalt** (German for “form”). We need four.
+
+- **Proximity.** What stands close together is seen as a whole. A section heading should be closer to its own text than to the previous section. This is the most common mistake: the empty space between a heading and a paragraph is the same as between a paragraph and the next heading, and the heading “floats”.
+- **Similarity.** What is styled the same is seen as the same kind of thing: all the service cards should be styled alike, and the main button should look like nothing else.
+- **Alignment.** What stands on one line seems connected. That is why aligning to the left edge and to a grid at once makes a page look put together.
+- **Contrast.** An element that differs draws the eye.
+
+A good rule: **group with empty space first, and only then add borders and lines**. Spacing alone is often enough.
+
+<details>
+<summary>Check yourself: what does proximity do?</summary>
+
+The brain treats what stands close together as a group. That is why a section heading is placed closer to its own text than to the previous section.
+
+</details>
+
+## Grid and empty space
+
+A **grid** is the invisible layout of a page: columns of equal width and gaps between them. All blocks stand on the lines of the grid, and that is why the page looks put together. In CSS a grid is made with the property `display: grid`, which you studied in the previous part.
+
+Why 12 columns exactly? The number 12 divides by 2, 3, 4 and 6, so 12 columns make bands of a half, a third, a quarter and a sixth. On a phone there are usually four columns: more simply won’t fit.
+
+```css
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+.card {
+  grid-column: span 4; /* three cards in a row */
+}
+```
+
+Empty space comes in two kinds. **Small** is the spacing inside a component and between lines. **Large** is the gaps between sections and the margins around the page. Beginners economize and squeeze everything together: it seems the emptiness is wasted. In fact emptiness is what makes the rest legible and “expensive”. Many of the best pages are almost entirely air.
+
+**The base step.** So you don’t invent spacing anew each time, take one step, say 8 pixels, and make all spacing a multiple of it: 8, 16, 24, 32, 48, 64. Material Design, IBM’s Carbon and Atlassian’s design system build their spacing on a base unit of 8 pixels (or 4 for the small things). Store one value in a variable and work out the rest from it:
+
+```css
+:root {
+  --space: 8px;
+}
+.section {
+  padding: calc(var(--space) * 6);
+}
+```
+
+There is also **line width**. Text that stretches across the whole width of a monitor is hard to read: the eye loses the start of the next line. A comfortable length is from 45 to 75 characters, around 65. In CSS you set it with the unit `ch` (the width of the digit “0” in the current font): `max-width: 65ch`.
+
+<details>
+<summary>Check yourself: what is a base spacing step for?</summary>
+
+So that all spacing is a multiple of one number: the rhythm is even, and choosing is easier. The number is stored in a single variable.
+
+</details>
+
+## Practice
+
+Build your project’s page so that the hierarchy works. In `index.html` set the levels: the name in `h1`, each section as a card with an `h2`, the main action as a link with the class `cta`. In `styles.css` define two values on `:root` (the spacing step and the line width) and a grid.
+
+When the checks pass, do one more thing, this time with no checks: squint at the preview. If the main action stands out most, you did it. If not, increase its weight or take the brightness off its neighbors.
+
+## What was wrong with 2014
+
+In 2014 grids were counted by hand and rigid: 12 columns of 60 pixels and margins of 20, 960 in all. Such a grid didn’t stretch, and for phones you had to make a second one. Today’s grid divides the available width itself, so the grid has become flexible while the principle has stayed the same.

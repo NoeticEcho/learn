@@ -1,0 +1,347 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/04-type-scale.svx. */
+	export const metadata = {
+		id: '04-design/04-type-scale',
+		part: 4,
+		order: 4,
+		title: 'The type scale: sizes on a ladder, not by guesswork',
+		definition: 'A type scale is a set of font sizes where each step is the previous one multiplied by a single ratio: at 1.25 that gives 16, 20, 25, 31.',
+		summary:
+			'You’ll learn to choose font sizes not by eye but from a scale: one base number and one ratio give the whole set. Afterwards your page has a ladder of sizes on CSS variables, and each piece of text has a clear role.',
+		minutes: 20,
+		teaches: ['design-type-scale'],
+		requires: ['design-visual-hierarchy', 'css-typography', 'css-units'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: '14 15 16 17 18', say: 'Sizes by eye: 14, 15, 16, 17, 18. Each seems fine, but together they sound like a note sung slightly off.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: '16|20|25|31|39', caption: 'Base 16, ratio 1.25', say: 'One base size and one ratio. Each step is 1.25 times the last, and the eye feels the order.' },
+				{ mood: 'cheer', prop: 'editor', label: '--ratio: 1.333', say: 'Change one number and the whole page rearranges. And sizes in rem also obey the browser’s font setting.' }
+			]
+		},
+		practice: {
+			id: 'design-type-scale',
+			title: 'A size scale for your page',
+			task: 'Right now the font sizes on the page are scattered numbers (29, 21 and 15 pixels). Replace them with a scale. 1) In styles.css on :root define a ratio --ratio (for example 1.25) and six steps --fs-sm, --fs-base, --fs-lg, --fs-xl, --fs-2xl, --fs-3xl in rem units (you can work them out with calc). 2) Give the steps to roles: h1 gets --fs-3xl, h2 gets --fs-xl, section paragraphs get --fs-base, and the small caption gets --fs-sm. 3) Give the section paragraphs a line height from 1.4 to 1.7.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p class="lead">{{who}}</p>
+      {{#each sections}}<section><h2>{{.}}</h2><p>The text of this section goes here.</p></section>
+      {{/each}}
+      <p><small>{{forWhom}}</small></p>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+h1 {
+  font-size: 29px;
+}
+h2 {
+  font-size: 21px;
+}
+section p {
+  font-size: 15px;
+  line-height: 1.1;
+}
+small {
+  font-size: 11px;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p class="lead">{{who}}</p>
+      {{#each sections}}<section><h2>{{.}}</h2><p>The text of this section goes here.</p></section>
+      {{/each}}
+      <p><small>{{forWhom}}</small></p>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+:root {
+  --ratio: 1.25;
+  --fs-sm: 0.8rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.563rem;
+  --fs-2xl: 1.953rem;
+  --fs-3xl: 2.441rem;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+h1 {
+  font-size: var(--fs-3xl);
+  line-height: 1.1;
+}
+h2 {
+  font-size: var(--fs-xl);
+  line-height: 1.2;
+}
+.lead {
+  font-size: var(--fs-lg);
+}
+section p {
+  font-size: var(--fs-base);
+  line-height: 1.55;
+}
+small {
+  font-size: var(--fs-sm);
+}
+`
+			},
+			checks: [
+				{ id: 'ratio', kind: 'style', selector: ':root', prop: '--ratio', matches: '^\\s*1\\.\\d+\\s*$' },
+				{ id: 'fs-sm', kind: 'style', selector: ':root', prop: '--fs-sm', matches: '^\\s*(\\d+(\\.\\d+)?rem|calc\\(.+\\))\\s*$' },
+				{ id: 'fs-base', kind: 'style', selector: ':root', prop: '--fs-base', matches: '^\\s*(\\d+(\\.\\d+)?rem|calc\\(.+\\))\\s*$' },
+				{ id: 'fs-lg', kind: 'style', selector: ':root', prop: '--fs-lg', matches: '^\\s*(\\d+(\\.\\d+)?rem|calc\\(.+\\))\\s*$' },
+				{ id: 'fs-xl', kind: 'style', selector: ':root', prop: '--fs-xl', matches: '^\\s*(\\d+(\\.\\d+)?rem|calc\\(.+\\))\\s*$' },
+				{ id: 'fs-2xl', kind: 'style', selector: ':root', prop: '--fs-2xl', matches: '^\\s*(\\d+(\\.\\d+)?rem|calc\\(.+\\))\\s*$' },
+				{ id: 'fs-3xl', kind: 'style', selector: ':root', prop: '--fs-3xl', matches: '^\\s*(\\d+(\\.\\d+)?rem|calc\\(.+\\))\\s*$' },
+				{ id: 'h1-size', kind: 'style', selector: 'h1', prop: 'font-size', matches: '^var\\(--fs-(2xl|3xl)\\)$|^(3\\d|[4-9]\\d)(\\.\\d+)?px$' },
+				{ id: 'h2-size', kind: 'style', selector: 'h2', prop: 'font-size', matches: '^var\\(--fs-(lg|xl|2xl)\\)$|^(2\\d|3\\d)(\\.\\d+)?px$' },
+				{ id: 'p-size', kind: 'style', selector: 'section p', prop: 'font-size', matches: '^var\\(--fs-base\\)$|^1[6-8](\\.\\d+)?px$|^1(\\.\\d+)?rem$' },
+				{ id: 'small-size', kind: 'style', selector: 'small', prop: 'font-size', matches: '^var\\(--fs-sm\\)$|^1[2-4](\\.\\d+)?px$' },
+				{ id: 'p-leading', kind: 'style', selector: 'section p', prop: 'line-height', matches: '^1\\.[4-7]\\d*$|^(2[2-9]|3[0-2])(\\.\\d+)?px$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is a type (modular) scale?',
+				options: [
+					'A set of font sizes, each the same number of times bigger than the one before',
+					'A list of all the fonts installed on the system',
+					'A ruler for measuring the height of letters on a monitor'
+				],
+				answer: 0,
+				why: [
+					'Yes. A base and a ratio determine every step: for example 16, 20, 25, 31, 39, 49 pixels at a ratio of 1.25.',
+					'No: the scale is about sizes, not about fonts.',
+					'No: it is a mathematical rule, not a tool.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each ratio with the character of the scale',
+				pairs: [
+					['1.125 to 1.2', 'calm, with small jumps: text and documentation'],
+					['1.25 to 1.333', 'all-round: suits most sites'],
+					['1.5 and above', 'sharp: striking headings, but the small steps grow too fast']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Why is it better to set font sizes in rem than in pixels?',
+				options: [
+					'rem is worked out from the size the person chose in the browser settings',
+					'The page stays legible when text is enlarged to 200%, as WCAG requires',
+					'The whole scale can be shifted by changing one number',
+					'Pixels don’t work in modern browsers'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: people with low vision often set a larger font size in their settings.',
+					'Yes: scaling text is an accessibility requirement.',
+					'Yes: you change the base size in one place and the rest follows.',
+					'No: pixels work. They just don’t respect the person’s settings.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does clamp(2rem, 1rem + 3vw, 3.5rem) do?',
+				options: [
+					'Gives a size that grows with the width of the screen, but is never less than 2rem or more than 3.5rem',
+					'Always gives 2rem',
+					'Squeezes the text if it doesn’t fit'
+				],
+				answer: 0,
+				why: [
+					'Yes. The middle argument is worked out from the screen width, and the first and last act as the lower and upper limits. This is how “fluid” headings are made.',
+					'No: clamp chooses a value between its limits.',
+					'No: it doesn’t check whether the text fits.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What line height suits body text, and what is it for large headings?',
+				options: [
+					'About 1.4 to 1.6 for body text; tighter for large headings, about 1.1 to 1.2',
+					'The same 1.0 for everything',
+					'Larger for headings than for body text'
+				],
+				answer: 0,
+				why: [
+					'Yes. The bigger the line, the less air is needed between lines, or the heading falls apart.',
+					'No: at 1.0 ordinary text sticks together.',
+					'No: on large headings a big line height looks torn apart.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of building a scale in order',
+				items: ['Choose the base size of body text', 'Choose a ratio', 'Work out the steps up and down', 'Give the steps to roles: heading, subheading, text, caption']
+			}
+		],
+		cards: [
+			{ id: 'design-scale-what', front: 'What is a type scale?', back: 'Font sizes, each the same number of times bigger than the one before. A base of 16 px and a ratio of 1.25 give 16, 20, 25, 31, 39, 49.' },
+			{ id: 'design-scale-ratio', front: 'How do you choose a ratio?', back: '1.125 to 1.2 is calm, 1.25 to 1.333 is all-round, 1.5 and above is striking but sharp. Ratios are often taken from musical intervals.' },
+			{ id: 'design-scale-rem', front: 'Why rem and not px?', back: 'rem is worked out from the browser setting and lets text be enlarged to 200% (WCAG). The base changes with one number.' },
+			{ id: 'design-scale-clamp', front: 'What is fluid size?', back: 'clamp(min, preferred, max): the size grows smoothly with the screen width and doesn’t leave its limits.' },
+			{ id: 'design-scale-leading', front: 'What line height should you choose?', back: 'For body text 1.4 to 1.6. The bigger the line, the tighter: about 1.1 to 1.2 for headings.' }
+		],
+		sources: [
+			{ title: 'Typography (web.dev, Learn CSS)', url: 'https://web.dev/learn/css/typography', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Modular Scale: a scale calculator', url: 'https://www.modularscale.com/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Utopia: fluid type and space', url: 'https://utopia.fyi/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'clamp() (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/clamp', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Line spacing (Practical Typography, Matthew Butterick)', url: 'https://practicaltypography.com/line-spacing.html', licence: 'link-only', kind: 'book', lang: 'en' },
+			{ title: 'Understanding: Resize Text, WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The sizes on this page were made up on the spot: 29, 21, 15, 11. Let’s replace them with a scale where every step follows from one ratio.',
+			hints: [
+				'First define the variables on :root: --ratio: 1.25 and six steps, for example --fs-base: 1rem, --fs-lg: 1.25rem, --fs-xl: 1.563rem and so on.',
+				'Then replace the numbers in the rules: h1 { font-size: var(--fs-3xl) }, h2 { font-size: var(--fs-xl) }, and var(--fs-base) for the section paragraphs.',
+				'Give the paragraphs in the sections line-height: 1.55. The small caption gets var(--fs-sm).'
+			],
+			mistakes: {
+				ratio: ':root needs a variable --ratio with a number like 1.25.',
+				'fs-sm': '--fs-sm is missing: the smallest step, for example 0.8rem.',
+				'fs-base': '--fs-base is missing: the size of body text, usually 1rem.',
+				'fs-lg': '--fs-lg is missing: the step above body text, for example 1.25rem.',
+				'fs-xl': '--fs-xl is missing, for example 1.563rem.',
+				'fs-2xl': '--fs-2xl is missing, for example 1.953rem.',
+				'fs-3xl': '--fs-3xl is missing, the biggest step, for example 2.441rem.',
+				'h1-size': 'The h1 heading should take its size from a large step: font-size: var(--fs-3xl).',
+				'h2-size': 'The h2 heading should take its size from a middle step, for example var(--fs-xl).',
+				'p-size': 'The section paragraphs (section p) should take the size of body text: var(--fs-base).',
+				'small-size': 'The small caption should take the smallest step: var(--fs-sm).',
+				'p-leading': 'The section paragraphs need a line height from 1.4 to 1.7, for example line-height: 1.55.'
+			},
+			outro: 'Now every size on the page comes from one number. If you want it bigger or smaller, change --fs-base or --ratio and the whole page recalculates.'
+		},
+		say: { CSS: 'C S S', rem: 'rem', px: 'pixels', clamp: 'clamp', vw: 'V W', WCAG: 'wuh-cag', ratio: 'ray-show', calc: 'calc' }
+	};
+</script>
+
+<script>
+	import TypeScaleLab from '../../diagrams/TypeScaleLab.svelte';
+</script>
+
+## Sizes by eye and sizes from a scale
+
+When sizes are chosen by eye, a page collects twenty almost identical sizes: 14, 15, 16, 17, 18 pixels. The look turns out “sloppy”, although nothing is wrong on its own. It is like music: a note sung slightly off grates on the ear, though no single note is false by itself.
+
+A **type scale** (also called a modular scale) does the opposite. You take one base size for body text and one ratio, and each next size is got by multiplying by it. With a base of 16 pixels and a ratio of 1.25 the ladder looks like this: 16, 20, 25, 31, 39, 49. Between the steps there is always the same relation, and the eye feels it as order.
+
+Ratios are often taken from music, because they are pleasant to hear and to see: 1.2 (a minor third), 1.25 (a major third), 1.333 (a perfect fourth), 1.5 (a perfect fifth), 1.618 (the golden ratio). A handy calculator is on the site modularscale.com, listed in the sources.
+
+Try it yourself: choose a ratio and see how the ladder changes. The headings in it are set in your project’s name.
+
+<TypeScaleLab />
+
+<details>
+<summary>Check yourself: what is a type scale made of?</summary>
+
+A base size for body text and one ratio. Each next step is the previous one multiplied by the ratio.
+
+</details>
+
+## How many steps a site needs
+
+An ordinary site needs six or seven: one step down (captions, small notes), body text, and four or five up (subheadings and headings of different levels). Systems with fifteen sizes are feared for good reason: the difference between them becomes invisible, and you have to choose every time.
+
+Big design systems give the steps roles. In Material Design 3 there are fifteen styles: display, headline, title, body and label, each in three sizes (large, medium, small). IBM’s Carbon divides type into two sets: “productive” for dense working interfaces and “expressive” for editorial pages. Role names save you from remembering numbers: a developer writes `headline-medium`, not `28px`.
+
+We’ll name our steps by size: `--fs-sm`, `--fs-base`, `--fs-lg`, `--fs-xl`, `--fs-2xl`, `--fs-3xl` (fs for font-size). And we’ll give the roles by rule: `h1` takes `--fs-3xl`, `h2` takes `--fs-xl`.
+
+## Units: rem, not px
+
+It is better to set font size in **rem**: one rem equals the font size of the root element, which a person can change in their browser settings. People with low vision often make it larger, and a page sized in pixels won’t notice. The WCAG accessibility rule requires that text can be enlarged to 200% without loss of content, and rem gives you that for free.
+
+```css
+:root {
+  --ratio: 1.25;
+  --fs-base: 1rem;
+  --fs-lg: calc(var(--fs-base) * var(--ratio));
+  --fs-xl: calc(var(--fs-lg) * var(--ratio));
+}
+```
+
+This way the whole scale can be shifted with one edit: change `--ratio` or `--fs-base`.
+
+## Fluid size
+
+A heading of 49 pixels is fine on a laptop and enormous on a phone. People used to write several media queries for this. Today there is the function `clamp(minimum, preferred, maximum)`: the size grows smoothly with the width of the screen, but doesn’t go past its limits.
+
+```css
+h1 {
+  font-size: clamp(2rem, 1rem + 3vw, 3.5rem);
+}
+```
+
+The unit `vw` equals one percent of the screen width. It is easier to find the numbers in a generator: the sources list Utopia, which builds a whole fluid scale from two width limits. The diagram above has a simple example: move the screen width.
+
+<details>
+<summary>Check yourself: what does clamp() do?</summary>
+
+It gives a value between its limits that grows with the screen width: never less than the minimum and never more than the maximum.
+
+</details>
+
+## Line height and character
+
+Each step has its own spacing between lines. For body text, 1.4 to 1.6 suits: the lines don’t stick together, and the eye doesn’t lose its path. Large headings have tighter spacing, about 1.1 to 1.2, or the lines of a heading drift apart. Set the line height as a number without units (`line-height: 1.55`), and it is counted from the font size of the element.
+
+And a little about fonts: one family is enough. For a heading and for text you can take two styles (bold and regular) of the same font, and create the contrast with size. Take a pair of different families only when you can explain why. In the CSS part you attached web fonts: remember that each costs bytes and loading time.
+
+## Practice
+
+Your project’s page is now set in sizes of 29, 21, 15 and 11 pixels: numbers plucked from the air. Replace them with a scale: define a ratio and six steps on `:root`, give the steps to roles (`h1`, `h2`, section paragraphs, the caption) and fix the line height of the paragraphs. Then change `--ratio` to `1.333` and see how the page rearranges. That is how a scale works: one number, the whole look.
+
+## What was wrong with 2014
+
+In 2014 sizes were set in pixels and fitted to every screen with media queries, and there were no “fluid” sizes. A page either didn’t fit on a phone or looked empty on a big screen. The function `clamp()` didn’t exist then: it appeared in browsers only in 2019 and 2020.
