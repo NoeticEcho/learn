@@ -1,0 +1,331 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/13-three-ways-test.svx. */
+	export const metadata = {
+		id: '12-storytelling/13-three-ways-test',
+		part: 12,
+		order: 13,
+		title: 'Which version works better: testing on readers',
+		definition: 'Testing story versions means comparing texts that differ in one thing. Five readers show what is unclear; an A/B test makes sense only with a lot of traffic.',
+		summary:
+			'You’ll learn to check which version of a story is better without fooling yourself: what exactly to compare, how many readers are needed and why, with small numbers, a “winner” is often chance. Afterwards you have a plan for testing two versions, written in advance, and the version you’ve chosen for now on the page.',
+		minutes: 30,
+		teaches: ['story-three-ways-test'],
+		requires: ['story-expert-ethics', 'story-abt'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'cards', label: '5 readers', caption: 'Testing on people', say: 'Five people from your audience, not friends, will show what is unclear. Ask about understanding, not “did you like it?”' },
+				{ mood: 'hint', side: 'right', prop: 'sheet', label: 'A / B', say: 'Change one thing. If the versions differ in story and headline both, you won’t know which one worked.' },
+				{ mood: 'hmm', prop: 'browser', label: '10% and 10%', caption: 'Two identical texts', say: 'With few visitors, one of them “pulls ahead” by chance. Stopping the test that day means believing chance.' }
+			]
+		},
+		practice: {
+			id: 'story-test-plan',
+			title: 'A plan to test two versions',
+			task: 'Put the version you have chosen for now on the home page (twelve words or more, with no guarantees and no “best” or “No. 1”). Then draw up a plan to test two versions: what differs in them and what is the same, what you measure (read to the end, and a click on your button), how many readers (a number of five or more), three questions, a decision rule with a number, written before the test, and how you will tell the readers. Replace every “…”.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header>
+      <h1>{{title}}</h1>
+      <p class="hero-story">…</p>
+      <a class="cta" href="#contact">{{mainAction.label}}</a>
+    </header>
+
+    <aside class="note" data-scaffold id="plan">
+      <h2>The test plan</h2>
+      <p>Version A: <span id="va">…</span></p>
+      <p>Version B: <span id="vb">…</span></p>
+      <p>What is the same in both: <span id="same">…</span></p>
+      <p>What we measure: <span id="metric">…</span></p>
+      <p>How many readers: <span id="readers">…</span></p>
+      <h3>Questions for the reader</h3>
+      <ol class="questions">
+        <li>…</li>
+        <li>…</li>
+        <li>…</li>
+      </ol>
+      <p>Decision rule (written before the test): <span id="decision">…</span></p>
+      <p>How we will tell the readers: <span id="consent">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header>
+      <h1>{{title}}</h1>
+      <p class="hero-story">People come with a question they have put off for a long time, but they don’t know where to start, so our first step is a short conversation.</p>
+      <a class="cta" href="#contact">{{mainAction.label}}</a>
+    </header>
+
+    <aside class="note" data-scaffold id="plan">
+      <h2>The test plan</h2>
+      <p>Version A: <span id="va">an ABT, one sentence at the top of the page</span></p>
+      <p>Version B: <span id="vb">a short case study in place of the introduction</span></p>
+      <p>What is the same in both: <span id="same">all the other text, the button and the page design</span></p>
+      <p>What we measure: <span id="metric">whether they read to the end and whether they press “{{mainAction.label}}”</span></p>
+      <p>How many readers: <span id="readers">5 for each version</span></p>
+      <h3>Questions for the reader</h3>
+      <ol class="questions">
+        <li>Tell me in your own words what this page is about.</li>
+        <li>What would you do next?</li>
+        <li>What in the text didn’t you believe, and why?</li>
+      </ol>
+      <p>Decision rule (written before the test): <span id="decision">I choose the version that was retold more accurately and after which more people are ready to take the next step, at least 3 out of 5</span></p>
+      <p>How we will tell the readers: <span id="consent">we will say it is a test of the text, note nothing about who they are, and they can leave at any moment</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'hero-filled', kind: 'text', selector: 'header p.hero-story', matches: '^[^…]*$' },
+				{ id: 'hero-length', kind: 'text', selector: 'header p.hero-story', matches: '^\\s*(\\S+\\s+){11}\\S+' },
+				{ id: 'hero-plain', kind: 'text', selector: 'header p.hero-story', matches: '^(?![\\s\\S]*(?:[Gg]uarantee|\\b[Bb]est\\b|#\\s?1|[Nn]o\\.\\s?1|[Uu]nique|100\\s?%))[\\s\\S]*$' },
+				{ id: 'cta-guard', kind: 'field', selector: 'header a.cta', field: 'mainAction.label' },
+				{ id: 'plan-no-blanks', kind: 'text', selector: '#plan', matches: '^[^…]*$' },
+				{ id: 'versions-described', kind: 'text', selector: '#va', matches: '^\\s*(\\S+\\s+){2}\\S+' },
+				{ id: 'versions-b', kind: 'text', selector: '#vb', matches: '^\\s*(\\S+\\s+){2}\\S+' },
+				{ id: 'same-part', kind: 'text', selector: '#same', matches: '^\\s*(\\S+\\s+){3}\\S+' },
+				{ id: 'metric-action', kind: 'field', selector: '#metric', field: 'mainAction.label' },
+				{ id: 'metric-read', kind: 'text', selector: '#metric', matches: '(?:[Rr]ead|to the end|finish)' },
+				{ id: 'readers-number', kind: 'text', selector: '#readers', matches: '^\\s*([5-9]|[1-9]\\d+)' },
+				{ id: 'questions', kind: 'count', selector: '#plan ol.questions li', min: 3 },
+				{ id: 'decision-rule', kind: 'text', selector: '#decision', matches: '^(?=[\\s\\S]*\\d)\\s*(\\S+\\s+){7}\\S+' },
+				{ id: 'consent', kind: 'text', selector: '#consent', matches: '^\\s*(\\S+\\s+){4}\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the steps of testing versions in order',
+				items: ['Decide what to measure', 'Write the decision rule', 'Show the versions to readers', 'Compare the results by the rule', 'Choose a version and say what is still unclear']
+			},
+			{
+				type: 'single',
+				prompt: 'Why is the decision rule written before the test?',
+				options: [
+					'So the conclusion isn’t bent to fit a result you like',
+					'To make the test go faster',
+					'Because the law requires it'
+				],
+				answer: 0,
+				why: [
+					'Yes: if the threshold is chosen afterwards, any result can be explained in your favor.',
+					'No: the speed doesn’t change.',
+					'No: this is method, not law.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of testing on five readers?',
+				options: [
+					'It is good at showing what is unclear and what isn’t believed',
+					'It proves that one version is statistically better than another',
+					'It can be done at little cost',
+					'It’s better to ask: “tell me what you understood”'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: a few attentive readers find most of the problems.',
+					'No: a “better or worse” comparison needs large samples, and five people can’t give one.',
+					'Yes: strangers from your audience and a notebook are enough.',
+					'Yes: a retelling shows what came across, not what was liked.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the “two identical texts” experiment (A/A) show?',
+				options: [
+					'With small numbers, one of two identical texts often “wins” by chance',
+					'Identical texts perform differently',
+					'A/B tests never work'
+				],
+				answer: 0,
+				why: [
+					'Yes. That is why you can’t draw a conclusion from twenty visitors, and as the number of visitors grows, chance “wins” disappear.',
+					'No: the texts are identical, and only chance differs.',
+					'No: tests work with enough data and the right rules.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What do you do if a site has only a few dozen visitors a week?',
+				options: [
+					'Use qualitative checks with live readers, and put the A/B test off until there is more traffic',
+					'Run an A/B test anyway and choose by the percentage',
+					'Test nothing'
+				],
+				answer: 0,
+				why: [
+					'Yes: with little traffic the numbers are random, and a conversation with a reader tells you more.',
+					'No: a percentage from a small sample misleads.',
+					'No: a qualitative check is always possible.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'How do you tell readers honestly about a test?',
+				options: [
+					'Say that it is a test of the text',
+					'Note no needless details about the person',
+					'Let them leave at any moment',
+					'Hide that it is a test, so the answers are more honest'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: people should know what they are taking part in.',
+					'Yes: if you collect data about people you need a lawful basis and consent, and it is simpler not to collect more than you need.',
+					'Yes: taking part is voluntary.',
+					'No: secrecy isn’t needed and isn’t ethical, and a text can be tested openly.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-test-plan-rule', front: 'Why write the decision rule in advance?', back: 'So the conclusion isn’t bent to fit a result you like. The threshold (for example “3 out of 5”) is chosen before the test.' },
+			{ id: 'story-five-readers', front: 'What does a test on five readers give?', back: 'It finds what is unclear and what isn’t believed. It does not prove one version is better: that needs large numbers.' },
+			{ id: 'story-aa-test', front: 'What is an A/A test, and what does it teach?', back: 'A comparison of two identical versions. It shows that on small samples a “winner” is often chance.' },
+			{ id: 'story-test-ethics', front: 'How do you test texts on people honestly?', back: 'Say it is a test, collect nothing needless about the person, and let them leave. If you collect data, you need a lawful basis.' }
+		],
+		sources: [
+			{ title: 'How Not To Run an A/B Test (Evan Miller)', url: 'https://www.evanmiller.org/how-not-to-run-an-ab-test.html', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'How Many Test Users in a Usability Study? (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/how-many-test-users/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Why You Only Need to Test with 5 Users (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Thinking Aloud: The #1 Usability Tool (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/thinking-aloud-the-1-usability-tool/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'A/B testing (Wikipedia)', url: 'https://en.wikipedia.org/wiki/A/B_testing', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Optional stopping (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Optional_stopping', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The three versions are written. Now choose two and plan an honest test. The main thing: decide how you will choose before you see the results.',
+			hints: [
+				'First put the version you’ve chosen for now on the page: twelve words or more, with no “best” and no “guarantee”.',
+				'You need to measure two things: whether they read to the end and whether they press your button (its label word for word). At least five readers.',
+				'The decision rule must contain a number, for example “at least 3 out of 5”, and be written before the test.'
+			],
+			mistakes: {
+				'hero-filled': 'The page version still has an ellipsis “…”.',
+				'hero-length': 'The chosen version is too short: it needs at least twelve words.',
+				'hero-plain': 'The chosen version still has guarantees or words like “best”. Replace them with a fact.',
+				'cta-guard': 'The main-action button has to stay on the page.',
+				'plan-no-blanks': 'The plan still has an ellipsis “…”. Fill in all the fields.',
+				'versions-described': 'Describe version A in at least three words.',
+				'versions-b': 'Describe version B in at least three words.',
+				'same-part': 'Say what stays the same in both versions: only the story should change.',
+				'metric-action': 'What you measure must contain your button’s label word for word.',
+				'metric-read': 'Measure also whether they read to the end.',
+				'readers-number': 'Give a number of readers: five or more.',
+				questions: 'You need at least three questions for the reader.',
+				'decision-rule': 'The decision rule needs a number (for example “at least 3 out of 5”) and at least eight words.',
+				consent: 'Describe in at least five words how you will tell the readers.'
+			},
+			outro: 'You have a version on the page and a plan for an honest test. Now you can not only tell a story but also test it. Next the course moves on to how the story gets found: marketing, search and metrics.'
+		},
+		say: { 'A/B': 'A B', 'A/A': 'A A', NN: 'N N' }
+	};
+</script>
+
+<script>
+	import AaTest from '../../diagrams/AaTest.svelte';
+</script>
+
+## You’ve written three versions, so what next
+
+You have collected several stories: an ABT, a case study, a founder’s story, a spine, a kishōtenketsu. Which of them works? It is easy to choose “the one I like”, but you like it, and someone else will read it. You can check this, and without great cost. Three questions need deciding: **what we compare**, **how we measure** and **how we decide**.
+
+## What we compare
+
+Rule one: **change one thing**. If versions A and B differ in story, headline and picture, then when one proves better you won’t understand why. Let only the shape of the story differ, and keep the rest identical.
+
+Rule two: **compare what answers your question**. “Which version is more convincing to someone seeing us for the first time?” is not the same as “which is prettier”.
+
+## What we measure
+
+There are two kinds of measurement, and they complement each other.
+
+- **What people do.** Whether they read to the end. Whether they press your button. These are numbers, but on a small site there aren’t many.
+- **What people understand.** Asking them to “tell me in your own words what this page is about” shows what came across better than any questionnaire. And the question “what did you not believe?” finds the places where the story breaks.
+
+Ask about understanding and trust, not about liking. “Did you like it?” gets a polite “yes” in answer.
+
+<details>
+<summary>Check yourself: why is it better to ask for a retelling than for a rating?</summary>
+
+A retelling shows what a person understood and remembered. A “liked it” is more often politeness than information.
+
+</details>
+
+## A test on five readers
+
+The researchers at Nielsen Norman Group showed long ago that with a small number of attentive participants (around five per group) you find a large share of the understanding problems, roughly 85 percent in Nielsen’s widely cited model, though that figure has been argued over, and each further person adds less and less. This is a qualitative test, and it answers “what is unclear and what isn’t believed”, not “which version is better, in percent”.
+
+How to run it.
+
+1. Find five people from your audience who aren’t friends that know you.
+2. Show each **one** version (one to five of them, the other to the other five).
+3. Ask them to read aloud or think aloud. Don’t prompt them.
+4. Ask three questions: “What is this page about?”, “What would you do next?”, “What did you not believe?”.
+5. Write the answers down word for word, without paraphrasing.
+
+## When you need an A/B test, and what makes it risky
+
+An **A/B test** shows two versions to different visitors of a site at the same time and compares what they do. It is needed when there are many visitors. If there are a few dozen a week, an A/B test won’t help you: the numbers are random. See for yourself.
+
+<AaTest />
+
+Here both texts are **identical**, and by design 10% of visitors click on each. But with a small number of visitors, one of them regularly “wins” by a few points. The more visitors, the more rarely, and that is a good way to remember it: **a small difference on small numbers means nothing**.
+
+Typical mistakes, which Evan Miller describes in detail in his article “How Not To Run an A/B Test”:
+
+- **Peeking.** Stopping the test on the day one version pulls ahead. (Statisticians call it optional stopping, and it inflates false wins.)
+- **Several changes at once.** Then it is unclear what worked.
+- **Too short a run.** Weekly swings get mistaken for an effect.
+- **A threshold set afterwards.** Choosing the criterion for winning after seeing the result.
+
+More on numbers, thresholds and the traps of A/B tests comes in the part on metrics.
+
+<details>
+<summary>Check yourself: why can’t you stop a test when one version pulls ahead?</summary>
+
+Random swings on small numbers easily produce a temporary “winner”. You have to decide in advance how much data to collect, and wait.
+
+</details>
+
+## The test plan
+
+A good plan fits on one page and is drawn up **before** the test.
+
+1. **Versions.** What is in A, what is in B.
+2. **What is the same.** The rest of the text, the button, the design.
+3. **What we measure.** Whether they read to the end and whether they take the main action.
+4. **How many readers.** Five at least.
+5. **Questions.** Three, as above.
+6. **A decision rule.** With a number: “I choose the version that was retold more accurately, provided at least 3 out of 5 are ready to take a step after it.” Write it down while you don’t know the result.
+7. **How we tell the readers.** We say it is a test of the text, we don’t collect more than we need, and we let people leave.
+
+A word on the last. Testing on people means handling other people’s data, even if only a little. If you note only answers without names, there is no problem. If you collect details about people, there are rules. In the EU and UK, the GDPR needs a lawful basis (often consent) and that you collect no more than you need, and a test that records people’s sessions or sets analytics cookies falls under it and under the ePrivacy rules (PECR in the UK). In the US there is no single law, but state privacy laws such as California’s apply to many businesses, and recording a call or a video session needs the other person’s consent: in a number of states, including California, everyone on the call must agree. Telling people it is a test, and asking before you record, is both the ethical and the simple way. This is general information, not legal advice.
+
+## Practice
+
+1. **Put the version you’ve chosen for now on the page**: twelve words or more, with no guarantees and no “best” or “No. 1”.
+2. **Draw up a plan to test** two versions by the steps above. The working note with the plan won’t be seen on a finished site: it is not shown in the gallery.
+3. **Choose a decision rule** with a number and write it down.
+
+Then, if you like, run the test on real people: five of them and a notebook. Write the results down and go back to the page: it should change.
+
+## How this part ends
+
+You have come the whole way from “why stories work” to “how to check that they work”: structure, hero, forms, page, brand, case study, data, scrolling, ethics and testing. Now your site has a voice. Next it has to be found: that is search optimization, social media and measurement, the subject of the following parts of the course.
