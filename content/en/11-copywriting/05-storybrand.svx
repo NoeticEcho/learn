@@ -1,0 +1,370 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/11-copywriting/05-storybrand.svx. */
+	export const metadata = {
+		id: '11-copywriting/05-storybrand',
+		part: 11,
+		order: 5,
+		title: 'StoryBrand and hook, story, offer',
+		definition: 'StoryBrand is Donald Miller’s scheme of seven elements in which the customer is the hero and the business is the guide. Hook, Story, Offer is its short form.',
+		summary:
+			'You’ll build a home-page outline from the seven elements of StoryBrand (the visitor is the hero and you are the guide) and write it briefly as “hook, story, offer”. Afterwards you have a page outline with an honest “failure” and a success, a one-line statement about the project and a text in three parts, and a habit of telling a real story from an invented one.',
+		minutes: 30,
+		teaches: ['copy-storybrand', 'copy-hook-story-offer'],
+		requires: ['copy-jtbd'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'Since 2010, we', caption: 'A page about us', say: 'We’ve existed since 2010, we have a team. But where on this page is the person who came to us?' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'customer = hero', caption: 'StoryBrand', say: 'The customer is the hero and the business is the guide: it gives a plan and calls to action. Not you, not your product.' },
+				{ mood: 'hint', prop: 'sheet', label: 'the story', caption: 'Hook, Story, Offer', say: 'The story must be true. An invention passed off as a real case is deceit. Call a typical case a typical case.' }
+			]
+		},
+		practice: {
+			id: 'storybrand-hso',
+			title: 'A page outline by StoryBrand and Hook, Story, Offer',
+			task: 'Build an outline of your project’s home page. 1) SB7: the hero (the visitor, not you: what they want), the problem, the guide (you: empathy and a proof from the brief in full), a plan of three steps, the call (the direct one is the main action from the brief in the same words, and the soft one is at least three words), the failure (honest consequences, without scaring) and the success. In one line (at least fifteen words): the problem, the plan, the result. 2) Hook, Story, Offer: a hook, a story (marked “typical case” or “with the client’s consent”: an invented story passed off as real is not allowed) and an offer that names an item from the brief and the main action. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="story">
+      <h2>SB7: the page outline</h2>
+      <dl id="sb7">
+        <dt>1. A character</dt>
+        <dd class="sb" data-part="hero">…</dd>
+        <dt>2. Has a problem</dt>
+        <dd class="sb" data-part="problem">…</dd>
+        <dt>3. Meets a guide</dt>
+        <dd class="sb" data-part="guide">…</dd>
+        <dt>4. Who gives them a plan</dt>
+        <dd class="sb" data-part="plan"><ol class="plan"><li>…</li><li>…</li><li>…</li></ol></dd>
+        <dt>5. And calls them to action</dt>
+        <dd class="sb" data-part="call">Direct: <span class="call-direct">…</span>. Soft: <span class="call-soft">…</span></dd>
+        <dt>6. That helps them avoid failure</dt>
+        <dd class="sb" data-part="failure">…</dd>
+        <dt>7. And ends in success</dt>
+        <dd class="sb" data-part="success">…</dd>
+      </dl>
+      <p>In one line (problem, plan, result): <span id="one-liner">…</span></p>
+
+      <h2>Hook, Story, Offer for the home page</h2>
+      <div id="hso">
+        <p class="hso" data-part="hook"><span class="tag">Hook:</span> …</p>
+        <p class="hso" data-part="story"><span class="tag">Story:</span> <span class="story-kind">…</span> …</p>
+        <p class="hso" data-part="offer"><span class="tag">Offer:</span> …</p>
+      </div>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="story">
+      <h2>SB7: the page outline</h2>
+      <dl id="sb7">
+        <dt>1. A character</dt>
+        <dd class="sb" data-part="hero">{{forWhom}}: a person who wants a clear order of action and doesn’t want to lose time or money.</dd>
+        <dt>2. Has a problem</dt>
+        <dd class="sb" data-part="problem">External: the job keeps being put off, and it isn’t clear where to start. Internal: the worry that something has been missed.</dd>
+        <dt>3. Meets a guide</dt>
+        <dd class="sb" data-part="guide">{{who}}. I understand that in matters like these it is hard to find your way without preparation. {{#each proofs}}{{title}}. {{/each}}</dd>
+        <dt>4. Who gives them a plan</dt>
+        <dd class="sb" data-part="plan"><ol class="plan"><li>You send a request.</li><li>We go through your situation and name the time and the price.</li><li>We do the work and explain the result.</li></ol></dd>
+        <dt>5. And calls them to action</dt>
+        <dd class="sb" data-part="call">Direct: <span class="call-direct">{{mainAction.label}}</span>. Soft: <span class="call-soft">see how it works, step by step</span></dd>
+        <dt>6. That helps them avoid failure</dt>
+        <dd class="sb" data-part="failure">The job stays unsolved, and the time or the cost grows as the weeks pass.</dd>
+        <dt>7. And ends in success</dt>
+        <dd class="sb" data-part="success">You know the order of work, the time and the price, and you get on calmly with other things.</dd>
+      </dl>
+      <p>In one line (problem, plan, result): <span id="one-liner">The job gets put off because it isn’t clear where to start; we go through your situation, name the time and the price and do the work, and you get clarity.</span></p>
+
+      <h2>Hook, Story, Offer for the home page</h2>
+      <div id="hso">
+        <p class="hso" data-part="hook"><span class="tag">Hook:</span> Putting this off because it isn’t clear where to start?</p>
+        <p class="hso" data-part="story"><span class="tag">Story:</span> <span class="story-kind">A typical case, not a particular client.</span> A person arrives with a question, we go through the situation together and name the order of work.</p>
+        <p class="hso" data-part="offer"><span class="tag">Offer:</span> {{items.0.title}}: the price and the time are named before work starts. {{mainAction.label}}.</p>
+      </div>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#story', matches: '^[^…]*$' },
+				{ id: 'sb7-parts', kind: 'count', selector: '#sb7 .sb', min: 7 },
+				{ id: 'hero', kind: 'text', selector: '#sb7 [data-part="hero"]', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' },
+				{ id: 'guide-proof', kind: 'field', selector: '#sb7 [data-part="guide"]', field: 'proofs[].title', min: 1, when: { brief: 'proofs[].title' } },
+				{ id: 'plan-steps', kind: 'count', selector: '#sb7 .plan li', min: 3 },
+				{ id: 'call-direct', kind: 'field', selector: '#sb7 .call-direct', field: 'mainAction.label' },
+				{ id: 'call-soft', kind: 'text', selector: '#sb7 .call-soft', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'failure-honest', kind: 'text', selector: '#sb7 [data-part="failure"]', matches: '^(?![\\s\\S]*(?:[Cc]atastroph|[Dd]isaster|[Nn]ightmare|[Tt]error|[Tt]errif|[Hh]orrif|[Hh]orror|[Ss]cary|[Dd]oom|lose everything))[\\s\\S]*\\S' },
+				{ id: 'success', kind: 'text', selector: '#sb7 [data-part="success"]', matches: '^\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'one-liner', kind: 'text', selector: '#one-liner', matches: '^\\s*\\S+(?:\\s+\\S+){14,}' },
+				{ id: 'hso-parts', kind: 'count', selector: '#hso .hso', min: 3 },
+				{ id: 'hook', kind: 'text', selector: '#hso [data-part="hook"]', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' },
+				{ id: 'story-kind', kind: 'text', selector: '#hso .story-kind', matches: '[Tt]ypical|[Cc]onsent|[Ff]ictional|[Ii]nvented|[Cc]omposite|[Ii]llustrative' },
+				{ id: 'offer-item', kind: 'field', selector: '#hso [data-part="offer"]', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'offer-action', kind: 'field', selector: '#hso [data-part="offer"]', field: 'mainAction.label' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the seven elements of StoryBrand in the order Donald Miller names them',
+				items: [
+					'A character (the customer)',
+					'Has a problem',
+					'Meets a guide',
+					'Who gives them a plan',
+					'And calls them to action',
+					'That helps them avoid failure',
+					'And ends in success'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Who is the hero of a page in StoryBrand?',
+				options: [
+					'The visitor: a person who wants something',
+					'You and your project',
+					'Your product'
+				],
+				answer: 0,
+				why: [
+					'Yes. Miller’s central idea: the customer is the hero and you are the guide. The page is about how you help them, not about how wonderful you are.',
+					'No: if you are the hero, the page becomes an “About us” with no reader.',
+					'No: the product is the guide’s tool, not the hero.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes up the image of the guide, according to Miller?',
+				options: [
+					'Empathy: “I understand your situation”',
+					'Authority backed by facts: experience, documents, results',
+					'A story of how magnificent I am',
+					'Loud promises'
+				],
+				answer: [0, 1],
+				why: [
+					'Yes: without understanding, a person won’t trust you.',
+					'Yes: authority is shown by checkable facts, not by words.',
+					'No: boasting makes you the hero and puts the reader off.',
+					'No: promises with no grounds undermine trust.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you write the “failure” (what happens if they don’t act) honestly?',
+				options: [
+					'Name the real consequences briefly and without scaring',
+					'Describe the worst outcome you can imagine',
+					'Don’t mention it at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. The “failure” is a prompt to think, not to frighten. The honest version rests on what really happens.',
+					'No: piling on is manipulation, and in regulated professions it also breaks advertising rules.',
+					'No: without stakes the call to action loses its point. But the stakes should be named calmly.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In Hook, Story, Offer you tell a customer’s story. How do you honestly present a case taken “from life”?',
+				options: [
+					'Mark it as a typical case and not a particular client, or give a real one if the client consented in writing',
+					'Pass off an invention as a real case: it is more convincing',
+					'Name the client and the case number'
+				],
+				answer: 0,
+				why: [
+					'Yes. An invented story passed off as real is deceit of the reader, and in advertising a service it can be a breach of the law: the FTC’s rule on consumer reviews and testimonials, for example, bans fake testimonials. Names of clients and cases are protected.',
+					'No: the trick has become a cliché and is easily exposed.',
+					'No: a client’s details cannot be revealed without consent, and for a lawyer it is also confidential.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each tool with what it does',
+				pairs: [
+					['StoryBrand (SB7)', 'Arranges the meaning of the page: character, problem, guide, plan, call, failure, success'],
+					['Hook, Story, Offer', 'A short sequence: stop them, show yourself in a story, make an offer'],
+					['The grunt test', 'Checks whether it is clear within seconds: what is offered, how it will improve life, what to do'],
+					['A direct and a soft call', 'Two steps: “book” and “see how it works”']
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'copy-sb7-parts',
+				front: 'Name the seven elements of StoryBrand',
+				back: 'A character (the customer), a problem, a guide (you), a plan, a call to action, failure, success. Donald Miller, “Building a StoryBrand”, 2017.'
+			},
+			{
+				id: 'copy-sb7-guide',
+				front: 'What should the guide be like?',
+				back: 'Empathetic (understands the situation) and competent, with the competence backed by checkable facts: documents, experience, results.'
+			},
+			{
+				id: 'copy-sb7-failure',
+				front: 'How do you write the “failure” honestly?',
+				back: 'The real consequences of doing nothing, briefly and calmly, without scaring. Piling on fear is manipulation.'
+			},
+			{
+				id: 'copy-hso-def',
+				front: 'What is Hook, Story, Offer?',
+				back: 'A hook (to stop them), a story (to show who you are and what you can do), an offer (one clear one, with terms). Russell Brunson (ClickFunnels).'
+			},
+			{
+				id: 'copy-hso-honest',
+				front: 'How do you tell a story honestly?',
+				back: 'Only the truth: a typical case is marked “not a particular client”, a real one is given with the client’s written consent. An invention passed off as fact is deceit.'
+			}
+		],
+		sources: [
+			{ title: 'StoryBrand: Donald Miller’s site', url: 'https://storybrand.com/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Donald Miller (author) (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Donald_Miller_(author)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Hook, Story, Offer (ClickFunnels)', url: 'https://www.clickfunnels.com/blog/hook-story-offer/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Monomyth (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Monomyth', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'StoryBrand turns the usual page around: the visitor becomes the hero and you are the guide. Let’s build your page that way.',
+			hints: [
+				'Start with the hero: it isn’t you. What does the person you are talking to want? Take “for whom” from the brief.',
+				'The guide shows two things: understanding and ability. The first in words, the second with a proof from the brief in full, as it is written.',
+				'In the Hook, Story, Offer story, be sure to mark what kind it is: “a typical case, not a particular client” or “with the client’s consent”. That way you won’t deceive the reader.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is left somewhere. Fill in all seven elements, the line and the three blocks.',
+				'sb7-parts': 'There must be seven elements of SB7. Don’t delete lines.',
+				hero: 'The hero is described too briefly: at least five words about what the visitor wants.',
+				'guide-proof': 'The guide has no proof from the brief. Put it in in full, as it is written.',
+				'plan-steps': 'The plan must have three steps.',
+				'call-direct': 'The direct call must name the main action from the brief in the same words.',
+				'call-soft': 'The soft call (for example, “see how it works”) must be at least three words.',
+				'failure-honest': 'The “failure” has words of scaremongering: “catastrophe”, “disaster”, “nightmare”, “scary”. Replace them with facts.',
+				success: 'The success is described too briefly: at least six words.',
+				'one-liner': 'The line about the problem, the plan and the result must be at least fifteen words.',
+				'hso-parts': 'You need three blocks: hook, story, offer.',
+				hook: 'The hook is too short: at least five words.',
+				'story-kind': 'Mark the story: “typical case”, “with the client’s consent” or “invented example”.',
+				'offer-item': 'The offer must name an item from your brief in full.',
+				'offer-action': 'The offer must have the main action from the brief in the same words.'
+			},
+			outro: 'You have a page outline in which the visitor is the hero and you are the guide, and a short version for the first screen. Next we’ll see where the line lies between persuasion and manipulation.'
+		},
+		say: { StoryBrand: 'StoryBrand', SB7: 'S B seven', Miller: 'Miller', Brunson: 'BRUN-son', ClickFunnels: 'click-funnels' }
+	};
+</script>
+
+<script>
+	import FormulaDesk from '../../diagrams/FormulaDesk.svelte';
+</script>
+
+## A page in which the reader is the hero
+
+Most small-business pages talk about the business itself: “We’ve been here since 2010”, “Our team”, “Our values”. The reader sits in the audience and watches others talk about themselves. The American writer and communications consultant **Donald Miller** proposed turning the roles around: make the customer the hero of the story and yourself their guide.
+
+The idea grew out of Miller, an author of books, studying for years how stories work in film, and taking from there a simple frame. The frame goes back to the monomyth (more on it in the part on storytelling: the hero’s journey after Joseph Campbell) and to screenwriting manuals, not to advertising research, and it is best understood as a working metaphor, not a scientific result. But the metaphor fits well with what you can already do: the reader’s level, the customer’s job, the pain.
+
+The scheme is called **StoryBrand**, and its seven elements are **SB7** (StoryBrand 7). Miller set them out in the book *Building a StoryBrand* (2017); his site is in the sources. In the part on storytelling you’ll assemble a whole page from them, and here we take the scheme apart and apply it to your brief. Put aside for a moment the formulas of the earlier lessons: they are about the text inside a block, and this scheme is about **which blocks a page is made of**.
+
+## Seven elements
+
+Open the diagram below and choose “StoryBrand (SB7)”: it lays the seven elements out on your brief.
+
+<FormulaDesk sets="sb7 hso" />
+
+1. **A character (the customer).** The hero is not you and not your product. It is a person who wants something. State the goal in one phrase: “wants to find out where their lot’s boundary runs”. That phrase nearly matches the “job” from the last lesson, and that is no accident.
+2. **Has a problem.** The hero has a problem on three levels. **External**: what gets in the way in practice (“the fence is in the wrong place”). **Internal**: what they feel (“anxiety, a sense of being cheated”). **Philosophical**: why it is wrong (“a person shouldn’t have to fear for their own land”). Miller stresses the internal level: people buy to solve an internal problem.
+3. **Meets a guide.** That is you. The guide shows **empathy** (“I understand how unpleasant this is”) and **authority** (experience, documents, results). Empathy without authority is touching but doesn’t help; authority without empathy makes a person doubt they will be welcome.
+4. **Who gives them a plan.** Three simple steps from “I want” to “I got it”. Miller distinguishes a process plan (the steps of buying) and an agreement plan (what you promise, such as a guarantee of terms). Three steps, because people will not remember more than three.
+5. **And calls them to action.** A direct call (“Book a consultation”) and a **soft** one (“see how it works”). The soft one is for those who aren’t ready: it keeps the contact without demanding a decision.
+6. **That helps them avoid failure.** What will happen if they don’t act. This is what PAS called agitation, and the rule is the same: **facts, without scaring**. A short line, not a paragraph.
+7. **And ends in success.** What comes of it when the hero reaches the end: their new position. This needs specifics, not “a better life”.
+
+Besides the seven elements, Miller has a handy check he calls the “grunt test”: look at the main screen. Would a person understand within a few seconds **what you offer, how it will make their life better, and what they need to do to get it**? If not, nothing else matters. We already called this the five-second check in the first lesson of the part on texts, and it is the same idea.
+
+**An example with the default persona (the invented Kate Alder).**
+
+- *Hero:* a landowner who needs to know where their boundary runs.
+- *Problem:* external: the fence was put up by the old posts, and the map shows the boundary elsewhere. Internal: the worry that the neighbor will turn out to be right and you not.
+- *Guide:* “I understand how unpleasant such a dispute is (empathy). I am a licensed surveyor and expert witness, and here are my license and my association membership (authority).”
+- *Plan:* 1. A consultation and a look at the documents. 2. A site visit and measurements. 3. A boundary plan, ready to file with the county recorder.
+- *Call:* direct, “Book a consultation”; soft, “See how a boundary survey goes”.
+- *Failure:* “Without a confirmed boundary it is harder to get a building permit or to sell.”
+- *Success:* “The boundary is on record, and you know where your land ends.”
+
+**When it works.** For a home page and a landing page, when the message is blurred and you need to check that every element is in place. It especially helps to shift the focus from “we” to “you”.
+
+**Where it lets you down.**
+
+- **Sameness.** If everybody writes by one scheme, pages begin to sound alike. The scheme is an arrangement of meaning, and the voice is set by your tone (lesson 5 of the part on texts).
+- **The failure turns into scaremongering.** Especially when you want to “strengthen” the call. Stay with facts.
+- **The film metaphor.** People are not the heroes of a film, and not every reader likes being told “your story”. For some sites (reference, utility) the scheme is excessive.
+- **It does not replace research.** The hero, the problem and the plan come from conversations with customers and from the canvas, not from imagination.
+
+<details>
+<summary>Check yourself: who is the hero of a page in StoryBrand, and who is the guide?</summary>
+
+The hero is the visitor, who has a goal and a problem. The guide is you: the one who understands and can help, and shows it with checkable facts.
+
+</details>
+
+## Hook, story, offer
+
+**Where from.** This short scheme was popularized by the American entrepreneur **Russell Brunson**, founder of ClickFunnels, in the books *DotCom Secrets* (2015) and *Expert Secrets* (2017). He teaches selling through funnels (more on them in the eighth lesson) and holds that any message has three parts: a hook, a story and an offer.
+
+**How it is built.**
+
+1. **Hook.** The first line, which stops them. This is where knowing the levels of awareness works: the hook names what the reader already knows or feels.
+2. **Story.** A short account that shows who you are, what you do and what the person can get. Brunson teaches building the story as a path from “before” to “after”, with a moment of insight. We treat it as a tool of trust: it is easier for a reader to believe a person than a list.
+3. **Offer.** One clear offer: what, on what terms, how to accept.
+
+**An example for a home page.**
+
+- *Hook:* “Is your fence not where the map says the boundary is?”
+- *Story:* “A typical case, not a particular client: someone buys a lot and finds that on paper it is two feet narrower. To sort it out you need a survey and a boundary plan.”
+- *Offer:* “A consultation: an hour on your documents. The price and the time are on the page. Book a consultation.”
+
+**Where it lets you down, and this matters.** Brunson is also known for a school that sells aggressively: limited offers, inflated “values”, invented stories (“I was broke and now…”). We take the frame from it, not the pressure techniques. Three rules of the honest version:
+
+- **The story is true.** An invented story passed off as real is deceit of the reader. If the example is a composite, write “a typical case, not a particular client”. If it is real, you need the client’s written consent (and they must not be recognizable), and for attorneys and some experts it isn’t allowed at all (remember the lesson on legal and expert texts). Regulators agree: the US FTC’s rules on testimonials and reviews, the UK’s CAP Code and the EU’s unfair-practices law all treat a made-up customer story as a false claim.
+- **The offer is one, and honest.** The terms are ones you will keep. No “today only” and “two places left” if it isn’t true.
+- **The hook doesn’t deceive.** What it promises is on the page.
+
+<details>
+<summary>Check yourself: how do you honestly tell a case “from practice” on a page, without exposing a client or deceiving the reader?</summary>
+
+Mark it as a typical (composite) case and not a particular client, or give a real case with the client’s written consent and anonymized. In regulated professions check the rules: sometimes case studies are not allowed.
+
+</details>
+
+## Practice
+
+Build an outline of your project’s home page. It all lies in a note, and you will see only the part that you put into the page later.
+
+1. **SB7.** The hero (the visitor; the goal from “for whom” and from the customer’s job), the problem, the guide (you: empathy and a proof from the brief in full), a plan of three steps, the call (the direct one is the main action from the brief in the same words, the soft one is your own), the failure (facts) and the success.
+2. **In one line** (at least fifteen words): the problem, the plan, the result.
+3. **Hook, Story, Offer.** A hook, a story with a mark (“typical case” or “with the client’s consent”) and an offer that names an item from the brief and the main action.
+
+The check looks at form: the seven elements, a proof in the guide, three steps of the plan, the mark on the story, the action in the offer. Whether the page is good is for you to decide: run the “grunt test” and see whether it is clear within five seconds what you offer, how it will improve the hero’s life and what to press.
