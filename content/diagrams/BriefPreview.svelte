@@ -5,27 +5,82 @@
 -->
 <script lang="ts">
 	import './shared.css';
-	import { t } from '#lib/i18n/index.ts';
-	import { TEMPLATES } from '#lib/persona/render.ts';
+	import { t, pick, getLocale } from '#lib/i18n/index.ts';
+	import { templatesFor } from '#lib/persona/render.ts';
 	import { KINDS, type Kind } from '#lib/persona/fields.ts';
 
+	const W = pick({
+		ru: {
+			labels: {
+				who: 'Кто и что',
+				forWhom: 'Для кого',
+				action: 'Главное действие',
+				sections: 'Разделы',
+				items: 'Услуги или товары',
+				people: 'Люди',
+				proofs: 'Доказательства',
+				contacts: 'Контакты',
+				languages: 'Языки',
+				tone: 'Тон'
+			},
+			tones: { formal: 'деловой', warm: 'тёплый', bold: 'смелый', calm: 'спокойный' },
+			langs: { ru: 'русский', en: 'английский' },
+			and: ' и ',
+			actions: { call: 'позвонить', form: 'написать через форму', buy: 'купить', book: 'записаться или забронировать', signup: 'вступить или попробовать', read: 'прочитать' },
+			none: 'пока не записано',
+			caption: 'Бриф слева, страница справа',
+			group: 'Тип проекта',
+			pageLabel: 'Схема страницы, собранной из брифа',
+			forWhomLine: 'Для кого:',
+			peopleLine: 'Люди:',
+			proofsLine: 'Документы и доказательства:',
+			empty: '{W.empty}',
+			filled: 'Заполнено полей:',
+			of: 'из',
+			toneOpen: 'Тон «',
+			toneClose: '» не рисуется блоком: он определит слова и вид страницы.',
+			toneUnset: 'не задан',
+			langChip: 'RU / EN'
+		},
+		en: {
+			labels: {
+				who: 'Who and what',
+				forWhom: 'For whom',
+				action: 'Main action',
+				sections: 'Sections',
+				items: 'Services or products',
+				people: 'People',
+				proofs: 'Proof',
+				contacts: 'Contacts',
+				languages: 'Languages',
+				tone: 'Tone'
+			},
+			tones: { formal: 'businesslike', warm: 'warm', bold: 'bold', calm: 'calm' },
+			langs: { ru: 'Russian', en: 'English' },
+			and: ' and ',
+			actions: { call: 'phone call', form: 'form message', buy: 'purchase', book: 'booking', signup: 'sign-up', read: 'reading' },
+			none: 'not written down yet',
+			caption: 'The brief on the left, the page on the right',
+			group: 'Kind of project',
+			pageLabel: 'A sketch of the page built from the brief',
+			forWhomLine: 'For:',
+			peopleLine: 'People:',
+			proofsLine: 'Credentials and proof:',
+			empty: 'The page is almost empty: there is nothing to say yet about this project.',
+			filled: 'Fields filled in:',
+			of: 'of',
+			toneOpen: 'The tone “',
+			toneClose: '” isn’t drawn as a block: it will decide the words and the look of the page.',
+			toneUnset: 'not set',
+			langChip: 'EN / RU'
+		}
+	});
+	const TEMPLATES = templatesFor(getLocale());
+
 	type Field = 'who' | 'forWhom' | 'action' | 'sections' | 'items' | 'people' | 'proofs' | 'contacts' | 'languages' | 'tone';
-	const labels: Record<Field, string> = {
-		who: 'Кто и что',
-		forWhom: 'Для кого',
-		action: 'Главное действие',
-		sections: 'Разделы',
-		items: 'Услуги или товары',
-		people: 'Люди',
-		proofs: 'Доказательства',
-		contacts: 'Контакты',
-		languages: 'Языки',
-		tone: 'Тон'
-	};
+	const labels: Record<Field, string> = W.labels;
 	const fields = Object.keys(labels) as Field[];
-	const tones = { formal: 'деловой', warm: 'тёплый', bold: 'смелый', calm: 'спокойный' } as const;
-	const langs = { ru: 'русский', en: 'английский' } as const;
-	const actions = { call: 'позвонить', form: 'написать через форму', buy: 'купить', book: 'записаться или забронировать', signup: 'вступить или попробовать', read: 'прочитать' } as const;
+	const { tones, langs, actions } = W;
 
 	let kind = $state<Kind>('expert');
 	let on = $state<Record<Field, boolean>>(Object.fromEntries(fields.map((f) => [f, true])) as Record<Field, boolean>);
@@ -42,15 +97,15 @@
 			case 'sections':
 				return b.sections.join(', ');
 			case 'items':
-				return b.items.length ? b.items.map((i) => i.title).join('; ') : 'пока не записано';
+				return b.items.length ? b.items.map((i) => i.title).join('; ') : W.none;
 			case 'people':
-				return b.people.length ? b.people.map((p) => `${p.name}, ${p.role}`).join('; ') : 'пока не записано';
+				return b.people.length ? b.people.map((p) => `${p.name}, ${p.role}`).join('; ') : W.none;
 			case 'proofs':
-				return b.proofs.length ? b.proofs.map((p) => p.title).join('; ') : 'пока не записано';
+				return b.proofs.length ? b.proofs.map((p) => p.title).join('; ') : W.none;
 			case 'contacts':
 				return [b.contacts.phone, b.contacts.email, b.contacts.address].filter(Boolean).join(', ');
 			case 'languages':
-				return b.languages.map((l) => langs[l]).join(' и ');
+				return b.languages.map((l) => langs[l]).join(W.and);
 			case 'tone':
 				return tones[b.tone];
 		}
@@ -58,8 +113,8 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Бриф слева, страница справа</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Тип проекта">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.group}>
 		{#each KINDS.filter((k) => k !== 'custom') as k (k)}
 			<button type="button" aria-pressed={kind === k} onclick={() => (kind = k)}>{t(`settings.kind.${k}`)}</button>
 		{/each}
@@ -75,25 +130,25 @@
 				</div>
 			{/each}
 		</dl>
-		<div class="page" aria-label="Схема страницы, собранной из брифа" role="group">
+		<div class="page" aria-label={W.pageLabel} role="group">
 			<header class="bar">
 				<strong>{b.title}</strong>
-				{#if on.languages && b.languages.length > 1}<span class="chip">RU / EN</span>{/if}
+				{#if on.languages && b.languages.length > 1}<span class="chip">{W.langChip}</span>{/if}
 			</header>
 			{#if on.who}<p class="hero">{b.who}</p>{/if}
 			{#if on.action}<p><span class="cta">{b.mainAction.label}</span></p>{/if}
 			{#if on.sections}<p class="chips">{#each b.sections as s (s)}<span class="chip">{s}</span>{/each}</p>{/if}
-			{#if on.forWhom}<p class="small">Для кого: {b.forWhom}</p>{/if}
+			{#if on.forWhom}<p class="small">{W.forWhomLine} {b.forWhom}</p>{/if}
 			{#if on.items && b.items.length}
 				<div class="cards">{#each b.items as i (i.title)}<span class="card">{i.title}</span>{/each}</div>
 			{/if}
-			{#if on.people && b.people.length}<p class="small">Люди: {b.people.map((p) => p.name).join(', ')}</p>{/if}
-			{#if on.proofs && b.proofs.length}<p class="small">Документы и доказательства: {b.proofs.length}</p>{/if}
+			{#if on.people && b.people.length}<p class="small">{W.peopleLine} {b.people.map((p) => p.name).join(', ')}</p>{/if}
+			{#if on.proofs && b.proofs.length}<p class="small">{W.proofsLine} {b.proofs.length}</p>{/if}
 			{#if on.contacts}<p class="small foot">{[b.contacts.phone, b.contacts.email].filter(Boolean).join(' · ')}</p>{/if}
-			{#if filled <= 2}<p class="small">Страница почти пуста: про этот проект пока нечего сказать.</p>{/if}
+			{#if filled <= 2}<p class="small">{W.empty}</p>{/if}
 		</div>
 	</div>
-	<p class="dg-out" aria-live="polite">Заполнено полей: <strong>{filled} из {fields.length}</strong>. Тон «{on.tone ? tones[b.tone] : 'не задан'}» не рисуется блоком: он определит слова и вид страницы.</p>
+	<p class="dg-out" aria-live="polite">{W.filled} <strong>{filled} {W.of} {fields.length}</strong>. {W.toneOpen}{on.tone ? tones[b.tone] : W.toneUnset}{W.toneClose}</p>
 </figure>
 
 <style>

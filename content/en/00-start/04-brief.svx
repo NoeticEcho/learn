@@ -1,0 +1,247 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/00-start/04-brief.svx. */
+	export const metadata = {
+		id: '00-start/04-brief',
+		part: 0,
+		order: 4,
+		title: 'The brief: your project in seven fields',
+		definition: 'A brief is a short written assignment for a website: who and what, for whom, the main action, sections, content, languages and tone.',
+		summary:
+			'You’ll describe your site or web app so that every step of the course knows what it is about. Afterwards you’ll have a brief: who, for whom, the main action, sections, content, languages and tone. And if you don’t have an idea yet, you’ll have a ready-made template.',
+		minutes: 20,
+		teaches: ['start-project-brief', 'start-brief-fields', 'start-persona'],
+		requires: ['start-workbench'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', caption: 'No brief', say: 'A site for everyone? Then there’s nothing to say on it and nowhere to send the visitor.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'Brief', say: 'A brief settles that in advance: who, for whom, the main action, sections, content, languages, tone.' },
+				{ mood: 'cheer', prop: 'browser', label: 'your project', say: 'Now every step of the course knows what your site is about. No idea yet? Take a template.' }
+			]
+		},
+		practice: {
+			id: 'brief-card',
+			title: 'Your project’s card',
+			task: 'A project card has been added under the heading: the seven fields of the brief. The title and the description are already in it, and the rest are marked with an ellipsis. Replace each “…” with your own words: the main action (one phrase), at least three sections (each in its own li), what is on the site, the site’s language, and the tone: businesslike, warm, bold or calm.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="brief-card">\n      <h2>Project brief</h2>\n      <dl>\n        <dt>Who and what</dt>\n        <dd class="who">{{who}}</dd>\n        <dt>For whom</dt>\n        <dd class="for-whom">{{forWhom}}</dd>\n        <dt>Main action</dt>\n        <dd class="action">…</dd>\n        <dt>Sections</dt>\n        <dd>\n          <ul class="sections">\n            <li>…</li>\n          </ul>\n        </dd>\n        <dt>Content</dt>\n        <dd class="content">…</dd>\n        <dt>Languages</dt>\n        <dd class="languages">…</dd>\n        <dt>Tone</dt>\n        <dd class="tone">…</dd>\n      </dl>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="brief-card">\n      <h2>Project brief</h2>\n      <dl>\n        <dt>Who and what</dt>\n        <dd class="who">{{who}}</dd>\n        <dt>For whom</dt>\n        <dd class="for-whom">{{forWhom}}</dd>\n        <dt>Main action</dt>\n        <dd class="action">{{mainAction.label}}</dd>\n        <dt>Sections</dt>\n        <dd>\n          <ul class="sections">\n            {{#each sections}}<li>{{.}}</li>\n            {{/each}}\n          </ul>\n        </dd>\n        <dt>Content</dt>\n        <dd class="content">{{profession}}; contacts: {{phone}}, {{email}}</dd>\n        <dt>Languages</dt>\n        <dd class="languages">English</dd>\n        <dt>Tone</dt>\n        <dd class="tone">calm</dd>\n      </dl>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'seven-fields', kind: 'count', selector: '#brief-card dt', min: 7 },
+				{ id: 'no-blanks', kind: 'text', selector: '#brief-card', matches: '^[^…]*$' },
+				{ id: 'action', kind: 'text', selector: '#brief-card .action', matches: '\\S' },
+				{ id: 'sections', kind: 'count', selector: '#brief-card .sections li', min: 3 },
+				{ id: 'content', kind: 'text', selector: '#brief-card .content', matches: '\\S' },
+				{ id: 'languages', kind: 'text', selector: '#brief-card .languages', matches: '\\S' },
+				{ id: 'tone', kind: 'text', selector: '#brief-card .tone', matches: '([Bb]usiness-?like|[Ww]arm|[Bb]old|[Cc]alm)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Which of these is the best way to word the main action in a brief?',
+				options: ['Learn more', 'Book a free trial class', 'Look at the site'],
+				answer: 1,
+				why: [
+					'Too vague: “learn more” isn’t something a visitor does, it’s something that happens to them. It isn’t clear which button to press.',
+					'Yes. It is a specific action that takes a minute, and it shows whether the site worked.',
+					'No: the visitor is already on the site, and there is no need to ask them to look at it.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these belong in a brief?',
+				options: [
+					'Who the site is for',
+					'The visitor’s main action',
+					'The color of the buttons',
+					'The site’s languages',
+					'What platform it will be built on'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: without it there is no telling what to talk about.',
+					'Yes: it decides what is most important on the site.',
+					'No: colors are chosen later and depend on the tone and the era.',
+					'Yes: the texts, the addresses and the layout depend on it.',
+					'No: the tool is chosen after the brief, for the task. Each era of the course has its own.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each brief field to what goes in it (the examples are for an invented pottery school)',
+				pairs: [
+					['Who and what', 'A pottery school for adults'],
+					['For whom', 'City dwellers who want to make something with their hands'],
+					['Main action', 'Book a trial class'],
+					['Sections', 'About, Classes, Timetable, Contact'],
+					['Tone', 'warm']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the fields in the order in which they are easiest to work out',
+				items: ['Who and what', 'For whom', 'Main action', 'Sections', 'Content']
+			},
+			{
+				type: 'single',
+				prompt: 'You don’t have an idea for a site. What do you do?',
+				options: [
+					'Do nothing and skip the practice',
+					'Take a project template or the example with the invented persona, and change the fields as the course goes on',
+					'Wait for an idea to come'
+				],
+				answer: 1,
+				why: [
+					'No: the practice is required, and the lesson isn’t done without it.',
+					'Yes. A template makes the practice complete from day one, and you can enter your own details at any time.',
+					'No: ideas often come while working, not before it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Whose details can you enter in the brief?',
+				options: [
+					'Any you find on the internet',
+					'Your own and invented ones. Other people’s only with their written consent',
+					'Only the details of famous people'
+				],
+				answer: 1,
+				why: [
+					'No: you must not enter a real person’s details without their consent. It is a question of law as well as of courtesy.',
+					'Yes. The textbook does the same: all its examples are invented, with numbers made of zeros.',
+					'No: other people’s details, famous or not, remain other people’s.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'start-brief-fields',
+				front: 'Which fields make up a project brief?',
+				back: 'Who and what; for whom; the main action; sections; content (services or products, people, proof, contacts); languages; tone.'
+			},
+			{
+				id: 'start-brief-action',
+				front: 'What should the main action be like?',
+				back: 'One action, specific, and something a visitor can do in a minute: call, book, buy, join.'
+			},
+			{
+				id: 'start-brief-why',
+				front: 'Why a brief, when you could just start making the site?',
+				back: 'Without it there is no answer to “what do I say?” and “what matters most here?”. Everything else (colors, tool, era) is decided afterwards.'
+			},
+			{
+				id: 'start-persona',
+				front: 'What is a persona in this course?',
+				back: 'The default invented project: Kate Alder, a land surveyor and expert witness in boundary disputes. Her details can be replaced with your own, all at once or field by field.'
+			},
+			{
+				id: 'start-brief-data',
+				front: 'Whose details can you enter in the brief?',
+				back: 'Your own and invented ones. Other people’s only with their written consent.'
+			}
+		],
+		sources: [
+			{ title: 'Creative brief (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Creative_brief', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Persona (user experience) (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Persona_(user_experience)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Personas Make Users Memorable (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/persona/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A brief answers the question “what is my site about?” in seven lines. Fill in the card, and from here on every lesson will talk about your project.',
+			hints: [
+				'Each ellipsis “…” has to be replaced with words. While even one is left, the “all fields are filled” check won’t pass.',
+				'Sections are menu items. Write each section on its own line between <li> and </li>. You need at least three.',
+				'Choose the tone from four words: businesslike, warm, bold or calm. Write exactly one.'
+			],
+			mistakes: {
+				'seven-fields': 'The card should still have seven pairs of a field name and a value. Don’t delete the fields.',
+				'no-blanks': 'There is still an ellipsis “…” in the card. Replace it with your own words.',
+				action: 'The main action is still empty. Write what a visitor should do, in one phrase.',
+				sections: 'You need at least three sections, each in its own <li> element.',
+				content: 'Describe in a sentence or two what is on the site: services or products, people, proof, contacts.',
+				languages: 'Give the site’s language, for example “English”.',
+				tone: 'The tone should be one of four words: businesslike, warm, bold, calm.'
+			},
+			outro: 'Now your project has a brief. All the next steps of the course will be about it.'
+		},
+		say: { AI: 'A I', RU: 'R U', EN: 'E N' }
+	};
+</script>
+
+<script>
+	import BriefPreview from '../../diagrams/BriefPreview.svelte';
+	import BriefEditor from '#lib/persona/BriefEditor.svelte';
+</script>
+
+## What a brief is
+
+A brief is a short written assignment for a piece of work. An agency that makes a website starts with a brief: what the company is, who the site is for, what it must achieve. A good brief fits on one page. It answers the questions that would otherwise have to be answered in the middle of the work, usually at a much higher price.
+
+In our course the brief plays the same role. You’ll build the same site eight times, in different eras and with different tools. The brief is what all eight versions have in common. The practice in every lesson reads your brief and fills in the names, words and goals from it, and the checks are written to work for any project.
+
+<details>
+<summary>Check yourself: what is a brief for?</summary>
+
+To answer in advance the questions “what do I say?” and “what matters most here?”. It is shared by all the versions of the site you’ll make.
+
+</details>
+
+## Seven fields
+
+The brief here has seven fields. It is easiest to work them out in this order, because each one builds on the ones before.
+
+1. **Who and what.** The project’s name and one sentence about what you do or what your idea is. Not “the best company”, but “a coffee shop and bakery by the river” or “a web app for small crews to price their jobs”.
+2. **For whom.** A specific person in a specific situation. “Homeowners whose neighbor has moved the fence” is an answer. “Everyone who needs our services” is not.
+3. **Main action.** What a visitor should do: call, write, buy, book, join, read. One thing. If there are five actions, the visitor will do none of them.
+4. **Sections.** What the site is made of: “About”, “Services”, “Contact”. Start with three, and three is enough. One of the sections should lead to the main action.
+5. **Content.** What stands inside the sections: services or products, people, proof (credentials, reviews, examples of work), contacts.
+6. **Languages.** Which languages the site is in. The texts, the page addresses and even the word order on buttons depend on it.
+7. **Tone.** How the site talks to a visitor. There are four options: businesslike, warm, bold, calm. The tone affects both the words and the look.
+
+The diagram below shows how a page is built from a brief. Choose a kind of project and untick fields: the page gets poorer. Real life works the same way: a site where you don’t know who it is for can’t be made convincing.
+
+<BriefPreview />
+
+<details>
+<summary>Check yourself: why should there be only one main action?</summary>
+
+A page that asks for several different things at once asks for none of them. One main action decides what is most prominent on the page.
+
+</details>
+
+## Templates and the persona
+
+If you already have a project, describe it. If you don’t, don’t worry: the course has eight templates. Pick the closest one in settings: an expert’s site, a portfolio, a small shop, a café or a salon, a community, an event, a web app’s landing page, or “my own idea”.
+
+The default template is a **persona**: Kate Alder, an invented land surveyor and expert witness in boundary disputes, from the invented town of Riverbend. Everything about her is made up: the town, the credentials, the numbers (they are made of zeros). The persona is there so that everyone has a full, coherent practice from day one, even without an idea of their own.
+
+Her details can be replaced with your own, all at once or one field at a time, right here. Below is the whole brief, all seven fields. An empty field takes its value from the template and is shown in gray; the lists of sections, services, people and proof show an example until you change them. Everything saves itself, in this browser. From this moment every era builds a site about you. You can always change the same brief in [settings](../../../settings/).
+
+<BriefEditor />
+
+One rule about other people’s details. You may enter your own and invented ones. Other people’s, meaning the name, phone number or biography of a living person, only with their written consent. All the examples in the textbook are invented, and real details stay in your browser and never leave it (more in the fifth lesson).
+
+<details>
+<summary>Check yourself: whose details can you enter in the brief?</summary>
+
+Your own and invented ones. Other people’s only with their written consent.
+
+</details>
+
+## Practice
+
+Below is your project’s page, and under it a project card: the seven fields of the brief. The title and the description are already filled in from your details, and the other fields are marked with an ellipsis. Replace each “…” with your own words:
+
+- the main action, in one phrase;
+- at least three sections, each in its own `li` element;
+- what is on the site: services or products, people, proof, contacts;
+- the site’s language;
+- the tone: businesslike, warm, bold or calm.
+
+You’ll open this card as a reference whenever a lesson needs you to remember what your project is about. If you’re stuck for now, go back to the diagram above: every template there has a ready-made example of each field.

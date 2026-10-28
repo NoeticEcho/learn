@@ -1,0 +1,288 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/00-start/05-local-first.svx. */
+	export const metadata = {
+		id: '00-start/05-local-first',
+		part: 0,
+		order: 5,
+		title: 'Your data stays on your device: storage, export, your own key',
+		definition: 'Local-first is an approach in which data belongs to the person and is kept on their own device, for example in the browser’s IndexedDB, rather than on a server.',
+		summary:
+			'You’ll see where your progress and your brief live, what is convenient and what is risky about that, and how to save everything in one file. Afterwards you can decide which details in the brief come from your own life and which stay invented.',
+		minutes: 15,
+		teaches: ['start-local-first'],
+		requires: ['start-project-brief'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', caption: 'Where your progress is', say: 'Here, in your browser. The textbook has no server for it to go to.' },
+				{ mood: 'hmm', side: 'right', caption: 'Site data cleared', say: 'The good part: nobody sees your data. The bad part: there is one copy, and now it’s gone.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'progress file', say: 'So save your progress to a file now and then. It’s a second copy, and it’s yours too.' }
+			]
+		},
+		practice: {
+			id: 'data-note',
+			title: 'Whose details are on the page',
+			task: 'A note has been added under your project card: four details that end up on the page. Each has an ellipsis beside it. For each one, decide whether it is yours or invented, and replace “…” with the word “mine” or “invented”. You can change this decision at any time.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="data-note">\n      <h2>Whose details these are</h2>\n      <ul>\n        <li>Name: {{name}}. This is <strong class="src">…</strong></li>\n        <li>Phone: {{phone}}. This is <strong class="src">…</strong></li>\n        <li>Email: {{email}}. This is <strong class="src">…</strong></li>\n        <li>City: {{city}}. This is <strong class="src">…</strong></li>\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="data-note">\n      <h2>Whose details these are</h2>\n      <ul>\n        <li>Name: {{name}}. This is <strong class="src">invented</strong></li>\n        <li>Phone: {{phone}}. This is <strong class="src">invented</strong></li>\n        <li>Email: {{email}}. This is <strong class="src">invented</strong></li>\n        <li>City: {{city}}. This is <strong class="src">mine</strong></li>\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'rows', kind: 'count', selector: '#data-note li', min: 4 },
+				{ id: 'no-blanks', kind: 'text', selector: '#data-note', matches: '^[^…]*$' },
+				{ id: 'words', kind: 'text', selector: '#data-note .src', matches: '^(mine|invented)$' },
+				{ id: 'all-marked', kind: 'count', selector: '#data-note .src', min: 4 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Where does the textbook keep your progress and your brief?',
+				options: [
+					'On the textbook’s server, in your account',
+					'In your browser, on your device',
+					'In a cloud the textbook chooses'
+				],
+				answer: 1,
+				why: [
+					'No: there are no accounts and no server for your data.',
+					'Yes: in the browser’s storage called IndexedDB.',
+					'No: the textbook has no cloud, which is why you need a file to move things.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can make progress in a browser disappear?',
+				options: [
+					'You cleared the site’s data in the browser’s settings',
+					'You closed the textbook’s tab',
+					'You moved to another computer or browser',
+					'The browser deleted the data of a site you hadn’t opened for a long time'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: clearing a site’s data deletes the textbook’s storage too.',
+					'No: closing a tab erases nothing. Progress is saved as you work.',
+					'Yes: another device means another storage. You can move things with a file.',
+					'Yes: when space runs short, and in some browsers after a period of time, the browser may free space by removing the data of rarely used sites.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of moving your progress to another computer in order',
+				items: [
+					'On the first computer, press “Save progress” in settings',
+					'Move the file to the second computer',
+					'Open the textbook on the second computer',
+					'Choose the file and look at what is in it',
+					'Confirm the load'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each piece of data to where it can go',
+				pairs: [
+					['Progress and brief', 'stay in the browser; go into a file when you press the button'],
+					['Your key for an AI service', 'goes into the file only if you tick the box'],
+					['Your question to Echo when a key is set', 'goes to the service you chose'],
+					['Your details from this list', 'never go to the textbook’s server']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A living person’s phone number and email: are they personal data?',
+				options: [
+					'No, a phone number is just digits',
+					'Yes: they are information that can identify a person',
+					'Only if the person is famous'
+				],
+				answer: 1,
+				why: [
+					'No: a phone number can lead to a person, so data protection law counts it as data that needs care.',
+					'Yes. Personal data is any information relating to an identified or identifiable person: a name, a phone number, an address, a photo.',
+					'No: being famous has nothing to do with it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What goes to the model when you ask Echo a question with a key set?',
+				options: [
+					'Everything the textbook knows about you',
+					'Your question, the lesson’s text and your code; the brief only if you ticked the box',
+					'Nothing: the model answers without receiving any data'
+				],
+				answer: 1,
+				why: [
+					'No: the brief goes only if you tick the box, and the key doesn’t go as content.',
+					'Yes. Everything that goes is listed in the diagram above, and the brief is not included by default.',
+					'No: to answer, the model needs at least the question.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'start-local-where',
+				front: 'Where is your progress in the textbook kept?',
+				back: 'In the browser, on your device, in IndexedDB storage. It never goes to the textbook’s server.'
+			},
+			{
+				id: 'start-local-backup',
+				front: 'How do you make a backup of your progress?',
+				back: 'Settings, “Save progress”: you get one file. The same file moves your progress to another computer. There is no other copy.'
+			},
+			{
+				id: 'start-local-key',
+				front: 'What happens to your key for an AI service?',
+				back: 'It is kept only in your browser, goes into the progress file only if you tick the box, and goes only to the service you chose.'
+			},
+			{
+				id: 'start-local-pd',
+				front: 'What data does the law count as personal?',
+				back: 'Any information relating to an identified or identifiable person: a name, a phone number, an email, an address, a photo.'
+			},
+			{
+				id: 'start-local-real-data',
+				front: 'Whose details can you enter in the brief?',
+				back: 'Your own and invented ones. Other people’s only with their consent.'
+			}
+		],
+		sources: [
+			{ title: 'IndexedDB API (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{
+				title: 'Storage quotas and eviction criteria (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Storage for the web (web.dev)', url: 'https://web.dev/articles/storage-for-the-web', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Local-first software: you own your data, in spite of the cloud (Ink & Switch)', url: 'https://www.inkandswitch.com/essay/local-first/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{
+				title: 'What is personal information? A guide (ICO, UK)',
+				url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/personal-information-what-is-it/what-is-personal-information-a-guide/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'What is personal data? (European Commission)',
+				url: 'https://commission.europa.eu/law/law-topic/data-protection/reform/what-personal-data_en',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'GDPR, Article 4: definitions (text of the regulation)', url: 'https://gdpr-info.eu/art-4-gdpr/', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This lesson is about where your data lives. The answer is simple: with you. But that has a price, and it is worth knowing about it in advance.',
+			hints: [
+				'On each line, replace the ellipsis with a word: “mine” or “invented”. The check won’t accept any other word.',
+				'Not sure whether it’s yours? If it’s the details of a living person who hasn’t agreed, write “invented”, and enter made-up ones in settings.'
+			],
+			mistakes: {
+				rows: 'The note should still have four lines: name, phone, email, city.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with the word “mine” or “invented”.',
+				words: 'The highlighted place should hold exactly one word, “mine” or “invented”, with no full stop.',
+				'all-marked': 'Mark all four details: each must keep its strong element with the class src.'
+			},
+			outro: 'You decided what on the page is yours and what is not. Now you have everything you need to start making a site. Next is the part about how the internet works.'
+		},
+		say: { IndexedDB: 'indexed D B', JSON: 'jason', AI: 'A I', API: 'A P I', GDPR: 'G D P R' }
+	};
+</script>
+
+<script>
+	import DataFlow from '../../diagrams/DataFlow.svelte';
+</script>
+
+## The textbook has no server for your data
+
+Most sites you have learned from kept your progress themselves: you made an account, and everything lay on their server. Here it is different. The textbook is a set of pages that the browser downloads once. Everything you do, your answers, your cards, your brief and your code, the browser writes down on your own device, in storage called IndexedDB. It is a database built into the browser: a site can put a lot of information there, and it stays after you close the tab.
+
+That is the upside. There is no sign-up, nobody watches what you do, and your data goes to no one and can’t leak from someone else’s server. This is called the local-first approach: the data belongs to the person and lives with them.
+
+<details>
+<summary>Check yourself: where is your progress kept?</summary>
+
+In your browser, on your device. It does not go to the textbook’s server.
+
+</details>
+
+## The price: a single copy
+
+If the data lives only with you, keeping it safe is also only up to you. It will be lost if:
+
+- you clear the site’s data in the browser’s settings;
+- you move to another computer or browser, because the storage there is different;
+- the browser removes the data of a site you haven’t used for a long time. That happens when the device runs out of space, and in Safari also after time: if you do nothing on a site for seven days.
+
+The last one can be softened but not removed: a browser may promise to “keep it permanently”, but it doesn’t have to. That is why the textbook has one main rule about safekeeping: **save your progress to a file**.
+
+## The progress file
+
+“Settings”, then “Save progress”: the browser downloads one file with everything you did: finished lessons, answers, cards, the brief and your code. It is the only copy of your data outside the browser, and also the way to move your work to another computer.
+
+Loading goes the other way. On the new device, open the textbook and choose the file in the same settings. Before changing anything, the textbook shows what is in the file and asks you to confirm: loading replaces everything that is in this browser now.
+
+Save the file now and then, for example once a week or after a big part. It is as useful as saving a document.
+
+<details>
+<summary>Check yourself: how many copies of your progress are there, and where is the second?</summary>
+
+One, in the browser. A second appears only when you save a file yourself.
+
+</details>
+
+## Your key and model mode
+
+Echo can answer questions in two ways. Without a key, they give the lesson’s prepared hints: free, with no network, and nothing goes anywhere. With a key, they can answer any question in their own words, but then the answer is prepared by an AI service that you chose yourself and pay for.
+
+What is worth knowing here:
+
+- **A key is like a password** for your account with the service. It is kept only in your browser.
+- **The key goes into the progress file only if you tick the box.** If you do, keep the file like a password.
+- **It goes only to the service you chose, and only when you ask a question.** The lesson’s text and your current code go with the question. The brief goes only if you allowed it for that question.
+- **Every question costs money**, and the textbook shows an estimate beforehand.
+- **Model mode is off by default.**
+
+Play with the switches and see what goes where.
+
+<DataFlow />
+
+<details>
+<summary>Check yourself: what goes to the AI service when you ask Echo a question?</summary>
+
+Your question, the lesson’s text and your current code. The brief only if you allowed it. If no key is entered, nothing goes anywhere.
+
+</details>
+
+## Mine or invented
+
+The brief holds details that can count as personal data: a name, a phone number, an email, a city, a photo, a biography. In the European Union and the United Kingdom, the GDPR defines personal data as any information relating to an identified or identifiable person, and a name, an identification number, location data or an online identifier all count. Russia’s law, 152-FZ, defines it in much the same way. The UK has its own version, the UK GDPR, with the same definition. The United States has no single federal law like this: it is a patchwork of state laws, such as California’s CCPA.
+
+The GDPR limits those who collect and process other people’s data. It does not apply, in broad terms, to what a person does purely for personal or household reasons. What the owner of a real site with a contact form must do is a topic for the part on quality and the law.
+
+For the practice this means the following.
+
+- **Your own details.** You can enter your own name, phone number, email and city. They go into your browser’s storage and your progress file, and you see them on the pages of your site. They go no further. But remember: if you put the site on the open internet, they become public.
+- **Invented details.** An invented name, a number made of zeros and an address at `example` will do. That is enough for the practice.
+- **Other people’s details.** Don’t enter the name, phone number or photo of a living person without their written consent. Not even “for study”.
+
+A good rule for later: use invented details in practice and in drafts, and enter the real ones at the last moment, when you really are about to publish the site.
+
+This is general information, not legal advice. If you need advice about a real site, ask a lawyer or your data protection authority: in the UK it is the Information Commissioner’s Office (ICO), and in the EU each member state has its own, listed by the European Data Protection Board.
+
+## Practice
+
+Below is your page, and under it a note of four lines: the details from your brief that end up on the page. For each one, decide whether it is yours or invented, and instead of the ellipsis write “mine” or “invented”. You can change this note whenever you like.
+
+## Do it now
+
+1. In [settings](../../../settings/), press “Save progress” and put the file somewhere you won’t lose it.
+2. If you want your own details on the site, enter them in settings. If you don’t, leave the example.
+3. Press “Finish the lesson”. Part 0 is done: next we’ll see how the internet works.
