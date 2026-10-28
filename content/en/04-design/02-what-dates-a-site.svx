@@ -1,0 +1,331 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/02-what-dates-a-site.svx. */
+	export const metadata = {
+		id: '04-design/02-what-dates-a-site',
+		part: 4,
+		order: 2,
+		title: 'What dates a site: outdated and modern',
+		definition: 'A dated design relies on a technology that has gone, or gets in the reader’s way in any fashion. What dates a page is whatever does not serve the reader.',
+		summary:
+			'You’ll learn to tell a trick that has really aged from one that is merely unfashionable, and from one that is new but harmful. Afterwards you can find the signs of datedness in another site’s page or your own, and fix them.',
+		minutes: 25,
+		teaches: ['design-outdated-vs-modern'],
+		requires: ['design-history-of-web-design', 'css-contrast', 'html-head-meta'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'Welcome!', caption: 'The first screen', say: 'The greeting takes the best spot and says nothing. But a visitor needs an answer: what is this, and who is it for?' },
+				{ mood: 'explain', side: 'right', prop: 'cards', label: 'dated, out of style, harmful', say: 'Outdated: tied to a technology that is gone. Out of style: reads fine, but isn’t done now. Harmful: new, but in the way.' },
+				{ mood: 'cheer', caption: 'One question', say: 'Who does this serve? No answer means decoration, and decorations age first. What serves the reader lasts for years.' }
+			]
+		},
+		practice: {
+			id: 'design-fix-dated',
+			title: 'Making a page young again',
+			task: 'This page is dated to the mid-nineties. Fix it without changing its meaning. 1) Remove the font, center and marquee tags. 2) Replace the “Welcome” greeting in the h1 heading with your project’s name. 3) Delete the visitor-counter “badge” and the Netscape notice. 4) In styles.css make the text no smaller than 16 pixels (1rem is fine) and dark enough: contrast with the background of at least 4.5. 5) Shorten the menu: keep no more than six items, and at least three sections from your project. 6) Make the main-action button solid: a background color rather than a gradient, and contrasting text. 7) Add a viewport meta tag to the head and remove the fixed 960-pixel width from styles.css.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="page">
+      <center><h1>Welcome to our website!</h1></center>
+      <font color="#999999">{{who}}</font>
+      <nav>
+        <a href="#">Home</a> | <a href="#">About us</a> | <a href="#">History</a> | <a href="#">Mission</a> | <a href="#">Partners</a> | <a href="#">News</a> | <a href="#">Offers</a> | <a href="#">Jobs</a> | <a href="#">Reviews</a> | <a href="#">Gallery</a> | <a href="#">Site map</a> | <a href="#">Contact</a>
+      </nav>
+      <p>For: {{forWhom}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <p>You are our visitor number 000123! Best viewed in Netscape 4.</p>
+    </div>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  background: #c0c0c0;
+  font-family: "Times New Roman", serif;
+}
+#page {
+  width: 960px;
+}
+p {
+  font-size: 11px;
+  color: #aaaaaa;
+}
+.cta {
+  background-image: linear-gradient(#8fd0ff, #1f7ad6);
+  color: #ffffff;
+  border: 2px outset #ffffff;
+  padding: 4px 10px;
+  text-shadow: 0 -1px 0 #14538f;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <nav>
+        {{#each sections}}<a href="#">{{.}}</a>
+        {{/each}}
+      </nav>
+      <p>For: {{forWhom}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+    </div>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  background: #faf9f7;
+  color: #1c1b19;
+  font-family: system-ui, sans-serif;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+p {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #1c1b19;
+}
+.cta {
+  display: inline-block;
+  background-color: #0b5cad;
+  color: #ffffff;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+`
+			},
+			checks: [
+				{ id: 'old-tags', kind: 'noTag', tags: ['font', 'center', 'marquee', 'blink'] },
+				{ id: 'greeting', kind: 'text', selector: 'h1', matches: '^(?![\\s\\S]*[Ww]elcome)[\\s\\S]+$' },
+				{ id: 'title-in-h1', kind: 'field', selector: 'h1', field: 'title' },
+				{ id: 'badge', kind: 'text', selector: '#page', matches: '^(?![\\s\\S]*(Netscape|\\d{6}))[\\s\\S]*$' },
+				{ id: 'text-size', kind: 'style', selector: '#page p', prop: 'font-size', matches: '^(1[6-9]|[2-9]\\d)(\\.\\d+)?px$|^[1-9](\\.\\d+)?r?em$' },
+				{ id: 'text-contrast', kind: 'contrast', selector: '#page p', min: 4.5 },
+				{ id: 'nav-short', kind: 'count', selector: 'nav a', min: 3, max: 6 },
+				{ id: 'nav-sections', kind: 'field', selector: 'nav', field: 'sections', min: 3 },
+				{ id: 'cta-flat', kind: 'style', selector: 'a.cta', prop: 'background-image', matches: '^(none)?$' },
+				{ id: 'cta-contrast', kind: 'contrast', selector: 'a.cta', min: 4.5 },
+				{ id: 'viewport', kind: 'attr', selector: 'meta[name="viewport"]', name: 'content', matches: 'width=device-width' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is the main sign that a trick has really become outdated, not just gone out of fashion?',
+				options: [
+					'It rested on a technology or a limitation that is gone, or it gets in the reader’s way in any fashion',
+					'It hasn’t been seen for a while on the sites of big companies',
+					'The designer doesn’t like it'
+				],
+				answer: 0,
+				why: [
+					'Yes. A Flash intro and a spacer image rested on a limitation that went away. Small gray text gets in the way always, in any fashion.',
+					'No: big companies make mistakes too, and the taste of the majority changes.',
+					'No: that is taste. Datedness is tested with facts: what the reader does with the trick.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which signs date a page to the nineties at once?',
+				options: ['A visitor counter and a “best viewed in this browser” badge', 'The font and center tags in the markup', 'A dark theme that follows the system setting', 'A “Welcome to our website” greeting instead of a headline about the business'],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: counters and browser badges are left over from the era when pages looked different in different browsers.',
+					'Yes: CSS replaced styling inside the markup.',
+					'No: a dark theme is modern, and it follows the user’s setting.',
+					'Yes: a greeting spends the most prominent place on empty words.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each trick with the reason it does harm',
+				pairs: [
+					['A carousel that turns by itself', 'it hides the main thing, and almost nobody clicks through it'],
+					['Small light gray text', 'it fails the contrast check and can’t be read outdoors'],
+					['A fixed width of 960 pixels', 'it doesn’t adapt to a phone'],
+					['The stock “handshake” photo', 'it is instantly recognizable and proves nothing']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A new page has text animated letter by letter and parallax across the whole screen. Is it modern?',
+				options: [
+					'Not necessarily: it is new, but if the effect makes people wait and gets in the way of reading, it will age as fast as a Flash intro',
+					'Yes: everything new is modern',
+					'Yes, if competitors don’t have one'
+				],
+				answer: 0,
+				why: [
+					'Yes. “Modern” means a trick serves the reader, not that it appeared recently. Motion also has to respect the “reduce motion” setting.',
+					'No: new and modern are not the same.',
+					'No: being different from competitors doesn’t make an effect useful.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these harms the reader in any fashion?',
+				options: ['Small light gray text on white', 'A page that doesn’t fit on a phone', 'An animation that can’t be stopped', 'A solid button with enough contrast'],
+				answer: [0, 1, 2],
+				why: ['Yes: the contrast is below the norm.', 'Yes: you have to drag the page sideways with a finger.', 'Yes: WCAG requires a way to stop automatic motion.', 'No: that is the solution.']
+			},
+			{
+				type: 'single',
+				prompt: 'What on a modern page is almost always better than a “Welcome!” greeting?',
+				options: [
+					'A headline that answers “what is this” and “who is it for”',
+					'A bigger greeting',
+					'A greeting with an animation'
+				],
+				answer: 0,
+				why: [
+					'Yes: a visitor decides whether to stay within seconds, and the answer to their question belongs on the first screen.',
+					'No: size adds no meaning.',
+					'No: animation adds no meaning.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-dated-test', front: 'How do you tell outdated from out of style?', back: 'Outdated relied on a technology that has gone, or gets in the reader’s way in any fashion. Out of style simply isn’t liked today, but reads just as well.' },
+			{ id: 'design-dated-new', front: 'Does new mean modern?', back: 'No. A new effect that gets in the way of reading or makes people wait will age as fast as a Flash intro.' },
+			{ id: 'design-dated-signs', front: 'Name three signs of a dated page', back: 'A greeting instead of a headline about the business, a counter and a browser badge, small gray text, a fixed width, a carousel, stock photos, a menu of ten items or more.' },
+			{ id: 'design-dated-hello', front: 'What should replace “Welcome!”?', back: 'A headline that answers at once: what is this, and who is it for. A visitor decides whether to stay within seconds.' },
+			{ id: 'design-dated-motion', front: 'What is required of automatic motion on a page?', back: 'A way to stop it (WCAG) and respect for the “reduce motion” setting (prefers-reduced-motion).' }
+		],
+		sources: [
+			{ title: 'Auto-Forwarding Carousels and Accordions Annoy Users and Reduce Visibility (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/auto-forwarding/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Photos as Web Content (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/photos-as-web-content/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Understanding: Pause, Stop, Hide, WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Responsive design basics (web.dev)', url: 'https://web.dev/articles/responsive-web-design-basics', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'prefers-reduced-motion (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Here is a page from 1996, and it needs to be made young again. There are seven fixes, one for each sign. Do them in order.',
+			hints: [
+				'Delete the font and center tags, and let the h1 heading speak about your project. Replace the greeting with the name.',
+				'Shorten the menu: keep links to your sections, no more than six. And delete the visitor-counter badge and the Netscape notice entirely.',
+				'In styles.css: give p a font-size of 1rem and a dark color, for example #1c1b19. Take background-image off .cta, give it background-color: #0b5cad and white text. Add a viewport meta tag to the head.'
+			],
+			mistakes: {
+				'old-tags': 'The tags font, center, marquee or blink are still in the markup. Delete them: CSS does the styling.',
+				greeting: 'The h1 heading still says “Welcome”. Replace it with your project’s name.',
+				'title-in-h1': 'The h1 should hold your project’s name.',
+				badge: 'The visitor-counter badge or the Netscape notice is still on the page. Delete the whole paragraph.',
+				'text-size': 'The paragraph text is a bit small. In styles.css give p a font-size of 1rem (which is 16 pixels) or more.',
+				'text-contrast': 'The text color is too light for the background. Make it dark, for example #1c1b19.',
+				'nav-short': 'The menu should have from three to six links. Right now it has more or fewer.',
+				'nav-sections': 'The menu should hold at least three sections of your project, named as in your brief.',
+				'cta-flat': 'The main-action button still has a gradient. Delete background-image and set background-color.',
+				'cta-contrast': 'The button text is hard to see against its background. Take a dark background, for example #0b5cad, and white text.',
+				viewport: 'The head has no viewport meta tag. Add a meta tag with name viewport and content width=device-width, initial-scale=1.'
+			},
+			outro: 'The page has become one you aren’t ashamed to show today. Notice that not one fix was about fashion: each was about the reader.'
+		},
+		say: { NN: 'N N', 'NN/g': 'N N slash g', Flash: 'flash', Netscape: 'net-scape', CSS: 'C S S', WCAG: 'wuh-cag', viewport: 'view-port', rem: 'rem', marquee: 'mar-key' }
+	};
+</script>
+
+<script>
+	import DatedOrNot from '../../diagrams/DatedOrNot.svelte';
+</script>
+
+## One page, ten years apart
+
+Open any site, and within a couple of seconds you feel whether it is “fresh” or “old”. That feeling is made of small things, and every small thing has a reason. Learning to see the reasons is useful twice over: so you don’t make something dated yourself, and so you don’t throw out something good by mistaking it for old stuff.
+
+For that you need to tell three things apart.
+
+- **Outdated.** The trick rested on a technology or a limitation that is gone (a Flash intro, spacers in tables), or it gets in the reader’s way in any fashion (small light gray text).
+- **Out of style.** The trick reads as well as it ever did, but it isn’t done now (for example, rounder or squarer corners than today’s). That is taste, and you can change it or not.
+- **New but harmful.** An effect that appeared recently and gets in the way of reading or makes people wait. It looks fresh and ages fast.
+
+The rule in one line: **what dates a page is whatever does not serve the reader**. Everything that serves the reader stays in service for decades: plain text, a clear button, an understandable headline.
+
+<details>
+<summary>Check yourself: how is “outdated” different from “out of style”?</summary>
+
+Outdated relied on a technology that has gone, or gets in the reader’s way in any fashion. Out of style reads just as well, but isn’t done today.
+
+</details>
+
+## A game: outdated or modern
+
+Below are eight pairs. In each, the same block is made in two ways. Choose the version that is less dated and serves the reader better, and only then read the explanation. One pair is a trap, where the new turns out worse: see whether you fall for it.
+
+<DatedOrNot />
+
+## Signs that date a page
+
+Almost all the signs fall into a few groups. This is a handy list for checking any page, yours included.
+
+**The first screen.**
+- A greeting instead of an answer to “what is this and who is it for”.
+- A carousel that turns by itself. Usability studies (Nielsen Norman Group among them) have shown more than once that almost nobody clicks through such carousels, and that automatic motion annoys the reader.
+- A splash page before the entrance.
+
+**Text.**
+- Small size and light gray color. The WCAG contrast check asks for 4.5 to 1 for ordinary text; there is a lesson on color coming up.
+- A line of 150 characters across the whole width or, the other way round, a narrow column in the middle of an empty screen.
+- Everything underlined, everything highlighted at once.
+
+**Structure and devices.**
+- A fixed page width. Most visitors today come from a phone, and a page has to adapt to the width of the screen.
+- A menu of ten or fifteen items.
+- Markup with the styling baked into the tags (`font`, `center`): this was done until CSS became reliable.
+
+**Pictures and decoration.**
+- Stock “handshakes” and “smiling employees”. Nielsen Norman Group showed that people look at real photographs of people and of the work, and skip decorative pictures.
+- Gloss, shadows under text and other styling “like an object” (skeuomorphism).
+- “Under construction” signs, counters and browser badges: these are leftovers from the era when every browser showed a page differently.
+
+**Motion.**
+- Automatic motion that can’t be stopped: WCAG 2.2 requires a way to pause it.
+- Animation that ignores the “reduce motion” setting. For people with vestibular disorders, parallax scrolling can be physically nauseating.
+
+<details>
+<summary>Check yourself: why is a “Welcome!” greeting counted among the dated tricks?</summary>
+
+It takes the most prominent place and says nothing. A visitor decides whether to stay within seconds, and in those seconds they need an answer: what is this, and who is it for.
+
+</details>
+
+## Modern things age too
+
+Don’t think “modern” is the finish line. “Glass” effects, running gradients and animations that look fresh today will date a page in a few years just as well as counters do. So a sensible strategy is this:
+
+1. **Take principles, not effects.** Legibility, hierarchy, clear states, understandable words.
+2. **Keep the look in one place.** When colors, sizes and corner radii are stored as named values (we’ll get to them in the lessons on tokens), you can change the “fashion” in an hour without rewriting pages.
+3. **Ask: who does this serve?** If there is no answer, the trick is decoration, and decorations age first.
+
+## Practice
+
+You are given a page from the mid-nineties: a greeting instead of a headline, `font` and `center` tags, a menu of twelve items, small gray text, a button with a gloss, a Netscape notice and a rigid 960 pixels. Fix the seven things listed in the task. Write the rules in the `styles.css` tab, and build the menu from your sections: put their names in place of the ready-made items.
+
+A hint about the menu: you can loop over the items from the brief the way the finished examples do, but it is simpler to type the names by hand and delete the rest. What matters is that the menu holds at least three sections of your project, and no more than six items in all.
+
+## What was wrong with 2014
+
+In 2014 many of this lesson’s tricks were still alive: carousels on home pages, stock photos, buttons with a shadow. They were heavily criticized even then, but templates and site builders kept copying them for years. So fashion isn’t the only cause of aging: often a trick survives just because it is in a template.
