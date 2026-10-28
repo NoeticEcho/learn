@@ -1,0 +1,433 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/12-atomic-components.svx. */
+	export const metadata = {
+		id: '04-design/12-atomic-components',
+		part: 4,
+		order: 12,
+		title: 'Atomic design: atoms, molecules, components and their states',
+		definition: 'Atomic design builds an interface from five levels: atoms, molecules, organisms, templates and pages. A component is a part with a name, a makeup and states.',
+		summary:
+			'You’ll learn to take any page apart into repeating parts and name them, and then to describe each component together with its states (default, hover, focus, pressed, disabled, loading, error). Afterwards you build a page from parts of your own, not by drawing each one anew.',
+		minutes: 30,
+		teaches: ['design-atomic-design', 'design-component'],
+		requires: ['design-tokens', 'html-semantic-elements'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'atom|molecule|organism', caption: 'Atomic design', say: 'Atoms make molecules, molecules make organisms. The value is in the habit of thinking in named parts.' },
+				{ mood: 'hmm', side: 'right', prop: 'cards', label: 'hover focus disabled', say: 'Beginners draw a button in one state. List them first: default, hover, focus, pressed, disabled, loading.' },
+				{ mood: 'hint', prop: 'browser', label: 'Tab', caption: 'Focus', say: 'Keep the focus outline, or Tab users get lost. Dislike it? Replace it with your own :focus-visible.' },
+				{ mood: 'cheer', side: 'right', prop: 'cards', label: 'card', say: 'A component’s rule lives in one place. Copy a card into five places and in a month you have five different cards.' }
+			]
+		},
+		practice: {
+			id: 'design-card-component',
+			title: 'A card and a button as components with states',
+			task: 'Style two parts as components. 1) The card .card: the same part for each item of your project (and one sample card is already on the page): in styles.css a visible border (at least 1 pixel), rounded corners and padding. 2) The button .btn in three states shown side by side: default; disabled (the disabled attribute) with an opacity from 0.2 to 0.7 and the cursor not-allowed; loading (aria-busy set to true) with the cursor progress. 3) Besides that, describe :hover, :focus-visible and :active with rules (the check can’t see them: press Tab and check by eye). 4) In the note name one atom, one molecule and one organism of your page. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+
+      <section id="cards">
+        <h2>Cards</h2>
+        <div class="cards">
+          <article class="card"><h3>Title</h3><p>A short description of the sample.</p></article>
+          {{#each items}}<article class="card"><h3>{{title}}</h3><p>{{text}}</p></article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="states">
+        <h2>The states of a button</h2>
+        <p>
+          <a class="btn" href="#contacts">{{mainAction.label}}</a>
+          <button class="btn" disabled>{{mainAction.label}}</button>
+          <button class="btn" aria-busy="true">Sending…</button>
+        </p>
+      </section>
+
+      <aside class="note" data-scaffold id="components">
+        <h2>My components</h2>
+        <ul>
+          <li>Atom: <span class="atom">…</span></li>
+          <li>Molecule: <span class="molecule">…</span></li>
+          <li>Organism: <span class="organism">…</span></li>
+        </ul>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: tokens and components */
+:root {
+  --accent: #0b5cad;
+  --on-accent: #ffffff;
+  --space-2: 8px;
+  --space-4: 16px;
+  --radius: 8px;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  text-decoration: none;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+
+      <section id="cards">
+        <h2>Cards</h2>
+        <div class="cards">
+          <article class="card"><h3>Title</h3><p>A short description of the sample.</p></article>
+          {{#each items}}<article class="card"><h3>{{title}}</h3><p>{{text}}</p></article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="states">
+        <h2>The states of a button</h2>
+        <p>
+          <a class="btn" href="#contacts">{{mainAction.label}}</a>
+          <button class="btn" disabled>{{mainAction.label}}</button>
+          <button class="btn" aria-busy="true">Sending…</button>
+        </p>
+      </section>
+
+      <aside class="note" data-scaffold id="components">
+        <h2>My components</h2>
+        <ul>
+          <li>Atom: <span class="atom">button</span></li>
+          <li>Molecule: <span class="molecule">an item card: a heading, a description, a link</span></li>
+          <li>Organism: <span class="organism">a section with a grid of cards</span></li>
+        </ul>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: tokens and components */
+:root {
+  --accent: #0b5cad;
+  --on-accent: #ffffff;
+  --space-2: 8px;
+  --space-4: 16px;
+  --radius: 8px;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.card {
+  padding: var(--space-4);
+  border: 1px solid #d9d5ce;
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+.card h3 {
+  margin: 0 0 var(--space-2);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover {
+  filter: brightness(1.15);
+}
+.btn:focus-visible {
+  outline: 3px solid #ffdd00;
+  outline-offset: 2px;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn[aria-busy="true"] {
+  opacity: 0.8;
+  cursor: progress;
+}
+`
+			},
+			checks: [
+				{ id: 'cards', kind: 'count', selector: 'article.card', min: { brief: 'items' } },
+				{ id: 'card-sample', kind: 'count', selector: 'article.card', min: 1 },
+				{ id: 'card-border', kind: 'style', selector: '.card', prop: 'border-top-width', matches: '^[1-9]\\d*(\\.\\d+)?px$' },
+				{ id: 'card-radius', kind: 'style', selector: '.card', prop: 'border-radius', matches: '^(var\\(--radius\\)|[1-9]\\d*(\\.\\d+)?(px|rem))$' },
+				{ id: 'btn-three', kind: 'count', selector: '#states .btn', min: 3 },
+				{ id: 'btn-disabled-opacity', kind: 'style', selector: '.btn[disabled]', prop: 'opacity', matches: '^0?\\.[2-7]\\d*$' },
+				{ id: 'btn-disabled-cursor', kind: 'style', selector: '.btn[disabled]', prop: 'cursor', equals: 'not-allowed' },
+				{ id: 'btn-busy-cursor', kind: 'style', selector: '.btn[aria-busy="true"]', prop: 'cursor', equals: 'progress' },
+				{ id: 'atom', kind: 'text', selector: '#components .atom', matches: '\\S{3,}' },
+				{ id: 'molecule', kind: 'text', selector: '#components .molecule', matches: '\\S{3,}' },
+				{ id: 'organism', kind: 'text', selector: '#components .organism', matches: '\\S{3,}' },
+				{ id: 'no-blanks', kind: 'text', selector: '#components', matches: '^[^…]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the levels of atomic design in order, from the smallest to the biggest',
+				items: ['Atoms', 'Molecules', 'Organisms', 'Templates', 'Pages']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each level with an example',
+				pairs: [
+					['Atom', 'a button, a label, a field, a heading'],
+					['Molecule', 'an item card: a heading, a description and a link'],
+					['Organism', 'a header with a menu, or a section with a grid of cards'],
+					['Template', 'the skeleton of a page with no real words']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which states does a button need?',
+				options: ['Default and hover', 'Keyboard focus (visible)', 'Pressed and disabled', 'Only default: the rest is superfluous'],
+				answer: [0, 1, 2],
+				why: ['Yes: hover hints that the button is alive.', 'Yes: without a visible focus a keyboard user gets lost (WCAG 2.4.7).', 'Yes: a press confirms the action, and “disabled” explains that something can’t be done right now.', 'No: without states a button is “dead”.']
+			},
+			{
+				type: 'single',
+				prompt: 'Why make a card one component and not copy the markup?',
+				options: [
+					'So that a change in one place changes all the cards at once',
+					'So that the page is shorter',
+					'So that search engines find it better'
+				],
+				answer: 0,
+				why: [
+					'Yes. Copies drift apart: in a month every card looks a little different.',
+					'No: the size of the page is secondary.',
+					'No: this does not affect search.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why must the focus outline (outline: none) not be removed “for looks”?',
+				options: [
+					'A person who moves around the page with the Tab key would stop seeing where they are',
+					'It would break the page',
+					'The browser doesn’t allow it'
+				],
+				answer: 0,
+				why: [
+					'Yes. If the outline is in the way, don’t remove it, replace it with your own visible one (an outline on :focus-visible).',
+					'No: the page works, but it is inaccessible to the keyboard.',
+					'No: the browser allows it, and many pages break their accessibility this way.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is BEM, which was devised at Yandex?',
+				options: [
+					'A way of naming classes: block, element, modifier (for example card, card__title, card--featured)',
+					'A language for describing tokens',
+					'A library of components for React'
+				],
+				answer: 0,
+				why: [
+					'Yes. From a class name you can see what component it is and which part. The approach was devised at Yandex, and it has long been used around the world.',
+					'No: tokens are described in the DTCG format.',
+					'No: BEM is an agreement about names, not a library.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-atomic-levels', front: 'What are the five levels of atomic design?', back: 'Atoms (a button, a label), molecules (an item card), organisms (a header, a section of cards), templates (a skeleton without words), pages (a template with real content). The author is Brad Frost.' },
+			{ id: 'design-component-states', front: 'What states does a component have?', back: 'Default, hover, focus (visible), pressed, disabled, loading, error, selected. States are described beforehand, not invented along the way.' },
+			{ id: 'design-component-focus', front: 'What must you never do to focus?', back: 'Remove the outline (outline: none) with no replacement: a keyboard user gets lost. Replace it with your own visible one on :focus-visible.' },
+			{ id: 'design-component-one', front: 'Why keep a component in one place?', back: 'A change to the rule changes every instance at once. Copies of markup drift apart, and the look loses its coherence.' },
+			{ id: 'design-bem', front: 'What is BEM?', back: 'Block__element--modifier: card, card__title, card--featured. A class name shows the component and its part. Devised at Yandex.' }
+		],
+		sources: [
+			{ title: 'Atomic Design (Brad Frost), the book online', url: 'https://atomicdesign.bradfrost.com/', licence: 'link-only', kind: 'book', lang: 'en' },
+			{ title: 'Storybook: documentation', url: 'https://storybook.js.org/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Understanding: Focus Visible, WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: ':focus-visible (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'BEM: Block, Element, Modifier (bem.info, from Yandex)', url: 'https://bem.info/en/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Design Systems 101: components and patterns (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/design-systems-101/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [{ title: 'Brad Frost: Atomic Design (beyond tellerrand, 2013)', url: 'https://www.youtube.com/watch?v=84LZyZsTiaA', licence: 'proprietary-link', kind: 'video', lang: 'en' }],
+		guide: {
+			intro: 'Right now your card and button have no styling. Let’s make them components: one rule for the card and five states for the button.',
+			hints: [
+				'.card needs padding, border: 1px solid #d9d5ce and border-radius: var(--radius). Then all the cards on the page are styled by one rule.',
+				'For the buttons: .btn[disabled] gets opacity: 0.5 and cursor: not-allowed, and .btn[aria-busy=true] gets cursor: progress.',
+				'Describe :hover, :focus-visible and :active too, although the check can’t see them. Then press Tab and make sure the focus is noticeable. In the note name one atom, one molecule and one organism.'
+			],
+			mistakes: {
+				cards: 'There must be at least as many article.card cards as there are items in your project.',
+				'card-sample': 'There must be at least one article.card card.',
+				'card-border': 'The card needs a visible border: border: 1px solid #d9d5ce.',
+				'card-radius': 'The card needs rounded corners: border-radius, for example var(--radius).',
+				'btn-three': 'The block of states needs three .btn buttons: default, disabled and loading.',
+				'btn-disabled-opacity': 'The disabled button must be paler: an opacity from 0.2 to 0.7.',
+				'btn-disabled-cursor': 'The disabled button’s cursor must be not-allowed.',
+				'btn-busy-cursor': 'The loading button (aria-busy set to true) must have the cursor progress.',
+				atom: 'Name one atom of your page, for example “button”.',
+				molecule: 'Name one molecule of your page, for example “an item card”.',
+				organism: 'Name one organism of your page, for example “a section with cards”.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.'
+			},
+			outro: 'Now you have a card and a button as real components, with states. Make the other parts the same way: names first, then states.'
+		},
+		say: { BEM: 'B E M', CSS: 'C S S', WCAG: 'wuh-cag', Tab: 'tab', Storybook: 'story book', outline: 'outline', disabled: 'disabled', Brad: 'brad', Frost: 'frost', hover: 'hover', focus: 'focus', active: 'active', aria: 'ah-ree-a', busy: 'busy', Yandex: 'yan-dex' }
+	};
+</script>
+
+<script>
+	import AtomicBreakdown from '../../diagrams/AtomicBreakdown.svelte';
+</script>
+
+## A page made of parts
+
+Open any site and look at it with your eyes half shut: it turns out to be built of repeating parts. Buttons of one shape, cards of one kind, headings in one style. If these parts are named and described, a page can be assembled, not drawn from scratch every time.
+
+In 2013 Brad Frost put this thought into words and called it **atomic design**, after chemistry: atoms make molecules, molecules make organisms. He has five levels.
+
+1. **Atoms.** What can’t be taken apart further without losing meaning: a heading, a paragraph, a link, a button, a label, a field.
+2. **Molecules.** Several atoms working as one: an item card (a heading, a description, a link), a field with a label and a hint.
+3. **Organisms.** A self-contained part of a page made of molecules and atoms: a header with a menu, a section with a grid of cards, a footer.
+4. **Templates.** The skeleton of a page made of organisms, with no real words. It shows the structure apart from the content.
+5. **Pages.** The template with the real content of your project. Here you find out whether the parts fit life: long titles, no picture, an empty section.
+
+Choose a level on the diagram: the parts it needs are outlined. And lower on the same diagram are the states of a button, which we will come to in a minute.
+
+<AtomicBreakdown />
+
+Don’t take the levels too literally. Sometimes it isn’t clear whether something is a molecule or an organism, and that is fine: what matters is that the part has a **name** and you know where it lives. The value of atomic design is not in the classification but in the habit of thinking in parts.
+
+<details>
+<summary>Check yourself: how does a molecule differ from an organism?</summary>
+
+A molecule is several atoms working together (a card). An organism is a self-contained part of a page made of molecules and atoms (a section of cards, a header).
+
+</details>
+
+## What a component is
+
+A **component** is a part of an interface with a name, a makeup and rules. A real component has these described:
+
+- **a name** and a purpose: what it is and when to take it;
+- **an anatomy:** the parts it is made of (for a card these are the border, the heading, the description, the link);
+- **variants:** primary and secondary, large and small;
+- **states:** how it looks at each moment (below);
+- **content:** how many words it holds, what happens when a field is empty;
+- **accessibility:** how to work with it by keyboard and with a screen reader;
+- **tokens:** which values it uses (color, spacing, radius).
+
+A card of six or seven such lines is already a system. It is exactly what you will find on the component pages of Material, GOV.UK, Carbon and other systems: anatomy, variants, states, rules, code.
+
+## States: the most forgotten part
+
+Beginners draw a component in one state, and then the code meets the others and a developer invents them along the way. So the list of states is written down beforehand.
+
+- **Default.** The resting state.
+- **Hover.** Hints that the part can be pressed. A phone has no hover, so the meaning must not rest on it alone.
+- **Focus.** Visible when the part has been reached with the Tab key. **The focus outline must not be removed:** without it a keyboard user can’t see where they are. If you dislike the default outline, replace it with your own visible one using the rule `:focus-visible`: it switches on only for keyboard control.
+- **Pressed (active).** A short reaction while the button is pressed.
+- **Disabled.** The action is impossible right now. Explain nearby why: a gray button with no explanation is annoying.
+- **Loading (busy).** Work is in progress. The label changes (“Sending…”), and a second press is blocked.
+- **Error, selected, empty:** as the meaning of the component requires.
+
+```css
+.btn:hover { filter: brightness(1.15); }
+.btn:focus-visible { outline: 3px solid #ffdd00; outline-offset: 2px; }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn[aria-busy="true"] { cursor: progress; }
+```
+
+The check can’t “hover” a mouse or “press” Tab, so it checks the static states (disabled, loading), and hover, focus and press are left to your conscience. Press Tab in the preview and look at whether the focus is visible.
+
+<details>
+<summary>Check yourself: why must the focus outline not be removed?</summary>
+
+A person who moves around the page with the Tab key would stop seeing where they are. If the outline is in the way, replace it with your own visible one.
+
+</details>
+
+## A component in one place
+
+A component’s rule lives in one place, and any change changes all its instances. If you copied a card’s markup into five places and fixed the style in each, in a month you have five different cards.
+
+So that class names don’t get tangled, people agree on names. A well-known way, **BEM** (block, element, modifier), was devised at Yandex: `card` is the block, `card__title` is its element, `card--featured` is its variant. From a class name you can see what the part is and which of its parts.
+
+Teams with many components need a showcase: a page where all of them are shown in every state. A popular tool for this is called **Storybook**. For your small project the showcase is an ordinary “States” page on the site, like the one you make in the practice.
+
+## Practice
+
+Style two parts of your project as components. The item card: one rule for all the cards. The button: three states side by side, default, disabled and loading. Describe the other states with rules and check them by hand.
+
+And write into “My components” one example at each of the three levels, to get used to naming parts.
+
+## What was wrong with 2014
+
+In 2014 buttons and cards were often drawn as pictures or given a separate rule on every page. States (except hover) were forgotten, and the focus outline was removed because it “spoiled the look”. The habit of describing states beforehand came with design systems.

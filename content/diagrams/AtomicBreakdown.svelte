@@ -7,8 +7,69 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let brief = $state({ title: 'Ваш проект', action: 'Главное действие', items: ['Первый пункт', 'Второй пункт', 'Третий пункт'] });
+	// The diagram's words, one table per edition (docs/content-plan/README.md, «English edition»).
+	const W = pick({
+		ru: {
+			fallback: { title: 'Ваш проект', action: 'Главное действие', items: ['Первый пункт', 'Второй пункт', 'Третий пункт'] },
+			levels: [
+				['Атомы', 'Нельзя разобрать дальше, не потеряв смысл: заголовок, абзац, ссылка, кнопка, метка, поле. На схеме выделены обведённым.'],
+				['Молекулы', 'Несколько атомов, работающих как одно целое: карточка пункта (заголовок, описание, ссылка), поле с подписью и подсказкой.'],
+				['Организмы', 'Самостоятельная часть страницы из молекул и атомов: шапка с меню, секция с карточками, подвал.'],
+				['Шаблон', 'Скелет страницы из организмов, без настоящих слов: так видно структуру отдельно от содержимого.'],
+				['Страница', 'Шаблон с настоящим содержимым вашего проекта. Здесь выясняется, подходят ли детали к жизни: длинные названия, пустые поля.']
+			],
+			states: [
+				['Обычное', 'Как кнопка выглядит, пока с ней ничего не делают.'],
+				['Наведение', 'Подсказка «это нажимается». На телефоне наведения нет, поэтому смысл не должен держаться только на нём.'],
+				['Фокус', 'Виден, когда на кнопку перешли клавишей Tab. Убирать его нельзя: тогда клавиатурный пользователь теряется (WCAG 2.4.7).'],
+				['Нажатие', 'Короткая реакция, пока нажата. Подтверждает, что нажатие принято.'],
+				['Недоступно', 'Действие сейчас невозможно. Объясните почему рядом: серая кнопка без пояснения раздражает.'],
+				['Загрузка', 'Идёт работа. Подпись меняется («Отправляем…»), а повторное нажатие блокируется.']
+			],
+			caption: 'Страница как набор деталей: пять уровней Брэда Фроста',
+			levelGroup: 'Уровень',
+			mock: 'Схема страницы',
+			menu: 'Меню',
+			what: 'Что мы делаем',
+			desc: 'Описание в одну строку',
+			more: 'Подробнее',
+			stateTitle: 'Состояния одной кнопки',
+			stateGroup: 'Состояние кнопки',
+			sending: 'Отправляем…'
+		},
+		en: {
+			fallback: { title: 'Your project', action: 'Main action', items: ['First item', 'Second item', 'Third item'] },
+			levels: [
+				['Atoms', 'They cannot be taken apart further without losing meaning: a heading, a paragraph, a link, a button, a label, a field. On the diagram they are outlined.'],
+				['Molecules', 'Several atoms working as one: an item card (a heading, a description, a link), a field with a label and a hint.'],
+				['Organisms', 'A self-contained part of a page made of molecules and atoms: a header with a menu, a section with cards, a footer.'],
+				['Template', 'The skeleton of a page made of organisms, with no real words: it shows the structure apart from the content.'],
+				['Page', 'The template with the real content of your project. Here you find out whether the parts fit real life: long titles, empty fields.']
+			],
+			states: [
+				['Default', 'How the button looks while nothing is being done to it.'],
+				['Hover', 'A hint: “this can be pressed”. A phone has no hover, so the meaning must not rest on it alone.'],
+				['Focus', 'Visible when the button has been reached with the Tab key. It must not be removed: a keyboard user would be lost (WCAG 2.4.7).'],
+				['Pressed', 'A short reaction while it is pressed. It confirms that the press was received.'],
+				['Disabled', 'The action is impossible right now. Explain why nearby: a gray button with no explanation is annoying.'],
+				['Loading', 'Work is in progress. The label changes (“Sending…”) and a second press is blocked.']
+			],
+			caption: 'A page as a set of parts: Brad Frost’s five levels',
+			levelGroup: 'Level',
+			mock: 'A diagram of the page',
+			menu: 'Menu',
+			what: 'What we do',
+			desc: 'A one-line description',
+			more: 'Read more',
+			stateTitle: 'The states of one button',
+			stateGroup: 'State of the button',
+			sending: 'Sending…'
+		}
+	});
+
+	let brief = $state({ ...W.fallback });
 	onMount(async () => {
 		try {
 			const learner = await import('#lib/learner.ts');
@@ -20,52 +81,49 @@
 		}
 	});
 
-	const levels = [
-		{ id: 'atom', name: 'Атомы', text: 'Нельзя разобрать дальше, не потеряв смысл: заголовок, абзац, ссылка, кнопка, метка, поле. На схеме выделены обведённым.' },
-		{ id: 'molecule', name: 'Молекулы', text: 'Несколько атомов, работающих как одно целое: карточка пункта (заголовок, описание, ссылка), поле с подписью и подсказкой.' },
-		{ id: 'organism', name: 'Организмы', text: 'Самостоятельная часть страницы из молекул и атомов: шапка с меню, секция с карточками, подвал.' },
-		{ id: 'template', name: 'Шаблон', text: 'Скелет страницы из организмов, без настоящих слов: так видно структуру отдельно от содержимого.' },
-		{ id: 'page', name: 'Страница', text: 'Шаблон с настоящим содержимым вашего проекта. Здесь выясняется, подходят ли детали к жизни: длинные названия, пустые поля.' }
-	] as const;
-	let level = $state<(typeof levels)[number]['id']>('atom');
+	const ids = ['atom', 'molecule', 'organism', 'template', 'page'] as const;
+	const levels = ids.map((id, i) => ({ id, name: W.levels[i][0], text: W.levels[i][1] }));
+	let level = $state<(typeof ids)[number]>('atom');
 	const cur = $derived(levels.find((l) => l.id === level)!);
 	const template = $derived(level === 'template');
 	const t = (s: string) => (template ? '▒▒▒▒▒' : s);
 
 	type St = 'normal' | 'hover' | 'focus' | 'pressed' | 'disabled' | 'loading';
-	const states: { id: St; name: string; style: string; note: string }[] = [
-		{ id: 'normal', name: 'Обычное', style: '', note: 'Как кнопка выглядит, пока с ней ничего не делают.' },
-		{ id: 'hover', name: 'Наведение', style: 'filter:brightness(1.18)', note: 'Подсказка «это нажимается». На телефоне наведения нет, поэтому смысл не должен держаться только на нём.' },
-		{ id: 'focus', name: 'Фокус', style: 'outline:3px solid #ffdd00;outline-offset:2px', note: 'Виден, когда на кнопку перешли клавишей Tab. Убирать его нельзя: тогда клавиатурный пользователь теряется (WCAG 2.4.7).' },
-		{ id: 'pressed', name: 'Нажатие', style: 'transform:translateY(2px);filter:brightness(.92)', note: 'Короткая реакция, пока нажата. Подтверждает, что нажатие принято.' },
-		{ id: 'disabled', name: 'Недоступно', style: 'opacity:.5;cursor:not-allowed', note: 'Действие сейчас невозможно. Объясните почему рядом: серая кнопка без пояснения раздражает.' },
-		{ id: 'loading', name: 'Загрузка', style: 'opacity:.8;cursor:progress', note: 'Идёт работа. Подпись меняется («Отправляем…»), а повторное нажатие блокируется.' }
-	];
+	const looks: Record<St, string> = {
+		normal: '',
+		hover: 'filter:brightness(1.18)',
+		focus: 'outline:3px solid #ffdd00;outline-offset:2px',
+		pressed: 'transform:translateY(2px);filter:brightness(.92)',
+		disabled: 'opacity:.5;cursor:not-allowed',
+		loading: 'opacity:.8;cursor:progress'
+	};
+	const stateIds: St[] = ['normal', 'hover', 'focus', 'pressed', 'disabled', 'loading'];
+	const states = stateIds.map((id, i) => ({ id, name: W.states[i][0], style: looks[id], note: W.states[i][1] }));
 	let st = $state<St>('normal');
 	const curSt = $derived(states.find((s) => s.id === st)!);
 </script>
 
 <figure class="dg">
-	<figcaption>Страница как набор деталей: пять уровней Брэда Фроста</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Уровень">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.levelGroup}>
 		{#each levels as l (l.id)}
 			<button type="button" aria-pressed={level === l.id} onclick={() => (level = l.id)}>{l.name}</button>
 		{/each}
 	</div>
 
-	<div class="mock" class:l-atom={level === 'atom'} class:l-molecule={level === 'molecule'} class:l-organism={level === 'organism'} class:l-template={template} role="group" aria-label="Схема страницы">
+	<div class="mock" class:l-atom={level === 'atom'} class:l-molecule={level === 'molecule'} class:l-organism={level === 'organism'} class:l-template={template} role="group" aria-label={W.mock}>
 		<div class="org header">
 			<span class="atom brand">{t(brief.title)}</span>
-			<span class="atom link">{t('Меню')}</span>
+			<span class="atom link">{t(W.menu)}</span>
 		</div>
 		<div class="org section">
-			<div class="dh atom">{t('Что мы делаем')}</div>
+			<div class="dh atom">{t(W.what)}</div>
 			<div class="grid">
 				{#each brief.items as it, k (k)}
 					<div class="mol card">
 						<span class="atom ttl">{t(it)}</span>
-						<span class="atom txt">{t('Описание в одну строку')}</span>
-						<span class="atom link">{t('Подробнее')}</span>
+						<span class="atom txt">{t(W.desc)}</span>
+						<span class="atom link">{t(W.more)}</span>
 					</div>
 				{/each}
 			</div>
@@ -76,14 +134,14 @@
 	</div>
 	<p class="dg-out" aria-live="polite"><strong>{cur.name}.</strong> {cur.text}</p>
 
-	<div class="dh sub">Состояния одной кнопки</div>
-	<div class="dg-ctl" role="group" aria-label="Состояние кнопки">
+	<div class="dh sub">{W.stateTitle}</div>
+	<div class="dg-ctl" role="group" aria-label={W.stateGroup}>
 		{#each states as s (s.id)}
 			<button type="button" aria-pressed={st === s.id} onclick={() => (st = s.id)}>{s.name}</button>
 		{/each}
 	</div>
 	<div class="stage">
-		<span class="b" style={curSt.style}>{st === 'loading' ? 'Отправляем…' : brief.action}</span>
+		<span class="b" style={curSt.style}>{st === 'loading' ? W.sending : brief.action}</span>
 	</div>
 	<p class="dg-out" aria-live="polite">{curSt.note}</p>
 </figure>
@@ -128,7 +186,7 @@
 	.dh.atom {
 		margin: 0;
 		font-size: 1rem;
-		/* the mock page's own ink, not the diagram title's theme colour (on Ink that was light on light) */
+		/* the mock page's own ink, not the diagram title's theme color (on Ink that was light on light) */
 		color: inherit;
 	}
 	.cta {
