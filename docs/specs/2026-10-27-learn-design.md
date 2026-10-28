@@ -342,7 +342,7 @@ Every lesson has the same parts, so the engine can render, test and track it:
 | `lib/sql` | real Postgres in the browser for part 7 | PGlite (lazy) |
 | `lib/guide` | the guide character, scripted dialogue, optional model | Rive or SVG, `fetch` |
 | `lib/game` | XP, streaks, era badges, the gallery | `lib/store` |
-| `lib/i18n` | UI strings, the locale switch | a JSON catalogue per locale |
+| `lib/i18n` | UI strings, the locale, `pick` for words outside the catalogues | a JSON catalogue per locale (`ru.json`, `en.json`, the same keys) |
 | `design/` | NoeticEcho tokens compiled to CSS variables | EchoBaby `design/tokens` (copied, with provenance) |
 
 ### 4.3 Progress, privacy and export
@@ -433,7 +433,7 @@ Videos are links: YouTube and VK Видео, behind a click-to-load facade, with
 - **Publishing:** GitHub Pages from `NoeticEcho/learn` at `open.noeticecho.space/learn`.
 - **The first release** is the whole programme (Martin's decision), tagged `v1.0.0`.
 - **The site:** open.noeticecho.space lists the textbook in «Open now».
-- **English** follows, part by part, as content in `content/en/`.
+- **English** follows, part by part, as content in `content/en/`, at `/learn/en/`. The engine for it (28.10.2026) is described in `docs/content-plan/README.md`, «English edition».
 
 ## 8. How the work is done
 

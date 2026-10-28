@@ -78,3 +78,72 @@ comic: {
 - **The drawing is `aria-hidden`; the words are text.** A screen reader hears the caption and each line with its speaker («Эхо: …», «Сервер: …»), so nothing may live only in the drawing: a label is decoration, and what it says, a line says too.
 - **Write the comic last**, from the lesson's own metaphors (the postcard, the envelope, the phone book), so the strip and the text tell one story. It must be accurate as the lesson is: a joke that teaches a wrong fact is worse than none. One idea per comic, the panels as beats: the problem, the turn, the rule.
 - **A new prop** is a drawing in `src/lib/comic/Prop.svelte` (a 150 × 130 box, tokens only, `vector-effect: non-scaling-stroke`) and a name in `kit.ts`; never an image file.
+
+## English edition (engine, 28.10.2026)
+
+The textbook is bilingual. Russian is the source edition and is complete; English follows part by part, written by translators into `content/en/`. The English edition is **localised, not translated**: it teaches the same concepts with the same practice, but in the world an English-speaking reader lives in.
+
+### How it is wired
+
+- **Addresses.** Russian stays at `/learn/…`, as it always was. English is `/learn/en/…`, the same paths below it: `/learn/en/lesson/00-start/01-how-to-learn/`. Every screen (home, map, review, gallery, settings) exists in both. Every lesson has an English page too: the lesson when it is translated, and otherwise an honest «This lesson isn't in English yet» page that links to the Russian one, says `noindex` and is left out of the English sitemap and `en/llms.txt`.
+- **The header's switch** goes to the same page in the other edition. From a Russian lesson English does not have yet, it goes to that lesson's part on the English map. The choice is remembered in this browser (`localStorage` `learn.lang`), and a person who chose English and opens the Russian home is sent to the English one. Settings has the same choice under «Language».
+- **One store for both.** Progress, cards, practice files and the brief are keyed by ids the editions share (lesson id, card id, practice step id), so a learner who switches keeps everything. A card keeps the language it was learnt in, and review marks it with `lang`.
+- **The head.** `<html lang>`, the canonical, `hreflang` for `ru`, `en` and `x-default` (Russian) on every page that exists in both, `og:locale` and `og:locale:alternate`, `inLanguage` in the structured data, an English Open Graph card (`og/en-…png`), sitemap entries with `xhtml:link` alternates, and `en/llms.txt` and `en/llms-full.txt`.
+- **UI strings** are `src/lib/i18n/ru.json` and `en.json`, with the same keys: `npm run check` fails on a key one has and the other lacks (`KeysMatch` in `index.ts`), and `tests/unit/i18n.test.ts` also holds placeholders and plural forms (three in Russian, two in English). A new string goes into both, written in each language, not translated by machine.
+- **Project templates.** `src/lib/persona/default.en.json` and `templates.en.json` are the English examples: Kate Alder, a land surveyor and expert witness in boundary disputes, and seven other projects, all in the invented town of Riverbend, with numbers made of zeros. They have the Russian templates' structure item for item, so every check passes for both (`tests/unit/persona.test.ts`). An empty field of the learner's brief takes the template of the page's edition; what the learner wrote is theirs and is never translated.
+
+### What a translator does, per lesson
+
+1. **Copy** `content/ru/<part>/<lesson>.svx` to `content/en/<part>/<lesson>.svx`: the same folder and file name, so the same id.
+2. **Keep what progress and the graph are keyed by**, which `npm run content:check` holds against the Russian lesson: `id`, `part`, `order`, `teaches` and `requires` (same concepts, same order), the card ids, and the practice step's `id`, `era`, `continues` and check ids. Everything else is the edition's own: the words, the quiz (its questions may differ), the sources and videos, the comic, the guide's lines, the checks' patterns.
+3. **Write it in English**, natively: the text, the definition (the rules of «Определение», with «you» in place of «вы»: no «you», no «In this lesson»), the summary, the comic, the quiz with its feedback, the cards, the guide's lines, and the practice task, starter and solution. A check that reads the person's words (`field`) works for any language; a check whose pattern is Russian text gets an English pattern. Run the unit tests: an English step is checked against all eight English templates (`tests/unit/content.test.ts`).
+4. **Diagrams** in `content/diagrams/` are shared by both editions. A diagram the lesson uses gets its words in a `pick({ ru: {…}, en: {…} })` table (`#lib/i18n/index.ts`), as `ForgettingCurve.svelte` does; the Russian rendering must not change.
+5. **Sources**: at least one in English (`content:check` refuses a lesson with none). Prefer the English primary source: MDN in English, the W3C or WHATWG text, the English Wikipedia, web.dev, the official English docs. A Russian source stays only where the topic is Russian (Runet, Яндекс, 152-ФЗ cited for comparison). Videos: English ones, found and checked as the Russian ones were.
+6. **Concepts** need no new entry: every part and concept already has an English title in `content/en/curriculum.yaml`. Use the title as the lesson's term; if the lesson shows the title is wrong, fix it there in the same commit.
+7. Run `npm run content:check`, `npm test -- --run` (including `tests/unit/style-en.test.ts`) and look at the page at `/learn/en/lesson/<id>/`.
+
+### Localisation rules
+
+- **Law.** A lesson that teaches Russian law teaches the English-speaking reader's equivalents instead, with Russia's kept as one example where the course compares jurisdictions:
+  - personal data: GDPR and UK GDPR (and the US state laws by name), in place of 152-ФЗ; cookies: the ePrivacy Directive and PECR;
+  - advertising: the FTC's endorsement guides and the ASA and the CAP Code, in place of the Russian ad law and ОРД; email: CAN-SPAM, PECR and GDPR consent;
+  - accessibility: WCAG 2.2 with the ADA, the European Accessibility Act and EN 301 549, in place of ГОСТ Р 52872-2019;
+  - consumer law: the EU and UK distance-selling rules (the Consumer Contracts Regulations), in place of the Russian law on consumer rights;
+  - data localisation: what GDPR says about transfers, with Russia's localisation rule as the strict case it is.
+  Every lesson on law carries a note that it is general information, not legal advice, and names the authority to ask. The legal facts are checked against the primary text, as `docs/legal-review.md` asks of the Russian ones.
+- **Russian tools and the Runet** stay where the lesson's point is history or a real example (the history of the Runet, Яндекс beside Google, VK and Telegram as one market among others, Tilda and 1С-Битрикс beside Wix, Squarespace and Shopify, Яндекс Метрика beside GA4 and the privacy-friendly counters). They are named in their Latin form (Yandex, Yandex Metrica, 1C-Bitrix) and explained once.
+- **Money and places.** Prices in pounds in the templates, «Riverbend» for the town, a «Russian host» becomes «an ordinary host».
+- **Echo** is the guide's name in English (Эхо in Russian); Iskin is Искин. Refer to Echo by name, and as «they» where a pronoun is needed. Echo speaks to the learner as «you», warmly and briefly, as in Russian.
+
+### English house style (`tests/unit/style-en.test.ts`)
+
+- **British spelling** (colour, licence as a noun, organise, behaviour), the spelling the code and the docs already use.
+- **Headings and titles in sentence case**: «Cards and spaced repetition», not «Cards and Spaced Repetition». A capital after the first word only for a name, an acronym or a word with capitals inside it (JavaScript); a name a lesson needs is added to `NAMES` in the test. After a colon the next word is lower case.
+- **Typographic quotes and apostrophes** in prose: “ ” and ’, never " or '. A label the learner presses is quoted: press “Save progress”.
+- **No dash in a sentence**, as in Russian: two sentences, a colon or a comma instead. A definition defines with «is»: «DNS is a distributed system that…».
+- **Plain English**: short sentences, active voice, «you» for the learner, contractions where they read naturally («you’ll», «isn’t»). No ё rule, no «вы» rule: their purposes are served here by the rules above.
+- **Numbers and dates**: «28 October 2026», «4.5 to 1», «1,000».
+- **Comic lines** keep the comic's limits (`src/lib/comic/kit.ts`): 28 characters a label, 32 a caption, 120 a line and 170 a panel; English runs shorter than Russian, so a line usually fits as it is. A joke that does not survive translation is replaced by one that teaches the same idea.
+
+### Glossary
+
+The terms are the concept titles in `content/en/curriculum.yaml`. Beyond them, the ones the UI and the reference lesson fixed:
+
+| Russian | English |
+|---|---|
+| Сквозь время | Through Time |
+| Эхо, проводник | Echo, the guide |
+| Зачем · Теория · Живая схема · Практика · Тест · Карточки · Источники · Дальше | Why · Theory · Live diagram · Practice · Test · Cards · Sources · Next |
+| Проверьте себя | Check yourself |
+| Карта курса | Course map |
+| Повторение | Review |
+| Снова · Трудно · Хорошо · Легко | Again · Hard · Good · Easy |
+| бриф проекта | project brief |
+| эпоха | era |
+| песочница, предпросмотр, проверки | sandbox, preview, checks |
+| Завершить урок | Finish the lesson |
+| Сохранить прогресс | Save progress |
+| инфостиль | plain, informative style |
+| канцелярит | officialese |
+| Заречье | Riverbend |
+| Искин | Iskin |
