@@ -1,0 +1,374 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/04-cdn-edge.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const plan = (v) => `<section data-scaffold id="edge-plan">
+      <h2>My site’s cache and function</h2>
+      <p id="cache-assets">Images, CSS and scripts: ${v.assets}</p>
+      <p id="cache-html">HTML pages: ${v.html}</p>
+      <p id="cache-pages">The site’s sections and what happens to them: ${v.pages}</p>
+      <p id="purge">Purging the cache after publishing: ${v.purge}</p>
+      <h3>A function for the main action</h3>
+      <p id="fn-what">What it does: ${v.what}</p>
+      <pre id="fn-code">${v.code}<\/pre>
+      <p id="fn-region">Where it runs and why there: ${v.region}</p>
+    </section>`;
+
+	const skeleton = `export default {
+  async fetch(request, env) {
+    // 1) let only POST through
+    // 2) read the form fields and check them
+    // 3) forward the request to the address in the settings (env.WEBHOOK_URL), not in the code
+    // 4) reply: 200 on success, 400 on bad data
+    …
+  }
+};`;
+
+	const solved = `export default {
+  async fetch(request, env) {
+    if (request.method !== 'POST') {
+      return new Response('POST only', { status: 405 });
+    }
+    const data = await request.formData();
+    const name = String(data.get('name') ?? '').trim();
+    const phone = String(data.get('phone') ?? '').trim();
+    if (!name || !/^[+0-9 ()-]{6,20}$/.test(phone)) {
+      return new Response('Check the fields', { status: 400 });
+    }
+    // the address and the key live in the service's settings (env), not in the page's code
+    await fetch(env.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, phone })
+    });
+    return new Response('Received', { status: 200 });
+  }
+};`;
+
+	export const metadata = {
+		id: '09-infrastructure/04-cdn-edge',
+		part: 9,
+		order: 4,
+		title: 'CDN, serverless and the edge: a site closer to the visitor',
+		definition: 'A CDN is a network of servers that serve a site’s files from a node near the visitor. Serverless runs functions on a platform, the edge runs them on CDN nodes.',
+		summary:
+			'A site in Virginia opens slowly in Seattle, because light in a cable is not infinitely fast. Afterwards you’ll understand how a CDN brings files closer to the visitor, what can and can’t be cached, why a file’s name carries a hash, what a function “without a server” looks like and what it takes from your project’s form.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'Virginia', caption: 'A visitor in Seattle', say: 'A signal can’t beat the speed of light. A far-away server answers more slowly, and no markup fixes that.' },
+				{ mood: 'explain', side: 'right', prop: 'network', label: 'CDN nodes', say: 'A CDN keeps copies of the files in many cities. The nearest node serves the request and rarely reaches your server.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'app.3f9a1c.css', caption: 'A hash in the name', say: 'A new version gets a new name, so the old copy in a cache is nothing to fear.' }
+			]
+		},
+		minutes: 25,
+		teaches: ['infra-cdn', 'infra-serverless-edge'],
+		requires: ['net-http-status-headers', 'net-http-request-response', 'infra-hosting-types', 'server-rest'],
+		practice: {
+			id: 'infra-cache-function',
+			title: 'What to cache, and a function for the main action',
+			task: 'Fill in a note on your project’s cache and function. 1) For images, CSS and scripts, write a Cache-Control value with a long term. 2) For HTML, choose a short term or revalidation. 3) Name every section from the brief and say what happens to it (cached or not). 4) Say how the cache is purged after publishing. 5) Describe the function: what it does for the project’s main action, naming that action in the words of the brief. 6) Finish its code: let only POST through, check the fields and answer 400 if they are bad, and take the receiver’s address from the settings (env), not from the code. 7) Say in which region it runs and why (personal data and privacy law). Every “…” has to be replaced.',
+			era: 6,
+			files: files({
+				scaffold: plan({ assets: '…', html: '…', pages: '…', purge: '…', what: '…', code: skeleton, region: '…' })
+			}),
+			solution: files({
+				scaffold: plan({
+					assets: 'Cache-Control: public, max-age=31536000, immutable: the file’s name has a hash in it, so a new version gets a new name.',
+					html: 'Cache-Control: no-cache: the copy is kept, but before it is shown the cache checks whether the page has changed (a 304 answer), so an edit is seen at once.',
+					pages: '{{#each sections}}{{.}}: cached like any ordinary page. {{/each}}Pages with the form and personal data are never cached (private, no-store).',
+					purge: 'every publish purges the CDN cache from the build by itself, and files with a hash in their names never need purging.',
+					what: 'The function receives the request from the form for the action “{{mainAction.label}}”: it checks the name and the phone number, passes them to the receiver of requests, and answers “received” or “check the fields”.',
+					code: solved,
+					region: 'It runs in a single region near the visitors and the form service’s data center, because it receives names and phone numbers: that is personal data, and privacy law (the GDPR for visitors in the EU, state laws in the US) follows the people, so I choose the region on purpose to keep the delay low.'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#edge-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#edge-plan', matches: '^[^…]*$' },
+				{ id: 'assets', kind: 'text', selector: '#cache-assets', matches: 'max-age\\s*=\\s*\\d{5,}|immutable|year|month' },
+				{ id: 'html', kind: 'text', selector: '#cache-html', matches: 'max-age\\s*=\\s*\\d{1,4}\\b|no-cache|revalidat|s-maxage|minute|short|ETag|not cache' },
+				{ id: 'sections', kind: 'field', selector: '#cache-pages', field: 'sections' },
+				{ id: 'private-pages', kind: 'text', selector: '#cache-pages', matches: 'not cache|never cache|private|no-store|personal' },
+				{ id: 'purge', kind: 'text', selector: '#purge', matches: 'purge|invalidat|version|hash|redeploy|re-upload|clear' },
+				{ id: 'fn-action', kind: 'field', selector: '#fn-what', field: 'mainAction.label' },
+				{ id: 'fn-method', kind: 'text', selector: '#fn-code', matches: 'request\\.method' },
+				{ id: 'fn-validate', kind: 'text', selector: '#fn-code', matches: 'status:\\s*400|400' },
+				{ id: 'fn-secret-in-env', kind: 'text', selector: '#fn-code', matches: 'env\\.[A-Z_]{3,}' },
+				{ id: 'fn-no-secret', kind: 'text', selector: '#fn-code', matches: '^(?![\\s\\S]*(?:Bearer\\s+[A-Za-z0-9]{10,}|sk-[A-Za-z0-9]{10,}|api[_-]?key\\s*[:=]\\s*[\'"][A-Za-z0-9]{8,}))' },
+				{ id: 'fn-region', kind: 'text', selector: '#fn-region', matches: '^(?=[\\s\\S]*(?:region|data center|US\\b|EU\\b|Europe|Frankfurt|Virginia|Ireland|UK\\b))(?=[\\s\\S]*(?:GDPR|CCPA|privacy|personal|delay|latency|closer|nearby))' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does a CDN do?',
+				options: [
+					'It keeps copies of your files on many servers in different places, and the visitor is served by the nearest one',
+					'It replaces your server and your database',
+					'It encrypts traffic between you and the visitor with no certificates'
+				],
+				answer: 0,
+				why: [
+					'Yes. A CDN (a content delivery network) brings files closer to the visitor: a shorter distance, less delay, and fewer requests reach your server.',
+					'No: a CDN caches what can be shown to everyone. The data and the program stay on your server.',
+					'No: HTTPS is needed in any case, and a CDN only takes it over.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each resource with a sensible cache policy',
+				pairs: [
+					['style.3f9a1c.css (a hash in the name)', 'for a year, immutable: with the same name the content never changes'],
+					['index.html', 'short, or with revalidation, so a publish is seen'],
+					['the “My orders” page after sign-in', 'private, no-store: a shared cache must not keep it'],
+					['the answer to a form (POST)', 'not cached at all']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You changed the CSS, and some visitors still see the old look. What is the most reliable way to prevent that?',
+				options: [
+					'Change the file’s name along with its content (a hash in the name): a new name can’t be mistaken for an old copy',
+					'Ask everyone to press Ctrl+F5',
+					'Set the cache term to a year and wait'
+				],
+				answer: 0,
+				why: [
+					'Yes. If the name is new, there simply is no old copy in the cache. That is why site bundlers add a hash to file names.',
+					'No: people shouldn’t have to know about your cache.',
+					'No: that very term is what would leave the old copy in place for a long time.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of a serverless function?',
+				options: [
+					'There are servers, but the platform looks after them: you only upload code',
+					'It is usually started on request, and you pay per call',
+					'It suits computations that last several hours',
+					'Between calls it keeps none of your data: you have to store it in a database'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: “serverless” means “you don’t have to think about the server”.',
+					'Yes: with no requests the function doesn’t run and costs nothing (there is a “cold start”: the first call takes longer).',
+					'No: functions have a time limit. Long jobs go into a queue or run on a server.',
+					'Yes: state isn’t kept between calls, so requests are written to a database, put in a queue or forwarded.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is it convenient to run at the edge of the network?',
+				options: [
+					'Light actions near the visitor: a redirect, a header check, swapping a version of a page, a quick answer',
+					'Storing the whole customer database',
+					'Complex calculations that take many minutes'
+				],
+				answer: 0,
+				why: [
+					'Yes. Code on a CDN node gains in distance, but gets little power and time and sits far from your data.',
+					'No: a database is usually in one place, and reaching it from the edge can take longer than from a server.',
+					'No: such functions have hard limits on time and memory.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-cdn-what',
+				front: 'How does a CDN speed up a site?',
+				back: 'It keeps copies of files (a cache) on nodes in different cities. The nearest node serves the request: a cache hit is faster than the trip to your server, and on a miss the node fetches the file itself.'
+			},
+			{
+				id: 'infra-cache-control',
+				front: 'Which Cache-Control values do you need to know?',
+				back: 'max-age (how many seconds to keep), no-cache (keep, but revalidate), no-store (don’t keep), private (only in the person’s own browser), immutable (never changes). For files with a hash in the name: a year and immutable.'
+			},
+			{
+				id: 'infra-cache-bust',
+				front: 'How do you make sure a new version is seen at once?',
+				back: 'For files: a hash in the name (a new name, no old cache). For HTML: a short term or revalidation. For the rest: purge the cache when you publish.'
+			},
+			{
+				id: 'infra-serverless',
+				front: 'What is serverless?',
+				back: 'You upload a function, the platform runs it on request and scales it, and you pay per call. The limits: a time limit, no state between calls, a cold start, being tied to a platform.'
+			},
+			{
+				id: 'infra-edge',
+				front: 'When is the edge the right place?',
+				back: 'For light actions near the visitor: redirects, checks, swapping a version, a quick answer. Not for heavy computing, and not where the data is far from the node.'
+			}
+		],
+		sources: [
+			{ title: 'MDN: CDN (glossary)', url: 'https://developer.mozilla.org/en-US/docs/Glossary/CDN', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'web.dev: Content delivery networks (CDN)', url: 'https://web.dev/articles/content-delivery-networks', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'MDN: HTTP caching', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'web.dev: Prevent unnecessary network requests with the HTTP Cache', url: 'https://web.dev/articles/http-cache', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Cloudflare Workers: documentation', url: 'https://developers.cloudflare.com/workers/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'AWS Lambda: What is Lambda?', url: 'https://docs.aws.amazon.com/lambda/latest/dg/welcome.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The site should open quickly everywhere, and the project’s form needs a receiver. First we decide what to keep in the cache, then we finish a small function for the main action.',
+			hints: [
+				'For files with a hash in the name: “Cache-Control: public, max-age=31536000, immutable”. For HTML: “no-cache” or a short max-age, such as 300.',
+				'Under sections, list every section from the brief, as in the navigation, and say what happens to it. Pages with personal data: private, no-store.',
+				'The code needs three things: a check of request.method, an answer with status 400 for bad data, and an address from env (for example env.WEBHOOK_URL). Don’t write keys into the code.',
+				'The function’s region: one you choose on purpose, and the reason: personal data and privacy law, and the delay for your visitors.'
+			],
+			mistakes: {
+				plan: 'The block “My site’s cache and function” (the section whose id is edge-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one, in the code too.',
+				assets: 'Images, CSS and scripts need a long term: for example max-age=31536000 and immutable.',
+				html: 'HTML needs a short term or revalidation: for example no-cache or max-age=300.',
+				sections: 'The note should have all the sections of your brief, each named in full.',
+				'private-pages': 'Say that pages with personal data aren’t cached (private, no-store).',
+				purge: 'Say how the cache is purged after publishing: a purge in the build, a new file name with a hash.',
+				'fn-action': 'Describe the function through the project’s main action, naming it in the words of the brief.',
+				'fn-method': 'The function’s code needs a check of request.method: accept only POST.',
+				'fn-validate': 'The function’s code needs an answer with status 400 for bad data.',
+				'fn-secret-in-env': 'Take the receiver’s address from the settings: for example env.WEBHOOK_URL.',
+				'fn-no-secret': 'A key or token is left in the code. Remove it: secrets live in the service’s settings.',
+				'fn-region': 'Say where the function runs (a region) and why: personal data, privacy law, the delay.'
+			},
+			outro: 'Now the site has a cache plan and a function for the main action, and there are no secrets in the page’s code. Next: what programs are packed into, so that they run the same everywhere.'
+		},
+		say: {
+			CDN: 'C D N',
+			'Cache-Control': 'cache control',
+			'max-age': 'max age',
+			immutable: 'immutable',
+			'no-cache': 'no cache',
+			'no-store': 'no store',
+			serverless: 'server less',
+			edge: 'edge',
+			Cloudflare: 'cloud flare',
+			Workers: 'workers',
+			POST: 'post',
+			env: 'env',
+			webhook: 'web hook',
+			purge: 'purge',
+			ETag: 'E tag',
+			PoP: 'P O P',
+			Lambda: 'lambda'
+		}
+	};
+</script>
+
+<script>
+	import CdnMap from '../../diagrams/CdnMap.svelte';
+</script>
+
+## Light is not infinitely fast
+
+You chose a host in Virginia, and in Virginia the site opens instantly. From Seattle the picture is different. A signal in an optical fiber travels about two hundred kilometers (a hundred and twenty-five miles) in a millisecond, and the straight line from Seattle to Virginia is about 3,700 kilometers (2,300 miles). Add the detours along the way. To show one page, the browser and the server exchange messages several times (the connection, the encryption, the request itself), and every exchange is a round trip. The result is a delay that neither fast markup nor a powerful server can fix: the distance is to blame.
+
+The solution is simple in idea: **put copies of the files closer to people**. That is what a **CDN** (a content delivery network) does.
+
+## How a CDN works
+
+A CDN is many servers in different cities (called nodes, or points of presence). Your real server, where the site lies, is called the **origin** in this scheme. After that it goes like this.
+
+1. The site’s address in DNS leads to the CDN, not straight to your server.
+2. The visitor arrives at the nearest node.
+3. If the node has a copy of the file, that is a **hit**: the node answers by itself and your server isn’t disturbed.
+4. If there is no copy, that is a **miss**: the node goes to the origin, gets the file, gives it to the visitor and keeps it for the period you set.
+
+There are three gains at once: the nearest node answers faster, your server survives a rush of visitors, and a CDN usually also takes over HTTPS, compression, the HTTP/2 and HTTP/3 protocols and protection against some attacks. That is why the static hosting you chose in the first lesson almost always already sits behind a CDN.
+
+Play with the distance: choose the visitor’s city and the server’s place, switch the CDN on, and see how the time changes. It’s a teaching model, not a measurement, but the shape of the picture is right: the gain is biggest for far cities, and a miss costs almost as much as having no CDN.
+
+<CdnMap />
+
+<details>
+<summary>Check yourself: what happens on a cache miss?</summary>
+
+The node goes to the origin, gets the file, gives it to the visitor and keeps it for the period you set. The next visitor gets the copy from the node.
+
+</details>
+
+## What to cache, and for how long
+
+A cache remembers an answer for as long as you allowed. The permission comes from the `Cache-Control` response header (you met headers in the lesson on HTTP):
+
+- `max-age=N`: keep it for N seconds;
+- `no-cache`: it may be kept, but before each showing ask the server whether it changed (if not, the server answers with a short `304` and no body);
+- `no-store`: don’t keep it at all;
+- `private`: it may be kept only in the person’s own browser, not by shared caches and CDNs;
+- `immutable`: this file at this address will never change, don’t recheck it.
+
+Three rules are enough for most sites.
+
+1. **Files with a hash in the name: a year.** Images, fonts, CSS and scripts that a bundler builds get a fingerprint of their content in the name (`app.3f9a1c.css`). Editing the file changes the name, and the old copy bothers no one. So `public, max-age=31536000, immutable` suits them.
+2. **HTML: short, or with revalidation.** A page is what you edit most often, and it links to the files with hashes. If you cache HTML for long, visitors will see neither your edits nor the new files. So `no-cache`, or a few minutes.
+3. **Anything personal: never in a shared cache.** A page with a signed-in person’s name, a form’s answer, a cart: `private, no-store`. The well-known mishap where a cache showed one person another’s page starts with a forgotten header on a personal page.
+
+If you need the new version to appear for everyone at once, there is the **purge**: a CDN command that means “forget this”. A good deploy purges the cache by itself (the lesson on CI/CD covers it).
+
+<details>
+<summary>Check yourself: why can a file with a hash in its name be cached for a year?</summary>
+
+Because when the content changes, the name changes, and the browser simply won’t find the old copy under the new name. The old copy is harmless.
+
+</details>
+
+## A function without a server
+
+Say a static site needs a request form (your project’s main action). A program has to receive the data, and you have no server. This is where **serverless** helps: “computing without a server”.
+
+The name doesn’t mean there are no servers. They exist, but the platform looks after them, and you upload a small **function**. The platform runs it when a request comes in, starts as many copies as needed, and bills you per call. If there are no requests, the function “sleeps” and costs nothing. Such platforms exist at the big clouds (the first was AWS Lambda, in 2014), at Cloudflare (Workers), at Vercel and Netlify, and elsewhere.
+
+In return there are limits worth knowing in advance.
+
+- **The time** of one call is limited, so long jobs aren’t for functions.
+- **There is no state**: what a function remembered in one call may be missing in the next. Data goes into a database or a queue, or is passed on.
+- **A cold start**: after a pause, the first call takes longer to start.
+- **Being tied to a platform**: every provider has its own way of running things.
+
+## Code at the edge of the network
+
+If a function runs not in one data center but right on the CDN’s nodes, that is called the **edge**. The code ends up next to the visitor and answers almost at once. What it is convenient for: redirects, checking whether a person is signed in, choosing a version of a page, swapping headers, a quick answer to a simple request.
+
+The price is hard limits (little memory and time) and the distance to your data: if the database sits in Virginia, a function on a node in Seattle still goes to Virginia for it, and the gain disappears. So the edge keeps decisions that need no data, and work with data stays next to the data.
+
+Here is such a function for a request form (in the style of Cloudflare Workers, though the idea is the same on any platform):
+
+```js
+export default {
+  async fetch(request, env) {
+    if (request.method !== 'POST') {
+      return new Response('POST only', { status: 405 });
+    }
+    const data = await request.formData();
+    const name = String(data.get('name') ?? '').trim();
+    const phone = String(data.get('phone') ?? '').trim();
+    if (!name || !/^[+0-9 ()-]{6,20}$/.test(phone)) {
+      return new Response('Check the fields', { status: 400 });
+    }
+    await fetch(env.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, phone })
+    });
+    return new Response('Received', { status: 200 });
+  }
+};
+```
+
+What matters in it. It **checks** what arrives (data from a visitor can’t be assumed honest: you read about this in the lesson on forms). It **keeps no secrets in the code**: the receiver’s address comes from `env`, the service’s settings, and isn’t written into a page that everyone sees. And it answers with clear statuses: 405, 400, 200.
+
+One more consideration, a non-technical one. The form takes a name and a phone number, and that is personal data. When you choose a platform for the function, you also choose where that data first lands, and privacy law (the GDPR for people in the EU, state laws in the US) follows the people, not the platform. So choose the function’s region on purpose, near your visitors, and make sure the service you forward the data to says where it keeps it. A note on the Russian market: there the law goes further and requires the first recording of Russian citizens’ data to be made in Russia, so such a form’s function runs in a Russian data center and the convenience of the edge doesn’t outweigh it (the last lesson of the part compares the rules).
+
+## Honestly: when you don’t need any of this
+
+A CDN is almost always on by default, and you needn’t think about it if you publish to static hosting. You don’t need functions if a ready-made service receives the form. You don’t need the edge until you’ve found that the distance is what’s slow. Don’t add mechanisms ahead of time: each is one more thing that can break.
+
+## Practice
+
+In this lesson you write down two decisions for your site. First: what to cache, for how long and how to purge it. Second: which function receives the project’s main action (a request, a booking, a calculation), and you finish its code. The code checks three things: the request method, a 400 answer for bad data, and the receiver’s address from the settings. There must be no keys or passwords in the page’s code.
+
+The check reads the page’s text. The function itself can’t be run in this sandbox, since there is no network here, so reading the code with your own eyes remains your job.
+
+## What was wrong before
+
+In 2010 the usual answer to a slow site was to buy a “stronger” server and hope it would do. The cache was set up in one place on the server, and after a CSS edit half the visitors saw the old look until you cleared the browser cache. Receiving a form without a server was impossible: you needed hosting with PHP even if there was only one form. Now a static site with a function in place of a server is cheaper and more reliable, but the same question remains: where is the copy of a person’s data, and who has access to it?

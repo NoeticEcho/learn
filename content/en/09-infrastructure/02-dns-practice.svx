@@ -1,0 +1,379 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/02-dns-practice.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const zone = (v) => `<section data-scaffold id="dns-plan">
+      <h2>My domain’s zone and the plan to move</h2>
+      <table id="zone">
+        <tr><th>Name</th><th>Type</th><th>Value</th><th>TTL, s</th></tr>
+        <tr class="rec"><td class="name">@</td><td class="type">${v.a[0]}</td><td class="value">${v.a[1]}</td><td class="ttl">${v.a[2]}</td></tr>
+        <tr class="rec"><td class="name">www</td><td class="type">${v.www[0]}</td><td class="value">${v.www[1]}</td><td class="ttl">${v.www[2]}</td></tr>
+        <tr class="rec"><td class="name">@ (mail)</td><td class="type">${v.mx[0]}</td><td class="value">${v.mx[1]}</td><td class="ttl">${v.mx[2]}</td></tr>
+        <tr class="rec"><td class="name">@ (sender rules)</td><td class="type">${v.spf[0]}</td><td class="value">${v.spf[1]}</td><td class="ttl">${v.spf[2]}</td></tr>
+        <tr class="rec"><td class="name">_dmarc</td><td class="type">${v.dmarc[0]}</td><td class="value">${v.dmarc[1]}</td><td class="ttl">${v.dmarc[2]}</td></tr>
+        <tr class="rec"><td class="name">@ (proof of ownership)</td><td class="type">${v.verify[0]}</td><td class="value">${v.verify[1]}</td><td class="ttl">${v.verify[2]}</td></tr>
+      </table>
+      <p id="langs">${v.langs}</p>
+      <p id="owner">${v.owner}</p>
+      <ol id="move">
+        <li>Two days ahead: ${v.m[0]}</li>
+        <li>The new server: ${v.m[1]}</li>
+        <li>Moving day: ${v.m[2]}</li>
+        <li>Checking: ${v.m[3]}</li>
+        <li>Afterwards: ${v.m[4]}</li>
+      </ol>
+    </section>`;
+
+	const blank = ['…', '…', '…'];
+
+	export const metadata = {
+		id: '09-infrastructure/02-dns-practice',
+		part: 9,
+		order: 2,
+		title: 'Domains and DNS in practice: your site’s zone and a move with no downtime',
+		definition: 'A DNS zone is the list of a domain’s records: A, CNAME, MX, TXT. The zone in force is the one the domain’s NS servers at the registrar point to.',
+		summary:
+			'You know what DNS records are, and now you use them. Afterwards you’ll be able to write your domain’s zone (the root, www, mail, proofs of ownership), choose where each language lives, and move a site to another host so that visitors notice nothing.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'the old address', caption: 'After the record changed', say: 'We changed the record, and some people still go to the old server!' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'TTL 86400', say: 'Caches remember the old answer until the TTL runs out. It should have been shortened in advance.' },
+				{ mood: 'cheer', prop: 'server', label: 'TTL 300', caption: 'Two days ahead', say: 'Now the move is invisible. I won’t switch the old server off at once: it’s needed for another day.' }
+			]
+		},
+		minutes: 25,
+		teaches: ['infra-dns-in-practice', 'infra-email-dns'],
+		requires: ['net-dns-resolution', 'net-dns-records', 'net-domain-names', 'infra-hosting-types'],
+		practice: {
+			id: 'infra-dns-zone',
+			title: 'A domain’s zone and the plan to move',
+			task: 'Fill in your domain’s zone and the plan for moving to another host. 1) In the table, enter the type, value and TTL in seconds for six records: the root (an A record with an IP address, such as 192.0.2.10), www (a CNAME to the root), mail (MX), sender rules (a TXT with v=spf1 in it), _dmarc (a TXT with v=DMARC1) and proof of ownership (a TXT). 2) In the paragraph on languages, say where each language of the brief lives: in a folder, on a subdomain or on a separate domain. 3) In the paragraph on the owner, say who the domain is registered to (you or your organization, not a contractor). 4) In the moving list, write what you do at each of the five steps; in the first and the last, name the TTL. Every “…” has to be replaced.',
+			era: 6,
+			files: files({ scaffold: zone({ a: blank, www: blank, mx: blank, spf: blank, dmarc: blank, verify: blank, langs: 'Site languages: …', owner: 'The domain is registered to: …', m: ['…', '…', '…', '…', '…'] }) }),
+			solution: files({
+				scaffold: zone({
+					a: ['A', '192.0.2.10', '300'],
+					www: ['CNAME', 'example.com.', '300'],
+					mx: ['MX', '10 mail.example.com.', '3600'],
+					spf: ['TXT', '"v=spf1 include:_spf.mail.example ~all"', '3600'],
+					dmarc: ['TXT', '"v=DMARC1; p=none; rua=mailto:dmarc@example.com"', '3600'],
+					verify: ['TXT', '"google-site-verification=0000000000000000"', '3600'],
+					langs: 'Site languages: English is the main language, and a second language (if the brief has one) goes in a folder such as /es/ on the same domain, not on a separate subdomain: DNS stays simpler and all of the domain’s weight stays in one place.',
+					owner: 'The domain is registered to: me personally, in my own account at the registrar; the contractor has access to the zone, not to the account.',
+					m: [
+						'I lower the A record’s TTL from a day to 300 seconds and wait at least as long as the old value.',
+						'I bring the site up on the new host, open it at a temporary address and check every page.',
+						'I change the A record to the new IP address, and www stays a CNAME to the root.',
+						'I check with dig that the answer is the new one, and open the site on my phone over the mobile network.',
+						'I keep the old server for another day, then put the TTL back to 3600 and shut the old host down.'
+					]
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#dns-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#dns-plan', matches: '^[^…]*$' },
+				{ id: 'records', kind: 'count', selector: '#zone tr.rec', min: 6 },
+				{ id: 'type-a', kind: 'text', selector: '#zone td.type', matches: '^\\s*(A|ALIAS|ANAME)\\s*$' },
+				{ id: 'ip', kind: 'text', selector: '#zone td.value', matches: '^\\s*\\d{1,3}(\\.\\d{1,3}){3}\\s*$' },
+				{ id: 'type-cname', kind: 'text', selector: '#zone td.type', matches: '^\\s*CNAME\\s*$' },
+				{ id: 'type-mx', kind: 'text', selector: '#zone td.type', matches: '^\\s*MX\\s*$' },
+				{ id: 'spf', kind: 'text', selector: '#zone td.value', matches: 'v=spf1' },
+				{ id: 'dmarc', kind: 'text', selector: '#zone td.value', matches: 'v=DMARC1' },
+				{ id: 'type-txt', kind: 'text', selector: '#zone td.type', matches: '^\\s*TXT\\s*$' },
+				{ id: 'ttl', kind: 'text', selector: '#zone td.ttl', matches: '^\\s*\\d{2,6}\\s*$' },
+				{ id: 'langs', kind: 'text', selector: '#langs', matches: 'language|English|Spanish|\\ben\\b|folder|directory|subdomain|separate' },
+				{ id: 'langs-en', kind: 'text', selector: '#langs', matches: 'folder|directory|/en|subdomain|separate', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'owner', kind: 'text', selector: '#owner', matches: '\\b(me|my|us|our|myself)\\b|organization|company|LLC|nonprofit|business|sole' },
+				{ id: 'move-steps', kind: 'count', selector: '#move li', min: 5 },
+				{ id: 'move-first', kind: 'text', selector: '#move li:nth-child(1)', matches: 'TTL|[Ll]ower|[Rr]educe|[Ss]horten|300' },
+				{ id: 'move-switch', kind: 'text', selector: '#move li:nth-child(3)', matches: 'record|IP|address|\\bA\\b|switch|change' },
+				{ id: 'move-check', kind: 'text', selector: '#move li:nth-child(4)', matches: 'dig|nslookup|check|verify|open' },
+				{ id: 'move-last', kind: 'text', selector: '#move li:nth-child(5)', matches: 'TTL|[Rr]estore|[Pp]ut|[Rr]aise|[Ii]ncrease|3600|86400|shut|switch off|turn off' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'You changed the A record at your host, but the site still opens from the old server. What is the first thing to check?',
+				options: [
+					'Which servers the domain’s NS records point to: the zone in force is the one they point at',
+					'Restarting your computer a few times',
+					'Buying a new domain'
+				],
+				answer: 0,
+				why: [
+					'Yes. You edit records where the zone lives. If the domain’s NS point at the registrar’s DNS and you changed a record at your host, nothing changes: you edited a copy nobody asks.',
+					'No: a browser or system cache can get in the way, but that is the second step, not the first.',
+					'No: the name isn’t the problem. The place where you edit the zone is.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why can’t you usually put a CNAME record at the root of a domain (@)?',
+				options: [
+					'A CNAME has to be the only record on its name, and the root already holds the service records NS and SOA',
+					'Because the root only ever serves mail',
+					'Because a CNAME only works for subdomains with digits in them'
+				],
+				answer: 0,
+				why: [
+					'Yes. By the rules of DNS a CNAME excludes other records on the same name. So the root gets an A record or a special ALIAS/ANAME (some providers call it “CNAME flattening”), and CNAME is kept for www and subdomains.',
+					'No: the root can hold anything except a CNAME.',
+					'No: digits have nothing to do with it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of moving a site to a new host with no downtime in order',
+				items: [
+					'Shorten the record’s TTL ahead of time and wait at least the old period',
+					'Bring the site up on the new host and check it at a temporary address',
+					'Change the record to the new server’s address',
+					'Check from different networks that the answer is the new one',
+					'A day later, restore the long TTL and switch the old server off'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are mistakes in a domain’s zone?',
+				options: [
+					'Two SPF records (a TXT with v=spf1) on one domain',
+					'An MX that points straight at an IP address',
+					'An A record for www and an A record for the root',
+					'A CNAME and an MX on the very same name'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: there must be one SPF record, or the check fails. The rules are merged into one record.',
+					'Yes: an MX gives the name of a mail server, and that name already has an A record of its own.',
+					'No: that is fine, and both records can lead to the same address.',
+					'Yes: a CNAME excludes other records on the same name, an MX included.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A Spanish version of a small site. What is simpler and more reliable to start with?',
+				options: [
+					'A /es/ folder on the same domain: one domain, one zone, one certificate',
+					'A separate domain for each language, to look established',
+					'A separate server and subdomain for every page'
+				],
+				answer: 0,
+				why: [
+					'Yes. For a small site a folder is simplest: nothing is added to DNS, and the domain’s weight stays shared. A subdomain is for when a language has a server or an application of its own, and a separate domain for when it is a separate brand or market. The versions are linked by hreflang, as in the part on HTML.',
+					'No: every domain is another fee, another zone and another certificate, and the pages lose their shared weight.',
+					'No: needless complexity with no reason.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-where-zone-lives',
+				front: 'Where do you edit DNS records?',
+				back: 'Where the domain’s NS point. The registrar holds the name, the NS say where the zone is, and the host answers for the site. An edit in the wrong place changes nothing.'
+			},
+			{
+				id: 'infra-root-cname',
+				front: 'What goes at the root of a domain instead of a CNAME?',
+				back: 'An A (or AAAA) record with an address, or ALIAS/ANAME/CNAME flattening at the DNS provider. A CNAME excludes other records on its name, and the root has many.'
+			},
+			{
+				id: 'infra-move-steps',
+				front: 'How do you move a site with no downtime?',
+				back: 'Two days ahead, shorten the TTL. Bring up and check the new server. Change the record. Check from different networks. Keep the old server another day, restore the TTL, switch the old one off.'
+			},
+			{
+				id: 'infra-dns-mistakes',
+				front: 'Three common mistakes in a zone',
+				back: 'Two SPF records, an MX pointing at an IP address, a CNAME beside other records. Also: a forgotten domain renewal, and a registrar account held by a contractor.'
+			},
+			{
+				id: 'infra-dns-check',
+				front: 'How do you check DNS from a terminal?',
+				back: 'dig example.com A or nslookup example.com; dig example.com NS shows whose zone it is. For comparison, ask another resolver: dig @1.1.1.1 example.com. The TTL in the answer counts down: that is what is left of the cache.'
+			}
+		],
+		sources: [
+			{
+				title: 'MDN: What is a domain name?',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_domain_name',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Domain Name System (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Domain_Name_System', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'RFC 1034: Domain names, concepts and facilities', url: 'https://www.rfc-editor.org/rfc/rfc1034', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Cloudflare DNS docs: DNS record types', url: 'https://developers.cloudflare.com/dns/manage-dns-records/reference/dns-record-types/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'ICANN: Registrar information for registrants', url: 'https://www.icann.org/resources/pages/registrars-0d-2012-02-25-en', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Time to write your own domain’s zone. First the site, then www, mail and the proofs of ownership, and last a plan for moving: you don’t need it today, but one day you will.',
+			hints: [
+				'The root needs an A record with an IP address: write, say, 192.0.2.10 (an address reserved for examples). For www, a CNAME to the root, that is to your domain.',
+				'Mail: an MX like “10 mail.example.com.”. Sender rules: a TXT that contains v=spf1. DMARC: a TXT at the name _dmarc that contains v=DMARC1.',
+				'A TTL is a number of seconds: 300 (5 minutes), 3600 (an hour), 86400 (a day). Before a move you shorten it.',
+				'In the plan, name the TTL and its lowering at step one, the change of record at step three, the check with dig at step four and putting the TTL back at step five.'
+			],
+			mistakes: {
+				plan: 'The block “My domain’s zone and the plan to move” (the section whose id is dns-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				records: 'The table should still have six rows of records.',
+				'type-a': 'The site needs a record of type A (or ALIAS) with an address.',
+				ip: 'In the A record the value is an IP address of four numbers, such as 192.0.2.10.',
+				'type-cname': 'www needs a record of type CNAME.',
+				'type-mx': 'Mail needs a record of type MX.',
+				spf: 'One of the TXT records must hold the sender rules: text that starts with v=spf1.',
+				dmarc: 'The name _dmarc needs a TXT record with v=DMARC1.',
+				'type-txt': 'Rules and proofs of ownership need the type TXT.',
+				ttl: 'A TTL is written as a number of seconds, such as 300 or 3600.',
+				langs: 'In the paragraph on languages, say where each language lives: a folder, a subdomain or a separate domain.',
+				'langs-en': 'Say where a second language would live (a folder like /es/, a subdomain or a separate domain), even if the brief has only one.',
+				owner: 'Say who the domain is registered to: you (or your organization), not a contractor.',
+				'move-steps': 'The moving list should still have five steps.',
+				'move-first': 'The first step is to lower the TTL ahead of time. Say so.',
+				'move-switch': 'At the third step, say what you change: the A record to the new address.',
+				'move-check': 'At the fourth step, name the check: dig, nslookup or opening the site.',
+				'move-last': 'At the fifth step, put the TTL back or say when you switch the old server off.'
+			},
+			outro: 'Now your site’s zone is written down, and a move has gone from a fear to a list. Next is the padlock: how to get a certificate for this domain.'
+		},
+		say: {
+			DNS: 'D N S',
+			TTL: 'T T L',
+			CNAME: 'see name',
+			MX: 'M X',
+			SPF: 'S P F',
+			DKIM: 'dee kim',
+			DMARC: 'dee mark',
+			TXT: 'T X T',
+			NS: 'N S',
+			ALIAS: 'alias',
+			ANAME: 'A name',
+			dig: 'dig',
+			nslookup: 'N S lookup',
+			CAA: 'C A A',
+			IP: 'I P',
+			www: 'double you double you double you'
+		}
+	};
+</script>
+
+<script>
+	import ZoneLab from '../../diagrams/ZoneLab.svelte';
+</script>
+
+## Three companies and one domain
+
+Three parties work with a domain at once, and mixing them up is the commonest reason for “I changed everything and nothing happened”.
+
+- **The registrar** is the company you bought the name from. It records in the registry (for example the registry of the `.com` zone, run by Verisign under ICANN’s rules) that the name is yours, and says whose **NS** servers answer for the zone. There are many registrars, ICANN accredits them, and the name is registered to a person or an organization. Since the GDPR most registrars hide the owner’s personal details in the public lookup.
+- **DNS hosting** is the servers that hold your **zone**: the list of the domain’s records. Often this is the registrar’s own DNS, but it can be your host’s DNS, a cloud provider’s, or a separate service such as Cloudflare.
+- **Site hosting** is the computer the A record points to. From the first lesson of this part you know it is a separate purchase.
+
+The main rule: **the zone in force is the one the domain’s NS point to**. If the domain’s NS point at the registrar’s DNS and you changed a record in your host’s panel, you fixed a copy nobody asks for. So the first check for any DNS problem is one: `dig example.com NS` (or the same in an online tool), and you edit where those servers lead.
+
+<details>
+<summary>Check yourself: where do you edit a domain’s records if the NS point at the registrar’s DNS?</summary>
+
+In the registrar’s DNS panel. Any other copy of the zone (at the host, at a service) isn’t used until the NS are switched to it.
+
+</details>
+
+## What a zone looks like
+
+The records you met in the [lesson on DNS](../../01-internet/05-dns/) hold nothing new. In practice, though, they are read as text. Each line of a zone is a name, a TTL, a type and a value:
+
+```text
+@      300   A      192.0.2.10
+www    300   CNAME  example.com.
+@      3600  MX     10 mail.example.com.
+@      3600  TXT    "v=spf1 include:_spf.mail.example ~all"
+_dmarc 3600  TXT    "v=DMARC1; p=none; rua=mailto:dmarc@example.com"
+```
+
+The addresses here are made up: `192.0.2.10` comes from a block reserved for documentation. Three small things trip people up.
+
+- **`@`** means the domain itself (the root), and `www` means the subdomain `www.example.com`.
+- **A dot at the end of a name** (`example.com.`) means “the full name, add nothing”. Some panels want the dot and others add it for you. If a panel without the dot ends up with `example.com.example.com`, it has added the domain a second time.
+- Every panel turns these lines into its own fields, but the meaning is the same: name, type, value, TTL.
+
+## The root and www
+
+Visitors type both, `example.com` and `www.example.com`, and both should open the site. It looks as if a CNAME at the root would do, but that is a trap: by the rules of DNS **a CNAME has to be the only record on its name** (RFC 1034), and the root always holds the service records NS and SOA, and often MX and TXT as well. So:
+
+- the root gets an **A** record (and **AAAA** for IPv6) with the server’s address. When a platform’s address changes and its documentation doesn’t promise otherwise, ask your DNS provider for **ALIAS/ANAME** or “CNAME flattening”, where the provider fills in the current address itself;
+- `www` gets a **CNAME** to the root, or to the name the platform gave you.
+
+And one more decision, which helps search as well: choose **one main address** and redirect the other to it with a permanent 301 redirect, as in the lesson on HTTP. Then the site has one address for people and search engines, not two identical ones.
+
+## Languages: a folder, a subdomain or a domain
+
+If the brief has a second language, you need to decide where it lives. There are three ways.
+
+1. **A folder**: `example.com/es/`. Nothing changes in DNS, there is one certificate, and the domain’s weight is shared. For a small site this is usually the best choice.
+2. **A subdomain**: `es.example.com`. It suits a language with a server or an application of its own. There is one more record in DNS, and the certificate has to cover the subdomain.
+3. **A separate domain**: `example.es`. It is a separate market or brand: you pay for it separately, and the site’s weight is split in two.
+
+Whichever you choose, the pages are tied together with the `hreflang` attribute, as in the part on HTML. Subdomains aren’t only for languages: `status.example.com` for a status page, `app.example.com` for an application, `blog.example.com` if the blog lives on another service.
+
+## Mail and proofs in the zone
+
+A zone has three “outside” jobs, and all of them are written into the same file.
+
+- **MX** says where to deliver mail. If an outside service runs your mail (Google Workspace, Microsoft 365, Fastmail and others), it gives you the exact values. An MX value is always the **name** of a server, never an IP address, and that name must not be a CNAME.
+- **SPF, DKIM and DMARC** are TXT records, described in detail in the part on email. Two practical things matter here: there must be **one** SPF record on a domain (two break the check, so you merge the rules into one), and DMARC starts at `p=none` while you watch the reports.
+- **TXT for proof of ownership.** Google Search Console, Bing Webmaster Tools, cloud services and platforms ask you to put a special string in a TXT record so they can be sure the domain is yours. You can leave such records for as long as you use the service.
+
+A **CAA** record is a useful addition: it lists which certificate authorities may issue certificates for the domain. For a small site it is optional protection, and it comes up in the next lesson.
+
+Play with the diagram. On the first tab you move to a new server and see how many visitors still go to the old one: change the TTL and the time when you shortened it. The second tab checks a zone written as text: the example has several mistakes at once, so find and fix them.
+
+<ZoneLab />
+
+<details>
+<summary>Check yourself: why do you shorten the TTL ahead of time before a move, not at the moment you change the record?</summary>
+
+Because caches keep an answer for as long as the TTL said when they got it. If you shorten the TTL and change the record at once, many visitors will still hold the old answer for a whole day. The long caches need time to expire before the move.
+
+</details>
+
+## Moving with no downtime
+
+This is the usual order, and it works for any site.
+
+1. **Two days ahead**, shorten the TTL of the records you will change to 300 seconds. Wait at least the old period: until it runs out, caches hold the long answer.
+2. **Prepare the new server** and test it without touching DNS: many platforms give a temporary address, and on your own computer you can temporarily map the name to the IP in the hosts file.
+3. **At the chosen hour**, change the A record (or the CNAME’s value) to the new address. From this minute new requests go to the new server, and old ones burn out as caches expire.
+4. **Check**: `dig +short example.com`, from different networks (home internet and mobile), on several public resolvers. Don’t forget the browser and the system, which have caches of their own.
+5. **Wait a day** and don’t switch the old server off: some visitors still go to it. Then put the TTL back to a sensible value (an hour) and only after that release the old host.
+
+If something goes wrong, a rollback is the same edit in reverse, and a short TTL is what makes it fast. That is the whole point of the preparation.
+
+## Mistakes that cost a site
+
+Some troubles happen not at a move but years later. Remember four.
+
+- **The domain expires.** The renewal isn’t paid, and the site, the mail and everything else disappear. Turn on auto-renewal and give an email address you read.
+- **The registrar account belongs to a contractor.** A freelancer “set everything up” and registered the domain to themselves. When you part ways, the domain may turn out to be someone else’s. A domain is registered to you or your organization, and a contractor is given access to the zone.
+- **One email for everything.** The email the registrar account uses is tied to the recovery of every password. Lose it, and you lose the domain with it.
+- **Forgotten records.** After a move, a stranger’s site can end up on your old IP address, and attackers make use of this. Delete records you no longer need.
+
+## How to look yourself
+
+```text
+dig +short example.com A       # the site's address
+dig example.com NS             # whose zone is in force
+dig @1.1.1.1 example.com A     # another resolver's answer, for comparison
+nslookup example.com           # the same without dig (it is on Windows)
+```
+
+The TTL in an answer counts down on repeated queries: it is what is left of the cache, and it shows how much longer the old answer will live.
+
+## Practice
+
+In front of you is your site, and under it a zone table and a moving plan. Enter the type, the value and the TTL for six records, then in the paragraphs say where the brief’s languages live and who the domain is registered to, and write out the five steps of the move. Take the example address from the block `192.0.2.x`: those are addresses for documentation, and your host will give you a real one.
+
+## What was wrong before
+
+In 2010 DNS was changed by an email to the host or in a registrar panel where “NS” was something mysterious, and mail and site were often tied to the same account. Few people had heard of SPF and DKIM, and mail from a domain was easy to forge. A move was done at night in the hope that “DNS would spread”. Now it is a list of five steps, and it doesn’t need a night.

@@ -1,0 +1,330 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/03-tls-practice.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const head = (s) => `    <link rel="canonical" href="${s}://example.com/">
+    <meta property="og:image" content="${s}://example.com/images/cover.jpg">`;
+	const main = (s) => `      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><img src="${s}://example.com/images/portrait.jpg" alt="{{name}}" width="320" height="240"></p>
+      <p><a class="button" href="${s}://example.com/#offer">{{mainAction.label}}</a></p>
+      <p><a href="${s}://example.com/privacy">Privacy policy</a></p>
+
+      <section id="offer">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about the section.</p>
+      </section>`;
+	const plan = (v) => `<section data-scaffold id="tls-plan">
+      <h2>My site’s HTTPS</h2>
+      <p id="cert-how">How we get the certificate: ${v.how}</p>
+      <p id="cert-names">Names in the certificate: ${v.names}</p>
+      <p id="cert-lang">Languages and subdomains: ${v.lang}</p>
+      <p id="cert-renew">How it is renewed: ${v.renew}</p>
+      <p id="cert-fail">If renewal breaks: ${v.fail}</p>
+      <p id="hsts">The HSTS header: ${v.hsts}</p>
+    </section>`;
+
+	export const metadata = {
+		id: '09-infrastructure/03-tls-practice',
+		part: 9,
+		order: 3,
+		title: 'HTTPS in practice: the certificate, renewal and the usual breakages',
+		definition: 'A TLS certificate goes to whoever proves they control the domain, by a file on the site (HTTP-01) or a DNS record (DNS-01). Let’s Encrypt does it over ACME.',
+		summary:
+			'You already know what TLS and a certificate are. Afterwards you’ll be able to get a certificate for your own domain, understand how an authority checks that the domain is yours, set up automatic renewal, and recognize the four breakages seen most often, “mixed content” among them.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'certificate', label: 'expires: yesterday', caption: 'Monday morning', say: [{ who: 'Browser', text: 'Your connection is not private.' }, { text: 'Renewal broke, and nobody knew.' }] },
+				{ mood: 'explain', side: 'right', prop: 'lock', label: 'http://', say: 'The padlock is there, but the picture over http didn’t load. That is mixed content.' },
+				{ mood: 'cheer', prop: 'certificate', label: 'auto-renew', caption: 'Automation and a watchman', say: 'Renewal is automatic, and a watchman emails you two weeks before the term ends.' }
+			]
+		},
+		minutes: 20,
+		teaches: ['infra-tls-certificates'],
+		requires: ['net-tls', 'net-certificates', 'infra-dns-in-practice'],
+		practice: {
+			id: 'infra-https-plan',
+			title: 'Fix mixed content and describe the certificate',
+			task: 'Your project’s page opens over https, but some addresses on it are still http: the picture, the site address in canonical, the picture for the link preview, the link to the policy and the one on the button. Change them all to https. Then fill in the note on the certificate: 1) how you get it, 2) which names it covers (the root and www), 3) where the brief’s languages live and whether they need subdomains, 4) how it is renewed, 5) what you will do if renewal breaks, 6) whether you plan to turn on HSTS and how carefully. Every “…” has to be replaced.',
+			era: 6,
+			files: files({
+				head: head('http'),
+				main: main('http'),
+				scaffold: plan({ how: '…', names: '…', lang: '…', renew: '…', fail: '…', hsts: '…' })
+			}),
+			solution: files({
+				head: head('https'),
+				main: main('https'),
+				scaffold: plan({
+					how: 'a free Let’s Encrypt certificate that the host turns on with one button in its panel.',
+					names: 'example.com and www.example.com, both names written into one certificate.',
+					lang: 'a second language, if the brief has one, lives in a folder such as /es/ of the same domain, so no separate subdomain or wildcard is needed.',
+					renew: 'automatically, about 30 days before the term ends; the software checks the domain the same way as the first time.',
+					fail: 'I have an outside monitor on the certificate’s expiry that emails me 14 days before the end; I would find the cause in the renewal log and renew by hand.',
+					hsts: 'I’ll turn it on later, once I’m sure the whole site works over https: first a max-age of one day, then half a year; I’m in no hurry for the preload list.'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#tls-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#tls-plan', matches: '^[^…]*$' },
+				{ id: 'no-http-resources', kind: 'count', selector: '[src^="http://"], link[href^="http://"], meta[content^="http://"]', max: 0 },
+				{ id: 'no-http-links', kind: 'count', selector: 'a[href^="http://"]', max: 0 },
+				{ id: 'canonical', kind: 'attr', selector: 'link[rel="canonical"]', name: 'href', matches: '^https://' },
+				{ id: 'og-image', kind: 'attr', selector: 'meta[property="og:image"]', name: 'content', matches: '^https://' },
+				{ id: 'how', kind: 'text', selector: '#cert-how', matches: 'Let|ACME|Certbot|Caddy|host|automatic|free|paid|panel' },
+				{ id: 'names', kind: 'text', selector: '#cert-names', matches: '^(?=[\\s\\S]*www)(?=[\\s\\S]*(?:\\.|domain|root))' },
+				{ id: 'lang', kind: 'text', selector: '#cert-lang', matches: 'folder|directory|/es|/en|subdomain|wildcard|\\*\\.|one language|language' },
+				{ id: 'renew', kind: 'text', selector: '#cert-renew', matches: 'automatic|Certbot|Caddy|host|ACME|days|by hand|manual' },
+				{ id: 'fail', kind: 'text', selector: '#cert-fail', matches: 'notif|monitor|email|alert|check|expir|log|by hand|manual' },
+				{ id: 'hsts', kind: 'text', selector: '#hsts', matches: 'HSTS|Strict-Transport-Security|max-age|later|not turn|careful' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'You ask Let’s Encrypt for a wildcard certificate for *.example.com. Which check is possible?',
+				options: [
+					'Only through DNS: a TXT record _acme-challenge in the domain’s zone',
+					'Only through a file on the site over HTTP',
+					'Any of the three'
+				],
+				answer: 0,
+				why: [
+					'Yes. A wildcard covers any subdomain, and a file on one site doesn’t prove you own them all. So the authority demands proof at the level of the zone: a record in DNS.',
+					'No: the HTTP check isn’t allowed for a wildcard.',
+					'No: for a wildcard only one is allowed.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each breakage with its cause',
+				pairs: [
+					['The certificate has expired', 'automatic renewal quietly stopped working'],
+					['A certificate for another name', 'it was issued for example.com, but the visitor went to www.example.com'],
+					['It works in one browser and not in another', 'the server didn’t send the intermediate certificate'],
+					['The padlock is there, but a picture didn’t load', 'its address starts with http://']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is worth doing so a certificate never “expires unexpectedly”?',
+				options: [
+					'Set up automatic renewal and make sure it worked',
+					'Put an outside monitor on the expiry date that emails you in advance',
+					'Buy a certificate for ten years',
+					'Keep the date in your head'
+				],
+				answer: [0, 1],
+				why: [
+					'Yes: certificates are short-lived and getting shorter, and nobody can renew them by hand in time.',
+					'Yes: since June 2025 Let’s Encrypt no longer emails you about an approaching expiry, so you need a signal of your own.',
+					'No: long certificates no longer exist. The term is capped, and the cap is being lowered.',
+					'No: people forget. Automate the forgetting.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A page is opened over https, and it contains an image whose address starts with http://. What happens?',
+				options: [
+					'The browser blocks or upgrades the picture and reports mixed content: the page’s protection is incomplete',
+					'Everything works as usual: the padlock guarantees the safety of the whole thing',
+					'The browser removes the page from search'
+				],
+				answer: 0,
+				why: [
+					'Yes. A resource over http can be listened to and swapped, so browsers block it (scripts and frames for certain) or upgrade it to https. Change the address yourself.',
+					'No: that is exactly why the padlock doesn’t guarantee everything.',
+					'No: search has nothing to do with it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What should you be careful about with the HSTS header?',
+				options: [
+					'Start with a short term: the browser remembers “this site only over https” and won’t let you back until the term passes',
+					'Set the longest term at once and add the site to the preload list',
+					'Turn it on before https works'
+				],
+				answer: 0,
+				why: [
+					'Yes. HSTS can’t be taken back from those who already got the header: until the term passes they won’t open the site over http. If https breaks, visitors can’t click through the warning.',
+					'No: the browsers’ preload list is almost irreversible, so don’t hurry.',
+					'No: https must first work steadily across the whole site.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-acme-http-dns',
+				front: 'How does Let’s Encrypt check that a domain is yours?',
+				back: 'HTTP-01: a file at /.well-known/acme-challenge/ on port 80. DNS-01: a TXT record _acme-challenge in the zone. A wildcard (*.example.com) is possible only through DNS-01.'
+			},
+			{
+				id: 'infra-cert-names',
+				front: 'Which names does a certificate need to cover?',
+				back: 'All the names the site opens under: the root and www, and the subdomains you need (or a wildcard). A certificate for example.com doesn’t cover www.example.com.'
+			},
+			{
+				id: 'infra-cert-four-faults',
+				front: 'Four common HTTPS breakages',
+				back: 'The term expired (renewal didn’t work), the name didn’t match, the chain is incomplete (no intermediate), mixed content (a resource over http on an https page).'
+			},
+			{
+				id: 'infra-hsts-careful',
+				front: 'What is HSTS, and what is the caution?',
+				back: 'The Strict-Transport-Security header: the browser remembers that the site is https only. Start with a small max-age: what has been remembered can’t be undone.'
+			}
+		],
+		sources: [
+			{ title: 'Let’s Encrypt: How It Works', url: 'https://letsencrypt.org/how-it-works/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Let’s Encrypt: Challenge Types', url: 'https://letsencrypt.org/docs/challenge-types/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Let’s Encrypt: Decreasing certificate lifetimes to 45 days (2025)', url: 'https://letsencrypt.org/2025/12/02/from-90-to-45', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{
+				title: 'Let’s Encrypt: Ending Expiration Emails (2025)',
+				url: 'https://letsencrypt.org/2025/01/22/ending-expiration-emails/',
+				licence: 'proprietary-link',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'CA/Browser Forum: Baseline Requirements for TLS server certificates', url: 'https://cabforum.org/working-groups/server/baseline-requirements/documents/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'MDN: Mixed content', url: 'https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{
+				title: 'MDN: Strict-Transport-Security',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'RFC 8555: Automatic Certificate Management Environment (ACME)', url: 'https://www.rfc-editor.org/rfc/rfc8555', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The site is on https, but some old http addresses are left in it. Find them and fix them, then write a short note on how your certificate will work.',
+			hints: [
+				'The http addresses hide in several places: the picture, canonical in the head, the picture for the link preview (og:image) and two links on the page. Look for “http://”.',
+				'The names in the certificate: your domain and www. If the brief has two languages, say where the second one lives: a folder or a subdomain.',
+				'Renewal: automatic, and how many days ahead. If it breaks: an expiry monitor, an email in advance, renewing by hand.',
+				'HSTS: you can say you’ll turn it on later and start with a small max-age.'
+			],
+			mistakes: {
+				plan: 'The block “My site’s HTTPS” (the section whose id is tls-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'no-http-resources': 'The page still has a resource over http: a picture, canonical or og:image. Change http:// to https://.',
+				'no-http-links': 'There are still links to http://. Change them to https://.',
+				canonical: 'The address in link rel=canonical must start with https://.',
+				'og-image': 'The address in the og:image meta tag must start with https://.',
+				how: 'Say how you get the certificate: Let’s Encrypt, the host, Certbot or a paid one.',
+				names: 'The certificate’s names include the domain and www. Name both.',
+				lang: 'Say where the brief’s languages live: a folder, a subdomain or a wildcard.',
+				renew: 'Describe renewal: automatic, and how often.',
+				fail: 'Say what you’ll do if renewal breaks: a monitor, an email, renewing by hand.',
+				hsts: 'Say something about HSTS: whether you’ll turn it on, and how carefully (a small max-age).'
+			},
+			outro: 'Now the page is honestly on https, and you think about the certificate in advance. The next task: making the site open quickly anywhere in the country as well.'
+		},
+		say: {
+			HTTPS: 'H T T P S',
+			TLS: 'T L S',
+			ACME: 'acme',
+			Certbot: 'cert bot',
+			HSTS: 'H S T S',
+			wildcard: 'wild card',
+			CAA: 'C A A',
+			'Let’s Encrypt': 'lets encrypt',
+			Caddy: 'caddy',
+			DNS: 'D N S',
+			TXT: 'T X T',
+			'HTTP-01': 'H T T P zero one',
+			'DNS-01': 'D N S zero one'
+		}
+	};
+</script>
+
+<script>
+	import CertLab from '../../diagrams/CertLab.svelte';
+</script>
+
+## What you have and what is missing
+
+In the [lesson on HTTPS and TLS](../../01-internet/07-https-tls/) you saw what TLS is: the handshake, the certificate and the certificate authority. Now for practice. For every site you need to answer four questions: how to get a certificate, how it will be renewed, what breaks if renewal doesn’t work, and whether everything on the page really goes over https. We’ll take them in order.
+
+## How to get a certificate
+
+For an ordinary site the certificate is almost always free and automatic. You know three routes from the [lesson on HTTPS and TLS](../../01-internet/07-https-tls/); here is how they look in practice, and the first is the best for a beginner.
+
+- **The platform does it all.** Static hosts (GitHub Pages, Cloudflare Pages, Netlify, Vercel) and most hosts with a control panel turn HTTPS on with one button, or from the start. You renew nothing.
+- **A program on your server.** Certbot, or the Caddy web server (which can turn HTTPS on by itself), asks the authority, gets a certificate and renews it in the background.
+- **A paid certificate** from a certificate authority: needed where an organization’s rules ask for it. For a small site it is usually unnecessary.
+
+Free certificates are issued by **Let’s Encrypt** over the open protocol **ACME** (RFC 8555): a program and the authority “agree” with no people involved. That is exactly why terms can be shortened: a person will forget once a quarter, and automation won’t.
+
+A note on the Russian market, as one comparison. Certificates for Russian sites are in flux (October 2026): foreign authorities may refuse organizations under sanctions, and the Russian state’s own authority issues certificates whose root the main browsers outside Russia don’t trust by default. The practical lesson is the same everywhere: before you build plans on one authority, find out how it could stop serving you.
+
+## How an authority checks that the domain is yours
+
+Any authority issues a certificate only to someone who controls the domain. For that there are “challenges”. Two of them you need to know.
+
+- **HTTP-01**: the authority asks you to put a file at `http://your-domain/.well-known/acme-challenge/<string>` and comes to fetch it. Port 80 must be open and the site must work. It’s simple and fits most cases.
+- **DNS-01**: the authority asks you to add a TXT record named `_acme-challenge.your-domain` to the zone. No site is needed, and port 80 can be closed. This is the only way to get a **wildcard** (`*.your-domain`, which covers any first-level subdomain), but to automate it the program needs access to your DNS provider’s API.
+
+There is a third, TLS-ALPN-01, which is rare. Play with it: switch on the wildcard and see what changes in the check. Then break the certificate in one of four ways and see what a visitor sees.
+
+<CertLab />
+
+<details>
+<summary>Check yourself: why does only the check through DNS suit a wildcard?</summary>
+
+A wildcard covers all subdomains. A file on one site doesn’t prove that you own all the others. A record in the zone proves that you control the whole domain.
+
+</details>
+
+## Names and what they cover
+
+A certificate is issued for a **list of names**. This matters: a certificate for `example.com` doesn’t cover `www.example.com`, and a visitor who types `www` gets a warning. So the certificate includes every name the site opens under: the root, `www` and the subdomains you need. If there are many subdomains or they appear often, you take a wildcard (with the caveat about the DNS check above).
+
+If the brief has a second language and you chose a folder such as `/es/` (as in the lesson on DNS), no separate certificate is needed: the domain is the same. That is one more argument for a folder.
+
+One more optional protection: a **CAA** record in the domain’s zone lists which authorities may issue certificates for your domain. The others will be refused.
+
+## Renewal: automation and a watchman
+
+How long a certificate may last is capped by the CA/Browser Forum, the body of certificate authorities and browser makers. Its Baseline Requirements set the maximum at 398 days until 15 March 2026, 200 days from that date, 100 days from 15 March 2027 and 47 days from 15 March 2029 (checked against the Baseline Requirements text in October 2026). Let’s Encrypt’s certificates are shorter still: 90 days today, with a 64-day default planned from 10 February 2027 and 45 days from 16 February 2028 (the dates are in the [lesson on HTTPS and TLS](../../01-internet/07-https-tls/)). Software renews them ahead of time, usually when a third of the term is left. It is good when that happens unnoticed, and bad when it happens without your knowing. Automation breaks silently: someone closed port 80, changed DNS, switched providers, or the disk filled up. Two and a half months later visitors see a red warning.
+
+So you need two layers of protection.
+
+1. **Automatic renewal** that you have tested once: for example, `certbot renew --dry-run` tries to renew without really issuing and shows the errors.
+2. **An independent watchman**: an outside monitor that checks the expiry date and writes to you two weeks before the end. Since 4 June 2025 Let’s Encrypt itself no longer sends warnings about an approaching expiry, so you can’t count on it. You can take a watchman from the same services that watch whether your site is up (the last lesson of the part).
+
+<details>
+<summary>Check yourself: why do you need independent monitoring if renewal is automatic?</summary>
+
+Automation breaks unnoticed. A monitor on the expiry date tells you before the site breaks, not after a visitor complains.
+
+</details>
+
+## Mixed content
+
+You went through TLS as if the whole page were protected. In fact a page is dozens of requests: HTML, styles, scripts, images, fonts, previews. If even one of them goes over `http://`, the protection is incomplete. This is called **mixed content**:
+
+- **active** (scripts, styles, frames): the browser blocks it outright, because a swapped script breaks the whole site;
+- **passive** (images, audio, video): browsers usually upgrade such requests to https or block them, but the padlock may go.
+
+How to fix it. Change `http://` to `https://` in the addresses, and for your own files use addresses with no domain: `/images/portrait.jpg`. As insurance add the header `Content-Security-Policy: upgrade-insecure-requests`, and the browser will try to load resources over https by itself. Check the small things people forget: the address in `canonical`, the picture for the link preview (`og:image`), links inside the site and in the sitemap.
+
+And a last detail: the site itself should redirect `http://` to `https://` with a permanent 301 redirect, and a cookie with the `Secure` flag (from the [lesson on authentication](../../06-server/07-authentication/)) won’t travel over http at all.
+
+## HSTS, but carefully
+
+The **Strict-Transport-Security** header (HSTS) tells the browser: “This site is https only, don’t try http, even if the user typed it.” It closes the last gap: the first http request, which could be intercepted.
+
+But it has a price. The browser remembers the instruction for the `max-age` period, and if you break https, visitors can’t open the site and won’t be allowed to click through the warning. So you start small (a day), make sure everything works, and only then lengthen the term. Preloading (`preload`), where your site is built into the browser itself, is almost irreversible: a small site doesn’t need it.
+
+## Practice
+
+The site of the 2022 era opens over https, but some “forgotten” http addresses are left in it: a picture, `canonical`, the link preview, the link to the policy. Fix them all. Then fill in the note: how you get the certificate, which names it covers, where the languages live, how it is renewed, what you do if renewal breaks, and what you decided about HSTS.
+
+The check reads the page’s code: it will find every address that starts with `http://`. The padlock and the browser’s warnings aren’t visible in this sandbox, so after a real deploy (the lesson on publishing) look at them yourself in the developer tools, on the “Console” tab.
+
+## What was wrong before
+
+As late as 2010 a certificate cost money (from tens of dollars a year) and was installed by hand once a year or two. People knew the date by heart or wrote it in a calendar, and every year a few well-known sites were left with a red warning on the day it ran out: the person who remembered had left. Today a certificate is free, and the problem has moved from “buying” to “not forgetting about the automation”: it works until someone breaks it.

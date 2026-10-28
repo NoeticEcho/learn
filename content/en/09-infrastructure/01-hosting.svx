@@ -1,0 +1,286 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/01-hosting.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const card = (v) => `<section data-scaffold id="host-card">
+      <h2>Where my site lives</h2>
+      <table>
+        <tr><th>Type of hosting</th><td id="h-type">${v.type}</td></tr>
+        <tr><th>Provider</th><td id="h-provider">${v.provider}</td></tr>
+        <tr><th>Data center region</th><td id="h-region">${v.region}</td></tr>
+        <tr><th>Price per year</th><td id="h-price">${v.price}</td></tr>
+        <tr><th>Who keeps it updated</th><td id="h-owner">${v.owner}</td></tr>
+      </table>
+      <p id="h-why">${v.why}</p>
+      <p id="h-region-why">${v.regionWhy}</p>
+    </section>`;
+
+	export const metadata = {
+		id: '09-infrastructure/01-hosting',
+		part: 9,
+		order: 1,
+		title: 'Where a site lives: from shared hosting to the cloud',
+		definition: 'Hosting is a place where a site lives on a computer that is always on: static hosting, shared hosting, a VPS, a dedicated server or the cloud.',
+		summary:
+			'A site has to live on a computer that never sleeps. Afterwards you’ll be able to tell static hosting, shared hosting, a VPS, a dedicated server and the cloud apart, know what you look after and what the provider does, and choose a home for your own site by its main action, its visitors and its budget.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'my laptop', caption: 'The site at home', say: 'I closed the lid and the site vanished. Laptops sleep, but a site has to answer around the clock.' },
+				{ mood: 'explain', side: 'right', prop: 'server', label: 'data center', say: 'So you rent room on a machine that never sleeps. That’s hosting. The domain is bought separately.' },
+				{ mood: 'cheer', prop: 'flowchart', label: 'files|shared|VPS|cloud', caption: 'The steps', say: 'Each step up gives more freedom and more work. Take the simplest one where your main action works.' }
+			]
+		},
+		minutes: 20,
+		teaches: ['infra-hosting-types', 'infra-hosting-choice'],
+		requires: ['net-http-request-response', 'server-web-server', 'server-static-vs-dynamic', 'cms-choosing-stack'],
+		practice: {
+			id: 'infra-hosting-card',
+			title: 'The “where my site lives” card',
+			task: 'Fill in the hosting card for your project. 1) Type: static hosting, shared hosting, a VPS, a dedicated server or the cloud. 2) Provider: name a specific one. 3) Data center region: a country or a city. 4) Price per year as a number with a currency. 5) Who keeps the server and system updated: you, the provider or a contractor. 6) In the “Why this type” paragraph, explain the choice and name the project’s main action in the words of the brief. 7) In the “Why this region” paragraph, say how it relates to the visitors and to personal data, and name the project’s city if the brief has one. Every “…” has to be replaced.',
+			era: 6,
+			files: files({
+				scaffold: card({ type: '…', provider: '…', region: '…', price: '…', owner: '…', why: 'Why this type: …', regionWhy: 'Why this region: …' })
+			}),
+			solution: files({
+				scaffold: card({
+					type: 'Static hosting (GitHub Pages)',
+					provider: 'GitHub Pages, with a domain from an ordinary registrar',
+					region: 'Served from the nearest edge location in the US and Europe, with the form handled by a service in a US data center',
+					price: '$15 a year: only the domain, the hosting itself is free',
+					owner: 'I change the files myself, and the provider updates the servers and the system',
+					why: 'Why this type: the project’s main action, “{{mainAction.label}}”, doesn’t need an application of its own on the page, so static hosting and a separate service for the form are enough.',
+					regionWhy: 'Why this region: most visitors to the project ({{city}}) are in the US, so a nearby server means less delay. The form collects personal data, and privacy law (the GDPR for visitors in the EU, state laws in the US) follows the visitors, so the form service must say where it keeps the data.'
+				})
+			}),
+			checks: [
+				{ id: 'card', kind: 'exists', selector: '#host-card' },
+				{ id: 'no-blanks', kind: 'text', selector: '#host-card', matches: '^[^…]*$' },
+				{ id: 'type', kind: 'text', selector: '#h-type', matches: '[Ss]tatic|[Ss]hared|[Vv]irtual|VPS|VDS|[Dd]edicated|[Cc]loud|PaaS' },
+				{ id: 'provider', kind: 'text', selector: '#h-provider', matches: '[A-Za-z]{3,}' },
+				{ id: 'region', kind: 'text', selector: '#h-region', matches: 'US\\b|USA|United States|America|Virginia|Oregon|Ohio|Europe|Germany|Frankfurt|Finland|Netherlands|Ireland|UK\\b|London|Canada|Asia|Singapore|Russia|edge|region|nearest' },
+				{ id: 'price', kind: 'text', selector: '#h-price', matches: '^(?=[\\s\\S]*\\d)(?=[\\s\\S]*(?:\\$|€|£|USD|EUR|GBP|dollar|euro))' },
+				{ id: 'owner', kind: 'text', selector: '#h-owner', matches: '\\bI\\b|\\bwe\\b|[Pp]rovider|[Hh]ost|[Cc]ontractor|[Aa]dministrator|[Dd]eveloper|[Pp]latform' },
+				{ id: 'why-type', kind: 'text', selector: '#h-why', matches: '[Ss]tatic|[Ss]hared|[Vv]irtual|VPS|VDS|[Dd]edicated|[Cc]loud|CMS|page' },
+				{ id: 'why-action', kind: 'field', selector: '#h-why', field: 'mainAction.label' },
+				{ id: 'region-why', kind: 'text', selector: '#h-region-why', matches: 'GDPR|privacy|personal|delay|latency|closer|nearby|visitor|audience|speed|CCPA' },
+				{ id: 'region-city', kind: 'field', selector: '#h-region-why', field: 'city', when: { brief: 'city' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why can’t you simply keep a site on your own home computer?',
+				options: [
+					'The computer turns off or sleeps, a home address often changes and is closed to incoming connections, and you’d be responsible for its security yourself',
+					'Because browsers refuse to open sites from home computers',
+					'Because the law forbids hosting a site at home'
+				],
+				answer: 0,
+				why: [
+					'Yes. A site has to answer at any minute from anywhere. That takes a computer that never sleeps, with a fixed public address and a good connection. Renting exactly that is what hosting is.',
+					'No: a browser doesn’t care where the server stands. It simply goes to the address.',
+					'No: no law forbids it. It’s a matter of practice, not of a ban.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each step with what you do on it',
+				pairs: [
+					['static hosting', 'you upload files and the platform does everything else'],
+					['shared hosting', 'you update the site, the CMS and the plugins in a ready-made control panel'],
+					['VPS', 'you look after the system, the web server, the certificate, security and backups'],
+					['the cloud', 'you assemble services from ready-made blocks and watch the budget']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A project has five pages and a contact form, with a few hundred visitors a month. What makes the most sense?',
+				options: [
+					'Static hosting and a ready-made way to receive the form: the fewest duties and the least money',
+					'A dedicated server, to be on the safe side',
+					'A container cluster, to do it properly'
+				],
+				answer: 0,
+				why: [
+					'Yes. The rule is the simplest step where your main action works. You can add complexity later, but unneeded complexity is something you keep paying for every month.',
+					'No: a dedicated server for a few hundred visitors means paying for emptiness and administering it too.',
+					'No: an orchestrator solves problems that a site like this doesn’t have. A later lesson covers it.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is worth checking when you choose a data center region?',
+				options: [
+					'Where most of the visitors are: the closer, the less delay',
+					'Where personal data from forms ends up, and what the law says about it',
+					'The color of the provider’s logo',
+					'Whether you can move the site to another provider later'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a signal is no faster than light in a cable, and a distant server answers noticeably slower.',
+					'Yes: privacy law follows the people the data is about, not only the server. The last lesson of this part covers it.',
+					'No: that has nothing to do with how a site works.',
+					'Yes: being tied to one provider is called lock-in. How easy it is to leave is part of the price.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does a VPS differ from shared hosting in who does what?',
+				options: [
+					'On a VPS you administer the system yourself: updates, the web server, security, backups',
+					'On a VPS the provider does everything, and on shared hosting you do',
+					'There is no difference but the price'
+				],
+				answer: 0,
+				why: [
+					'Yes. A VPS is a virtual server you have full access to, and with it all the responsibility. On shared hosting the provider looks after the server and the system, and you look after your site.',
+					'No: it’s the other way round.',
+					'No: the price follows from the difference in freedom and duties.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-what-is-hosting',
+				front: 'What is hosting?',
+				back: 'Renting room on a computer (a server) that runs around the clock, with a fixed public address and a good connection. A domain is a separate purchase: it only points at that address.'
+			},
+			{
+				id: 'infra-hosting-ladder',
+				front: 'Name the steps of hosting from simplest to most complex',
+				back: 'Static hosting (files only), shared hosting (a ready-made panel, PHP and a database), a VPS (your own virtual server), a dedicated server, the cloud (blocks from ready-made services). The higher the step, the more freedom and the more duties for you.'
+			},
+			{
+				id: 'infra-simplest-step',
+				front: 'How do you choose a step?',
+				back: 'The simplest one where the project’s main action works. Then check the visitors, the region, who keeps it updated and whether you can leave for another provider.'
+			},
+			{
+				id: 'infra-region-two-reasons',
+				front: 'Two reasons to choose a data center region',
+				back: 'The distance to the visitors (delay) and the law on personal data, which follows the visitors, not only the server.'
+			}
+		],
+		sources: [
+			{
+				title: 'MDN: What is a web server?',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_web_server',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Web hosting service (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Web_hosting_service', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'GitHub Docs: What is GitHub Pages?', url: 'https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'GitHub Docs: GitHub Pages limits', url: 'https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Cloudflare Pages: documentation', url: 'https://developers.cloudflare.com/pages/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'DigitalOcean: Droplet pricing', url: 'https://www.digitalocean.com/pricing/droplets', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The site exists, and now it needs a home. Pick the simplest place where your project’s main action works, and write down honestly what you pay for it in money and in time.',
+			hints: [
+				'Choose the type by the project. Only pages and a form: static hosting. A ready-made CMS: shared hosting or a VPS. Your own application with a database: a VPS or the cloud.',
+				'“Why this type” should name the project’s main action in the words of the brief: what the visitor does, and why the chosen step is (or isn’t) enough for it.',
+				'Price per year: a number and a currency, such as “$15”. If the hosting is free, count the domain.',
+				'In “Why this region”, say where your visitors are and where the data from the form goes. Name the project’s city.'
+			],
+			mistakes: {
+				card: 'The “Where my site lives” block (the section whose id is host-card) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				type: 'In “Type of hosting”, name the step: static hosting, shared hosting, a VPS, a dedicated server or the cloud.',
+				provider: 'Name a specific provider or platform.',
+				region: 'In the region field, name the country or the city of the data center.',
+				price: 'The yearly price must be a number with a currency, such as “$15”.',
+				owner: 'Say who keeps the server and the system updated: you, the provider or a contractor.',
+				'why-type': 'In “Why this type”, name the step you chose or explain why it fits.',
+				'why-action': 'In “Why this type”, name the project’s main action in the words of the brief.',
+				'region-why': 'In “Why this region”, say something about the visitors, the delay or personal data.',
+				'region-city': 'Name the project’s city from the brief in this paragraph.'
+			},
+			outro: 'Now the site has a home, and you know what in it is yours and what is the provider’s. Next: how to find that home from the site’s name.'
+		},
+		say: {
+			VPS: 'V P S',
+			VDS: 'V D S',
+			PaaS: 'pass',
+			IaaS: 'eye ass',
+			FTP: 'F T P',
+			CMS: 'C M S',
+			'lock-in': 'lock in',
+			GitHub: 'git hub',
+			Cloudflare: 'cloud flare',
+			Netlify: 'net li fy',
+			Vercel: 'ver sel',
+			WordPress: 'word press',
+			DigitalOcean: 'digital ocean',
+			Hetzner: 'hets ner'
+		}
+	};
+</script>
+
+<script>
+	import HostingLadder from '../../diagrams/HostingLadder.svelte';
+</script>
+
+## A computer that never sleeps
+
+A site is files (and sometimes a program with a database) that some computer has to hand out when asked. You know from the part on servers: a browser arrives at an address, and a web server answers. But someone has to keep that answerer switched on all the time. Your laptop won’t do. It sleeps, it restarts, it goes with you to the café, and a home internet address usually changes and is closed to incoming connections.
+
+So you **rent** a computer. The service is called **hosting** (from “host”, to receive guests): you’re given room on a machine in a data center that has a fixed public address, backup power and a wide connection. The domain, which the next lesson covers, is bought separately. It’s only a sign pointing at that address.
+
+<details>
+<summary>Check yourself: how does hosting differ from a domain?</summary>
+
+Hosting is the place where the site lies and from which it is served. A domain is the name by which people find it. You can buy them from different companies and point the name at a different place at any time.
+
+</details>
+
+## Five steps
+
+Hosting is built like a ladder. On each step you hand the provider some of the chores, and in return you lose some freedom.
+
+1. **Static hosting.** You upload finished files (HTML, CSS, images) and the platform serves them. GitHub Pages, Netlify, Vercel and Cloudflare work this way, and so does a storage bucket at any big cloud. There’s no server, no system and no PHP: nothing to update. In return there’s no program on the server side. Receiving a form has to go to a separate service or a small function (the next lessons). Mind the terms, too: GitHub says its Pages service isn’t meant to run an online business or an online store, so a shop belongs on a platform whose terms allow it (checked October 2026).
+2. **Shared hosting.** Hundreds of other people’s sites live on one machine, and you get a folder of your own, a database and a convenient control panel. WordPress and other ready-made CMSs run here, because PHP and MySQL are already set up. The provider looks after the system and the server, and you look after the site, the plugins and the passwords. The downside is the neighbors and the limits. If a neighbor has trouble, you may slow down, and you can’t go beyond what the provider allows.
+3. **A VPS** (virtual private server). A slice of a big machine that looks like a computer of your own, and you’re its administrator. You can install anything: nginx, a database, your own application. But you also update the system, close needless ports, renew the certificate and make the backups. A mistake here most often ends with the server being broken into. DigitalOcean, Hetzner, Vultr and the big clouds all rent VPSs; DigitalOcean lists its smallest at $4 a month (October 2026).
+4. **A dedicated server.** The whole physical machine is yours. You need it when a VPS isn’t enough: a great deal of data, or special demands on hardware or isolation. For a small site it’s overkill.
+5. **The cloud.** Instead of one machine, a set of ready-made services you pay for by use: virtual machines, file storage, a managed database, functions, a load balancer. AWS, Google Cloud and Microsoft Azure are the three big ones. It’s powerful and flexible, but it’s easy to get lost in the settings and in the bill.
+
+Move the sliders: choose what kind of site you have, how many people visit and how much time a month you’re willing to give the server. The page shows what you look after and what the provider does, and which steps suit you. Your project’s main action is filled in from the brief.
+
+<HostingLadder />
+
+<details>
+<summary>Check yourself: who updates the operating system on the server in your project if you choose a VPS?</summary>
+
+You do. On a VPS the system is yours, and so are the updates, the security and the backups. On shared and static hosting the provider does it.
+
+</details>
+
+## How to choose
+
+One rule works most often: **choose the simplest step where the project’s main action works**. An extra step costs you money every month and time every week, and you can always climb higher later.
+
+Check yourself against five questions.
+
+1. **What is the site?** Only pages and a form: static hosting. A ready-made CMS: shared hosting, managed WordPress hosting or a VPS. Your own application with a database: a VPS, the cloud, or a platform such as Render or Fly.io.
+2. **Where are the visitors?** The speed of a signal in a cable is finite, and a distant server answers more slowly. From Sydney to a data center in Virginia is tens of milliseconds just for the trip, and a request and its answer repeat many times while one page loads. Choose a region near your audience, or a content delivery network (two lessons ahead).
+3. **What data do you collect?** If a form takes a name and a phone number, privacy law applies, and it follows the people, not the server. The last lesson of this part covers it, but you choose the region here.
+4. **Who looks after all of it?** An honest answer of “nobody” means you need a step where the provider does. A hacked and forgotten VPS is worse than a site on the humblest platform.
+5. **How do you leave?** Being tied to one provider is called *lock-in*. Static files and an ordinary CMS move easily. A single provider’s complex cloud services are expensive to move. It’s good if you can take your site and data away on any day.
+
+A note on the Russian market, where the same ladder has other names on it. Russian businesses often choose a host inside Russia (Timeweb, Beget, REG.RU for shared hosting; Selectel, Yandex Cloud, VK Cloud for VPSs and the cloud) because a law requires the first recording of Russian citizens’ personal data to be made in a database in Russia. The steps are the same; the region and the law are what change.
+
+About prices: in October 2026 static hosting is often free, shared hosting and a simple VPS cost a few dollars a month, and the cloud can cost anything. Figures change quickly, so this lesson gives only orders of magnitude: look at the provider’s own page for today’s plans. And remember that the domain is paid for separately.
+
+## Practice
+
+You’re on the site of the 2022 era, when a site became a set of files published with one command. In front of you is your ordinary site, and under it a hosting card. Fill it in for your project: the type, the provider, the region, the price per year, who keeps it updated, and two short explanations. In the first, name the project’s main action in the words of the brief. In the second, say where your visitors are and where the data from the form will go.
+
+The card exists only for the exercise: it won’t be on the downloaded site.
+
+## What was wrong before
+
+In 2010 almost every site lived on shared hosting, and files were uploaded by FTP, a protocol that sent the password in plain text. There were no versions, and a change uploaded to the live site was visible to everyone at once, mistakes included. One password opened the site, the mail and the control panel. People learned the hosting limits when the site went down.
+
+Today one commit and an automatic deploy (a few lessons ahead) do the same, and there’s nothing to “upload” in the provider’s panel. But the main idea holds: a site lives on someone else’s computer, and you should know whose computer it is and who is responsible for it.
