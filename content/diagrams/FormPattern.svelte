@@ -7,8 +7,53 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let mode = $state<'gov' | 'colour'>('gov');
+	// The diagram's words, one table per edition (docs/content-plan/README.md, «English edition»).
+	const W = pick({
+		ru: {
+			caption: 'Отправьте форму пустой и сравните два способа показать ошибку',
+			modes: 'Способ показа ошибки',
+			gov: 'Сводка и сообщения (как у GOV.UK)',
+			border: 'Только красная рамка',
+			form: 'Пример формы',
+			problem: 'Есть ошибки',
+			sumName: 'Укажите, как к вам обращаться',
+			sumMail: 'Введите адрес почты, например name@example.ru',
+			name: 'Как к вам обращаться',
+			nameHint: 'Достаточно имени',
+			nameErr: 'Ошибка: укажите, как к вам обращаться',
+			mail: 'Адрес почты',
+			mailErr: 'Ошибка: введите адрес почты, например name@example.ru',
+			send: 'Отправить',
+			clear: 'Очистить',
+			start: 'Нажмите «Отправить» с пустыми полями.',
+			govOut: 'Фокус перешёл на сводку, а ссылки в ней ведут к полям. Рядом с каждым полем сообщение со словом «Ошибка», так что смысл не держится на цвете.',
+			borderOut: 'Поля покраснели, а больше ничего не изменилось: человек не знает, что именно не так, а экранный диктор вообще не заметил ошибки. Это самый частый способ показать ошибку, и самый плохой.'
+		},
+		en: {
+			caption: 'Send the form empty and compare two ways of showing an error',
+			modes: 'How the error is shown',
+			gov: 'A summary and messages (as in GOV.UK)',
+			border: 'A red border only',
+			form: 'An example form',
+			problem: 'There is a problem',
+			sumName: 'Enter your name',
+			sumMail: 'Enter your email address, for example name@example.com',
+			name: 'Your name',
+			nameHint: 'A first name is enough',
+			nameErr: 'Error: enter your name',
+			mail: 'Email address',
+			mailErr: 'Error: enter your email address, for example name@example.com',
+			send: 'Send',
+			clear: 'Clear',
+			start: 'Press “Send” with the fields empty.',
+			govOut: 'Focus moved to the summary, and its links lead to the fields. Beside each field is a message with the word “Error”, so the meaning doesn’t rest on color.',
+			borderOut: 'The fields turned red and nothing else changed: the person doesn’t know what exactly is wrong, and a screen reader didn’t notice the error at all. This is the most common way to show an error, and the worst.'
+		}
+	});
+
+	let mode = $state<'gov' | 'border'>('gov');
 	let sent = $state(false);
 	let summary = $state<HTMLElement | null>(null);
 
@@ -30,47 +75,46 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Отправьте форму пустой и сравните два способа показать ошибку</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Способ показа ошибки">
-		<button type="button" aria-pressed={mode === 'gov'} onclick={() => ((mode = 'gov'), reset())}>Сводка и сообщения (как у GOV.UK)</button>
-		<button type="button" aria-pressed={mode === 'colour'} onclick={() => ((mode = 'colour'), reset())}>Только красная рамка</button>
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.modes}>
+		<button type="button" aria-pressed={mode === 'gov'} onclick={() => ((mode = 'gov'), reset())}>{W.gov}</button>
+		<button type="button" aria-pressed={mode === 'border'} onclick={() => ((mode = 'border'), reset())}>{W.border}</button>
 	</div>
 
-	<form class="form" novalidate onsubmit={submit} aria-label="Пример формы">
+	<form class="form" novalidate onsubmit={submit} aria-label={W.form}>
 		{#if sent && mode === 'gov'}
 			<div class="summary" role="alert" tabindex="-1" bind:this={summary}>
-				<div class="dh">Есть ошибки</div>
+				<div class="dh">{W.problem}</div>
 				<ul>
-					<li><a href="#fp-name" onclick={(e) => go('fp-name', e)}>Укажите, как к вам обращаться</a></li>
-					<li><a href="#fp-mail" onclick={(e) => go('fp-mail', e)}>Введите адрес почты, например name@example.ru</a></li>
+					<li><a href="#fp-name" onclick={(e) => go('fp-name', e)}>{W.sumName}</a></li>
+					<li><a href="#fp-mail" onclick={(e) => go('fp-mail', e)}>{W.sumMail}</a></li>
 				</ul>
 			</div>
 		{/if}
 		<div class="field">
-			<label for="fp-name">Как к вам обращаться</label>
-			<p class="hint" id="fp-name-hint">Достаточно имени</p>
-			{#if sent && mode === 'gov'}<p class="err" id="fp-name-err">Ошибка: укажите, как к вам обращаться</p>{/if}
+			<label for="fp-name">{W.name}</label>
+			<p class="hint" id="fp-name-hint">{W.nameHint}</p>
+			{#if sent && mode === 'gov'}<p class="err" id="fp-name-err">{W.nameErr}</p>{/if}
 			<input id="fp-name" class:bad={sent} autocomplete="name" aria-describedby={sent && mode === 'gov' ? 'fp-name-hint fp-name-err' : 'fp-name-hint'} />
 		</div>
 		<div class="field">
-			<label for="fp-mail">Адрес почты</label>
-			{#if sent && mode === 'gov'}<p class="err" id="fp-mail-err">Ошибка: введите адрес почты, например name@example.ru</p>{/if}
+			<label for="fp-mail">{W.mail}</label>
+			{#if sent && mode === 'gov'}<p class="err" id="fp-mail-err">{W.mailErr}</p>{/if}
 			<input id="fp-mail" type="email" class:bad={sent} autocomplete="email" aria-describedby={sent && mode === 'gov' ? 'fp-mail-err' : undefined} />
 		</div>
 		<div class="dg-ctl" style="margin:0">
-			<button type="submit">Отправить</button>
-			<button type="button" onclick={reset}>Очистить</button>
+			<button type="submit">{W.send}</button>
+			<button type="button" onclick={reset}>{W.clear}</button>
 		</div>
 	</form>
 
 	<p class="dg-out" aria-live="polite">
 		{#if !sent}
-			Нажмите «Отправить» с пустыми полями.
+			{W.start}
 		{:else if mode === 'gov'}
-			Фокус перешёл на сводку, а ссылки в ней ведут к полям. Рядом с каждым полем сообщение со словом «Ошибка», так что смысл не держится на цвете.
+			{W.govOut}
 		{:else}
-			Поля покраснели, а больше ничего не изменилось: человек не знает, что именно не так, а экранный диктор вообще не заметил ошибки. Это самый частый способ
-			показать ошибку, и самый плохой.
+			{W.borderOut}
 		{/if}
 	</p>
 </figure>

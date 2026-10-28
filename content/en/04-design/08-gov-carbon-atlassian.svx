@@ -1,0 +1,300 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/08-gov-carbon-atlassian.svx. */
+	export const metadata = {
+		id: '04-design/08-gov-carbon-atlassian',
+		part: 4,
+		order: 8,
+		title: 'Systems of governments and big companies: GOV.UK, Carbon, Atlassian',
+		definition: 'GOV.UK Design System is the UK government’s system and a model of clear forms. IBM’s Carbon teaches order in data, and Atlassian’s teaches how to name tokens.',
+		summary:
+			'You’ll go through three systems that have something to teach a beginner in particular: GOV.UK (clear forms and accessibility), IBM’s Carbon (grids and data) and Atlassian (telling token names). Afterwards you have a contact form built by the rules of GOV.UK.',
+		minutes: 30,
+		teaches: ['design-ds-public-and-enterprise'],
+		requires: ['design-reading-a-design-system', 'html-forms', 'html-a11y-basics'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'Name', caption: 'A label inside the field', say: 'A hint used as a label vanishes once the person types. In GOV.UK the label is always above the field and always visible.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', label: 'Error: enter an email', say: 'The message begins with the word “Error” and says what to do. Not “Invalid value”, but “Enter an email address”.' },
+				{ mood: 'explain', prop: 'editor', label: 'space.200', say: 'At Atlassian space.200 is 16 pixels: the number is a percent of the 8-pixel step. Take the rules, not the look.' }
+			]
+		},
+		practice: {
+			id: 'design-gov-form',
+			title: 'A contact form by the rules of GOV.UK',
+			task: 'Build a feedback form the way the GOV.UK Design System describes. 1) Every field has a visible label above it (a label element), not only a placeholder. 2) At least two fields have an autocomplete attribute (for example name and email). 3) A field has a hint (an element with the class hint) tied to it through aria-describedby. 4) Add an example of an error state: a summary (an element with the class error-summary and role alert) with links to the fields, and a message beside a field (the class field-error) that begins with the word “Error:”. These two blocks are a model and are marked data-scaffold: they won’t be on the finished site. 5) The submit button: a button with type submit and a verb as its label.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <form id="contact" action="#" method="post" novalidate>
+        <input name="name" placeholder="What should we call you">
+        <input name="email" type="email" placeholder="Email address">
+        <textarea name="msg" placeholder="Message"></textarea>
+        <button>OK</button>
+      </form>
+    </main>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <form id="contact" action="#" method="post" novalidate>
+        <div class="error-summary" data-scaffold role="alert" tabindex="-1">
+          <h2>There is a problem</h2>
+          <ul>
+            <li><a href="#name">Enter your name</a></li>
+            <li><a href="#email">Enter an email address in the correct format, like name@example.com</a></li>
+          </ul>
+        </div>
+        <div class="field">
+          <label for="name">What should we call you</label>
+          <p id="name-hint" class="hint">A first name is enough</p>
+          <p id="name-error" class="field-error" data-scaffold>Error: enter your name</p>
+          <input id="name" name="name" autocomplete="name" aria-describedby="name-hint name-error">
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="msg">Message</label>
+          <textarea id="msg" name="msg"></textarea>
+        </div>
+        <button type="submit">Send message</button>
+      </form>
+    </main>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'labels', kind: 'label' },
+				{ id: 'visible-labels', kind: 'count', selector: 'label[for]', min: 3 },
+				{ id: 'autocomplete', kind: 'count', selector: 'input[autocomplete]', min: 2 },
+				{ id: 'hint', kind: 'exists', selector: '.hint' },
+				{ id: 'describedby', kind: 'attr', selector: 'input[aria-describedby]', name: 'aria-describedby', matches: 'hint' },
+				{ id: 'summary-role', kind: 'attr', selector: '.error-summary', name: 'role', matches: '^alert$' },
+				{ id: 'summary-links', kind: 'count', selector: '.error-summary a[href^="#"]', min: 2 },
+				{ id: 'field-error', kind: 'text', selector: '.field-error', matches: '^\\s*Error:' },
+				{ id: 'submit', kind: 'text', selector: 'button[type="submit"]', matches: '^\\s*[A-Za-z]{4,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why must a field’s label not be replaced by a placeholder?',
+				options: [
+					'It disappears when the person starts typing; not all screen readers read it out; its default color is often too pale',
+					'Placeholders are forbidden by the HTML standard',
+					'A placeholder takes up a lot of room'
+				],
+				answer: 0,
+				why: [
+					'Yes. GOV.UK’s guidance says the same. A label should always be in view.',
+					'No: a placeholder is allowed, but not as a replacement for a label.',
+					'No: size has nothing to do with it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put what should happen when a form has an error in order, by GOV.UK',
+				items: ['An error summary appears above the form', 'Keyboard focus moves to the summary', 'The links in the summary lead to the fields', 'Beside each field is a message with the word “Error”']
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of the GOV.UK system?',
+				options: [
+					'It separates components from patterns',
+					'It rests on government design principles and on research',
+					'It requires everyone to use its branding',
+					'Its content is published under the Open Government Licence'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a button, a field and a table are components, while “how to ask for an address” is a pattern.',
+					'Yes: it is based on principles and on the research of service teams.',
+					'No: the GOV.UK branding is meant for UK government services, not for everyone.',
+					'Yes: except where stated otherwise, the content is open under OGL v3.0.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each system with what is worth learning from it',
+				pairs: [
+					['GOV.UK', 'forms, an error summary, plain language, a visible focus'],
+					['Carbon (IBM)', 'the 2x Grid, dense screens of data, two type sets'],
+					['Atlassian', 'telling tokens such as color.text.accent.red, and an 8-pixel step']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the number in the name of Atlassian’s token space.200 mean?',
+				options: [
+					'A percent of the base value of 8 pixels: 200% is 16 pixels',
+					'Two hundred pixels',
+					'The version number of the token'
+				],
+				answer: 0,
+				why: [
+					'Yes. space.100 is 8 pixels, space.050 is 4, space.200 is 16.',
+					'No: that would be an enormous gap.',
+					'No: the number shows a size, not a version.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the message “Enter your email address”, in GOV.UK style, do that “Invalid value” does not?',
+				options: [
+					'It says what exactly to do; “invalid value” does not',
+					'It is shorter',
+					'It is politer, but means the same'
+				],
+				answer: 0,
+				why: [
+					'Yes. For an empty field GOV.UK advises starting with “Enter” and naming what is needed, for example “Enter your email address”.',
+					'No: it is not about length but about prompting an action.',
+					'No: the meaning differs. One tells you how to fix it, the other does not.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-gov-label', front: 'What are GOV.UK’s rules for labels and hints?', back: 'The label is always visible, above the field, and short; a placeholder doesn’t replace a label or a hint; a hint is short, has no links, and is tied to the field through aria-describedby.' },
+			{ id: 'design-gov-errors', front: 'How does GOV.UK show a form error?', back: 'An error summary at the top of the main block, focus moves to it, its links lead to the fields, and beside each field is a message “Error: …” (in GOV.UK the prefix is hidden from the eye but read by screen readers). The meaning doesn’t rest on color.' },
+			{ id: 'design-gov-autocomplete', front: 'What is the autocomplete attribute for?', back: 'It tells the browser what data is being asked for (name, email, tel), and the browser can fill it in. It is also an accessibility requirement (WCAG 1.3.5).' },
+			{ id: 'design-carbon', front: 'What is Carbon useful for?', back: 'The 2x Grid, two type sets (for working screens and for editorial ones), pages on data and tables, and four color themes.' },
+			{ id: 'design-atlassian', front: 'How does Atlassian name tokens?', back: 'By role and state: color.text.accent.red, elevation.surface.hovered. Spacing is a multiple of 8 pixels: space.100 is 8, space.200 is 16.' }
+		],
+		sources: [
+			{ title: 'GOV.UK Design System', url: 'https://design-system.service.gov.uk/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'GOV.UK: Error summary', url: 'https://design-system.service.gov.uk/components/error-summary/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'GOV.UK: Text input', url: 'https://design-system.service.gov.uk/components/text-input/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Government design principles (GOV.UK)', url: 'https://www.gov.uk/guidance/government-design-principles', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'GOV.UK Frontend: using it without GOV.UK branding', url: 'https://frontend.design-system.service.gov.uk/using-govuk-frontend-without-govuk-branding/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Carbon Design System (IBM)', url: 'https://carbondesignsystem.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Carbon: 2x Grid', url: 'https://carbondesignsystem.com/elements/2x-grid/overview/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Atlassian Design System: Spacing', url: 'https://atlassian.design/foundations/spacing/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'autocomplete (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now your form rests on placeholders. Let’s make it the way the UK government’s system, GOV.UK, describes: labels, hints, errors.',
+			hints: [
+				'Every field needs a label with for equal to the field’s id. The placeholder itself can go.',
+				'The hint: a p with the class hint and an id. Add aria-describedby with that id to the field. The autocomplete attribute: name for the name and email for the email.',
+				'The error model: a block error-summary with role alert, holding links to #name and #email; beside a field, a p with the class field-error that begins with “Error:”. Both blocks carry data-scaffold.'
+			],
+			mistakes: {
+				labels: 'A field has no label. Each needs a label tied to it through for and id.',
+				'visible-labels': 'You need three label elements with a for attribute: name, email, message.',
+				autocomplete: 'Add autocomplete to at least two fields: name and email.',
+				hint: 'You need a hint: an element with the class hint.',
+				describedby: 'The field must refer to the hint through aria-describedby with the hint’s id.',
+				'summary-role': 'The error summary must have role alert so that a screen reader announces it.',
+				'summary-links': 'The error summary needs at least two links to fields: href #name and href #email.',
+				'field-error': 'The message beside the field must begin with the words “Error:”.',
+				submit: 'The submit button must be a button with type submit and a verb as its label, for example “Send message”.'
+			},
+			outro: 'You’ve built a form the way government services build it, where accessibility is mandatory. Notice that no rule was about beauty; all were about understanding.'
+		},
+		say: { GOV: 'gov', UK: 'U K', Carbon: 'carbon', IBM: 'I B M', Atlassian: 'at-lass-ee-an', Jira: 'jee-ra', Confluence: 'confluence', placeholder: 'place-holder', label: 'label', autocomplete: 'auto-complete', WCAG: 'wuh-cag', OGL: 'O G L', aria: 'ah-ree-a', describedby: 'described by', hint: 'hint', summary: 'summary', alert: 'alert' }
+	};
+</script>
+
+<script>
+	import SystemExplorer from '../../diagrams/SystemExplorer.svelte';
+	import FormPattern from '../../diagrams/FormPattern.svelte';
+</script>
+
+## Three systems worth learning from
+
+The systems of Material, Apple and Microsoft set the look of platforms. These three are of another kind: they explain best **how to solve particular tasks**. GOV.UK teaches how to make clear forms, Carbon shows order and data, and Atlassian gave a model of telling tokens.
+
+<SystemExplorer ids={['govuk', 'carbon', 'atlassian']} />
+
+## GOV.UK: when anyone must be able to use a site
+
+GOV.UK is the single site of UK government services, and its Design System is maintained by the Government Digital Service (GDS). The reason everyone reads it is that it grew out of a task: **to make sure any citizen can complete a service on their own**: an older person on a phone, a person with a vision impairment, someone who finds reading hard. So everything in it is tested by research, not by taste.
+
+The system rests on open government design principles: start with user needs, do less, do the hard work to make it simple, make things open. The pages of the components explain when a component fits and when it does not, and refer to research.
+
+It is worth taking its rules for forms. Here are the most important, and each is confirmed on the system’s own pages.
+
+- **The label is always above the field and always visible.** A placeholder doesn’t replace it: it disappears when the person starts typing, and not all screen readers read it out.
+- **A hint** is a separate short sentence, with no links, tied to the field by the attribute `aria-describedby`.
+- **The attribute `autocomplete`** tells the browser what data is being asked for (`name`, `email`, `tel`), and the browser will fill it in. It is also a requirement of WCAG 2.2 (criterion 1.3.5).
+- **An error summary.** If there is an error, a summary is shown at the top of the main block, keyboard focus moves to it, and its links lead to the fields. The summary’s title is “There is a problem”.
+- **The message beside a field** says what to do: “Enter your email address”, not “Invalid value”. In GOV.UK’s markup the word “Error:” sits before the message as a prefix hidden from the eye, for screen readers; in our exercise it is visible, so that the meaning doesn’t rest on color.
+
+Press “Send” in the form below, first in one mode and then in the other.
+
+<FormPattern />
+
+<details>
+<summary>Check yourself: why doesn’t a placeholder replace a label?</summary>
+
+It disappears when the person types, not all screen readers read it out, and its default color is usually too pale.
+
+</details>
+
+A word about the license. GOV.UK’s content is open under the Open Government Licence v3.0 (except what is stated separately), but its guidance for services outside GOV.UK is to replace the branded images and to use another font in place of its own typeface. Take the rules and the code, and make the styling your own. This is general information, not legal advice: read the license itself before you reuse anything.
+
+## Carbon: order and data
+
+Carbon is IBM’s design system, and it is made for business applications: tables, dashboards, forms of dozens of fields. Its foundations are the **2x Grid** (a grid built on an 8-pixel mini unit), accessibility, color, content, icons, motion, spacing, themes and typography.
+
+What is interesting in it for a beginner:
+- **Two type sets.** “Productive” for dense working screens and “expressive” for pages that people read and look at. You can keep two modes too: a dense one for tables and a free one for storytelling.
+- **Themes.** Four color themes: White, Gray 10, Gray 90 and Gray 100, from light to dark. The system shows how to build a dark theme without inversion.
+- **Data.** Detailed pages on data tables and on how to draw charts: a good guide for when your site shows numbers.
+- **Openness.** Carbon is open, and it has a guide to contributing.
+
+Carbon is strict and businesslike. For the general public it will seem cold, but as a school of order in data it is better than most.
+
+## Atlassian: tokens with names
+
+Atlassian’s design system holds a single language for products such as Jira and Confluence. We need it for one thing: a model of how to name tokens. Its names are telling: `color.text.accent.red`, `elevation.surface.hovered`. They read left to right: **property, role, state**. From the name you see where the value is applied, and the color itself can be changed without rewriting the rules.
+
+Atlassian’s spacing is a multiple of 8 pixels: `space.100` is 8, `space.050` is 4, `space.200` is 16, `space.300` is 24 pixels. The number in the name is a percent of the base step. You did the same thing in the lesson on hierarchy, only with a single number: now you can see what it looks like in a big system.
+
+<details>
+<summary>Check yourself: what does space.200 mean at Atlassian?</summary>
+
+16 pixels: the number is a percent of the base step of 8 pixels (200%).
+
+</details>
+
+## What to take, what to leave
+
+| System | Take | Don’t take |
+|---|---|---|
+| GOV.UK | forms, plain language, an error summary, a visible focus | the branding and its typeface |
+| Carbon | the grid, two type sets, the rules for data | business density for a site “for everyone” |
+| Atlassian | the way tokens are named, the 8-pixel step | the look of Atlassian’s products |
+
+## Practice
+
+Almost every project has a contact form on its site, and the main action often depends on it. Build it by the rules of GOV.UK: visible labels, a hint, `autocomplete`, a model of the error state with a summary. The error models are marked `data-scaffold`: they are there so you can see the right markup, and on the finished site errors will be shown only by a script (which you will write in the part on JavaScript).
+
+## What was wrong with 2014
+
+In 2014 forms were painted in colors and the hint was put inside the field: that looked neat. Research on accessibility and usability showed the price: the label vanishes as you type, and the form doesn’t say what is wrong. Today the rules of GOV.UK have become common practice, and accessibility requirements lean on them.
