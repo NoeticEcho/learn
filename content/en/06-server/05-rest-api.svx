@@ -1,0 +1,854 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/05-rest-api.svx. */
+	export const metadata = {
+		id: '06-server/05-rest-api',
+		part: 6,
+		order: 5,
+		title: 'APIs and REST: how programs talk to each other',
+		definition: 'An API is a set of rules for how programs exchange data. REST is an HTTP API style: the address names a resource, the method the action, the code the result.',
+		summary:
+			'A page talks to a server, and often two programs from different companies talk to each other, by the rules of an API. Afterwards you’ll read and design a simple HTTP API: resources, the GET, POST, PUT and DELETE methods, status codes, errors and versions, and you’ll describe it in an OpenAPI file.',
+		minutes: 30,
+		teaches: ['server-rest', 'server-openapi'],
+		requires: ['net-http-request-response', 'js-fetch', 'js-json'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'GET /items/7', caption: 'A noun', say: 'The address names a thing: /items/7, offering number seven. No verb in the address. The method says the action.' },
+				{ mood: 'hint', side: 'right', prop: 'server', label: 'DELETE /items/7', caption: 'Twice', say: 'DELETE is idempotent: two identical requests leave the server as one would. If no answer came back, it’s safe to retry.' },
+				{ mood: 'hmm', prop: 'browser', label: 'GET /deleteItem?id=1', caption: 'Not like this', say: 'GET must be safe. A robot or a prefetch can open an address that deletes, and the item is gone.' },
+				{ mood: 'cheer', side: 'right', prop: 'server', label: '201 Created', say: 'The status code answers: 201 created, 404 no such thing, 401 sign in, 403 signing in isn’t enough, 500 we broke it.' }
+			]
+		},
+		practice: {
+			id: 'server-openapi',
+			title: 'An OpenAPI description of your project’s API',
+			task: 'The sandbox does not check YAML, so write the description as text in the pre block with the id openapi (in place of the “…”), like an openapi.yaml file, and compare it with the example in the lesson. Describe the API for your offerings and enquiries. 1) The version: openapi: 3.1.0, info, and servers with the address https://…/api/v1. 2) Paths are plural nouns: /items for the list of offerings (get) and /items/{id} for one, and /requests (post) for an enquiry from the form. There must be no verbs in the paths. 3) GET has no side effects; an enquiry is created with POST and answers 201 (or 202). 4) Describe the 200, 400 and 404 answers and a shared error format in components.schemas.Error (the fields code and message). 5) List the required fields of the enquiry with required, and say that personal data is accepted only over HTTPS.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="api-spec">
+      <h2>My project’s API description</h2>
+      <pre id="openapi">…<\/pre>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="api-spec">
+      <h2>My project’s API description</h2>
+      <pre id="openapi">openapi: 3.1.0
+info:
+  title: My site’s API
+  version: 1.0.0
+servers:
+  - url: https://riverbend.example/api/v1
+paths:
+  /items:
+    get:
+      summary: List of offerings
+      responses:
+        '200':
+          description: An array of offerings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+  /items/{id}:
+    get:
+      summary: One offering
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: An offering
+        '404':
+          description: There is no such offering
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /requests:
+    post:
+      summary: Create an enquiry from the form
+      description: Takes the visitor’s personal data, so it works only over HTTPS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone]
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: Enquiry created
+        '400':
+          description: The enquiry data is wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        title:
+          type: string
+        price:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string<\/pre>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'spec-section',
+					kind: 'exists',
+					selector: '#api-spec #openapi'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'version',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s*openapi:\\s*3\\.\\d\\.\\d'
+				},
+				{
+					id: 'servers-https',
+					kind: 'text',
+					selector: '#openapi',
+					matches: 'url:\\s*https://\\S+'
+				},
+				{
+					id: 'plural-nouns',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{2}/[a-z][a-z-]*s:\\s*(?:\\n|$)'
+				},
+				{
+					id: 'no-verbs',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^(?![\\s\\S]*\\n\\s{2}/(?:get|create|add|delete|update|remove|list|fetch|send|save)[A-Za-z-]*[:/])'
+				},
+				{
+					id: 'one-item-path',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{2}/[a-z][a-z-]*s/\\{\\w+\\}:'
+				},
+				{
+					id: 'get-operation',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{4}get:'
+				},
+				{
+					id: 'post-creates',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '(?:^|\\n)\\s{4}post:[\\s\\S]*[\'"]?20[12][\'"]?\\s*:'
+				},
+				{
+					id: 'statuses',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^(?=[\\s\\S]*[\'"]?200[\'"]?\\s*:)(?=[\\s\\S]*[\'"]?400[\'"]?\\s*:)(?=[\\s\\S]*[\'"]?404[\'"]?\\s*:)'
+				},
+				{
+					id: 'error-schema',
+					kind: 'text',
+					selector: '#openapi',
+					matches: 'Error:[\\s\\S]*code:[\\s\\S]*message:|Error:[\\s\\S]*message:[\\s\\S]*code:'
+				},
+				{
+					id: 'required-fields',
+					kind: 'text',
+					selector: '#openapi',
+					matches: 'required:\\s*\\[[^\\]]+\\]|required:\\s*\\n\\s*-\\s*\\w+'
+				},
+				{
+					id: 'https-personal-data',
+					kind: 'text',
+					selector: '#openapi',
+					matches: '^(?=[\\s\\S]*(?:HTTPS|https))(?=[\\s\\S]*[Pp]ersonal)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'A page requests GET /items?delete=2, and afterwards item 2 is gone. What is wrong?',
+				options: [
+					'GET must be safe and change nothing: deleting needs DELETE',
+					'Nothing: you choose the address yourself',
+					'The list should have been read with POST'
+				],
+				answer: 0,
+				why: [
+					'Yes. GET is defined as safe: anybody may call it, any number of times (a browser, a search robot, an extension). If it deletes something, one curious robot wipes your data.',
+					'No: a free choice of address does not cancel the rules of the methods. Caches, robots and security depend on them.',
+					'No: reading a list is exactly what GET is for.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each HTTP method with its usual meaning in an API',
+				pairs: [
+					['GET', 'read a resource, changing nothing'],
+					['POST', 'create a new resource or perform an action'],
+					['PUT', 'replace a resource entirely'],
+					['PATCH', 'change some fields of a resource'],
+					['DELETE', 'remove a resource']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which address is best for a list of offerings in the REST style?',
+				options: ['GET /items', 'GET /getAllItems', 'POST /items/list'],
+				answer: 0,
+				why: [
+					'Yes. The address names the resource (offerings, in the plural) and the method expresses the action. That makes an API predictable: /items, /items/7, /requests.',
+					'No: a verb in the address repeats what the GET method already says.',
+					'No: reading takes GET, and POST means “create”.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'An enquiry has been accepted and created on the server. Which status code is expected?',
+				options: ['201 Created, usually with a Location header', '200 OK with no explanation', '404 Not Found'],
+				answer: 0,
+				why: [
+					'Yes. 201 says a resource was created, and Location gives its address. Use 202 when the enquiry was accepted but will be processed later.',
+					'It is allowed, but 201 is more informative: it says specifically that something was created.',
+					'No: 404 means something is missing, not that it was created.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is useful in an API’s error message?',
+				options: [
+					'The right status code (400, 404, 409…)',
+					'A short machine-readable error code',
+					'Text a person can read, with no secrets in it',
+					'A full stack trace and the database password'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the code tells the class of trouble at once.',
+					'Yes: a client program uses it to decide what to do (retry, highlight a field, sign out).',
+					'Yes: the text helps the developer and the visitor, but must not reveal how the system is built.',
+					'No: that is how passwords and the layout of a server leak. Details go in the log, not in the response.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is an OpenAPI file for?',
+				options: [
+					'It describes the API in a machine-readable form: documentation is built from it, requests are checked against it and clients are generated',
+					'It makes the server faster',
+					'It replaces the database'
+				],
+				answer: 0,
+				why: [
+					'Yes. One file is a contract between the people who build the server and the people who use it. Interactive documentation (Swagger UI), code stubs and tests come out of it automatically.',
+					'No: it does not speed a server up, it describes the server’s interface.',
+					'No: it does not replace a database.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-rest-what',
+				front: 'What is REST?',
+				back: 'A style of designing web APIs from Roy Fielding’s 2000 dissertation: resources with addresses, HTTP methods as actions, status codes, and responses that do not depend on earlier requests. Most often it means JSON over HTTP.'
+			},
+			{
+				id: 'server-rest-methods',
+				front: 'Which HTTP methods are there, and what do they mean?',
+				back: 'GET: read (safe). POST: create. PUT: replace entirely. PATCH: change part. DELETE: remove. GET, PUT and DELETE are idempotent: repeating them gives the same result.'
+			},
+			{
+				id: 'server-rest-codes',
+				front: 'Which API status codes should you know?',
+				back: '200 success, 201 created, 204 success with no body, 400 bad request, 401 not signed in, 403 forbidden, 404 not found, 409 conflict, 429 too many requests, 500 server error.'
+			},
+			{
+				id: 'server-api-errors',
+				front: 'How should API errors look?',
+				back: 'The same everywhere: a status code, a short error code and readable text (the fields code and message, or the RFC 9457 format). No secrets and no stack trace.'
+			},
+			{
+				id: 'server-openapi',
+				front: 'What is OpenAPI?',
+				back: 'A format for describing an HTTP API in a YAML or JSON file: paths, methods, parameters, responses, data schemas. Documentation (Swagger UI), clients and tests come from it. It grew out of Swagger (2011).'
+			}
+		],
+		sources: [
+			{
+				title: 'Fielding: Architectural Styles and the Design of Network-based Software Architectures, chapter 5 (REST)',
+				url: 'https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			},
+			{
+				title: 'RFC 9110: HTTP Semantics',
+				url: 'https://www.rfc-editor.org/rfc/rfc9110',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'OpenAPI Specification',
+				url: 'https://spec.openapis.org/oas/latest.html',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: HTTP request methods',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: HTTP response status codes',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'RFC 9457: Problem Details for HTTP APIs',
+				url: 'https://www.rfc-editor.org/rfc/rfc9457',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'What is a REST API? (IBM Technology)',
+				url: 'https://www.youtube.com/watch?v=lsMQRaeKNDk',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'You’ll describe the API the way real projects do: with a file in the OpenAPI standard. The lesson has an example. Put in your own paths and fields, and keep to the rules: nouns, the right methods, honest status codes.',
+			hints: [
+				'The start: openapi: 3.1.0, info with a title and a version, and servers: - url: https://riverbend.example/api/v1. Indentation is two spaces a level.',
+				'Paths are indented two spaces and start with a slash: /items: and /items/{id}: and /requests:. The method goes two more spaces in: get: or post:.',
+				'Responses: responses: and under it the codes in quotes: “200”, “404”, and for the enquiry “201” and “400”. Move the shared error into components: schemas: Error: with the fields code and message.',
+				'For the enquiry: required: [name, phone] and a sentence in description: “personal data is accepted only over HTTPS”.'
+			],
+			mistakes: {
+				'spec-section': 'You need a section with the id api-spec holding a pre with the id openapi. Put it back.',
+				'no-blanks': 'The description still has the “…”. Replace the whole block with your API description.',
+				version: 'The description starts with the line openapi: 3.1.0.',
+				'servers-https': 'servers needs an HTTPS address: - url: https://riverbend.example/api/v1.',
+				'plural-nouns': 'Paths should be plural nouns: /items, /requests.',
+				'no-verbs': 'There must be no verbs in the paths (getItems, createRequest, delete…): the method says the action.',
+				'one-item-path': 'You need the path of one resource with a parameter: /items/{id}.',
+				'get-operation': 'You need a read operation: get: inside a path.',
+				'post-creates': 'An enquiry is created with post and answers with the code “201” (or “202”).',
+				statuses: 'Describe the 200, 400 and 404 answers.',
+				'error-schema': 'The shared error format: components, then schemas, then Error with the fields code and message.',
+				'required-fields': 'List the required fields of the enquiry: required: [name, phone].',
+				'https-personal-data': 'Write that personal data is accepted only over HTTPS (in the description of the enquiry).'
+			},
+			outro: 'Your project now has a contract: any programmer (and any AI model) can read this file and know how to talk to it. Paste the text into the Swagger editor (editor.swagger.io) and it draws interactive documentation.'
+		},
+		say: {
+			API: 'A P I',
+			REST: 'rest',
+			OpenAPI: 'open A P I',
+			Swagger: 'swagger',
+			YAML: 'yammel',
+			JSON: 'jay-son',
+			GET: 'get',
+			POST: 'post',
+			PUT: 'put',
+			PATCH: 'patch',
+			DELETE: 'delete',
+			Fielding: 'fielding',
+			RFC: 'R F C',
+			Location: 'location',
+			curl: 'curl',
+			Postman: 'postman'
+		}
+	};
+</script>
+
+<script>
+	import RestTrainer from '../../diagrams/RestTrainer.svelte';
+</script>
+
+## Programs talk too
+
+So far the “client” of a server has been a browser, and a person read the answer. But more and more on the web, **programs** talk to each other. Your page asks a server for the list of offerings (you did that in the lesson on fetch). A mobile app sends an enquiry. A shop’s site asks a courier service for a price. An AI model reads data through a tool. Such conversations need rules: what to ask, in what form, and which answers are possible. A set of such rules is called an **API** (Application Programming Interface).
+
+Most often a web API is plain HTTP, which you already know: a request with a method and an address, a response with a status code and a body, and usually the body is JSON. The only difference from a page is that the response is meant for a program, not for eyes.
+
+## REST: resources and verbs
+
+The most common style of such APIs is called **REST** (Representational State Transfer). Roy Fielding, one of the authors of HTTP, described it in his doctoral dissertation in 2000. The idea is to use HTTP the way it was designed:
+
+- the address names a **resource**, a noun in the plural: `/items` (offerings), `/items/7` (offering number seven), `/requests` (enquiries);
+- the **action** is expressed by the HTTP method, not by a word in the address;
+- the **status code** reports the result;
+- the server keeps nothing about the client between requests: everything needed arrives in the request itself.
+
+To be honest, what the industry calls a “REST API” usually follows this idea only roughly (strict REST also wants links inside responses, and almost nobody does that). What matters to us are the rules themselves, because they make an API predictable: a developer who sees `/items` can guess what `/requests` looks like.
+
+## Methods
+
+Each method has an agreed meaning, written down in the HTTP standard (RFC 9110):
+
+- **GET**: read. It is **safe**: it changes nothing, so anybody can call it any number of times (a browser, a search robot, an extension).
+- **POST**: create a new resource or perform an action (“send an enquiry”). A repeat may create a second copy, so POST is not idempotent.
+- **PUT**: replace a resource entirely.
+- **PATCH**: change some of its fields.
+- **DELETE**: remove it.
+
+**Idempotent** means “repeating it does not change the result”: two identical `DELETE /items/7` requests leave the server in the same state as one. GET, PUT and DELETE are idempotent, so a client can safely repeat a request if no answer came. POST gives no such guarantee, which is why we disabled the button while sending in the lesson on fetch.
+
+## Status codes
+
+You know the groups of codes (2xx, 3xx, 4xx, 5xx). APIs use a fairly definite set:
+
+- `200 OK`: success; `201 Created`: created (with a `Location` header holding the address of the new resource); `202 Accepted`: accepted, processed later; `204 No Content`: success with no body;
+- `400 Bad Request`: the request is wrong (a field is missing); `401 Unauthorized`: sign in first; `403 Forbidden`: signing in isn’t enough, this isn’t allowed; `404 Not Found`: there is no such resource; `409 Conflict`: it conflicts with the current state; `422`: the data is understood but failed validation; `429 Too Many Requests`: too often;
+- `500 Internal Server Error`: a fault on the server, and the client is not to blame.
+
+Pick a request and look at the response. Two of the requests break the rules on purpose:
+
+<RestTrainer />
+
+<details>
+<summary>Check yourself: why must you not delete with GET /deleteItem?id=1?</summary>
+
+GET must be safe, and this request changes data. Anyone can send it by accident: a robot, a page prefetch, an extension. Deleting has its own method, DELETE, and the action needn’t be described by a verb in the address.
+
+</details>
+
+## A good error
+
+The most annoying thing in somebody else’s API is a `500` with no explanation, or a `200` with the word “error” inside. Agree on how errors look and keep to it everywhere. The minimum is **the right status code**, **a short machine-readable code** (`invalid`, `not_found`) by which a program decides what to do, and **text a person can read**. There is a standard for this format, RFC 9457 “Problem Details”. Details (the stack trace, passwords, paths on disk) don’t go in the response. They stay in the server’s log.
+
+## Versions, pages and safety
+
+- **Versions.** An API changes, and the people who use it can’t keep up with you. So the version number goes in the address (`/api/v1/items`), and the old version lives as long as someone uses it.
+- **Pages and filters.** A list of a thousand records isn’t returned whole: `/items?page=2&limit=20`, `/items?q=surveying`.
+- **HTTPS always**, and especially when the request carries personal data (a name, a phone number). Data protection law expects you to protect it (in the UK and the EU that is the GDPR and its UK version, which the lesson on authentication returns to), and encryption in transit is the first step.
+- **Validate input.** Anything can arrive in a request: the server checks every field and doesn’t trust the client.
+- **Rate limiting**, so that one attacker can’t flood the server.
+
+## OpenAPI: the contract as a file
+
+So as not to explain an API in words, it is described by a file in the **OpenAPI** standard: YAML or JSON that lists the addresses, methods, parameters, and the shapes of requests and responses. The format grew out of the Swagger project (2011) and has been developed as an open standard since 2015. From such a file you automatically get interactive documentation (Swagger UI), stubs for client programs, and a check that the server answers as promised.
+
+```yaml
+paths:
+  /requests:
+    post:
+      summary: Create an enquiry from the form
+      responses:
+        '201':
+          description: Enquiry created
+```
+
+Indentation with spaces matters: in YAML, nesting is set by it.
+
+## How to try an API
+
+Three ways, and none needs special software. The Network tab in the developer tools shows the page’s real requests. The `curl` command in a terminal (`curl https://riverbend.example/api/v1/items` shows the response). And the Swagger editor (`editor.swagger.io`), where you can paste an OpenAPI file and press “Try it out”.
+
+## Practice
+
+You are on a site from the 2022 era, when sites talk through APIs (the time of Jamstack). Describe your project’s API in an OpenAPI file: the list of your offerings, one offering, and creating an enquiry from the form. You write the text in a pre block right on the page, and the checks read it.
+
+Three rules the checks will catch: paths are plural nouns with no verbs; GET reads, while an enquiry is created with POST and answers 201; the 200, 400 and 404 answers and a shared error format are described. And one rule the checks won’t understand but data protection law will: personal data from the form is accepted only over HTTPS. Write that in the description of the enquiry.
+
+## What was wrong before
+
+Before REST there was a fashion for SOAP: messages in XML envelopes, with huge descriptions (WSDL) and tools without which they couldn’t be read. And in the simple APIs of the 2000s everything went through one address with an action parameter (`/api.php?action=deleteItem&id=7`). The method was almost always GET or POST, picked at random, and the `200` came back both on success and on failure, only with different text. Any program that read such an API first had to write a parser for “what did they mean here”.
+
+Today’s convention is humbler but more reliable: the address names a thing, the method says the action, the status code says whether it worked, and an OpenAPI file writes all of it down for people and machines.

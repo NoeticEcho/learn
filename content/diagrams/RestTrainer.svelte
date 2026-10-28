@@ -8,8 +8,72 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let first = $state('Первое предложение');
+	const W = pick({
+		ru: {
+			first: 'Первое предложение',
+			host: 'example.ru',
+			name: 'Анна',
+			phone: '+7 000 000-00-00',
+			notFoundMsg: 'Такого предложения нет',
+			needPhone: 'Укажите телефон',
+			needLogin: 'Нужно войти',
+			list: 'Чтение списка: GET, адрес называет ресурс.',
+			listSpec: '/items:\n  get:\n    responses:\n      \'200\': { description: Массив предложений }',
+			one: 'Один ресурс по номеру в адресе.',
+			missing: 'Нет такого ресурса: честный 404 и ошибка в общем формате.',
+			create: 'Создание: POST, ответ 201 и адрес нового ресурса.',
+			createSpec: '/requests:\n  post:\n    requestBody: { required: true }\n    responses:\n      \'201\': { description: Заявка создана }',
+			bad: 'Данные неверны: 400 и понятное сообщение, а не 500.',
+			del: 'Удалять может не каждый: без входа ответ 401 (о входе в уроке про аутентификацию).',
+			badget: 'Ошибка: глагол в адресе, а главное, GET изменил данные. Любой робот и любое расширение, зашедшие по такой ссылке, удалят пункт.',
+			badgetStatus: '200 OK (и пункт пропал)',
+			badgetSpec: '(так описывать нельзя: GET не должен менять данные)',
+			badpost: 'Ошибка: читать надо методом GET, а не POST, и без глагола в адресе. POST не кэшируется, и браузер переспросит при обновлении.',
+			badpostSpec: '(верно: GET /items)',
+			caption: 'Запрос и ответ API',
+			requests: 'Запросы',
+			request: 'Запрос',
+			response: 'Ответ',
+			okVerdict: 'По правилам.',
+			badVerdict: 'Нарушение правил.',
+			specLabel: 'Фрагмент OpenAPI',
+			specHead: 'Как это записано в файле OpenAPI'
+		},
+		en: {
+			first: 'First offering',
+			host: 'api.riverbend.example',
+			name: 'Anna',
+			phone: '+44 0000 000000',
+			notFoundMsg: 'There is no such offering',
+			needPhone: 'Please give a phone number',
+			needLogin: 'Sign in first',
+			list: 'Reading a list: GET, and the address names the resource.',
+			listSpec: '/items:\n  get:\n    responses:\n      \'200\': { description: An array of offerings }',
+			one: 'One resource, by the number in the address.',
+			missing: 'No such resource: an honest 404 and an error in the shared format.',
+			create: 'Creating: POST, a 201 answer and the address of the new resource.',
+			createSpec: '/requests:\n  post:\n    requestBody: { required: true }\n    responses:\n      \'201\': { description: Enquiry created }',
+			bad: 'The data is wrong: 400 and a clear message, not a 500.',
+			del: 'Not everybody may delete: without signing in the answer is 401 (sign-in is in the lesson on authentication).',
+			badget: 'Wrong: there is a verb in the address and, worse, GET changed data. Any robot or browser extension that follows such a link will delete the item.',
+			badgetStatus: '200 OK (and the item is gone)',
+			badgetSpec: '(this must not be described: GET must not change data)',
+			badpost: 'Wrong: reading takes GET, not POST, and no verb in the address. POST is not cached, and the browser asks again on a refresh.',
+			badpostSpec: '(correct: GET /items)',
+			caption: 'An API request and its response',
+			requests: 'Requests',
+			request: 'Request',
+			response: 'Response',
+			okVerdict: 'By the rules.',
+			badVerdict: 'A rule is broken.',
+			specLabel: 'OpenAPI fragment',
+			specHead: 'How it is written in the OpenAPI file'
+		}
+	});
+
+	let first = $state(W.first);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -21,41 +85,41 @@
 
 	type Case = { id: string; method: string; path: string; body?: string; status: string; json: string; ok: boolean; note: string; spec: string };
 	const cases = $derived<Case[]>([
-		{ id: 'list', method: 'GET', path: '/items', status: '200 OK', json: `[{ "id": 1, "title": "${first}" }, …]`, ok: true, note: 'Чтение списка: GET, адрес называет ресурс.', spec: '/items:\n  get:\n    responses:\n      \'200\': { description: Массив предложений }' },
-		{ id: 'one', method: 'GET', path: '/items/1', status: '200 OK', json: `{ "id": 1, "title": "${first}" }`, ok: true, note: 'Один ресурс по номеру в адресе.', spec: '/items/{id}:\n  get:\n    parameters: [{ name: id, in: path }]' },
-		{ id: 'missing', method: 'GET', path: '/items/999', status: '404 Not Found', json: '{ "code": "not_found", "message": "Такого предложения нет" }', ok: true, note: 'Нет такого ресурса: честный 404 и ошибка в общем формате.', spec: "      '404': { $ref: '#/components/responses/NotFound' }" },
-		{ id: 'create', method: 'POST', path: '/requests', body: '{ "name": "Анна", "phone": "+7 000 000-00-00" }', status: '201 Created', json: '{ "id": 17 }   Location: /requests/17', ok: true, note: 'Создание: POST, ответ 201 и адрес нового ресурса.', spec: '/requests:\n  post:\n    requestBody: { required: true }\n    responses:\n      \'201\': { description: Заявка создана }' },
-		{ id: 'bad', method: 'POST', path: '/requests', body: '{ "name": "" }', status: '400 Bad Request', json: '{ "code": "invalid", "message": "Укажите телефон" }', ok: true, note: 'Данные неверны: 400 и понятное сообщение, а не 500.', spec: "      '400': { $ref: '#/components/responses/BadRequest' }" },
-		{ id: 'delete', method: 'DELETE', path: '/items/1', status: '401 Unauthorized', json: '{ "code": "auth_required", "message": "Нужно войти" }', ok: true, note: 'Удалять может не каждый: без входа ответ 401 (о входе в уроке про аутентификацию).', spec: "    delete:\n      security: [{ bearer: [] }]" },
-		{ id: 'badget', method: 'GET', path: '/deleteItem?id=1', status: '200 OK (и пункт пропал)', json: '{ "deleted": true }', ok: false, note: 'Ошибка: глагол в адресе, а главное, GET изменил данные. Любой робот и любое расширение, зашедшие по такой ссылке, удалят пункт.', spec: '(так описывать нельзя: GET не должен менять данные)' },
-		{ id: 'badpost', method: 'POST', path: '/getItems', status: '200 OK', json: `[{ "id": 1, "title": "${first}" }, …]`, ok: false, note: 'Ошибка: читать надо методом GET, а не POST, и без глагола в адресе. POST не кэшируется, и браузер переспросит при обновлении.', spec: '(верно: GET /items)' }
+		{ id: 'list', method: 'GET', path: '/items', status: '200 OK', json: `[{ "id": 1, "title": "${first}" }, …]`, ok: true, note: W.list, spec: W.listSpec },
+		{ id: 'one', method: 'GET', path: '/items/1', status: '200 OK', json: `{ "id": 1, "title": "${first}" }`, ok: true, note: W.one, spec: '/items/{id}:\n  get:\n    parameters: [{ name: id, in: path }]' },
+		{ id: 'missing', method: 'GET', path: '/items/999', status: '404 Not Found', json: `{ "code": "not_found", "message": "${W.notFoundMsg}" }`, ok: true, note: W.missing, spec: "      '404': { $ref: '#/components/responses/NotFound' }" },
+		{ id: 'create', method: 'POST', path: '/requests', body: `{ "name": "${W.name}", "phone": "${W.phone}" }`, status: '201 Created', json: '{ "id": 17 }   Location: /requests/17', ok: true, note: W.create, spec: W.createSpec },
+		{ id: 'bad', method: 'POST', path: '/requests', body: '{ "name": "" }', status: '400 Bad Request', json: `{ "code": "invalid", "message": "${W.needPhone}" }`, ok: true, note: W.bad, spec: "      '400': { $ref: '#/components/responses/BadRequest' }" },
+		{ id: 'delete', method: 'DELETE', path: '/items/1', status: '401 Unauthorized', json: `{ "code": "auth_required", "message": "${W.needLogin}" }`, ok: true, note: W.del, spec: "    delete:\n      security: [{ bearer: [] }]" },
+		{ id: 'badget', method: 'GET', path: '/deleteItem?id=1', status: W.badgetStatus, json: '{ "deleted": true }', ok: false, note: W.badget, spec: W.badgetSpec },
+		{ id: 'badpost', method: 'POST', path: '/getItems', status: '200 OK', json: `[{ "id": 1, "title": "${first}" }, …]`, ok: false, note: W.badpost, spec: W.badpostSpec }
 	]);
-	let pick = $state('list');
-	const cur = $derived(cases.find((c) => c.id === pick)!);
+	let pick_ = $state('list');
+	const cur = $derived(cases.find((c) => c.id === pick_)!);
 </script>
 
 <figure class="dg">
-	<figcaption>Запрос и ответ API</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Запросы">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.requests}>
 		{#each cases as c (c.id)}
-			<button type="button" class="dg-mono" aria-pressed={pick === c.id} onclick={() => (pick = c.id)}><span class:badmark={!c.ok}>{c.method} {c.path}</span></button>
+			<button type="button" class="dg-mono" aria-pressed={pick_ === c.id} onclick={() => (pick_ = c.id)}><span class:badmark={!c.ok}>{c.method} {c.path}</span></button>
 		{/each}
 	</div>
 	<div class="two">
-		<section aria-label="Запрос">
-			<div class="dh">Запрос</div>
+		<section aria-label={W.request}>
+			<div class="dh">{W.request}</div>
 			<pre class="dg-box dg-mono">{cur.method} {cur.path} HTTP/1.1
-Host: example.ru{cur.body ? '\nContent-Type: application/json\n\n' + cur.body : ''}</pre>
+Host: {W.host}{cur.body ? '\nContent-Type: application/json\n\n' + cur.body : ''}</pre>
 		</section>
-		<section aria-label="Ответ" aria-live="polite">
-			<div class="dh">Ответ</div>
+		<section aria-label={W.response} aria-live="polite">
+			<div class="dh">{W.response}</div>
 			<pre class="dg-box dg-mono" class:bad={!cur.ok}>{cur.status}
 {cur.json}</pre>
 		</section>
 	</div>
-	<p class="dg-out" aria-live="polite"><strong>{cur.ok ? 'По правилам.' : 'Нарушение правил.'}</strong> {cur.note}</p>
-	<section aria-label="Фрагмент OpenAPI">
-		<div class="dh">Как это записано в файле OpenAPI</div>
+	<p class="dg-out" aria-live="polite"><strong>{cur.ok ? W.okVerdict : W.badVerdict}</strong> {cur.note}</p>
+	<section aria-label={W.specLabel}>
+		<div class="dh">{W.specHead}</div>
 		<pre class="dg-box dg-mono">{cur.spec}</pre>
 	</section>
 </figure>

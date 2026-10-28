@@ -1,0 +1,794 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/06-graphql-webhooks.svx. */
+	export const metadata = {
+		id: '06-server/06-graphql-webhooks',
+		part: 6,
+		order: 6,
+		title: 'GraphQL and webhooks',
+		definition: 'A webhook is an HTTP request a service sends by itself to a set address when an event happens. GraphQL is an API with one address where the client picks fields.',
+		summary:
+			'GraphQL returns exactly the fields the client asked for, and a webhook lets a service tell you about an event itself. Afterwards you’ll know how GraphQL differs from REST, and you’ll set up a notification for an enquiry with a signature check and protection against repeats.',
+		minutes: 25,
+		teaches: ['server-graphql', 'server-webhooks'],
+		requires: ['server-rest'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'phone', label: 'POST /hooks/request', say: [{ text: 'Polling is “are we there yet?” from the back seat. A webhook: the service calls you when an enquiry arrives.' }, { who: 'Service', text: 'An enquiry came in, calling.' }] },
+				{ mood: 'explain', side: 'right', prop: 'lock', label: 'HMAC', caption: 'The signature', say: 'The handler’s address is no secret. A signature from the body and a shared secret proves the real service is calling.' },
+				{ mood: 'hint', prop: 'packets', label: '7 7', caption: 'Event 7, twice', say: 'The reply got lost, so the service tried again. We’ve seen number 7: answer 200 and do nothing a second time.' },
+				{ mood: 'cheer', side: 'right', prop: 'browser', label: 'items { title price }', caption: 'GraphQL', say: 'GraphQL: one address, and the client picks the fields. Ask for the title and price, and only those arrive.' }
+			]
+		},
+		practice: {
+			id: 'server-webhook',
+			title: 'An enquiry reaches the owner: a webhook and its protection',
+			task: 'A real receiver cannot run in the sandbox, so write the handler’s code as text in the pre block with the id handler, and try signatures on the diagram above. 1) In the Channel paragraph, name where the enquiry will arrive: Slack, email or another channel. 2) In the pre, write the handler (in Node.js, following the example in the lesson): the secret from process.env, an HMAC SHA-256 signature over the raw body (crypto.createHmac with sha256), a safe comparison (timingSafeEqual), a 401 answer when it does not match, a repeat of an event with the same id ignored, and a quick 200 on success. 3) In the paragraph “If the receiver is down”, describe what happens on a failure and why the enquiry is neither lost nor delivered twice. 4) In the GraphQL paragraph, compare it with REST for your data: name one item from your brief and a case where GraphQL is handier. Do not write the value of the secret into the code. Every “…” must be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="webhook-plan">
+      <h2>Enquiry, webhook, owner</h2>
+      <p id="channel">Channel: …</p>
+      <pre id="handler">…<\/pre>
+      <p id="retry">If the receiver is down: …</p>
+      <p id="graphql">GraphQL or REST for my data: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="webhook-plan">
+      <h2>Enquiry, webhook, owner</h2>
+      <p id="channel">Channel: Slack. A message with the visitor’s name and phone number goes to the owner’s channel as soon as an enquiry reaches the handler. The fallback channel: an email.</p>
+      <pre id="handler">import crypto from 'node:crypto';
+
+const SECRET = process.env.WEBHOOK_SECRET;   // the secret is in the environment, not in the code
+const seen = new Set();                       // ids of events already processed
+
+export async function handleWebhook(req, res) {
+  const signature = req.headers['x-signature'];
+  const expected = crypto.createHmac('sha256', SECRET).update(req.rawBody).digest('hex');
+  const ok = signature && signature.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  if (!ok) return res.status(401).end();      // the signature does not match: not our service
+
+  const event = JSON.parse(req.rawBody);
+  if (seen.has(event.id)) return res.status(200).end();   // a repeat: already handled
+  seen.add(event.id);
+
+  await sendToOwner(event);                   // a message to the owner, for example via a Slack incoming webhook
+  res.status(200).end();
+}<\/pre>
+      <p id="retry">If the receiver is down: the service retries the delivery after a minute, after an hour and later. The enquiry is not lost, because the handler is idempotent (a repeat with the same event id is ignored) and answers 200 quickly, while sending to the owner goes through a queue. If it stays down for long, I look at the delivery log.</p>
+      <p id="graphql">GraphQL or REST for my data: for the list with “{{items.0.title}}” and the other items REST is enough, because the requests are simple and always the same. GraphQL would be handy if different screens needed different fields of the same data.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'plan-section',
+					kind: 'exists',
+					selector: '#webhook-plan'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#webhook-plan',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'channel',
+					kind: 'text',
+					selector: '#channel',
+					matches: 'Slack|Telegram|WhatsApp|Signal|Discord|Teams|[Ee]-?mail|SMS|chat|push'
+				},
+				{
+					id: 'hmac',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'createHmac\\(\\s*[\'"]sha256[\'"]'
+				},
+				{
+					id: 'secret-from-env',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'process\\.env\\.\\w+'
+				},
+				{
+					id: 'no-hardcoded-secret',
+					kind: 'text',
+					selector: '#handler',
+					matches: '^(?![\\s\\S]*(?:SECRET|secret|TOKEN|token|KEY|key)\\s*=\\s*[\'"][^\'"]{6,}[\'"])'
+				},
+				{
+					id: 'safe-compare',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'timingSafeEqual'
+				},
+				{
+					id: 'rejects-bad-signature',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'status\\(\\s*40[13]\\s*\\)|statusCode\\s*=\\s*40[13]'
+				},
+				{
+					id: 'idempotent',
+					kind: 'text',
+					selector: '#handler',
+					matches: '^(?=[\\s\\S]*(?:event\\.id|delivery|idempot))(?=[\\s\\S]*(?:\\.has\\(|already|processed|seen|SELECT))'
+				},
+				{
+					id: 'fast-ack',
+					kind: 'text',
+					selector: '#handler',
+					matches: 'status\\(\\s*200\\s*\\)|statusCode\\s*=\\s*200|sendStatus\\(\\s*200\\s*\\)'
+				},
+				{
+					id: 'retry-answer',
+					kind: 'text',
+					selector: '#retry',
+					matches: '^(?=[\\s\\S]*(?:retr(?:y|ies)|again|repeat|resend|redeliver))(?=[\\s\\S]*(?:queue|log|not lost|won’t be lost|idempoten))'
+				},
+				{
+					id: 'graphql-vs-rest',
+					kind: 'text',
+					selector: '#graphql',
+					matches: '^(?=[\\s\\S]*GraphQL)(?=[\\s\\S]*REST)(?=[\\s\\S]*(?:if|when|because|since))'
+				},
+				{
+					id: 'graphql-names-item',
+					kind: 'field',
+					selector: '#graphql',
+					field: 'items[].title',
+					min: 1,
+					when: {
+						brief: 'items[].title'
+					}
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does a webhook differ from polling?',
+				options: [
+					'With polling you ask “any news?” every few minutes yourself, while a webhook comes to you with a request when the event happens',
+					'A webhook works only in a browser',
+					'Polling is faster, because it does not use the network'
+				],
+				answer: 0,
+				why: [
+					'Yes. Polling is wasteful (the answer is mostly “nothing new”) and always late. A webhook reverses the direction: the service where the event happened sends a POST to your address.',
+					'No: a webhook is an ordinary HTTP request between servers, and no browser takes part.',
+					'No: polling is exactly what sends many empty requests over the network.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is the signature of an incoming webhook checked?',
+				options: [
+					'To make sure the real service sent the request and the body was not changed on the way',
+					'To speed up processing',
+					'To count the enquiries'
+				],
+				answer: 0,
+				why: [
+					'Yes. Anyone can find out the address of your receiver. Only someone who knows the secret can make the signature (an HMAC of the body with a shared secret), so a forged request is cut off before processing.',
+					'No: the check adds work, but it protects against forgery.',
+					'No: the signature has nothing to do with counting.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Your handler did not answer in time, and the service sent the same event a second time. What should a correct handler do?',
+				options: [
+					'Recognize the event by its id and not process it again: the processing is idempotent',
+					'Process it a second time: it may come in handy',
+					'Block the service for good'
+				],
+				answer: 0,
+				why: [
+					'Yes. Webhooks are delivered “at least once”, so repeats come from the service and from failures alike. If you remember the ids of processed events, the owner will not get the enquiry twice.',
+					'No: the owner would get two identical enquiries, and a payment would be charged twice.',
+					'No: a repeat shows that the service is doing what it should.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true about storing the secret used to check signatures?',
+				options: [
+					'It goes in environment variables or a secrets store',
+					'It must not be written in public code or a repository',
+					'It can be posted in the README so it isn’t lost',
+					'It is changed if it may have leaked'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: many people see the code, while only the server sees its environment variables.',
+					'Yes: whatever lands in a public repository is considered leaked for good.',
+					'No: everybody reads the README, and the signature would no longer guarantee anything.',
+					'Yes: rotating a secret is ordinary hygiene.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each approach with its description',
+				pairs: [
+					['REST', 'many addresses, each returning its resource whole'],
+					['GraphQL', 'one address, and the client lists the fields it needs'],
+					['webhook', 'the service sends a request about an event to your address'],
+					['HMAC signature', 'a hash of the body with a shared secret: it proves the request is genuine']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'For a list of three services on a small business site, which is more sensible, REST or GraphQL?',
+				options: [
+					'REST: the requests are simple and the same each time, and GraphQL would add complexity with no gain',
+					'GraphQL: it is always better',
+					'Neither: a list needs no API at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. GraphQL pays off when different clients need different fields, or when there are many related resources (a mobile app and a website). For three services there is nothing to gain, and the cost in complexity and caching is real.',
+					'No: it has a cost. It is harder to cache, you must guard against queries that are too heavy, and you need a query layer of its own.',
+					'No: if the list changes without re-uploading the site, it needs an API, however simple.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-webhook',
+				front: 'What is a webhook?',
+				back: 'A callback over HTTP: when something happens in a service (a payment, an enquiry, a commit), it sends a POST describing the event to your address, so you needn’t poll it.'
+			},
+			{
+				id: 'server-webhook-signature',
+				front: 'How do you check that a webhook is genuine?',
+				back: 'The service signs the raw request body with a shared secret (HMAC SHA-256) and sends the signature in a header. The receiver computes its own and compares them with a safe function. No match: 401, and the event is not processed.'
+			},
+			{
+				id: 'server-idempotent-webhook',
+				front: 'Why must webhook processing be idempotent?',
+				back: 'Delivery is “at least once”: after failures the service repeats the request. Remember event ids and do not process a repeat. Answer 200 quickly, and do heavy work in a queue.'
+			},
+			{
+				id: 'server-graphql',
+				front: 'What is GraphQL?',
+				back: 'A query language for APIs (Facebook, 2015): one address, a typed schema, and the client lists the fields and related data it needs. No surplus fields and no extra requests, but caching and protection get harder.'
+			},
+			{
+				id: 'server-graphql-or-rest',
+				front: 'When GraphQL, and when REST?',
+				back: 'REST: simple, similar requests, caching, small sites. GraphQL: many different clients (a site, a mobile app) and a lot of related data, and a team ready to support it.'
+			}
+		],
+		sources: [
+			{
+				title: 'GraphQL: Introduction to GraphQL',
+				url: 'https://graphql.org/learn/',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Stripe: Webhooks',
+				url: 'https://docs.stripe.com/webhooks',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'GitHub Docs: Validating webhook deliveries',
+				url: 'https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Slack: Sending messages using incoming webhooks',
+				url: 'https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'ICO: International transfers',
+				url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Telegram Bot API: setWebhook',
+				url: 'https://core.telegram.org/bots/api#setwebhook',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'What Is GraphQL? REST vs. GraphQL (ByteByteGo)',
+				url: 'https://www.youtube.com/watch?v=yWzKJPw_VzM',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'You’ll set up the path of an enquiry: the form, then a webhook, then the owner. The receiver’s code is written as for a real server, and you can try the signature on the diagram above. The key ideas of the lesson: the signature, a secret kept out of the code, and repeats.',
+			hints: [
+				'The first line: import crypto from node:crypto. The secret: const SECRET = process.env.WEBHOOK_SECRET (do not write the value of the secret into the code).',
+				'The signature: crypto.createHmac with sha256 and SECRET, then update with req.rawBody, then digest as hex. Compare with crypto.timingSafeEqual on two Buffers. No match: res.status(401).end().',
+				'Repeats: const seen = new Set(), and if (seen.has(event.id)) return res.status(200).end(), then seen.add(event.id). At the end, res.status(200).end().',
+				'In the paragraphs: the channel (Slack or email), what happens on a failure (retry, queue, idempotency), and the GraphQL versus REST comparison on one of your items, with an “if…” in it.'
+			],
+			mistakes: {
+				'plan-section': 'The “Enquiry, webhook, owner” block (the section with the id webhook-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				channel: 'Name the delivery channel: Slack, email or another.',
+				hmac: 'The signature is an HMAC SHA-256: crypto.createHmac with sha256 and SECRET.',
+				'secret-from-env': 'The secret comes from the environment: process.env.WEBHOOK_SECRET.',
+				'no-hardcoded-secret': 'The secret must not be written in the code as a string. Remove the value and take it from process.env.',
+				'safe-compare': 'Signatures are compared with a safe function: crypto.timingSafeEqual.',
+				'rejects-bad-signature': 'If the signature does not match, answer 401: res.status(401).end().',
+				idempotent: 'You need protection against repeats: remember event.id and check whether the event was processed (seen.has(event.id)).',
+				'fast-ack': 'On success, answer 200 quickly: res.status(200).end().',
+				'retry-answer': 'Say what happens when the receiver is down: the delivery is retried, a queue or log is used, and why the enquiry is not lost.',
+				'graphql-vs-rest': 'In the last paragraph compare GraphQL and REST: “REST… because…”, “GraphQL is handy if…”.',
+				'graphql-names-item': 'Name one of your items from the brief in the comparison: the reasoning should be about your data.'
+			},
+			outro: 'Your enquiry now has a dependable path: the signature protects against forgery, the id against repeats, and a quick answer keeps the service from fretting. That is nearly the full set of rules for receiving webhooks.'
+		},
+		say: {
+			GraphQL: 'graph Q L',
+			webhook: 'web hook',
+			HMAC: 'H mack',
+			SHA: 'shah',
+			Telegram: 'telegram',
+			Stripe: 'stripe',
+			GitHub: 'git hub',
+			REST: 'rest',
+			'Bot API': 'bot A P I',
+			process: 'process',
+			env: 'N V',
+			Facebook: 'facebook',
+			timingSafeEqual: 'timing safe equal',
+			idempotent: 'eye-dem-poe-tent'
+		}
+	};
+</script>
+
+<script>
+	import WebhookGraphQL from '../../diagrams/WebhookGraphQL.svelte';
+</script>
+
+## When the server knocks on your door
+
+Imagine a payment or an enquiry from a form is due to arrive. How do you find out? There are two ways. You can **ask**: every few minutes go to the service and say “well, has it come?”, and nine times in ten hear “no”. That is called polling, and it is wasteful and always late. Or you can ask the service to **call you**: “when it arrives, send me a message at this address”. Such a callback over HTTP is called a **webhook**.
+
+It works like this. You tell the service the address of your handler (`https://riverbend.example/hooks/request`). When an event happens (a payment, an enquiry, a new commit), the service itself sends a `POST` request to that address, with a description of the event in JSON. Your handler reads it, does the job (for example, forwards the enquiry to the owner) and answers with `200`. Payment notifications, chat messages and the rebuild of a site after an edit all work on the same principle.
+
+A good handler follows three rules, and each of them was born of someone’s trouble.
+
+## Rule one: check that the request is genuine
+
+The address of your handler is no secret: anyone can find it and send anything to it. If the handler believes the first request that comes along, an “enquiry” or a “payment” can be faked. So the service **signs** the request. The most common method is called **HMAC**: the service takes the body of the request and a **secret** shared with you, computes a hash (a checksum string) from them and sends it in a header. The handler computes the same itself and compares. They match: the request came from someone who knows the secret, and the body was not changed on the way. They don’t: answer `401` and nothing more.
+
+The signature is computed over the **raw body**, exactly as it arrived (if you first parse the JSON and write it out again, the spaces change and the signature won’t match). Compare signatures with a special function (`timingSafeEqual`) that always takes the same time: an ordinary string comparison tells an attacker, by how fast it answers, how many of the first characters he guessed. Some services (Telegram, for one) don’t sign at all: they send the secret itself, the one you chose when you set it up, in a header, and that is what you compare.
+
+Try it by hand: change the body or the secret and see what happens to the signature. The browser computes it with real cryptography, but nothing is sent anywhere:
+
+<WebhookGraphQL mode="webhook" />
+
+And the secret lives **outside the code**. Whatever lands in a public repository is considered leaked for good, so the secret goes in the server’s environment variables (`process.env.WEBHOOK_SECRET`) or in a secrets store, and is changed if it may have leaked.
+
+## Rule two: answer quickly
+
+A service waits for an answer only briefly, a few seconds. If you haven’t answered `2xx` in that time, it decides the request didn’t arrive. So the handler first checks the signature, records the event and answers `200`, and does the heavy work (sending a message, recalculating, calling another service) afterwards, in a queue for instance.
+
+## Rule three: a repeat must break nothing
+
+If there is no answer, or it comes back as an error, the service **repeats** the request: after a minute, after five, after an hour, with growing pauses. So delivery works on an “at least once” principle, not “exactly once”. The same request can arrive twice: say you processed the event, but the answer got lost on the way.
+
+So the processing must be **idempotent**: a repeated request must not repeat the effect. For that, every event has a number (`id`). The handler remembers which numbers it has seen, and simply acknowledges a repeated event (`200`) without doing anything. Without that, the client gets two enquiries and the shopper pays twice.
+
+<details>
+<summary>Check yourself: why does a handler that gets a repeated event still answer 200?</summary>
+
+The answer “200” tells the service “received, don’t send it again”. If you answered with an error, the service would keep repeating. And the event has already been handled, so the work needn’t be done again.
+
+</details>
+
+## Where to send the enquiry
+
+There are several ways to forward an enquiry to the owner: an email, a message in a chat app, a row in a spreadsheet. Slack has incoming webhooks: the handler sends a `POST` with the text to a secret address. That address is a secret just like the signature, so it doesn’t belong in the code. Telegram, popular in some countries, has a bot API where the handler calls `sendMessage` with the bot’s token, and that token is a secret too.
+
+There is a legal side here as well. A visitor’s name and phone number are personal data, and a message sent to a chat app or an email service lands on servers outside your own hosting, and perhaps outside your country. Under the GDPR in the EU, and the UK GDPR in the United Kingdom, a service that handles the data for you is a processor: you need a contract with it, and if it sits in another country, the rules on international transfers apply. So every such channel belongs in your privacy notice, and is worth discussing with a lawyer. We return to the law in the part on quality and the law. For comparison, Russia goes further than the GDPR: its localization rule requires that the first recording of Russian citizens’ personal data be made on servers in Russia.
+
+This is general information, not legal advice. For the UK, the Information Commissioner’s Office (ico.org.uk) explains the rules; elsewhere in Europe, ask your national data protection authority.
+
+## GraphQL: the client picks the fields
+
+Alongside REST came another way to ask a server for data: **GraphQL**. It was invented at Facebook in 2012 (inside the company, for its mobile app) and opened up in 2015. The difference is that the API has **one address** (`POST /graphql`), and in the body of the request the client lists the fields it needs:
+
+```graphql
+{
+  items {
+    title
+    price
+  }
+}
+```
+
+and it gets exactly those, no more and no less. In REST the address `/items` returns every offering whole, even if the page needs only the title and price. If data from several related resources is needed, REST takes several requests and GraphQL takes one. The shape of the data is described by a **schema** with types, and documentation and checks are built from it.
+
+Choose fields and compare the sizes of the response:
+
+<WebhookGraphQL />
+
+GraphQL has a price too: it needs a separate layer on the server, it is harder to cache (every request goes to one address), and you must guard against queries that are too heavy (“give me everything about everyone”). So it is chosen when a project has several different clients (a site, a mobile app) that need different fields, and a lot of related data. For a list of a dozen services on a small business site, REST is simpler and enough.
+
+## Practice
+
+You are on a site from the 2022 era, where sites talk to services. Set up the path of an enquiry from the form to the owner. A real receiver cannot run in the sandbox, so you write the handler’s code as text, as it would sit on a server, following the example in the lessons on the signature and repeats: in a `pre` block on the page. The checks look in it for the essentials: the secret from the environment, the HMAC signature, a safe comparison, the `401` answer, protection against repeats and a quick answer.
+
+In two paragraphs, answer in words: what happens if the receiver is down, and when GraphQL is handier for your data and when REST. Name one of your items from the brief so that the reasoning is about your project.
+
+## What was wrong before
+
+The main way to learn about an event was polling, and services exchanged data through SOAP and through files that somebody put on an FTP server on a schedule. When webhooks appeared, they were received with no signature (“nobody knows the address”), the secret was baked into the code and pushed to GitHub, and the “200” was sent only after heavy work, so services sent repeats and duplicate enquiries had to be sorted out by hand.
+
+What is right has stayed: a callback instead of polling, a signature, a quick answer and idempotency. And GraphQL never pushed REST out: both live on, because they solve slightly different problems.

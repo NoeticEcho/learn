@@ -1,0 +1,774 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/08-stack-choice.svx. */
+	export const metadata = {
+		id: '06-server/08-stack-choice',
+		part: 6,
+		order: 8,
+		title: 'Choosing a stack for a project',
+		definition: 'A stack is the set of technologies a service is made of: pages, language, API, sign-in, alerts, data and hosting, chosen by the main action.',
+		summary:
+			'Everything in this part now comes together in one choice: server, language, API, sign-in and webhooks for a particular project, with the law on personal data and the risks of depending on one provider in mind. Afterwards you’ll have a diagram of the server side and a list of risks.',
+		minutes: 20,
+		teaches: ['server-stack-choice'],
+		requires: ['server-language-niches', 'server-rest', 'server-authentication', 'server-webhooks'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'form|intake|email|owner', caption: 'An enquiry’s path', say: 'Start with the main action and the path of the data. Each step of the path is a block that needs a tool.' },
+				{ mood: 'hint', side: 'right', prop: 'sheet', label: 'no database, no app', say: 'At every step take the simplest thing that fits. A file is enough: no database. A form service is enough: no app.' },
+				{ mood: 'hmm', prop: 'network', label: 'a plan for failure', say: 'Every block fails one day. The form is down: the page shows a phone and an email. Alerts down: email still works.' },
+				{ mood: 'cheer', side: 'right', prop: 'server', label: '10 components', say: 'Ten components for a small business site, and all ten can break. Complexity has to be earned.' }
+			]
+		},
+		practice: {
+			id: 'server-stack',
+			title: 'A one-page diagram of your project’s server side',
+			task: 'Put the diagram together. 1) In the “Main action” paragraph, name it in the words of your brief and say how it ends. 2) In the list #flow, four steps (the class hop) of the data’s path from the visitor to the owner: name the visitor and the owner. 3) In the table, seven blocks (the class block): pages, language and application, API, sign-in, enquiries, data, hosting. In the “Choice” column, a specific tool or “not needed”; in “Why”, the reason; in one of the reasons, name an item from your list. 4) In the paragraph about personal data, say where it is physically kept and why that matters (the GDPR and UK GDPR, and what they say about transfers abroad). 5) In the list #risks, three risks (the class risk), each with a plan for when the block fails: a backup, a fallback channel, a manual workaround. Every “…” must be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="stack">
+      <h2>My project’s server side</h2>
+      <p id="goal">Main action: …</p>
+      <ol id="flow">
+        <li class="hop">…</li>
+        <li class="hop">…</li>
+        <li class="hop">…</li>
+        <li class="hop">…</li>
+      </ol>
+      <table>
+        <tr><th>Block</th><th>Choice</th><th>Why</th></tr>
+        <tr class="block"><td>Pages</td><td class="pick">…</td><td class="why">…</td></tr>
+        <tr class="block"><td>Language and application</td><td class="pick">…</td><td class="why">…</td></tr>
+        <tr class="block"><td>API</td><td class="pick">…</td><td class="why">…</td></tr>
+        <tr class="block"><td>Sign-in</td><td class="pick">…</td><td class="why">…</td></tr>
+        <tr class="block"><td>Enquiries</td><td class="pick">…</td><td class="why">…</td></tr>
+        <tr class="block"><td>Data</td><td class="pick">…</td><td class="why">…</td></tr>
+        <tr class="block"><td>Hosting and server</td><td class="pick">…</td><td class="why">…</td></tr>
+      </table>
+      <p id="pd-location">Where personal data is kept: …</p>
+      <ol id="risks">
+        <li class="risk">…</li>
+        <li class="risk">…</li>
+        <li class="risk">…</li>
+      </ol>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="stack">
+      <h2>My project’s server side</h2>
+      <p id="goal">Main action: “{{mainAction.label}}”. The visitor leaves an enquiry, and the owner receives it in Slack and by email.</p>
+      <ol id="flow">
+        <li class="hop">The visitor opens a page of the site, and nginx serves it as a ready-made file.</li>
+        <li class="hop">The visitor fills in the form and sends the enquiry over HTTPS to the API address /api/v1/requests.</li>
+        <li class="hop">The application validates the data, saves the enquiry in the database and answers with the code 201.</li>
+        <li class="hop">A webhook sends the enquiry to the owner in Slack and by email, and the owner sees it.</li>
+      </ol>
+      <table>
+        <tr><th>Block</th><th>Choice</th><th>Why</th></tr>
+        <tr class="block"><td>Pages</td><td class="pick">static files built by a generator, served by nginx</td><td class="why">The sections and the list with “{{items.0.title}}” rarely change: ready-made files are faster and safer.</td></tr>
+        <tr class="block"><td>Language and application</td><td class="pick">a small Node.js or PHP application only for receiving enquiries</td><td class="why">Only one place needs to be dynamic, the rest is static.</td></tr>
+        <tr class="block"><td>API</td><td class="pick">REST described in OpenAPI</td><td class="why">One list and one enquiry: GraphQL would be overkill.</td></tr>
+        <tr class="block"><td>Sign-in</td><td class="pick">not needed for visitors; for the owner a passkey or a link by email</td><td class="why">Visitors need no account, and one person edits the site.</td></tr>
+        <tr class="block"><td>Enquiries</td><td class="pick">a webhook into Slack and an email</td><td class="why">The owner learns of an enquiry at once, and the failure of one channel does not lose it.</td></tr>
+        <tr class="block"><td>Data</td><td class="pick">a small PostgreSQL database</td><td class="why">Enquiries must be kept somewhere, and a database gives both order and backups.</td></tr>
+        <tr class="block"><td>Hosting and server</td><td class="pick">a VPS from a UK or EU provider (for example Hetzner or DigitalOcean)</td><td class="why">One server with nginx is enough, and the data stays in the UK or EEA.</td></tr>
+      </table>
+      <p id="pd-location">Where personal data is kept: enquiries with names and phone numbers are written to a database on a server in the UK (a UK provider), so the UK GDPR applies and no transfer abroad is needed. A copy in Slack and by email does not replace the main storage, and any processor outside the UK or EEA is covered by a transfer mechanism and named in the privacy notice.</p>
+      <ol id="risks">
+        <li class="risk">The application with the form is down: the pages stay available, the page shows a phone number and an email for enquiries, and monitoring reports the failure.</li>
+        <li class="risk">Slack is unavailable: the enquiry is duplicated by email, so the owner will not lose it.</li>
+        <li class="risk">The server is lost: a backup of the database goes elsewhere every day, and the site is redeployed from the repository within an hour.</li>
+      </ol>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'stack-section',
+					kind: 'exists',
+					selector: '#stack'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#stack',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'goal-label',
+					kind: 'field',
+					selector: '#goal',
+					field: 'mainAction.label'
+				},
+				{
+					id: 'four-hops',
+					kind: 'count',
+					selector: '#flow li.hop',
+					min: 4
+				},
+				{
+					id: 'flow-ends',
+					kind: 'text',
+					selector: '#flow',
+					matches: '^(?=[\\s\\S]*[Vv]isitor)(?=[\\s\\S]*(?:[Oo]wner|[Aa]dmin|[Mm]anager))'
+				},
+				{
+					id: 'seven-blocks',
+					kind: 'count',
+					selector: '#stack tr.block',
+					min: 7
+				},
+				{
+					id: 'concrete-picks',
+					kind: 'text',
+					selector: '#stack td.pick',
+					matches: 'nginx|Caddy|Apache|PHP|Python|Node|Go\\b|Elixir|Ruby|Java|WordPress|Drupal|Wix|Squarespace|Shopify|REST|GraphQL|OpenAPI|PostgreSQL|SQLite|Slack|Telegram|[Ee]mail|not needed|passkey|Google|Hetzner|DigitalOcean|AWS|Netlify|Vercel|Cloudflare|static'
+				},
+				{
+					id: 'mentions-item',
+					kind: 'field',
+					selector: '#stack td.why',
+					field: 'items[].title',
+					min: 1,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'pd-location',
+					kind: 'text',
+					selector: '#pd-location',
+					matches: '^(?=[\\s\\S]*(?:\\b(?:UK|EU|EEA)\\b|Europe|United Kingdom|Britain))(?=[\\s\\S]*(?:GDPR|law|transfer))'
+				},
+				{
+					id: 'three-risks',
+					kind: 'count',
+					selector: '#risks li.risk',
+					min: 3
+				},
+				{
+					id: 'risk-plans',
+					kind: 'text',
+					selector: '#risks',
+					matches: 'backup|copy|fallback|spare|plan|switch|manual|duplicat|[Ee]mail'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Where should the choice of a stack for a project begin?',
+				options: [
+					'With the visitor’s main action and the path of the data from them to the owner: then find tools for that',
+					'With the trendiest language',
+					'With the most expensive hosting'
+				],
+				answer: 0,
+				why: [
+					'Yes. A stack serves a task: once you know an enquiry must reach the owner, you can see which blocks are needed and which are surplus.',
+					'No: fashion passes, and the project is left with the wrong tool.',
+					'No: the price of hosting has nothing to do with what the project needs.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these does a small business site with an enquiry form need?',
+				options: [
+					'Hosting or a server for the static pages',
+					'A way to receive an enquiry: an application or a form service',
+					'A notification to the owner about an enquiry',
+					'A Kubernetes cluster'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: pages need an address from which they are served.',
+					'Yes: a form needs a receiver, however small.',
+					'Yes: an enquiry nobody hears about is lost.',
+					'No: Kubernetes for a small business site is complexity that will not pay for itself. It comes up in the part on infrastructure.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Enquiries with the name and phone number of people in the UK or the EU are best stored...',
+				options: [
+					'In a database with a provider you have a contract with, in the UK or EEA or under a lawful transfer mechanism, and described in the privacy notice',
+					'Only in a chat app: it is cheaper',
+					'Anywhere: the law says nothing about it'
+				],
+				answer: 0,
+				why: [
+					'Yes. The GDPR and UK GDPR require a contract with each processor, and a lawful basis for sending data outside the UK or EEA (an adequacy decision, standard contractual clauses and so on). Say where the data goes in the privacy notice. Details are worth discussing with a lawyer, or the regulator.',
+					'No: a chat app is not a store, and its servers may be outside your country.',
+					'No: the law speaks about it directly, and fines for breaking it exist.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does “a plan for when a block fails” mean?',
+				options: [
+					'It is known in advance what to do if a block breaks: a fallback channel, a backup, a manual workaround',
+					'A plan to replace all the blocks once a year',
+					'A hope that the block will not break'
+				],
+				answer: 0,
+				why: [
+					'Yes. Everything fails, and the question is not “if” but “when”. A good plan is short: “we duplicate the enquiry by email”, “the copy sits somewhere else”.',
+					'No: that is an upgrade plan, not a response plan.',
+					'No: hope is not a plan.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is risky about relying on a single outside service for an important block (taking payments, say, or forms)?',
+				options: [
+					'It can become unavailable, change its terms or its prices, or stop working in your country: a fallback is needed',
+					'Outside services are always unreliable',
+					'Nothing: they are better than anything you could build'
+				],
+				answer: 0,
+				why: [
+					'Yes. Terms, prices and availability of a service change quickly, and not at your wish. For every important block think of a replacement, so that moving takes days, not months.',
+					'No: the point is not quality but dependence on terms you do not control.',
+					'No: “better” does not answer the question about risk.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of choosing a stack in order',
+				items: [
+					'Write down the visitor’s main action',
+					'Draw the data’s path from the visitor to the owner',
+					'Pick the simplest suitable tool for every block of the path',
+					'Check where the personal data is physically kept',
+					'Name the risks and a plan for the failure of each block'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-stack-start',
+				front: 'Where do you start when choosing a stack?',
+				back: 'With the visitor’s main action and the path of the data to the owner. For each step of the path pick the simplest suitable tool, and cross out whatever isn’t needed.'
+			},
+			{
+				id: 'server-stack-blocks',
+				front: 'What blocks does the server side consist of?',
+				back: 'Pages (static or dynamic), language and application, API, sign-in, receiving enquiries and notifications, data storage, hosting and server. Some blocks may be “not needed”, and that is fine.'
+			},
+			{
+				id: 'server-stack-pd',
+				front: 'Where do you keep visitors’ personal data?',
+				back: 'With a processor you have a contract with, and where the law allows. Under the GDPR and UK GDPR, sending data outside the UK or EEA needs a transfer mechanism, and the privacy notice says where it goes. Russia is stricter: the first recording of Russian citizens’ data must be made in Russia (152-FZ).'
+			},
+			{
+				id: 'server-stack-risks',
+				front: 'How should you treat the risks of a stack?',
+				back: 'For each important block, name in advance what happens when it fails, and a plan: a backup somewhere else, a fallback notification channel, a manual workaround, a spare provider.'
+			},
+			{
+				id: 'server-stack-boring',
+				front: 'Why is a “boring” stack often better?',
+				back: 'Proven tools are easier to maintain, and it is easier to find people and answers for them. Take something new when it solves a problem the boring option cannot.'
+			}
+		],
+		sources: [
+			{
+				title: 'The UK GDPR: Regulation (EU) 2016/679 as it forms part of UK law (legislation.gov.uk)',
+				url: 'https://www.legislation.gov.uk/eur/2016/679/contents',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'ICO: International transfers',
+				url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/international-transfers/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'EDPB: International data transfers (guide for small businesses)',
+				url: 'https://www.edpb.europa.eu/sme/be-compliant/international-data-transfers_en',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Stack Overflow Developer Survey 2025',
+				url: 'https://survey.stackoverflow.co/2025/',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Federal Law of 27.07.2006 No. 152-FZ “On Personal Data” (Russia, for comparison)',
+				url: 'https://www.consultant.ru/document/cons_doc_LAW_61801/',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'ru'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'The summary of the part: a one-page diagram of your project’s server side. Start from the main action: what must happen, and which blocks that takes.',
+			hints: [
+				'Write the main action in the words of your brief. Then four steps: the visitor, the page, the form and API, the application, the notification, the owner.',
+				'The table has seven blocks. In “Choice” put something specific: nginx, Node.js or PHP, REST, a passkey, Slack, PostgreSQL, a VPS. If a block is not needed, write “not needed”.',
+				'About personal data: say where enquiries are kept (a database on a server with a UK or EU provider, say) and which law applies (the GDPR or UK GDPR).',
+				'Risks: for each, one block and one “if it breaks, then…”: a fallback channel (an email), a copy somewhere else, a manual workaround (a phone number on the page).'
+			],
+			mistakes: {
+				'stack-section': 'The “My project’s server side” block (the section with the id stack) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'goal-label': 'Name the project’s main action in the words of your brief.',
+				'four-hops': 'The list #flow needs at least four steps with the class hop.',
+				'flow-ends': 'The steps must include the visitor and the owner: the path runs from the first to the second.',
+				'seven-blocks': 'The table needs seven rows with the class block: pages, language and application, API, sign-in, enquiries, data, hosting.',
+				'concrete-picks': 'The “Choice” column needs specific names (nginx, Node.js, REST, PostgreSQL, Slack…) or “not needed”.',
+				'mentions-item': 'In one of the reasons, name an item from your list of offerings: the diagram should be about your project.',
+				'pd-location': 'Say where the personal data is physically kept (the UK, the EU or the EEA) and which law applies (the GDPR or UK GDPR).',
+				'three-risks': 'The list #risks needs three risks with the class risk.',
+				'risk-plans': 'The risks need a plan: a backup, a fallback channel, duplication, a manual workaround.'
+			},
+			outro: 'Your project now has a server diagram: what is static and what is dynamic, which language, which API, how an enquiry reaches the owner, where the data is kept and what to do on a failure. You can now argue with a developer as an equal, or set this task for an AI model.'
+		},
+		say: {
+			VPS: 'V P S',
+			PostgreSQL: 'post-gres Q L',
+			Hetzner: 'hetsner',
+			DigitalOcean: 'digital ocean',
+			Slack: 'slack',
+			OpenAPI: 'open A P I',
+			REST: 'rest',
+			GraphQL: 'graph Q L',
+			Kubernetes: 'koo-ber-net-eez',
+			nginx: 'engine X',
+			GDPR: 'G D P R'
+		}
+	};
+</script>
+
+<script>
+	import StackBuilder from '../../diagrams/StackBuilder.svelte';
+</script>
+
+## From parts to a whole
+
+You have learned how a server works, how static differs from dynamic, how PHP differs from Node.js, what an API looks like, how enquiries arrive and how sign-in is built. Now you can put it all into one decision for your project. That is called **choosing a stack**: the set of technologies a service is made of. There is no right answer “in general”. There is an answer that suits your project, and you can justify it.
+
+## How to reason
+
+The order of reasoning matters more than any particular names, and it is always the same.
+
+1. **The main action.** What must the visitor do on the site: leave an enquiry, buy, book, read? Everything else serves it. It is the very action from your brief.
+2. **The path of the data.** What happens after the click: where does the data go, who receives it, who learns about it and how. For an enquiry it is the visitor, the form, intake, storage, a notification and the owner. Each step of the path is a block that needs a tool.
+3. **The simplest suitable thing at each step.** Not the most powerful, not the trendiest. If a ready-made file is enough, you need no database. If a form service is enough, you need no application. If it is enough to send the enquiry by email, you need no account area.
+4. **What happens when it breaks.** Every block fails one day, and the plan for that is made in advance, while things are calm.
+5. **Where the data sits and who sees it.** The law is not a formality here.
+
+## The stack, block by block
+
+**Pages.** Static or dynamic. For a small business site, a landing page or a blog, static is most often right: ready-made files served by nginx or by the host (remember how much faster, cheaper and safer that is). On a CMS (WordPress, Drupal) the pages are built from a database, and that is justified when several people who are not programmers change the content often. There is a whole part ahead about CMSs and site generators.
+
+**Language and application.** Needed only if there is something dynamic: receiving enquiries, sign-in, an account area. You have seen how to choose: for a CMS site it is PHP, for a chat Node.js, Go or Elixir, and otherwise the language in which it is easiest to find people. If the only dynamic thing on the site is one form, it often pays better not to write an application but to plug in a **form service** or a cloud function.
+
+**API.** For a list and an enquiry, plain REST with an OpenAPI description is enough. GraphQL is needed when a project has several different clients.
+
+**Sign-in.** Begin with the question of whether it is needed. If it is, then without passwords (a passkey, a link by email, sign in with Google or Apple), and fix the roles in advance.
+
+**Enquiries and notifications.** Receiving, a webhook into a chat app, or an email. A signature, idempotency and a quick answer. Two channels are more dependable than one.
+
+**Data.** A database is needed if something has to be stored and searched: enquiries, users, orders. If not, don’t start one. Databases are the next part.
+
+**Hosting and server.** From cheap hosting with PHP to a virtual server (a VPS) and the cloud. For a small project one VPS with nginx is most often enough. The cloud, containers and Kubernetes (the part on infrastructure) are for when the project has grown.
+
+Pick blocks for your main action, and the diagram will tell you what is missing and what is surplus:
+
+<StackBuilder />
+
+<details>
+<summary>Check yourself: why is a diagram with only a “pages” block incomplete for a small business site with an enquiry form?</summary>
+
+Someone has to receive the form’s data and tell the owner about it. You need at least an intake (an application or a form service) and a notification.
+
+</details>
+
+## Law and place: what to consider
+
+Wherever you work, three questions come up, and the law answers the first.
+
+**Where the data sits.** The GDPR applies to the personal data of people in the EU, and the UK GDPR with the Data Protection Act 2018 to people in the UK, wherever your server is. An enquiry with a name and a phone number is exactly such data. You need a contract with every service that handles it for you (a processor, under Article 28 of the GDPR). Sending the data outside the UK or the EEA is allowed only with a lawful transfer mechanism (Chapter V of the GDPR): an adequacy decision, such as the one for companies certified under the EU–US Data Privacy Framework, standard contractual clauses, or another safeguard. So a provider in your own region, or one on that list, makes the answer simple. Copies in other services (a chat app, say) are possible, but the privacy notice has to say so. For comparison, Russia’s law (152-FZ) is stricter than the GDPR: the first recording of Russian citizens’ personal data must be made in databases on Russian territory, which is why Russian projects pick a Russian host for the main database. This is general information, not legal advice. In the UK the Information Commissioner’s Office (ico.org.uk) explains the rules, and in the EU you can ask your national data protection authority.
+
+**The availability of outside services.** The terms, prices and availability of services change quickly, and not at your wish: an API you depend on is retired, a payment provider leaves your country, a free plan ends. For every important block (email, forms, payments, hosting) it is worth knowing a fallback in advance, and being able to switch in days, not months.
+
+**Hosts and CMSs.** Cheap shared hosting with PHP is everywhere (WordPress is installed there in a couple of clicks), and there is a large market of specialists for it. For a CMS project it is a perfectly good option, not an “outdated” one.
+
+## Risks
+
+For each block think about what happens when it fails, and write the plan in one line. Three typical ones:
+
+- **the application with the form is down**: the pages stay available (they are static), the page shows a phone number and an email, and monitoring reports the failure;
+- **the notification channel is unavailable**: the enquiry is duplicated by email;
+- **the server is lost**: the backup of the database sits somewhere else and is refreshed every day, and the site is redeployed from the repository.
+
+## Practice
+
+You are on a site from the 2022 era, summing up the part. Put together, on one page, a diagram of your project’s server side: the main action, the path of the data from the visitor to the owner, seven blocks with a choice and a reason, where the personal data is kept, and three risks with a plan. “Not needed” for a block is as good an answer as the name of a tool. A good diagram is short and specific: you can set a task to a developer or an AI model from it.
+
+## What was wrong before
+
+In the 2010s it was considered “modern” to assemble, for a small business site, a stack of ten technologies: an application, a database, a cache, a message queue, a search engine, containers. This was called “so that it scales later”. Then it turned out that the site never grew beyond a thousand visitors a month, and there was nobody to maintain ten components that could each break. At the other pole stood the “black box”: a CMS site with fifty plugins of unknown origin, where nobody knew what was stored where.
+
+The lesson of both slants is the same: complexity has to be earned. Start simple, and keep an eye on the data’s path, on where personal data is kept, and on the plan for a failure.

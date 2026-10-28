@@ -1,0 +1,824 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/07-authentication.svx. */
+	export const metadata = {
+		id: '06-server/07-authentication',
+		part: 6,
+		order: 7,
+		title: 'Authentication in plain words',
+		definition: 'Authentication checks who a user is, and authorization decides what that user may do. A person is recognized by a session cookie, a JWT, OAuth or a passkey.',
+		summary:
+			'“Who are you?” and “what may you do?” are two different questions. Afterwards you’ll explain how sessions and cookies, JWT tokens, signing in through another service (OAuth) and passkeys work, you’ll choose a safe way to sign in for a project, and you won’t store passwords as plain text.',
+		minutes: 30,
+		teaches: [
+			'server-sessions-and-cookies',
+			'server-authentication',
+			'server-authorization',
+			'server-oauth',
+			'server-passkeys'
+		],
+		requires: ['server-rest', 'net-tls'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'pass: editor', say: 'Authentication: who you are, a passport at the gate. Authorization: what you may do, a pass for certain doors.' },
+				{ mood: 'hmm', side: 'right', prop: 'lock', label: 'hash and salt', say: 'A password is stored as a slow hash with a salt. That’s why an honest site can’t remind you of it: it doesn’t know it.' },
+				{ mood: 'hint', prop: 'postcard', label: 'role: editor + signature', caption: 'JWT', say: 'A token is a postcard with a seal: anyone can read it, nobody can forge it. Never put a password in it.' },
+				{ mood: 'cheer', side: 'right', prop: 'browser', label: 'button “Delete”', say: 'Hiding the button is not enough: the request can be sent without it. The server checks rights on every request.' }
+			]
+		},
+		practice: {
+			id: 'server-auth-plan',
+			title: 'Does your site need sign-in, and how does it work',
+			task: 'Decide whether your project needs sign-in, and describe it. 1) In the “Is sign-in needed” paragraph, answer “needed” or “not needed” and give a reason tied to the project’s main action: name that action in the words of your brief (for example, in quotation marks). 2) In the “Way to sign in” paragraph, name the way: a password, a link sent by email, sign in with Google, a passkey, or “no sign-in”. 3) In the table, give three roles (the class role): visitor, owner and one more (editor, or your own), and what each may do (the class can). 4) In the paragraph about passwords, name the storage scheme (an argon2id or bcrypt hash with a salt) or say that sign-in is passwordless. 5) In the last paragraph, say that signing in through a third-party provider or by SMS is processing of personal data under the GDPR, and that it needs a lawful basis such as consent, and a privacy notice. Every “…” must be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="auth-plan">
+      <h2>Does my site need sign-in</h2>
+      <p id="need">Is sign-in needed: …</p>
+      <p id="method">Way to sign in: …</p>
+      <table>
+        <tr><th>Role</th><th>What they can do</th></tr>
+        <tr class="role"><td>Visitor</td><td class="can">…</td></tr>
+        <tr class="role"><td>Owner</td><td class="can">…</td></tr>
+        <tr class="role"><td>…</td><td class="can">…</td></tr>
+      </table>
+      <p id="passwords">Passwords: …</p>
+      <p id="pd">Personal data at sign-in: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="auth-plan">
+      <h2>Does my site need sign-in</h2>
+      <p id="need">Is sign-in needed: not needed for visitors. The project’s main action (“{{mainAction.label}}”) is an enquiry through a form, and it needs no sign-in: making an account for a single enquiry would be too much to ask of the audience. Only the owner needs to sign in, to edit the list of offerings.</p>
+      <p id="method">Way to sign in: for the owner, a link sent by email, or a passkey, with no password; for visitors there is no sign-in.</p>
+      <table>
+        <tr><th>Role</th><th>What they can do</th></tr>
+        <tr class="role"><td>Visitor</td><td class="can">looks at the pages and sends an enquiry through the form</td></tr>
+        <tr class="role"><td>Owner</td><td class="can">sees the enquiries, edits the texts and the list of offerings, appoints editors</td></tr>
+        <tr class="role"><td>Editor</td><td class="can">edits the page texts but does not see enquiries with personal data</td></tr>
+      </table>
+      <p id="passwords">Passwords: if passwords are needed after all, they are stored only as a hash (argon2id or bcrypt) with a salt, never as plain text; better still is passwordless sign-in, by a link or a passkey.</p>
+      <p id="pd">Personal data at sign-in: an email address and a name are personal data under the GDPR: they need a lawful basis such as consent, and a privacy notice. Signing in with Google or by SMS is also processing of data, and the privacy notice says so.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'plan-section',
+					kind: 'exists',
+					selector: '#auth-plan'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#auth-plan',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'need-answer',
+					kind: 'text',
+					selector: '#need',
+					matches: '[Nn]ot\\s+(?:needed|required)|[Nn]eeded|[Rr]equired|[Nn]o\\s+need'
+				},
+				{
+					id: 'need-reason-action',
+					kind: 'field',
+					selector: '#need',
+					field: 'mainAction.label'
+				},
+				{
+					id: 'method',
+					kind: 'text',
+					selector: '#method',
+					matches: 'password|Google|Apple|GitHub|OAuth|passkey|SMS|link|no sign-in|no login'
+				},
+				{
+					id: 'three-roles',
+					kind: 'count',
+					selector: '#auth-plan tr.role',
+					min: 3
+				},
+				{
+					id: 'visitor-owner',
+					kind: 'text',
+					selector: '#auth-plan tr.role',
+					matches: '^(?=[\\s\\S]*[Vv]isitor)'
+				},
+				{
+					id: 'owner-role',
+					kind: 'text',
+					selector: '#auth-plan',
+					matches: '[Oo]wner|[Aa]dmin'
+				},
+				{
+					id: 'roles-can',
+					kind: 'text',
+					selector: '#auth-plan td.can',
+					matches: '\\S+\\s+\\S+\\s+\\S+'
+				},
+				{
+					id: 'password-scheme',
+					kind: 'text',
+					selector: '#passwords',
+					matches: 'hash|bcrypt|argon2|scrypt|PBKDF2|passwordless|no password|passkey|link'
+				},
+				{
+					id: 'pd-note',
+					kind: 'text',
+					selector: '#pd',
+					matches: '^(?=[\\s\\S]*(?:GDPR|[Pp]ersonal data))(?=[\\s\\S]*(?:consent|privacy|lawful))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each term with the question it answers',
+				pairs: [
+					['authentication', 'who are you? (a passport at the gate)'],
+					['authorization', 'what may you do? (a pass that opens certain doors)'],
+					['session', 'how the server remembers you between requests after you sign in'],
+					[
+						'password hash',
+						'an irreversible “checksum” of the password, stored instead of the password itself'
+					]
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How should a server store users’ passwords?',
+				options: [
+					'Only as a slow hash with a salt (argon2id, bcrypt): the password itself can’t be recovered',
+					'In plain text, so a forgotten one can be sent back',
+					'Encrypted with one shared key'
+				],
+				answer: 0,
+				why: [
+					'Yes. If the database is stolen, the passwords can’t be read from the hashes (and the salt stops anyone attacking all of them at once). A slow algorithm makes guessing expensive.',
+					'No: that leaks every password at once, and people use one password on many sites. This is exactly why a site can’t “remind” you of a password: it doesn’t know it, it can only reset it.',
+					'No: a shared key stolen with the database reveals all the passwords. A hash is irreversible, encryption is not.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which flags protect a session cookie?',
+				options: [
+					'HttpOnly: the page’s scripts can’t read the cookie',
+					'Secure: the cookie is sent only over HTTPS',
+					'SameSite: limits sending the cookie from other sites',
+					'Public: every visitor can see the cookie'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: if a foreign script gets into the page (XSS), it can’t steal the session.',
+					'Yes: over plain HTTP the cookie could be intercepted.',
+					'Yes: it protects against forged requests from other sites (CSRF).',
+					'No: there is no such flag, and the point of the protection is the opposite.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is true of a JWT (a token that looks like xxxxx.yyyyy.zzzzz)?',
+				options: [
+					'It is signed but not encrypted: anyone can read the contents, but without the secret nobody can forge it',
+					'It is encrypted, and only the server can read it',
+					'It stays valid forever'
+				],
+				answer: 0,
+				why: [
+					'Yes. The first two parts are just base64 of JSON, and anybody can decode them. The signature (the third part) protects against tampering. So no secrets go in a JWT, and its lifetime is kept short.',
+					'No: encryption and signing are different things. An encrypted token is called a JWE and is rarer.',
+					'No: a token has an expiry (the exp field), and revoking it early is hard, which is why the lifetime is short.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What happens when someone signs in with Google (OAuth / OpenID Connect)?',
+				options: [
+					'The password is typed only on Google’s page, and your site gets confirmation of who the person is (and, with permission, some data)',
+					'Your site gets the password from Google and checks it itself',
+					'Google creates the user in your database'
+				],
+				answer: 0,
+				why: [
+					'Yes. Your site never sees the password and trusts the provider, who confirmed that the person signed in. You don’t store passwords, but the user’s data passes through a third-party operator, and the privacy notice has to say so.',
+					'No: that is the whole point: the password never leaves the provider’s page.',
+					'No: you create the user in your own database yourself, once you have the confirmation.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does a passkey resist phishing (a fake site)?',
+				options: [
+					'The private key stays on the device, and the signature is tied to the address of the real site: on a fake one, sign-in simply won’t work',
+					'Because a passkey is longer than any password',
+					'Because the server stores the passkey'
+				],
+				answer: 0,
+				why: [
+					'Yes. At registration a pair of keys is made: the private one never leaves the device, and the site keeps the public one. The browser gives a signature only to the address the key was made for.',
+					'No: length isn’t the point. A password of any length can be coaxed out of someone and typed into a fake page.',
+					'No: the server stores only the public half, and the private half is yours.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In an interface, the “Delete enquiry” button is hidden from visitors. Is that enough to stop them deleting an enquiry?',
+				options: [
+					'No: rights must be checked on the server, because the request can be sent without the button',
+					'Yes: what can’t be seen doesn’t exist',
+					'Yes, if the button is hidden with the style display: none'
+				],
+				answer: 0,
+				why: [
+					'Yes. A hidden button is a convenience, not protection: anyone can send the same request from the console or from a program. Authorization is checked on the server on every request.',
+					'No: what is hidden is still in the page and in the API.',
+					'No: display: none hides things on the screen only.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-authn-authz',
+				front: 'How does authentication differ from authorization?',
+				back: 'Authentication answers “who are you?” (signing in). Authorization answers “what may you do?” (rights and roles). The first is checked once, at sign-in, the second on every request, and on the server.'
+			},
+			{
+				id: 'server-session-cookie',
+				front: 'How does signing in with a session and a cookie work?',
+				back: 'After sign-in the server creates a session and gives the browser a cookie with its number (Set-Cookie). The browser sends it with every request. The flags: HttpOnly, Secure, SameSite.'
+			},
+			{
+				id: 'server-password-hash',
+				front: 'How should passwords be stored?',
+				back: 'Never as plain text: only as a slow hash with a salt (argon2id, bcrypt, scrypt). Limit the number of attempts, check against lists of leaked passwords, add a second factor where possible, or move to passwordless sign-in.'
+			},
+			{
+				id: 'server-jwt-oauth',
+				front: 'What are JWT and OAuth?',
+				back: 'JWT: a signed (not encrypted!) token of three parts that anyone can read. OAuth 2.0: a protocol for delegating access; OpenID Connect on top of it gives sign-in through a third-party provider (Google, Apple, GitHub).'
+			},
+			{
+				id: 'server-passkeys',
+				front: 'What are passkeys?',
+				back: 'Passwordless sign-in under the WebAuthn standard: a pair of keys, the private key stays on the device, and a fingerprint, face or PIN confirms it. Resistant to phishing, and the server holds nothing worth stealing.'
+			}
+		],
+		sources: [
+			{
+				title: 'MDN: HTTP authentication',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'OWASP Cheat Sheet: Authentication',
+				url: 'https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'OWASP Cheat Sheet: Session Management',
+				url: 'https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'OAuth 2.0: description and specifications',
+				url: 'https://oauth.net/2/',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'passkeys.dev: passkeys for developers',
+				url: 'https://passkeys.dev/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'ICO: Guide to the UK GDPR',
+				url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Yandex ID: documentation for developers',
+				url: 'https://yandex.ru/dev/id/doc/ru/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'ru'
+			}
+		],
+		videos: [
+			{
+				title: 'Session vs Token Authentication in 100 Seconds (Fireship)',
+				url: 'https://www.youtube.com/watch?v=UBUNrFtufWo',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'The main decision of this lesson may well be “no sign-in”. Think about your project’s main action and your visitors, and decide honestly. And if sign-in is needed, think through the roles and how passwords are stored.',
+			hints: [
+				'In “Is sign-in needed”, say “not needed” or “needed” and give the reason: what the visitor does on the site (the main action) and whether they need an account for it. Name the action in the words of your brief.',
+				'The way to sign in: a password, a link sent by email, sign in with Google or Apple, a passkey. If there is no sign-in at all, say so: “no sign-in”.',
+				'Roles: visitor, owner and one more, such as editor. For each, one phrase saying what they may do (at least three words).',
+				'About passwords: an argon2id or bcrypt hash with a salt, never plain text, or passwordless sign-in. And at the end: the GDPR, a lawful basis such as consent, and a privacy notice.'
+			],
+			mistakes: {
+				'plan-section': 'The “Does my site need sign-in” block (the section with the id auth-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'need-answer': 'In the “Is sign-in needed” paragraph, answer directly: “needed” or “not needed”.',
+				'need-reason-action': 'The reason must be tied to the project’s main action: name it in the words of your brief.',
+				method: 'In the “Way to sign in” paragraph, name the way: a password, a link by email, sign in with Google, a passkey or “no sign-in”.',
+				'three-roles': 'The table needs at least three rows with the class role.',
+				'visitor-owner': 'The table must have a “Visitor” role.',
+				'owner-role': 'The table must have an owner or admin role.',
+				'roles-can': 'The “What they can do” column needs real phrases of at least three words.',
+				'password-scheme': 'In the paragraph about passwords, name the scheme: a hash (argon2id, bcrypt) with a salt, or passwordless sign-in.',
+				'pd-note': 'In the last paragraph, say that signing in is processing of personal data (the GDPR), and that it needs consent or another lawful basis, and a privacy notice.'
+			},
+			outro: 'You’ve decided whether sign-in is needed, who may do what, and how not to keep more than you must. The best protection for passwords is not to have them at all. It’s worth remembering.'
+		},
+		say: {
+			OAuth: 'oh-auth',
+			OpenID: 'open I D',
+			JWT: 'J W T',
+			cookie: 'cookie',
+			Cookie: 'cookie',
+			HttpOnly: 'H T T P only',
+			SameSite: 'same site',
+			Secure: 'secure',
+			argon2id: 'argon two I D',
+			bcrypt: 'bee-crypt',
+			scrypt: 'ess-crypt',
+			WebAuthn: 'web auth en',
+			FIDO2: 'fido two',
+			passkey: 'passkey',
+			XSS: 'X S S',
+			CSRF: 'C S R F',
+			'Yandex ID': 'yandex I D',
+			'VK ID': 'V K I D',
+			SMS: 'S M S',
+			OWASP: 'oh-wasp',
+			HMAC: 'H mack',
+			base64: 'base sixty-four',
+			GDPR: 'G D P R'
+		}
+	};
+</script>
+
+<script>
+	import AuthFlows from '../../diagrams/AuthFlows.svelte';
+</script>
+
+## Two questions that get mixed up
+
+When a site gets a sign-in, two different questions appear, and it helps to keep them apart.
+
+**Authentication** is *who are you?* It is a check of identity: you typed a password, confirmed a code from an SMS, put a finger on a reader. Like a passport at the gate.
+
+**Authorization** is *what may you do?* These are rights: a guest may look, an editor may change the texts, an owner may delete and see the enquiries. Like a pass that opens some doors and not others.
+
+First the server finds out who has come, and then, on every request, it decides whether this person may have what they ask for. We start with the first.
+
+## The main question: is sign-in needed at all?
+
+Any sign-in means accounts, and accounts mean duties. You keep other people’s personal data (you have already met the law on it), you answer for a leak, you must be able to restore forgotten passwords, and you must defend against break-ins. For a small business site, a landing page or a blog, sign-in is most often not needed at all: the visitor looks at the page and leaves an enquiry with no account. Sign-in is needed where something is **personal**: an account area, orders, a closed section, editing by the owner.
+
+A rule that will save months: **no sign-in, no sign-in problems**. Start without it.
+
+## Sessions and cookies
+
+Suppose sign-in is needed. HTTP, as you remember, doesn’t remember you between requests. So after a person has signed in, they must somehow be recognized on every following request. The classic way is a **session**. The server checks the password, makes a record on its side, “session number …, user Anna”, and sends the browser the number in a `Set-Cookie` header. The browser stores this **cookie** and sends it back by itself with every request to this site. The server sees the number and recognizes the person.
+
+A session cookie gets three flags, always:
+
+- `HttpOnly`: scripts on the page can’t read the cookie, so even if a foreign script gets onto the page (the XSS from the lesson on the DOM), it can’t steal the session;
+- `Secure`: the cookie is sent only over HTTPS;
+- `SameSite`: the cookie isn’t sent with requests started by other sites, which protects against forged requests (CSRF).
+
+## Passwords: store what can’t be read
+
+If the check uses a password, the most serious question arises: **how do you store passwords?** The answer leaves no choice: **never as plain text**. Databases leak, and people use the same password on many sites, so a leaked password breaks other people’s accounts elsewhere.
+
+What is stored is a **hash** of the password: the result of an irreversible calculation (you can’t get the password back from a hash, you can only calculate the hash of a guessed password and compare). But not just any hash: a **slow one, with a salt**:
+
+- a **salt** is a random addition to each password, so two people with the same password get different hashes, and attacking everyone at once won’t work;
+- a **slow algorithm** (argon2id, bcrypt, scrypt) makes every guess take noticeable time, so trying billions of variants is expensive. Fast hashes such as MD5 or SHA-1 are no good for passwords: billions can be computed a second.
+
+It follows that a service can’t “remind” you of a password: it doesn’t know it, it can only let you set a new one. If a site emails you a forgotten password, it stores passwords as plain text, and that site can’t be trusted. Beyond that: limit the number of attempts, don’t force fussy composition rules, but do check passwords against lists of leaked ones, and encourage a **second factor** (a code from an app). A detailed list of rules is in the OWASP authentication cheat sheet (the link is in the sources).
+
+## Tokens and JWT
+
+For API interfaces and systems made of many servers, a session is awkward: every server has to know about it. So **tokens** were invented. After sign-in the server issues a signed string that records who you are and until when it is valid, and keeps nothing afterwards. The best-known format is the **JWT** (JSON Web Token), which has three parts separated by dots: a header, the content and a signature.
+
+Two properties are worth grasping. First, a JWT is **signed but not encrypted**. The first two parts are just JSON in base64 encoding, and anyone can read them. The signature protects against *tampering*, not against *reading*, so no secrets go in a token. Second, a token is valid until it expires, and revoking it early is hard. So the lifetime is kept short, and the token is stored in an `HttpOnly` cookie. Check it on the diagram: read the contents of a token, swap the role and see what the server says:
+
+<AuthFlows mode="jwt" />
+
+<details>
+<summary>Check yourself: why can’t you put a password or a card number in a JWT, since it is signed?</summary>
+
+A signature doesn’t hide the contents, it only stops them being changed. Anyone who has the token can decode its first two parts.
+
+</details>
+
+## Signing in through a provider: OAuth
+
+Storing passwords is frightening and remembering ten of them is hard, so “sign in with…” appeared: **Google**, **Apple**, GitHub, and in some countries a government service such as GOV.UK One Login in the UK or Login.gov in the United States. In Russia the same role is played by Yandex ID, VK ID and the Gosuslugi portal. It all runs on the **OAuth 2.0** standard, or more exactly on **OpenID Connect**, which adds the question “who are you?” to it. (OAuth itself is about something else: it lets one service get limited access to another’s data with your consent, for example an app reading your calendar.)
+
+The idea is that **the password is typed only on the provider’s page**, and your site gets confirmation from the provider that the person signed in, and (with their permission) a name or an email. You don’t store a password, you don’t invent recovery, and you get the provider’s two-factor protection for free. The price is dependence on the provider and an important legal subtlety: the visitor’s data passes through a third-party operator, so this is processing of personal data, which has to be mentioned in the privacy notice.
+
+## Passkeys: signing in without a password
+
+The most modern protection is called a **passkey** and rests on the WebAuthn standard (FIDO2). At registration the device creates a **pair of keys**: the public key goes to the site, and the private key stays on the device and never leaves it. At sign-in the site sends a random string, and the device signs it with the private key, after you have confirmed yourself with a fingerprint, a face or the device’s code.
+
+The result: there is no password, so it can’t be spied on, guessed, stolen from a database (the server holds only public keys) or coaxed out on a fake site, because the signature is tied to the real address. Passkeys sync between devices through the password managers of Apple, Google and others. They are still unfamiliar to many people, and a fallback way to sign in is needed, but the future is theirs.
+
+Walk through the four ways step by step and see what can be stolen in each:
+
+<AuthFlows />
+
+## Authorization: roles and rights
+
+Once it is clear *who* has come, the question is what they may do. The simplest and most common method is **roles**. Each user is given a role (visitor, editor, owner), and each role a set of rights (read, change texts, delete, see enquiries). Hand out as little as possible: **the minimum needed for the work**.
+
+There is one main rule of authorization: **check on the server, on every request**. Hiding the “Delete” button from visitors is convenient, but it isn’t protection: a request can be sent without the button, from the console or from a program. If the server doesn’t check rights, the button protects nothing.
+
+## Privacy law and sign-in
+
+An email address and a name are personal data. In the EU the GDPR applies to them, and in the United Kingdom the UK GDPR and the Data Protection Act 2018. In short: you need a **lawful basis** for processing (consent is one; a contract or a legitimate interest can be others), a **privacy notice** that says what you collect and why, and a contract with each service that processes the data for you. When a provider such as Google or Apple takes part in signing in, say so in the notice, and if the provider is outside the UK or the EEA, the rules on international transfers apply. Several US states have comparable laws, such as California’s CCPA. For comparison, Russia’s law (152-FZ) also asks for consent and a policy, and in addition requires the first recording of Russian citizens’ data to be made on servers in Russia.
+
+This is general information, not legal advice. In the UK the Information Commissioner’s Office (ico.org.uk) explains the rules, and in the EU you can ask your national data protection authority; the European Data Protection Board (edpb.europa.eu) publishes shared guidance.
+
+## Practice
+
+You are on a site from the 2022 era. Before you think about how to build sign-in, decide whether it is needed. Ask yourself: what does a visitor do on my site (the main action from the brief), and must they be recognized to do it? For an enquiry through a form, most often not.
+
+If sign-in is needed even for the owner alone, describe three roles and what each may do, choose a way to sign in, and say how passwords are stored (or that there are none). And be sure to mention the law: an email address and a name are personal data (the GDPR), and signing in with Google or by SMS is processing of that data with third-party operators taking part. A lawful basis and a privacy notice are needed.
+
+## What was wrong before
+
+Passwords were stored as plain text, then as an unsalted MD5 hash (“enough that it can’t be read”), and at every leak millions of passwords were cracked within hours. “Secret questions” (“your mother’s maiden name”) were guessed or found on social networks. The session number was put right in the address of the page (`?sid=...`), and a forwarded link handed over somebody else’s account. Basic authentication sent the login and password in the open with every request. Password rules (“eight characters, a digit, a capital and a symbol”) made people invent weak and repeated passwords.
+
+Today’s advice is the opposite: long passwords without fussy rules, a check against lists of leaked ones, a slow hash with a salt, a second factor, and better still passkeys and signing in through a provider. The best solution is not to store passwords at all.
