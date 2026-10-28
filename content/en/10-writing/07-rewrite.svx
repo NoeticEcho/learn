@@ -1,0 +1,288 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/10-writing/07-rewrite.svx. */
+	export const metadata = {
+		id: '10-writing/07-rewrite',
+		part: 10,
+		order: 7,
+		title: 'Editing: a biography before and after',
+		definition: 'Editing is reworking a text in passes: the point first, facts instead of judgments, structure, tone and what is allowed. So a biography becomes an About page.',
+		summary:
+			'You’ll apply every technique of the part at once: take a long, self-describing biography and turn it into an About page that is read, believed and leads to action. Afterwards you have an About page and a before-and-after pair with a note on what was changed and why.',
+		minutes: 25,
+		teaches: ['texts-rewrite'],
+		requires: ['texts-headlines', 'texts-expert-text'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'Biography', caption: 'Before', say: 'A greeting, a childhood, thank-yous. Who she is and how she helps, the text doesn’t say.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'point|facts|structure|tone', say: 'Edit in passes, each through one lens: the point first, facts, structure, tone. At the end, check what is allowed.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'About', caption: 'After', say: 'Keep the before-and-after pair with a note on what changed and why. Then editing stops being a matter of taste.' }
+			]
+		},
+		practice: {
+			id: 'about-rewrite',
+			title: 'An About page: before and after',
+			task: 'The “Before” note holds your biography at its weakest. Rewrite it in five passes on the page #about. Pass 1, the point first: in the paragraph with the class lead, name yourself and say what you do and who you help. Pass 2, facts: years, documents and length of practice instead of judgments. Pass 3, structure: at least three h2 subheadings, short paragraphs, each on its own line of the file, and the proofs from the brief as a list. Pass 4, tone: it must sound the way the brief says. Pass 5, what is allowed: no guarantees, superlatives or empty judgments. The link to the main action (an a with the class cta, in a paragraph of its own) comes no later than after three paragraphs. In the note “What and why” write three changes and the reason for each. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <article id="about">\n      <h1>About me</h1>\n      <p class="lead">…</p>\n      <p class="cta-line"><a class="cta" href="#contacts">…</a></p>\n    </article>\n\n    <aside class="note" data-scaffold id="before">\n      <h2>Before</h2>\n      <p>Welcome to my page! My name is {{name}}, and at this point in time I am a {{profession}}. I have worked for many years in {{city}} and am a true professional in my field. {{who}}. I really love my work, and I always try to find an individual approach to every client: {{forWhom}}. I carry out the provision of quality services at a high level. {{#each proofs}}I hold: {{title}}. {{/each}}I have a wealth of experience and a large number of diplomas and certificates. In my free time I like reading and walking. If you have any questions, do not hesitate to contact me, I am always happy to help!</p>\n    </aside>\n\n    <aside class="note" data-scaffold id="changes">\n      <h2>What and why</h2>\n      <ol>\n        <li>…</li>\n        <li>…</li>\n        <li>…</li>\n      </ol>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <article id="about">\n      <h1>{{name}}: about me</h1>\n      <p class="lead">{{name}}: {{profession}}. I work in {{city}} and help the people who need it: {{forWhom}}.</p>\n      <h2>What I do</h2>\n      <p>{{who}}. I start by studying the documents, and I give the time and the price before work begins.</p>\n      <p class="cta-line"><a class="cta" href="#contacts">{{mainAction.label}}</a></p>\n      <h2>What backs it up</h2>\n      <ul>\n        {{#each proofs}}<li>{{title}}</li>\n        {{/each}}\n      </ul>\n      <h2>How I work</h2>\n      <p>First I study the documents and the task, then I give the time and the price, then I do the work and explain the result.</p>\n      <h2>What I don’t promise</h2>\n      <p>The outcome depends on the documents and on the decisions of other people. I promise a careful analysis and an honest answer.</p>\n    </article>\n\n    <aside class="note" data-scaffold id="before">\n      <h2>Before</h2>\n      <p>Welcome to my page! My name is {{name}}, and at this point in time I am a {{profession}}. I have worked for many years in {{city}} and am a true professional in my field. {{who}}. I really love my work, and I always try to find an individual approach to every client: {{forWhom}}. I carry out the provision of quality services at a high level. {{#each proofs}}I hold: {{title}}. {{/each}}I have a wealth of experience and a large number of diplomas and certificates. In my free time I like reading and walking. If you have any questions, do not hesitate to contact me, I am always happy to help!</p>\n    </aside>\n\n    <aside class="note" data-scaffold id="changes">\n      <h2>What and why</h2>\n      <ol>\n        <li>The main point moved into the first paragraph, so you can see who I am and how I help before scrolling.</li>\n        <li>Judgments replaced by documents from the brief, because a document can be checked and a judgment can’t.</li>\n        <li>A section on what I don’t promise was added, so as not to create expectations I won’t meet.</li>\n      </ol>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#about', matches: '^[^…]*$' },
+				{ id: 'no-blanks-changes', kind: 'text', selector: '#changes', matches: '^[^…]*$' },
+				{ id: 'lead-name', kind: 'field', selector: '#about .lead', field: 'name' },
+				{ id: 'lead-length', kind: 'text', selector: '#about .lead', matches: '^\\s*\\S+(?:\\s+\\S+){9,}' },
+				{ id: 'headings', kind: 'count', selector: '#about h2', min: 3 },
+				{ id: 'cta-early', kind: 'count', selector: '#about > p:nth-of-type(-n+4) > a.cta', min: 1 },
+				{ id: 'cta-action', kind: 'field', selector: '#about a.cta', field: 'mainAction.label' },
+				{ id: 'proofs-listed', kind: 'field', selector: '#about li', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{
+					id: 'no-stop-words',
+					kind: 'text',
+					selector: '#about',
+					matches:
+						'^(?![\\s\\S]*\\b(?:[Bb]est|[Hh]igh-quality|[Qq]uality|[Uu]nique|[Pp]ersonali[sz]ed|[Ii]ndividual approach|[Hh]ighly qualified|[Ww]ide range|[Ww]ealth of experience|[Tt]eam of professionals|[Rr]eliable|[Uu]tili[sz]e|[Ll]everage|[Ii]n order to|[Pp]ursuant to|[Ii]n accordance with|[Cc]arry out|[Cc]arries out|[Pp]rovision of|[Pp]erformance of)\\b)[\\s\\S]*\\S'
+				},
+				{
+					id: 'no-guarantees',
+					kind: 'text',
+					selector: '#about',
+					matches: '^(?![\\s\\S]*(?:[Gg]uarantee|[Nn]umber one|No\\. ?1|#1|100 ?%|[Ww]e(?:’|\')?ll win|[Ww]e will win|[Rr]isk-free|[Uu]nmatched|[Ss]econd to none|[Nn]ever let (?:anyone|a client) down|[Nn]ever failed))[\\s\\S]*\\S',
+					when: { brief: 'kind', equals: 'expert' }
+				},
+				{ id: 'no-wall', kind: 'text', selector: '#about', matches: '^(?![\\s\\S]*[^\\n]{450})[\\s\\S]*\\S' },
+				{ id: 'before-kept', kind: 'exists', selector: '#before' },
+				{ id: 'changes', kind: 'count', selector: '#changes li', min: 3 },
+				{ id: 'changes-reasons', kind: 'text', selector: '#changes li', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the editing passes in the order in which they are convenient to do',
+				items: [
+					'The point first: who you are and how you help',
+					'Facts instead of judgments: years, documents, numbers',
+					'Structure: subheadings, short paragraphs, lists',
+					'Tone: as in the brief, one voice with the whole site',
+					'What is allowed: remove promises and superlatives'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What belongs in the first paragraph of an About page?',
+				options: [
+					'Who you are, what you do and who you help',
+					'The story of your childhood and your hobbies',
+					'A greeting and thanks for the visit'
+				],
+				answer: 0,
+				why: [
+					'Yes. A reader decides whether to read on from the first lines. Answer their question “is this about me?” in them.',
+					'No: childhood can be told lower down, and only if it works for trust.',
+					'No: “welcome” tells nothing. The reader already knows they are on your site.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which things in an expert’s biography should be deleted or replaced by a fact?',
+				options: [
+					'“Welcome to my page!”',
+					'“I studied land surveying and graduated in 2006”',
+					'“I have never let anyone down”',
+					'“Licensed surveyor, license no. 00-00-00”',
+					'“I am a highly qualified specialist”'
+				],
+				answer: [0, 2, 4],
+				why: [
+					'Yes: an empty greeting.',
+					'No: this is a fact with a year, and it stays.',
+					'Yes: a judgment nobody can check, and it also sounds like a promise of results.',
+					'No: a document with a number is exactly what is needed.',
+					'Yes: a judgment with no fact; replace it with a list of documents and years.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each editing pass with a change',
+				pairs: [
+					['The point first', 'The first paragraph now says who you are and how you help'],
+					['Facts instead of judgments', '“Highly qualified specialist” was replaced with documents and years'],
+					['Structure', 'Subheadings, a list of documents and short paragraphs appeared'],
+					['What is allowed', '“Never let anyone down” was deleted and “what I don’t promise” added']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'When does a hobby stay in a biography?',
+				options: [
+					'When it works for trust in the project: a photographer’s love of hiking, a coffee shop’s story of its place',
+					'Always: it is more human',
+					'Never'
+				],
+				answer: 0,
+				why: [
+					'Yes. It isn’t taste that decides but use to the reader. A hobby that shows the character of the project stays; an incidental one goes.',
+					'No: “always” lengthens the page and blurs the main point.',
+					'No: there are projects where the personal is the trust.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why keep the before-and-after pair with a note on the changes?',
+				options: [
+					'You can see what changed and why, and next time the edits are made on purpose',
+					'To decorate the gallery',
+					'To be able to go back to the old text'
+				],
+				answer: 0,
+				why: [
+					'Yes. The note turns an edit from a matter of taste into a matter of argument. You can show it to a client, an editor or yourself in six months.',
+					'No: a gallery shows a site, not drafts.',
+					'No: the old text isn’t needed, but understanding why it was bad is.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'texts-five-passes',
+				front: 'Name the five editing passes',
+				back: 'The point first; facts instead of judgments; structure; tone as in the brief; a check of what is allowed.'
+			},
+			{
+				id: 'texts-about-first',
+				front: 'What goes in the first paragraph of an About page?',
+				back: 'Who you are, what you do and who you help. Leave the greeting and the life story from childhood for later, or drop them.'
+			},
+			{
+				id: 'texts-about-proofs',
+				front: 'What does every statement about your merits rest on?',
+				back: 'A document or fact from the brief: a number, a year, an entry in a register. A judgment with nothing under it is deleted.'
+			},
+			{
+				id: 'texts-cta-early',
+				front: 'Where does the call to action go on an About page?',
+				back: 'No later than after three paragraphs: once a person has decided you suit them, the button should be near.'
+			},
+			{
+				id: 'texts-before-after',
+				front: 'What is the “what and why” note for?',
+				back: 'It turns an edit into an argument: you can see which technique was used and why, and you can repeat it in the next text.'
+			}
+		],
+		sources: [
+			{ title: 'Writing for GOV.UK', url: 'https://www.gov.uk/guidance/content-design/writing-for-gov-uk', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Content design: planning, writing and managing content (GOV.UK)', url: 'https://www.gov.uk/guidance/content-design', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'How Users Read on the Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/how-users-read-on-the-web/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Federal Plain Language Guidelines (plainlanguage.gov)', url: 'https://www.plainlanguage.gov/guidelines/', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Максим Ильяхов: сайт автора («Пиши, сокращай», «Главред»)', url: 'https://maximilyahov.ru/', licence: 'proprietary-link', kind: 'book', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is the summing-up of the part: you take a weak biography and apply everything you’ve learned, one pass after another.',
+			hints: [
+				'First write only the lead paragraph: who you are, what you do, who you help. The rest later.',
+				'Name the h2 subheadings by their content: “What I do”, “What backs it up”, “How I work”. Take the list of proofs from the brief.',
+				'Put the call to action in a p of its own with the class cta-line, no further than the fourth paragraph of the article. Move it up if it ended up at the bottom.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is left in the About page. Replace it with your own words.',
+				'no-blanks-changes': 'Ellipses are left in the note “What and why”. Write three changes.',
+				'lead-name': 'The first paragraph (lead) must have your name or the project’s name, as in the brief.',
+				'lead-length': 'The first paragraph is too short. It needs at least ten words: who you are, what you do, who you help.',
+				headings: 'You need at least three h2 subheadings.',
+				'cta-early': 'The a link with the class cta must stand in a p of its own among the first four paragraphs of the article.',
+				'cta-action': 'The link must name the main action from the brief in the same words.',
+				'proofs-listed': 'Each proof from the brief must stand in a list item li of its own on the page.',
+				'no-stop-words': 'The text still has judgments or officialese: “best”, “quality”, “unique”, “individual approach”, “highly qualified”, “carry out”, “provision of”. Replace them with facts.',
+				'no-guarantees': 'The text still has promises or superlatives: “guarantee”, “100%”, “we’ll win”, “never let anyone down”. For your profession that is risky.',
+				'no-wall': 'Somewhere on the page a paragraph is too long. Break it up, each paragraph on its own line of the file.',
+				'before-kept': 'The “Before” note is gone. Put it back: without it there is no before-and-after pair.',
+				changes: 'The note “What and why” needs three changes, each in its own li.',
+				'changes-reasons': 'Describe at least one change in more detail: what you changed and why, in at least five words.'
+			},
+			outro: 'You have an About page and a before-and-after pair. The part on writing for the web is done: the page can be scanned, it can be believed, and it leads to action.'
+		},
+		say: { CTA: 'C T A' }
+	};
+</script>
+
+<script>
+	import BioSlider from '../../diagrams/BioSlider.svelte';
+</script>
+
+## Everything together, on one text
+
+For six lessons you learned one thing at a time: reading as a visitor, clearing noise out of a text, putting the main point first, writing for forms, holding a tone and staying within the law. Now we put it all together in one exercise: take a bad biography and turn it into an About page you can be proud of. In the practice the “Before” note builds the biography in its weakest form from the fields of your brief. And if you have a real one, put its data in the brief, and that is what you will edit.
+
+The About page is one of the most-read pages on a site, and one of the worst written. The author is writing about themselves, afraid of boasting and of being dull, and two kinds of text result: “Welcome, my name is…” with a form-style CV, and “I am a top-class professional” with judgments. Neither works for the reader, who has come to find out **whether this person can help them in particular, and whether they can be trusted**.
+
+A good About page answers two questions: “who are you and how are you useful to me?” and “how will I know you can be trusted?” Everything else, favorite color, childhood, hometown, stays only if it helps answer one of those two.
+
+## Five passes
+
+It’s better to edit not “by inspiration” but in passes. In each you look at the text through one lens. That way nothing is forgotten, and the edits of one pass don’t get in the way of the others.
+
+1. **The point first** (lesson 3). Find in the text whatever answers “who, what they do, how they’re useful” and put it in the first paragraph. Whatever came before it (“welcome”, “my name is”) goes or gets shorter.
+2. **Facts instead of judgments** (lesson 2). Find the judgments (“highly qualified”, “wealth of experience”) and ask of each: what stands behind it? Replace it with years, documents, numbers. No fact: delete.
+3. **Structure** (lesson 1). Break the text into subheadings, short paragraphs and lists. Name subheadings by their content. Put the proofs (documents, memberships) in a list.
+4. **Tone** (lesson 5). Check whether the page sounds as the brief says and is in one voice with the whole site. “I’m always happy to help!” in a formal project sounds like a stranger’s voice.
+5. **What is allowed** (lesson 6). Go through every statement: can it be checked? Does it sound like a guarantee or a superlative? Does it name clients? For an expert this is the strictest pass.
+
+See how it looks in an example with the invented Kate Alder. Drag the slider: at each step the text changes, and below are the number of words and the number of words marked by the noise dictionary. Notice that the words don’t necessarily get fewer, they become different.
+
+<BioSlider />
+
+<details>
+<summary>Check yourself: why is it better to edit in passes than all at once?</summary>
+
+In each pass you look through one lens and miss nothing. The edits of one pass don’t interfere with the others, and the order makes sure you don’t polish what you’ll delete later.
+
+</details>
+
+## What stays and what goes
+
+The hardest thing in editing is deciding what to cross out. One question helps: **does this work toward the answer to “who are you and can you be trusted”?**
+
+- **Greetings and thank-yous.** Go. The reader already knows where they are.
+- **A tale of childhood.** Goes, unless it explains why you work as you do. Sometimes it does (“I loved maps as a child, and today I measure boundaries”), and then one sentence stays.
+- **Education and length of practice.** Stay as facts with years. “I studied land surveying and graduated in 2006” works; “I have a higher education” doesn’t.
+- **Hobbies and interests.** The project decides. For a coffee shop, a photographer, a club, the personal is the trust. For an expert in land disputes it usually adds nothing.
+- **Awards and thanks.** Stay if they can be checked: the name, the year, who gave it.
+- **Judgments with nothing under them.** Go. With something under them they become facts.
+- **Promises and “never let anyone down”.** Go. In their place you can honestly write what you don’t promise.
+
+The last item is unexpected, but it does the most for trust. A section “What I don’t promise” (or “What the result depends on”) tells the reader: this is a person who knows their limits. For an expert and a lawyer it is also protection: you haven’t raised expectations you can’t meet.
+
+<details>
+<summary>Check yourself: what question decides whether a phrase stays in a biography?</summary>
+
+Whether the phrase works toward the answer to “who are you, how are you useful, and can you be trusted”. If not, it goes.
+
+</details>
+
+## The call, and the before-and-after pair
+
+An About page doesn’t finish the job, it leads up to it. If a person has read that you suit them, the action button should be close: **no later than after three paragraphs**. Otherwise they finish reading, think “good”, and close the tab. Don’t hide the button at the very end, and don’t repeat it after every paragraph: an early call and one more at the end, if the page is long, are enough.
+
+And keep the before-and-after pair with a note on **what changed and why**. It isn’t decoration. The note turns an edit from a matter of taste into a matter of argument: “took out the judgment because it can’t be checked; added a document because it can”. In six months you won’t remember why the text is built as it is. And the pair will be useful in later parts: in the lessons on stories and on metrics you will compare versions of a text.
+
+When you finish, your project will have: an informative first screen (lesson 1), a text without noise (lesson 2), an honest headline and description for search (lesson 3), clear microcopy for the form (lesson 4), a recorded voice (lesson 5), a draft notice and proofs with sources (lesson 6) and an About page that gathers it all (lesson 7). That is the base on which the copywriting formulas of the next part will rest.
+
+## Practice
+
+The “Before” note holds your biography at its weakest. Rewrite it on the page `#about` in five passes.
+
+1. **The point first.** In the paragraph `lead`, name yourself and say what you do and who you help.
+2. **Facts.** Years, documents and length of practice instead of judgments.
+3. **Structure.** At least three `h2` subheadings; short paragraphs, each on its own line of the file; the proofs from the brief as a list.
+4. **Tone.** The page must sound as the brief says, in your voice.
+5. **What is allowed.** No guarantees, superlatives or empty judgments.
+
+The link to the main action (an `a` with the class `cta`, in a paragraph of its own) comes no later than after three paragraphs. And in the note “What and why” write three changes and the reason for each.
+
+The check looks at form: the first paragraph, the subheadings, the early link, the proofs as a list, and the absence of typical judgments and promises. Whether the page is good in substance is for you to decide. Read it aloud and ask yourself: would I believe it if I were a stranger from “for whom”?
