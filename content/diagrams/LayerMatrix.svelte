@@ -6,41 +6,78 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick as byLocale } from '#lib/i18n/index.ts';
 
-	const layers = ['Структура', 'Поведение', 'Доступность', 'Вид'];
-	type Row = { id: string; name: string; gives: [boolean, boolean, boolean, boolean]; note: string; price: string };
+	// The diagram's words, one table per edition (docs/content-plan/README.md, «English edition»).
+	const W = byLocale({
+		ru: {
+			layers: ['Структура', 'Поведение', 'Доступность', 'Вид'],
+			rows: {
+				native: ['Обычный HTML (dialog, details)', 'Браузер знает, как открыть и закрыть, как ловить фокус и что сказать диктору. Вид пишете вы.', 'Поведение ограничено тем, что умеет браузер.'],
+				headless: ['Безстилевые компоненты (Radix, React Aria, Headless UI)', 'Берёте сложное поведение и доступность готовыми, вид пишете сами. Такие компоненты называют «безголовыми».', 'Нужен фреймворк (чаще React) и привычка собирать вид самому.'],
+				copy: ['Копируемый код (shadcn/ui)', 'Код компонента попадает в ваш репозиторий вместе с начальным видом. Он ваш: меняйте как угодно.', 'Обновлять и чинить скопированное придётся вам.'],
+				styled: ['Готовая система (Polaris, Primer, Material UI)', 'Всё готово и согласовано, включая вид. Быстрее всего начать.', 'Вид и устройство навязаны: чужой характер, зависимость от версий.'],
+				utility: ['Утилиты (Tailwind CSS)', 'Даёт только словарь вида: короткие классы из ваших токенов. Структуру, поведение и доступность пишете сами.', 'Ответственность за доступность на вас, а разметка пухнет от классов.']
+			} as Record<string, string[]>,
+			caption: 'Кто что делает за вас: четыре слоя любой детали интерфейса',
+			approach: 'Подход',
+			table: 'Что даёт выбранный подход',
+			done: 'готово',
+			yours: 'пишете вы',
+			price: 'Цена выбора.'
+		},
+		en: {
+			layers: ['Structure', 'Behavior', 'Accessibility', 'Look'],
+			rows: {
+				native: ['Plain HTML (dialog, details)', 'The browser knows how to open and close, how to trap focus and what to tell a screen reader. You write the look.', 'The behavior is limited to what the browser can do.'],
+				headless: ['Unstyled components (Radix, React Aria, Headless UI)', 'You take complex behavior and accessibility ready-made and write the look yourself. Such components are called “headless”.', 'You need a framework (most often React) and the habit of building the look yourself.'],
+				copy: ['Copied code (shadcn/ui)', 'The component’s code lands in your repository along with a starting look. It is yours: change it however you like.', 'You will have to update and fix what you copied.'],
+				styled: ['A ready-made system (Polaris, Primer, Material UI)', 'Everything is ready and consistent, the look included. The quickest way to start.', 'The look and the structure are imposed: someone else’s character, and a dependence on versions.'],
+				utility: ['Utilities (Tailwind CSS)', 'Gives only a vocabulary for the look: short classes from your tokens. You write the structure, behavior and accessibility yourself.', 'Accessibility is your responsibility, and the markup swells with classes.']
+			} as Record<string, string[]>,
+			caption: 'Who does what for you: the four layers of any interface part',
+			approach: 'Approach',
+			table: 'What the chosen approach gives',
+			done: 'ready',
+			yours: 'you write it',
+			price: 'The price of the choice.'
+		}
+	});
+	const layers = W.layers;
+	type Row = { id: string; gives: [boolean, boolean, boolean, boolean] };
 	const rows: Row[] = [
-		{ id: 'native', name: 'Обычный HTML (dialog, details)', gives: [true, true, true, false], note: 'Браузер знает, как открыть и закрыть, как ловить фокус и что сказать диктору. Вид пишете вы.', price: 'Поведение ограничено тем, что умеет браузер.' },
-		{ id: 'headless', name: 'Безстилевые компоненты (Radix, React Aria, Headless UI)', gives: [true, true, true, false], note: 'Берёте сложное поведение и доступность готовыми, вид пишете сами. Такие компоненты называют «безголовыми».', price: 'Нужен фреймворк (чаще React) и привычка собирать вид самому.' },
-		{ id: 'copy', name: 'Копируемый код (shadcn/ui)', gives: [true, true, true, true], note: 'Код компонента попадает в ваш репозиторий вместе с начальным видом. Он ваш: меняйте как угодно.', price: 'Обновлять и чинить скопированное придётся вам.' },
-		{ id: 'styled', name: 'Готовая система (Polaris, Primer, Material UI)', gives: [true, true, true, true], note: 'Всё готово и согласовано, включая вид. Быстрее всего начать.', price: 'Вид и устройство навязаны: чужой характер, зависимость от версий.' },
-		{ id: 'utility', name: 'Утилиты (Tailwind CSS)', gives: [false, false, false, true], note: 'Даёт только словарь вида: короткие классы из ваших токенов. Структуру, поведение и доступность пишете сами.', price: 'Ответственность за доступность на вас, а разметка пухнет от классов.' }
+		{ id: 'native', gives: [true, true, true, false] },
+		{ id: 'headless', gives: [true, true, true, false] },
+		{ id: 'copy', gives: [true, true, true, true] },
+		{ id: 'styled', gives: [true, true, true, true] },
+		{ id: 'utility', gives: [false, false, false, true] }
 	];
-	let pick = $state('native');
-	const cur = $derived(rows.find((r) => r.id === pick)!);
+	let picked = $state('native');
+	const cur = $derived(rows.find((r) => r.id === picked)!);
+	const text = (id: string) => W.rows[id];
 </script>
 
 <figure class="dg">
-	<figcaption>Кто что делает за вас: четыре слоя любой детали интерфейса</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Подход">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.approach}>
 		{#each rows as r (r.id)}
-			<button type="button" aria-pressed={pick === r.id} onclick={() => (pick = r.id)}>{r.name}</button>
+			<button type="button" aria-pressed={picked === r.id} onclick={() => (picked = r.id)}>{text(r.id)[0]}</button>
 		{/each}
 	</div>
-	<table class="tbl" aria-label="Что даёт выбранный подход">
+	<table class="tbl" aria-label={W.table}>
 		<thead>
 			<tr>{#each layers as l (l)}<th>{l}</th>{/each}</tr>
 		</thead>
 		<tbody>
 			<tr>
 				{#each cur.gives as g, i (i)}
-					<td class:yes={g}>{g ? 'готово' : 'пишете вы'}</td>
+					<td class:yes={g}>{g ? W.done : W.yours}</td>
 				{/each}
 			</tr>
 		</tbody>
 	</table>
-	<p class="dg-out" aria-live="polite"><strong>{cur.name}.</strong> {cur.note}</p>
-	<p class="dg-out"><strong>Цена выбора.</strong> {cur.price}</p>
+	<p class="dg-out" aria-live="polite"><strong>{text(cur.id)[0]}.</strong> {text(cur.id)[1]}</p>
+	<p class="dg-out"><strong>{W.price}</strong> {text(cur.id)[2]}</p>
 </figure>
 
 <style>

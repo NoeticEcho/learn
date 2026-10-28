@@ -126,7 +126,7 @@ export const SYSTEMS_EN: Record<string, Partial<System>> = {
 		components: 'There are no ready components in the core: you build them from utilities yourself.',
 		access: 'The responsibility is the author’s: utilities don’t know whether a page is accessible.',
 		open: 'Open code; a popular way to style a project without writing styles of your own.',
-		take: 'The idea of a limited set of values with short names: you can’t write “17 pixels”, you can write “p-4”.',
+		take: 'The idea of a limited set of values with short names: by default you write “p-4” instead of “17 pixels” (the escape hatch in brackets, p-[17px], is treated as an exception).',
 		avoid: 'When markup with dozens of classes scares you, or when you must hand the markup to someone who knows only CSS.'
 	},
 	gravity: {

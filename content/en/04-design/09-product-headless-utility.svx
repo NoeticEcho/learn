@@ -1,0 +1,348 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/09-product-headless-utility.svx. */
+	export const metadata = {
+		id: '04-design/09-product-headless-utility',
+		part: 4,
+		order: 9,
+		title: 'Product and “headless” systems: Polaris, Primer, Radix, shadcn/ui, Tailwind',
+		definition: 'Headless components give an interface part behavior and accessibility but no styling, as in Radix. Polaris, Primer, shadcn/ui and Tailwind take other layers.',
+		summary:
+			'You’ll see that an interface part has four layers (structure, behavior, accessibility, look) and that different systems take on different numbers of them. Afterwards you can explain how Radix differs from Polaris, and build utility classes from your own tokens, as in Tailwind.',
+		minutes: 30,
+		teaches: ['design-ds-product-and-headless'],
+		requires: ['design-reading-a-design-system', 'css-custom-properties'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'behavior|accessibility|look', caption: 'A modal window', say: 'A beginner thinks of the look, but the hard parts are behavior and accessibility. Systems take on different layers.' },
+				{ mood: 'hint', side: 'right', prop: 'cards', label: 'Radix', caption: 'Headless', say: 'A headless component gives behavior and accessibility with no styling. The head, meaning the look, you write yourself.' },
+				{ mood: 'explain', prop: 'editor', label: 'p-4 text-lg', caption: 'Tailwind', say: 'Utilities cover only the look, from a vocabulary. “17 pixels” goes in brackets, as an exception: that is discipline.' },
+				{ mood: 'cheer', side: 'right', prop: 'browser', label: 'dialog', say: 'Ask the browser first: details, dialog and popover already do this themselves. If they are enough, you need no library.' }
+			]
+		},
+		practice: {
+			id: 'design-utilities',
+			title: 'Utility classes from your tokens',
+			task: 'styles.css already has tokens (spacing, radius, font sizes, accent colors). Make a vocabulary of utilities from them, as in Tailwind, and rewrite the page. 1) Define eight classes: .flex, .gap-4, .p-4, .rounded, .text-lg, .text-sm, .bg-accent and .text-on-accent, each through the tokens in :root. 2) Rewrite the cards for your project’s sections using only these classes (remove the class .card): .p-4, .rounded, .bg-accent and .text-on-accent on every card, and .text-lg on its heading. 3) The container of the cards gets .flex and .gap-4. The style attribute must not be used in the markup.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <div class="cards">
+        {{#each sections}}<section class="card"><h2>{{.}}</h2><p>The text of this section goes here.</p></section>
+        {{/each}}
+      </div>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: tokens and the look */
+:root {
+  --space-4: 16px;
+  --radius: 8px;
+  --fs-sm: 0.8rem;
+  --fs-lg: 1.25rem;
+  --accent: #0b5cad;
+  --on-accent: #ffffff;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+/* How it was before utilities: everything in one rule. */
+.cards {
+  display: flex;
+  gap: 16px;
+}
+.card {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #0b5cad;
+  color: #ffffff;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <div class="flex gap-4">
+        {{#each sections}}<section class="p-4 rounded bg-accent text-on-accent"><h2 class="text-lg">{{.}}</h2><p class="text-sm">The text of this section goes here.</p></section>
+        {{/each}}
+      </div>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: tokens and the look */
+:root {
+  --space-4: 16px;
+  --radius: 8px;
+  --fs-sm: 0.8rem;
+  --fs-lg: 1.25rem;
+  --accent: #0b5cad;
+  --on-accent: #ffffff;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+/* Utilities: one property per class, values from the tokens. */
+.flex {
+  display: flex;
+}
+.gap-4 {
+  gap: var(--space-4);
+}
+.p-4 {
+  padding: var(--space-4);
+}
+.rounded {
+  border-radius: var(--radius);
+}
+.text-lg {
+  font-size: var(--fs-lg);
+}
+.text-sm {
+  font-size: var(--fs-sm);
+}
+.bg-accent {
+  background-color: var(--accent);
+}
+.text-on-accent {
+  color: var(--on-accent);
+}
+`
+			},
+			checks: [
+				{ id: 'flex', kind: 'style', selector: '.flex', prop: 'display', equals: 'flex' },
+				{ id: 'gap', kind: 'style', selector: '.gap-4', prop: 'gap', matches: '^var\\(--space-4\\)$|^16px(\\s+16px)?$' },
+				{ id: 'pad', kind: 'style', selector: '.p-4', prop: 'padding', matches: '^var\\(--space-4\\)$|^16px$|^0$' },
+				{ id: 'rounded', kind: 'style', selector: '.rounded', prop: 'border-radius', matches: '^var\\(--radius\\)$|^8px$' },
+				{ id: 'text-lg', kind: 'style', selector: '.text-lg', prop: 'font-size', matches: '^var\\(--fs-lg\\)$|^20px$' },
+				{ id: 'text-sm', kind: 'style', selector: '.text-sm', prop: 'font-size', matches: '^var\\(--fs-sm\\)$|^12\\.8px$' },
+				{ id: 'bg-accent', kind: 'style', selector: '.bg-accent', prop: 'background-color', matches: '^var\\(--accent\\)$|^rgb\\(11, 92, 173\\)$' },
+				{ id: 'on-accent', kind: 'style', selector: '.text-on-accent', prop: 'color', matches: '^var\\(--on-accent\\)$|^rgb\\(255, 255, 255\\)$' },
+				{ id: 'cards-use', kind: 'count', selector: '.p-4.rounded.bg-accent.text-on-accent', min: { brief: 'sections' } },
+				{ id: 'no-card', kind: 'count', selector: '.card', max: 0 },
+				{ id: 'no-inline', kind: 'count', selector: '[style]', max: 0 }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each approach with what it takes on',
+				pairs: [
+					['A ready-made system (Polaris, Primer)', 'structure, behavior, accessibility and look'],
+					['Unstyled components (Radix)', 'structure, behavior and accessibility, but not the look'],
+					['Copied code (shadcn/ui)', 'the component’s code with a starting look, which then belongs to you'],
+					['Utilities (Tailwind CSS)', 'only a vocabulary for the look: short classes from tokens']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does a “headless” component mean?',
+				options: [
+					'A component that knows how to behave and be accessible but has no styling of its own',
+					'A component with no heading',
+					'A component that doesn’t work without the internet'
+				],
+				answer: 0,
+				why: [
+					'Yes. The hard parts (moving focus, closing on Esc, ARIA) are ready, and you write the look.',
+					'No: a heading has nothing to do with it.',
+					'No: the internet has nothing to do with it.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can be done with plain HTML and no library?',
+				options: ['A disclosure block with details and summary', 'A modal window with the dialog element', 'A popover with the popover attribute', 'A date-range calendar in any language, with no line of code'],
+				answer: [0, 1, 2],
+				why: ['Yes: the browser opens and closes it itself.', 'Yes: dialog can hold focus and close on Esc.', 'Yes: the popover attribute gives a layer that pops up.', 'No: complex widgets need a library or a script.']
+			},
+			{
+				type: 'single',
+				prompt: 'What is the main difference between shadcn/ui and an ordinary library?',
+				options: [
+					'The components’ code is copied into your project and you own it, but you also fix it yourself',
+					'It works only in the Chrome browser',
+					'It is paid'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is “not a component library, but how you build your own”: you are free to change it, but you make the updates yourself.',
+					'No: there is no browser restriction.',
+					'No: the source code is open.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the danger of pure utility classes?',
+				options: [
+					'The responsibility for structure, behavior and accessibility is the author’s, and the markup swells with classes',
+					'They don’t work with variables',
+					'They make the page slow'
+				],
+				answer: 0,
+				why: [
+					'Yes. Utilities don’t know whether a page is accessible: you have to check that yourself.',
+					'No: they are in fact based on variables, on tokens.',
+					'No: speed is usually good, and the unused styles are cut out in the build.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the approaches by how much work is left to you, from least to most',
+				items: ['A ready-made system (Polaris, Primer)', 'Copied code (shadcn/ui)', 'Unstyled components (Radix)', 'Utilities (Tailwind CSS)']
+			}
+		],
+		cards: [
+			{ id: 'design-layers-four', front: 'What four layers does an interface part have?', back: 'Structure (the markup), behavior (how it opens, how focus moves), accessibility (ARIA, keyboard) and look. Approaches differ in how many layers they take on.' },
+			{ id: 'design-headless', front: 'What are “headless” components?', back: 'Structure, behavior and accessibility are ready, and there is no styling: you write the look. Examples: Radix, React Aria, Headless UI.' },
+			{ id: 'design-shadcn', front: 'How is shadcn/ui different from a library?', back: 'The components’ code is copied into your project by a command and becomes yours. You are free to change it, but you fix and update it yourself.' },
+			{ id: 'design-tailwind', front: 'What is Tailwind as a system?', back: 'The tokens of the theme produce short classes (p-4, text-lg, bg-blue-600). By default you don’t write “17 pixels”: you take a value from the vocabulary, and the escape hatch in brackets counts as an exception.' },
+			{ id: 'design-native', front: 'What does plain HTML do in place of a library?', back: 'details opens a block, dialog holds focus and closes on Esc, the popover attribute gives a layer that pops up. First check whether a ready element exists.' }
+		],
+		sources: [
+			{ title: 'Shopify Polaris', url: 'https://shopify.dev/docs/api/polaris', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Primer (GitHub)', url: 'https://primer.style/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Radix Primitives', url: 'https://www.radix-ui.com/primitives', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'shadcn/ui: documentation', url: 'https://ui.shadcn.com/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Tailwind CSS: Theme variables', url: 'https://tailwindcss.com/docs/theme', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: '<dialog> (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now all the styling of the cards is written in one rule, .card. Let’s split it into utilities: small classes, each about one property, with values from the tokens.',
+			hints: [
+				'A utility is a rule of one property: .p-4 { padding: var(--space-4) }. Write all eight classes in styles.css.',
+				'In the markup, give a card the classes p-4 rounded bg-accent text-on-accent, and the heading inside it the class text-lg. Delete the class card.',
+				'Give the container of the cards (the old .cards) the classes flex gap-4. The old rules .cards and .card can go.'
+			],
+			mistakes: {
+				flex: 'You need a class .flex with display: flex, and it must be used in the markup.',
+				gap: '.gap-4 must have gap: var(--space-4). The class has to be applied to the container.',
+				pad: '.p-4 must have padding: var(--space-4). Apply it to the cards.',
+				rounded: '.rounded must have border-radius: var(--radius).',
+				'text-lg': '.text-lg must have font-size: var(--fs-lg). Apply it to the headings of the cards.',
+				'text-sm': '.text-sm must have font-size: var(--fs-sm). Apply it to the text of the card.',
+				'bg-accent': '.bg-accent must have background-color: var(--accent).',
+				'on-accent': '.text-on-accent must have color: var(--on-accent).',
+				'cards-use': 'Each card must have all four classes at once: p-4, rounded, bg-accent, text-on-accent.',
+				'no-card': 'The class card must disappear from the markup: the cards are now built from utilities.',
+				'no-inline': 'A style attribute is still in the markup. Move it into the utility classes.'
+			},
+			outro: 'You’ve built a vocabulary for the look from tokens. Notice that by default you can’t write “17 pixels”: you take a value from the vocabulary. That is the strength of the approach.'
+		},
+		say: { Polaris: 'polaris', Shopify: 'shop-ih-fy', Primer: 'primer', GitHub: 'git hub', Radix: 'radix', shadcn: 'shad C N', Tailwind: 'tailwind', React: 'react', ARIA: 'ah-ree-a', HTML: 'H T M L', CSS: 'C S S', headless: 'head-less', Esc: 'escape', dialog: 'dialog', popover: 'pop-over', details: 'details', CLI: 'C L I', Adobe: 'a-doh-bee' }
+	};
+</script>
+
+<script>
+	import LayerMatrix from '../../diagrams/LayerMatrix.svelte';
+	import SystemExplorer from '../../diagrams/SystemExplorer.svelte';
+</script>
+
+## An interface part, cut into layers
+
+Take a modal window. What does it need to be a good one?
+
+1. **Structure:** the markup of the window, a heading, a close button.
+2. **Behavior:** it opens on a press, closes on Esc and on a click outside it, keeps focus inside, and gives focus back to the button.
+3. **Accessibility:** a screen reader announces the window, and the background is not read out.
+4. **Look:** colors, corners, a shadow, an animation.
+
+A beginner thinks about the fourth, but the difficulties lie in the first three: they are hard to get right even by hand. That is why systems differ in **how many layers they take on**. Choose an approach on the diagram and see what is left for you.
+
+<LayerMatrix />
+
+<details>
+<summary>Check yourself: what four layers does an interface part have?</summary>
+
+Structure, behavior, accessibility and look.
+
+</details>
+
+## Product systems: Polaris and Primer
+
+**Polaris** is Shopify’s system for the interface of a shop’s admin, and **Primer** is GitHub’s system. Both are made for the company’s own products, and that is both their strength and their weakness.
+
+The strength: they answer in detail the question “how do you build working screens”: lists and details, tables, settings forms. The examples are visible and alive: millions of people use them.
+
+The weakness: outside their own platform they travel badly. Polaris now rests on web components for apps that are embedded in Shopify’s admin. And Primer at GitHub has two faces: Product UI for the interface of the service itself, and Brand UI together with a Brand toolkit for marketing pages. This is an instructive split: an “interface you work in” and a “page that persuades” have different needs for density and air, and the systems for them should be different, or at least have different modes. Primer calls its tokens “primitives”: color, spacing and typography.
+
+<SystemExplorer ids={['polaris', 'primer', 'radix', 'shadcn', 'tailwind']} />
+
+## Headless: Radix and its relatives
+
+**Radix Primitives** (a project of WorkOS) gives complex behaviors with no line of styling: an accordion, a dialog, a dropdown menu, tabs and others, each in its own package. Everything follows the WAI-ARIA guidelines, with keyboard control and focus management that are tested with screen readers. You write the look yourself, in CSS or in Tailwind.
+
+Radix has relatives: Adobe’s React Aria and Headless UI. The idea is the same: **do the hardest and most boring part (accessibility) once, and give it to everyone for free**, and leave the styling to the authors.
+
+But before a library, think about the platform. The browser can do a lot by itself: `details` opens a block, `dialog` holds focus and closes on Esc, the `popover` attribute gives a layer that pops up. All of these are already “headless” components, built into the language. If a task is solved by them, you need no library.
+
+## shadcn/ui: code you own
+
+**shadcn/ui** calls itself “not a component library”: the components are not installed as a package but copied by a command straight into your project as source code. You get both the behavior and a starting look, and you can change anything without waiting for another library’s release. You pay by making the updates and fixes yourself. It is an owner’s choice: “my code, my concern”. The source is open.
+
+## Tailwind: a system inside the markup
+
+**Tailwind CSS** turns the usual order upside down. Instead of a ready component you get a **vocabulary of short classes**, and they are built on the tokens of a theme: `p-4` is a spacing from the spacing scale, `text-lg` is a size from the type scale, `bg-blue-600` is a color from the palette. In Tailwind the theme is described by CSS variables, and each variable produces utility classes.
+
+The main property of such a system: **by default you don’t write “17 pixels”**, you take a value from the vocabulary. There is an escape hatch (a value in square brackets, `p-[17px]`), but it stands out in the markup and counts as an exception. That is the discipline of a design system, built into the very way of writing. The price: the markup grows classes, and accessibility is your responsibility. You already know tokens; in this lesson you will make a small vocabulary of utilities and see how it is built inside.
+
+<details>
+<summary>Check yourself: how is shadcn/ui different from a library?</summary>
+
+The components’ code is copied into your project and becomes yours: you are free to change it, but you will have to fix it yourself.
+
+</details>
+
+## How to choose
+
+A rough rule:
+- **You need it fast and without character** (an internal service): a ready-made system.
+- **You need a character of your own and complex widgets:** headless components or shadcn/ui.
+- **You need only the look by rules:** utilities.
+- **A simple site without complex widgets:** plain HTML, your own tokens and components.
+
+For your project it is almost certainly the last. But it is useful to know the others, because sites and builders that you will meet in the parts on AI are made from exactly these.
+
+## Practice
+
+Build a mini Tailwind from your project’s tokens: eight utility classes and a page built from them alone. Notice how the rule for the look moves from one place (“this is what a card looks like”) into words (“it has spacing 4, a radius and the accent”).
+
+## What was wrong with 2014
+
+In 2014 there was no limited vocabulary: everyone wrote sizes and colors as they liked, and pages drifted apart. Later it turned out that the constraints (“only these values are allowed”) were the most valuable thing in systems, and Tailwind, shadcn/ui and Radix are built on that discovery.
