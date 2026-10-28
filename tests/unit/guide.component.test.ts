@@ -31,3 +31,23 @@ it('model mode appears with a key, and names where the question goes', () => {
 	expect(screen.getByRole('textbox')).toBeTruthy();
 	expect(screen.getByText(/уйдёт только в Anthropic/)).toBeTruthy();
 });
+
+it('names the mascot in the page’s language', async () => {
+	const { registerCatalogue, setLocale, getLocale } = await import('#lib/i18n/index.ts');
+	const en = (await import('#lib/i18n/en.json')).default;
+	registerCatalogue('en', en);
+	const was = getLocale();
+	try {
+		const title = (l: 'ru' | 'en') => {
+			setLocale(l);
+			const { container, unmount } = render(Guide, { lines });
+			const text = container.querySelector('svg.echo title')!.textContent;
+			unmount();
+			return text;
+		};
+		expect(title('ru')).toBe('Эхо, проводник курса');
+		expect(title('en')).toBe('Echo, your guide through the course');
+	} finally {
+		setLocale(was);
+	}
+});

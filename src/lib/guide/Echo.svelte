@@ -6,6 +6,7 @@
 -->
 <script lang="ts">
 	import raw from '../../../design/mascot/echo.svg?raw';
+	import { t } from '#lib/i18n/index.ts';
 
 	export type Mood = 'idle' | 'explain' | 'hint' | 'cheer' | 'hmm';
 	type Props = { mood?: Mood; era?: number | null; size?: number };
@@ -18,6 +19,7 @@
 		const box = compact ? '36 24 88 108' : '0 0 160 160';
 		return raw
 			.replace(/<svg [^>]*>/, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}" class="${cls}" role="img" aria-labelledby="${uid}-title" width="100%" height="100%">`)
+			.replace(/(<title[^>]*>)[\s\S]*?(<\/title>)/, `$1${t('echo.title')}$2`)
 			.replaceAll('echo-title', `${uid}-title`)
 			.replaceAll('echo-glow', `${uid}-glow`);
 	});
