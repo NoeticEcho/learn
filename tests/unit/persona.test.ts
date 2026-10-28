@@ -48,7 +48,7 @@ describe('the English edition’s templates', async () => {
 			expect(JSON.stringify(p), kind).not.toMatch(/[А-Яа-яЁё]/);
 		}
 		const digits = JSON.stringify(defaultPersonaFor('en')).match(/\d[\d\s()+-]{5,}\d/g) ?? [];
-		for (const d of digits) if (!/^(19|20)\d\d/.test(d)) expect(d.replace(/\D/g, '')).toMatch(/^(44)?0+$/);
+		for (const d of digits) if (!/^(19|20)\d\d/.test(d)) expect(d.replace(/\D/g, '')).toMatch(/^(1|44)?0+$/);
 	});
 	it('has the Russian template’s structure, item for item, so every check passes for both', () => {
 		for (const kind of Object.keys(ru) as (keyof typeof ru)[]) {

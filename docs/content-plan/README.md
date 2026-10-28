@@ -112,7 +112,7 @@ The textbook is bilingual. Russian is the source edition and is complete; Englis
   - data localization: what GDPR says about transfers, with Russia's localization rule as the strict case it is.
   Every lesson on law carries a note that it is general information, not legal advice, and names the authority to ask. The legal facts are checked against the primary text, as `docs/legal-review.md` asks of the Russian ones.
 - **Russian tools and the Runet** stay where the lesson's point is history or a real example (the history of the Runet, Яндекс beside Google, VK and Telegram as one market among others, Tilda and 1С-Битрикс beside Wix, Squarespace and Shopify, Яндекс Метрика beside GA4 and the privacy-friendly counters). They are named in their Latin form (Yandex, Yandex Metrica, 1C-Bitrix) and explained once.
-- **Money and places.** Prices in pounds in the templates, «Riverbend» for the town, a «Russian host» becomes «an ordinary host».
+- **Money and places.** Prices in dollars in the templates (US usage throughout: attorneys, county recorder, estimates, miles), «Riverbend» for the town, a «Russian host» becomes «an ordinary host».
 - **Echo** is the guide's name in English (Эхо in Russian); Iskin is Искин. Refer to Echo by name, and as «they» where a pronoun is needed. Echo speaks to the learner as «you», warmly and briefly, as in Russian.
 
 ### English house style (`tests/unit/style-en.test.ts`)
