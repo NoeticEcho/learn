@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readdirSync } from 'node:fs';
 
 test('home renders under /learn', async ({ page }) => {
 	await page.goto('./');
@@ -48,3 +49,23 @@ test('a returning person is sent to the next lesson, from the hashed lesson list
 	await expect(page.getByRole('link', { name: 'Продолжить: Как устроен этот учебник' })).toBeVisible();
 	await context.setOffline(false);
 });
+
+// Every lesson, not a sample: the QA pass of 28.10.2026 loaded all of them in Chromium, and a
+// diagram or a lesson body that throws on hydration would show only here. One test per part,
+// so a failure names the part.
+const lessonsByPart = new Map<string, string[]>();
+for (const part of readdirSync('content/ru').sort())
+	lessonsByPart.set(part, readdirSync(`content/ru/${part}`).filter((f) => f.endsWith('.svx')).sort().map((f) => f.slice(0, -4)));
+
+for (const [part, lessons] of lessonsByPart)
+	test(`every lesson of ${part} hydrates without an error`, async ({ page }) => {
+		test.setTimeout(30_000 + lessons.length * 10_000);
+		const errors: string[] = [];
+		page.on('pageerror', (e) => errors.push(`${page.url()}: ${e.message}`));
+		for (const lesson of lessons) {
+			await page.goto(`./lesson/${part}/${lesson}/`);
+			await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Что-то сломалось');
+			await expect(page.locator('.theory .prose')).toBeVisible();
+		}
+		expect(errors).toEqual([]);
+	});
