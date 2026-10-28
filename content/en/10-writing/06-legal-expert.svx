@@ -1,0 +1,368 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/10-writing/06-legal-expert.svx. */
+	export const metadata = {
+		id: '10-writing/06-legal-expert',
+		part: 10,
+		order: 6,
+		title: 'Legal and expert texts',
+		definition: 'A site’s legal texts are its privacy notice and consent; its expert texts tell of qualifications and results. They are written simply, but exactly.',
+		summary:
+			'You’ll write a privacy page and a consent in plain language without losing accuracy, and learn the limits of an expert text: how to speak of qualifications and results without breaking advertising law or professional rules. Afterwards your project has a teaching draft of a privacy notice, proofs labeled with their sources, and a clean text about the work. The lesson is not legal advice: a lawyer checks the texts before publication.',
+		minutes: 25,
+		teaches: ['texts-legal-text', 'texts-expert-text'],
+		requires: ['texts-tone-of-voice', 'data-privacy-by-design'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'Notice', caption: 'A text you answer for', say: 'A privacy notice isn’t a spell. It describes what you actually do, and you’ll be held to it.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: '6 questions', say: 'The short layer answers six questions: who, which data, what for, who gets it, how long, how to withdraw.' },
+				{ mood: 'hint', prop: 'browser', label: 'we’ll win!', caption: 'About the expert', say: 'A lawyer usually can’t promise a result. More honest: “We’ll tell you what your chances are.”' }
+			]
+		},
+		practice: {
+			id: 'legal-expert-page',
+			title: 'A notice, a consent and proofs',
+			task: 'Write a teaching draft of three things for your project. 1) A page about personal data (the block privacy): who is responsible (with your name from the brief), your status (sole proprietor, self-employed, company or individual), which data, what for, how long it is kept (a period), and how to withdraw consent (the email address from the brief). 2) A consent beside the form: a separate tick box, not ticked in advance, with text that says what is done with the data and a link to the privacy block. 3) Proofs: for each proof from the brief, write in source where it can be checked: a document, a number or a link. And in the paragraph pitch write briefly how you are useful, without guarantees or superlatives. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <main>\n      <section id="pitch-block">\n        <h2>About the work</h2>\n        <p class="pitch">…</p>\n      </section>\n\n      <section id="proofs-block">\n        <h2>Credentials</h2>\n        <ul id="proofs">\n          {{#each proofs}}<li class="proof"><span class="claim">{{title}}</span>: <span class="source">…</span></li>\n          {{/each}}\n        </ul>\n      </section>\n\n      <form id="request-legal">\n        <p>\n          <input id="consent-box" name="consent" type="checkbox">\n          <label for="consent-box" class="consent">…</label>\n          <a href="#">How we handle your data</a>\n        </p>\n      </form>\n\n      <section id="privacy">\n        <h2>How we handle your personal data</h2>\n        <dl>\n          <dt>Who is responsible</dt>\n          <dd class="operator">…</dd>\n          <dt>Status</dt>\n          <dd class="status">…</dd>\n          <dt>Which data</dt>\n          <dd class="data">…</dd>\n          <dt>What for</dt>\n          <dd class="purpose">…</dd>\n          <dt>How long it is kept</dt>\n          <dd class="term">…</dd>\n          <dt>How to withdraw consent</dt>\n          <dd class="withdraw">…</dd>\n        </dl>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="legal-note">\n      <p>This is a teaching draft, not a finished legal document. A lawyer must check it before it is published.</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <main>\n      <section id="pitch-block">\n        <h2>About the work</h2>\n        <p class="pitch">{{who}}. Before any work starts, I explain what can be done in your case, which documents are needed and what the timing and price depend on. The outcome depends on the documents and on the decisions of others, so I promise a clear analysis, not a result.</p>\n      </section>\n\n      <section id="proofs-block">\n        <h2>Credentials</h2>\n        <ul id="proofs">\n          {{#each proofs}}<li class="proof"><span class="claim">{{title}}</span>: <span class="source">the number on the document and the entry in the public register, link on request</span></li>\n          {{/each}}\n        </ul>\n      </section>\n\n      <form id="request-legal">\n        <p>\n          <input id="consent-box" name="consent" type="checkbox">\n          <label for="consent-box" class="consent">I agree to you using my name and phone number to contact me about this request.</label>\n          <a href="#privacy">How we handle your data</a>\n        </p>\n      </form>\n\n      <section id="privacy">\n        <h2>How we handle your personal data</h2>\n        <dl>\n          <dt>Who is responsible</dt>\n          <dd class="operator">{{name}}</dd>\n          <dt>Status</dt>\n          <dd class="status">self-employed sole proprietor</dd>\n          <dt>Which data</dt>\n          <dd class="data">the name and phone number you type into the form</dd>\n          <dt>What for</dt>\n          <dd class="purpose">to answer your request and get in touch with you, and for nothing else</dd>\n          <dt>How long it is kept</dt>\n          <dd class="term">no longer than 3 years after your request</dd>\n          <dt>How to withdraw consent</dt>\n          <dd class="withdraw">write to {{email}} and we will delete the data</dd>\n        </dl>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="legal-note">\n      <p>This is a teaching draft, not a finished legal document. A lawyer must check it before it is published.</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: 'main', matches: '^[^…]*$' },
+				{ id: 'operator', kind: 'field', selector: '#privacy .operator', field: 'name' },
+				{ id: 'status', kind: 'text', selector: '#privacy .status', matches: '[Ss]elf-employed|[Ss]ole (?:proprietor|trader)|(?<![A-Za-z])(?:LLC|Ltd|Inc|LLP|PLC|GmbH)(?![A-Za-z])|[Cc]ompany|[Cc]orporation|[Pp]artnership|[Nn]on-?profit|[Cc]harity|[Ii]ndividual|[Aa]ssociation' },
+				{ id: 'data', kind: 'text', selector: '#privacy .data', matches: '^\\s*\\S+(?:\\s+\\S+){1,}' },
+				{ id: 'purpose', kind: 'text', selector: '#privacy .purpose', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'term', kind: 'text', selector: '#privacy .term', matches: '\\d|[Yy]ear|[Mm]onth|[Uu]ntil|[Ss]o long as|[Aa]s long as' },
+				{ id: 'withdraw', kind: 'field', selector: '#privacy .withdraw', field: 'email' },
+				{ id: 'consent-box', kind: 'count', selector: '#request-legal input[type="checkbox"]', min: 1 },
+				{ id: 'consent-unchecked', kind: 'count', selector: '#request-legal input[type="checkbox"][checked]', max: 0 },
+				{ id: 'consent-text', kind: 'text', selector: '#request-legal label.consent', matches: '(?:[Uu]s(?:e|ing)|[Pp]rocess|[Ss]tor(?:e|ing)|[Kk]eep)' },
+				{ id: 'consent-link', kind: 'attr', selector: '#request-legal a', name: 'href', matches: '#privacy' },
+				{ id: 'proof-sources', kind: 'count', selector: '#proofs .proof .source', min: { brief: 'proofs' } },
+				{ id: 'proof-verifiable', kind: 'text', selector: '#proofs .source', matches: '\\d|No\\.|#|https?:|[Rr]egist|[Nn]umber|[Dd]ocument|[Ll]icen[sc]e|[Cc]ertificate', when: { brief: 'proofs[].title' } },
+				{ id: 'pitch-length', kind: 'text', selector: '#pitch-block .pitch', matches: '^\\s*\\S+(?:\\s+\\S+){11,}' },
+				{
+					id: 'no-guarantees',
+					kind: 'text',
+					selector: '#pitch-block',
+					matches: '^(?![\\s\\S]*(?:[Gg]uarantee|\\b[Bb]est\\b|[Nn]umber one|No\\. ?1|#1|100 ?%|[Ww]e(?:’|\')?ll win|[Ww]e will win|[Rr]isk-free|[Uu]nmatched|[Ss]econd to none|[Tt]op-rated|[Tt]he leading))[\\s\\S]*\\S',
+					when: { brief: 'kind', equals: 'expert' }
+				},
+				{ id: 'note-kept', kind: 'exists', selector: '#legal-note' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Who is a data controller (in the US, the “business”) for the personal data on a site?',
+				options: [
+					'The one who decides why and how personal data is processed: for example, the site owner who collects requests through a form',
+					'Only a large company with a security department',
+					'The data protection regulator'
+				],
+				answer: 0,
+				why: [
+					'Yes. If you collect names and phone numbers on your own site, you are the controller, whether you are a sole proprietor, a self-employed person or a company.',
+					'No: size doesn’t matter. Anyone who decides why and how to process data becomes a controller.',
+					'No: the regulator oversees controllers, and is not one.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What must you not lose when you retell a privacy notice in plain words?',
+				options: [
+					'Who is responsible',
+					'Which data is collected',
+					'What for (the purpose)',
+					'How long it is kept',
+					'How to withdraw consent',
+					'Every legal formula word for word'
+				],
+				answer: [0, 1, 2, 3, 4],
+				why: [
+					'Yes: the person must know whom they are giving their data to.',
+					'Yes: without the list it isn’t clear what they are agreeing to.',
+					'Yes: the purpose decides how the data may be used.',
+					'Yes: the period has to be stated.',
+					'Yes: the right to withdraw consent is always there, and the text must say how.',
+					'No: the formulas needn’t be kept word for word. Plain words will do if the meaning isn’t lost and the full text sits beside them.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why must a consent box not be ticked in advance?',
+				options: [
+					'Consent has to be a clear, deliberate act. A box ticked in advance is the form deciding for the person',
+					'Because it looks nicer',
+					'Because browsers can’t tick boxes'
+				],
+				answer: 0,
+				why: [
+					'Yes. The GDPR asks for consent that is freely given, specific, informed and unambiguous, shown by a clear affirmative act, and its Recital 32 names pre-ticked boxes as not consent. Such a trick is also called a dark pattern.',
+					'No: the point is that the person has to make the decision.',
+					'No: browsers can, and that is why the trick is used.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each statement about an expert with the verdict',
+				pairs: [
+					['The best expert in town', 'Not allowed: a comparison with no criterion and no proof'],
+					['License no. 00-00-00, with a link to the register', 'Allowed: it can be checked'],
+					['15 years of experience', 'Needs a source: a document that shows the length of practice'],
+					['We guarantee the result', 'Not allowed: the result is not in your power']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'May you take a privacy notice from another site and put it on yours?',
+				options: [
+					'No: it describes someone else’s processing, and yours has to describe yours, with your controller, data and periods',
+					'Yes, if you change the name',
+					'Yes, since privacy notices are public'
+				],
+				answer: 0,
+				why: [
+					'Yes. A notice has to match what you really do. Someone else’s text almost certainly speaks about something else. And in the US a notice that doesn’t match your practice can be treated as a deceptive practice.',
+					'No: changing the name doesn’t change the data, purposes and periods you stated.',
+					'No: the text may be under copyright, and above all it doesn’t describe you.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why put a short plain-words version of the notice first, with the full text below?',
+				options: [
+					'The person gets the main point at once, and the exact text remains for those who need it, and for checking',
+					'To make the page longer',
+					'So that lawyers don’t read it'
+				],
+				answer: 0,
+				why: [
+					'Yes. This is called a “layered notice”: a short layer for people, the full one for accuracy. UK and EU regulators recommend it.',
+					'No: length is not the aim.',
+					'No: lawyers read exactly the full layer.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'An expert wants to talk about past cases on the site. What is sensible?',
+				options: [
+					'An anonymized example with the client’s written permission, if the professional rules allow it, or an account of how the work goes, with no cases',
+					'Name the client and the case number, to look convincing',
+					'Write “we win 95% of our cases”'
+				],
+				answer: 0,
+				why: [
+					'Yes. A client’s data and the circumstances of the case are protected (for a lawyer it is a duty of confidentiality, and for any controller it is also personal data). The order of work shows experience with no risk.',
+					'No: that breaches confidentiality and probably data protection law, and the client has the right to complain.',
+					'No: such a statistic can’t be checked, and in these professions the rules usually restrict it.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'texts-operator',
+				front: 'Who is the controller of personal data?',
+				back: 'The one who decides why and how personal data is processed: a site owner who collects names and phone numbers through a form. It is named in the notice. (In Russian law, the “operator”.)'
+			},
+			{
+				id: 'texts-policy-parts',
+				front: 'What must a privacy notice say in plain words?',
+				back: 'Who is responsible; which data; what for; what is done with it and who gets it; how long it is kept; how to withdraw consent and complain.'
+			},
+			{
+				id: 'texts-consent-box',
+				front: 'What should the consent on a form be like?',
+				back: 'A separate act (a tick box) with no pre-ticking; a clear text about what and why; a link to the notice. Not built into the button.'
+			},
+			{
+				id: 'texts-expert-claims',
+				front: 'Which statements about an expert are dangerous?',
+				back: 'Superlatives with no criterion (“the best”), guarantees of results, win statistics, clients’ names. Safe: documents with numbers, deadlines, the order of work.'
+			},
+			{
+				id: 'texts-expert-modesty',
+				front: 'What does “modesty” mean in an expert text?',
+				back: 'Not humility but checkability: facts, sources and limits (“what I don’t do”, “what the result depends on”). That raises trust.'
+			},
+			{
+				id: 'texts-not-legal-advice',
+				front: 'Do the course’s texts replace a lawyer?',
+				back: 'No. They are drafts for learning: the law changes, and your data and purposes are your own. Publish only text a lawyer has checked.'
+			}
+		],
+		sources: [
+			{ title: 'Regulation (EU) 2016/679, the General Data Protection Regulation (EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'What privacy information should we provide? (ICO, UK)', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/what-privacy-information-should-we-provide/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'California Online Privacy Protection Act (Wikipedia)', url: 'https://en.wikipedia.org/wiki/California_Online_Privacy_Protection_Act', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'California Consumer Privacy Act (Wikipedia)', url: 'https://en.wikipedia.org/wiki/California_Consumer_Privacy_Act', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: '16 CFR Part 255: Guides concerning the use of endorsements and testimonials in advertising (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-255', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: '16 CFR Part 465: Rule on the use of consumer reviews and testimonials (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-D/part-465', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'The CAP Code, section 3: Misleading advertising (ASA, UK)', url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Directive 2005/29/EC on unfair commercial practices (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32005L0029', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Civil Procedure Rules, Part 35: experts and assessors (Ministry of Justice, England and Wales)', url: 'https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Expert witness (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Expert_witness', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Federal Plain Language Guidelines (plainlanguage.gov)', url: 'https://www.plainlanguage.gov/guidelines/', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Федеральный закон № 152-ФЗ «О персональных данных» (for comparison, in Russian)', url: 'https://www.consultant.ru/document/cons_doc_LAW_61801/', licence: 'proprietary-link', kind: 'spec', lang: 'ru' },
+			{ title: 'Федеральный закон № 38-ФЗ «О рекламе» (for comparison, in Russian)', url: 'https://www.consultant.ru/document/cons_doc_LAW_58968/', licence: 'proprietary-link', kind: 'spec', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Here the words answer to the law, so we write carefully and simply. This is a teaching draft, and a lawyer will check it all the same.',
+			hints: [
+				'Start with the data page: six points, a short answer to each. The controller is your name from the brief, and for withdrawing consent give the email from the same place.',
+				'For each proof from the brief, write where it can be checked: the name of a register, a document number, a link. “On request” is a weak source, but better than a blank.',
+				'The text about the work mustn’t have the words “best”, “guarantee”, “100%”. Describe what you do and what the result depends on.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is left somewhere in main. Replace it with your own words.',
+				operator: 'Under “Who is responsible” there should be your name, or the name from the brief.',
+				status: 'Under “Status” say: self-employed, sole proprietor, company (Inc., LLC, Ltd), nonprofit or individual.',
+				data: 'Under “Which data” list at least two kinds of data you collect.',
+				purpose: 'Under “What for” write what the data is needed for, in at least three words.',
+				term: 'Under “How long it is kept” give a period, in figures or words: “3 years”, “until you withdraw consent”.',
+				withdraw: 'Under “How to withdraw consent” give the email address from the brief.',
+				'consent-box': 'The consent must be a separate tick box (an input of type checkbox) in the form.',
+				'consent-unchecked': 'The box must not be ticked in advance: remove the checked attribute.',
+				'consent-text': 'The consent text should say what is done with the data: that you agree to it being used, stored or processed, and for what.',
+				'consent-link': 'The link beside the box must lead to the notice block, which is #privacy.',
+				'proof-sources': 'Each proof from the brief must have its own source in a source element.',
+				'proof-verifiable': 'At least one source needs a document, number, register or link.',
+				'pitch-length': 'The text about the work must be at least twelve words long.',
+				'no-guarantees': 'The text about the work still has guarantees or superlatives: “best”, “guarantee”, “100%”, “we’ll win”. For your profession that is risky: replace them with a description.',
+				'note-kept': 'The note “This is a teaching draft” is gone. Put it back: it reminds you to have a lawyer check the text.'
+			},
+			outro: 'Now the project has a draft notice, a consent and proofs with sources. One step of the part is left: gathering all the techniques into one “About” page.'
+		},
+		say: { GDPR: 'G D P R', ICO: 'I C O', FTC: 'F T C', ASA: 'A S A', CAP: 'cap', CCPA: 'C C P A' }
+	};
+</script>
+
+<script>
+	import LegalPlain from '../../diagrams/LegalPlain.svelte';
+</script>
+
+## Texts you answer for
+
+Until now a mistake in a text cost you a reader. In this lesson it can cost a fine, or the trust of your profession. There are two kinds of text in which the words answer to the law: **legal** ones (a privacy notice, a consent, terms of sale) and **expert** ones (an account of qualifications and results). They are alike in that simplicity here is not a whim but a necessity: a person must understand what they agree to and what they believe. And alike in that simplicity can’t cost accuracy.
+
+A caveat first. **This lesson is not legal advice.** We are writing in October 2026, laws change, and your situation is your own. Everything you write in the practice is a teaching draft. Before it is published, it must be shown to a lawyer who knows your profession and your country. The rules themselves are gathered in the part on quality and the law; here we learn to write so that the lawyer has something to check.
+
+Because the course is read in many places, the lesson names the English-speaking world’s rules: the EU and UK data protection laws, the US state laws and the US Federal Trade Commission (FTC), and the UK advertising regulator. Russia’s rules appear for comparison, because the course began there.
+
+## Personal data and the controller
+
+**Personal data** is any information that relates to a particular person or allows them to be identified: a name, a phone number, an email, an address. If your site collects any of these through a form, it processes personal data. The one who decides why and how is called a **controller** in the EU’s General Data Protection Regulation (GDPR) and its UK twin, the UK GDPR. In the US the closest idea is the “business” in the California Consumer Privacy Act (CCPA, as amended by the CPRA). The controller is you: a sole proprietor, a self-employed person or a company.
+
+What the law expects of a controller where texts are concerned, in outline:
+
+- **Tell people what you do.** GDPR Article 13 lists what a notice must contain when you collect data from the person: who you are and how to reach you, the purposes and the legal basis, who receives the data, whether it leaves the country, how long it is kept, the person’s rights (including withdrawing consent), and the right to complain to the supervisory authority. Article 12 requires this in a “concise, transparent, intelligible and easily accessible form, using clear and plain language”. Plain language is the law here, not a style choice.
+- **In the US there is no single federal privacy law for ordinary sites**, but there are rules that reach you anyway. California’s Online Privacy Protection Act (CalOPPA) requires a commercial website that collects personal information from Californians to post a privacy policy, and the CCPA adds a “notice at collection” for businesses above certain thresholds. And the FTC treats a privacy policy as a promise: saying one thing and doing another is a deceptive practice under Section 5 of the FTC Act.
+- **Other duties live outside the text**: keeping the data secure, honoring requests to see or delete it, reporting a breach. We don’t touch them here, but remember that the text describes what you **really do**.
+
+The last point matters. A notice and a consent are not a spell but a description of your real practice. If the text says “data is kept for three years” and you never delete it, the text is false.
+
+<details>
+<summary>Check yourself: who is the controller of personal data?</summary>
+
+The one who decides why and how personal data is processed: the owner of a site who collects names and phone numbers through a form, whether a sole proprietor, a self-employed person or a company.
+
+</details>
+
+## Consent: what to say and how
+
+Under the GDPR, where you rely on consent it must be freely given, specific, informed and unambiguous, shown by a statement or a clear affirmative act (Article 4(11)). In terms of a form:
+
+- **Specific and informed**: the person sees which data, for what and who the controller is. “I agree to everything” won’t do.
+- **A clear act**: the person does something themselves. A box they ticked. Not “by clicking you agree”, and not a box that is already ticked. Recital 32 says plainly that pre-ticked boxes, silence and inactivity are not consent. Such a box counts as a dark pattern as well: the form decides for the person.
+- **Separate**: a request for consent must be clearly distinguishable from other matters (Article 7(2)), and a newsletter gets its own box.
+- **As easy to withdraw as to give** (Article 7(3)).
+- **Not always needed.** Consent is only one of six lawful bases (Article 6). Replying to someone’s enquiry can often rest on taking steps at their request or on legitimate interests, and then you need a clear notice, not a box. If you do ask for a box, the consent must be real.
+- **Marketing is a separate matter.** In the US, CAN-SPAM lets you send commercial email until someone opts out, as long as you follow its rules. In the UK and EU, the PECR and the ePrivacy rules (with GDPR) generally want prior opt-in for marketing email to individuals. Consent to answer a request is not consent to a newsletter. A separate box, a separate text.
+
+For comparison, Russia’s law on personal data (152-FZ) leans harder on consent: it is the usual basis, it must be specific and conscious, and since 1 September 2025 it is drawn up separately from other documents. The Russian law on advertising (38-FZ, Article 18) likewise requires prior consent for advertising by phone and email.
+
+By meaning, the text of a consent should name: **who is responsible, which data, what for, what is done with it, how long, and how to withdraw consent.** For a form that is two or three lines (we wrote one in the lesson on microcopy) with a link to the full notice.
+
+## A notice in plain words
+
+A privacy notice is usually written in a language that ordinary people don’t read. That is bad not only for people: if a person didn’t read and didn’t understand, the consent stays a formality. So good practice is built in **two layers**: a short statement in plain words on top, and the full exact text below for those who need it. The UK’s ICO and the European data protection regulators recommend exactly this “layered” approach.
+
+The short layer answers six questions:
+
+1. **Who handles it.** A name or a company name, the status.
+2. **Which data.** What exactly the person types into the form.
+3. **What for.** One purpose, stated directly.
+4. **What is done with it and who gets it.** Storage, the hosting company, an email service, if there are any.
+5. **How long it is kept.** A period you can keep to.
+6. **How to withdraw consent** and where to complain if rights were breached.
+
+Now, what may be simplified and what may not. Words may be simplified: “collects, records and stores” becomes “we write it down and keep it”. Content may not: the six points above must stay. In the diagram below is a teaching notice for an invented site, point by point, in two forms. Try removing a required point and see what is missing.
+
+<LegalPlain />
+
+<details>
+<summary>Check yourself: what may be simplified in a notice, and what may not?</summary>
+
+Words and phrases may be simplified. The content may not be removed: who is responsible, which data, what for, what is done with it, how long, how to withdraw consent.
+
+</details>
+
+## An expert text: checkable and modest
+
+Expert sites most often sin in two ways. Some boast: “the best”, “a recognized expert”, “we guarantee results”. Others hide: “an experienced specialist” without a single detail. One thing helps: **checkability**. Instead of a judgment, a document with a number. Instead of “many years of experience”, the year work began and the kind of cases. Instead of “we guarantee”, the order of action and what the result depends on.
+
+Modesty here is not humility but honesty about limits. The phrase “I don’t take criminal cases or family disputes” doesn’t put people off, it reassures them: they see you know your limits. So does “Timing and price depend on the documents, so I give them after I have studied the papers”: you don’t promise what you can’t deliver.
+
+### What advertising law says
+
+The description of your services on your site is most likely advertising in the legal sense, and the line between advertising and information can be thin, so it’s safer to behave as if it were advertising. The rules are alike in spirit across the English-speaking world:
+
+- **United States.** The FTC Act bans unfair or deceptive acts. The FTC expects an advertiser to have a “reasonable basis”, usually evidence, for an objective claim before making it. Obvious exaggeration that no one takes literally (“the best coffee on Earth”) is called puffery and isn’t treated as a factual claim, but “the best surveyor in the county” sounds like a fact someone could test. The Endorsement Guides (16 CFR Part 255) say that a testimonial must reflect honest opinions and a material connection (payment, a free service) must be disclosed. Since 21 October 2024 the FTC’s rule on consumer reviews and testimonials (16 CFR Part 465) bans fake or bought reviews, which carries civil penalties per violation.
+- **United Kingdom.** The CAP Code, applied by the Advertising Standards Authority (ASA), requires marketing not to mislead (section 3) and requires marketers to hold documentary evidence for objective claims before they make them (rule 3.7). A claim of “best” or “leading” must be backed by evidence or be obvious puffery. The consumer-protection law was reworked by the Digital Markets, Competition and Consumers Act 2024, which also deals with fake reviews.
+- **European Union.** The Unfair Commercial Practices Directive (2005/29/EC) bans misleading actions and misleading omissions (Articles 6 and 7), and its blacklist, as updated in 2019, includes fake reviews.
+- **Conditions.** “The first consultation is free” needs the terms: how long it lasts and what it includes. Leaving out material terms also misleads, and in the US the FTC has a guide on the word “free” (16 CFR Part 251).
+
+For comparison, Russia’s advertising law (38-FZ, Article 5) requires advertising to be fair and reliable, and the Russian regulator, the FAS, accepts a superlative if the criterion of comparison is stated and can be proved. The idea is the same: a comparison needs a criterion and proof.
+
+### What the rules of the profession say
+
+Many professions have their own restrictions, stricter than the general law. In the US, attorneys are bound by state bar rules, most modeled on the ABA Model Rules: Rule 7.1 bars false or misleading statements about the lawyer’s services, and Rule 1.6 protects client confidences. Many states want a disclaimer if you mention results. Land surveyors are licensed by state boards, which set their own rules on how a licensee may describe themselves. In England and Wales the Solicitors Regulation Authority sets similar duties, and an expert witness’s duty is to the court, which overrides any obligation to whoever instructs or pays them (Civil Procedure Rules, Part 35). Promising “the result you need” doesn’t fit that role. Which rules bind you is for your bar, your board, your regulator or a lawyer to say. For learning, remember the general frame:
+
+- **Don’t promise an outcome.** “We’ll tell you what your chances are” instead of “we’ll win”.
+- **Don’t boast of win statistics.** A court decides, not you, statistics can’t be checked, and clients’ cases are protected.
+- **Don’t name clients.** A case study only anonymized and with the client’s written permission, and where the profession forbids it, no case studies at all: show how the work goes.
+- **Don’t compare yourself with colleagues.** Tell about yourself.
+
+Practice on the second tab of the diagram: statements about an expert that are allowed, need a source or are not allowed.
+
+<details>
+<summary>Check yourself: what do you replace “the best expert in town” with?</summary>
+
+With facts that can be checked: documents with numbers, length of practice, the number of jobs done, deadlines. A superlative with no criterion and no proof is risky under advertising rules and under professional ethics.
+
+</details>
+
+## Where it lets you down
+
+- **Simplicity against accuracy.** If you simplified the words and lost the retention period or the way to withdraw consent, the text got worse, not simpler. Check it against the list of six points.
+- **Someone else’s text.** A notice copied from another site describes someone else’s processing. The controller is not you, the data and the periods differ, and the gap with your real practice makes the text false. Copy the structure, write the content yourself.
+- **Generated texts.** Policy generators and model answers can be convincing and wrong: they mix up articles, go out of date, invent rules. This is a draft, not a source of law.
+- **The law changes.** The rules on consent, reviews and dark patterns have moved in the last few years. The texts of this lesson will go out of date faster than your site. Check the current text at the time you publish.
+- **A legal text need not be ugly.** If the full text must be complex, keep a short statement above it. People don’t read formulas, but they do read explanations.
+
+## Practice
+
+Write a teaching draft of three things for your project. Remember: before real publication a lawyer will check it (the note at the bottom says so).
+
+1. **A page about personal data** (the block `privacy`). Six points: who is responsible (your name from the brief), status, which data, what for, how long it is kept, and how to withdraw consent (the email address from the brief).
+2. **A consent beside the form.** A separate tick box, not ticked in advance, with text that says what is done with the data and a link to the `privacy` block.
+3. **Proofs.** For each proof from the brief, write where it can be checked: the name of a register, a document number, a link. This is what turns “I have a license” into “here is the license, check it”.
+4. **A paragraph “About the work”** (`pitch`): how you are useful, with no guarantees or superlatives. For an expert the check will look for words like “guarantee” and “best”.
+
+If your brief has no proofs (for example in the “My project” template), the list of proofs will stay empty. Add some to the brief in settings: sites without proofs persuade less.
