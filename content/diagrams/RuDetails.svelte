@@ -65,7 +65,7 @@
 			{@const f = forLang(l.tag)}
 			<li>
 				<strong>{l.name}:</strong>
-				{#if f.word}<span class="out"><strong>{n} {f.word}</strong></span>{/if}
+				<span class="out"><strong>{n} {f.word ?? '…'}</strong></span>
 				<span class="small">(category “{f.cat}”; all the forms this language has: {f.cats})</span>
 			</li>
 		{/each}
@@ -78,7 +78,7 @@
 	</label>
 	<ul class="langs">
 		{#each places as tag (tag)}
-			<li><strong>{tag}:</strong> <span class="out"><strong>{moneyFor(tag)}</strong></span> <span class="small">· spaces inside a number are non-breaking, shown here as “␣”: {showNbsp(moneyFor(tag))}</span></li>
+			<li><strong>{tag}:</strong> <span class="out"><strong>{moneyFor(tag)}</strong></span> <span class="small">· a non-breaking space, where a place uses one, is shown here as “␣”: {showNbsp(moneyFor(tag))}</span></li>
 		{/each}
 	</ul>
 	<ul class="langs">
