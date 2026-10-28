@@ -1,0 +1,911 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/07-data/06-vector-search.svx. */
+	export const metadata = {
+		id: '07-data/06-vector-search',
+		part: 7,
+		order: 6,
+		title: 'Search: full-text and vector',
+		definition: 'Full-text search finds texts by their words, via an inverted index and stems. Vector search finds them by meaning, via embeddings and nearest neighbors.',
+		summary:
+			'You’ll see how a site searches by words and by meaning: tokens, an index, ranking, embeddings and nearest neighbors. Afterwards you can choose between search inside Postgres, a separate engine and a vector database, and you know how AI answers use your texts.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'editor',
+					label: 'LIKE %boundary%',
+					caption: 'Brute-force search',
+					say: [
+						{ text: 'Searching for “boundary”.' },
+						{ who: 'LIKE', text: '“Boundaries”? Different letters. Found nothing.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'boundar → 1, 3, 7',
+					caption: 'The index',
+					say: 'Words are cut down to a stem, and an index records which texts contain each stem.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'network',
+					label: 'close in meaning',
+					caption: 'Embedding',
+					say: [
+						{ text: 'How much is it?' },
+						{ who: 'Search', text: 'No words in common, but “Prices and billing” sits close in meaning.' }
+					]
+				}
+			]
+		},
+		minutes: 30,
+		teaches: ['data-full-text-search', 'data-vector-db'],
+		requires: ['data-index', 'data-choose-database'],
+		practice: {
+			id: 'data-search-items',
+			title: 'Search your services: words, stems, a query',
+			task: 'The page has a working search demo over your services. 1) Try a query in different forms of a word. 2) In the table, write three forms of one word from your services and their stem (the stem is shared). 3) In the query box, write a PostgreSQL query that selects services with the English text search configuration: to_tsvector and plainto_tsquery, both with the english configuration, joined by the @@ operator, then ts_rank and ORDER BY … DESC. 4) In the index box, create a GIN index on to_tsvector. 5) Answer in three phrases: when word search is enough for you; when you would need search by meaning and which texts would go into it; which texts would go to an outside service, and whether you would need a legal basis or consent. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="search-work">
+      <h2>Search your services<\/h2>
+      <p>The demo below searches your services and understands word forms. Type, for example, a word from a title in another form: the stem is the same, so the result is the same.<\/p>
+      <p><label for="fts-q">Query<\/label> <input id="fts-q" type="search" value="{{services.0}}" autocomplete="off"><\/p>
+      <ol id="fts-results"><\/ol>
+
+      <h3>Three forms of one word from your services, and their stem<\/h3>
+      <table id="lemma">
+        <tr><th>Form of the word<\/th><th>Stem<\/th><\/tr>
+        <tr class="form"><td class="word">…<\/td><td class="stem">…<\/td><\/tr>
+        <tr class="form"><td class="word">…<\/td><td class="stem">…<\/td><\/tr>
+        <tr class="form"><td class="word">…<\/td><td class="stem">…<\/td><\/tr>
+      <\/table>
+
+      <h3>A PostgreSQL query: find and order by relevance<\/h3>
+      <p>The table is items(id, title, text). Use the English configuration. Here the query is only checked as text; the real PostgreSQL in a browser is at pglite.dev.<\/p>
+      <textarea aria-label="The q-fts field" id="q-fts" rows="8">SELECT …
+FROM items
+WHERE …
+ORDER BY …;<\/textarea>
+
+      <h3>An index for this search<\/h3>
+      <textarea aria-label="An index for this search" id="q-gin" rows="3">CREATE INDEX …<\/textarea>
+
+      <p>When word search is enough for me: <span id="enough">…<\/span><\/p>
+      <p>When I would need search by meaning, and which texts would go into it: <span id="vector-when">…<\/span><\/p>
+      <p>Which texts would go to an outside service, and whether I would need a legal basis or consent: <span id="vector-send">…<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fts-demo">
+      // A search demo (a simplified model, not PostgreSQL): your services from the brief, with English endings cut off.
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      const own = [{{#each items}}{ title: '{{title}}', text: '{{text}}' }, {{/each}}].map((d) => ({ title: unesc(d.title), text: unesc(d.text) }));
+      const docs = own.length ? own : [{ title: 'First service', text: 'A description of the service.' }, { title: 'Second service', text: 'Another service and its price.' }];
+      const STOP = new Set('a an and the of to in on at for from by with is are was be do you your it or but not as how what'.split(' '));
+      const ENDINGS = 'ingly edly ings ing ies ied ers er ed es ly s'.split(' ').sort((a, b) => b.length - a.length);
+      const stem = (w) => { for (const e of ENDINGS) if (w.length - e.length >= 3 && w.endsWith(e) && !(e === 's' && w.endsWith('ss'))) { w = w.slice(0, -e.length) + (e === 'ies' || e === 'ied' ? 'y' : ''); break; } return w.replace(/y$/, 'i').replace(/e$/, ''); };
+      const tokens = (s) => (s.toLowerCase().match(/[a-z0-9]+/g) || []).filter((t) => !STOP.has(t)).map(stem);
+      const input = document.getElementById('fts-q');
+      const list = document.getElementById('fts-results');
+      function draw() {
+        const q = tokens(input.value);
+        const rows = docs.map((d, i) => ({ d, i, s: q.reduce((n, w) => n + 2 * tokens(d.title).filter((x) => x === w).length + tokens(d.text).filter((x) => x === w).length, 0) }))
+          .filter((r) => r.s > 0).sort((a, b) => b.s - a.s || a.i - b.i);
+        list.replaceChildren(...(rows.length ? rows.map((r) => Object.assign(document.createElement('li'), { textContent: r.d.title + ' (score ' + r.s + ')' })) : [Object.assign(document.createElement('li'), { textContent: 'Nothing found' })]));
+      }
+      input.addEventListener('input', draw);
+      draw();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="search-work">
+      <h2>Search your services<\/h2>
+      <p>The demo below searches your services and understands word forms. Type, for example, a word from a title in another form: the stem is the same, so the result is the same.<\/p>
+      <p><label for="fts-q">Query<\/label> <input id="fts-q" type="search" value="{{services.0}}" autocomplete="off"><\/p>
+      <ol id="fts-results"><\/ol>
+
+      <h3>Three forms of one word from your services, and their stem<\/h3>
+      <table id="lemma">
+        <tr><th>Form of the word<\/th><th>Stem<\/th><\/tr>
+        <tr class="form"><td class="word">survey<\/td><td class="stem">survey<\/td><\/tr>
+        <tr class="form"><td class="word">surveys<\/td><td class="stem">survey<\/td><\/tr>
+        <tr class="form"><td class="word">surveyed<\/td><td class="stem">survey<\/td><\/tr>
+      <\/table>
+
+      <h3>A PostgreSQL query: find and order by relevance<\/h3>
+      <p>The table is items(id, title, text). Use the English configuration. Here the query is only checked as text; the real PostgreSQL in a browser is at pglite.dev.<\/p>
+      <textarea aria-label="The q-fts field" id="q-fts" rows="8">SELECT title,
+       ts_rank(to_tsvector('english', title || ' ' || text), plainto_tsquery('english', 'survey')) AS rank
+FROM items
+WHERE to_tsvector('english', title || ' ' || text) @@ plainto_tsquery('english', 'survey')
+ORDER BY rank DESC;<\/textarea>
+
+      <h3>An index for this search<\/h3>
+      <textarea aria-label="An index for this search" id="q-gin" rows="3">CREATE INDEX items_fts_idx ON items USING GIN (to_tsvector('english', title || ' ' || text));<\/textarea>
+
+      <p>When word search is enough for me: <span id="enough">when there are dozens of services, visitors type words from the titles, and I need word forms and ranking: then search inside PostgreSQL is enough<\/span><\/p>
+      <p>When I would need search by meaning, and which texts would go into it: <span id="vector-when">if visitors ask questions in their own words and the words differ from the text (synonyms), I would need search by meaning, and the service texts and the answers to frequent questions would go into it<\/span><\/p>
+      <p>Which texts would go to an outside service, and whether I would need a legal basis or consent: <span id="vector-send">the texts of services and questions would go to a third-party service for embeddings; without personal data no consent is needed, but with it I would need a lawful basis and a processor contract, or a local model on my own server<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fts-demo">
+      // A search demo (a simplified model, not PostgreSQL): your services from the brief, with English endings cut off.
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      const own = [{{#each items}}{ title: '{{title}}', text: '{{text}}' }, {{/each}}].map((d) => ({ title: unesc(d.title), text: unesc(d.text) }));
+      const docs = own.length ? own : [{ title: 'First service', text: 'A description of the service.' }, { title: 'Second service', text: 'Another service and its price.' }];
+      const STOP = new Set('a an and the of to in on at for from by with is are was be do you your it or but not as how what'.split(' '));
+      const ENDINGS = 'ingly edly ings ing ies ied ers er ed es ly s'.split(' ').sort((a, b) => b.length - a.length);
+      const stem = (w) => { for (const e of ENDINGS) if (w.length - e.length >= 3 && w.endsWith(e) && !(e === 's' && w.endsWith('ss'))) { w = w.slice(0, -e.length) + (e === 'ies' || e === 'ied' ? 'y' : ''); break; } return w.replace(/y$/, 'i').replace(/e$/, ''); };
+      const tokens = (s) => (s.toLowerCase().match(/[a-z0-9]+/g) || []).filter((t) => !STOP.has(t)).map(stem);
+      const input = document.getElementById('fts-q');
+      const list = document.getElementById('fts-results');
+      function draw() {
+        const q = tokens(input.value);
+        const rows = docs.map((d, i) => ({ d, i, s: q.reduce((n, w) => n + 2 * tokens(d.title).filter((x) => x === w).length + tokens(d.text).filter((x) => x === w).length, 0) }))
+          .filter((r) => r.s > 0).sort((a, b) => b.s - a.s || a.i - b.i);
+        list.replaceChildren(...(rows.length ? rows.map((r) => Object.assign(document.createElement('li'), { textContent: r.d.title + ' (score ' + r.s + ')' })) : [Object.assign(document.createElement('li'), { textContent: 'Nothing found' })]));
+      }
+      input.addEventListener('input', draw);
+      draw();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'search-exists', kind: 'exists', selector: '#search-work' },
+				{ id: 'no-blanks', kind: 'text', selector: '#search-work', matches: '^[^…]*$' },
+				{ id: 'forms', kind: 'count', selector: '#lemma tr.form', min: 3 },
+				{ id: 'fts-vector', kind: 'text', selector: '#q-fts', matches: '[Tt][Oo]_[Tt][Ss][Vv][Ee][Cc][Tt][Oo][Rr]\\(\\s*\'english\'' },
+				{
+					id: 'fts-match',
+					kind: 'text',
+					selector: '#q-fts',
+					matches: '@@\\s*(?:[Pp][Ll][Aa][Ii][Nn][Tt][Oo]_[Tt][Ss][Qq][Uu][Ee][Rr][Yy]|[Ww][Ee][Bb][Ss][Ee][Aa][Rr][Cc][Hh]_[Tt][Oo]_[Tt][Ss][Qq][Uu][Ee][Rr][Yy]|[Tt][Oo]_[Tt][Ss][Qq][Uu][Ee][Rr][Yy])\\(\\s*\'english\''
+				},
+				{ id: 'fts-rank', kind: 'text', selector: '#q-fts', matches: '[Tt][Ss]_[Rr][Aa][Nn][Kk]' },
+				{ id: 'fts-order', kind: 'text', selector: '#q-fts', matches: '[Oo][Rr][Dd][Ee][Rr]\\s+[Bb][Yy][\\s\\S]*[Dd][Ee][Ss][Cc]' },
+				{
+					id: 'gin-index',
+					kind: 'text',
+					selector: '#q-gin',
+					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Ii][Nn][Dd][Ee][Xx][\\s\\S]*[Uu][Ss][Ii][Nn][Gg]\\s+[Gg][Ii][Nn]'
+				},
+				{
+					id: 'enough',
+					kind: 'text',
+					selector: '#enough',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[Ww]ord|[Ff]orm|[Ss]tem|[Tt]itle|[Ss]mall|[Dd]ozen|[Rr]ank|[Kk]eyword|[Ss]pell|[Mm]orpholog))'
+				},
+				{
+					id: 'vector-when',
+					kind: 'text',
+					selector: '#vector-when',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[Mm]eaning|[Ss]ynonym|[Qq]uestion|[Ss]imilar|[Pp]araphras))'
+				},
+				{ id: 'vector-third-party', kind: 'text', selector: '#vector-send', matches: '[Tt]hird|[Pp]rovider|[Ee]xternal|[Oo]utside|[Cc]loud|API|[Mm]odel|[Vv]endor' },
+				{ id: 'vector-consent', kind: 'text', selector: '#vector-send', matches: '[Cc]onsent|[Pp]ersonal|not send|[Aa]nonym|[Ll]ocal|[Ll]awful|[Pp]rocessor|[Bb]asis' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why does searching with LIKE for %boundary% not find a text that says “boundaries”?',
+				options: [
+					'LIKE looks for a substring letter for letter and knows nothing about word forms',
+					'LIKE cannot search for letters of the English alphabet',
+					'The word “boundaries” is stored differently in the database'
+				],
+				answer: 0,
+				why: [
+					'Yes. “Boundary” ends in a y and “boundaries” in ies, so for LIKE they are different strings. Full-text search reduces both forms to one stem.',
+					'No: LIKE finds English letters without any trouble.',
+					'No: the stored text is exactly what was written. The trouble is the way it is compared.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of preparing text for full-text search in order',
+				items: [
+					'Split the text into words (tokens)',
+					'Lower-case everything and drop the function words',
+					'Reduce the words to stems',
+					'Build an index: each stem with the list of texts that contain it',
+					'At query time, order what was found by relevance'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each tool to the situation where it fits',
+				pairs: [
+					['PostgreSQL: tsvector and a GIN index', 'a small or medium site whose data is already in this database'],
+					['Meilisearch or Typesense', 'fast search as you type, with typo tolerance'],
+					['Elasticsearch or OpenSearch', 'huge volumes, complex filters and tuning, and a team to run it'],
+					['pgvector or a vector database', 'finding by meaning when the words of the query and the text differ']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A visitor types “how much does it cost”, and the page is called “Prices and billing”. They share no words. What will find it?',
+				options: [
+					'Search by meaning: the embeddings of the question and the page end up close together',
+					'Full-text search: it knows that “cost” and “price” are the same thing',
+					'A plain LIKE with wildcards'
+				],
+				answer: 0,
+				why: [
+					'Yes. A model turned both texts into numbers, and they are close in meaning although the words differ.',
+					'No: full-text search folds the forms of one word together, but it does not know synonyms (unless you add a synonym dictionary yourself).',
+					'No: LIKE only looks for a substring.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A visitor searches for the exact order number “ORD-2024-117”. What is more reliable?',
+				options: [
+					'Word search with an exact match: vector search may “guess” similar numbers',
+					'Vector search only: it understands the meaning of a number',
+					'It makes no difference'
+				],
+				answer: 0,
+				why: [
+					'Yes. Codes, SKUs and article numbers are not meaning, they are exact strings. Exact matching is better here, and often the two approaches are combined (hybrid search).',
+					'No: a number has no “meaning”, so vector search returns similar ones, not that one.',
+					'No: for exact identifiers the difference is large.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is RAG in plain words?',
+				options: [
+					'Find the pieces of your texts closest to a question and hand them to a model together with it, so it answers from them',
+					'Train a new model on your texts from scratch',
+					'Compress the database'
+				],
+				answer: 0,
+				why: [
+					'Yes. Retrieval-augmented generation: search first (often vector search), then the model answers with the found pieces in its prompt. This is how a chatbot answers “from your knowledge base”.',
+					'No: RAG does not retrain the model, it only shows the model the right pieces.',
+					'No: it has nothing to do with compression.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What should you find out before sending texts to an outside service to compute embeddings?',
+				options: [
+					'Whether the texts contain people’s personal data',
+					'Where the service processes and stores the texts, and on what terms',
+					'Whether you need a legal basis, a contract with the provider or consent for such a transfer',
+					'What color the service’s logo is'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: if they do, sending them is processing personal data, with all that privacy law then requires.',
+					'Yes: that decides where the data ends up and who can reach it.',
+					'Yes: this is a question for an attorney, not a developer. Often it is simpler not to send personal data at all, or to compute embeddings yourself.',
+					'No: a logo does not protect any data.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-search-like',
+				front: 'Why is LIKE a poor choice for searching a site?',
+				back: 'It looks for a substring letter for letter: it does not know word forms (boundary and boundaries), it does not rank, and on big tables it is slow. Searching needs a full-text mechanism.'
+			},
+			{
+				id: 'data-search-fts',
+				front: 'How does full-text search work?',
+				back: 'The text is split into words, function words are dropped, words are reduced to stems, an index “stem → texts” is built (an inverted index) and the results are ordered by relevance. In PostgreSQL that is tsvector, tsquery and a GIN index.'
+			},
+			{
+				id: 'data-search-tools',
+				front: 'When is PostgreSQL enough, and when do you need a separate engine?',
+				back: 'For a small or medium site, search inside PostgreSQL is enough. Meilisearch and Typesense give fast search with typo tolerance, and Elasticsearch is for big volumes and complex tuning.'
+			},
+			{
+				id: 'data-vector-embedding',
+				front: 'What is an embedding, and what is search by meaning?',
+				back: 'A model turns text into a list of numbers, “coordinates of meaning”. Texts close in meaning land close together, so the nearest neighbors of a query are found even when the words differ. The weak spot is exact codes and numbers.'
+			},
+			{
+				id: 'data-vector-privacy',
+				front: 'What should you consider before sending texts to an outside service for embeddings?',
+				back: 'It is a transfer of your texts to a third party. If they contain personal data, you need a legal basis, a contract with the provider as your processor, and to know where it stores the data. The alternative is to compute embeddings on your own server.'
+			}
+		],
+		sources: [
+			{ title: 'PostgreSQL: Full Text Search', url: 'https://www.postgresql.org/docs/current/textsearch.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'pgvector: vector search for Postgres', url: 'https://github.com/pgvector/pgvector', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Meilisearch: documentation', url: 'https://www.meilisearch.com/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Word embedding (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Word_embedding', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Retrieval-augmented generation (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Retrieval-augmented_generation', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Vector databases are so hot right now. WTF are they? (Fireship)', url: 'https://www.youtube.com/watch?v=klTvEwg3oJ4', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now you’ll teach your site to find services by their words, and you’ll see where words are no longer enough and meaning is needed.',
+			hints: [
+				'The demo above searches by word stem. Type one of the words of a service title in another form and see what turns up.',
+				'The PostgreSQL query is put together from parts: to_tsvector of the title and the text @@ plainto_tsquery of your word in WHERE, both with the english configuration, then ts_rank(…) for the score and ORDER BY rank DESC.',
+				'In the answer about vector search, say what would go into it, and judge honestly whether personal data would go to an outside service.'
+			],
+			mistakes: {
+				'search-exists': 'The search block is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				forms: 'The table needs three rows: a form of the word and its stem.',
+				'fts-vector': 'The query has no to_tsvector with the english configuration: that is how text becomes a set of stems for English.',
+				'fts-match': 'There is no comparison: to_tsvector(…) @@ plainto_tsquery(…), both with the english configuration.',
+				'fts-rank': 'You need a score for each result: the function ts_rank(…).',
+				'fts-order': 'Results must be ordered by the score: ORDER BY rank DESC.',
+				'gin-index': 'An index is created like this: CREATE INDEX name ON items USING GIN (to_tsvector(…)).',
+				enough: 'Explain in a few words when word search is enough for you.',
+				'vector-when': 'Say when you would need search by meaning: for example, when visitors ask questions in their own words and the words do not match the text.',
+				'vector-third-party': 'Name the texts that would go to an outside service (the embeddings provider).',
+				'vector-consent': 'Say whether a legal basis or consent is needed: do those texts contain personal data?'
+			},
+			outro: 'Now your data can be searched by words and, if it ever comes to that, by meaning. One last question remains in the part on data: what to store about people, and where.'
+		},
+		say: {
+			LIKE: 'like',
+			tsvector: 'T S vector',
+			tsquery: 'T S query',
+			GIN: 'gin',
+			RAG: 'rag',
+			pgvector: 'P G vector',
+			Meilisearch: 'may-lee search',
+			Elasticsearch: 'elastic search',
+			Typesense: 'type sense',
+			PostgreSQL: 'post-gres Q L',
+			SKU: 'skew'
+		}
+	};
+</script>
+
+<script>
+	import SearchModes from '../../diagrams/SearchModes.svelte';
+</script>
+
+## Search is not LIKE
+
+Say a site has a search box. The simplest idea that comes to mind is `WHERE title LIKE '%boundary%'`. That looks for a substring **letter for letter**. It finds “boundary lines” but not “boundaries”, because the ending is different. It treats “Boundary” and “boundary” as different words unless you switch to `ILIKE`. It cannot tell a page about the topic from one that mentions it in passing, it orders nothing by importance, and on a big table it is slow: an ordinary index does not help when the pattern starts with `%`. Searching text calls for a device of its own.
+
+## Searching by words: how it works
+
+**Full-text search** prepares the text in advance, like the index at the back of a book (you met that idea in the lesson on indexes).
+
+1. **Tokens.** The text is cut into words.
+2. **Normalization.** Everything is put in one case, and function words are dropped: “the”, “of”, “and”, “for”, “how”. They are everywhere and tell texts apart from nothing.
+3. **Stems.** Words are reduced to a stem: “survey”, “surveys”, “surveyed” and “surveying” all become “survey”. This is called stemming, or lemmatization (a lemma is the dictionary form). In Russian this matters far more than in English, because a Russian word has dozens of endings, but even English has plurals, tenses and “boundary” against “boundaries”.
+4. **The index.** A table is built: “stem → the texts it appears in”. This is an **inverted index**.
+5. **Ranking.** The results are put in order. The idea: a word counts for more if it is frequent in this text and rare in the whole collection (this is what TF-IDF and its improvement BM25 compute), and a match in the title weighs more than one in the body.
+
+Play with the diagram. On the “By words” tab the search runs over your own services. Press “Another form of the word”, then switch off “Match word forms”: that is what LIKE would do.
+
+<SearchModes />
+
+PostgreSQL has all of this built in. The `tsvector` type holds a text broken into stems, `tsquery` holds a query, the `@@` operator tests for a match, `ts_rank` computes a score, and a GIN index speeds all of it up on big tables.
+
+```sql
+SELECT title,
+       ts_rank(to_tsvector('english', title || ' ' || text), q) AS rank
+FROM items, plainto_tsquery('english', 'survey') AS q
+WHERE to_tsvector('english', title || ' ' || text) @@ q
+ORDER BY rank DESC;
+
+CREATE INDEX items_fts_idx ON items
+  USING GIN (to_tsvector('english', title || ' ' || text));
+```
+
+The word `'english'` picks the English configuration: its stemming rules and its list of function words. Name the configuration explicitly, because with the wrong one the words are not reduced to the stems you expect.
+
+The built-in search has limits: it does not correct typos and it does not suggest as you type. When that matters, people reach for a **separate search engine**. Meilisearch and Typesense are easy to install and handle typos and “instant” search. Elasticsearch and OpenSearch are for when the data is huge, the filters and tuning are complex, and there is somebody to run it. The price is the same as for any new database: one more server, one more copy of the data that has to be kept in step with the main one (remember the deliberate copy from lesson 3).
+
+<details>
+<summary>Check yourself: why are function words dropped before searching?</summary>
+
+They appear in almost every text, so they do not help tell one text from another, and they would make the index swell.
+
+</details>
+
+## Searching by meaning
+
+Now a question that words cannot answer. A visitor types “how much does it cost”, and the page is called “Prices and billing”. They have no words in common, but the meaning is the same.
+
+**Embeddings** were invented for this. A special model turns a text into a list of hundreds or thousands of numbers: “coordinates of meaning”. Texts close in meaning get close coordinates, like cities on a map. To answer a question, it is turned into coordinates too, and the **nearest neighbors** are taken: the texts that lie next to it. That is how it finds things even when the words are different.
+
+Switch to the “By meaning” tab. There the map is drawn by hand, with just two axes instead of hundreds, and it shows the idea: a question about price lands next to “Prices and billing” and “Payment methods”, and a question about getting money back lands next to “Refund policy”. Below it you can see what a word search would have found: often nothing.
+
+Storing these numbers and finding the nearest among them is the job of **vector databases** (Qdrant, Pinecone, Weaviate) and the **pgvector** extension for PostgreSQL. So as not to compare a question with every text, they build a special approximate-search index (HNSW, IVF), and again they pay for it: the answer is “almost the closest”, but fast.
+
+What search by meaning does badly:
+
+- **Exact identifiers.** An order number, a SKU or the number of a statute is not meaning. Vector search returns “similar” ones, and you need that exact one. That is why the two methods are often combined in **hybrid search**.
+- **Explainability.** It is hard to say why exactly this result came up: similarity is a number.
+- **Model errors.** It may count as close two texts that are opposites (“refunds are allowed” and “refunds are not allowed”).
+
+## RAG: how AI answers from your texts
+
+The same embeddings stand behind most chatbots that answer “from a company’s knowledge base”. The scheme is called **RAG** (retrieval-augmented generation):
+
+1. Your texts are cut into pieces beforehand, and an embedding is computed for each.
+2. A question comes in. Its embedding is compared with the pieces, and the few nearest are taken.
+3. The model is given the question and the pieces found: “answer using only this”.
+
+The model is not retrained, it is only shown the right pages. So an answer can be checked against its source, and for the bot to know something new, it is enough to update the texts.
+
+## Whose texts leave, and where do they go
+
+A practical question that is often forgotten. Many people compute embeddings on **someone else’s service**: the texts go over the network to an outside provider. If those texts contain **personal data** (names, phone numbers, details of requests), then sending them is already processing personal data by a third party, with the requirements of privacy law (the next lesson is about that). What to do:
+
+- Do not send more than necessary: the pages of services and the answers to frequent questions usually hold no personal data.
+- Find out where the provider processes and stores the texts, and on what terms. Under GDPR a provider that handles personal data on your behalf is your **processor**, and you need a written contract with it. In the US the state privacy laws ask for similar contracts with “service providers” or “processors”.
+- If you do need to send personal data, make sure there is a legal basis (consent is one), or compute the embeddings **yourself**, on your own server, with an open model.
+
+The decision here is not the developer’s. It belongs to the site’s owner, together with an attorney. But the person who builds the search is the one who has to ask: “What exactly are we sending?”
+
+## Practice
+
+You are in the era of 2022: sites now have a search box that understands word forms. Add one to your project.
+
+The page has a demo that searches your services. Write down three forms of one word and their stem, write a PostgreSQL query with the English configuration, ranking and an index, and then answer briefly: when word search is enough for you, and when you would need meaning. The real PostgreSQL in a browser is on the PGlite site; here the text of the query is what gets checked.
+
+## What was wrong before
+
+The built-in search of 2010s sites was usually simple: it looked for words in the title and the text and ranked poorly. Many sites plugged in an outside engine, and Apache Solr and Elasticsearch (both built on the Lucene library) were the usual choices. Search by meaning stayed the business of research labs. Today vector search is available to any site, and the main question is no longer “how do we do it” but “what exactly are we sending, and to whom”.

@@ -1,0 +1,854 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/07-data/07-privacy-by-design.svx. This lesson is general information, not legal advice. */
+	export const metadata = {
+		id: '07-data/07-privacy-by-design',
+		part: 7,
+		order: 7,
+		title: 'Privacy by design: what to store and where',
+		definition: 'Privacy by design builds data protection into the schema in advance: minimal fields, each with a purpose and a retention period. GDPR Article 25 requires it.',
+		summary:
+			'You’ll build data protection into a database schema instead of bolting it on: collect the minimum, set retention periods, keep personal data apart and record consent as a fact. Afterwards you know the core of GDPR Article 25 and of the US state privacy laws, how Russia’s 152-FZ differs, and you can list which data of your project they touch.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'sheet',
+					label: 'passport, birth date',
+					caption: 'Booking form',
+					say: [
+						{ text: 'Why does a booking form ask for a passport number?' },
+						{ who: 'Form', text: 'Just in case.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'lock',
+					label: 'keep: 3 years',
+					caption: 'Retention',
+					say: 'What you never collect cannot leak. What you do collect is kept with the date it will be deleted.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'text, version 2',
+					caption: 'Consent',
+					say: 'Consent is a record: when, to which text, and for what. A tick box alone is not enough.'
+				}
+			]
+		},
+		minutes: 30,
+		teaches: ['data-privacy-by-design', 'data-data-localisation'],
+		requires: ['data-transaction', 'data-sql-write', 'server-authentication'],
+		practice: {
+			id: 'data-privacy-register',
+			title: 'A data register, and consent as a record',
+			task: 'The page has a data register table and a box for SQL. 1) For each of the four rows (name, phone, comment, the people shown on the site), fill in the seven cells: the purpose; where it is stored; the retention period and the condition for deleting (for example “3 years after the request, then deleted”); who has access; the lawful basis; and whether it is personal data (“yes” or “no”, with a note). 2) Name a field you decided not to collect although you were tempted (date of birth, a passport or Social Security number, an email address) and say why. 3) Say where the main record of your visitors’ data sits (which country or region), and what happens to copies or transfers to another country. 4) Say how personal data is kept apart from the rest (for example, a separate table of requests). 5) In the SQL box, create a consents table: a consent is stored with a date, the version of the text and a purpose, and it refers to a request. Every “…” has to be replaced. This is a teaching draft, not a legal document.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="register">
+      <h2>The project’s data register<\/h2>
+      <p>For each group of data: what it is, why you hold it, where it sits, how long it is kept and on what condition it is deleted, who has access, the lawful basis, and whether it is personal data.<\/p>
+      <table>
+        <tr><th>Data<\/th><th>Purpose<\/th><th>Where it is stored<\/th><th>Retention and deletion<\/th><th>Who has access<\/th><th>Lawful basis<\/th><th>Personal data?<\/th><\/tr>
+        <tr class="field visitor"><td class="what">Visitor’s name from the request form<\/td><td class="why">…<\/td><td class="where">…<\/td><td class="keep">…<\/td><td class="access">…<\/td><td class="basis">…<\/td><td class="pd">…<\/td><\/tr>
+        <tr class="field visitor"><td class="what">Visitor’s phone number<\/td><td class="why">…<\/td><td class="where">…<\/td><td class="keep">…<\/td><td class="access">…<\/td><td class="basis">…<\/td><td class="pd">…<\/td><\/tr>
+        <tr class="field visitor"><td class="what">Comment on the request (free text)<\/td><td class="why">…<\/td><td class="where">…<\/td><td class="keep">…<\/td><td class="access">…<\/td><td class="basis">…<\/td><td class="pd">…<\/td><\/tr>
+        <tr class="field people"><td class="what">Data of the people you show on the site (people)<\/td><td class="why">…<\/td><td class="where">…<\/td><td class="keep">…<\/td><td class="access">…<\/td><td class="basis">…<\/td><td class="pd">…<\/td><\/tr>
+      <\/table>
+      <p>A field I decided not to collect although I was tempted, and why: <span id="removed">…<\/span><\/p>
+      <p>Where the main record of visitors’ data sits, and what happens to copies or transfers to another country: <span id="localisation">…<\/span><\/p>
+      <p>How personal data is kept apart from the rest in the schema: <span id="separate">…<\/span><\/p>
+
+      <h3>Consent as a record in the database<\/h3>
+      <textarea aria-label="Consent as a record in the database" id="q-consent" rows="9">CREATE TABLE consents (
+  id serial PRIMARY KEY,
+  …
+);<\/textarea>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="register">
+      <h2>The project’s data register<\/h2>
+      <p>For each group of data: what it is, why you hold it, where it sits, how long it is kept and on what condition it is deleted, who has access, the lawful basis, and whether it is personal data.<\/p>
+      <table>
+        <tr><th>Data<\/th><th>Purpose<\/th><th>Where it is stored<\/th><th>Retention and deletion<\/th><th>Who has access<\/th><th>Lawful basis<\/th><th>Personal data?<\/th><\/tr>
+        <tr class="field visitor"><td class="what">Visitor’s name from the request form<\/td><td class="why">to know how to address them when replying<\/td><td class="where">the requests table in PostgreSQL, on a server in the United States<\/td><td class="keep">3 years after the request, then a script deletes it<\/td><td class="access">the owner through the admin screen, and the site’s server<\/td><td class="basis">steps the person asked for (replying to a request)<\/td><td class="pd">yes<\/td><\/tr>
+        <tr class="field visitor"><td class="what">Visitor’s phone number<\/td><td class="why">to get in touch about the request, and for nothing else<\/td><td class="where">the requests table in PostgreSQL, on a server in the United States<\/td><td class="keep">3 years after the request, then a script deletes it<\/td><td class="access">the owner through the admin screen, and the site’s server<\/td><td class="basis">steps the person asked for (replying to a request)<\/td><td class="pd">yes<\/td><\/tr>
+        <tr class="field visitor"><td class="what">Comment on the request (free text)<\/td><td class="why">to understand the task before the call<\/td><td class="where">the requests table in PostgreSQL, on a server in the United States<\/td><td class="keep">1 year after the request, then deleted<\/td><td class="access">the owner through the admin screen<\/td><td class="basis">steps the person asked for (replying to a request)<\/td><td class="pd">yes, if the person writes about themselves<\/td><\/tr>
+        <tr class="field people"><td class="what">Data of the people you show on the site (people)<\/td><td class="why">so that visitors know who they will work with<\/td><td class="where">the people table and a page of the site, on a server in the United States<\/td><td class="keep">while the person works on the project, then deleted at their request<\/td><td class="access">the owner and the person themselves<\/td><td class="basis">the person’s consent to be shown<\/td><td class="pd">yes: name and photo, published with the person’s consent<\/td><\/tr>
+      <\/table>
+      <p>A field I decided not to collect although I was tempted, and why: <span id="removed">date of birth: a consultation request does not need it, and it would only add personal data<\/span><\/p>
+      <p>Where the main record of visitors’ data sits, and what happens to copies or transfers to another country: <span id="localisation">the main record of requests goes into a database on a server in the United States, where my visitors are; there are no copies abroad, and if one appears it is a transfer that needs a safeguard (standard contractual clauses), which I would settle with an attorney first<\/span><\/p>
+      <p>How personal data is kept apart from the rest in the schema: <span id="separate">requests sit in a table of their own called requests, and logs and analytics keep only the request number, without a name or phone<\/span><\/p>
+
+      <h3>Consent as a record in the database<\/h3>
+      <textarea aria-label="Consent as a record in the database" id="q-consent" rows="9">CREATE TABLE consents (
+  id serial PRIMARY KEY,
+  request_id integer REFERENCES requests(id),
+  given_at timestamp NOT NULL,
+  text_version text NOT NULL,
+  purpose text NOT NULL
+);<\/textarea>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling of the exercise (the data-scaffold blocks). It does not reach the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'register-exists', kind: 'exists', selector: '#register' },
+				{ id: 'no-blanks', kind: 'text', selector: '#register', matches: '^[^…]*$' },
+				{ id: 'rows', kind: 'count', selector: '#register tr.field', min: 4 },
+				{ id: 'purpose', kind: 'text', selector: '#register td.why', matches: '[Tt]o |[Ff]or |[Ss]o |[Cc]ontact|[Rr]eply|[Aa]nswer|[Bb]ook|[Ss]how|[Uu]nderstand' },
+				{ id: 'term-numbers', kind: 'text', selector: '#register td.keep', matches: '\\d+\\s*(?:day|week|month|year)|[Uu]ntil|[Ww]hile|[Aa]s long as' },
+				{ id: 'delete-condition', kind: 'text', selector: '#register td.keep', matches: '[Dd]elet|[Aa]nonymi[sz]|[Ee]rase|[Rr]emov|[Dd]estroy|[Pp]urge|[Ww]ipe' },
+				{ id: 'access-named', kind: 'text', selector: '#register td.access', matches: '[Oo]wner|[Aa]dmin|[Ss]erver|[Oo]nly|[Aa]ccountant|[Ee]ditor|[Ss]taff|\\bI\\b' },
+				{ id: 'pd-marked', kind: 'text', selector: '#register td.pd', matches: '^\\s*[Yy]es' },
+				{
+					id: 'removed-field',
+					kind: 'text',
+					selector: '#removed',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[Nn]ot need|[Uu]nnecessar|[Ee]xtra|[Nn]ot collect|[Dd]id not|[Dd]idn[’\']t|[Ww]ithout|[Nn]o need|[Dd]on[’\']t need|[Dd]on[’\']t collect))'
+				},
+				{
+					id: 'localisation',
+					kind: 'text',
+					selector: '#localisation',
+					matches: '(?=[\\s\\S]*(?:\\bEU\\b|EEA|Europe|\\bUK\\b|\\bUS\\b|U\\.S\\.|[Uu]nited|[Cc]ountr|[Rr]egion|Russia|[Aa]broad|[Oo]utside|[Oo]verseas|[Tt]ransfer|[Cc]lauses|[Aa]dequacy))(?=[\\s\\S]*(?:[Ss]erver|[Dd]atabase|[Hh]ost|[Cc]loud|[Dd]ata cent|[Ss]tored|[Tt]able))'
+				},
+				{
+					id: 'separation',
+					kind: 'text',
+					selector: '#separate',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[Ss]eparate|[Tt]able|requests|[Rr]equest|[Aa]nonym|[Nn]umber|[Pp]seudonym))'
+				},
+				{
+					id: 'consent-table',
+					kind: 'text',
+					selector: '#q-consent',
+					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Tt][Aa][Bb][Ll][Ee]\\s+[Cc][Oo][Nn][Ss][Ee][Nn][Tt][Ss]'
+				},
+				{
+					id: 'consent-date',
+					kind: 'text',
+					selector: '#q-consent',
+					matches: '(?:given_at|accepted_at|created_at|consent_date|[Tt][Ii][Mm][Ee][Ss][Tt][Aa][Mm][Pp]|[Dd][Aa][Tt][Ee])'
+				},
+				{ id: 'consent-version', kind: 'text', selector: '#q-consent', matches: 'version' },
+				{ id: 'consent-purpose', kind: 'text', selector: '#q-consent', matches: 'purpose' },
+				{ id: 'consent-link', kind: 'text', selector: '#q-consent', matches: '[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s+\\w+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'A booking form for consultations asks for a name, a phone number, a date of birth and a passport number. What goes, by the rule of minimum?',
+				options: [
+					'The date of birth and the passport number: a booking does not need them',
+					'The phone number: it is personal data',
+					'Nothing: the more data, the better'
+				],
+				answer: 0,
+				why: [
+					'Yes. You collect only what a stated purpose needs. A booking needs a way to address the person and a way to reach them. The rest is risk with no benefit.',
+					'No: the phone number is needed to reach the person. That it is personal data does not mean “remove it”, it means “protect it and explain why you ask”.',
+					'No: GDPR (Article 5) and the US state laws want the amount of data limited to what the purpose needs.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each step of privacy by design to what it means',
+				pairs: [
+					['Minimum', 'do not collect what the purpose does not need'],
+					['Purpose', 'every field has a stated reason and is used for nothing else'],
+					['Retention', 'it is written down how long to keep the data, and when to delete or anonymize it'],
+					['Separation', 'personal data lives apart, and logs and analytics hold only numbers'],
+					['Consent as a record', 'a date, the version of the text and a purpose are stored, not just a “yes”']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is worth storing about a visitor’s consent, besides the fact that they agreed?',
+				options: [
+					'The date and time the consent was given',
+					'The version of the text they agreed to',
+					'The purpose the consent was given for',
+					'The visitor’s email password'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: without a date you cannot show that consent came before the processing.',
+					'Yes: texts change over time, and you need to know which one the person agreed to.',
+					'Yes: consent is given for a specific purpose, and it does not cover other uses.',
+					'No: nobody needs anyone else’s password, anywhere. That is exactly the data you should not hold.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Your site sells to people in Germany, and the database is on a server in the United States. What does GDPR require?',
+				options: [
+					'There is no rule that data must stay in the EU, but the transfer needs a safeguard, such as an adequacy decision or standard contractual clauses',
+					'Nothing: once the data leaves the EU, GDPR no longer applies',
+					'The data must stay in the EU, and any copy abroad is forbidden'
+				],
+				answer: 0,
+				why: [
+					'Yes. Chapter V of GDPR allows a transfer to another country only with a tool such as an adequacy decision (for example, for US companies in the EU–US Data Privacy Framework) or standard contractual clauses. GDPR also reaches a site outside the EU that offers goods or services to people in it.',
+					'No: GDPR follows the people, not the server. It applies to a site that offers goods or services to people in the EU wherever the site is.',
+					'No: that is localization, and GDPR does not demand it. Russia’s 152-FZ is the example of a law that does.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A person asked you to delete their request, and you deleted the row. What else should you think about?',
+				options: [
+					'Backups, logs and analytics: the data may remain there, so copies have retention periods too',
+					'Nothing: if the row is gone, the data is nowhere',
+					'Phone the person and ask whether they are sure'
+				],
+				answer: 0,
+				why: [
+					'Yes. Data lives in more than the main table. That is why each copy has its own retention period in the register, and personal data is best kept out of logs altogether.',
+					'No: a copy on a backup disk holds the data too.',
+					'No: the person has a right to ask for deletion (GDPR Article 17, and a right to delete in California and other states). Checking who is asking is fair, but it must not become an obstacle.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How should visitors’ passwords be stored if the site has a login?',
+				options: [
+					'Not the passwords themselves but their hashes, computed with a slow function (for example argon2 or bcrypt) and a salt',
+					'In plain text, so that a forgotten password can be emailed',
+					'Encrypted with one shared key stored in the same database'
+				],
+				answer: 0,
+				why: [
+					'Yes. A hash cannot be “decrypted”, but a password can still be checked against it. If the database leaks, not everyone has to change their password.',
+					'No: whoever gets the database gets every password, and people often reuse one password on many sites.',
+					'No: a key beside the data protects nothing: whoever gets the database gets the key too.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The “Comment” field of the form is free text. Why is it risky for privacy?',
+				options: [
+					'People write things there that you did not ask for, including details about their health or family',
+					'It is slower than ordinary fields',
+					'Nobody can write accented letters in it'
+				],
+				answer: 0,
+				why: [
+					'Yes. You collect data you did not plan to, possibly special categories (GDPR Article 9) or sensitive data under state laws, which need stricter retention and protection. A hint beside the field (“please do not share health details here”) helps.',
+					'No: speed has nothing to do with it.',
+					'No: accented letters are no problem in a field like that.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-privacy-idea',
+				front: 'What is privacy by design?',
+				back: 'Data protection is built into the schema and the processes from the start instead of being bolted on: minimum data, purpose, retention, separation, protection and transparency. In GDPR it is Article 25, “data protection by design and by default”.'
+			},
+			{
+				id: 'data-privacy-steps',
+				front: 'The five privacy steps in a database schema',
+				back: 'Minimum (collect nothing extra), a purpose for every field, a retention period with a condition for deleting, personal data kept apart, and consent as a record (date, version of the text, purpose).'
+			},
+			{
+				id: 'data-privacy-consent',
+				front: 'What should you store about consent?',
+				back: 'The date and time, the version of the text, the purpose of the processing and a reference to the request or the person. A “yes” flag is not enough: you must be able to show what exactly the person agreed to, and when.'
+			},
+			{
+				id: 'data-localisation',
+				front: 'Where may personal data be stored?',
+				back: 'GDPR and the US state laws do not demand a storage country, but under GDPR a transfer outside the EU or UK needs a safeguard (an adequacy decision, standard contractual clauses). Russia is the strict case: the primary database of Russian citizens’ data must be in Russia.'
+			},
+			{
+				id: 'data-privacy-copies',
+				front: 'Where else does data sit besides the main table?',
+				back: 'In backups, logs, analytics, emails and exports. Each copy has its own retention period, and personal data is best kept out of logs altogether.'
+			}
+		],
+		sources: [
+			{ title: 'GDPR, Article 25: Data protection by design and by default', url: 'https://gdpr-info.eu/art-25-gdpr/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'GDPR, Article 5: Principles relating to processing of personal data', url: 'https://gdpr-info.eu/art-5-gdpr/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'GDPR, Chapter V: Transfers of personal data to third countries', url: 'https://gdpr-info.eu/chapter-5/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'ICO: UK GDPR guidance and resources', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'California Privacy Protection Agency: CCPA and CPRA, frequently asked questions', url: 'https://cppa.ca.gov/faq.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Virginia Consumer Data Protection Act (Code of Virginia, Title 59.1, Chapter 53)', url: 'https://law.lis.virginia.gov/vacode/title59.1/chapter53/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'European Commission: EU–US data transfers', url: 'https://commission.europa.eu/law/law-topic/data-protection/international-dimension-data-protection/eu-us-data-transfers_en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Privacy by design (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Privacy_by_design', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'OWASP: Database Security Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Федеральный закон № 152-ФЗ «О персональных данных» (for comparison, in Russian)', url: 'https://www.consultant.ru/document/cons_doc_LAW_61801/', licence: 'proprietary-link', kind: 'spec', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'We’re drawing up a register of your project’s data: what you keep about people, why, where and for how long. It is not a legal document but an honest inventory, which an attorney can then work from.',
+			hints: [
+				'For each row, answer in order: why you need it (one purpose), where it sits, how long it is kept and what happens when the time is up, who has access, what the lawful basis is, and whether it is personal data.',
+				'A retention period is a number plus a condition: “3 years after the request, then deleted”. The words “kept forever” do not belong in a register.',
+				'Consent in the database is a consents table: a date (given_at), the version of the text (text_version), a purpose (purpose) and a link to the request through REFERENCES.'
+			],
+			mistakes: {
+				'register-exists': 'The register block is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				rows: 'The register should keep at least four rows.',
+				purpose: 'The “Purpose” column does not show a purpose. Begin with words like “to…”.',
+				'term-numbers': 'A retention period needs a number: for example “3 years” or “6 months”.',
+				'delete-condition': 'After the period, add what happens next: the data is deleted or anonymized.',
+				'access-named': 'Say who has access: for example “the owner through the admin screen”.',
+				'pd-marked': 'A name and a phone number are personal data. In the last column, begin with “yes”.',
+				'removed-field': 'Name a field you decided not to collect, and explain why it is not needed for the purpose.',
+				localisation: 'Say where the main record of visitors’ data sits (which country or region, on what server), and what happens to copies or transfers abroad.',
+				separation: 'Say how personal data is kept apart from the rest, for example in a separate table of requests.',
+				'consent-table': 'The consent table is called consents: CREATE TABLE consents (…).',
+				'consent-date': 'A consent needs a date: a column given_at of type timestamp.',
+				'consent-version': 'A consent needs the version of the text: a column text_version.',
+				'consent-purpose': 'A consent needs a purpose: a column purpose.',
+				'consent-link': 'A consent should refer to the request: request_id integer REFERENCES requests(id).'
+			},
+			outro: 'Now your project has an inventory of its data and a consents table. Next comes the part on CMSs: where a site’s content lives, and who edits it.'
+		},
+		say: { PostgreSQL: 'post-gres Q L', GDPR: 'G D P R', CCPA: 'C C P A', CPRA: 'C P R A', ICO: 'I C O', OWASP: 'oh-wasp', argon2: 'argon two', bcrypt: 'bee-crypt', SQL: 'S Q L', FZ: 'F Z', EEA: 'E E A' }
+	};
+</script>
+
+<script>
+	import DataRegister from '../../diagrams/DataRegister.svelte';
+</script>
+
+## The riskiest thing in your database
+
+Your project’s database can hold anything, but the most dangerous thing in it is **data about people**: names, phone numbers, requests. If the catalog of services leaks, nothing happens. If the requests leak, it is a harm to the people and to you. That is why this part ends with privacy: now you know how data is arranged, and you can decide what to store and how.
+
+**This lesson is general information, not legal advice.** Laws change and differ from place to place, and for a real project an attorney who works in privacy law checks the texts and the process. Regulators publish free guidance too: the Information Commissioner’s Office (ICO) in the UK, the data protection authorities of the EU countries (the European Data Protection Board lists them), and in the US the Federal Trade Commission and your state attorney general. What you can learn here is to **ask the right questions** and to build the answers into the schema.
+
+## Privacy by design
+
+The idea comes from Ann Cavoukian, Ontario’s privacy commissioner, in the 1990s: protection should be **built into the way a system is made**, not glued on after the first leak. The European GDPR wrote it into law as Article 25, “data protection by design and by default”. Cavoukian’s seven principles come down to this:
+
+1. Act in advance, not after an incident.
+2. The most private settings are on by default.
+3. Privacy is built into the design of the system.
+4. Nothing is sacrificed: good protection and a well-working site go together.
+5. Protection for the whole life of the data, from collecting to deleting.
+6. Transparency: people can see what happens to their data.
+7. Respect for the person: their interests come first.
+
+Article 25 turns this into two duties. **By design**: when you decide how to process data, and while you do it, you put in place technical and organizational measures (pseudonymization is the law’s own example) built to carry out the data protection principles, such as data minimization. **By default**: unless a person chooses otherwise, only the personal data necessary for each specific purpose is processed, and that applies to the amount collected, how far it is processed, **how long it is stored** and **who can reach it**. Those four things are exactly what a database schema decides.
+
+## Five steps in a schema
+
+In practice, for a schema, this becomes **five steps**.
+
+**1. Minimum.** Collect nothing the purpose does not need. What you do not collect cannot leak, and you will not have to protect, keep or delete it. GDPR says personal data must be “adequate, relevant and limited to what is necessary” (Article 5(1)(c)). Virginia’s law says a controller must limit collection to what is “adequate, relevant, and reasonably necessary” for the disclosed purposes, and California’s says collection, use and retention must be “reasonably necessary and proportionate”. A booking form needs a name and a way to reach the person. A date of birth “just in case” is not a purpose. Switch fields on and off in the diagram below: the counter shows how much extra you would be holding.
+
+**2. A purpose for every field.** For every field you must be able to say why it is there. GDPR calls this purpose limitation: purposes are “specified, explicit and legitimate”, and the data is not used in a way that does not fit them. The US state laws say much the same. A phone number taken to answer a request cannot, without a new basis, be put on a marketing list.
+
+**3. Retention and deletion.** Each group of data needs a retention period and a condition for deleting or anonymizing it: “three years after the request, then deleted”. Data without a period piles up forever, and the responsibility for it stays with you. GDPR calls this storage limitation: no longer than the purpose needs. California goes further and asks a business to tell people how long it keeps each category. The period must be written down, and the deleting should be automatic (a scheduled job), or nobody will remember it.
+
+**4. Separation and protection.** Personal data is kept **apart**: requests in a table of their own. Logs, analytics and emails hold only the request number, not the name and phone. Access goes by role: the accountant does not need contacts, and the editor does not need requests (more on authorization in part 6). The connection to the database and the disk are encrypted, and visitors’ passwords are stored not as they are but as **hashes** (a slow function such as argon2 or bcrypt, plus a salt), as the lesson on authentication explained. The OWASP cheat sheet in the sources is a useful list of measures.
+
+**5. Consent as a record.** A form has a tick box, and many people stop there. But when a person comes and asks “what did I agree to?”, you need to show a **record**: the date and time, the version of the text they agreed to, and the purpose. GDPR is explicit: where processing rests on consent, the controller “shall be able to demonstrate” that the person consented (Article 7(1)). So consent is a row in a table, not a boolean: `consents(request_id, given_at, text_version, purpose)`.
+
+Consent is only one of the legal reasons to process data. GDPR lists six **lawful bases** (Article 6): consent, a contract (including steps a person asks for before one), a legal obligation, vital interests, a public task, and legitimate interests. Replying to a visitor who wrote to you rests on the second or the last, not on consent. Consent is the right basis for things the visitor could refuse without losing the service, such as a newsletter. In the US the state laws lean on notice and a right to opt out, and they ask for opt-in consent mainly for sensitive data.
+
+<DataRegister />
+
+<details>
+<summary>Check yourself: why is the “Comment” field riskier than the others?</summary>
+
+People fill free text with anything, including details about health and family that you never asked for. The data turns out unexpectedly sensitive, while the protection was built for ordinary data. A hint beside the field, saying what not to write, helps.
+
+</details>
+
+## What sits in the copies
+
+When a person asks you to delete their data, deleting a row is not enough. Data also lives in **backups**, in server **logs** (an error saying “could not send the text message to +1 …” wrote a phone number into a file), in **analytics**, in emails and in exports. Each copy needs its own retention period, and it is best to keep personal data out of logs altogether. Make the register include the copies: that is what it is for.
+
+## What the law says
+
+The details differ by place. Here are the main frames an English-speaking site meets, and one strict example for comparison.
+
+**GDPR (the EU).** The General Data Protection Regulation applies to anyone who offers goods or services to people in the EU, or watches their behavior, wherever the site is (Article 3). **Personal data** is any information about an identifiable person: a name, a phone number, an email, but also an IP address, a photo or a location. The **controller** decides why and how the data is processed (if your form collects names, that is you, even as a one-person business). A **processor** handles data on the controller’s behalf: your hosting company, your email service, an embeddings provider. You need a contract with each processor (Article 28). What follows for the database:
+
+- **A lawful basis** for each purpose (Article 6, above), and stricter rules for **special categories** such as health, beliefs or biometrics (Article 9). If you do not need them, do not ask.
+- **Purpose, minimum and storage limits** (Article 5), which the steps 1 to 3 carry out. Article 25 makes it a duty to build them into the system.
+- **People’s rights** (Articles 15 to 22): to see what you hold, to have it corrected or erased, to restrict or object to processing, and to take it elsewhere. The reply is due within a month. That is why you must be able to find and delete one person’s data.
+- **A record of processing** (Article 30). Smaller organizations are partly exempt, but a register like the one in this lesson is the easiest way to answer any question about your data.
+- **A breach must be reported** to the authority within 72 hours (Article 33) when it puts people at risk. Fines for the gravest breaches reach 20 million euros or 4% of worldwide annual turnover.
+
+**The UK.** After Brexit the UK kept the same rules as the **UK GDPR**, together with the Data Protection Act 2018. The regulator is the ICO. For a site, the practical advice is the same.
+
+**The United States.** There is no single federal privacy law for websites in general. There are laws for particular areas (children’s data under COPPA, health under HIPAA, finance under the Gramm-Leach-Bliley Act), the **Federal Trade Commission**, which acts against companies that break their own privacy promises, a breach-notification law in every state, and, since California started in 2018, a growing list of **state privacy laws**: California’s CCPA as amended by the CPRA, then Virginia, Colorado, Connecticut, Utah, Texas and many more (the IAPP keeps a tracker). They differ in detail, but they share a core: tell people what you collect and why, limit collection to what is needed, let people see, correct and delete their data and opt out of its sale or sharing, and take extra care with sensitive data. Most apply only above a size: California’s CCPA, for example, covers a business with annual revenue above about 26.6 million dollars, or one that buys, sells or shares the data of 100,000 or more residents or households, or that earns half its revenue from selling or sharing it. A one-person practice may fall below every line, but whether it does is a question for an attorney, and customers expect the same care either way.
+
+**Data localization and transfers.** Where may the database sit? **GDPR does not require data to stay in the EU.** Chapter V says it may leave only with a tool: an adequacy decision (the European Commission has found some countries adequate, and since 10 July 2023 a US company that joins the EU–US Data Privacy Framework counts), standard contractual clauses between you and the receiver, or another safeguard. **The US state laws have no localization rule**, though your privacy notice should say who receives the data, and some government contracts and regulated sectors add rules of their own.
+
+**Russia, for comparison.** Russia’s 152-FZ is the strict case. Its Article 18, part 5, says that when personal data of Russian citizens is collected, including over the internet, recording, storing and retrieving it must use databases located in Russia. A foreign server cannot be the **primary** store, and a copy abroad is a separate transfer procedure. In 2016 the regulator blocked the LinkedIn site in Russia for breaking this rule. China and some other countries have localization rules of their own. If your visitors are in a country with such a rule, the host’s location is a legal question from the first day.
+
+Whatever the law, one habit pays off everywhere: know **which country your host stores the data in**, and write it in the register.
+
+## Practice
+
+You are in the era of 2022: protecting data is turning from a wish into something regulators check. Draw up an inventory of your project’s data and add consent to the schema.
+
+The page has a register table with four rows (name, phone, comment, the people on the site) and a box for SQL. Fill in the register, say what you decided not to collect, where the main record sits and how personal data is kept apart, and create a consents table with a date, the version of the text and a purpose.
+
+## What was wrong before
+
+In the 2010s, requests from a site usually went by email to the owner’s personal mailbox, in plain text, and piled up there for years: nobody knew how many, who had access, or when to delete them. Forms loved “required” fields just in case, and consent was a sentence in small print at the bottom of the page. Today that is not only a bad habit but a risk: data leaks from a mailbox just as it does from a database, and there is nothing to prove consent. The register and the consents table solve both problems.
