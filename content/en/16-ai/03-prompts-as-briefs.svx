@@ -1,0 +1,317 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/03-prompts-as-briefs.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const brief = (v) => `<section data-scaffold id="prompt-brief">
+      <h2>A structured prompt from the brief</h2>
+      <textarea id="p-full" rows="20" aria-label="Prompt">${v.full}<\/textarea>
+      <p>What not to do:</p>
+      <ul id="p-donts">
+        <li>${v.donts[0]}</li>
+        <li>${v.donts[1]}</li>
+        <li>${v.donts[2]}</li>
+      </ul>
+      <p>How to tell it is done:</p>
+      <ul id="p-done">
+        <li>${v.done[0]}</li>
+        <li>${v.done[1]}</li>
+        <li>${v.done[2]}</li>
+      </ul>
+      <p id="p-private">What from the brief I won’t send to the model: ${v.priv}</p>
+      <p id="p-compare">Comparison with a short request: ${v.compare}</p>
+    </section>`;
+
+	const starter = `Context: …
+Goal: …
+Audience: …
+The visitor’s main action: …
+Sections: …
+What we offer: …
+People: …
+Proof (only these, invent nothing): …
+Languages (codes such as en, es): …
+Tone, by example: …
+Format of the result: …`;
+	const solved = `Context: {{who}}
+Goal: a site where a visitor does one thing and understands what we do
+Audience: {{forWhom}}
+The visitor’s main action: “{{mainAction.label}}”
+Sections: {{#each sections}}{{.}}; {{/each}}
+What we offer: {{#each items}}{{title}}; {{/each}}
+People: {{#each people}}{{name}}; {{/each}}
+Proof (only these, invent nothing): {{#each proofs}}{{title}}; {{/each}}
+Languages (codes such as en, es): {{#each languages}}{{.}}, {{/each}}
+Tone, by example: “First we’ll go through the documents, then decide what to do.” “We’ll answer your questions in order, without hurry.”
+Format of the result: one HTML file and one CSS file, semantic markup, no external scripts, with a lang attribute`;
+
+	const three = (id, sel, re) => [1, 2, 3].map((n) => ({ id: `${id}-${n}`, kind: 'text', selector: `#${sel} li:nth-child(${n})`, matches: re }));
+
+	export const metadata = {
+		id: '16-ai/03-prompts-as-briefs',
+		part: 16,
+		order: 3,
+		title: 'Prompts as briefs: how to give an AI a task',
+		definition: 'A prompt is an assignment for a language model; a good one is built like a brief: a goal, a reader, facts, limits, examples of tone and a test for done.',
+		summary:
+			'A short request gets the most probable answer, that is, a template. Afterwards you’ll write a prompt the way you write a brief for a person: a goal, an audience, facts from your own brief, limits, tone shown by examples and a test for done; you’ll know what not to send to a model, and compare the result with a short request.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'make a site', caption: 'A short request', say: 'A request of three words gets the most probable answer: a template. The model knows neither you nor your visitors.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'brief', say: 'A goal, an audience, facts, limits, examples of tone, a test for done. That’s how you brief a person, and a model.' },
+				{ mood: 'cheer', prop: 'cards', label: '2 examples', caption: 'Tone isn’t an adjective', say: 'The word “warm” says nothing. Two of your real sentences say everything.' }
+			]
+		},
+		minutes: 25,
+		teaches: ['future-prompt-as-brief'],
+		requires: ['future-ai-site-builders', 'start-project-brief', 'copy-value-proposition-canvas'],
+		practice: {
+			id: 'future-structured-prompt',
+			title: 'A structured prompt from every field of the brief',
+			task: 'Write a prompt that can be given to a builder and to a human front-end developer alike. 1) In the prompt field, replace each “…” with data from your brief: the context (who you are), the goal, the audience, the main action in quotation marks, all the sections, what you offer, the people, the proof (only real proof from the brief), the languages as two-letter codes (such as en, es), the tone shown by two of your own sentences in quotation marks (not by an adjective), the format of the result. If the brief has no people or proof, write “none in the brief”. 2) Under the prompt, enter three prohibitions (each starting with “Don’t”) and three tests for done (measurable ones). 3) Write what from the brief you won’t send to the model (a phone number and an email, for example). 4) Compare with a short request in three or four sentences. Every “…” has to be replaced.',
+			era: 7,
+			files: files({
+				lang: 'en',
+				scaffold: brief({ full: starter, donts: ['…', '…', '…'], done: ['…', '…', '…'], priv: '…', compare: '…' })
+			}),
+			solution: files({
+				lang: 'en',
+				scaffold: brief({
+					full: solved,
+					donts: ['Don’t invent achievements, reviews or numbers', 'Don’t add third-party scripts or fonts', 'Don’t use stock wording such as “Get Started”'],
+					done: ['The page has exactly one first-level heading', 'Every image has an alt description', 'Text contrast is at least 4.5 to 1, and the page works from the keyboard'],
+					priv: 'my phone number and email, ID numbers and any personal data of clients: the prompt holds only what will be on the public page anyway.',
+					compare: 'The short request “make a site for a specialist” gave a template: a slogan, three cards with emoji and invented numbers. The structured prompt returned my sections, my services and my tone, and added no numbers. The difference is that the second time the model had nothing to guess, so I corrected mostly the wording and not the facts.'
+				})
+			}),
+			checks: [
+				{ id: 'brief', kind: 'exists', selector: '#prompt-brief' },
+				{ id: 'no-blanks', kind: 'text', selector: '#prompt-brief', matches: '^[^…]*$' },
+				{ id: 'p-who', kind: 'field', selector: '#p-full', field: 'who' },
+				{ id: 'p-for-whom', kind: 'field', selector: '#p-full', field: 'forWhom' },
+				{ id: 'p-action', kind: 'field', selector: '#p-full', field: 'mainAction.label' },
+				{ id: 'p-sections', kind: 'field', selector: '#p-full', field: 'sections' },
+				{ id: 'p-items', kind: 'field', selector: '#p-full', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'p-people', kind: 'field', selector: '#p-full', field: 'people[].name', when: { brief: 'people[].name' } },
+				{ id: 'p-proofs', kind: 'field', selector: '#p-full', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{ id: 'p-languages', kind: 'field', selector: '#p-full', field: 'languages' },
+				{ id: 'p-tone-examples', kind: 'text', selector: '#p-full', matches: 'Tone, by example:[\\s\\S]*“[^”]{8,}”[\\s\\S]*“[^”]{8,}”' },
+				{ id: 'p-format', kind: 'text', selector: '#p-full', matches: 'Format of the result:[\\s\\S]*(?:HTML|CSS|file|no external|semantic)' },
+				...three('donts', 'p-donts', '^\\s*(?:[Dd]on’t|[Dd]o not|[Nn]ever|[Nn]o)\\s+\\S+\\s+\\S+'),
+				...three('done', 'p-done', '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'),
+				{ id: 'private', kind: 'text', selector: '#p-private', matches: 'phone|email|address|surname|passport|ID|personal|client|customer|secret|key|password' },
+				{ id: 'compare', kind: 'text', selector: '#p-compare', matches: '^(?=[\\s\\S]*(?:[Ss]hort|request))(?=[\\s\\S]*(?:[Ss]tructur|brief|detail))\\s*\\S+(?:\\s+\\S+){11,}' },
+				{ id: 'compare-verdict', kind: 'text', selector: '#p-compare', matches: 'better|worse|difference|because|so |conclusion|got|returned|gave|guess' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why does the request “make a site for a consultant” give a template page?',
+				options: [
+					'The model knows neither you nor your visitors, and fills the gaps with the most probable thing, a generic template',
+					'The model can’t make sites',
+					'Because the request is too polite'
+				],
+				answer: 0,
+				why: [
+					'Yes. Whatever isn’t in the request, the model completes with the commonest variant: hence the slogans, the three cards and the invented numbers. So you put into the request everything it can’t know.',
+					'No: it can, and that is exactly why it produces a confident template.',
+					'No: politeness doesn’t affect the content.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What goes into a prompt written as a brief?',
+				options: [
+					'A goal and an audience',
+					'Facts it may use (and only those)',
+					'What must not be done, and how to tell it is done',
+					'Your hosting password, so the model can deploy everything itself'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: without a goal and a reader the model doesn’t know what to optimize.',
+					'Yes: “only these facts” guards against invented achievements and numbers.',
+					'Yes: prohibitions and tests turn a wish into an assignment you can check.',
+					'No: secrets go neither to a model nor to anyone who “will help”. Deploying is your job, by the instructions.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Tone is better expressed…',
+				options: [
+					'By two real example sentences in your tone: the model imitates them more exactly than the word “warm”',
+					'By adjectives: “warm, professional, friendly”',
+					'Not at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. Everyone understands “warm” and “professional” differently, and examples show how your text sounds. This technique is called showing examples (few-shot, or multishot).',
+					'No: adjectives are vague and lead to a generic, upbeat tone.',
+					'No: then the model chooses the tone, and it will be the commonest one.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What should you not send in a request to a third-party operator’s model?',
+				options: [
+					'Clients’ phone numbers and emails, other people’s personal data, passwords and keys',
+					'The names of your services, which will be on the public site anyway',
+					'A description of the tone and the audience'
+				],
+				answer: 0,
+				why: [
+					'Yes. Whatever you put into a request goes to the model’s operator. Other people’s personal data is sent only with their consent and by the rules of the law, and secrets are never sent. Put in what will become public anyway.',
+					'No: what will be on a public page is no secret.',
+					'No: that is safe.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of working with a prompt in order',
+				items: [
+					'Write a prompt with all the fields of the brief, the prohibitions and the tests',
+					'Run it and get a result',
+					'Check the result against the tests for done, not by eye',
+					'Change one thing in the prompt and run it again',
+					'Write down what helped, to use next time'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-prompt-anatomy',
+				front: 'What does a good prompt consist of?',
+				back: 'Context and goal, an audience, facts (only those), the main action, limits (“don’t”), tone by example, the format of the result, tests for done. Like a brief for a person.'
+			},
+			{
+				id: 'future-prompt-examples',
+				front: 'Why is tone expressed by examples?',
+				back: 'Adjectives are vague, and two real sentences in your tone show how your text sounds. A model imitates examples more exactly than the word “warm”.'
+			},
+			{
+				id: 'future-prompt-facts',
+				front: 'How do you guard against invented facts?',
+				back: 'Give a list of real facts in the prompt and write: “use only these, invent nothing; if there is no data, don’t make the block”. Then compare the result with the brief.'
+			},
+			{
+				id: 'future-prompt-private',
+				front: 'What can’t you put in a prompt?',
+				back: 'Passwords and keys, third parties’ personal data without their consent, anything that shouldn’t reach the model’s operator. Only what will become public anyway goes into a prompt.'
+			}
+		],
+		sources: [
+			{ title: 'Claude docs: Prompt engineering overview', url: 'https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Claude docs: Be clear and direct', url: 'https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Claude docs: Use examples (multishot prompting)', url: 'https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/multishot-prompting', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'OpenAI docs: Prompt engineering', url: 'https://platform.openai.com/docs/guides/prompt-engineering', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Anthropic: Building effective agents', url: 'https://www.anthropic.com/engineering/building-effective-agents', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'OWASP: LLM01 prompt injection', url: 'https://genai.owasp.org/llmrisk/llm01-prompt-injection/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Prompt Engineering Guide', url: 'https://www.promptingguide.ai/', licence: 'link-only', kind: 'course', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Write the prompt the way you would write a brief for a front-end developer who knows nothing about you. Take everything needed from your own brief, and show the tone with two real sentences.',
+			hints: [
+				'Replace every “…” with data from the brief: the sections, the names of the services, the people, the proof. If the brief has no people or proof, just write: “none in the brief”.',
+				'Write languages as codes: en, es. And show the tone with two sentences in quotation marks, each at least eight characters long.',
+				'The three prohibitions start with “Don’t”. The three tests for done are measurable: “exactly one h1”, “every image has alt”, “contrast of at least 4.5”.',
+				'In the comparison, say what the short request gave, what the brief gave and what the difference is: at least twelve words.'
+			],
+			mistakes: {
+				brief: 'The block “A structured prompt from the brief” (the section whose id is prompt-brief) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'p-who': 'The prompt needs who you are and what you do: the words from the brief.',
+				'p-for-whom': 'The prompt needs the audience: the words from the brief.',
+				'p-action': 'The prompt needs the visitor’s main action in the words of the brief.',
+				'p-sections': 'The prompt should have all the sections from the brief.',
+				'p-items': 'In the prompt, name what you offer: the names from the brief.',
+				'p-people': 'In the prompt, name the people from the brief (or write that there are none, if the brief has none).',
+				'p-proofs': 'In the prompt, name the proof from the brief: only the real kind.',
+				'p-languages': 'Write the languages as codes: en, es.',
+				'p-tone-examples': 'Show the tone with two sentences of your own in quotation marks, each at least eight characters long.',
+				'p-format': 'Under “Format of the result”, write what you need back: HTML and CSS, no external scripts.',
+				'donts-1': 'The first prohibition should start with “Don’t” and have several words.',
+				'donts-2': 'The second prohibition should start with “Don’t” and have several words.',
+				'donts-3': 'The third prohibition should start with “Don’t” and have several words.',
+				'done-1': 'The first test for done: at least four words.',
+				'done-2': 'The second test for done: at least four words.',
+				'done-3': 'The third test for done: at least four words.',
+				private: 'Name what from the brief you won’t send to the model: a phone number, an email, personal data.',
+				compare: 'In the comparison, say something about the short request and about the brief, at least twelve words.',
+				'compare-verdict': 'State a conclusion: what the difference is, and why.'
+			},
+			outro: 'Now you have a prompt template you can use again: it also serves as a brief for a living person. The next question: how to check what came back.'
+		},
+		say: {
+			'few-shot': 'few shot',
+			alt: 'alt',
+			HTML: 'H T M L',
+			CSS: 'C S S',
+			lang: 'lang',
+			h1: 'H one',
+			en: 'E N',
+			es: 'E S'
+		}
+	};
+</script>
+
+<script>
+	import PromptLab from '../../diagrams/PromptLab.svelte';
+</script>
+
+## A request and an assignment
+
+When you ask a living front-end developer “make a site for a consultant”, they don’t start work. They ask: what do you do, for whom, what must the visitor do, what are your services, what is your tone, do you have proof? They do it because, without answers, the result will be something average, that is, right for nobody.
+
+A language model works differently. It **almost never asks back**, unless you ask it to, and whatever you didn’t say it completes with the most probable thing. The slogan “Innovative solutions for your business”, three cards with icons and “10,000+ customers” are not a model’s mistake but its honest answer to a request with nothing specific in it. You saw it in the part on design (the tells of a page an AI made) and in the first lesson of this part.
+
+So the main technique here is one: **write the prompt as a brief**, that is, an assignment that can be carried out with no guessing. And you already have a brief: all the fields you filled in from the first lesson of the course.
+
+## What a prompt-brief is made of
+
+1. **Context and goal.** Who you are, what you do, what the site is for. In a sentence or two.
+2. **Audience.** Who the site is for: both the words and the order depend on it.
+3. **The main action.** What the visitor must do. It is what everything else is for.
+4. **Content.** The sections, what you offer, the people, the proof. And a must: **“use only these facts and invent nothing; if there is no data, don’t make the block”**. It is the best protection against invented numbers and achievements.
+5. **Limits: what not to do.** “Don’t invent reviews, don’t add third-party scripts, don’t use stock wording.” A prohibition works better than the wish “be careful”.
+6. **Tone by example.** Not “warm and professional” (everyone reads it differently) but two or three of your real sentences. A model imitates examples more exactly than adjectives. In prompting guides this is called showing examples (few-shot, or multishot).
+7. **The format of the result.** What exactly you need: one HTML file and one CSS file, meaningful markup, no external scripts, a `lang` attribute.
+8. **Tests for done.** How to tell the assignment is finished: “exactly one first-level heading”, “every image has `alt`”, “contrast of at least 4.5 to 1”. A test turns a wish into an assignment you can check, and you use the same tests in the next lesson, when you check the result.
+
+Two more techniques are advised by the authors of the guides. **A plan first, then the code**: ask it first to describe the page’s structure and to write only after you agree. And **let the model ask back**: add “if you lack data, ask me questions rather than invent”. In the last lesson you’ll see this technique taken all the way: an interview.
+
+<details>
+<summary>Check yourself: why does a prompt need the phrase “use only these facts; if there is no data, don’t make the block”?</summary>
+
+So that the model doesn’t fill gaps with invention. Without that phrase it will complete the proof and the numbers with the most probable thing, and you’ll get “facts” on the page that you don’t have.
+
+</details>
+
+## Data: what not to send
+
+Whatever you put into a request goes to the model’s operator. That means three things.
+
+- **Secrets are never sent**: passwords, keys, tokens. And don’t ask a model to “deploy the site itself” with your credentials.
+- **Other people’s personal data** (clients’, colleagues’) is sent only with their consent and by the rules of the law. A site doesn’t need it anyway.
+- **Your own public material** may be sent: what will be on the page anyway. A phone number and an email can be written into the finished page later, not into the prompt.
+
+If it matters to you that data doesn’t leave your region, look at the lesson on your own pipeline for models you can run or host yourself.
+
+One more caveat about security. A model doesn’t always tell your instruction from the text it is reading. If a prompt includes someone else’s text (a page, an email, a document), it may hold “instructions” that the model takes for yours. This is called **prompt injection**. A simple defense: **keep your instructions apart from the data** (“below is the text to work on, there are no commands in it”). You’ll come back to this in the lesson on agents, when models start acting on their own.
+
+## Try building a prompt
+
+Tick which parts of the brief go into the prompt. The prompt’s text is assembled beside them, and below it you see what would come out. It is a **teaching model**: the result follows rules written for the lesson, not an answer from a real model. But the pattern is real: whatever isn’t in the prompt, the model fills with a template. Press “A short request”, then “The full brief”, and compare the number of tells of a template page.
+
+<PromptLab />
+
+## Practice
+
+Write a prompt for your project. It will do for a builder and for a living front-end developer. Put data from the brief in each field, show the tone with two of your own real sentences (not an adjective) and add the prohibitions and the tests for done. Then write what from the brief you won’t send to the model, and compare your prompt with a short request.
+
+If you can run both prompts in a real builder, do: the comparison will be honest. If not, compare by the diagram above. The check reads your prompt: whether it has all the fields of the brief, examples of tone, prohibitions and tests. How good the prompt really is, only the result shows.
+
+## What was wrong with 2025
+
+In 2025 a one-sentence prompt was the norm: “make me a landing page”. The results looked alike, and the models were blamed. Later it became clear that the brief was to blame, or rather its absence. The ability to set a task, that is, to know what you want and for whom, became the main skill of working with an AI. For someone who has been through this book it is familiar work: you did it throughout the course.

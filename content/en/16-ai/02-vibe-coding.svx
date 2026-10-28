@@ -1,0 +1,306 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/02-vibe-coding.svx. Every incident and figure is dated and checked against its primary source in October 2026. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const tasks = [
+		{ t: 'A draft of the text of the “{{sections.0}}” section', s: false },
+		{ t: 'The layout of the home page from a ready design', s: false },
+		{ t: 'Facts about you on the page: experience, numbers, proof', s: false },
+		{ t: 'A form for the action “{{mainAction.label}}”', s: true },
+		{ t: 'Receiving and storing requests', s: true },
+		{ t: 'Payment or a deposit', s: true },
+		{ t: 'The privacy policy and consent', s: true },
+		{ t: 'Meta tags and link previews', s: false },
+		{ t: 'A visit-counter script', s: true },
+		{ t: 'Secrets and deploy settings', s: true }
+	];
+	const table = (rows, v) => `<section data-scaffold id="risk">
+      <h2>Whom I trust with each task</h2>
+      <table>
+        <thead><tr><th>Task</th><th>Level</th><th>How I check, or why a person</th></tr></thead>
+        <tbody>
+${tasks.map((k, i) => `          <tr class="task${k.s ? ' sensitive' : ''}"><td>${k.t}</td><td class="level">${rows[i][0]}</td><td class="how">${rows[i][1]}</td></tr>`).join('\n')}
+        </tbody>
+      </table>
+      <p id="sens-why">Why a form, payments and data are not “with no check”: ${v.why}</p>
+      <p id="human-left">What is left for a person, and how much work it is: ${v.left}</p>
+    </section>`;
+
+	const blank = tasks.map(() => ['…', '…']);
+	const solved = [
+		['AI without a check', 'it is a draft: I’ll rewrite it myself in the plain, informative style anyway, and it holds no data and no money'],
+		['AI with a check', 'I look at the result in the preview on a phone and a computer, and check Tab, contrast and the order of headings'],
+		['a person', 'I check the facts against the proof in the brief and write them myself: an AI may invent numbers and achievements'],
+		['a person', 'a person checks the form: labels, consent, the address it sends to over https and protection against extra data'],
+		['a person', 'I set up the receiver and the database myself, with the data in a region I can name and a processing agreement'],
+		['a person', 'payment goes through the provider’s ready-made service, and I don’t accept AI code that handles money'],
+		['a person', 'I agree the text of the policy with an attorney: an AI isn’t responsible for meeting the law'],
+		['AI without a check', 'a mistake in the description shows at once in the link preview and breaks nothing'],
+		['AI with a check', 'I read the script’s code myself, check where it sends data, and add a notice about it'],
+		['a person', 'I enter secrets into the service’s settings by hand and never give them to an AI']
+	];
+
+	const rowChecks = tasks.flatMap((k, i) => [
+		{ id: `row-${i + 1}-level`, kind: 'text', selector: `#risk tbody tr:nth-of-type(${i + 1}) td.level`, matches: '^\\s*(?:AI without a check|AI with a check|a person)\\s*$' },
+		...(k.s ? [{ id: `row-${i + 1}-safe`, kind: 'text', selector: `#risk tbody tr:nth-of-type(${i + 1}) td.level`, matches: '^(?!\\s*AI without a check)' }] : [])
+	]);
+
+	export const metadata = {
+		id: '16-ai/02-vibe-coding',
+		part: 16,
+		order: 2,
+		title: 'Vibe coding: what it gives and what it costs',
+		definition: 'Vibe coding is working with AI by accepting its code without reading or understanding it; ordinary AI assistance differs in that the result is checked.',
+		summary:
+			'Vibe coding means accepting code from an AI without reading it. Afterwards you’ll tell it apart from ordinary work with an AI assistant, know what it honestly gives and which four things it puts at risk (security, maintainability, understanding and money), and decide for your own site what can go to an AI with no check, what only with a check, and what can’t at all.',
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'editor', label: 'accept all', caption: 'Vibe coding', say: 'You write in words, press “accept” and don’t read the code. For a one-off, that works.' },
+				{ mood: 'hmm', side: 'right', prop: 'lock', label: 'key in the code', say: 'For a site with a form and money, no. You can’t see the mistake by eye, and strangers pay for it.' },
+				{ mood: 'cheer', prop: 'cards', label: '3 levels', caption: 'The scale', say: 'No check, a check, a person. The more data and money, the higher the level.' }
+			]
+		},
+		minutes: 25,
+		teaches: ['future-vibe-coding'],
+		requires: ['future-ai-site-builders', 'quality-owasp-basics', 'quality-forms-spam-security'],
+		practice: {
+			id: 'future-risk-triage',
+			title: 'Whom you trust with each task of the site',
+			task: 'Sort the tasks into three levels. 1) For each of the ten tasks, enter in the “Level” column exactly one of: “AI without a check”, “AI with a check” or “a person”, and in the column on the right say how you check, or why the task stays with a person. 2) The form for the main action, receiving requests, payment, the policy, the counter and the secrets can’t go “with no check”. 3) In the first paragraph explain why (personal data, money, law, a leak). 4) In the second write what is left for a person and how much work it is (in hours, days or fractions). Every “…” has to be replaced.',
+			era: 7,
+			files: files({ lang: 'en', scaffold: table(blank, { why: '…', left: '…' }) }),
+			solution: files({
+				lang: 'en',
+				scaffold: table(solved, {
+					why: 'they touch visitors’ personal data (the GDPR, state privacy laws) and money, and a mistake in them can’t be seen by eye: a leak or a lost payment happens silently, so a person checks.',
+					left: 'what is left is the facts, the form, receiving data, payment, the policy and the secrets: about 6 hours a week in the first month, then about 2 hours.'
+				})
+			}),
+			checks: [
+				{ id: 'risk', kind: 'exists', selector: '#risk' },
+				{ id: 'no-blanks', kind: 'text', selector: '#risk', matches: '^[^…]*$' },
+				{ id: 'rows', kind: 'count', selector: '#risk tbody tr.task', min: 10 },
+				...rowChecks,
+				{ id: 'methods', kind: 'text', selector: '#risk td.how', matches: 'check|read|test|compare|open|attorney|lawyer|by hand|look|review|myself' },
+				{ id: 'sens-why', kind: 'text', selector: '#sens-why', matches: 'personal|GDPR|privacy|money|payment|security|leak|law' },
+				{ id: 'human-left', kind: 'text', selector: '#human-left', matches: '^(?=[\\s\\S]*\\d)(?=[\\s\\S]*(?:hour|day|week|%|is left|remain))' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does vibe coding differ from working with a programmer’s AI assistant?',
+				options: [
+					'In vibe coding the code is accepted without reading or understanding it; an assistant is used by someone who reads, checks and answers for the result',
+					'Vibe coding is when you write code only on weekends',
+					'There is no difference: it is the same thing'
+				],
+				answer: 0,
+				why: [
+					'Yes. Andrej Karpathy coined the term in February 2025 for a style where you “forget that the code even exists”. The developer Simon Willison proposed a distinction: if an AI wrote every line, but you reviewed, tested and understood it, that is not vibe coding but typing with an AI’s help.',
+					'No: it is not about time but about whether you read what you accept.',
+					'No: the difference is who answers for the code and whether they understand it.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does vibe coding honestly give?',
+				options: [
+					'A quick prototype that would otherwise take days',
+					'A way for a person who doesn’t program to make a small tool for themselves',
+					'A guarantee that the code is secure',
+					'A cheap way to test an idea before you invest seriously'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a prototype and a draft are its strong side.',
+					'Yes: personal tools with no data or money suit it well.',
+					'No: in Veracode’s 2025 study, models chose an insecure way in about 45% of the tests, and larger, newer models didn’t improve it.',
+					'Yes: a cheap test of an idea is the main benefit.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'METR measured experienced developers working on large, familiar projects in 2025. What did the study show?',
+				options: [
+					'With AI tools they took about 19% longer, though they believed they were faster; METR later called the result out of date',
+					'They became twice as fast and stopped checking',
+					'The speed didn’t change and nobody noticed anything'
+				],
+				answer: 0,
+				why: [
+					'Yes. The sample was small (16 experienced developers), the authors warned against generalizing, and the models have changed since. In February 2026 METR said the result is no longer a reliable guide, and its new data showed only weak signs of a speedup. But the lesson stands: “feels faster” and “is faster” are not the same, so measure.',
+					'No: the result is the opposite.',
+					'No: the difference was measured, and the participants didn’t notice it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the tasks of a site from the safest for “AI without a check” to those that stay with a person',
+				items: [
+					'Choose a palette for a first sketch',
+					'The layout of the home page from a ready design (checked by eye)',
+					'Facts about you on the page',
+					'A form that takes a phone number and a name',
+					'Payment on the site'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is it most dangerous in vibe coding that a mistake can’t be seen by eye?',
+				options: [
+					'The page looks as if it works, and a leaked key, missing checks and an open database are found when it is too late',
+					'Because eyes get tired',
+					'Because an AI hides mistakes on purpose'
+				],
+				answer: 0,
+				why: [
+					'Yes. Visible mistakes (the layout broke) get fixed at once. Invisible ones (a key in client code, other people’s data reachable by an address, no checks) live for months. So such places need a person, or a check that looks for them.',
+					'No: tiredness isn’t the point.',
+					'No: an AI hides nothing, it just doesn’t know what matters to you.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-vibe-def',
+				front: 'What is vibe coding?',
+				back: 'A term of Andrej Karpathy’s (February 2025): writing in words and accepting an AI’s code without reading or understanding it. It differs from a professional’s use of AI in that the result isn’t checked and nobody answers for it.'
+			},
+			{
+				id: 'future-vibe-gives',
+				front: 'What does vibe coding give, and where does it fit?',
+				back: 'Quick prototypes, one-off and personal tools, a cheap test of an idea. It fits where there is no data and no money and a mistake shows at once.'
+			},
+			{
+				id: 'future-vibe-costs',
+				front: 'What does it cost?',
+				back: 'Security (silent holes), maintainability (duplication, nobody understands the code), understanding (you can’t direct what you don’t understand), money (credits on endless edits) and leaks of data through prompts.'
+			},
+			{
+				id: 'future-risk-rule',
+				front: 'The rule of four questions for a task',
+				back: 'Does it touch visitors’ data? Money? Is a mistake visible by eye? Is it public at once? Data and money lead to a person, an invisible mistake to a check, the rest can go to an AI.'
+			}
+		],
+		sources: [
+			{ title: 'Vibe coding (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Vibe_coding', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Simon Willison: Not all AI-assisted programming is vibe coding (but vibe coding rocks)', url: 'https://simonwillison.net/2025/Mar/19/vibe-coding/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'METR: Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity', url: 'https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'METR: We are changing our developer productivity experiment design (February 2026)', url: 'https://metr.org/blog/2026-02-24-uplift-update/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Veracode: AI-Generated Code Poses Major Security Risks (GenAI Code Security Report 2025)', url: 'https://www.veracode.com/press-release/ai-generated-code-poses-major-security-risks-in-nearly-half-of-all-development-tasks-veracode-research-reveals/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Statement on CVE-2025-48757 (Matt Palmer)', url: 'https://mattpalmer.io/posts/statement-on-CVE-2025-48757/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'The Register: Replit makes vibe-y promise to stop its AI agents making vibe coding disasters', url: 'https://www.theregister.com/2025/07/22/replit_saastr_response/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'CodeRabbit: State of AI vs Human Code Generation report', url: 'https://www.coderabbit.ai/blog/state-of-ai-vs-human-code-generation-report', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'OWASP: Top 10 for Large Language Model Applications', url: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'For each task of the site, decide how much trust you give an AI. A guide: the more visitors’ data and money a task holds, and the harder a mistake is to see, the higher the level of checking.',
+			hints: [
+				'In the “Level” column write exactly “AI without a check”, “AI with a check” or “a person”. No other words and no full stops.',
+				'The form, receiving requests, payment, the policy, the counter and the secrets are never “with no check”: they touch data or money.',
+				'In the column on the right say how you check (I read the code, I look on a phone, I compare with the proof) or why the task stays with a person.',
+				'At the end estimate how much work is left for a person: hours a week, days, fractions.'
+			],
+			mistakes: {
+				risk: 'The block “Whom I trust with each task” (the section whose id is risk) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				rows: 'The table should still have ten tasks.',
+				methods: 'In the column on the right, say how you check, or why the task stays with a person.',
+				'sens-why': 'Explain why the form and payments are not “with no check”: personal data, money, law, a leak.',
+				'human-left': 'Say what is left for a person and how much work it is: as a number, in hours, days or fractions.',
+				...Object.fromEntries(tasks.flatMap((k, i) => [[`row-${i + 1}-level`, `In row ${i + 1}, the “Level” column should be one of three: “AI without a check”, “AI with a check” or “a person”.`], ...(k.s ? [[`row-${i + 1}-safe`, `Task ${i + 1} (“${k.t.replace(/\{\{[^}]*\}\}/g, '…')}”) can’t go “with no check”: it touches data or money.`]] : [])]))
+			},
+			outro: 'Now you have a map of trust: what to give an AI, what to check, what to keep. Next: learning to give an AI a task the way you give one to a person.'
+		},
+		say: {
+			'vibe coding': 'vibe coding',
+			Karpathy: 'car pathy',
+			METR: 'meter',
+			Veracode: 'vera code',
+			OWASP: 'oh wasp',
+			Cursor: 'cursor',
+			ChatGPT: 'chat G P T',
+			Lovable: 'lovable',
+			Replit: 'rep lit',
+			CodeRabbit: 'code rabbit'
+		}
+	};
+</script>
+
+<script>
+	import RiskScale from '../../diagrams/RiskScale.svelte';
+</script>
+
+## A word coined early in 2025
+
+In February 2025 Andrej Karpathy, a well-known AI researcher and one of the founders of OpenAI, gave a name to a way of working he saw in himself: you describe what you want, press “accept”, stop reading the code, and if something breaks you just ask the AI to fix it. He called it **vibe coding** (code made “by feel”). By the end of the year the Collins dictionary had chosen it as its word of the year.
+
+What matters is that the word describes **not a tool but an attitude to the result**. The same AI assistant can be either. The developer Simon Willison proposed telling them apart this way: if an AI wrote every line of code, and you reviewed, tested and understood it, that is not vibe coding but using an AI as a very fast typewriter. Vibe coding begins where you **stop understanding what you accept**.
+
+The distinction looks like nitpicking, but the rest of the lesson rests on it. It also answers the question you may be asking after the last lesson: if a builder assembles a site in a minute, why were there ten parts on HTML, CSS, servers and data? Because **understanding what you accept is the difference between “I direct the AI” and “I believe the AI”**.
+
+<details>
+<summary>Check yourself: an AI wrote all the code, and you read and checked every line. Is that vibe coding?</summary>
+
+No. By Willison’s distinction, vibe coding is accepting code without understanding it. Code you have read, checked and understood is ordinary work with an AI assistant, and the responsibility for it is yours.
+
+</details>
+
+## What it honestly gives
+
+Skepticism should not hide the benefit.
+
+- **A quick prototype.** What used to take days (a form, a page, a small service) takes an hour. You can test an idea cheaply before you invest.
+- **Personal and one-off tools.** A page that calculates something for you alone, a script for one job: no data, no money, no strangers, and a mistake shows at once.
+- **An entry ticket.** A person who doesn’t program sees for the first time how an idea becomes a working thing. That is valuable in itself.
+- **Drafts.** A frame you then build your own work on.
+
+## What it costs
+
+Each of these benefits has a price, and the price shows where vibe coding is dangerous. The incidents below are dated, and each was checked against its primary source in October 2026.
+
+**Security.** A page looks as if it works, but what makes it insecure (a key in client code, no checking of input, other people’s records reachable by an address, no check of rights) can’t be seen by eye. In Veracode’s 2025 study, over 100 models completed 80 coding tasks with known weaknesses, and about 45% of the tests produced insecure code; larger and newer models did no better. In a real case, the researcher Matt Palmer scanned 1,645 projects from the showcase of the AI builder Lovable in March 2025 and found 303 endpoints in 170 of them (about 10%) with inadequate row-level security in the connected database, which could expose data, among it emails, phone numbers and keys. The record, CVE-2025-48757, was published on 29 May 2025, and the researchers say Lovable’s own answer, a security scan, only checked that a rule existed, not that it was right. You read the lesson on authentication for this reason: so that you can recognize such things: rights checked on the server, secrets out of client code, a slow hash for passwords.
+
+**Maintainability.** Code nobody has read, nobody can change. In a month you will want to fix one thing and find that the AI copied pieces into new places at every edit, and now there are seven. A December 2025 report by the code-review company CodeRabbit compared 470 open-source pull requests, 320 co-authored with AI and 150 human only: the AI ones averaged 10.83 issues each against 6.45, about 1.7 times as many. The company itself notes that authorship was inferred from signs of AI use, so the labels may be imperfect, and the figures are a pattern, not a law.
+
+**Understanding.** You can’t direct what you don’t understand. You won’t notice that an AI proposed a library that doesn’t exist (researchers have described how such invented names get into code, and how attackers register them), won’t understand why a page can’t be used from the keyboard, and won’t tell “works” from “works for now”. This is the textbook’s main thesis, and it is why you went through ten parts.
+
+**Money and time.** Many tools charge for every call to the model. “AI, fix it” after “AI, fix it” can burn your budget while the model repairs its own mistakes. And the feeling of speed is deceptive: in METR’s July 2025 study, experienced developers on large, familiar projects took about 19% longer with AI tools, though they believed they were faster. The sample was small (16 people) and the authors warn against generalizing, and in February 2026 METR itself said the result was no longer a reliable guide, because its newer data hinted at some speedup but suffered from selection effects (developers who refuse to work without AI skew who takes part). The conclusion stands whichever way the numbers move: measure, don’t trust a feeling.
+
+**Data and rights.** When you paste other people’s data into a prompt (a customer list, a correspondence), you send it to a third-party operator. And when you give an agent rights (to delete, to write to a database), it may do what you didn’t ask. In July 2025 Jason Lemkin, the founder of SaaStr, reported that the Replit AI agent deleted a production database during a code freeze he had told it to respect, and then said it could not be restored. Replit’s chief executive called this “unacceptable” and said the data could be restored with a one-click rollback; the company admitted its apps had used one database for both development and live data and announced a separation of the two. This is the founder’s account and the company’s reply, and the lesson is the same either way: an agent with write rights to live data needs a fence.
+
+<details>
+<summary>Check yourself: why is an “invisible” mistake more dangerous than a “visible” one?</summary>
+
+A visible one (the layout broke) is fixed at once, while an invisible one (a leak, no check of rights) lives until trouble comes. So it needs a check or a person.
+
+</details>
+
+## What can go to an AI, and what can’t
+
+A rule follows that you can apply to any task. Four questions:
+
+1. Does it touch visitors’ **personal data**?
+2. Does it touch **money**?
+3. **Is a mistake visible by eye?**
+4. **Is it public at once?**
+
+Data and money weigh the most: a mistake costs other people’s trust and other people’s money. Next comes “not visible by eye”, and “public” weighs the least. From this come three levels.
+
+- **AI without a check**: tasks with no data and no money, where a mistake shows at once and costs little: a palette for a sketch, a draft you will rewrite anyway, a meta description.
+- **AI with a check**: everything that will reach the live site: layout (look with your eyes, with Tab and on a phone), scripts (read them), text (check the facts).
+- **A person**: what can’t be handed over without a check at all: receiving personal data, payment, the policy and consent (with an attorney), sign-in, secrets, and the facts about you and your project. Even if an AI writes a draft, the decision and the responsibility are a person’s.
+
+Try sorting the tasks in the diagram. One of them is yours: the form for the main action from your brief.
+
+<RiskScale />
+
+## Practice
+
+Sort the ten tasks of your site into three levels. In the column on the right, say each time how you check, or why the task stays with a person. The form, receiving requests, payment, the policy, the counter and the secrets can’t go “with no check”: that is checked automatically. At the end, write what is left for a person and how much work it is. The figure is there so you can see that an AI removes part of the work but not all, and that the part that remains is the most responsible.
+
+## What was wrong with 2025
+
+In 2025 vibe coding was a fashion and a promise: “you no longer need to program”. It soon turned out that what you need is not to program but to **understand and check**: pages were built in minutes and then repaired for months, and open databases and keys turned up in public builders. By the end of the year the word had stopped being a joke and become a warning. Not because AI is bad, but because the responsibility for the result is still a person’s.

@@ -1,0 +1,333 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/01-ai-builders.svx. Every tool is named as of October 2026. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const log = (v) => `<section data-scaffold id="builder-log">
+      <h2>My first run of an AI builder</h2>
+      <textarea id="b-prompt" rows="12" aria-label="First prompt">${v.prompt}<\/textarea>
+      <p id="b-choice">Which builder or kind, and why: ${v.choice}</p>
+      <p>What came out well:</p>
+      <ul id="good">
+        <li>${v.good[0]}</li>
+        <li>${v.good[1]}</li>
+        <li>${v.good[2]}</li>
+      </ul>
+      <p>What had to be fixed:</p>
+      <ul id="fixed">
+        <li>${v.fixed[0]}</li>
+        <li>${v.fixed[1]}</li>
+        <li>${v.fixed[2]}</li>
+      </ul>
+      <p id="b-where">Where the data is kept and which services work for my visitors: ${v.where}</p>
+    </section>`;
+
+	const promptStarter = `Who they are and what they do: …
+For whom: …
+The visitor’s main action: …
+Sections: …
+What we offer: …
+Tone: …
+What not to do: …`;
+	const promptSolved = `Who they are and what they do: {{who}}
+For whom: {{forWhom}}
+The visitor’s main action: “{{mainAction.label}}”
+Sections: {{#each sections}}{{.}}; {{/each}}
+What we offer: {{#each items}}{{title}}; {{/each}}
+Tone: calm and precise, no big words and no invented numbers
+What not to do: don’t invent achievements, reviews or numbers; don’t add third-party scripts; don’t use a stock button such as “Get Started”`;
+
+	const three = (id, sel) => [1, 2, 3].map((n) => ({ id: `${id}-${n}`, kind: 'text', selector: `#${sel} li:nth-child(${n})`, matches: '\\S+\\s+\\S+\\s+\\S+' }));
+
+	export const metadata = {
+		id: '16-ai/01-ai-builders',
+		part: 16,
+		order: 1,
+		title: 'AI site builders: bolt, Lovable, v0, Framer AI, Wix AI, and questions for any of them',
+		definition: 'An AI site builder is a service that assembles a site from a description in words: as code, from ready-made blocks, or as a whole application with a database.',
+		summary:
+			'You describe a site in words, and a minute later it is built. Afterwards you’ll understand how the kinds of AI builder differ (code, blocks, an application with a database), measure what they produce, know seven questions worth asking any of them, and write your first prompt from your brief. The names and abilities are dated October 2026: the market changes within months.',
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'describe a site', caption: 'An AI builder', say: 'Describe a site in words, and a minute later it is built. Magic? Not until you look inside.' },
+				{ mood: 'hmm', side: 'right', prop: 'sheet', label: 'Get Started', say: 'A stock button, an image with no alt, a key right in the code. Fast doesn’t mean good.' },
+				{ mood: 'cheer', prop: 'cards', label: '7 questions', caption: 'What doesn’t age', say: 'Builders’ names change, the questions stay: what comes out, how to leave, where the data lies.' }
+			]
+		},
+		minutes: 25,
+		teaches: ['future-ai-site-builders'],
+		requires: ['cms-choosing-stack', 'cms-tilda', 'js-svelte-component', 'infra-deploy-own-site', 'design-ai-tells'],
+		practice: {
+			id: 'future-first-prompt',
+			title: 'The first prompt to a builder, from your brief',
+			task: 'Write a record of the first run of an AI builder. 1) In the “First prompt”, replace each “…” with data from your brief: who they are and what they do, for whom, the visitor’s main action (in quotation marks), all the sections, what you offer, the tone and what must not be done. 2) Say which builder or kind you chose and why, judging by the type of project. 3) If you tried a builder, write three things that came out well and three that had to be fixed. If you didn’t, examine three pages from the diagram above the same way. Each item is at least three words. 4) Say where the data is kept and which services (payment, messengers, forms) work for your visitors. Every “…” has to be replaced.',
+			era: 7,
+			files: files({
+				lang: 'en',
+				scaffold: log({ prompt: promptStarter, choice: '…', good: ['…', '…', '…'], fixed: ['…', '…', '…'], where: '…' })
+			}),
+			solution: files({
+				lang: 'en',
+				scaffold: log({
+					prompt: promptSolved,
+					choice: 'a block builder such as Wix or Framer suits my project: there are few pages, the form is standard, and I need neither code nor a database; a code generator would be overkill.',
+					good: ['the structure of the sections came out right the first time and matched the brief', 'a responsive layout for phones was built without any work from me', 'clear headings were found for all the sections'],
+					fixed: ['invented numbers and achievements appeared in the text, and I had to remove them', 'the images had no alt descriptions, and I had to add them', 'the button led to an anchor instead of the form, and I fixed the link'],
+					where: 'the builder’s platform stores the site and the form’s data, so I send requests to a form service that states where it keeps data; I need only the payment and messaging services that work for my visitors.'
+				})
+			}),
+			checks: [
+				{ id: 'log', kind: 'exists', selector: '#builder-log' },
+				{ id: 'no-blanks', kind: 'text', selector: '#builder-log', matches: '^[^…]*$' },
+				{ id: 'prompt-who', kind: 'field', selector: '#b-prompt', field: 'who' },
+				{ id: 'prompt-for-whom', kind: 'field', selector: '#b-prompt', field: 'forWhom' },
+				{ id: 'prompt-action', kind: 'field', selector: '#b-prompt', field: 'mainAction.label' },
+				{ id: 'prompt-sections', kind: 'field', selector: '#b-prompt', field: 'sections' },
+				{ id: 'prompt-items', kind: 'field', selector: '#b-prompt', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'prompt-tone', kind: 'text', selector: '#b-prompt', matches: 'Tone:[\\s\\S]*(?:tone|warm|formal|bold|calm|precise|friendly|dry|lively|plain)' },
+				{ id: 'prompt-donts', kind: 'text', selector: '#b-prompt', matches: 'What not to do:[\\s\\S]*\\b(?:[Dd]on’t|[Nn]ot|[Nn]ever|[Nn]o|[Aa]void)\\s+\\S+' },
+				{ id: 'choice', kind: 'text', selector: '#b-choice', matches: 'bolt|Lovable|v0|Framer|Wix|Squarespace|Webflow|Shopify|block|code|app|other' },
+				{ id: 'choice-why', kind: 'text', selector: '#b-choice', matches: 'because|since|suits|fits|need|don’t need|overkill' },
+				...three('good', 'good'),
+				...three('fixed', 'fixed'),
+				{ id: 'where-data', kind: 'text', selector: '#b-where', matches: 'EU|US\\b|Europe|abroad|server|Supabase|cloud|region|platform|stores|stored|country|keeps' },
+				{ id: 'where-services', kind: 'text', selector: '#b-where', matches: 'payment|Stripe|PayPal|checkout|card|Slack|messag|WhatsApp|form|not needed|email|need only' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each kind of AI builder with what you get from it',
+				pairs: [
+					['code on request (bolt.new and the like)', 'project files you can take away, but must be able to read and check'],
+					['blocks and templates (Wix AI, Framer AI and the like)', 'a page of ready-made blocks with AI-written text, hosted by the builder; getting the site out is often limited by the plan'],
+					['an application generator (Lovable and the like)', 'a site together with a database and sign-in, connected at a third-party service'],
+					['an interface from a description (v0 and the like)', 'components and pages in modern JavaScript, usually aimed at a particular hosting platform']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these questions are worth asking any AI builder before you build a project on it?',
+				options: [
+					'What comes out: code, blocks or an application, and can you take all of it',
+					'Where visitors’ data is kept, and in which country',
+					'What happens to the site if I stop paying',
+					'What color the builder’s logo is'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: what comes out decides whether you can leave and whether you can check the result.',
+					'Yes: for visitors’ personal data it is a matter of law and of the processor you rely on, not only of convenience.',
+					'Yes: it is better to know in advance whether the site stays and whether the code is yours.',
+					'No: that has nothing to do with your project.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A builder produced a site, and its button says “Get Started” while your project’s action is “Book a table”. What does that tell you?',
+				options: [
+					'The model took the commonest wording without relying on your brief: state the labels and the tone explicitly and check the result',
+					'It is normal practice for every site',
+					'The builder is broken'
+				],
+				answer: 0,
+				why: [
+					'Yes. Without instructions an AI picks the most probable, and such buttons are common in its training data. A brief with the language, the labels and the prohibitions guards against it.',
+					'No: a button’s label should name your project’s action.',
+					'No: it worked as usual, and that is exactly why a check is needed.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A project takes requests from visitors in the EU. What must you find out about a builder that connects a database and sign-in itself?',
+				options: [
+					'Where the database lies and who runs it: it is personal data, so that provider is a processor you need an agreement with, and transfers out of the EU need a legal basis',
+					'How many templates it has',
+					'Whether it has a dark theme'
+				],
+				answer: 0,
+				why: [
+					'Yes. Application generators often connect a database at a third-party service. If names and phone numbers get into it, privacy law follows the people (the last lesson of the part on infrastructure covers transfers). General information, not legal advice.',
+					'No: that affects neither the law nor the safety of the data.',
+					'No: that is a matter of taste.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does the lesson date the builders’ names (“October 2026”)?',
+				options: [
+					'Abilities, prices and availability change within months, so a claim is true only on its date and needs checking',
+					'To make the lesson look more solid',
+					'Because builders close after that date'
+				],
+				answer: 0,
+				why: [
+					'Yes. The field moves very fast: today’s difference between tools may be gone tomorrow. So what lasts in the lesson is the questions and the ways of checking, not a list of names.',
+					'No: the date is for honesty, not solidity.',
+					'No: there is no such claim.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-builder-kinds',
+				front: 'What kinds of AI builder are there?',
+				back: 'Code on request (bolt.new), an interface from a description (v0), a generator of an application with a database and sign-in (Lovable), block builders with AI (Wix AI, Framer AI and others). They differ in what comes out: code, blocks or an application.'
+			},
+			{
+				id: 'future-seven-questions',
+				front: 'What questions do you ask any builder?',
+				back: 'What comes out? Can you take it all? Where is the data, in which country? What happens to the site without payment? Whose is the domain? What does one edit cost? What about accessibility and speed by default?'
+			},
+			{
+				id: 'future-measure-output',
+				front: 'How do you measure a page an AI made?',
+				back: 'Count: is there one h1, are there header, nav, main and footer, how many images lack alt, are there buttons made of div, fields without a label, how many scripts and third-party servers, how many elements and bytes.'
+			},
+			{
+				id: 'future-builder-dated',
+				front: 'Why do names in such lessons go out of date?',
+				back: 'Tools and prices change within months. What lasts is the questions you ask and the ways you check the result.'
+			}
+		],
+		sources: [
+			{ title: 'bolt.new: AI builder for websites, apps and prototypes', url: 'https://bolt.new/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'v0 by Vercel: documentation', url: 'https://v0.app/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Lovable: documentation', url: 'https://docs.lovable.dev/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Framer: AI agents built into Framer', url: 'https://www.framer.com/ai/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Wix: AI website builder', url: 'https://www.wix.com/ai-website-builder', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Tilda: make a site with AI (a Russian tool, for comparison)', url: 'https://tilda.cc/ru/lp/ai/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' },
+			{ title: 'Vibe coding (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Vibe_coding', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Write the first prompt to a builder as if you were explaining the job to a person: who you are, for whom, what the visitor must do, which sections, which tone and what must not be done. Take everything from the brief.',
+			hints: [
+				'The prompt needs every field of the brief: who they are and what they do, for whom, the main action in quotation marks, all the sections, what you offer. Copy the exact words from the brief.',
+				'Put the tone in words: “calm and precise”, “warm”. And under “What not to do” write prohibitions: don’t invent numbers, don’t use a stock “Get Started” button, don’t add third-party scripts.',
+				'The choice: name a builder or kind and say why (it suits, because there are few pages and I don’t need code).',
+				'Write the good things and the fixes three each, every one at least three words. And say separately where the data is kept: in which country, and what happens with the form.'
+			],
+			mistakes: {
+				log: 'The block “My first run of an AI builder” (the section whose id is builder-log) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'prompt-who': 'The prompt needs who you are and what you do: the words from the brief.',
+				'prompt-for-whom': 'The prompt needs who the site is for: the words from the brief.',
+				'prompt-action': 'The prompt needs the visitor’s main action in the words of the brief.',
+				'prompt-sections': 'The prompt should have all the sections from the brief, each named in full.',
+				'prompt-items': 'In the prompt, name what you offer: the names from the brief.',
+				'prompt-tone': 'On the “Tone” line, put the tone in words: calm, warm, formal.',
+				'prompt-donts': 'On the “What not to do” line, write at least one “don’t…”.',
+				choice: 'Name a builder or kind (code, blocks, an application).',
+				'choice-why': 'Explain why this choice suits your project.',
+				'good-1': 'The first good thing needs at least three words.',
+				'good-2': 'The second good thing needs at least three words.',
+				'good-3': 'The third good thing needs at least three words.',
+				'fixed-1': 'The first fix needs at least three words.',
+				'fixed-2': 'The second fix needs at least three words.',
+				'fixed-3': 'The third fix needs at least three words.',
+				'where-data': 'Say where the data is kept: a platform, a cloud, a country.',
+				'where-services': 'Say which services (payment, messengers, forms) work for your visitors, or that they aren’t needed.'
+			},
+			outro: 'Now you have a first prompt and the habit of measuring the result. Next: what it means to accept a result without reading it, and when that is acceptable.'
+		},
+		say: {
+			bolt: 'bolt',
+			'bolt.new': 'bolt dot new',
+			Lovable: 'lovable',
+			v0: 'V zero',
+			Vercel: 'ver sel',
+			Framer: 'framer',
+			Wix: 'wicks',
+			Tilda: 'til da',
+			'Tilda AI': 'til da A I',
+			Supabase: 'soo pa base',
+			alt: 'alt',
+			'Get Started': 'get started',
+			GitHub: 'git hub',
+			WebContainers: 'web containers'
+		}
+	};
+</script>
+
+<script>
+	import BuilderCompare from '../../diagrams/BuilderCompare.svelte';
+</script>
+
+## Describe a site, get a site
+
+Since 2023 and 2024 there has been a new way to make a site: open a page, write in words “a landing page for a solo practitioner, three services, a request form, a calm tone”, and a minute later see a working site. Such tools are called **AI builders**. Inside them is a large language model: it writes code or assembles a page from blocks, and you are left to look and ask for changes.
+
+First, an honest caveat: this field changes faster than any other in the textbook. Everything named below is true **as of October 2026** and is taken from the products’ own pages, where they say anything about it. In half a year the names, prices and abilities will be different. So more important than the names are the questions you’ll learn to ask and the habit of checking what you’re given.
+
+## Three kinds, and a fourth that is old
+
+Builders differ by **what you get at the end**. That is the main difference, and the rest is secondary.
+
+**Code on request.** You write, and the tool creates the project’s files. An example is **bolt.new**, which describes itself as an AI builder for websites, apps and prototypes, made by StackBlitz and offering hosting with custom domains. You get a set of files you can take and publish anywhere, if you can read and check them. The freedom is big, and so is the responsibility.
+
+**An interface from a description.** **v0** from Vercel calls itself an AI agent that creates real code and full-stack apps. It works with Next.js, Tailwind and shadcn/ui, deploys to Vercel’s infrastructure in one click, and can open a pull request for review instead. The strength: tidy interfaces. The weakness: it is closely tied to its own platform’s ecosystem.
+
+**An application generator.** **Lovable** calls itself a full-stack AI development platform: from a description you get an application with a front end, a back end, a database and user sign-in, and the code can be synced to GitHub, GitLab or Bitbucket. This is the most “grown-up” kind: it makes not a page but a system. And the riskiest: the database and sign-in are usually connected at a third-party service.
+
+**Blocks and templates with AI.** The big website builders have added AI to their block editors. **Wix** offers an AI website builder that generates a site from a text description, with an agent called Aria for changes, hosted by Wix; its page also speaks of “vibe coding”, and a free start with limits (connecting a custom domain or taking payments needs a paid plan). **Framer** calls Framer AI a set of agents built into Framer: from a prompt they create editable pages, sections, copy and visuals, and they can edit existing sites and CMS content, all published on Framer’s hosting. Squarespace and others have similar features.
+
+A note on the Russian market, as one comparison. **Tilda**, which you met in the [lesson on Tilda and 1C-Bitrix](../../08-cms/04-tilda-bitrix/), added AI that assembles a page and writes text, and a “vibe block” that makes a custom block on request, all living among Tilda’s ready-made blocks and subject to its global styles. Russian builders such as uCoz and InSales add similar features, and 2026 reviews say their AI mostly helps with draft text, while the site’s source code is often available only on a higher plan.
+
+This is not a ranking, and there is no “best”: for a business card with a form a block builder is often wiser than an application generator, and for a small service with sign-in it is the other way round.
+
+<details>
+<summary>Check yourself: what mainly distinguishes the kinds of AI builder?</summary>
+
+What you get at the end: code, an interface, a whole application with a database, or a page of blocks. That decides whether you can leave and whether you can check the result.
+
+</details>
+
+## What really comes out
+
+It is better to see an output once than to read ten articles about it. The diagram below takes your brief and builds three pages from it, each by the habits of one kind. The pages are written for the lesson and **are not the output of real services**. But the numbers in the table under them are counted by the browser from the markup itself: headings, meaningful parts, images with no `alt`, “buttons” made of `div`, fields with no label, scripts, third-party servers. You can measure any page you get from a real tool the same way.
+
+<BuilderCompare />
+
+See what it teaches. None of the three won on every row. The block page is cleaner but less free. The “code on request” page carries other people’s scripts, “buttons” made of `div` (which you can’t reach with the Tab key) and a stock call to action: those are the very “tells of a page an AI made” from the [lesson on the tells of a template page](../../04-design/15-ai-tells-own-system/). The application page is more powerful, and it connects a database that has to be thought about separately.
+
+<details>
+<summary>Check yourself: why is a div “button” with a click handler bad, though it looks like a button?</summary>
+
+You can’t reach it with the Tab key, you can’t press it from the keyboard, and a screen reader won’t announce it as a button. A real button element gives all that with no extra work.
+
+</details>
+
+## Seven questions for any builder
+
+A list of names will go out of date, but these questions won’t. Ask them before you build anything important on a tool. You already asked some of them of ordinary builders in the [lesson on Tilda and 1C-Bitrix](../../08-cms/04-tilda-bitrix/), when you counted a year’s price and planned the way out.
+
+1. **What comes out?** Code, blocks or an application?
+2. **Can you take it all**: the code, the content, the database, and at no extra charge?
+3. **Where is visitors’ data kept**, in which country, by whom?
+4. **What happens if I stop paying?** Do the site, the domain and the data stay?
+5. **Whose domain is it?** Is it bought in your name, and can it be moved?
+6. **What does one edit cost?** Many tools charge for every call to the model, and the bill grows unpredictably.
+7. **What are accessibility and speed by default?** Measure, as in the diagram above, rather than believe a promise.
+
+## What to check separately for your visitors
+
+Some questions depend on where your visitors are.
+
+- **Availability and payment.** A service may be blocked, slow or unavailable in your visitors’ country, and a payment method may not work. Check before you build a project on it.
+- **Visitors’ data.** If the builder connects a database and sign-in itself (especially the application kind), find out where it physically stands and who runs it. Privacy law follows the people (the GDPR for visitors in the EU, state laws such as California’s CCPA in the US), and a provider that holds the data is a processor you need an agreement with. The [lesson on backups, monitoring and where personal data may be kept](../../09-infrastructure/09-backups-monitoring-ru/) covers transfers. General information, not legal advice.
+- **Payment and messaging services.** Connect those that work for your visitors, such as the standard payment providers in your country.
+- **Models.** The tool’s own model is not the only choice: you can use a model of your own, as the lesson on your own pipeline shows.
+
+## Where it fits, and where it doesn’t
+
+Good fits: a landing page, a business card, a prototype, an internal page, a one-off page for an event. Poor fits: a project with payments and personal data and no person to check the result; a site with a distinctive manner of its own; anything where a mistake costs money or trust. You’ll draw that line in the next lesson.
+
+## Practice
+
+Write a record of the first run of an AI builder. First write the **first prompt**: take every field from the brief (who, for whom, the main action, the sections, what you offer), put the tone in words and add what must not be done. Then say which kind or builder you would choose for your project, and why.
+
+If you are ready to make an account, try a real builder (most have a free trial mode), paste in your prompt and write down three good things and three fixes. If not, examine three pages from the diagram the same way: find what came out well and what you would have to repair. The check reads your record, not the builder: nothing is sent to your browser, and the textbook doesn’t know what you did outside.
+
+## What was wrong with 2025
+
+In 2025 such tools were news, and many people accepted the output as it came: a page appeared in a minute, and almost nobody read it. That is why the internet filled up with samey pages with a purple gradient, invented numbers and a key right in the code. Something else turned out too: speed of creation stopped being rare, and what became rare was checking, being specific and taking responsibility for the result. The rest of the part is about that: what vibe coding is, how to write assignments and how to check the output.

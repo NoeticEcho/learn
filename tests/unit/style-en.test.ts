@@ -23,6 +23,9 @@ const NAMES = new Set([
 	'Web', 'World', 'Wide', 'I', 'Story', 'Brand', 'Canvas', 'Value', 'Proposition', 'Metric', 'Star', 'North', 'Svelte'
 ]);
 
+// Added by part 16: names of AI tools that a heading carries.
+for (const n of ['Framer']) NAMES.add(n);
+
 function body(file: string): string {
 	// the module and instance scripts open the file, each closed by a `</script>` at a line's start
 	let prose = readFileSync(file, 'utf8').trimStart();
