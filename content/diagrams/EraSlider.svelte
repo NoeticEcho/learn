@@ -7,19 +7,54 @@
 	import { onMount, type Component } from 'svelte';
 	import type { FrameProps } from '#lib/prologue/types.ts';
 	import type { EraId } from '#lib/prologue/sequence.ts';
+	import { pick } from '#lib/i18n/index.ts';
 
-	const eras: { id: EraId; year: string; tool: string }[] = [
-		{ id: '1991', year: '1991', tool: 'Чистый HTML, написанный вручную: заголовки, абзацы, ссылки.' },
-		{ id: '1996', year: '1996', tool: 'Таблицы для раскладки, тег font, фоновая плитка и счётчик посетителей в виде картинки.' },
-		{ id: '2000', year: '2000', tool: 'Flash: анимированная заставка и кнопка «пропустить».' },
-		{ id: '2005', year: '2005', tool: 'Отдельный CSS, градиенты и скруглённые углы: «веб 2.0».' },
-		{ id: '2014', year: '2014', tool: 'Адаптивная вёрстка: один сайт перестраивается под ширину экрана.' },
-		{ id: '2025', year: '2025', tool: 'ИИ-конструктор: сайт собирается по описанию словами.' }
-	];
+	const W = pick({
+		ru: {
+			caption: 'Один и тот же проект, шесть эпох',
+			label: 'Эпоха:',
+			stage: (year: string) => `Страница вашего проекта в ${year} году`,
+			wait: 'Собираю страницы…',
+			project: 'Ваш проект',
+			forWhom: 'Для кого он',
+			action: 'Что делает посетитель',
+			tools: {
+				'1991': 'Чистый HTML, написанный вручную: заголовки, абзацы, ссылки.',
+				'1996': 'Таблицы для раскладки, тег font, фоновая плитка и счётчик посетителей в виде картинки.',
+				'2000': 'Flash: анимированная заставка и кнопка «пропустить».',
+				'2005': 'Отдельный CSS, градиенты и скруглённые углы: «веб 2.0».',
+				'2014': 'Адаптивная вёрстка: один сайт перестраивается под ширину экрана.',
+				'2025': 'ИИ-конструктор: сайт собирается по описанию словами.'
+			} as Record<string, string>
+		},
+		en: {
+			caption: 'One project, six eras',
+			label: 'Era:',
+			stage: (year: string) => `Your project’s page in ${year}`,
+			wait: 'Building the pages…',
+			project: 'Your project',
+			forWhom: 'Who it’s for',
+			action: 'What a visitor does',
+			tools: {
+				'1991': 'Plain HTML written by hand: headings, paragraphs, links.',
+				'1996': 'Tables for layout, the font tag, a tiled background and a visitor counter made of images.',
+				'2000': 'Flash: an animated intro and a “skip” button.',
+				'2005': 'A separate CSS file, gradients and rounded corners: “web 2.0”.',
+				'2014': 'Responsive layout: one site rearranges itself to the width of the screen.',
+				'2025': 'An AI builder: the site is built from a description in words.'
+			} as Record<string, string>
+		}
+	});
+
+	const eras: { id: EraId; year: string; tool: string }[] = (['1991', '1996', '2000', '2005', '2014', '2025'] as const).map((id) => ({
+		id,
+		year: id,
+		tool: W.tools[id]
+	}));
 
 	let i = $state(0);
 	let frames = $state.raw<Record<string, Component<FrameProps>> | null>(null);
-	let brief = $state({ title: 'Ваш проект', forWhom: 'Для кого он', action: 'Что делает посетитель' });
+	let brief = $state({ title: W.project, forWhom: W.forWhom, action: W.action });
 	let still = $state(true);
 
 	onMount(async () => {
@@ -38,18 +73,18 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Один и тот же проект, шесть эпох</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
 		<label>
-			Эпоха:
+			{W.label}
 			<input type="range" min="0" max={eras.length - 1} step="1" bind:value={i} aria-valuetext={eras[i].year} />
 		</label>
 		<span class="years" aria-hidden="true">
 			{#each eras as e, k (e.id)}<button type="button" class:on={k === i} onclick={() => (i = k)} tabindex="-1">{e.year}</button>{/each}
 		</span>
 	</div>
-	<div class="stage" role="img" aria-label="Страница вашего проекта в {eras[i].year} году">
-		{#if Frame}<Frame {brief} {still} />{:else}<p class="wait">Собираю страницы…</p>{/if}
+	<div class="stage" role="img" aria-label={W.stage(eras[i].year)}>
+		{#if Frame}<Frame {brief} {still} />{:else}<p class="wait">{W.wait}</p>{/if}
 	</div>
 	<p class="dg-out" aria-live="polite"><strong>{eras[i].year}.</strong> {eras[i].tool}</p>
 </figure>

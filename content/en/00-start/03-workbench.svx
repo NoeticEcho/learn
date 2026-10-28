@@ -1,0 +1,245 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/00-start/03-workbench.svx. */
+	export const metadata = {
+		id: '00-start/03-workbench',
+		part: 0,
+		order: 3,
+		title: 'The workbench: editor, preview and checks',
+		definition: 'A web developer’s workbench is a file editor, a preview where the browser draws the page, and checks. The browser’s developer tools (F12) show the page’s tree.',
+		summary:
+			'You’ll get to know the tools all the practice happens in: the editor, the preview, the checks and the browser’s developer tools. Afterwards you’ll edit a file, see the result, and know what “a check didn’t pass” means.',
+		minutes: 20,
+		teaches: ['start-workbench', 'start-devtools-first-look'],
+		requires: ['start-time-machine'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'editor', label: 'index.html', caption: 'Three windows', say: 'You write on the left, the browser draws the page on the right, and the checks sit below.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', say: 'A check doesn’t compare letters with a model answer. It looks at the finished page, the way a browser does.' },
+				{ mood: 'hmm', caption: 'A check didn’t pass', say: 'That isn’t a grade, it’s a hint: the page doesn’t yet have what the task is looking for.' }
+			]
+		},
+		practice: {
+			id: 'first-heading',
+			title: 'The first page of your project',
+			task: 'Right now the page is just two lines of text, and the browser doesn’t know which is the main one. Wrap the project’s name in a top-level heading, h1, and the description in a paragraph, p. Then open the developer tools and find your heading in the element tree.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    {{title}}\n    {{who}}\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'one-h1', kind: 'count', selector: 'h1', min: 1, max: 1 },
+				{ id: 'h1-title', kind: 'field', selector: 'h1', field: 'title' },
+				{ id: 'p-who', kind: 'field', selector: 'p', field: 'who' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the steps of working in the practice in the order they happen',
+				items: ['You edit the file in the editor', 'The preview updates', 'The checks read the page', 'You see which checks didn’t pass']
+			},
+			{
+				type: 'single',
+				prompt: 'What does “a check didn’t pass” mean?',
+				options: [
+					'You made a mistake and have to start again',
+					'The page doesn’t yet have what the check is looking for: you can fix it and look again',
+					'The computer has broken'
+				],
+				answer: 1,
+				why: [
+					'No: nothing is lost, and everything saves itself. A check just tells you what is missing.',
+					'Yes. Checks are hints, not grades. Fix it and look again as often as you like.',
+					'No: this is how a check normally works.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can you do in the browser’s developer tools?',
+				options: [
+					'See the element tree of the open page',
+					'See which requests the page made and how big they were',
+					'Change someone else’s site for all its visitors',
+					'Read the page’s error messages'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: the Elements tab.',
+					'Yes: the Network tab.',
+					'No: you only change your own copy of the page, in your own browser. Reload the page and everything comes back.',
+					'Yes: the Console tab.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each developer tools tab to what it shows',
+				pairs: [
+					['Elements', 'the page’s element tree and its styles'],
+					['Console', 'the page’s messages and errors'],
+					['Network', 'the page’s requests and their size']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does the preview run in a “sandbox”?',
+				options: [
+					'So the page can’t send anything to the internet and can’t see anything except itself',
+					'So it opens faster',
+					'So it can’t be changed'
+				],
+				answer: 0,
+				why: [
+					'Yes. Your code runs as if it were someone else’s: in a closed box, with no access to your data or to the network.',
+					'No: speed has nothing to do with it.',
+					'No: you can change it as much as you like.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a top-level heading that says “Hello”.',
+				starter: '',
+				checks: [{ id: 'h1-hello', kind: 'text', selector: 'h1', matches: 'Hello' }]
+			}
+		],
+		cards: [
+			{
+				id: 'start-workbench-parts',
+				front: 'What does the practice workbench consist of?',
+				back: 'An editor with a file, a preview in a sandbox and a list of checks. You edit the file, the preview updates, and the checks read the page.'
+			},
+			{
+				id: 'start-check-failed',
+				front: 'What does “a check didn’t pass” mean?',
+				back: 'The page doesn’t yet have what the check is looking for. It’s a hint, not a grade: fix it and look again.'
+			},
+			{
+				id: 'start-devtools-open',
+				front: 'How do you open the developer tools?',
+				back: 'F12, or Ctrl+Shift+I (Cmd+Option+I on a Mac), or right-click the page and choose “Inspect”.'
+			},
+			{
+				id: 'start-devtools-tabs',
+				front: 'What do the Elements, Console and Network tabs show?',
+				back: 'The element tree and styles; the page’s messages and errors; the page’s requests and their size.'
+			}
+		],
+		sources: [
+			{
+				title: 'What are browser developer tools? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Dealing with files (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Environment_setup/Dealing_with_files',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'Chrome DevTools: overview', url: 'https://developer.chrome.com/docs/devtools/overview', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Firefox DevTools user docs', url: 'https://firefox-source-docs.mozilla.org/devtools-user/', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is your workbench. The file is on the left, the result is on the right, and the checks are below it. You edit the file, and I make sure you understand what is going on.',
+			hints: [
+				'A heading is written like this: <h1>, then the text itself, then </h1>. The closing tag has a slash.',
+				'A paragraph works the same way, with the tag p: <p>, the text, </p>.',
+				'Stuck? Look at your page in the preview: if all the text runs on in one line, the browser doesn’t yet know what is what.'
+			],
+			mistakes: {
+				'one-h1': 'There is no top-level heading yet, or there is more than one. You need exactly one <h1>.',
+				'h1-title': 'There is a heading, but it should hold the project’s title, exactly as it is written in the file.',
+				'p-who': 'The description isn’t in a paragraph yet. Wrap it in <p> and </p>.'
+			},
+			outro: 'You wrote a first page and found it in the tree. From here on you’ll do this with any content.'
+		},
+		say: { DevTools: 'dev tools', HTML: 'H T M L', F12: 'F twelve', Ctrl: 'control', Cmd: 'command' }
+	};
+</script>
+
+<script>
+	import Workbench from '../../diagrams/Workbench.svelte';
+</script>
+
+## Three windows
+
+The practice is laid out the same way in every lesson, and the three windows you’ll see are all you need:
+
+1. **The editor.** A text field where you write and edit a file. It colors the code to make it easier to read, but otherwise it is plain text.
+2. **The preview.** Next to it you see how the browser draws your file. A fraction of a second after you stop typing, it updates by itself.
+3. **The checks.** Below the preview is a list of what the task is looking for: “there is a heading”, “it holds your project’s title” and so on. What has worked is ticked.
+
+A webmaster works the same way: write, look, adjust. The difference is that here a helper sits next to you and tells you at once what is already in place.
+
+If you get tangled up, there is a “Reset” button under the editor (it brings back the original text) and a “Show the solution” button (with a confirmation, so you don’t press it by accident). The solution is shown as a difference from your file: you see what to add and what to remove.
+
+<details>
+<summary>Check yourself: what is the working loop in the practice?</summary>
+
+You edit the file, the preview updates, the checks read the page, and you see which of them have not passed yet.
+
+</details>
+
+## Files
+
+A site is made of files. While it is simple, there is one file: `index.html`, the page. When styles and scripts join the lessons, two more appear: `styles.css` for the look and `script.js` for the behavior. In the editor they will be tabs. The name `index.html` is no accident: it is what the main page of any site is called by default.
+
+Your work saves itself, in the browser. Close the tab and come back tomorrow: everything will be there. Each era of the course keeps its own version of the site separately.
+
+## Checks read the page, not the letters
+
+The checks don’t compare your text with a model answer. They look at the finished page as the browser built it: is there a heading, what does it say, what color is a block. So the same task can be solved in different ways, and the checks will accept them.
+
+The checks also know your project. If you entered your own title in settings, the task will ask for exactly that. A check doesn’t quarrel with your words: it needs them to be there.
+
+## The sandbox
+
+The code you write runs in a “sandbox”: an isolated box. You see the page in its window, but it can’t send anything to the internet and can’t see anything except itself. This isn’t distrust of you. It is a habit of the web: any code that didn’t come from you is run under restrictions, and code you wrote yourself or copied from a forum can be wrong too. So you can experiment without fear.
+
+## Developer tools
+
+Every browser has a built-in toolkit for people who make websites, and yours has it too: there is nothing to install. You can open it with the `F12` key, with `Ctrl+Shift+I` (`Cmd+Option+I` on a Mac), or by right-clicking the page and choosing “Inspect”.
+
+Three tabs will be useful first:
+
+- **Elements.** The page’s tree: which elements it is made of, and which styles apply to them. If you click an element in the tree, it lights up on the page. And the other way round: you can point at the page and find the element that matches.
+- **Console.** The browser writes the page’s messages and errors here. While the site is simple it is empty, and that is a good thing.
+- **Network.** A list of the requests the page made: what was downloaded, how big it was, how long it took. It will be useful in the next part, when we look at how a page travels across the network.
+
+One important property: in the tools you can change the page. Double-click some text in the tree and rewrite it, and the page changes. But you only change your own copy, in your own browser. Reload the page and everything comes back. It is safe to try: you can’t break anything.
+
+Try it on the diagram: press a line, an element or a tree node, then “forget” the closing tag and see what happens.
+
+<Workbench />
+
+<details>
+<summary>Check yourself: does an edit in the developer tools change someone else’s site?</summary>
+
+No. You only change your own copy in your own browser, and after you reload the page everything comes back.
+
+</details>
+
+## A short introduction to markup
+
+For the first practice you need exactly one idea. A page is text in which marks show what is important. A mark is written in angle brackets and is called a tag. A top-level heading is wrapped in `<h1>` and `</h1>`, and a paragraph in `<p>` and `</p>`. The slash in the closing tag says: the element has ended.
+
+```html
+<h1>Project title</h1>
+<p>One sentence about who you are.</p>
+```
+
+That is everything in these two lines: an opening tag, the text, a closing tag. There is more in part 2. For now you only need to feel how text becomes a page.
+
+## Practice
+
+Below is your first page. It already holds your project’s title and the description from your brief, but as plain text. Mark them up, and the checks will light up. Then open the developer tools, find your heading in the tree and click it.
+
+A hint: the page lives inside the preview window. In the tree, expand the `iframe` element and, below it, `body`.
