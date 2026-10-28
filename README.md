@@ -32,7 +32,8 @@ Each lesson has:
 - diagrams;
 - sources you can check;
 - a quiz;
-- practice in a browser sandbox that checks the page you build.
+- practice in a browser sandbox that checks the page you build;
+- narration you can listen to, section by section (synthesised: see [`docs/narration.md`](docs/narration.md)).
 
 Spaced repetition keeps what you learned. A guide called Эхо (Echo) walks with you.
 
@@ -55,6 +56,7 @@ npm test                    # unit tests
 npm run check               # svelte-check
 npm run content:check       # lessons, concepts, checks and links in the plan
 npx playwright test         # end-to-end
+npm run narration -- status # which lessons have audio of their current text
 ```
 
 SvelteKit, static build, served from `/learn` on GitHub Pages.

@@ -47,7 +47,7 @@
 		{jsonld} />
 
 	{#key data.lesson.id}
-		<LessonView lesson={data.lesson} part={data.part} concepts={data.concepts!} index={data.index!} body={data.body} />
+		<LessonView lesson={data.lesson} part={data.part} concepts={data.concepts!} index={data.index!} body={data.body} narration={data.narration ?? null} />
 	{/key}
 {:else if data.untranslated}
 	<Seo title={t('untranslated.title', { title: data.untranslated.title })} description={t('untranslated.description')} noindex />

@@ -21,9 +21,11 @@
 	import type { ModelConfig } from '#lib/guide/model.ts';
 	import type { CheckResult } from '#lib/practice/checks.ts';
 	import type { Persona } from '#lib/persona/fields.ts';
+	import Listen from '#lib/narration/Listen.svelte';
+	import type { Narration } from '#lib/narration/types.ts';
 
-	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null };
-	let { lesson, part, concepts: taught, index, body: Body }: Props = $props();
+	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null; narration?: Narration | null };
+	let { lesson, part, concepts: taught, index, body: Body, narration = null }: Props = $props();
 
 	const lang = getLocale();
 	const share = $derived({ url: at.lesson(lesson.id, lang), title: lesson.title, text: lessonText(lesson.title, lesson.definition, t('app.title'), lang) });
@@ -175,6 +177,7 @@
 		<h1>{lesson.title}</h1>
 		<p class="why"><span class="visually-hidden">{t('lesson.why')}: </span>{lesson.summary}</p>
 		<p class="minutes">{t('lesson.minutes', { n: lesson.minutes, minutes: pl(lesson.minutes, 'minute.forms') })}</p>
+		{#if narration}<Listen {narration} lesson={lesson.id} title={lesson.title} />{/if}
 		<div class="share-head"><Share {...share} /></div>
 	</header>
 

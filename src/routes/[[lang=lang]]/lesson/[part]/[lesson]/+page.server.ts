@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import { loadContent, loadEdition } from '#lib/content/load.ts';
 import { homeIndex } from '#lib/content/catalogue.server.ts';
 import { lastmod, lessonCard, og } from '#lib/seo/pages.server.ts';
+import { narration } from '#lib/narration/narration.server.ts';
 import type { Locale } from '#lib/i18n/index.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
@@ -40,6 +41,8 @@ export const load: PageServerLoad = ({ params }) => {
 		editions,
 		index: homeIndex(lang).hash,
 		og: og(lessonCard(lesson, part, lang)),
-		lastmod: lastmod(id, lang)
+		lastmod: lastmod(id, lang),
+		// its audio, when every section of its current text has some (docs/narration.md)
+		narration: narration(lesson, lang)
 	};
 };
