@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { parse } from 'yaml';
-import { cardinal, ordinal, speakPercents, speakYears } from '#lib/narration/numbers.ts';
+import { cardinal, ordinal, speakNumbers, speakPercents, speakYears } from '#lib/narration/numbers.ts';
 import { narrate, sentences, speak, stressMark, bodyOf, type Lexicon } from '#lib/narration/script.ts';
 import { match, script, sectionHash, manifest, type Manifest } from '#lib/narration/narration.server.ts';
 import { align, wer, words } from '#lib/narration/wer.ts';
@@ -22,6 +22,7 @@ describe('years in words', () => {
 		expect(ordinal(2040)).toBe('две тысячи сороковой');
 		expect(ordinal(2016)).toBe('две тысячи шестнадцатый');
 		expect(cardinal(2048)).toBe('две тысячи сорок восемь');
+		expect(cardinal(4_294_967_296 % 1e9)).toBe('двести девяносто четыре миллиона девятьсот шестьдесят семь тысяч двести девяносто шесть');
 	});
 	test('a year next to «год» takes the case the sentence gives it', () => {
 		expect(speakYears('В 1995 году')).toBe('В тысяча девятьсот девяносто пятом году');
@@ -38,6 +39,15 @@ describe('years in words', () => {
 		expect(speakYears('например 2001:db8::1')).toBe('например 2001:db8::1');
 		expect(speakYears('1500 пикселей')).toBe('1500 пикселей');
 	});
+	test('every other number in words', () => {
+		expect(speakNumbers('порт 65535')).toBe('порт шестьдесят пять тысяч пятьсот тридцать пять');
+		expect(speakNumbers('301 Moved')).toBe('триста один Moved');
+		expect(speakNumbers('адрес 8.8.8.8')).toBe('адрес восемь точка восемь точка восемь точка восемь');
+		expect(speakNumbers('около 4,3 миллиарда')).toBe('около четыре и три десятых миллиарда');
+		expect(speakNumbers('1 000 000 строк')).toBe('один миллион строк');
+		expect(speakNumbers('в 3-м уроке, 2-го числа')).toBe('в третьем уроке, второго числа');
+		expect(speakNumbers('HTTP 1.1')).toBe('HTTP один точка один');
+	});
 	test('percents agree with their number', () => {
 		expect(speakPercents('90%')).toBe('90 процентов');
 		expect(speakPercents('21%')).toBe('21 процент');
@@ -51,7 +61,7 @@ describe('speaking', () => {
 	test("the lesson's map wins over the course's, and an unmapped acronym is spelt", () => {
 		expect(speak('Netscape и DNS', lex, { DNS: 'ди-эн-эс' })).toBe('нетскейп и ди-эн-эс');
 		expect(speak('Протокол HTTPS', lex)).toBe('Протокол эйч-ти-ти-пи-эс');
-		expect(speak('Версия HTTP/2', lex)).toBe('Версия эйч-ти-ти-пи 2');
+		expect(speak('Версия HTTP/2', lex)).toBe('Версия эйч-ти-ти-пи два');
 		expect(speak('Формат JSON', lex)).toBe('Формат джейсон');
 	});
 	test('a domain is read with «точка»', () => {
@@ -59,7 +69,7 @@ describe('speaking', () => {
 		expect(speak('Зона .ru создана', lex)).toBe('Зона точка ру создана');
 	});
 	test('units after a number', () => {
-		expect(speak('отступ 16px', lex)).toBe('отступ 16 пикселей');
+		expect(speak('отступ 16px', lex)).toBe('отступ шестнадцать пикселей');
 	});
 	test('a stress mark becomes a capital vowel, which the engine reads without a glide', () => {
 		expect(stressMark('за́мок')).toBe('зАмок');
@@ -212,6 +222,6 @@ test('every Russian lesson file is a lesson', () => {
 });
 
 test('a number fused to letters by a hyphen is said with a pause, and a year keeps its suffix', () => {
-	expect(speak('Закон 152-ФЗ.', lex, { ФЗ: 'эф-зэ' })).toBe('Закон 152 эф-зэ.');
+	expect(speak('Закон 152-ФЗ.', lex, { ФЗ: 'эф-зэ' })).toBe('Закон сто пятьдесят два эф-зэ.');
 	expect(speak('В 1990-х годах тег был главным.', lex)).toBe('В тысяча девятьсот девяностых годах тэг был главным.');
 });

@@ -79,7 +79,9 @@ const code = await withApp(async (load) => {
 				const h = heard[l.id]?.[s.key];
 				if (!h || h.hash !== s.hash) continue;
 				const ref = w.words(s.sentences.join(' '));
-				const { errors, ops } = w.align(ref, w.words(n.spoken(h.text, l, 'ru')));
+				// Whisper spells an acronym it heard letter by letter as «H T T P S»: one word again
+				const heard = h.text.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m) => m.replace(/[ .]/g, ''));
+				const { errors, ops } = w.align(ref, w.words(n.spoken(heard, l, 'ru')));
 				refWords += ref.length;
 				errs += errors;
 				scored++;

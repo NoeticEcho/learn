@@ -65,11 +65,18 @@ export function ordinal(n: number, c: Case = 'nom', plural = false): string {
 	return [...words, ending(stem, c, plural)].join(' ');
 }
 
-/** A cardinal below a million in words, nominative (for tests and the odd count). */
+/** A cardinal below a billion in words, nominative (for tests and the odd count). */
 export function cardinal(n: number): string {
 	if (n === 0) return 'ноль';
-	const th = Math.floor(n / 1000);
 	const words: string[] = [];
+	if (n >= 1_000_000) {
+		const mil = Math.floor(n / 1_000_000);
+		const last = mil % 100 >= 10 && mil % 100 < 20 ? 0 : mil % 10;
+		words.push(...cardinalBelow1000(mil % 1000), last === 1 ? 'миллион' : last >= 2 && last <= 4 ? 'миллиона' : 'миллионов');
+		n %= 1_000_000;
+		if (!n) return words.join(' ');
+	}
+	const th = Math.floor(n / 1000);
 	if (th) {
 		const t = cardinalBelow1000(th);
 		const last = th % 100 >= 10 && th % 100 < 20 ? 0 : th % 10;
@@ -135,4 +142,29 @@ export function speakPercents(s: string): string {
 		const word = v >= 11 && v <= 14 ? 'процентов' : last === 1 ? 'процент' : last >= 2 && last <= 4 ? 'процента' : 'процентов';
 		return `${n} ${word}`;
 	});
+}
+
+// «1-й», «2-го», «в 3-м», «в 90-х»: an ordinal suffix names the case (feminine and neuter forms are left as digits)
+const SMALL_SUFFIX: Record<string, [Case, boolean]> = { й: ['nom', false], го: ['gen', false], му: ['dat', false], м: ['prep', false], х: ['prep', true], ми: ['inst', true] };
+const DECIMAL = ['', 'десятых', 'сотых', 'тысячных'];
+
+/**
+ * Every number left after the years and percents, in words. The voice read digits unreliably
+ * in the pilot («65535» as «пять тысяч пятьсот», «301 Moved Permanently» drifting into syllables
+ * of no language), so nothing reaches it as digits. Cardinals are nominative: a wrong case is
+ * a small thing beside a wrong number. Dotted numbers (addresses, versions) are read part by
+ * part with «точка»; a decimal comma as «и … десятых».
+ */
+export function speakNumbers(s: string): string {
+	const card = (n: string) => (n.length <= 9 ? cardinal(Number(n)) : n.split('').map((d) => cardinal(Number(d))).join(' '));
+	return s
+		.replace(/(?<![\p{L}\d])(\d{1,3})(?:[  ](\d{3}))+(?![\p{L}\d])/gu, (m) => m.replace(/[  ]/g, ''))
+		.replace(/(?<![\p{L}\d.])(\d+(?:\.\d+){2,})(?![\p{L}\d])/gu, (m) => m.split('.').map(card).join(' точка '))
+		.replace(/(?<![\p{L}\d.,])(\d+),(\d{1,3})(?![\p{L}\d])/gu, (m, a: string, b: string) => `${card(a)} и ${card(b)} ${DECIMAL[b.length]}`)
+		.replace(/(?<![\p{L}\d.])(\d+)\.(\d+)(?![\p{L}\d])/gu, (m, a: string, b: string) => `${card(a)} точка ${card(b)}`)
+		.replace(/(?<![\p{L}\d])(\d{1,4})-(й|го|му|м|х|ми)(?![\p{L}])/gu, (m, n: string, suf: string) => {
+			const [c, plural] = SMALL_SUFFIX[suf];
+			return +n >= 1 && +n <= 2999 ? ordinal(+n, c, plural) : m;
+		})
+		.replace(/(?<![\p{L}\d])\d+(?![\d])/gu, (n) => card(n));
 }

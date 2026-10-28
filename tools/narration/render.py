@@ -17,7 +17,8 @@ every minute and logging the pause.
 
 usage: render.py --scripts .cache/narration/ru.scripts.json --audio ../learn-audio
                  [--parts 0,1] [--lessons id,id] [--log private/narration/render.log]
-                 [--min-free-gb 6] [--dry-run]
+                 [--min-free-gb 6] [--resume-free-gb 8] [--dry-run]
+                 [--redo id#key,id#key --salt 2]   another sample of sections Whisper flagged
 """
 import argparse, json, os, signal, subprocess, sys, tempfile, time, wave
 from datetime import datetime
@@ -30,6 +31,7 @@ CHARS_PER_SECOND = 14.0  # serena's Russian, measured in the spike
 BATCH_SENTENCES, BATCH_CHARS = 12, 2400
 
 log_file = None
+STOP = {"now": False}
 
 
 def log(msg):
@@ -75,8 +77,8 @@ def wait_for_memory(min_gb, resume_gb):
     if gb >= min_gb and not busy:
         return
     log(f"pause: {gb:.1f} GB available (pause below {min_gb}, resume at {resume_gb}){', a test run is active' if busy else ''}")
-    while mem_available_gb() < resume_gb or test_run_active():
-        time.sleep(60)
+    while (mem_available_gb() < resume_gb or test_run_active()) and not STOP["now"]:
+        time.sleep(10)
     log(f"resume: {mem_available_gb():.1f} GB available")
 
 
@@ -162,6 +164,8 @@ def main():
     ap.add_argument("--log")
     ap.add_argument("--min-free-gb", type=float, default=6.0, help="pause below this much available memory")
     ap.add_argument("--resume-free-gb", type=float, default=8.0, help="and resume only at this much")
+    ap.add_argument("--redo", help="lesson#key,…: render these sections again although they have audio (another sample)")
+    ap.add_argument("--salt", type=int, default=1, help="with --redo: which other sample (the seed is shifted by it)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     log_file = a.log
@@ -190,7 +194,10 @@ def main():
                 return s
         return None
 
-    todo = [(l, s) for l in lessons for s in l["sections"] if not done(l, s)]
+    redo = set(a.redo.split(",")) if a.redo else set()
+    if redo:
+        lessons = [l for l in lessons if any(r.split("#")[0] == l["id"] for r in redo)]
+    todo = [(l, s) for l in lessons for s in l["sections"] if not done(l, s) or f"{l['id']}#{s['key']}" in redo]
     total_chars = sum(len(t) for _, s in todo for t in s["sentences"])
     log(f"start: {len(lessons)} lesson(s), {len(todo)} section(s) to render, {total_chars} chars "
         f"(~{total_chars / CHARS_PER_SECOND / 60:.0f} min of audio), {mem_available_gb():.1f} GB available, pid {os.getpid()}")
@@ -200,7 +207,7 @@ def main():
         return
 
     lockfile = lock(audio)
-    stop = {"now": False}
+    stop = STOP
 
     def on_signal(sig, frame):
         stop["now"] = True
@@ -230,9 +237,11 @@ def main():
             if stop["now"]:
                 break
             wait_for_memory(a.min_free_gb, a.resume_free_gb)
+            if stop["now"]:
+                break
             ts = time.monotonic()
             sents = sec["sentences"]
-            seed = int(sec["hash"][:8], 16)
+            seed = int(sec["hash"][:8], 16) + (a.salt * 7919 if f"{lesson['id']}#{sec['key']}" in redo else 0)
             out = [None] * len(sents)
             sr = 24000
             for b in batches(sents):

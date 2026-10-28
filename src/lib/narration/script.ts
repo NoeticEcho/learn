@@ -15,7 +15,7 @@
  * are spelt out in their case (numbers.ts); a word the voice stresses wrongly is given its stress.
  * None of this reaches the page: the displayed text is never touched.
  */
-import { speakPercents, speakYears } from './numbers.ts';
+import { speakNumbers, speakPercents, speakYears } from './numbers.ts';
 
 export type Lexicon = {
 	/** How each Latin letter is named when an acronym is spelt out: { A: 'эй', … }. */
@@ -282,7 +282,7 @@ export function speak(s: string, lex: Lexicon, say: Record<string, string> = {})
 	out = speakYears(out);
 	out = speakPercents(out);
 	// «152-эф-зэ», «HTML5-страница»: a number fused to letters by a hyphen is said with a pause
-	out = out.replace(/(?<=\d)-(?=\p{L})|(?<=\p{L})-(?=\d)/gu, ' ');
+	out = out.replace(/(?<=\d)-(?=\p{L}{2})(?!(?:го|му|ми)(?!\p{L}))|(?<=\p{L})-(?=\d)/gu, ' ');
 	out = out.replace(/(\d)\s?(px|rem|em|fr|vh|vw|ch|ms|КБ|kB|KB|МБ|MB|ГБ|GB)(?![\p{L}\p{N}])/gu, (m, d: string, u: string) => `${d} ${UNITS[u.toLowerCase()] ?? u}`);
 	out = out.replace(/(?<![\p{L}\p{N}])F(\d{1,2})(?![\p{L}\p{N}])/gu, 'эф $1');
 	const keep = new Set(lex.keep);
@@ -296,6 +296,7 @@ export function speak(s: string, lex: Lexicon, say: Record<string, string> = {})
 		.replace(/\s\+\s|(?<=\p{L})\+(?=\p{L})/gu, ' плюс ')
 		.replace(/(?<![\p{L}])(\d)xx(?![\p{L}])/gu, '$1-икс-икс')
 		.replace(/\s×\s|(?<=\d)×(?=\d)/g, ' на ');
+	out = speakNumbers(out);
 	out = applyMap(out, stressMap(lex.stress));
 	return stressMark(out).replace(/\s+/g, ' ').trim();
 }
