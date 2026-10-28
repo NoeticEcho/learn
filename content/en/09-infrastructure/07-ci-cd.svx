@@ -1,0 +1,380 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/07-ci-cd.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const plan = (v) => `<section data-scaffold id="cicd-plan">
+      <h2>My site’s pipeline</h2>
+      <textarea id="workflow" rows="30" aria-label="The pipeline file .github/workflows/deploy.yml">${v.yaml}<\/textarea>
+      <p id="pipeline-pages">What the build checks for each section: ${v.pages}</p>
+      <p id="rollback">How to roll back a bad version: ${v.rollback}</p>
+    </section>`;
+
+	const starter = `name: …
+on:
+  push:
+    branches: […]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: …
+        run: …
+  deploy:
+    needs: …
+    runs-on: ubuntu-latest
+    steps:
+      - name: …
+        run: …`;
+
+	const solved = `name: Check and deploy the site
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Links and markup
+        run: npm run check:links && npm run check:html
+      - name: Build the pages
+        run: npm run build
+      - name: The privacy policy and consent page is there
+        run: test -f dist/privacy/index.html
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/deploy-pages@v5
+      - name: Tell the chat
+        if: always()
+        run: curl -fsS -X POST "$NOTIFY_URL" -d "text=Deploy: &#123;&#123; job.status &#125;&#125;"
+        env:
+          NOTIFY_URL: &#123;&#123; secrets.NOTIFY_URL &#125;&#125;`;
+
+	const consent = { regex: 'privacy|consent|policy|cookie' };
+
+	export const metadata = {
+		id: '09-infrastructure/07-ci-cd',
+		part: 9,
+		order: 7,
+		title: 'CI/CD: a deploy on every commit',
+		definition: 'CI/CD is a pipeline that checks, builds and deploys a site on every commit by itself, and deploys only when every check has passed.',
+		summary:
+			'Uploading a site by hand over FTP means hoping nothing was forgotten. Afterwards you’ll understand continuous integration and delivery, read and write a pipeline file for GitHub Actions that checks, builds and deploys your site, keep secrets in settings, and know how to roll back a bad version.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser-1996', label: 'FTP', caption: 'Friday evening', say: 'Uploaded a fix over FTP. A broken link went to the live site, and there is no earlier version to go back to.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'commit|checks|build|site', say: 'The pipeline starts by itself on every commit. A check is red: nothing goes further, and the live site is safe.' },
+				{ mood: 'cheer', prop: 'server', label: 'rollback', caption: 'In a minute', say: 'A bad version got out anyway? Deploy the previous commit again, and the site is as it was.' }
+			]
+		},
+		minutes: 25,
+		teaches: ['infra-ci-cd'],
+		requires: ['infra-dockerfile-compose', 'infra-hosting-types', 'cms-build-webhook-rebuild', 'js-tooling'],
+		practice: {
+			id: 'infra-pipeline-file',
+			title: 'A pipeline file for your site',
+			task: 'Finish the pipeline file for GitHub Actions. 1) The name and the trigger: on every push to the main branch. 2) The job check: get the code, check links and markup, build the pages, and if the site has a form, check that the privacy policy and consent page is there. 3) The job deploy with needs: check, so that the deploy runs only after the checks succeed. 4) Take secrets (the chat address) from the service’s settings as secrets.NAME, and don’t write them into the file. 5) Under the file, write what the build checks for each section of the project (name every section from the brief) and how to roll back a bad version. Every “…” has to be replaced.',
+			era: 6,
+			files: files({ scaffold: plan({ yaml: starter, pages: '…', rollback: '…' }) }),
+			solution: files({
+				scaffold: plan({
+					yaml: solved,
+					pages: 'for every section ({{#each sections}}{{.}}; {{/each}}) the build fails if the page wasn’t created, and then the deploy doesn’t start.',
+					rollback: 'I revert the commit with git revert and push it to main: the pipeline deploys the previous version; on static hosting I can also pick an earlier deploy in the panel.'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#cicd-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#cicd-plan', matches: '^[^…]*$' },
+				{ id: 'trigger', kind: 'text', selector: '#workflow', matches: 'on:[\\s\\S]*push:[\\s\\S]*main' },
+				{ id: 'jobs', kind: 'text', selector: '#workflow', matches: 'jobs:[\\s\\S]*check:[\\s\\S]*deploy:' },
+				{ id: 'needs', kind: 'text', selector: '#workflow', matches: 'needs:\\s*\\[?\\s*check' },
+				{ id: 'build-step', kind: 'text', selector: '#workflow', matches: 'build' },
+				{ id: 'links-html', kind: 'text', selector: '#workflow', matches: '[Ll]ink|html|HTML|markup' },
+				{ id: 'secrets-in-settings', kind: 'text', selector: '#workflow', matches: 'secrets\\.[A-Z_]{3,}' },
+				{ id: 'no-token-in-file', kind: 'text', selector: '#workflow', matches: '^(?![\\s\\S]*(?:ghp_[A-Za-z0-9]{20,}|token:\\s*[A-Za-z0-9]{16,}|password:\\s*\\S{6,}))' },
+				{ id: 'consent-form', kind: 'text', selector: '#workflow', matches: consent.regex, when: { brief: 'mainAction.kind', equals: 'form' } },
+				{ id: 'consent-book', kind: 'text', selector: '#workflow', matches: consent.regex, when: { brief: 'mainAction.kind', equals: 'book' } },
+				{ id: 'consent-signup', kind: 'text', selector: '#workflow', matches: consent.regex, when: { brief: 'mainAction.kind', equals: 'signup' } },
+				{ id: 'consent-buy', kind: 'text', selector: '#workflow', matches: consent.regex, when: { brief: 'mainAction.kind', equals: 'buy' } },
+				{ id: 'pages-all', kind: 'field', selector: '#pipeline-pages', field: 'sections' },
+				{ id: 'rollback', kind: 'text', selector: '#rollback', matches: 'roll|revert|previous|restore|earlier|go back' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the stations of the pipeline in order',
+				items: [
+					'A commit to the main branch starts the pipeline',
+					'Checks: links, markup, tests',
+					'Building the site',
+					'A preview at a temporary address',
+					'Deploying to the live site',
+					'A notice in the chat about the result'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the difference between continuous delivery and continuous deployment?',
+				options: [
+					'With delivery a version is always ready to deploy and a button deploys it; with deployment it goes to the live site by itself after the checks pass',
+					'None: they are two names for the same thing',
+					'Delivery is about mail, deployment is about servers'
+				],
+				answer: 0,
+				why: [
+					'Yes. For a small site deployment is usually the choice: the checks are green and the site is updated. For risky systems the “release” button is left to a person.',
+					'No: the difference is who takes the last decision, a person or the pipeline.',
+					'No: both terms are about how a version reaches people.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The pipeline needs a token to deploy. Where do you keep it?',
+				options: [
+					'In the service’s secrets settings: the pipeline file refers to a name, and the value is not in the repository',
+					'In the pipeline file, so it works for everyone',
+					'In the README, so it doesn’t get lost'
+				],
+				answer: 0,
+				why: [
+					'Yes. Colleagues read a repository, and sometimes everyone can; whatever gets into it counts as leaked. The file says secrets.NAME, and the value is kept in the settings and hidden from the log.',
+					'No: a repository and its history keep the token for good, even if you delete it later.',
+					'No: everyone reads a README.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can a pipeline check automatically on a small site?',
+				options: [
+					'That there are no broken links',
+					'That all the pages build',
+					'That the page with the form has a link to the privacy policy and consent',
+					'That the writing is good and persuasive'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: link checkers are an ordinary thing.',
+					'Yes: a failed build should stop the deploy.',
+					'Yes: it is easy to check that a page and a link exist, though a machine can’t judge whether it meets the law.',
+					'No: that is a person’s work, not a pipeline’s.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A bad version got onto the site after all. What do you do?',
+				options: [
+					'Roll back: restore the previous commit (git revert) or the previous deploy, and investigate later',
+					'Fix it right on the server, to be faster',
+					'Switch the site off for a week'
+				],
+				answer: 0,
+				why: [
+					'Yes. First bring back what worked, then look for the cause. The pipeline does a rollback as reliably as a deploy.',
+					'No: a hand edit that bypasses the pipeline leaves a server that isn’t in the repository.',
+					'No: a rollback takes minutes.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-ci-cd-what',
+				front: 'What are CI and CD?',
+				back: 'CI (continuous integration): every change is built and checked automatically. CD: continuous delivery (a version is always ready, and a button deploys it) or deployment (after the checks it goes to the site by itself).'
+			},
+			{
+				id: 'infra-pipeline-stations',
+				front: 'What is a site’s pipeline made of?',
+				back: 'A start on commit, checks (links, markup, consent), a build, a preview, a deploy only after green checks, a notice. If any station fails, nothing goes further.'
+			},
+			{
+				id: 'infra-ci-secrets',
+				front: 'Where do you keep a pipeline’s tokens and keys?',
+				back: 'In the service’s secrets settings. The pipeline file refers to a name, and the value never reaches the repository. If someone read the repository, they read everything in it.'
+			},
+			{
+				id: 'infra-rollback',
+				front: 'How do you roll back a bad version?',
+				back: 'Bring back the previous one: git revert the bad commit and push (the pipeline deploys the earlier version), or pick an earlier deploy in the hosting panel. Don’t rewrite the history of main.'
+			}
+		],
+		sources: [
+			{ title: 'GitHub Docs: Understanding GitHub Actions', url: 'https://docs.github.com/en/actions/about-github-actions/understanding-github-actions', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'GitHub Docs: Using custom workflows with GitHub Pages', url: 'https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'GitLab Docs: CI/CD', url: 'https://docs.gitlab.com/ci/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Continuous integration (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Continuous_integration', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'The Twelve-Factor App', url: 'https://12factor.net/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'DevOps CI/CD Explained in 100 Seconds (Fireship)', url: 'https://www.youtube.com/watch?v=scEDHsr3APg', licence: 'proprietary-link', kind: 'video', lang: 'en' },
+			{ title: 'GitHub Actions Tutorial: Basic Concepts and CI/CD Pipeline with Docker (TechWorld with Nana)', url: 'https://www.youtube.com/watch?v=R8_veQiYBjI', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'A pipeline is a file that tells a machine what to do at every commit. Finish it so that a deploy happens only after green checks, and with no secrets in the text.',
+			hints: [
+				'The trigger: on: push: branches: [main]. The name can be anything clear.',
+				'The deploy job runs only after check: write needs: check. Secrets are taken as secrets.NAME, for example secrets.NOTIFY_URL, and the value is kept in the settings.',
+				'If the site has a form, check in one step that the privacy policy and consent page exists (for example test -f dist/privacy/index.html).',
+				'Under the file, name every section of the project and say how to roll back: git revert and push, or an earlier deploy in the panel.'
+			],
+			mistakes: {
+				plan: 'The block “My site’s pipeline” (the section whose id is cicd-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one, in the file too.',
+				trigger: 'The pipeline should run on a push to the main branch: on: push: branches: [main].',
+				jobs: 'The file should have two jobs: check and deploy.',
+				needs: 'The deploy job should have needs: check, so that it runs only after the checks.',
+				'build-step': 'The check job needs a step that builds the site (build).',
+				'links-html': 'The check job needs a check of links and markup.',
+				'secrets-in-settings': 'Take the secret from the settings: secrets.NAME (for example secrets.NOTIFY_URL).',
+				'no-token-in-file': 'A token or a password is written in the file. Remove it: the value is kept in the service’s settings.',
+				'consent-form': 'Your project has a form: add a step that checks the privacy policy and consent page.',
+				'consent-book': 'Your project has booking: add a step that checks the privacy policy and consent page.',
+				'consent-signup': 'Your project has sign-up: add a step that checks the privacy policy and consent page.',
+				'consent-buy': 'Your project has purchases: add a step that checks the privacy policy and consent page.',
+				'pages-all': 'Name every section of the project from the brief, in full.',
+				rollback: 'Say how to roll back a bad version: git revert and push, or an earlier deploy.'
+			},
+			outro: 'Now a deploy for you is not a ritual but a file: it can be read, checked and repeated. Next: running a real site through this pipeline.'
+		},
+		say: {
+			'CI/CD': 'C I C D',
+			CI: 'C I',
+			CD: 'C D',
+			GitHub: 'git hub',
+			Actions: 'actions',
+			GitLab: 'git lab',
+			push: 'push',
+			main: 'main',
+			deploy: 'deploy',
+			revert: 'revert',
+			YAML: 'yammel',
+			FTP: 'F T P',
+			workflow: 'workflow',
+			secrets: 'secrets',
+			token: 'token'
+		}
+	};
+</script>
+
+<script>
+	import PipelineSim from '../../diagrams/PipelineSim.svelte';
+</script>
+
+## Friday evening, FTP
+
+Remember how a site was deployed in 2010: open a program, connect to the server, drag files from one folder to another. What can go wrong here? Everything. One file forgotten. The wrong version uploaded. A broken link unnoticed. A change goes to the live site unchecked, and the earlier version is nowhere. And all of it is known by one person who “knows how to upload”.
+
+The modern answer is called **CI/CD**, and behind the two letters hides a simple idea: let a machine do the deploying, by written rules, the same way every time.
+
+- **CI** (continuous integration): every change is built and checked automatically at once. Small edits, frequent checks, and a mistake is found while it is fresh.
+- **CD** (continuous delivery or deployment): a checked version reaches people automatically. With **delivery**, a version is always ready, and a person presses the last “release” button. With **deployment**, the site is updated by itself after green checks. For a small site the second is usually the choice.
+
+For you this means that editing a site turns from a ritual into a **commit**: you saved a change in the repository (you know Git as a way to keep versions), pushed it to the main branch, and everything after that goes by itself.
+
+## The stations of a pipeline
+
+A pipeline is a chain of stations, and each checks or does something. If a station jams (turns red), nothing goes further.
+
+1. **The start**: an event, such as a commit to the `main` branch or an opened pull request.
+2. **Checks**: broken links, markup errors, tests, accessibility, the presence of the pages that must exist.
+3. **The build**: turns the sources into a finished site (you read about building in the part on JavaScript).
+4. **A preview**: a draft at a temporary address so you can look at it with your own eyes. Many platforms make one for every pull request.
+5. **The deploy**: replacing the live site, but only when everything before it is green.
+6. **A notice**: a message in the chat or by email: “published”, or “failed on the link check”.
+
+Run a change through the diagram. Then jam different stations and compare with deploying by hand: there nobody stops a bad change. Switch on “a mistake the checks can’t see” and press “Roll back”.
+
+<PipelineSim />
+
+<details>
+<summary>Check yourself: why does the deploy come after the checks and not beside them?</summary>
+
+So that a bad version doesn’t reach the live site: if any check is red, the deploy never starts, and the site stays as it was.
+
+</details>
+
+## What it looks like in a file
+
+A pipeline is written in a file. In GitHub Actions it is a text YAML file in the `.github/workflows/` folder. Here is a file for a site on GitHub Pages (the lesson on publishing shows it at work):
+
+```yaml
+name: Check and deploy the site
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Links and markup
+        run: npm run check:links && npm run check:html
+      - name: Build the pages
+        run: npm run build
+      - name: The privacy policy and consent page is there
+        run: test -f dist/privacy/index.html
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/deploy-pages@v5
+```
+
+Read it as instructions. `on: push: branches: [main]`: run on every commit to `main`. There are two **jobs**: `check` (check and build) and `deploy`. The line `needs: check` says the deploy waits for the checks to succeed, and if they are red it won’t run. Each **step** is either a ready-made action (`uses:`, for example getting the code) or a command (`run:`). The version numbers of the actions (`@v7`, `@v5`) keep changing: the current ones are in the documentation (in the sources), and these were the latest releases in October 2026.
+
+Lines such as `npm run check:links` are your own commands: they are defined in the project. What each does depends on the tools you chose: a link checker, a markup checker, a bundler. This textbook is checked the same way: on every change it runs type checks, tests, an accessibility check, a link check and a content check, and only then is the main branch deployed to Pages. If the site has a form, add a check that the privacy policy and consent page exists (a step in the example): that way the important page won’t be lost in the next edit.
+
+GitLab writes the same thing in a file called `.gitlab-ci.yml`, and platforms such as Netlify, Vercel and Cloudflare Pages manage with no file at all: connect a repository, and they build and deploy on every commit themselves. That is the simplest pipeline, and for many sites it is enough.
+
+## Secrets
+
+A pipeline needs rights: to deploy to hosting, to write in the chat. Those rights are kept in **tokens and keys**. The main rule is the same as in Docker: **secrets don’t live in the repository**. Not in the pipeline file, not in the code, not in the README. Colleagues, contractors and sometimes the whole world read a repository, and Git’s history keeps everything for good: a deleted file stays in the old commits.
+
+Secrets go into the **service’s settings** (at GitHub, the “Secrets and variables” section in the repository’s settings). The file holds only a name, such as `secrets.NOTIFY_URL`, and the platform fills in the value at run time, hiding it in the log. Three more habits: give a token the least rights it needs (only deploying), pin the versions of other people’s actions (other people’s code runs with your rights), and remember that pull requests from other people’s copies of the repository don’t get secrets.
+
+<details>
+<summary>Check yourself: why can’t you just delete a token from the repository after it got there?</summary>
+
+It stays in the commit history, and anyone who read or copied the history could have seen it. A token that got into a repository counts as leaked: you revoke it and issue a new one.
+
+</details>
+
+## Rolling back
+
+Any pipeline will one day release a bad version: checks don’t see everything. So decide in advance how you will go back.
+
+- **Through Git.** The `git revert` command creates a new commit that undoes the bad one. You push it to `main`, and the same pipeline deploys the earlier behavior. You don’t rewrite the main branch’s history with a forced push: that is how other people’s work gets lost.
+- **Through the hosting panel.** Static platforms keep earlier deploys, and you can make one of them live with a button.
+- **First bring it back, then investigate.** Minutes of downtime are worth more than a fine understanding of the cause.
+
+The one thing a rollback can’t fix is data: if a bad version spoiled the database, the data has to be restored, and that needs backups (the last lesson of the part).
+
+## Practice
+
+In front of you is your project’s site, and under it a pipeline file with gaps. Finish it: a start on a push to `main`, a `check` job with the build and the checks (links, markup and, if the project has a form, the privacy page), a `deploy` job with `needs: check`, and a secret as `secrets.NAME`. Then write what the build checks for each section of the brief, and how you would roll back.
+
+The file here is only read and checked: Actions can’t be run in the sandbox. In the next lesson you’ll deploy a real site, and this file will be useful to you.
+
+## What was wrong before
+
+In 2010 people were afraid of the word “release”: once a month, at night, with a six-page checklist and one person who had “everything set up”. After a release, a week went on fixing what was found. The idea of continuous integration appeared earlier (in the late 1990s), but it became ordinary for small sites only when free pipelines came with repositories. Now a release is boring, and that is exactly what was wanted.

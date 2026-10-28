@@ -1,0 +1,340 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/06-kubernetes.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const plan = (v) => `<section data-scaffold id="k8s-plan">
+      <h2>Does my project need an orchestrator</h2>
+      <table>
+        <tr><th>How many services</th><td id="k-services">${v.services}</td></tr>
+        <tr><th>Downtime I can accept</th><td id="k-downtime">${v.downtime}</td></tr>
+        <tr><th>Who will run the cluster</th><td id="k-owner">${v.owner}</td></tr>
+      </table>
+      <p id="k-verdict">Verdict: ${v.verdict}</p>
+      <p id="k-cheap">The cheap option without Kubernetes: ${v.cheap}</p>
+      <ul id="k-terms">
+        <li>pod: ${v.pod}</li>
+        <li>service: ${v.service}</li>
+        <li>deployment: ${v.deployment}</li>
+      </ul>
+    </section>`;
+
+	export const metadata = {
+		id: '09-infrastructure/06-kubernetes',
+		part: 9,
+		order: 6,
+		title: 'Kubernetes in plain words, and when you don’t need it',
+		definition: 'Kubernetes is a container orchestrator: given a description of the state wanted, its controllers restart and update copies until the real state matches.',
+		summary:
+			'When there are many containers, something has to restart, multiply and update them. Afterwards you’ll understand what Kubernetes does and what the words pod, deployment, service and ingress mean, know what it costs, and be able to answer honestly whether your project needs it. Almost always the answer is no.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'a node is down', caption: 'At night', say: 'A server fell over, and a copy of the site with it. Someone must notice and start a new one before the visitors wake.' },
+				{ mood: 'explain', side: 'right', prop: 'network', label: 'cluster', say: 'An orchestrator holds the wanted state: “three copies”. It compares it with the real one and fixes the gap itself.' },
+				{ mood: 'cheer', prop: 'sheet', label: '1 site, 2 services', caption: 'The honest verdict', say: 'One server is enough for my project. An orchestrator solves problems I don’t have.' }
+			]
+		},
+		minutes: 20,
+		teaches: ['infra-kubernetes', 'infra-when-not-k8s'],
+		requires: ['infra-containers', 'infra-hosting-choice'],
+		practice: {
+			id: 'infra-k8s-verdict',
+			title: 'Does your project need an orchestrator',
+			task: 'Assess your project. 1) Enter the number of services (the site, a request receiver, a database, a queue: how many separate programs you run) and the downtime you can accept (for example, “up to an hour”). 2) Say who would run the cluster if you needed one: you, a team, the provider, a contractor or nobody. 3) In the verdict, say plainly whether you need an orchestrator, relying on the number of services and the downtime and naming the project’s main action in the words of the brief. 4) Name the cheap option without Kubernetes: static hosting, one server with Compose, a platform. 5) In the list, write what in your project would be a pod, a service and a deployment, at least four words in each item. Every “…” has to be replaced.',
+			era: 6,
+			files: files({
+				scaffold: plan({ services: '…', downtime: '…', owner: '…', verdict: '…', cheap: '…', pod: '…', service: '…', deployment: '…' })
+			}),
+			solution: files({
+				scaffold: plan({
+					services: '2: the site and a request receiver',
+					downtime: 'up to an hour: a request can wait, and pages lose nothing without it',
+					owner: 'nobody but me: the project has no team, and a cluster needs a person of its own',
+					verdict: 'I don’t need an orchestrator: 2 services and a downtime of up to an hour don’t justify a cluster, and the action “{{mainAction.label}}” doesn’t need copies added automatically.',
+					cheap: 'static hosting for the pages and one server with Compose for the request receiver, restarting automatically.',
+					pod: 'in my project this is one running container of the request receiver',
+					service: 'in my project this is the receiver’s permanent address that the form points at',
+					deployment: 'in my project this is the rule “keep two copies of the receiver and update them one at a time”'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#k8s-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#k8s-plan', matches: '^[^…]*$' },
+				{ id: 'services', kind: 'text', selector: '#k-services', matches: '\\d' },
+				{ id: 'downtime', kind: 'text', selector: '#k-downtime', matches: 'minute|hour|day|no downtime|none|never|can wait|tolerate|second|downtime|night' },
+				{ id: 'owner', kind: 'text', selector: '#k-owner', matches: '\\bI\\b|\\bme\\b|\\bwe\\b|team|provider|nobody|no one|contractor|administrator|DevOps|engineer' },
+				{ id: 'verdict-yes-no', kind: 'text', selector: '#k-verdict', matches: '(?:do(?:n’t| not)|doesn’t|does not)\\s+need|(?:do|does|will|would)\\s+need|\\bneeded\\b|\\bnot needed\\b|\\bneed an\\b|\\bneeds\\b' },
+				{ id: 'verdict-numbers', kind: 'text', selector: '#k-verdict', matches: '^(?=[\\s\\S]*\\d)(?=[\\s\\S]*(?:downtime|minute|hour|service))' },
+				{ id: 'verdict-action', kind: 'field', selector: '#k-verdict', field: 'mainAction.label' },
+				{ id: 'cheap', kind: 'text', selector: '#k-cheap', matches: 'static|hosting|VPS|server|Compose|compose|platform|PaaS|cloud|serverless|container' },
+				{ id: 'terms', kind: 'count', selector: '#k-terms li', min: 3 },
+				{ id: 'term-pod', kind: 'text', selector: '#k-terms li:nth-child(1)', matches: ':\\s*\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'term-service', kind: 'text', selector: '#k-terms li:nth-child(2)', matches: ':\\s*\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'term-deployment', kind: 'text', selector: '#k-terms li:nth-child(3)', matches: ':\\s*\\S+\\s+\\S+\\s+\\S+\\s+\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each Kubernetes word with what it means',
+				pairs: [
+					['pod', 'the smallest unit: one or several closely tied containers'],
+					['deployment', 'a description of what you want: how many copies, of which version, and how to update them'],
+					['service', 'a permanent address in front of copies that come and go'],
+					['ingress', 'an entrance for HTTP requests from outside the cluster to the right service']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does it mean that Kubernetes works from “the desired state”?',
+				options: [
+					'You describe what should exist (three copies of version 2), and controllers compare it with the real state and fix the gap themselves',
+					'You start every copy by hand with a command, and Kubernetes only records it',
+					'Kubernetes guesses what you need, with no description'
+				],
+				answer: 0,
+				why: [
+					'Yes. This is the declarative approach: you say “what”, and the system works out “how”. A node falls, and a copy starts on another, because the gap with the description was noticed.',
+					'No: starting by hand is Docker. The idea of Kubernetes is that controllers do the routine.',
+					'No: with no description it does nothing.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does an orchestrator really do for you?',
+				options: [
+					'Restarts fallen copies and moves them off a node that has failed',
+					'Updates the version one copy at a time without switching the site off',
+					'Writes the text and builds the pages',
+					'Adds copies when the load has grown (if that is set up)'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: self-healing is its main benefit.',
+					'Yes: a gradual update (a rolling update) and a rollback to the previous version.',
+					'No: it manages how programs are started, not what is in them.',
+					'Yes: autoscaling exists, but it has to be set up and tested.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A one-page business site, a request form and a dozen visitors a day. Does it need Kubernetes?',
+				options: [
+					'No: static hosting or one small server is enough, and a cluster would cost more than the whole project',
+					'Yes: for the future, in case we grow',
+					'Yes: without it the site is unreliable'
+				],
+				answer: 0,
+				why: [
+					'Yes. An orchestrator solves the problems of many services and an uneven load, and you have neither. “To grow into” is the most expensive reason: a cluster has to be updated, secured and understood every month.',
+					'No: complicating things for hypothetical growth costs more than moving later.',
+					'No: a static site on good hosting is more reliable than a home-made cluster.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps in order from the simplest to the most complex (climb only when you’ve hit a limit)',
+				items: [
+					'Static hosting',
+					'A platform that runs the application for you',
+					'One server (a VPS) with Compose and automatic restarts',
+					'Managed Kubernetes at a provider'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-k8s-what',
+				front: 'What does Kubernetes do?',
+				back: 'It manages how many containers are started on many machines: it keeps the needed number of copies, restarts fallen ones, updates with no downtime and scales. You describe what you want, and the system brings the real state to it.'
+			},
+			{
+				id: 'infra-k8s-words',
+				front: 'Pod, deployment, service, ingress',
+				back: 'Pod: the smallest unit (containers together). Deployment: the desired number of copies and the version. Service: a permanent address in front of the copies. Ingress: the HTTP entrance from outside. A node is a machine, and a cluster is the nodes together.'
+			},
+			{
+				id: 'infra-k8s-cost',
+				front: 'What does Kubernetes cost?',
+				back: 'Complexity: you need a person or a team who update the cluster and set up the network, permissions and monitoring. A provider’s managed cluster takes away some of the work, but not the knowledge.'
+			},
+			{
+				id: 'infra-k8s-ladder',
+				front: 'A ladder instead of a jump',
+				back: 'Static hosting, a platform, one server with Compose, managed containers, Kubernetes. Climb when you’ve hit a real limit: many services, an uneven load, strict downtime and people to run the cluster.'
+			}
+		],
+		sources: [
+			{ title: 'Kubernetes: Overview', url: 'https://kubernetes.io/docs/concepts/overview/', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Kubernetes: Learn Kubernetes Basics', url: 'https://kubernetes.io/docs/tutorials/kubernetes-basics/', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Kubernetes: Deployments', url: 'https://kubernetes.io/docs/concepts/workloads/controllers/deployment/', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Kubernetes: Patch releases and the support period', url: 'https://kubernetes.io/releases/patch-releases/', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Kubernetes (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Kubernetes', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Kubernetes Explained in 100 Seconds (Fireship)', url: 'https://www.youtube.com/watch?v=PziYflu8cB8', licence: 'proprietary-link', kind: 'video', lang: 'en' },
+			{ title: 'Kubernetes Tutorial for Beginners, full course (TechWorld with Nana)', url: 'https://www.youtube.com/watch?v=X48VuDVv0do', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'First play with the dispatcher: take down a node, send in a rush of visitors and roll out a new version. Then assess your own project honestly: the number of services, the downtime and the people.',
+			hints: [
+				'Services are the separate programs you run: the site, a request receiver, a database. Enter a number. Downtime: for example “up to an hour” or “none at all”.',
+				'The verdict should say whether you need an orchestrator, lean on the number of services and the downtime, and name the project’s main action in the words of the brief.',
+				'The cheap option: static hosting, one server with Compose, a platform that runs the application for you.',
+				'For pod, service and deployment, finish after the colon with what each would be in your project: at least four words in each.'
+			],
+			mistakes: {
+				plan: 'The block “Does my project need an orchestrator” (the section whose id is k8s-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				services: 'Enter the number of services as a digit.',
+				downtime: 'Say what downtime is acceptable: minutes, an hour, a day or “none”.',
+				owner: 'Say who will run the cluster: you, a team, the provider, a contractor or nobody.',
+				'verdict-yes-no': 'In the verdict, say plainly whether you need an orchestrator or not.',
+				'verdict-numbers': 'The verdict should rest on the number of services and the acceptable downtime: name them in digits or in words.',
+				'verdict-action': 'In the verdict, name the project’s main action in the words of the brief.',
+				cheap: 'Name the cheap option without Kubernetes: static hosting, a server with Compose, a platform.',
+				terms: 'The list should still have three items: pod, service, deployment.',
+				'term-pod': 'After “pod:”, write what it is in your project, at least four words.',
+				'term-service': 'After “service:”, write what it is in your project, at least four words.',
+				'term-deployment': 'After “deployment:”, write what it is in your project, at least four words.'
+			},
+			outro: 'Now you know what an orchestrator does, and you can say “we don’t need it” with reasons. That is a mature position, not a backward one.'
+		},
+		say: {
+			Kubernetes: 'koo ber net eez',
+			K8s: 'kates',
+			pod: 'pod',
+			deployment: 'deployment',
+			service: 'service',
+			ingress: 'in gress',
+			kubectl: 'cube control',
+			Compose: 'compose',
+			VPS: 'V P S',
+			k3s: 'K three S',
+			Nomad: 'nomad',
+			Swarm: 'swarm',
+			YAML: 'yammel',
+			CNCF: 'C N C F',
+			Borg: 'borg'
+		}
+	};
+</script>
+
+<script>
+	import OrchestraSim from '../../diagrams/OrchestraSim.svelte';
+</script>
+
+## When there are many containers
+
+Docker solved the problem of “one box everywhere”. But imagine your project has grown: ten boxes (the site, a request receiver, a database, a queue, a mail service…) on three machines. Questions appear at once that Docker alone doesn’t answer.
+
+- A machine fell over at night. Who will notice and start its containers on another one?
+- A lot of people came. Who will add copies of the site, and take the extra ones away when they leave?
+- A new version came out. How do you replace the copies one by one so the site is never gone for a second?
+- One container has to find another. But containers’ addresses change at every start. How?
+
+A program that answers these questions is called an **orchestrator**: like a conductor, it plays nothing itself but sees that every musician comes in on time. The best-known orchestrator is **Kubernetes** (written K8s: “K”, eight letters and “s”). Google open-sourced it in 2014, having built it from the experience of its own internal system, and today an independent foundation, the CNCF, looks after it.
+
+## The idea: wanted and real
+
+The main idea of Kubernetes is simple. You don’t start copies one by one. You **describe the desired state**: “I want three copies of this image.” After that **controllers** work: they keep comparing what is wanted with what is real, and fixing the gap. A copy fell, and a controller starts a new one. A node vanished, and copies appear on the others. You changed the desired version, and copies are replaced one at a time.
+
+Try it yourself. It is a simplified model: three nodes as runways, copies as airplanes, and a dispatcher who keeps their number. Take down a node, raise the stream of visitors, roll out a new version and watch the picture change. Under the diagram is a short questionnaire about your own project: do you need such a dispatcher?
+
+<OrchestraSim />
+
+<details>
+<summary>Check yourself: what does Kubernetes do when a node holding two copies of the site goes down?</summary>
+
+A controller notices that there are fewer copies than wanted and starts the missing ones on the remaining nodes. You don’t have to do anything.
+
+</details>
+
+## The vocabulary
+
+Five words are enough to follow the talk about it.
+
+- **Cluster**: the whole estate together. A **node** is one machine (or virtual machine) of the cluster.
+- **Pod**: the smallest unit Kubernetes runs: one container, and sometimes several closely tied ones. A copy of the site is a pod.
+- **Deployment**: a description of what you want: “keep three pods of this version, update them one at a time.” It is what you write most often.
+- **Service**: a permanent address and name in front of a group of pods. Pods come and go while the service stays the same, so other programs talk to it.
+- **Ingress**: the entrance from outside: a rule such as “send requests to example.com/api to such-and-such a service.” It also usually handles HTTPS.
+
+All this is written in YAML files. Here are a Deployment and a Service for the request receiver from the last lesson. You don’t need to memorize the lines. Look at the meaning: how many copies, which image, which port, and how to find them.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: receiver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: receiver
+  template:
+    metadata:
+      labels:
+        app: receiver
+    spec:
+      containers:
+        - name: receiver
+          image: registry.example.com/receiver:1.0
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: receiver
+spec:
+  selector:
+    app: receiver
+  ports:
+    - port: 80
+      targetPort: 8080
+```
+
+The command `kubectl apply -f file.yaml` hands this description to the cluster, and `kubectl get pods` shows what is running.
+
+## What an orchestrator gives you
+
+- **Self-healing**: what fell is restarted, and what was lost with a node moves.
+- **Updates with no downtime** (a rolling update), and a rollback to the previous version with one command.
+- **Scaling**: by hand (change the number of copies) or automatically by load.
+- **Service discovery and balancing**: pods find each other by name, and the load is shared between copies.
+- **Settings and secrets** apart from the images.
+
+This is a huge benefit when you have many services, several teams and a load that jumps about. Now the price.
+
+## The price
+
+Kubernetes is a big system in itself. A cluster has to be **updated**: new versions come out every few months, and each is supported for a limited time (roughly fourteen months, according to the project’s own patch-release policy, checked October 2026), so updates are regular. You have to set up the **network**, **access rights**, **data storage**, **monitoring** (logs, metrics, alerts) and **backups**. A mistake in the settings easily opens up more than you meant. Someone has to **understand** the cluster: even in the managed kind, where a provider (AWS, Google Cloud, Microsoft Azure and others) runs the cluster’s “brain” for you, your applications, their settings and the responsibility stay with you.
+
+So experienced engineers repeat a rule: Kubernetes solves **problems of scale**, and to bring it where there is no such scale is to buy a freight train to fetch bread.
+
+<details>
+<summary>Check yourself: why does a provider’s managed Kubernetes not make a cluster “free” in labor?</summary>
+
+The provider runs the cluster’s control part, but your applications, their settings, permissions, image updates and monitoring stay with you. You still need to know what is going on.
+
+</details>
+
+## A ladder, not a jump
+
+A good habit is to climb only when you’ve hit a real limit.
+
+1. **Static hosting.** Pages and a form service. For most projects this is the whole infrastructure.
+2. **A platform** (PaaS) that runs the application from a repository or an image and restarts it, so you don’t think about servers.
+3. **One server with Compose.** The containers of the site, the receiver and the database on one machine, with `restart: unless-stopped` and copies of the data. Docker restarts after a crash by itself, and a server at a provider usually runs for years.
+4. **Managed running of containers** at a cloud (with no cluster of your own).
+5. **Kubernetes**, managed by a provider; for small setups there are also lighter versions such as k3s, and alternatives such as Nomad. This step is for a real load: dozens of services, uneven traffic, strict demands on downtime, and people to run the cluster.
+
+The questionnaire under the diagram asks the same questions. Turn the knobs: with two services and an acceptable downtime of “up to an hour”, you don’t need an orchestrator, and that is the right answer.
+
+## Practice
+
+You assess your project the way an engineer does. Enter the number of services, the acceptable downtime and who would run the cluster, then write a verdict (“needed” or “not needed”) with arguments from those figures and the project’s main action. Name the cheap option without Kubernetes. And spell out three words (pod, service, deployment) with your own project as the example: what in it would be what. This is needed even by those who decided “not needed”: the words will still be useful when you meet them in other people’s projects.
+
+## What was wrong before
+
+In 2010 this problem hardly existed: one server, and if it went down, the admin drove to the data center at night. When services multiplied, people built their own “orchestrators” from scripts, different in every team and understood only by their author. Kubernetes became a common language, and with it came the fashionable idea that a “real” project must live in a cluster. That is a mistake: most projects don’t need it, and an honest refusal is not falling behind but saving effort.

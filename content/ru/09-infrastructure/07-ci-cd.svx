@@ -17,7 +17,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: …
         run: …
   deploy:
@@ -39,14 +39,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Ссылки и разметка
         run: npm run check:links && npm run check:html
       - name: Сборка страниц
         run: npm run build
       - name: Страница политики и согласия на месте
         run: test -f dist/politika/index.html
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
   deploy:
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: github-pages
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
       - name: Сообщить в чат
         if: always()
         run: curl -fsS -X POST "$NOTIFY_URL" -d "text=Выкладка: &#123;&#123; job.status &#125;&#125;"
@@ -319,14 +319,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Ссылки и разметка
         run: npm run check:links && npm run check:html
       - name: Сборка страниц
         run: npm run build
       - name: Страница политики и согласия на месте
         run: test -f dist/politika/index.html
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
   deploy:
@@ -334,10 +334,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: github-pages
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
 ```
 
-Прочтите как инструкцию. `on: push: branches: [main]`: запускать при каждом коммите в `main`. Два **задания**: `check` (проверить и собрать) и `deploy`. Строка `needs: check` говорит, что выкладка ждёт успеха проверок, а если проверки красные, она не запустится. Каждый **шаг** это либо готовое действие (`uses:`, например получение кода), либо команда (`run:`). Номера версий действий (`@v6`, `@v4`) меняются: актуальные смотрите в документации (она в источниках).
+Прочтите как инструкцию. `on: push: branches: [main]`: запускать при каждом коммите в `main`. Два **задания**: `check` (проверить и собрать) и `deploy`. Строка `needs: check` говорит, что выкладка ждёт успеха проверок, а если проверки красные, она не запустится. Каждый **шаг** это либо готовое действие (`uses:`, например получение кода), либо команда (`run:`). Номера версий действий (`@v7`, `@v5`) меняются: актуальные смотрите в документации (она в источниках).
 
 Строки с `npm run check:links` и подобные это ваши команды: они определены в проекте. Что делает каждая, зависит от выбранных вами инструментов: проверяльщика ссылок, проверяльщика разметки, сборщика. Этот учебник проверяется так же: на каждое изменение запускаются проверки типов, тесты, проверка доступности, проверка ссылок и проверка содержимого, и только потом основная ветка выкладывается на Pages. Если на сайте есть форма, добавьте проверку, что страница политики и согласия существует (шаг в примере): так важное не потеряется при очередной правке.
 

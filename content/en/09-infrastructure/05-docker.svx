@@ -1,0 +1,379 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/09-infrastructure/05-docker.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const plan = (v) => `<section data-scaffold id="docker-plan">
+      <h2>My site’s container</h2>
+      <p>Dockerfile:</p>
+      <textarea id="dockerfile" rows="6" aria-label="Dockerfile">${v.docker}<\/textarea>
+      <p>compose.yaml:</p>
+      <textarea id="compose" rows="14" aria-label="compose.yaml">${v.compose}<\/textarea>
+      <p id="ps-line">The docker ps line in the simulator: ${v.ps}</p>
+      <p id="vol-why">What is on the volume and why: ${v.vol}</p>
+      <p id="overkill">Whether my project needs Docker: ${v.overkill}</p>
+    </section>`;
+
+	const dockerStarter = `FROM …
+COPY … …
+EXPOSE …`;
+	const composeStarter = `services:
+  site:
+    build: .
+    ports:
+      - "…"
+  receiver:
+    build: ./receiver
+    env_file: …
+    volumes:
+      - …
+volumes:
+  …`;
+	const dockerSolved = `FROM nginx:alpine
+COPY dist/ /usr/share/nginx/html/
+EXPOSE 80`;
+	const composeSolved = `services:
+  site:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+  receiver:
+    build: ./receiver
+    env_file: .env
+    volumes:
+      - requests:/data
+    restart: unless-stopped
+volumes:
+  requests:`;
+
+	export const metadata = {
+		id: '09-infrastructure/05-docker',
+		part: 9,
+		order: 5,
+		title: 'Containers and Docker: the same box everywhere',
+		definition: 'Docker packs a program and what it needs into an image and runs it as a container anywhere. A Dockerfile defines the image, compose.yaml a set of containers.',
+		summary:
+			'“It works on my machine” stops being an excuse once a program travels in a box with everything it needs. Afterwards you’ll tell an image, a container and a volume apart, read and write a Dockerfile and a compose file for your project’s site, run a container in a simulator and decide honestly whether you need one at all.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'my computer', caption: 'But it works for me', say: 'The site works on my computer and not on the server: everything there is a different version. Sound familiar?' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'Dockerfile', say: 'Describe the box: what’s in it and how it starts. The description builds an image, and the image runs as a container.' },
+				{ mood: 'cheer', prop: 'server', label: 'container', caption: 'The same everywhere', say: 'One box behaves the same on any server. Data we’d hate to lose lives on a volume, not inside it.' }
+			]
+		},
+		minutes: 30,
+		teaches: ['infra-containers', 'infra-dockerfile-compose'],
+		requires: ['server-web-server', 'infra-hosting-types', 'cms-static-site-generator'],
+		practice: {
+			id: 'infra-docker-files',
+			title: 'A Dockerfile and compose for your site',
+			task: 'Describe your project’s containers. 1) In the Dockerfile, write the base web-server image (nginx:alpine), copying the built files from the dist folder into /usr/share/nginx/html/, and port 80. 2) In compose.yaml, publish the site’s port as “8080:80”, take the secrets of the request receiver from the file .env (env_file) and attach the volume requests, mounted at /data. Don’t write keys or passwords into the Dockerfile or into compose. 3) Open the simulator above, build the image, run the container and paste the docker ps line with Up here. 4) Say what is on the volume, naming the project’s main action in the words of the brief. 5) Decide honestly whether your project needs Docker, and name a simpler replacement if it doesn’t. Every “…” has to be replaced.',
+			era: 6,
+			files: files({
+				scaffold: plan({ docker: dockerStarter, compose: composeStarter, ps: '…', vol: '…', overkill: '…' })
+			}),
+			solution: files({
+				scaffold: plan({
+					docker: dockerSolved,
+					compose: composeSolved,
+					ps: 'a1b2c3d4e5f6 site Up 8080->80 site: the container is running and opens on port 8080.',
+					vol: 'the volume requests holds the database of requests that the receiver accepts for the action “{{mainAction.label}}”: the container can be removed and created again, and the requests stay.',
+					overkill: 'for a single site with no program of its own I don’t need Docker, and static hosting is enough; containers will be useful once there is a request receiver and a database, and I want to run them the same way at home and on a server.'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#docker-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#docker-plan', matches: '^[^…]*$' },
+				{ id: 'from', kind: 'text', selector: '#dockerfile', matches: 'FROM\\s+\\S+' },
+				{ id: 'copy', kind: 'text', selector: '#dockerfile', matches: 'COPY\\s+\\S+\\s+\\S+' },
+				{ id: 'expose', kind: 'text', selector: '#dockerfile', matches: 'EXPOSE\\s+\\d+' },
+				{ id: 'dockerfile-no-secret', kind: 'text', selector: '#dockerfile', matches: '^(?![\\s\\S]*(?:ENV|ARG)\\s+\\S*(?:KEY|TOKEN|SECRET|PASSWORD)\\S*\\s*=)' },
+				{ id: 'services', kind: 'text', selector: '#compose', matches: 'services:' },
+				{ id: 'port-mapping', kind: 'text', selector: '#compose', matches: '"?\\d{2,5}:\\d{2,5}"?' },
+				{ id: 'env-file', kind: 'text', selector: '#compose', matches: 'env_file|environment' },
+				{ id: 'volume', kind: 'text', selector: '#compose', matches: '\\S+:/\\S+' },
+				{ id: 'top-volumes', kind: 'text', selector: '#compose', matches: 'volumes:\\s*\\n\\s+\\w+:\\s*$|volumes:[\\s\\S]*volumes:\\s*\\n\\s+\\w+:' },
+				{ id: 'compose-no-secret', kind: 'text', selector: '#compose', matches: '^(?![\\s\\S]*(?:KEY|TOKEN|SECRET|PASSWORD)\\w*\\s*[:=]\\s*[\'"]?[A-Za-z0-9]{6,})' },
+				{ id: 'ps', kind: 'text', selector: '#ps-line', matches: 'Up|running' },
+				{ id: 'vol-action', kind: 'field', selector: '#vol-why', field: 'mainAction.label' },
+				{ id: 'vol-data', kind: 'text', selector: '#vol-why', matches: 'request|data|database|record|file|order|client|message|booking' },
+				{ id: 'overkill', kind: 'text', selector: '#overkill', matches: 'need|enough|overkill|unnecessary|excessive|useful|worth' },
+				{ id: 'overkill-alt', kind: 'text', selector: '#overkill', matches: 'static|hosting|without Docker|no container|VPS|Compose|compose|platform' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each Docker term with what it is',
+				pairs: [
+					['image', 'a ready, unchangeable “box”: the system, the program and its settings'],
+					['container', 'a running instance of an image, an isolated process'],
+					['volume', 'a place for data that lives apart from the container'],
+					['registry', 'a store of images, where they are downloaded from and published to']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does a container differ from a virtual machine?',
+				options: [
+					'A container uses the host system’s kernel, so it is lighter and starts faster; a virtual machine has a whole system of its own',
+					'A container is a virtual machine under another name',
+					'A container has no isolation at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. A container isolates a process (its files, network and processes), but the kernel is shared. So it takes megabytes and starts in seconds, while a virtual machine carries a whole system. The price: the isolation is weaker than a virtual machine’s.',
+					'No: they are different levels. A virtual machine imitates a computer, and a container isolates a process.',
+					'No: there is isolation, though it is weaker than a virtual machine’s.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A Dockerfile says ENV API_KEY=sk-live-123. What is wrong?',
+				options: [
+					'The key is written into the image, and anyone who has the image can see it; secrets are passed at launch',
+					'Nothing: the image is private, so it’s fine',
+					'The key is too short'
+				],
+				answer: 0,
+				why: [
+					'Yes. An image’s layers can be read, and images get published, copied and saved. A key must be passed at launch: through an environment variable or a .env file that doesn’t end up in the repository or the image.',
+					'No: sooner or later the image goes to a registry or to a colleague, and the secret goes with it.',
+					'No: the length isn’t the point. Where the key lies is.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You removed the container with the program that received requests, and the requests vanished. What was missed?',
+				options: [
+					'The data was written inside the container and should have been on a volume',
+					'The container should have had a different name',
+					'You should have bought more expensive hosting'
+				],
+				answer: 0,
+				why: [
+					'Yes. Whatever a container writes inside itself disappears with it. Data you’d hate to lose goes on a volume or in a separate database.',
+					'No: a name has no effect on whether data survives.',
+					'No: it’s a matter of how it’s built, not of price.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'When is Docker more likely to be overkill?',
+				options: [
+					'A site of a few static pages that can go on static hosting',
+					'One person and one server where nothing changes',
+					'Several programs (the site, a request receiver, a database) that must run the same way at home and on a server',
+					'A project that needs only a form and a ready-made service to receive it'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: files on hosting are enough, and a container would add only chores.',
+					'Yes: if the environment never changes and you have only one, an identical box gains nothing.',
+					'No: this is exactly where Docker and Compose are useful.',
+					'Yes: the service already has a receiver, so there is nothing to pack.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'infra-image-container',
+				front: 'How does an image differ from a container?',
+				back: 'An image is an unchangeable template (layers: the system, the program, the settings). A container is a running instance of an image. You can run many containers from one image.'
+			},
+			{
+				id: 'infra-volume',
+				front: 'What is a volume for?',
+				back: 'Whatever a container writes inside itself disappears with it. A volume keeps data apart: the container can be removed and created again, and the data stays.'
+			},
+			{
+				id: 'infra-dockerfile-basics',
+				front: 'The main Dockerfile instructions',
+				back: 'FROM (the base image), WORKDIR, COPY (put files in), RUN (a command at build time), ENV, EXPOSE (which port it listens on), CMD (what to run). Each instruction makes a layer, and unchanged layers come from the cache.'
+			},
+			{
+				id: 'infra-docker-secrets',
+				front: 'How do you handle secrets in Docker?',
+				back: 'Don’t write them into the Dockerfile (ENV, ARG) or into a compose file kept in the repository. Pass them at launch: environment variables, an env_file with a .env file outside the repository, a secrets manager.'
+			},
+			{
+				id: 'infra-docker-overkill',
+				front: 'When is Docker not needed?',
+				back: 'For a site of static files (static hosting is enough) and when there is one environment that never changes. It is useful when several programs must run the same way in different places.'
+			}
+		],
+		sources: [
+			{ title: 'Docker Docs: What is Docker?', url: 'https://docs.docker.com/get-started/docker-overview/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Docker Docs: Dockerfile reference', url: 'https://docs.docker.com/reference/dockerfile/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Docker Docs: Docker Compose', url: 'https://docs.docker.com/compose/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Docker (software) (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Docker_(software)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'The Twelve-Factor App', url: 'https://12factor.net/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Docker in 100 Seconds (Fireship)', url: 'https://www.youtube.com/watch?v=Gjnup-PuquQ', licence: 'proprietary-link', kind: 'video', lang: 'en' },
+			{ title: 'Docker Tutorial for Beginners, full course (TechWorld with Nana)', url: 'https://www.youtube.com/watch?v=3c-iBn73dDE', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'First play with containers in the simulator: build an image, run it, look at ps and curl. Then describe the same in files for your project. And at the end, decide honestly whether you need Docker.',
+			hints: [
+				'A Dockerfile for a ready site takes three lines: FROM nginx:alpine, COPY dist/ /usr/share/nginx/html/ and EXPOSE 80.',
+				'In compose a port is published as “8080:80”: the first number is outside, the second inside the container. Take secrets from env_file: .env. The volume is attached with the line requests:/data and declared at the bottom of the file under volumes.',
+				'Neither the Dockerfile nor compose should contain keys or passwords: they hold only the names of variables and files.',
+				'Take the ps line from the simulator: it must have the word Up in it. About Docker, be honest: needed or not, and what is simpler.'
+			],
+			mistakes: {
+				plan: 'The block “My site’s container” (the section whose id is docker-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one, in the files too.',
+				from: 'The first line of the Dockerfile must be FROM with a base image, such as nginx:alpine.',
+				copy: 'The Dockerfile needs a COPY line: where the site’s files come from and go to.',
+				expose: 'The Dockerfile needs an EXPOSE line with the port the server answers on (80).',
+				'dockerfile-no-secret': 'A secret is written in the Dockerfile (ENV or ARG with KEY, TOKEN, SECRET, PASSWORD). Remove it.',
+				services: 'Compose needs a services: section.',
+				'port-mapping': 'The port is published in the form “8080:80”.',
+				'env-file': 'Take secrets from a file or from variables: env_file or environment.',
+				volume: 'The volume is attached with a line like requests:/data.',
+				'top-volumes': 'The volume must be declared at the bottom of the file too, under volumes.',
+				'compose-no-secret': 'A secret is written in compose. Leave only the name of a file or a variable.',
+				ps: 'Paste a docker ps line in which the container is running (the word Up).',
+				'vol-action': 'Say what is on the volume, naming the project’s main action in the words of the brief.',
+				'vol-data': 'Name the data on the volume (requests, records, files).',
+				overkill: 'Answer plainly: does your project need Docker?',
+				'overkill-alt': 'Name a simpler replacement (static hosting, a VPS without containers) or say what in the project justifies containers.'
+			},
+			outro: 'Now you have a description of the containers and an honest answer on whether you need them. The main idea: Docker packs up the problem of “it works for me”, but don’t carry extra packaging without a reason.'
+		},
+		say: {
+			Docker: 'docker',
+			Dockerfile: 'docker file',
+			Compose: 'compose',
+			compose: 'compose',
+			nginx: 'engine X',
+			Kubernetes: 'koo ber net eez',
+			volume: 'volume',
+			env_file: 'env file',
+			YAML: 'yammel',
+			dist: 'dist',
+			Podman: 'pod man',
+			alpine: 'alpine'
+		}
+	};
+</script>
+
+<script>
+	import DockerSim from '../../diagrams/DockerSim.svelte';
+</script>
+
+## “It works on my machine”
+
+Everyone who has ever moved a program to another computer has this story. On the laptop the site works, and on the server it doesn’t: the language version is different, a library is missing, the web server is set up another way. People used to close that gap with ten pages of instructions (“install this, then that, then fix that file”), and the instructions went stale.
+
+The solution was borrowed from shipping. Cargo used to travel any which way: sacks, barrels, crates, and every port loaded it differently. The standard **container** changed everything: whatever is inside, the port, the train and the truck treat the box the same. In programming the logic is the same. A program is packed together with everything it needs, and from then on you don’t care which computer runs it.
+
+## Image, container, volume
+
+These are three words you need to keep apart.
+
+- An **image** is a ready, unchangeable “box”: a trimmed-down system, your program, its libraries and settings. An image is made of **layers**, each adding something to the one before.
+- A **container** is a running instance of an image: a process that believes it has a file system and a network of its own. You can run as many containers as you like from one image. An image is the recipe for a cake, and a container is the cake on the table.
+- A **volume** is a place for data that lives apart from the container. Whatever a container wrote inside itself disappears with it. So what you’d hate to lose (requests, uploaded files, the database) is kept on a volume or in a separate database.
+
+There is also the **registry**: a store of images, where they are downloaded from (Docker Hub, and the big clouds and GitHub have registries of their own). From a registry you take other people’s images (a ready-made nginx, say), and into a registry you publish your own.
+
+You’ll remember the difference from a **virtual machine** in one phrase: a virtual machine carries a whole operating system with it, while a container uses the host system’s kernel and isolates only its own process. So a container takes megabytes and starts in seconds. The price: the isolation is weaker than a virtual machine’s.
+
+<details>
+<summary>Check yourself: what happens to the data a container wrote inside itself if you remove it?</summary>
+
+It disappears with the container. For data that has to be kept you need a volume or a separate database.
+
+</details>
+
+## The recipe for an image
+
+An image is described in a file named `Dockerfile`: short lines of instructions, each making one layer.
+
+```text
+FROM nginx:alpine
+COPY dist/ /usr/share/nginx/html/
+EXPOSE 80
+```
+
+Read it as a recipe. `FROM` says which ready image to start from (here the nginx web server in the light alpine build). `COPY` puts your site’s built files from the `dist` folder into the image (the build gives you that folder, as you learned in the parts on JavaScript and generators). `EXPOSE` warns that the thing inside listens on port 80. Everything else needed to serve files is already in nginx.
+
+When the site has to be built first, a **multi-stage build** helps: in the first stage Node.js builds the site, and in the second only the finished result goes into a clean nginx, with no Node and no sources.
+
+```text
+FROM node:lts-alpine AS build
+WORKDIR /app
+COPY package.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+```
+
+Two features save time and nerves. First: Docker remembers layers, and if an instruction and everything before it are unchanged, it takes the layer from the cache. So you copy what rarely changes first (`package.json`) and what changes often after it (the code). Second, and the main one: **secrets don’t go into an image**. The line `ENV API_KEY=...` writes the key into a layer for good: images get published and copied, and the key travels with them. Secrets are passed at launch. A small thing: a `.dockerignore` file keeps what you don’t need (a `.env`, say, or the `node_modules` folder) out of the image.
+
+## Several containers as one project
+
+A project usually has several parts: the site, a program that receives requests, sometimes a database. Starting each with a command of five flags is awkward, so there is **Compose**: one file, `compose.yaml`, describes all the containers, ports, volumes and the links between them.
+
+```yaml
+services:
+  site:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+  receiver:
+    build: ./receiver
+    env_file: .env
+    volumes:
+      - requests:/data
+    restart: unless-stopped
+volumes:
+  requests:
+```
+
+Here `ports: "8080:80"` joins port 8080 of your computer to port 80 inside the container (the left is “outside”, the right “inside”). `env_file: .env` takes secrets from a file that goes neither into the image nor into the repository. `requests:/data` attaches the volume `requests` to the receiver’s folder `/data`, and the volume is declared in the `volumes` section at the bottom. To start the whole project: `docker compose up -d`; its state: `docker compose ps`; to stop it: `docker compose down` (the volumes stay).
+
+## Try it in the simulator
+
+There is no real Docker in a browser, so this is a **simulator**: the page reads the commands itself. But the order of things and the messages are real. Choose a Dockerfile (in the third one a key is written into the image, so see what the build says), build the image, run the container, open the site with `curl`, then stop and remove the container.
+
+<DockerSim />
+
+What to notice. If you run a container without `-p`, it works but can’t be opened from outside. If a port is already taken by another container, you get an error. A second build takes unchanged layers from the cache. And the site `curl` returns is signed with your project’s name.
+
+If you want to try it for real, install Docker Desktop or its free replacement Podman and repeat the same commands in a terminal. Docker Desktop is free for individuals, for education, for non-commercial open source, and for companies with fewer than 250 employees and less than $10 million a year in revenue; larger organizations need a paid subscription (Docker’s FAQ, October 2026). Docker Engine itself on Linux is open source.
+
+<details>
+<summary>Check yourself: what does -p 8080:80 mean in the run command?</summary>
+
+Port 8080 of your computer is joined to port 80 inside the container. Without it the container works but can’t be opened from outside.
+
+</details>
+
+## Honestly: when Docker is overkill
+
+Containers have a price: you have to learn them, update the base images (vulnerabilities are found in those too), and watch the disk and the logs. So the honest question is: what do they solve for you?
+
+- **A site of static files.** You don’t need Docker at all: the files go on static hosting, which is cheaper and more reliable. A container with nginx for one page is a complicated way of doing something simple.
+- **One machine, a fixed environment.** An “identical box” gains nothing.
+- **Several programs that must run the same way** for you, your colleague and the server (the site, a request receiver, a database): here Docker and Compose pay off.
+- **A project whose main action a ready-made service covers** (receiving forms, booking, payment): there is nothing to pack.
+
+Compare the first lesson of the part. The steps of hosting were a ladder too, and Docker is one more rung, not a necessity.
+
+## Practice
+
+In front of you is your project’s site, and under it two files in boxes: a Dockerfile and compose.yaml. Finish them on the model in the lesson. Then open the simulator, build the image, run the container with its port, and paste the line from `docker ps` into the note. Say what is on the volume (through your project’s main action), and answer the last question: do you need Docker?
+
+The check reads the texts in the boxes. Docker can’t be run in the sandbox, so running it in the simulator remains your job, and the note shows that it worked.
+
+## What was wrong before
+
+In 2010 the unit of moving was a server: an admin set up a machine by hand, and a year later no one remembered how exactly. Such servers were called “snowflakes”: each is unique, and you can’t make a copy. A move meant a week of manual work and several “oh, we also need to install…”. A container turned the setup into a file that lies in the repository, can be read and reproduced. But, as always with convenient things, the main point remains: a container packs not the knowledge but only its record, and understanding what is inside is still your job.
