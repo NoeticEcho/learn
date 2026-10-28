@@ -1,0 +1,397 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/05-colour-contrast.svx. */
+	export const metadata = {
+		id: '04-design/05-colour-contrast',
+		part: 4,
+		order: 5,
+		title: 'Color systems and contrast: a palette you can read',
+		definition: 'A color system is a set of steps and roles (background, text, accent, status colors) that all colors are taken from. WCAG measures text contrast.',
+		summary:
+			'You’ll build a palette that looks cohesive and can be read by people with low vision, and you’ll check contrast with numbers, not by eye. Afterwards you know the roles of colors, can build steps from one hue, and can make a light and a dark theme.',
+		minutes: 25,
+		teaches: ['design-colour-system', 'design-contrast'],
+		requires: ['design-visual-hierarchy', 'css-color', 'css-contrast', 'css-custom-properties'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'editor', label: '--accent', caption: 'Color by role', say: 'Name a color by its role: --accent, not --blue. If the accent turns green tomorrow, the main-button rule stays.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'pale gray text', caption: 'Contrast', say: 'Don’t trust your eye: in sunlight nobody reads weak text. Contrast is calculated, and body text needs 4.5 to 1.' },
+				{ mood: 'cheer', prop: 'browser', label: 'Error: enter a phone number', say: 'And meaning not by color alone. An error needs a word or an icon, not just a red border.' }
+			]
+		},
+		practice: {
+			id: 'design-palette',
+			title: 'A palette with checked contrast, light and dark',
+			task: 'Right now the page has gray on white and pale blue: it is hard to read. Build a palette and check it. 1) In styles.css on :root define the steps: --neutral-50, --neutral-900, --accent-100, --accent-500, --accent-700 (colors in hex). 2) Recolor the page with these colors, but for now write the colors straight into the rules (in the lesson on tokens you will replace them with variables): the body text, the secondary text .lead and the link in the paragraph must have contrast of at least 4.5; so must the .cta button, and the link in the paragraph is underlined. 3) The block with the attribute data-theme set to dark is the dark theme: give it a dark background and light text, a light link and a light button with dark text: also at least 4.5. 4) Add a color-scheme meta tag with the value “light dark” to the head. 5) The error message must not rest on color: begin it with the word “Error”.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p class="lead">{{who}}</p>
+      <p>For: {{forWhom}}. <a href="#more">Read more</a></p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <p class="error" role="alert">The phone number is not valid.</p>
+      <section data-theme="dark">
+        <h2>The dark theme</h2>
+        <p>This is how the page looks at night. <a href="#more">Read more</a></p>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      </section>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  background: #ffffff;
+  color: #999999;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.lead {
+  color: #aaaaaa;
+}
+a {
+  color: #9bb7e0;
+  text-decoration: none;
+}
+.cta {
+  display: inline-block;
+  background: #9bb7e0;
+  color: #ffffff;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+}
+.error {
+  color: #ee4444;
+}
+[data-theme="dark"] {
+  background: #222222;
+  color: #555555;
+  padding: 1rem;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p class="lead">{{who}}</p>
+      <p>For: {{forWhom}}. <a href="#more">Read more</a></p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      <p class="error" role="alert">Error: the phone number is not valid.</p>
+      <section data-theme="dark">
+        <h2>The dark theme</h2>
+        <p>This is how the page looks at night. <a href="#more">Read more</a></p>
+        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+      </section>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+:root {
+  --neutral-50: #faf9f7;
+  --neutral-900: #1c1b19;
+  --accent-100: #d9e8f8;
+  --accent-500: #2f7cc7;
+  --accent-700: #0b4a8b;
+}
+body {
+  font-family: system-ui, sans-serif;
+  background: #faf9f7;
+  color: #1c1b19;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.lead {
+  color: #4a4742;
+}
+a {
+  color: #0b4a8b;
+  text-decoration: underline;
+}
+.cta {
+  display: inline-block;
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+}
+.error {
+  color: #a31515;
+}
+[data-theme="dark"] {
+  background-color: #14130f;
+  color: #f2efe9;
+  padding: 1rem;
+}
+[data-theme="dark"] a {
+  color: #9cc4f0;
+}
+[data-theme="dark"] .cta {
+  background-color: #9cc4f0;
+  color: #14130f;
+}
+`
+			},
+			checks: [
+				{ id: 'neutral-50', kind: 'style', selector: ':root', prop: '--neutral-50', matches: '^\\s*#[0-9a-fA-F]{3,8}\\s*$' },
+				{ id: 'neutral-900', kind: 'style', selector: ':root', prop: '--neutral-900', matches: '^\\s*#[0-9a-fA-F]{3,8}\\s*$' },
+				{ id: 'accent-100', kind: 'style', selector: ':root', prop: '--accent-100', matches: '^\\s*#[0-9a-fA-F]{3,8}\\s*$' },
+				{ id: 'accent-500', kind: 'style', selector: ':root', prop: '--accent-500', matches: '^\\s*#[0-9a-fA-F]{3,8}\\s*$' },
+				{ id: 'accent-700', kind: 'style', selector: ':root', prop: '--accent-700', matches: '^\\s*#[0-9a-fA-F]{3,8}\\s*$' },
+				{ id: 'body-contrast', kind: 'contrast', selector: '#page > p:not(.lead):not(.error)', min: 4.5 },
+				{ id: 'lead-contrast', kind: 'contrast', selector: '.lead', min: 4.5 },
+				{ id: 'link-contrast', kind: 'contrast', selector: '#page p a:not(.cta)', min: 4.5 },
+				{ id: 'link-underline', kind: 'style', selector: '#page p a:not(.cta)', prop: 'text-decoration', matches: 'underline' },
+				{ id: 'cta-contrast', kind: 'contrast', selector: '#page > p a.cta', min: 4.5 },
+				{ id: 'dark-text', kind: 'contrast', selector: '[data-theme="dark"] p', min: 4.5 },
+				{ id: 'dark-link', kind: 'contrast', selector: '[data-theme="dark"] p a:not(.cta)', min: 4.5 },
+				{ id: 'dark-cta', kind: 'contrast', selector: '[data-theme="dark"] a.cta', min: 4.5 },
+				{ id: 'color-scheme', kind: 'attr', selector: 'meta[name="color-scheme"]', name: 'content', matches: 'light\\s+dark|dark\\s+light' },
+				{ id: 'error-word', kind: 'text', selector: '.error', matches: '^\\s*(Error|✕|⚠)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What contrast does WCAG require for ordinary text and for large text?',
+				options: ['At least 4.5 to 1 for ordinary and 3 to 1 for large', 'At least 2 to 1 for any', 'At least 21 to 1'],
+				answer: 0,
+				why: [
+					'Yes. Text counts as large from 24 pixels (or from 18.66 pixels in bold). Icons and the borders of fields also need at least 3 to 1.',
+					'No: 2 to 1 is readable only in perfect conditions.',
+					'No: 21 to 1 is black on white, the maximum, not a requirement.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Besides color, what can carry the meaning of an error or a link?',
+				options: ['An underline on a link', 'The word or an icon “Error” beside the field', 'Only a red border', 'Only a change of link color on hover'],
+				answer: [0, 1],
+				why: [
+					'Yes: an underline is seen even by those who can’t tell colors apart.',
+					'Yes: a text or graphic sign is available to everyone.',
+					'No: people with color vision deficiency may not notice a red border.',
+					'No: there is no hover on a phone, and color alone doesn’t carry meaning.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is OKLCH more convenient than HEX for building steps?',
+				options: [
+					'Lightness in it is perceived evenly: an equal step gives an equal change by feel',
+					'It takes up less space in a file',
+					'It works in older browsers'
+				],
+				answer: 0,
+				why: [
+					'Yes. So steps built in OKLCH can be compared across hues: “step 600” is equally dark everywhere.',
+					'No: the notation is usually longer.',
+					'No: on the contrary, OKLCH is younger than HEX.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each color role with where it is used',
+				pairs: [
+					['Surface', 'the background of the page and of cards'],
+					['Text', 'body and secondary text'],
+					['Accent', 'the main button and links'],
+					['Status color', 'error, success, warning']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is a dark theme not simply an inversion of the light one?',
+				options: [
+					'Other steps play the same roles: pure black and pure white are harsh on the eye, saturated colors “vibrate”, shadows can’t be seen',
+					'Because dark pages are forbidden by the standard',
+					'Because the browser swaps the colors by itself'
+				],
+				answer: 0,
+				why: [
+					'Yes. A dark theme is built as a separate arrangement of roles: the background is very dark but not black, the text is light but not white, the accent is lighter.',
+					'No: nothing is forbidden.',
+					'No: the browser switches the theme only where you have described it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of building a color system in order',
+				items: ['Build the neutral steps (background and text)', 'Choose the accent hue and build its steps', 'Add the status colors: error, success, warning', 'Give the steps to roles and check the contrast of each pair', 'Build the dark theme from other steps']
+			}
+		],
+		cards: [
+			{ id: 'design-colour-wcag', front: 'What contrast does text need?', back: 'At least 4.5 to 1 for ordinary text, 3 to 1 for large text (from 24 px, or 18.66 px bold) and for icons and field borders (WCAG 2.2).' },
+			{ id: 'design-colour-roles', front: 'What roles do colors have in a system?', back: 'Surface (background), text, accent (the main action, links) and status colors (error, success, warning). Colors are named by role, not by look.' },
+			{ id: 'design-colour-oklch', front: 'Why OKLCH?', back: 'Lightness in it is perceived evenly, so steps of one lightness increment look equal to the eye for any hue.' },
+			{ id: 'design-colour-dark', front: 'How is a dark theme made?', back: 'Not by inversion: with other steps for the same roles. The background is dark gray, the text isn’t pure white, the accent is lighter. It is switched on with prefers-color-scheme.' },
+			{ id: 'design-colour-alone', front: 'Can meaning be carried by color alone?', back: 'No. An error gets a word or an icon, a link gets an underline: that way the meaning is available even to people who can’t tell colors apart.' }
+		],
+		sources: [
+			{ title: 'Understanding Contrast (Minimum), WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Understanding Use of Color, WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Color contrast (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/Accessibility/Guides/Understanding_WCAG/Perceivable/Color_contrast', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OKLCH in CSS: why we moved from RGB and HSL (Evil Martians)', url: 'https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'prefers-color-scheme (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Color roles (Material Design 3)', url: 'https://m3.material.io/styles/color/roles', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now the page has light gray on white, and it is hard to read. We’ll build a palette and check it with numbers.',
+			hints: [
+				'To check contrast, use the WebAIM Contrast Checker. Make body text very dark (#1c1b19) and the background light (#faf9f7). Secondary text no lighter than #4a4742.',
+				'Make the link dark blue (#0b4a8b) and underlined. Give the .cta button a background of #0b5cad and white text.',
+				'In the dark block (data-theme set to dark) the background is #14130f, the text #f2efe9, the links #9cc4f0; the button in it is light (#9cc4f0) with dark text. Don’t forget the color-scheme meta tag.'
+			],
+			mistakes: {
+				'neutral-50': ':root needs a variable --neutral-50: the lightest neutral, in hex, for example #faf9f7.',
+				'neutral-900': ':root needs a variable --neutral-900: the darkest neutral, for example #1c1b19.',
+				'accent-100': ':root needs --accent-100: a light step of the accent, in hex.',
+				'accent-500': ':root needs --accent-500: a middle step of the accent, in hex.',
+				'accent-700': ':root needs --accent-700: a dark step of the accent, in hex.',
+				'body-contrast': 'The body text is too light for the background: the contrast must be at least 4.5. Make it nearly black.',
+				'lead-contrast': 'The secondary text .lead is too light. Its contrast must be at least 4.5, for example #4a4742 on a light background.',
+				'link-contrast': 'The link in the paragraph is hard to see against the background. Take a dark blue, for example #0b4a8b.',
+				'link-underline': 'The link in the paragraph must be underlined: text-decoration: underline. Otherwise only its color sets it apart.',
+				'cta-contrast': 'The text of the .cta button is hard to see against its background. Take a dark background (#0b5cad) and white text.',
+				'dark-text': 'In the dark block the text is too dark on a dark background. Make the text light, for example #f2efe9.',
+				'dark-link': 'In the dark block the link is hard to see. Take a light blue, for example #9cc4f0.',
+				'dark-cta': 'The button in the dark block must have contrast of at least 4.5: a light background and dark text.',
+				'color-scheme': 'The head needs a meta tag with name color-scheme and content light dark.',
+				'error-word': 'The error message must begin with the word “Error”: color alone is not enough for meaning.'
+			},
+			outro: 'You’ve made a palette that can be checked with numbers. For now all your colors are written straight into the rules, and in the lesson on tokens we’ll move them into variables.'
+		},
+		say: { OKLCH: 'oak-L-C-H', HEX: 'hex', WCAG: 'wuh-cag', CSS: 'C S S', WebAIM: 'web-A-I-M', hex: 'hex', AA: 'double A', AAA: 'triple A', rgb: 'R G B' }
+	};
+</script>
+
+<script>
+	import PaletteLab from '../../diagrams/PaletteLab.svelte';
+</script>
+
+## Color as a system
+
+Colors on a site are not chosen “each time as the situation goes”. If a button is one blue on one page and another blue on the next, the visitor stops understanding what is a button. So colors are gathered into a **system**: a set of steps and roles from which every value is taken.
+
+There are usually four roles.
+
+- **Surface:** the background of the page, of cards and of panels.
+- **Text:** body and secondary (captions, explanations).
+- **Accent:** what you want people to press: the main button and links.
+- **Status colors:** error, success, warning, hint. By default they are red, green, yellow and blue, and they must not coincide with the accent.
+
+Names are taken **by role**, not by look: `--accent`, not `--blue`. If the accent turns green tomorrow, the rule about the main button isn’t affected.
+
+The work goes in this order: first the neutral steps (from nearly white to nearly black, used to build backgrounds and text), then the accent steps, then the status colors, then the dark theme. In the end color takes up little room: on most good pages it is 90% neutral, a little accent and a scattering of status colors.
+
+<details>
+<summary>Check yourself: why are colors named by role and not by look?</summary>
+
+So you can change a color without rewriting the rules: the role (“main action”) stays, and only the value changes.
+
+</details>
+
+## Steps from one hue
+
+Instead of one blue, you take a row: from very light to very dark, usually eleven steps (50, 100, 200 and on up to 900 and 950). Backgrounds are made from the light ones, text from the dark ones, the accent from the middle ones.
+
+In HEX or RGB it is awkward to build a row: for different hues the same “number” looks differently light. In **OKLCH** lightness is perceived evenly, so a row of equal lightness steps gives an even ladder for any hue. It has three numbers: lightness (L from 0 to 1), chroma, or saturation (C, up to about 0.4) and hue (H in degrees). You met them in the [lesson on typography and color](../../03-css/03-typography-colour/).
+
+Move the hue and the chroma. The steps are built automatically, and below, the contrast is calculated for every “text on background” pair.
+
+<PaletteLab />
+
+<details>
+<summary>Check yourself: why is OKLCH more convenient than HEX for steps?</summary>
+
+Lightness in OKLCH is perceived evenly: an equal step gives an equal change to the eye for any hue.
+
+</details>
+
+## Contrast is calculated, not judged by eye
+
+Why you can’t judge contrast by eye, and what the **luminance ratio** of text and background is (from 1 to 1 up to 21 to 1, black on white), you know from the [lesson on typography and color](../../03-css/03-typography-colour/); the main mistake is there too: light gray text on white. Here are the same thresholds with the numbers of the WCAG 2.2 success criteria that auditors cite:
+- **4.5 to 1** for ordinary text (criterion 1.4.3, Contrast (Minimum));
+- **3 to 1** for large text (from 24 pixels, or from 18.66 pixels in bold);
+- **3 to 1** for icons, field borders and other parts of an interface (criterion 1.4.11).
+
+The formula goes like this: first the relative luminance is worked out for each color (allowing for the fact that a screen is not linear), then the lighter is divided by the darker, with 0.05 added to both. You don’t have to calculate by hand: there are services (the WebAIM Contrast Checker, in the sources), and the browser’s developer tools show the ratio right when you pick a color. The table in the diagram above uses the same formula, and you can check it yourself.
+
+What is useful to remember:
+- **Text over a picture or a gradient.** Check at the lightest spot under the letters, or, more reliably, put a solid semi-transparent plate behind.
+- **States.** A button on hover and on focus must pass too.
+- A new method of assessment, APCA, is in preparation (in the drafts of WCAG 3). For now, the official standard that laws and auditors cite is the luminance ratio from WCAG 2.
+
+<details>
+<summary>Check yourself: what contrast does ordinary text need?</summary>
+
+At least 4.5 to 1; large text and icons need only 3 to 1.
+
+</details>
+
+## Not by color alone
+
+About one man in twelve, and far fewer women, can’t tell some colors apart, and there are people with other vision impairments, and just bright sun. So **meaning must not be carried by color alone** (criterion 1.4.1):
+
+- an error needs a word or an icon (“Error: the phone number is not valid”), not only a red border;
+- a link in text needs an underline, not only a different color;
+- on a chart, different lines are told apart by the shape of their points or by a label, not only by hue.
+
+## Light and dark themes
+
+A dark theme is not an inversion of the light one. You can’t just swap white for black, for three reasons. Pure black and pure white are harsher on the eye than dark gray and a warm light. Saturated colors on dark “vibrate”. Shadows can’t be seen on dark, so height is shown by being lighter than the background, not darker.
+
+That is why in a dark theme **the same roles are played by other steps**: the background is step 950, the text step 100, the accent step 300 to 400. It is switched on by the person’s system setting.
+
+```css
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #14130f;
+    --text: #f2efe9;
+  }
+}
+```
+
+And do tell the browser that the page can do both themes, with the meta tag `<meta name="color-scheme" content="light dark">`: then form fields and scroll bars are recolored too. Give `body` an explicit background: otherwise dark text may end up on dark.
+
+We can’t check the `@media` rule automatically, so in the practice the dark theme is made as a `[data-theme="dark"]` block right on the page: this way you see both themes side by side.
+
+## Practice
+
+Your project’s page has pale colors right now. Build a palette and recolor the page, checking the pairs against the contrast table. For now write all the colors straight into the rules: that way the contrast check reads them unambiguously. In later lessons you’ll replace them with variables, and the page will recolor completely with one change.
+
+While you’re at it, make an error message that is clear without color, and a dark block with its own arrangement of steps.
+
+## What was wrong with 2014
+
+In 2014 there were no dark themes in browsers, and contrast was rarely checked: flat design loved light gray on white. The WCAG contrast requirement has existed since 2008, but it was written into tenders and laws much later. Today it is checked automatically, and a page with gray text will not pass.

@@ -7,6 +7,57 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// The diagram's words, one table per edition (docs/content-plan/README.md, «English edition»).
+	const W = pick({
+		ru: {
+			pairs: {
+				dark: ['Основной текст (нейтральный 100 на 950)', 'Вторичный текст (нейтральный 300 на 950)', 'Ссылка (акцент 300 на 950)', 'Кнопка: тёмный текст на акценте 400', 'Слишком тёмный акцент 700 на 950'],
+				light: ['Основной текст (нейтральный 900 на 50)', 'Вторичный текст (нейтральный 700 на 50)', 'Ссылка (акцент 700 на 50)', 'Кнопка: белый текст на акценте 600', 'Слишком светлый акцент 300 на 50']
+			},
+			fails: 'не проходит',
+			caption: 'Палитра из одного оттенка и проверка контраста',
+			hue: 'Оттенок',
+			chroma: 'Насыщенность',
+			theme: 'Тема',
+			lightTheme: 'Светлая тема',
+			darkTheme: 'Тёмная тема',
+			accentRamp: 'Одиннадцать ступеней акцентного цвета',
+			neutralRamp: 'Одиннадцать ступеней нейтрального цвета',
+			demoTitle: 'Так выглядит страница в этой теме',
+			demoText: 'Обычный текст и',
+			demoLink: 'ссылка с подчёркиванием',
+			demoAction: 'Главное действие',
+			tableCaption: 'Контраст пар по формуле WCAG (нужно не меньше 4,5 к 1 для обычного текста)',
+			head: ['Пара', 'Цвета', 'Контраст', 'Итог'],
+			to: 'к 1',
+			note: 'Заметьте: ступени подобраны по одинаковому шагу светлоты, поэтому роли держатся на одних и тех же номерах при любом оттенке. А в тёмной теме те же роли играют другие ступени: это не инверсия, а новая раскладка. Если пара не проходит при каком-то оттенке, сдвиньте ступень на одну в сторону темноты (для светлой темы) или светлоты (для тёмной).'
+		},
+		en: {
+			pairs: {
+				dark: ['Body text (neutral 100 on 950)', 'Secondary text (neutral 300 on 950)', 'Link (accent 300 on 950)', 'Button: dark text on accent 400', 'Accent 700 on 950, too dark'],
+				light: ['Body text (neutral 900 on 50)', 'Secondary text (neutral 700 on 50)', 'Link (accent 700 on 50)', 'Button: white text on accent 600', 'Accent 300 on 50, too light']
+			},
+			fails: 'fails',
+			caption: 'A palette from one hue, and a contrast check',
+			hue: 'Hue',
+			chroma: 'Chroma',
+			theme: 'Theme',
+			lightTheme: 'Light theme',
+			darkTheme: 'Dark theme',
+			accentRamp: 'Eleven steps of the accent color',
+			neutralRamp: 'Eleven steps of the neutral color',
+			demoTitle: 'This is how a page looks in this theme',
+			demoText: 'Ordinary text and a',
+			demoLink: 'link with an underline',
+			demoAction: 'Main action',
+			tableCaption: 'Contrast of the pairs by the WCAG formula (at least 4.5 to 1 is needed for ordinary text)',
+			head: ['Pair', 'Colors', 'Contrast', 'Result'],
+			to: 'to 1',
+			note: 'Notice that the steps are chosen at an equal step of lightness, so the roles stay on the same numbers for any hue. And in the dark theme the same roles are played by other steps: it is not an inversion but a new arrangement. If a pair fails for some hue, move the step one place toward dark (in the light theme) or toward light (in the dark one).'
+		}
+	});
 
 	let hue = $state(255);
 	let chroma = $state(0.14);
@@ -68,20 +119,21 @@
 		const r = (s: number) => ramp.find((x) => x.s === s)!;
 		const n = (s: number) => neutral.find((x) => x.s === s)!;
 		const mk = (name: string, fg: { lin: number[]; hex: string }, bg: { lin: number[]; hex: string }, need = 4.5): Pair => ({ name, fg: fg.lin, bg: bg.lin, fgHex: fg.hex, bgHex: bg.hex, need });
+		const names = dark ? W.pairs.dark : W.pairs.light;
 		return dark
 			? [
-					mk('Основной текст (нейтральный 100 на 950)', n(100), n(950)),
-					mk('Вторичный текст (нейтральный 300 на 950)', n(300), n(950)),
-					mk('Ссылка (акцент 300 на 950)', r(300), n(950)),
-					mk('Кнопка: тёмный текст на акценте 400', n(950), r(400)),
-					mk('Слишком тёмный акцент 700 на 950', r(700), n(950))
+					mk(names[0], n(100), n(950)),
+					mk(names[1], n(300), n(950)),
+					mk(names[2], r(300), n(950)),
+					mk(names[3], n(950), r(400)),
+					mk(names[4], r(700), n(950))
 				]
 			: [
-					mk('Основной текст (нейтральный 900 на 50)', n(900), n(50)),
-					mk('Вторичный текст (нейтральный 700 на 50)', n(700), n(50)),
-					mk('Ссылка (акцент 700 на 50)', r(700), n(50)),
-					mk('Кнопка: белый текст на акценте 600', { lin: white, hex: '#ffffff' }, r(600)),
-					mk('Слишком светлый акцент 300 на 50', r(300), n(50))
+					mk(names[0], n(900), n(50)),
+					mk(names[1], n(700), n(50)),
+					mk(names[2], r(700), n(50)),
+					mk(names[3], { lin: white, hex: '#ffffff' }, r(600)),
+					mk(names[4], r(300), n(50))
 				];
 	});
 	const rows = $derived(pairs.map((p) => ({ ...p, ratio: ratio(p.fg, p.bg) })));
@@ -90,55 +142,52 @@
 	const link = $derived(ramp.find((x) => x.s === (dark ? 300 : 700))!.hex);
 	const btnBg = $derived(ramp.find((x) => x.s === (dark ? 400 : 600))!.hex);
 	const btnFg = $derived(dark ? neutral.find((x) => x.s === 950)!.hex : '#ffffff');
-	const badge = (v: number, need: number) => (v >= 7 && need === 4.5 ? 'AAA' : v >= need ? 'AA' : 'не проходит');
+	const badge = (v: number, need: number) => (v >= 7 && need === 4.5 ? 'AAA' : v >= need ? 'AA' : W.fails);
 </script>
 
 <figure class="dg">
-	<figcaption>Палитра из одного оттенка и проверка контраста</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="ctl">
-		<label>Оттенок: {hue}° <input type="range" min="0" max="360" step="5" bind:value={hue} /></label>
-		<label>Насыщенность: {chroma.toFixed(2)} <input type="range" min="0" max="0.2" step="0.01" bind:value={chroma} /></label>
-		<div class="dg-ctl" role="group" aria-label="Тема" style="margin:0">
-			<button type="button" aria-pressed={!dark} onclick={() => (dark = false)}>Светлая тема</button>
-			<button type="button" aria-pressed={dark} onclick={() => (dark = true)}>Тёмная тема</button>
+		<label>{W.hue}: {hue}° <input type="range" min="0" max="360" step="5" bind:value={hue} /></label>
+		<label>{W.chroma}: {chroma.toFixed(2)} <input type="range" min="0" max="0.2" step="0.01" bind:value={chroma} /></label>
+		<div class="dg-ctl" role="group" aria-label={W.theme} style="margin:0">
+			<button type="button" aria-pressed={!dark} onclick={() => (dark = false)}>{W.lightTheme}</button>
+			<button type="button" aria-pressed={dark} onclick={() => (dark = true)}>{W.darkTheme}</button>
 		</div>
 	</div>
 
-	<div class="ramp" role="img" aria-label="Одиннадцать ступеней акцентного цвета">
+	<div class="ramp" role="img" aria-label={W.accentRamp}>
 		{#each ramp as r (r.s)}
 			<div class="sw" style="background:{r.hex};color:{lum(r.lin) > 0.179 ? '#000' : '#fff'}"><span>{r.s}</span></div>
 		{/each}
 	</div>
-	<div class="ramp" role="img" aria-label="Одиннадцать ступеней нейтрального цвета">
+	<div class="ramp" role="img" aria-label={W.neutralRamp}>
 		{#each neutral as r (r.s)}
 			<div class="sw" style="background:{r.hex};color:{lum(r.lin) > 0.179 ? '#000' : '#fff'}"><span>{r.s}</span></div>
 		{/each}
 	</div>
 
 	<div class="demo" style="background:{stageBg};color:{stageFg}">
-		<p style="margin:0 0 .5rem;font-size:1.1rem;font-weight:600">Так выглядит страница в этой теме</p>
-		<p style="margin:0 0 .6rem">Обычный текст и <a href="#top" tabindex="-1" style="color:{link};text-decoration:underline">ссылка с подчёркиванием</a>.</p>
-		<span class="btn" style="background:{btnBg};color:{btnFg}">Главное действие</span>
+		<p style="margin:0 0 .5rem;font-size:1.1rem;font-weight:600">{W.demoTitle}</p>
+		<p style="margin:0 0 .6rem">{W.demoText} <a href="#top" tabindex="-1" style="color:{link};text-decoration:underline">{W.demoLink}</a>.</p>
+		<span class="btn" style="background:{btnBg};color:{btnFg}">{W.demoAction}</span>
 	</div>
 
 	<table class="tbl">
-		<caption class="dg-out" style="text-align:left;margin:var(--space-4) 0 var(--space-2)">Контраст пар по формуле WCAG (нужно не меньше 4,5 к 1 для обычного текста)</caption>
-		<thead><tr><th>Пара</th><th>Цвета</th><th>Контраст</th><th>Итог</th></tr></thead>
+		<caption class="dg-out" style="text-align:left;margin:var(--space-4) 0 var(--space-2)">{W.tableCaption}</caption>
+		<thead><tr>{#each W.head as h (h)}<th>{h}</th>{/each}</tr></thead>
 		<tbody>
 			{#each rows as p (p.name)}
 				<tr class:fail={p.ratio < p.need}>
 					<td>{p.name}</td>
 					<td class="dg-mono">{p.fgHex} / {p.bgHex}</td>
-					<td>{p.ratio.toFixed(2)} к 1</td>
+					<td>{p.ratio.toFixed(2)} {W.to}</td>
 					<td>{p.ratio >= p.need ? '✓ ' : '✕ '}{badge(p.ratio, p.need)}</td>
 				</tr>
 			{/each}
 		</tbody>
 	</table>
-	<p class="dg-out">
-		Заметьте: ступени подобраны по одинаковому шагу светлоты, поэтому роли держатся на одних и тех же номерах при любом оттенке. А в тёмной
-		теме те же роли играют другие ступени: это не инверсия, а новая раскладка. Если пара не проходит при каком-то оттенке, сдвиньте ступень на одну в сторону темноты (для светлой темы) или светлоты (для тёмной).
-	</p>
+	<p class="dg-out">{W.note}</p>
 </figure>
 
 <style>
