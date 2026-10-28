@@ -37,7 +37,8 @@ function body(file: string): string {
 		.replace(/\]\([^)]*\)/g, ']');
 }
 
-const SKIP = /^(practice\.(id|continues|files|solution|checks)|sources|videos|say|id$)/;
+// ids are the Russian lesson's (a concept, a card, a step), so “design-colour-system” is not prose.
+const SKIP = /^(practice\.(id|continues|files|solution|checks)|sources|videos|say|id$|teaches|requires|cards\.\d+\.id)/;
 function words(value: unknown, path = ''): string[] {
 	if (SKIP.test(path)) return [];
 	if (typeof value === 'string') return [value];
