@@ -174,28 +174,39 @@ export type Comic = z.infer<typeof Comic>;
  * The lesson's definition (docs/content-plan/README.md, «Определение»): the quotable one- or
  * two-sentence answer to «что такое <тема>?». It opens the lesson, and it is the page's meta
  * description, its structured data's description and its line in llms.txt, so it is held to
- * what a snippet can carry: 50 to 160 characters, a whole sentence, and no «вы», because it is
- * read quoted alone, by a search engine or an answer engine, not as part of the lesson.
+ * what a snippet can carry: 50 to 160 characters, a whole sentence, and no «вы» (in English, no
+ * «you»), because it is read quoted alone, by a search engine or an answer engine, not as part
+ * of the lesson.
  */
-export const Definition = z
-	.string({ error: 'every lesson opens with a definition of its topic (docs/content-plan/README.md, «Определение»)' })
-	.trim()
-	.min(50, 'a definition is one or two sentences, at least 50 characters')
-	.max(160, 'a definition fits a search snippet: 160 characters at most')
-	.refine((d) => /[.!?…]$/.test(d), 'a definition ends as a sentence does')
-	.refine((d) => !/(^|[^а-яё])(вы|вас|вам|вами|ваш[а-яё]*)(?=[^а-яё]|$)/i.test(d), 'a definition is read quoted alone: no «вы»')
-	.refine((d) => !/^(в этом уроке|этот урок|урок )/i.test(d), 'a definition defines the topic, not the lesson');
+const definitionFor = (lang: 'ru' | 'en') => {
+	const base = z
+		.string({ error: 'every lesson opens with a definition of its topic (docs/content-plan/README.md, «Определение»)' })
+		.trim()
+		.min(50, 'a definition is one or two sentences, at least 50 characters')
+		.max(160, 'a definition fits a search snippet: 160 characters at most')
+		.refine((d) => /[.!?…]$/.test(d), 'a definition ends as a sentence does');
+	return lang === 'ru'
+		? base
+				.refine((d) => !/(^|[^а-яё])(вы|вас|вам|вами|ваш[а-яё]*)(?=[^а-яё]|$)/i.test(d), 'a definition is read quoted alone: no «вы»')
+				.refine((d) => !/^(в этом уроке|этот урок|урок )/i.test(d), 'a definition defines the topic, not the lesson')
+		: base
+				.refine((d) => !/\b(you|your|yours|yourself)\b/i.test(d), 'a definition is read quoted alone: no «you»')
+				.refine((d) => !/^(in this lesson|this lesson|the lesson|lesson )/i.test(d), 'a definition defines the topic, not the lesson');
+};
+export const Definition = definitionFor('ru');
+export const DefinitionEn = definitionFor('en');
 
 export const ConceptId = z.string().regex(/^[a-z0-9-]+$/);
 
-export const LessonMeta = z
+const lessonMeta = (lang: 'ru' | 'en') =>
+	z
 	.object({
 		id: z.string().regex(/^\d\d-[a-z0-9-]+\/\d\d-[a-z0-9-]+$/, 'id is "<part-slug>/<lesson-slug>"'),
 		part: z.number().int().min(0).max(16),
 		order: z.number().int().min(1),
 		title: text,
 		/** The topic's definition, quotable alone (Definition above). */
-		definition: Definition,
+		definition: definitionFor(lang),
 		/** «Зачем»: what the person can do after the lesson. */
 		summary: text,
 		minutes: z.number().int().min(1).max(120),
@@ -224,6 +235,9 @@ export const LessonMeta = z
 			if (!l.practice?.checks.some((c) => c.id === k))
 				ctx.addIssue({ code: 'custom', path: ['guide', 'mistakes', k], message: `no check ${k}` });
 	});
+/** A lesson of the Russian edition, the source; `LessonMetaEn` is the English edition's. */
+export const LessonMeta = lessonMeta('ru');
+export const LessonMetaEn = lessonMeta('en');
 export type LessonMeta = z.infer<typeof LessonMeta>;
 
 export const Part = z.object({
@@ -240,3 +254,16 @@ export type Concept = z.infer<typeof Concept>;
 
 export const Curriculum = z.object({ parts: z.array(Part).min(1), concepts: z.array(Concept) });
 export type Curriculum = z.infer<typeof Curriculum>;
+
+/**
+ * An edition's words for the curriculum (content/en/curriculum.yaml): a title and a summary for
+ * every part, by its slug, and a title for every concept, by its id. The structure stays in
+ * content/curriculum.yaml.
+ */
+export const CurriculumWords = z
+	.object({
+		parts: z.record(z.string(), z.object({ title: text, summary: text }).strict()),
+		concepts: z.record(ConceptId, text)
+	})
+	.strict();
+export type CurriculumWords = z.infer<typeof CurriculumWords>;

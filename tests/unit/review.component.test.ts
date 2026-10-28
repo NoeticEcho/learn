@@ -3,7 +3,7 @@
 import 'fake-indexeddb/auto';
 import { it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import Review from '../../src/routes/review/+page.svelte';
+import Review from '../../src/routes/[[lang=lang]]/review/+page.svelte';
 import { db } from '#lib/learner.ts';
 import { enrol } from '#lib/srs/index.ts';
 

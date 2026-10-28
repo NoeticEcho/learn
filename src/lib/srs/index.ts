@@ -8,7 +8,8 @@
 import { createEmptyCard, fsrs, generatorParameters, Rating, type Card as FsrsCard, type Grade } from 'ts-fsrs';
 import type { Db } from '#lib/store/db.ts';
 
-export type ReviewCard = { id: string; front: string; back: string };
+/** A card, in the edition it was learnt in (`lang`; Russian when absent, as before there were editions). */
+export type ReviewCard = { id: string; front: string; back: string; lang?: 'ru' | 'en' };
 export type RatingName = 'again' | 'hard' | 'good' | 'easy';
 
 type Stored = { card: ReviewCard; fsrs: Record<string, unknown> };

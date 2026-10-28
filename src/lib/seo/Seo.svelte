@@ -1,7 +1,8 @@
 <!--
 	A page's head for search engines, answer engines and link previews: the title and the meta
-	description, the canonical address, Open Graph and the Twitter card, the alternates of other
-	editions (none yet: site.ts EDITIONS), and the structured data. One component, so every page
+	description, the canonical address, Open Graph and the Twitter card, the alternates of the
+	other edition (site.ts EDITIONS: hreflang links and og:locale:alternate, for a page that exists
+	in both), and the structured data. One component, so every page
 	says the same things the same way; tests/e2e/seo.spec.ts reads the built pages.
 
 	Link previews: Telegram and VK read og:title, og:description and og:image (absolute, https,
@@ -11,7 +12,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { ldJson } from './jsonld.ts';
-	import { BASE, LOCALE, SITE_NAME, absolute, alternates, at, type Alternate } from './site.ts';
+	import { getLocale, type Locale } from '#lib/i18n/index.ts';
+	import { EDITIONS, OG_LOCALES, SITE_NAMES, absolute, alternates, at, innerPath, type Alternate } from './site.ts';
 
 	type Props = {
 		/** The page's own title; the document title adds the site's name. */
@@ -27,13 +29,18 @@
 		type?: 'website' | 'article';
 		jsonld?: Record<string, unknown>[];
 		noindex?: boolean;
+		/** The editions this page exists in; every screen is in both, a lesson may not be yet. */
+		editions?: readonly Locale[];
 	};
-	let { title, full: fullTitle, description, preview = description, image, type = 'website', jsonld = [], noindex = false }: Props = $props();
+	let { title, full: fullTitle, description, preview = description, image, type = 'website', jsonld = [], noindex = false, editions = EDITIONS.map((e) => e.lang) }: Props = $props();
 
+	const lang = getLocale();
+	const SITE_NAME = SITE_NAMES[lang];
 	const url = $derived(absolute(page.url.pathname));
 	const img = $derived(image && at.file(image.file));
 	const full = $derived(fullTitle ?? (title === SITE_NAME ? title : `${title}: ${SITE_NAME}`));
-	const alts: Alternate[] = $derived(alternates(page.url.pathname.slice(BASE.length)));
+	const alts: Alternate[] = $derived(alternates(innerPath(page.url.pathname), editions));
+	const otherLocales = $derived(editions.filter((l) => l !== lang).map((l) => OG_LOCALES[l]));
 	const scripts = $derived(jsonld.map((d) => `<script type="application/ld+json">${ldJson(d)}<\/script>`).join(''));
 </script>
 
@@ -48,7 +55,8 @@
 	{/if}
 	<meta property="og:type" content={type} />
 	<meta property="og:site_name" content={SITE_NAME} />
-	<meta property="og:locale" content={LOCALE} />
+	<meta property="og:locale" content={OG_LOCALES[lang]} />
+	{#each otherLocales as l (l)}<meta property="og:locale:alternate" content={l} />{/each}
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={preview} />
 	<meta property="og:url" content={url} />

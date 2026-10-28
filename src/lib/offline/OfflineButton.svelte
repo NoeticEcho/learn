@@ -1,7 +1,7 @@
-<!-- «Скачать курс целиком» (spec §4.8): asks the service worker to cache every page, and reports progress. -->
+<!-- «Скачать курс целиком» (spec §4.8): asks the service worker to cache every page of this edition, and reports progress. -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { t } from '#lib/i18n/index.ts';
+	import { t, getLocale } from '#lib/i18n/index.ts';
 
 	let phase = $state<'idle' | 'busy' | 'done' | 'partial' | 'unsupported'>('idle');
 	let done = $state(0);
@@ -23,7 +23,7 @@
 	async function start() {
 		phase = 'busy';
 		const reg = await navigator.serviceWorker.ready;
-		reg.active?.postMessage({ type: 'cache-all' });
+		reg.active?.postMessage({ type: 'cache-all', lang: getLocale() });
 	}
 </script>
 

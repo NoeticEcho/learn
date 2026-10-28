@@ -3,10 +3,10 @@
 // persona and for every other project template, so the checks hold for anyone's project.
 import { describe, it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { loadContent } from '#lib/content/load.ts';
+import { loadContent, loadEdition } from '#lib/content/load.ts';
 import { buildSrcdoc } from '#lib/practice/sandbox.ts';
 import { evaluate, facts } from '#lib/practice/checks.ts';
-import { render, TEMPLATES } from '#lib/persona/render.ts';
+import { render, TEMPLATES, templatesFor } from '#lib/persona/render.ts';
 import type { PracticeFiles } from '#lib/content/schema.ts';
 
 const content = loadContent();
@@ -39,6 +39,18 @@ describe('content', () => {
 				expect(good.filter((r) => !r.ok)).toEqual([]);
 				const bad = run(step.files, step.checks, p);
 				expect(bad.some((r) => !r.ok)).toBe(true);
+			});
+	}
+
+	// The English edition's steps, with the English templates: a translated step's checks hold
+	// for the projects an English page fills in.
+	for (const lesson of loadEdition('en').lessons.filter((l) => l.practice)) {
+		const step = lesson.practice!;
+		for (const [kind, persona] of Object.entries(templatesFor('en')))
+			it(`en/${lesson.id}: the solution passes and the starter fails (${kind})`, () => {
+				const p = persona as unknown as Record<string, unknown>;
+				expect(run(step.solution, step.checks, p).filter((r) => !r.ok)).toEqual([]);
+				expect(run(step.files, step.checks, p).some((r) => !r.ok)).toBe(true);
 			});
 	}
 

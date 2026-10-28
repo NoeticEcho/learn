@@ -10,7 +10,7 @@
  * Raw `fetch` rather than a provider SDK: three providers, a browser, and a first-route budget,
  * and the plan's interface takes a `fetch` so tests never touch the network.
  */
-import { t } from '#lib/i18n/index.ts';
+import { getLocale, t, type Locale } from '#lib/i18n/index.ts';
 
 export type Provider = 'anthropic' | 'openai' | 'openrouter';
 export type ModelConfig = { provider: Provider; key: string; model: string };
@@ -38,28 +38,47 @@ export const MODELS: Record<Provider, string[]> = {
 	openrouter: []
 };
 
-export const SYSTEM_PROMPT = [
-	'Ты Эхо, наставник в учебнике «Сквозь время» о том, как устроен веб. Ученик взрослый и только начинает.',
-	'Объясняй простыми словами, по-русски, коротко: два-три абзаца.',
-	'Сначала подскажи, где искать ответ, и только если ученик просит прямо, покажи решение.',
-	'Опирайся на текст урока, который тебе дали, и ссылайся на его источники, когда они есть.',
-	'Если не уверен, так и скажи. Не выдумывай факты, адреса и цифры.',
-	'Никогда не проси у ученика личные данные, пароли или ключи.'
-].join(' ');
+/** The guide's instructions, in the edition's language: the same tutor in both. */
+export const SYSTEM_PROMPTS: Record<Locale, string> = {
+	ru: [
+		'Ты Эхо, наставник в учебнике «Сквозь время» о том, как устроен веб. Ученик взрослый и только начинает.',
+		'Объясняй простыми словами, по-русски, коротко: два-три абзаца.',
+		'Сначала подскажи, где искать ответ, и только если ученик просит прямо, покажи решение.',
+		'Опирайся на текст урока, который тебе дали, и ссылайся на его источники, когда они есть.',
+		'Если не уверен, так и скажи. Не выдумывай факты, адреса и цифры.',
+		'Никогда не проси у ученика личные данные, пароли или ключи.'
+	].join(' '),
+	en: [
+		'You are Echo, the guide in “Through Time”, a textbook about how the web works. The learner is an adult and a beginner.',
+		'Explain in plain English, briefly: two or three paragraphs.',
+		'First point to where the answer can be found; show the solution only if the learner asks for it directly.',
+		'Ground your answer in the lesson text you are given, and cite its sources when there are any.',
+		'If you are not sure, say so. Do not invent facts, addresses or numbers.',
+		'Never ask the learner for personal data, passwords or keys.'
+	].join(' ')
+};
+export const SYSTEM_PROMPT = SYSTEM_PROMPTS.ru;
 
-function userMessage(ctx: AskContext): string {
-	const parts = [`Урок:\n${ctx.lesson}`];
-	if (ctx.code) parts.push(`Код ученика:\n${ctx.code}`);
-	if (ctx.persona) parts.push(`Данные проекта ученика (он разрешил их передать):\n${JSON.stringify(ctx.persona)}`);
-	parts.push(`Вопрос:\n${ctx.question}`);
+const LABELS: Record<Locale, { lesson: string; code: string; persona: string; question: string }> = {
+	ru: { lesson: 'Урок', code: 'Код ученика', persona: 'Данные проекта ученика (он разрешил их передать)', question: 'Вопрос' },
+	en: { lesson: 'Lesson', code: "The learner's code", persona: "The learner's project details (they agreed to share them)", question: 'Question' }
+};
+
+function userMessage(ctx: AskContext, l: Locale): string {
+	const w = LABELS[l];
+	const parts = [`${w.lesson}:\n${ctx.lesson}`];
+	if (ctx.code) parts.push(`${w.code}:\n${ctx.code}`);
+	if (ctx.persona) parts.push(`${w.persona}:\n${JSON.stringify(ctx.persona)}`);
+	parts.push(`${w.question}:\n${ctx.question}`);
 	return parts.join('\n\n');
 }
 
 /** Models that accept the server-side refusal fallback (Anthropic's guidance for these models). */
 const FALLBACK = /^claude-(sonnet-5-5|opus-5-5|opus-5|fable-5-1)$/;
 
-export async function ask(cfg: ModelConfig, ctx: AskContext, fetchImpl: typeof fetch = fetch): Promise<string> {
-	const content = userMessage(ctx);
+export async function ask(cfg: ModelConfig, ctx: AskContext, fetchImpl: typeof fetch = fetch, l: Locale = getLocale()): Promise<string> {
+	const content = userMessage(ctx, l);
+	const SYSTEM_PROMPT = SYSTEM_PROMPTS[l];
 	const url = ENDPOINTS[cfg.provider];
 	let headers: Record<string, string>;
 	let body: Record<string, unknown>;
@@ -129,13 +148,15 @@ export const PRICES: Record<string, { input: number; output: number }> = {
 };
 
 /**
- * ₽ for one question: input tokens from characters (Cyrillic runs about 2.5 characters a token),
- * the system prompt included, and the answer doubled for the model's own thinking.
+ * The cost of one question, in roubles for the Russian edition and in US dollars (the providers'
+ * own currency) for the English one: input tokens from characters (Cyrillic runs about 2.5
+ * characters a token, English about 4), the system prompt included, and the answer doubled for
+ * the model's own thinking. Roubles are rounded to the kopeck, dollars to a tenth of a cent.
  */
-export function estimateCost(provider: Provider, model: string, inputChars: number, outputTokens = 600): number | null {
+export function estimateCost(provider: Provider, model: string, inputChars: number, outputTokens = 600, l: Locale = 'ru'): number | null {
 	const p = PRICES[`${provider}:${model}`];
 	if (!p) return null;
-	const input = (inputChars + SYSTEM_PROMPT.length) / 2.5;
+	const input = (inputChars + SYSTEM_PROMPTS[l].length) / (l === 'ru' ? 2.5 : 4);
 	const usd = (input * p.input + outputTokens * 2 * p.output) / 1_000_000;
-	return Math.round(usd * USD_RUB * 100) / 100;
+	return l === 'ru' ? Math.round(usd * USD_RUB * 100) / 100 : Math.round(usd * 1000) / 1000;
 }

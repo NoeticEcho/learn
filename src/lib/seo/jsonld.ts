@@ -11,7 +11,8 @@
  * tests/unit/seo.test.ts holds every page to it.
  */
 import type { LessonMeta, Part, Source } from '#lib/content/schema.ts';
-import { LANG, LICENCE_URL, PUBLISHER, SITE_NAME } from './site.ts';
+import type { Locale } from '#lib/i18n/index.ts';
+import { LICENCE_URL, PUBLISHER, SITE_NAMES } from './site.ts';
 
 type Thing = Record<string, unknown>;
 
@@ -25,16 +26,17 @@ export const duration = (minutes: number) => {
 
 export const courseId = (homeUrl: string) => `${homeUrl}#course`;
 
-export function course(o: { homeUrl: string; description: string; image?: string; minutes: number; parts?: Part[] }): Thing {
+export function course(o: { homeUrl: string; description: string; image?: string; minutes: number; parts?: Part[]; lang?: Locale }): Thing {
+	const lang = o.lang ?? 'ru';
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'Course',
 		'@id': courseId(o.homeUrl),
-		name: SITE_NAME,
+		name: SITE_NAMES[lang],
 		description: o.description,
 		url: o.homeUrl,
 		...(o.image ? { image: o.image } : {}),
-		inLanguage: LANG,
+		inLanguage: lang,
 		educationalLevel: 'beginner',
 		isAccessibleForFree: true,
 		license: LICENCE_URL,
@@ -42,12 +44,12 @@ export function course(o: { homeUrl: string; description: string; image?: string
 		publisher,
 		...(o.parts ? { syllabusSections: o.parts.map((p) => ({ '@type': 'Syllabus', name: p.title, description: p.summary })) } : {}),
 		hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: duration(o.minutes) },
-		offers: { '@type': 'Offer', category: 'Free', price: 0, priceCurrency: 'RUB' }
+		offers: { '@type': 'Offer', category: 'Free', price: 0, priceCurrency: lang === 'ru' ? 'RUB' : 'GBP' }
 	};
 }
 
-export function website(homeUrl: string, description: string): Thing {
-	return { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: homeUrl, inLanguage: LANG, description, publisher };
+export function website(homeUrl: string, description: string, lang: Locale = 'ru'): Thing {
+	return { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAMES[lang], url: homeUrl, inLanguage: lang, description, publisher };
 }
 
 const citation = (s: Source) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, inLanguage: s.lang });
@@ -60,8 +62,10 @@ export function learningResource(o: {
 	teaches: string[];
 	requires?: string[];
 	dateModified?: string;
+	lang?: Locale;
 }): Thing {
 	const l = o.lesson;
+	const lang = o.lang ?? 'ru';
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'LearningResource',
@@ -71,10 +75,10 @@ export function learningResource(o: {
 		abstract: l.summary,
 		url: o.url,
 		...(o.image ? { image: o.image } : {}),
-		inLanguage: LANG,
+		inLanguage: lang,
 		learningResourceType: 'lesson',
 		educationalLevel: 'beginner',
-		isPartOf: { '@type': 'Course', '@id': courseId(o.homeUrl), name: SITE_NAME, url: o.homeUrl },
+		isPartOf: { '@type': 'Course', '@id': courseId(o.homeUrl), name: SITE_NAMES[lang], url: o.homeUrl },
 		teaches: o.teaches,
 		...(o.requires?.length ? { competencyRequired: o.requires } : {}),
 		timeRequired: duration(l.minutes),

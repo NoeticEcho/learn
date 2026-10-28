@@ -3,7 +3,7 @@
 import 'fake-indexeddb/auto';
 import { it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import Settings from '../../src/routes/settings/+page.svelte';
+import Settings from '../../src/routes/[[lang=lang]]/settings/+page.svelte';
 import { db, progress } from '#lib/learner.ts';
 import { EDITABLE } from '#lib/persona/fields.ts';
 

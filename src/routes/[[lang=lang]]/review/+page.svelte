@@ -2,7 +2,7 @@
 <script lang="ts">
 	import Seo from '#lib/seo/Seo.svelte';
 	import { onMount } from 'svelte';
-	import { t, pl } from '#lib/i18n/index.ts';
+	import { t, pl, getLocale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Echo from '#lib/guide/Echo.svelte';
 	import type { ReviewCard, RatingName } from '#lib/srs/index.ts';
@@ -11,6 +11,9 @@
 	let loaded = $state(false);
 	let shown = $state(false);
 	const card = $derived(queue[0]);
+	// A card learnt in the other edition is shown in its own language, and marked so.
+	const lang = getLocale();
+	const cardLang = $derived(card && (card.lang ?? 'ru') !== lang ? (card.lang ?? 'ru') : undefined);
 
 	onMount(async () => {
 		const [{ db }, srs] = await Promise.all([import('#lib/learner.ts'), import('#lib/srs/index.ts')]);
@@ -55,9 +58,9 @@
 		{#if card}
 			<p class="count" role="status">{t('review.due', { n: queue.length, cards: pl(queue.length, 'card.forms') })}</p>
 			<section class="card" aria-live="polite">
-				<p class="front">{card.front}</p>
+				<p class="front" lang={cardLang}>{card.front}</p>
 				{#if shown}
-					<p class="back">{card.back}</p>
+					<p class="back" lang={cardLang}>{card.back}</p>
 					<fieldset>
 						<legend>{t('review.rate')}</legend>
 						<div class="rates">

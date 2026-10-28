@@ -11,7 +11,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { t } from '#lib/i18n/index.ts';
+	import { t, getLocale } from '#lib/i18n/index.ts';
 	import { targets } from './targets.ts';
 
 	type Props = { url: string; title: string; text: string; label?: string };
@@ -25,7 +25,7 @@
 		clipboard = !!navigator.clipboard?.writeText && isSecureContext;
 	});
 
-	const links = $derived(targets({ url, title, text }));
+	const links = $derived(targets({ url, title, text, lang: getLocale() }));
 
 	async function share() {
 		try {

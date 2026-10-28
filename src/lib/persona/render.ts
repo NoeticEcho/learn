@@ -3,9 +3,10 @@
  * `{{a.b}}`, `{{.}}` inside a loop, and `{{#each list}}…{{/each}}`. No expressions, no partials,
  * no raw output: every value is HTML-escaped, because the values are the person's own words.
  */
-import { TEMPLATES, defaultPersona, type Brief, type Kind, type Persona } from './fields.ts';
+import { getLocale, type Locale } from '#lib/i18n/index.ts';
+import { TEMPLATES, defaultPersona, defaultPersonaFor, templatesFor, type Brief, type Kind, type Persona } from './fields.ts';
 
-export { TEMPLATES, defaultPersona };
+export { TEMPLATES, defaultPersona, defaultPersonaFor, templatesFor };
 
 const escape = (s: string) =>
 	s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -71,10 +72,13 @@ export function render(template: string, p: Persona | Record<string, unknown>): 
 
 const filled = (v: unknown) => v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0);
 
-/** The person's own fields over that kind's template. Empty values keep the default. */
-export function merged(own: Partial<Persona> | Record<string, unknown>, kind?: Kind): Persona {
+/**
+ * The person's own fields over that kind's template, in the page's edition. Empty values keep
+ * the template's: the English template on an English page, the Russian one on a Russian page.
+ */
+export function merged(own: Partial<Persona> | Record<string, unknown>, kind?: Kind, l: Locale = getLocale()): Persona {
 	const k = (kind ?? (own as Partial<Persona>).kind ?? 'expert') as Kind;
-	const base = structuredClone(TEMPLATES[k] ?? defaultPersona);
+	const base = structuredClone(templatesFor(l)[k] ?? defaultPersonaFor(l));
 	const out: Record<string, unknown> = { ...base };
 	for (const [key, v] of Object.entries(own)) {
 		if (!filled(v)) continue;
@@ -85,12 +89,13 @@ export function merged(own: Partial<Persona> | Record<string, unknown>, kind?: K
 	return out as Persona;
 }
 
+// The kind of action a phrase names, in either language: a person writes in theirs.
 const ACTIONS: [RegExp, Brief['mainAction']['kind']][] = [
-	[/позвон|звон|телефон/i, 'call'],
-	[/запис|заброн|бронь|приём|прием/i, 'book'],
-	[/куп|заказ|оплат/i, 'buy'],
-	[/подпис|регистр|вступ|присоедин|попроб/i, 'signup'],
-	[/прочит|узна|почита|посмотр/i, 'read']
+	[/позвон|звон|телефон|\bcall\b|\bphone\b|\bring\b/i, 'call'],
+	[/запис|заброн|бронь|приём|прием|\bbook|\breserv|appointment/i, 'book'],
+	[/куп|заказ|оплат|\bbuy\b|\border\b|\bpurchase|\bshop\b/i, 'buy'],
+	[/подпис|регистр|вступ|присоедин|попроб|sign ?up|subscribe|\bjoin\b|register|\btry\b/i, 'signup'],
+	[/прочит|узна|почита|посмотр|\bread\b|learn|find out|\bsee\b|\bwatch\b/i, 'read']
 ];
 
 /** The prologue's three answers, as the start of a brief. */

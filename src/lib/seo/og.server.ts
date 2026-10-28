@@ -26,7 +26,8 @@ import { join } from 'node:path';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import wawoff2 from 'wawoff2';
-import { SITE_NAME, eraLabel } from './site.ts';
+import type { Locale } from '#lib/i18n/index.ts';
+import { SITE_NAMES, eraLabel } from './site.ts';
 
 /** Bump when the template's drawing changes, so every card gets a new URL. */
 const TEMPLATE = 2;
@@ -46,6 +47,8 @@ export type OgCard = {
 	mood: Mood;
 	/** What the picture shows, for og:image:alt. */
 	alt: string;
+	/** The edition the card is for: its brand and its address. Russian when absent. */
+	lang?: Locale;
 };
 
 const root = process.cwd();
@@ -179,7 +182,8 @@ const titleSize = (t: string) => (t.length <= 34 ? 76 : t.length <= 56 ? 66 : t.
 export async function renderCard(card: OgCard): Promise<Buffer> {
 	const c = palette();
 	const echo = `data:image/svg+xml;base64,${Buffer.from(staticEcho(card.era, card.mood)).toString('base64')}`;
-	const era = eraLabel(card.era);
+	const era = eraLabel(card.era, card.lang);
+	const lang = card.lang ?? 'ru';
 	const tree = h(
 		'div',
 		{
@@ -217,8 +221,8 @@ export async function renderCard(card: OgCard): Promise<Buffer> {
 			h(
 				'div',
 				{ display: 'flex', alignItems: 'baseline', gap: 24 },
-				h('div', { display: 'flex', fontFamily: SERIF, fontSize: 36, color: c('--brass-300') }, SITE_NAME),
-				h('div', { display: 'flex', fontSize: 22, color: c('--ash-400') }, 'open.noeticecho.space/learn')
+				h('div', { display: 'flex', fontFamily: SERIF, fontSize: 36, color: c('--brass-300') }, SITE_NAMES[lang]),
+				h('div', { display: 'flex', fontSize: 22, color: c('--ash-400') }, lang === 'en' ? 'open.noeticecho.space/learn/en' : 'open.noeticecho.space/learn')
 			)
 		),
 		h(

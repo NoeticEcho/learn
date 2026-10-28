@@ -16,6 +16,8 @@ export type LessonSummary = {
 	requires: string[];
 	era: number | null;
 	practice: boolean;
+	/** Set when the lesson is shown in another edition's words: an English map's lesson not yet translated is `ru`. */
+	lang?: 'ru';
 };
 
 export type Catalogue = { parts: Part[]; concepts: Concept[]; lessons: LessonSummary[] };
@@ -46,7 +48,7 @@ export const lessonParams = (id: string) => {
  * ones that teach a concept it requires). Home is prerendered with its data inline, so this is
  * paid by every first visit, and it grows with every lesson: no summaries, concepts or parts.
  */
-export type HomeLesson = { id: string; title: string; after: string[] };
+export type HomeLesson = { id: string; title: string; after: string[]; lang?: 'ru' };
 
 /** In curriculum order. The graph has been validated at build time, so every requirement has a teacher. */
 export function homeLessons(lessons: LessonSummary[]): HomeLesson[] {
@@ -57,6 +59,7 @@ export function homeLessons(lessons: LessonSummary[]): HomeLesson[] {
 		.map((l) => ({
 			id: l.id,
 			title: l.title,
+			...(l.lang ? { lang: l.lang } : {}),
 			after: [...new Set(l.requires.map((c) => teacher.get(c)).filter((id): id is string => !!id && id !== l.id))]
 		}));
 }

@@ -15,7 +15,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { t } from '#lib/i18n/index.ts';
-	import { KINDS, TEMPLATES, type Kind, type Persona } from './fields.ts';
+	import { KINDS, templatesFor, type Kind, type Persona } from './fields.ts';
 
 	type Props = {
 		/** «Вернуть пример», which erases everything the person wrote; settings shows it, a lesson does not. */
@@ -52,7 +52,8 @@
 	let note = $state('');
 	let resetting = $state(false);
 
-	const template = $derived(TEMPLATES[kind] as Persona);
+	const templates = templatesFor();
+	const template = $derived(templates[kind] as Persona);
 	const shown = <K extends ListKey>(k: K): Lists[K] => (lists[k] ?? (template[k] as Lists[K])) as Lists[K];
 	const langs = $derived(languages ?? template.languages);
 	const toneNow = $derived(tone ?? template.tone);

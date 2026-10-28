@@ -6,7 +6,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { t, pl, midSentence } from '#lib/i18n/index.ts';
+	import { t, pl, midSentence, getLocale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import { buildGraph, status, unmet, type LessonStatus } from '#lib/content/graph.ts';
 	import Seo from '#lib/seo/Seo.svelte';
@@ -15,6 +15,7 @@
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+	const lang = getLocale();
 	const cat = $derived(data.catalogue);
 	const graph = $derived(buildGraph(cat.lessons, cat));
 	let done = $state(new Set<string>());
@@ -84,12 +85,15 @@
 	description={t('seo.map.description')}
 	image={data.og}
 	jsonld={[
-		breadcrumbs([{ name: t('app.title'), url: at.home() }, { name: t('map.title') }]),
+		breadcrumbs([{ name: t('app.title'), url: at.home(lang) }, { name: t('map.title') }]),
 		{
 			'@context': 'https://schema.org',
 			'@type': 'ItemList',
 			name: t('map.title'),
-			itemListElement: cat.lessons.map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.title, url: at.lesson(l.id) }))
+			// The lessons written in this edition: a lesson not yet translated is a noindex page here.
+			itemListElement: cat.lessons
+				.filter((l) => !l.lang)
+				.map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.title, url: at.lesson(l.id, lang) }))
 		}
 	]}
 />
@@ -122,7 +126,8 @@
 							{@const s = statusOf(l.id)}
 							<li>
 								<a class="node {s}" class:near={near.has(l.id)} href={links.lesson(l.id)} data-node={l.id} data-testid="lesson-{l.id}" data-status={s}>
-									<span class="title">{l.title}</span>
+									<span class="title" lang={l.lang}>{l.title}</span>
+									{#if l.lang}<span class="tag">{t('map.untranslated')}</span>{/if}
 									<span class="meta">
 										{#if s === 'done'}{t('map.status.done')}{:else if s === 'open'}{t('map.minutes', { n: l.minutes, minutes: pl(l.minutes, 'minute.forms') })}{:else}{t('map.status.locked', {
 												needs: unmet(graph, l.id, done).map(conceptTitle).join(', ')
@@ -275,6 +280,11 @@
 	}
 	.meta {
 		font-size: var(--text-body-sm);
+		color: var(--text-secondary);
+	}
+	/* A lesson the edition shows in Russian for now: said in words, not only by its title's script. */
+	.tag {
+		font-size: var(--text-label);
 		color: var(--text-secondary);
 	}
 	.node.done .meta {

@@ -37,7 +37,7 @@ test('a lesson’s head: description, canonical, Open Graph, the card, and its s
 	expect(meta('twitter:card')).toBe('summary_large_image');
 	expect(decode(meta('og:image:alt')!)).toContain('Первая страница');
 	expect(meta('twitter:image')).toBe(meta('og:image'));
-	expect(html).not.toMatch(/hreflang/); // no second edition yet
+	expect(html).not.toMatch(/rel="alternate" hreflang/); // not translated into English yet
 
 	const image = meta('og:image')!;
 	expect(image).toMatch(new RegExp(`^${PUBLIC}og/lesson-02-html-01-first-page-[0-9a-f]{10}\\.png$`));

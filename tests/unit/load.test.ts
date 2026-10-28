@@ -52,3 +52,63 @@ describe('loadContent', () => {
 		expect(curriculum.parts.map((p) => p.number)).toEqual([...Array(17).keys()]);
 	});
 });
+
+describe('the English edition, checked against the Russian one', async () => {
+	const { validateEdition } = await import('#lib/content/load.ts');
+	const ru = validate({ [file]: { metadata: validLesson } }, yaml);
+	const words = `
+parts:
+  02-html: { title: HTML, summary: 'The document and its tags.' }
+concepts:
+  html-tag: Tag and element
+`;
+	const enFile = '/content/en/02-html/01-first-page.svx';
+	const english = {
+		...validLesson,
+		title: 'A first page',
+		definition: 'HTML is a markup language: its tags tell a browser where a heading, a paragraph and a link are.',
+		sources: validLesson.sources.map((s, i) => (i === 0 ? { ...s, lang: 'en' as const } : s))
+	};
+	const problems = (meta: unknown, w = words) => {
+		try {
+			validateEdition({ [enFile]: { metadata: meta } }, w, ru);
+			return '';
+		} catch (e) {
+			return (e as ContentError).problems.join('\n');
+		}
+	};
+
+	it('accepts a translation, and names what is not translated yet', () => {
+		const e = validateEdition({ [enFile]: { metadata: english } }, words, ru);
+		expect(e.lessons.map((l) => l.title)).toEqual(['A first page']);
+		expect(e.curriculum.concepts[0].title).toBe('Tag and element');
+		expect(validateEdition({}, words, ru).missing).toEqual(['02-html/01-first-page']);
+	});
+	it('keeps what progress is keyed by: the step id, its check ids, the card ids', () => {
+		expect(problems({ ...english, practice: { ...english.practice, id: 'other' } })).toMatch(/practice is/);
+		expect(problems({ ...english, guide: { ...english.guide, mistakes: {} }, practice: { ...english.practice, checks: [{ id: 'heading', kind: 'exists', selector: 'h1' }] } })).toMatch(/check ids/);
+		expect(problems({ ...english, cards: english.cards.map((c, i) => (i ? c : { ...c, id: 'renamed' })) })).toMatch(/card ids/);
+	});
+	it('keeps the graph: the same concepts, taught and required, and the same place', () => {
+		expect(problems({ ...english, requires: ['html-tag'] })).toMatch(/requires/);
+		expect(problems({ ...english, order: 2 })).toMatch(/order/);
+	});
+	it('needs an English definition, an English source, a Russian original and every title', () => {
+		expect(problems(english)).toBe('');
+		expect(problems({ ...english, definition: 'Your page is HTML: tags tell a browser where the heading and the link are.' })).toMatch(/you/);
+		expect(problems({ ...english, sources: validLesson.sources.map((s) => ({ ...s, lang: 'ru' as const })) })).toMatch(/no source in en/);
+		expect(problems({ ...english, id: '02-html/09-other' })).toMatch(/does not match/);
+		expect(problems(english, words.replace('  html-tag: Tag and element\n', ''))).toMatch(/no title for concept html-tag/);
+	});
+});
+
+describe('loadEdition', () => {
+	it('reads the real English edition: every part and concept titled, lessons a subset of the Russian', async () => {
+		const { loadContent, loadEdition } = await import('#lib/content/load.ts');
+		const ru = loadContent();
+		const en = loadEdition('en');
+		expect(en.curriculum.parts.map((p) => p.slug)).toEqual(ru.curriculum.parts.map((p) => p.slug));
+		expect(en.lessons.length + en.missing.length).toBe(ru.lessons.length);
+		expect(en.lessons.map((l) => l.id)).toContain('00-start/01-how-to-learn');
+	});
+});

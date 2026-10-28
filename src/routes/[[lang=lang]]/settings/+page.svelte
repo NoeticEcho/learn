@@ -1,5 +1,6 @@
 <!--
-	Settings (spec §4.3): the theme, the person's project, their own model key, and the backup.
+	Settings (spec §4.3): the theme, the edition's language, the person's project, their own model
+	key, and the backup.
 	Everything here lives only in this browser. The key is a password field, is never put in a URL
 	or a log, and leaves the browser only in a request to the provider chosen here, or in a backup
 	file when the person ticks that box.
@@ -7,7 +8,8 @@
 <script lang="ts">
 	import Seo from '#lib/seo/Seo.svelte';
 	import { onMount } from 'svelte';
-	import { t, pl } from '#lib/i18n/index.ts';
+	import { t, pl, date, getLocale, LOCALES, type Locale } from '#lib/i18n/index.ts';
+	import * as links from '#lib/links.ts';
 	import { getTheme, setTheme, THEME_KEY, type Theme } from '#lib/theme.ts';
 	import BriefEditor from '#lib/persona/BriefEditor.svelte';
 	import type { Provider } from '#lib/guide/model.ts';
@@ -16,6 +18,19 @@
 	const ANTHROPIC_MODELS = ['claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-opus-5-5'];
 
 	let theme = $state<Theme | 'system'>('system');
+
+	// The language is the edition's, which is the URL's: choosing one opens these settings in it,
+	// and remembers it, so the Russian home sends a person who chose English on (app.html).
+	const lang = getLocale();
+	function chooseLanguage(l: Locale) {
+		if (l === lang) return;
+		try {
+			localStorage.setItem('learn.lang', l);
+		} catch {
+			// storage blocked: the choice still applies to this visit
+		}
+		location.assign(links.counterpart('/settings/', l));
+	}
 
 	let provider = $state<Provider>('anthropic');
 	let model = $state(ANTHROPIC_MODELS[0]);
@@ -111,7 +126,7 @@
 			const p = preview(data);
 			pending = data;
 			previewText = t('settings.import.preview', {
-				date: new Date(p.exportedAt).toLocaleDateString('ru-RU'),
+				date: date(new Date(p.exportedAt)),
 				lessons: p.counts.lessons,
 				lessonsWord: pl(p.counts.lessons, 'lesson.forms'),
 				cards: p.counts.cards,
@@ -210,6 +225,16 @@
 			</div>
 		</form>
 		{#if keyNote}<p class="status" role="status">{keyNote}</p>{/if}
+	</section>
+
+	<section aria-labelledby="s-language">
+		<h2 id="s-language">{t('settings.language')}</h2>
+		<p class="note">{t('settings.language.lede')}</p>
+		<div class="row" role="radiogroup" aria-labelledby="s-language">
+			{#each LOCALES as l (l)}
+				<label class="check" lang={l}><input type="radio" name="language" checked={lang === l} onchange={() => chooseLanguage(l)} /> {t(`settings.language.${l}`)}</label>
+			{/each}
+		</div>
 	</section>
 
 	<section aria-labelledby="s-theme">

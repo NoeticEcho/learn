@@ -2,8 +2,8 @@
 // data's required fields for every lesson, the Open Graph cards, the sitemap, robots.txt and
 // llms.txt, and the share links. The built pages' heads are read in tests/e2e/seo.spec.ts.
 import { describe, it, expect } from 'vitest';
-import { loadContent } from '#lib/content/load.ts';
-import { Definition } from '#lib/content/schema.ts';
+import { loadContent, loadEdition } from '#lib/content/load.ts';
+import { Definition, DefinitionEn } from '#lib/content/schema.ts';
 import { alternates, at, describe as describeText, EDITIONS } from '#lib/seo/site.ts';
 import { breadcrumbs, course, duration, learningResource, ldJson, website } from '#lib/seo/jsonld.ts';
 import { cards, homeCard, lessonCard, lastmod } from '#lib/seo/pages.server.ts';
@@ -15,6 +15,7 @@ import { GET as robots } from '../../src/routes/robots.txt/+server.ts';
 
 const { lessons, curriculum } = loadContent();
 const partOf = (n: number) => curriculum.parts.find((p) => p.number === n)!;
+const en = loadEdition('en');
 
 describe('the definition convention', () => {
 	it('every lesson has one that fits a snippet', () => {
@@ -78,9 +79,28 @@ describe('structured data', () => {
 		expect(ldJson(tricky)).not.toContain('<');
 		expect(JSON.parse(ldJson(tricky))).toEqual(tricky);
 	});
-	it('no hreflang until a second edition exists', () => {
-		expect(EDITIONS.map((e) => e.lang)).toEqual(['ru']);
-		expect(alternates('/lesson/02-html/01-first-page/')).toEqual([]);
+	it('hreflang for a page in both editions, Russian the default; none for a page in one', () => {
+		expect(EDITIONS.map((e) => e.lang)).toEqual(['ru', 'en']);
+		expect(alternates('/map/')).toEqual([
+			{ hreflang: 'ru', href: at.map() },
+			{ hreflang: 'en', href: at.map('en') },
+			{ hreflang: 'x-default', href: at.map() }
+		]);
+		expect(alternates('/lesson/02-html/01-first-page/', ['ru'])).toEqual([]);
+	});
+	it('an English definition is held to the same rules, with «you» in place of «вы»', () => {
+		const ok = 'DNS is a distributed system that turns a site name into the IP address of its server.';
+		expect(DefinitionEn.safeParse(ok).success).toBe(true);
+		expect(DefinitionEn.safeParse('DNS is a system that turns your site name into the IP address of a server.').success).toBe(false);
+		expect(DefinitionEn.safeParse('In this lesson we see how DNS turns a site name into the address of a server.').success).toBe(false);
+		expect(DefinitionEn.safeParse(ok.replace(/\.$/, '')).success).toBe(false);
+		for (const l of en.lessons) expect(DefinitionEn.safeParse(l.definition).success, l.id).toBe(true);
+	});
+	it('the English edition\'s structured data says English and the English name', () => {
+		const l = en.lessons[0];
+		const d = JSON.parse(ldJson(learningResource({ lesson: l, url: at.lesson(l.id, 'en'), homeUrl: at.home('en'), teaches: ['a'], lang: 'en' })));
+		expect(d).toMatchObject({ inLanguage: 'en', isPartOf: { name: 'Through Time', url: at.home('en') } });
+		expect(JSON.parse(ldJson(website(at.home('en'), 'x', 'en')))).toMatchObject({ name: 'Through Time', inLanguage: 'en' });
 	});
 });
 
@@ -90,8 +110,12 @@ const size = (png: Buffer) => ({ width: png.readUInt32BE(16), height: png.readUI
 describe('Open Graph cards', () => {
 	it('one per lesson, the home and the map, each named by a hash of what it draws', () => {
 		const all = cards();
-		expect(all.size).toBe(lessons.length + 2);
-		for (const file of all.keys()) expect(file).toMatch(/^(home|map|lesson-\d\d-[a-z0-9-]+)-[0-9a-f]{10}\.png$/);
+		// both editions: every Russian lesson, and every lesson translated into English
+		expect(all.size).toBe(lessons.length + 2 + en.lessons.length + 2);
+		for (const file of all.keys()) expect(file).toMatch(/^(en-)?(home|map|lesson-\d\d-[a-z0-9-]+)-[0-9a-f]{10}\.png$/);
+		const enCard = lessonCard(en.lessons[0], en.curriculum.parts.find((p) => p.number === en.lessons[0].part)!, 'en');
+		expect(enCard).toMatchObject({ stem: `en-lesson-${en.lessons[0].id.replace('/', '-')}`, lang: 'en' });
+		expect(enCard.alt).toContain('Echo');
 		const l = lessons[0];
 		const card = lessonCard(l, partOf(l.part));
 		expect(ogFile(card)).toBe(ogFile({ ...card }));
@@ -140,9 +164,14 @@ describe('Open Graph cards', () => {
 describe('sitemap, robots.txt and llms.txt', () => {
 	it('the sitemap lists home, the map and every lesson, each with a date', async () => {
 		const xml = await (sitemap as () => Response)().text();
-		const urls = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><lastmod>(\d{4}-\d\d-\d\d)<\/lastmod><\/url>/g)];
-		expect(urls.length).toBe(lessons.length + 2);
+		const urls = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><lastmod>(\d{4}-\d\d-\d\d)<\/lastmod>/g)];
+		// Russian: home, map, every lesson; English: home, map, the lessons translated so far
+		expect(urls.length).toBe(lessons.length + 2 + en.lessons.length + 2);
 		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home(), at.map(), ...lessons.map((l) => at.lesson(l.id))]));
+		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home('en'), at.map('en'), ...en.lessons.map((l) => at.lesson(l.id, 'en'))]));
+		for (const id of en.missing) expect(xml, id).not.toContain(`<loc>${at.lesson(id, 'en')}</loc>`);
+		const translated = en.lessons[0].id;
+		expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="en" href="${at.lesson(translated, 'en')}"/>`);
 		for (const page of ['gallery', 'review', 'settings']) expect(xml).not.toContain(`<loc>${at.file(`${page}/`)}</loc>`);
 		expect(lastmod(lessons[0].id)).toMatch(/^\d{4}-\d\d-\d\d$/);
 	});
@@ -155,6 +184,13 @@ describe('sitemap, robots.txt and llms.txt', () => {
 		const txt = llmsTxt();
 		expect(txt.startsWith('# Сквозь время\n\n> ')).toBe(true);
 		for (const l of lessons) expect(txt).toContain(`- [${l.title}](${at.lesson(l.id)}): ${l.definition}`);
+	});
+	it('the English llms.txt lists the translated lessons only, in English', () => {
+		const txt = llmsTxt('en');
+		expect(txt.startsWith('# Through Time\n\n> ')).toBe(true);
+		for (const l of en.lessons) expect(txt).toContain(`- [${l.title}](${at.lesson(l.id, 'en')}): ${l.definition}`);
+		for (const id of en.missing) expect(txt).not.toContain(at.lesson(id, 'en'));
+		expect(llmsFullTxt('en')).toContain(`# ${en.lessons[0].title}\n`);
 	});
 	it('llms-full.txt is every lesson as Markdown, without scripts or diagrams', () => {
 		const txt = llmsFullTxt();

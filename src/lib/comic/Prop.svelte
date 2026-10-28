@@ -7,6 +7,9 @@
 -->
 <script lang="ts">
 	import type { PropName } from './kit.ts';
+	import { pick } from '#lib/i18n/index.ts';
+	// The words a prop draws when the panel gives it no label, in the edition's language.
+	const D = pick({ ru: { password: 'пароль: …', certificate: 'сертификат' }, en: { password: 'password: …', certificate: 'certificate' } });
 
 	type Props = { name: PropName; label?: string };
 	let { name, label }: Props = $props();
@@ -126,7 +129,7 @@
 	<path class="rule" d="M82 34 V106" />
 	<rect class="stamp" x="118" y="32" width="20" height="24" />
 	<path class="ink-line" d="M92 74 H138 M92 86 H138 M92 98 H130" />
-	<text class="t small" x="12" y="46" textLength={fit(label ?? 'пароль: …', 64, 8.5)} lengthAdjust="spacingAndGlyphs">{label ?? 'пароль: …'}</text>
+	<text class="t small" x="12" y="46" textLength={fit(label ?? D.password, 64, 8.5)} lengthAdjust="spacingAndGlyphs">{label ?? D.password}</text>
 	<path class="echo-line" d="M12 60 Q24 55 36 60 T60 60 T74 60 M12 74 Q24 69 36 74 T60 74" />
 {:else if name === 'lock'}
 	<path class="shackle" d="M54 62 V44 A21 21 0 0 1 96 44 V62" />
@@ -137,7 +140,7 @@
 {:else if name === 'certificate'}
 	<rect class="body paperish" x="12" y="6" width="126" height="108" />
 	<rect class="rule-box" x="18" y="12" width="114" height="96" />
-	<text class="t small" x="75" y="30" text-anchor="middle" textLength={fit(label ?? 'сертификат', 100, 8.5)} lengthAdjust="spacingAndGlyphs">{label ?? 'сертификат'}</text>
+	<text class="t small" x="75" y="30" text-anchor="middle" textLength={fit(label ?? D.certificate, 100, 8.5)} lengthAdjust="spacingAndGlyphs">{label ?? D.certificate}</text>
 	<path class="ink-line" d="M30 44 H120 M30 54 H112 M30 64 H118" />
 	<path class="seal-ribbon" d="M98 92 L92 122 L100 116 L106 124 L110 94" />
 	<circle class="seal" cx="104" cy="88" r="12" />

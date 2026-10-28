@@ -5,13 +5,13 @@
  * says the person has been here before. So the inline data has a fixed cap, not one per lesson.
  */
 import { it, expect } from 'vitest';
-import { load } from '../../src/routes/+page.server.ts';
+import { load } from '../../src/routes/[[lang=lang]]/+page.server.ts';
 import { GET, entries } from '../../src/routes/data/home-[hash].json/+server.ts';
 import { loadContent } from '#lib/content/load.ts';
 import { nextLessons } from '#lib/content/graph.ts';
 import { nextHome, type HomeLesson } from '#lib/content/catalogue.ts';
 
-const data = load();
+const data = load({ params: {} });
 const [{ hash }] = entries() as { hash: string }[];
 const index = async (h: string) => GET({ params: { hash: h } } as Parameters<typeof GET>[0]);
 const lessons: HomeLesson[] = await (await index(hash)).json();

@@ -17,7 +17,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Echo from '#lib/guide/Echo.svelte';
-	import { t } from '#lib/i18n/index.ts';
+	import { t, pick } from '#lib/i18n/index.ts';
 
 	let run = $state(false);
 	let hidden = $state(false);
@@ -30,7 +30,12 @@
 		return () => document.removeEventListener('visibilitychange', onVis);
 	});
 
-	const YEARS = ['1991', '1996', '2000', '2005', '2014', '2019', '2025', 'Искин'];
+	// The eras' own words, in the edition's language: drawn text, decoration (the scene is aria-hidden).
+	const W = pick({
+		ru: { iskin: 'Искин', home: 'Моя домашняя страница', portal: 'ПОРТАЛ', signup: 'Зарегистрируйтесь!' },
+		en: { iskin: 'Iskin', home: 'My Home Page', portal: 'PORTAL', signup: 'Sign up now!' }
+	});
+	const YEARS = ['1991', '1996', '2000', '2005', '2014', '2019', '2025', W.iskin];
 	// Эхо's ring (design/mascot/echo.svg): era n's dot, clockwise from the top.
 	const DOTS = [
 		[80, 20],
@@ -64,7 +69,7 @@
 				<g transform="translate(298 0)">
 					<rect width="298" height="208" fill="#c0c0c0" />
 					<rect x="14" y="14" width="270" height="34" fill="#000080" />
-					<text x="149" y="37" text-anchor="middle" font-family="'Comic Sans MS', 'Comic Neue', cursive" font-size="16" fill="#ffff00">Моя домашняя страница</text>
+					<text x="149" y="37" text-anchor="middle" font-family="'Comic Sans MS', 'Comic Neue', cursive" font-size="16" fill="#ffff00">{W.home}</text>
 					<g fill="#fff" stroke="#808080" stroke-width="2">
 						<rect x="14" y="58" width="80" height="92" /><rect x="102" y="58" width="182" height="92" />
 					</g>
@@ -83,7 +88,7 @@
 					<rect width="298" height="208" fill="#0b1f3a" />
 					<circle cx="149" cy="92" r="56" fill="none" stroke="#3fa9f5" stroke-width="3" opacity=".7" />
 					<path d="M70 120 C120 40 190 40 232 80" fill="none" stroke="#f7931e" stroke-width="6" stroke-linecap="round" />
-					<text x="149" y="100" text-anchor="middle" font-family="Verdana, sans-serif" font-size="18" font-weight="bold" fill="#fff" letter-spacing="2">ПОРТАЛ</text>
+					<text x="149" y="100" text-anchor="middle" font-family="Verdana, sans-serif" font-size="18" font-weight="bold" fill="#fff" letter-spacing="2">{W.portal}</text>
 					<rect x="104" y="158" width="90" height="24" rx="3" fill="none" stroke="#fff" stroke-width="1.5" />
 					<text x="149" y="175" text-anchor="middle" font-family="Verdana, sans-serif" font-size="11" fill="#fff">Skip intro ›</text>
 				</g>
@@ -99,7 +104,7 @@
 					<text x="116" y="28" text-anchor="middle" font-family="Verdana, sans-serif" font-size="9" fill="#fff">beta</text>
 					<rect x="20" y="64" width="258" height="40" rx="20" fill="url(#era-gloss)" />
 					<rect x="30" y="68" width="238" height="14" rx="7" fill="#fff" opacity=".35" />
-					<text x="149" y="90" text-anchor="middle" font-family="'Lucida Grande', Verdana, sans-serif" font-size="14" font-weight="bold" fill="#fff">Зарегистрируйтесь!</text>
+					<text x="149" y="90" text-anchor="middle" font-family="'Lucida Grande', Verdana, sans-serif" font-size="14" font-weight="bold" fill="#fff">{W.signup}</text>
 					<g fill="#c9d6e8"><rect x="20" y="122" width="76" height="62" rx="6" /><rect x="111" y="122" width="76" height="62" rx="6" /><rect x="202" y="122" width="76" height="62" rx="6" /></g>
 					<g fill="#fff" opacity=".5"><rect x="20" y="122" width="76" height="22" rx="6" /><rect x="111" y="122" width="76" height="22" rx="6" /><rect x="202" y="122" width="76" height="22" rx="6" /></g>
 				</g>

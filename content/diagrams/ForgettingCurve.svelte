@@ -2,11 +2,15 @@
 	«Кривая забывания» (part 0). A schematic, not FSRS itself: memory fades as exp(-t/S), where S,
 	the stability, grows each time the person recalls the card. The person moves the interval
 	between reviews and sees the two curves: with reviews and without.
+
+	Bilingual (docs/content-plan/README.md, «English edition»): its words are in `W`, one entry per
+	edition, picked by the page's locale.
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick, pl } from '#lib/i18n/index.ts';
 	const DAYS = 60;
-	const W = 480,
+	const WIDTH = 480,
 		H = 250,
 		L = 46,
 		B = 28,
@@ -15,7 +19,7 @@
 	const intervals = [1, 3, 7, 14, 21, 30];
 	let interval = $state(3);
 
-	const x = (d: number) => L + ((W - L - R) * d) / DAYS;
+	const x = (d: number) => L + ((WIDTH - L - R) * d) / DAYS;
 	const y = (p: number) => T + (H - T - B) * (1 - p);
 
 	// stability in days; a recall at retention r multiplies it (more is gained when more was forgotten)
@@ -41,22 +45,47 @@
 	const without = curve(null);
 	const withReviews = $derived(curve(interval));
 	const pct = (p: number) => Math.round(p * 100);
-	const show = (p: number) => (p < 0.01 ? 'меньше 1%' : pct(p) + '%');
-	const word = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? 'раз' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'раза' : 'раз');
+	const W = pick({
+		ru: {
+			caption: `Одна карточка за ${DAYS} дней`,
+			group: 'Как часто повторять карточку',
+			every: (d: number) => `каждые ${d} ${pl(d, 'day.forms', 'ru')}`,
+			chart: 'График: вероятность вспомнить карточку по дням, с повторениями и без',
+			under: 'меньше 1%',
+			times: (n: number) => (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'раза' : 'раз'),
+			with: (n: number, times: string) => `С повторениями (${n} ${times}) к ${DAYS}-му дню:`,
+			without: 'Без повторений:',
+			after:
+				'Точки на графике: дни, когда вы смотрели карточку. Слишком редко (раз в 30 дней) карточка успевает забыться почти целиком, слишком часто (каждый день) уходит лишний труд. Это схема; реальное расписание считает алгоритм FSRS.'
+		},
+		en: {
+			caption: `One card over ${DAYS} days`,
+			group: 'How often to review the card',
+			every: (d: number) => (d === 1 ? 'every day' : `every ${d} days`),
+			chart: 'Chart: the chance of recalling the card, day by day, with reviews and without',
+			under: 'under 1%',
+			times: (n: number) => (n === 1 ? 'review' : 'reviews'),
+			with: (n: number, times: string) => `With reviews (${n} ${times}), by day ${DAYS}:`,
+			without: 'Without reviews:',
+			after:
+				'The dots on the chart are the days you looked at the card. Too rarely (once in 30 days) and the card is almost entirely forgotten in between; too often (every day) and the effort is wasted. This is a sketch; the real schedule is worked out by the FSRS algorithm.'
+		}
+	});
+	const show = (p: number) => (p < 0.01 ? W.under : pct(p) + '%');
 </script>
 
 <figure class="dg">
-	<figcaption>Одна карточка за {DAYS} дней</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Как часто повторять карточку">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.group}>
 		{#each intervals as d (d)}
 			<button type="button" aria-pressed={interval === d} onclick={() => (interval = d)}>
-				каждые {d} {d === 1 ? 'день' : d < 5 ? 'дня' : 'дней'}
+				{W.every(d)}
 			</button>
 		{/each}
 	</div>
-	<svg viewBox="0 0 {W} {H}" role="img" aria-label="График: вероятность вспомнить карточку по дням, с повторениями и без" width="100%">
+	<svg viewBox="0 0 {WIDTH} {H}" role="img" aria-label={W.chart} width="100%">
 		{#each [0, 0.5, 1] as p (p)}
-			<line x1={L} x2={W - R} y1={y(p)} y2={y(p)} stroke="var(--border-hairline)" />
+			<line x1={L} x2={WIDTH - R} y1={y(p)} y2={y(p)} stroke="var(--border-hairline)" />
 			<text x={L - 6} y={y(p) + 4} text-anchor="end" font-size="13">{pct(p)}%</text>
 		{/each}
 		{#each [0, 15, 30, 45, 60] as d (d)}
@@ -69,8 +98,7 @@
 		{/each}
 	</svg>
 	<p class="dg-out" aria-live="polite">
-		С повторениями ({withReviews.reviews.length} {word(withReviews.reviews.length)}) к {DAYS}-му дню: <strong>{show(withReviews.end)}</strong>. Без повторений:
-		<strong>{show(without.end)}</strong>. Точки на графике: дни, когда вы смотрели карточку. Слишком редко (раз в 30 дней) карточка успевает забыться почти целиком, слишком часто
-		(каждый день) уходит лишний труд. Это схема; реальное расписание считает алгоритм FSRS.
+		{W.with(withReviews.reviews.length, W.times(withReviews.reviews.length))} <strong>{show(withReviews.end)}</strong>. {W.without}
+		<strong>{show(without.end)}</strong>. {W.after}
 	</p>
 </figure>

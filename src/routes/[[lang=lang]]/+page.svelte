@@ -6,11 +6,11 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { t, pl } from '#lib/i18n/index.ts';
+	import { t, pl, getLocale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Prologue, { type Answers } from '#lib/prologue/Prologue.svelte';
 	import Project from '#lib/home/Project.svelte';
-	import persona from '#lib/persona/default.ru.json';
+	import { defaultPersonaFor } from '#lib/persona/defaults.ts';
 	import type { HomeLesson } from '#lib/content/catalogue.ts';
 	import Seo from '#lib/seo/Seo.svelte';
 	import { course, website } from '#lib/seo/jsonld.ts';
@@ -19,6 +19,8 @@
 
 	let { data }: PageProps = $props();
 
+	const lang = getLocale();
+	const persona = defaultPersonaFor(lang);
 	const example: Answers = {
 		who: `${persona.name}, ${persona.people[0].role.split(',')[0]}`,
 		forWhom: persona.forWhom,
@@ -26,7 +28,9 @@
 	};
 
 	let mode = $state<'prologue' | 'home'>('prologue');
-	let next = $state<{ id: string; title: string } | null>(null);
+	let next = $state<{ id: string; title: string; lang?: 'ru' } | null>(null);
+	// «Continue: <title>», with the title in its own language when the edition has not translated it yet.
+	const [continueBefore, continueAfter] = t('home.continue', { title: '\u0000' }).split('\u0000');
 	let doneCount = $state(0);
 	let xp = $state(0);
 	let days = $state(0);
@@ -92,8 +96,8 @@
 	description={t('seo.home.description')}
 	image={{ file: data.seo.og, alt: t('seo.home.alt') }}
 	jsonld={[
-		course({ homeUrl: at.home(), description: t('seo.home.description'), image: at.file(data.seo.og), minutes: data.seo.minutes }),
-		website(at.home(), t('seo.home.description'))
+		course({ homeUrl: at.home(lang), description: t('seo.home.description'), image: at.file(data.seo.og), minutes: data.seo.minutes, lang }),
+		website(at.home(lang), t('seo.home.description'), lang)
 	]}
 />
 
@@ -115,7 +119,7 @@
 					{#if !ready}
 						<span class="primary placeholder" aria-hidden="true">{t('home.start')}</span>
 					{:else if next}
-						<a class="primary" href={links.lesson(next.id)}>{t('home.continue', { title: next.title })}</a>
+						<a class="primary" href={links.lesson(next.id)}>{continueBefore}<span lang={next.lang}>{next.title}</span>{continueAfter}</a>
 					{:else}
 						<span class="done">{t('home.finished')}</span>
 					{/if}

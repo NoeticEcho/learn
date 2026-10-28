@@ -9,7 +9,7 @@
 -->
 <script lang="ts">
 	import type { GuideLines } from '#lib/content/schema.ts';
-	import { t } from '#lib/i18n/index.ts';
+	import { t, date, getLocale, number } from '#lib/i18n/index.ts';
 	import Echo from './Echo.svelte';
 	import { nextLine, type GuideEvent } from './script.ts';
 	import type { ModelConfig, AskContext } from './model.ts';
@@ -33,6 +33,9 @@
 	let answer = $state('');
 	let error = $state('');
 	let busy = $state(false);
+	const lang = getLocale();
+	// Roubles in the Russian edition («0,12»; the ₽ is in the sentence), dollars in the English one.
+	const price = (n: number) => (lang === 'ru' ? number(n) : n < 0.001 ? 'under $0.001' : `$${n}`);
 	let cost = $state<number | null>(null);
 	let costFor = $state('');
 
@@ -44,7 +47,7 @@
 		const ctx = context?.() ?? { lesson: '' };
 		import('./model.ts').then(({ estimateCost, PRICES_DATED }) => {
 			const chars = q.length + ctx.lesson.length + (ctx.code?.length ?? 0) + (sharePersona && persona ? JSON.stringify(persona).length : 0);
-			cost = estimateCost(m.provider, m.model, chars);
+			cost = estimateCost(m.provider, m.model, chars, undefined, lang);
 			costFor = PRICES_DATED;
 		});
 	});
@@ -81,7 +84,7 @@
 				<label class="check"><input type="checkbox" bind:checked={sharePersona} /> {t('guide.ask.persona')}</label>
 			{/if}
 			<p class="meta">
-				{cost === null ? t('guide.ask.cost.unknown') : t('guide.ask.cost', { cost: cost.toLocaleString('ru-RU'), date: costFor.split('-').reverse().join('.') })}
+				{cost === null ? t('guide.ask.cost.unknown') : t('guide.ask.cost', { cost: price(cost), date: date(new Date(`${costFor}T12:00:00`)) })}
 				{t('guide.ask.where', { provider: t(`guide.provider.${model.provider}`) })}
 			</p>
 			<button type="submit" class="secondary" disabled={busy || !question.trim()}>{busy ? t('guide.ask.sending') : t('guide.ask.send')}</button>

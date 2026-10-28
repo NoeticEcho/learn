@@ -7,42 +7,61 @@
  * The full text is the lesson's Markdown with what only a browser can use taken out: the
  * scripts, the live diagrams (Svelte components) and the template blocks. Build-time only.
  */
-import { loadContent } from '#lib/content/load.ts';
+import { loadContent, loadEdition } from '#lib/content/load.ts';
 import type { LessonMeta, Part } from '#lib/content/schema.ts';
-import { t } from '#lib/i18n/index.ts';
-import { LICENCE_URL, SITE_NAME, at } from './site.ts';
+import '#lib/i18n/all.server.ts';
+import { t, type Locale } from '#lib/i18n/index.ts';
+import { LICENCE_URL, SITE_NAMES, at } from './site.ts';
 
-const raw = import.meta.glob<string>('/content/ru/**/*.svx', { query: '?raw', import: 'default', eager: true });
+const raw = {
+	ru: import.meta.glob<string>('/content/ru/**/*.svx', { query: '?raw', import: 'default', eager: true }),
+	en: import.meta.glob<string>('/content/en/**/*.svx', { query: '?raw', import: 'default', eager: true })
+};
 
-const ordered = () => {
-	const { lessons, curriculum } = loadContent();
+/** An edition's parts with the lessons written in it; a part with none is left out. */
+const ordered = (lang: Locale) => {
+	const { lessons, curriculum } = loadEdition(lang);
 	return curriculum.parts
 		.map((part) => ({ part, lessons: lessons.filter((l) => l.part === part.number).sort((a, b) => a.order - b.order) }))
 		.filter((p) => p.lessons.length);
 };
 
-const partHeading = (p: Part) => `${t('map.part', { n: p.number })}. ${p.title}`;
+const partHeading = (p: Part, lang: Locale) => `${t('map.part', { n: p.number }, lang)}. ${p.title}`;
 
-const about = (n: number) =>
-	`Открытый интерактивный учебник веба на русском языке: от первой страницы 1991 года до агентного веба. ${n} уроков в ${loadContent().curriculum.parts.length} частях; каждый урок открывается определением своей темы, затем теория, живая схема, практика на собственном сайте читателя, тест, карточки для повторения и источники. Бесплатно, без регистрации. Тексты уроков: CC BY-SA 4.0 (${LICENCE_URL}).`;
+const about = (n: number, lang: Locale) => {
+	const parts = loadContent().curriculum.parts.length;
+	if (lang === 'ru')
+		return `Открытый интерактивный учебник веба на русском языке: от первой страницы 1991 года до агентного веба. ${n} уроков в ${parts} частях; каждый урок открывается определением своей темы, затем теория, живая схема, практика на собственном сайте читателя, тест, карточки для повторения и источники. Бесплатно, без регистрации. Тексты уроков: CC BY-SA 4.0 (${LICENCE_URL}).`;
+	const all = loadContent().lessons.length;
+	return `An open, interactive textbook of the web in English: from the first web page of 1991 to the agentic web. The English edition is being translated from the Russian one, part by part: ${n} of ${all} lessons in ${parts} parts so far. Each lesson opens with a definition of its topic, then theory, a live diagram, practice on the reader's own site, a test, review cards and sources. Free, no sign-up. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`;
+};
 
-export function llmsTxt(): string {
-	const parts = ordered();
+export function llmsTxt(lang: Locale = 'ru'): string {
+	const parts = ordered(lang);
 	const n = parts.reduce((s, p) => s + p.lessons.length, 0);
 	const out = [
-		`# ${SITE_NAME}`,
+		`# ${SITE_NAMES[lang]}`,
 		'',
-		`> ${about(n)}`,
+		`> ${about(n, lang)}`,
 		'',
-		`Адрес учебника: ${at.home()}. Карта курса со связями уроков: ${at.map()}. Полный текст всех уроков одним файлом: ${at.file('llms-full.txt')}.`,
+		lang === 'ru'
+			? `Адрес учебника: ${at.home()}. Карта курса со связями уроков: ${at.map()}. Полный текст всех уроков одним файлом: ${at.editionFile('llms-full.txt')}. Английское издание: ${at.editionFile('llms.txt', 'en')}.`
+			: `The textbook: ${at.home('en')}. The course map, with how the lessons connect: ${at.map('en')}. The full text of every translated lesson in one file: ${at.editionFile('llms-full.txt', 'en')}. The complete Russian edition: ${at.editionFile('llms.txt')}.`,
 		''
 	];
 	for (const { part, lessons } of parts) {
-		out.push(`## ${partHeading(part)}`, '', part.summary, '');
-		for (const l of lessons) out.push(`- [${l.title}](${at.lesson(l.id)}): ${l.definition}`);
+		out.push(`## ${partHeading(part, lang)}`, '', part.summary, '');
+		for (const l of lessons) out.push(`- [${l.title}](${at.lesson(l.id, lang)}): ${l.definition}`);
 		out.push('');
 	}
-	out.push('## Optional', '', `- [Исходный код и тексты](https://github.com/NoeticEcho/learn): репозиторий учебника`, '');
+	out.push(
+		'## Optional',
+		'',
+		lang === 'ru'
+			? `- [Исходный код и тексты](https://github.com/NoeticEcho/learn): репозиторий учебника`
+			: `- [Source code and texts](https://github.com/NoeticEcho/learn): the textbook's repository`,
+		''
+	);
 	return out.join('\n');
 }
 
@@ -93,12 +112,12 @@ export function lessonMarkdown(source: string): string {
 		.trim();
 }
 
-function lessonFull(l: LessonMeta, part: Part): string {
-	const body = lessonMarkdown(raw[`/content/ru/${l.id}.svx`] ?? '').replace(/^(#{1,5}) /gm, '#$1 ');
+function lessonFull(l: LessonMeta, part: Part, lang: Locale): string {
+	const body = lessonMarkdown(raw[lang][`/content/${lang}/${l.id}.svx`] ?? '').replace(/^(#{1,5}) /gm, '#$1 ');
 	return [
 		`# ${l.title}`,
 		'',
-		`${partHeading(part)}. Урок ${l.order}. ${at.lesson(l.id)}`,
+		`${partHeading(part, lang)}. ${lang === 'ru' ? 'Урок' : 'Lesson'} ${l.order}. ${at.lesson(l.id, lang)}`,
 		'',
 		`> ${l.definition}`,
 		'',
@@ -106,14 +125,14 @@ function lessonFull(l: LessonMeta, part: Part): string {
 		'',
 		body,
 		'',
-		'Источники:',
+		lang === 'ru' ? 'Источники:' : 'Sources:',
 		...l.sources.map((s) => `- [${s.title}](${s.url})`),
 		''
 	].join('\n');
 }
 
-export function llmsFullTxt(): string {
-	const parts = ordered();
+export function llmsFullTxt(lang: Locale = 'ru'): string {
+	const parts = ordered(lang);
 	const n = parts.reduce((s, p) => s + p.lessons.length, 0);
-	return [`# ${SITE_NAME}`, '', `> ${about(n)}`, '', ...parts.flatMap(({ part, lessons }) => lessons.map((l) => lessonFull(l, part)))].join('\n');
+	return [`# ${SITE_NAMES[lang]}`, '', `> ${about(n, lang)}`, '', ...parts.flatMap(({ part, lessons }) => lessons.map((l) => lessonFull(l, part, lang)))].join('\n');
 }

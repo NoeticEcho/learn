@@ -58,7 +58,7 @@
 					<button type="button" class="secondary" onclick={() => save(era)}>{t('gallery.download')}</button>
 				{:else if data.starts[era]}
 					<!-- What to do about an empty era, said once per era and different for each. -->
-					<p class="empty">{t('gallery.starts')} <a href={links.lesson(data.starts[era].id)}>{data.starts[era].title}</a></p>
+					<p class="empty">{t('gallery.starts')} <a href={links.lesson(data.starts[era].id)} lang={data.starts[era].lang}>{data.starts[era].title}</a></p>
 				{:else}
 					<p class="empty">{t('gallery.soon')}</p>
 				{/if}

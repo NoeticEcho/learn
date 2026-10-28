@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru" data-theme="ink">
+<html lang="%learn.lang%" data-theme="ink">
 	<head>
 		<meta charset="utf-8" />
 		<!--
@@ -17,7 +17,12 @@
 		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/icon-192.png" />
 		<script>
-			// Before paint: the theme the person chose, else the system's, else Ink.
+			// Before paint: the theme the person chose, else the system's, else Ink. And a person who
+			// chose English (the header's switch, settings) and opens the Russian home is sent to the
+			// English one; every other address keeps the edition it names.
+			try {
+				if (location.pathname === '%learn.base%/' && localStorage.getItem('learn.lang') === 'en') location.replace('%learn.base%/en/');
+			} catch (e) {}
 			try {
 				var t = localStorage.getItem('learn.theme');
 				var l = matchMedia('(prefers-color-scheme: light)').matches;

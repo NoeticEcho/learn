@@ -8,7 +8,7 @@
 	import { onMount, type Component } from 'svelte';
 	import type { LessonMeta, Part, Question } from '#lib/content/schema.ts';
 	import type { HomeLesson } from '#lib/content/catalogue.ts';
-	import { t, pl, midSentence } from '#lib/i18n/index.ts';
+	import { t, pl, midSentence, getLocale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Quiz from '#lib/quiz/Quiz.svelte';
 	import Guide from '#lib/guide/Guide.svelte';
@@ -25,7 +25,8 @@
 	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null };
 	let { lesson, part, concepts: taught, index, body: Body }: Props = $props();
 
-	const share = $derived({ url: at.lesson(lesson.id), title: lesson.title, text: lessonText(lesson.title, lesson.definition, t('app.title')) });
+	const lang = getLocale();
+	const share = $derived({ url: at.lesson(lesson.id, lang), title: lesson.title, text: lessonText(lesson.title, lesson.definition, t('app.title'), lang) });
 
 	let Practice = $state<Component<any> | null>(null);
 	let persona = $state<Persona | null>(null);
@@ -47,7 +48,7 @@
 		const was = new Set(open(before).map((l) => l.id));
 		return open(new Set([...before, lesson.id])).filter((l) => !was.has(l.id) && l.id !== lesson.id);
 	});
-	const concepts = $derived(taught.map(midSentence));
+	const concepts = $derived(taught.map((c) => midSentence(c)));
 
 	onMount(() => {
 		fetch(links.homeIndex(index))
@@ -154,7 +155,8 @@
 		const first = !(await progress.doneSet(d)).has(lesson.id);
 		await progress.markDone(d, lesson.id, XP.lesson);
 		if (first) await award(d, 'lesson');
-		await srs.enrol(d, lesson.cards);
+		// A card keeps the language it was learnt in, so review can mark it when the editions differ.
+		await srs.enrol(d, lesson.cards.map((c) => ({ ...c, lang })));
 		doneSet = await progress.doneSet(d);
 		done = true;
 		justFinished = true;
@@ -246,7 +248,7 @@
 			{#if opened.length}
 				<p>{t('lesson.next.opens')}</p>
 				<ul class="opens">
-					{#each opened as l (l.id)}<li><a href={links.lesson(l.id)}>{l.title}</a></li>{/each}
+					{#each opened as l (l.id)}<li><a href={links.lesson(l.id)} lang={l.lang}>{l.title}</a></li>{/each}
 				</ul>
 			{:else}
 				{#if course.length}<p class="note">{t('lesson.next.none')}</p>{/if}
