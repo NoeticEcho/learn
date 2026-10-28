@@ -1,0 +1,262 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/01-internet/08-rendering.svx. */
+	export const metadata = {
+		id: '01-internet/08-rendering',
+		part: 1,
+		order: 8,
+		title: 'How a browser draws a page',
+		definition: 'Rendering is a page’s road from bytes to pixels: HTML is parsed into the DOM, CSS into the CSSOM, then come the render tree, layout and painting.',
+		summary:
+			'You’ll see the road from the response’s bytes to pixels, and where the “white screen” and “jumping layout” come from. Afterwards you can name the stages: parsing, the DOM, the CSSOM, layout and painting, and say what slows them down.',
+		minutes: 25,
+		teaches: ['net-rendering-pipeline'],
+		requires: ['net-http-status-headers', 'net-tls'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'DOM|CSSOM|layout|pixels', say: 'Bytes aren’t a page yet: the browser builds the DOM and the CSSOM, works out the layout, and only then paints.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', caption: 'The picture came late', say: 'It had no size, and the text you were reading jumped down.' },
+				{ mood: 'hint', prop: 'browser', say: 'Give a picture a width and a height: the browser leaves room in advance, and nothing jumps.' }
+			]
+		},
+		practice: {
+			id: 'network-notes',
+			title: 'Measure two sites in the Network tab',
+			task: 'Open the very first website (info.cern.ch/hypertext/WWW/TheProject.html) in a new tab, and any modern site of your choice. For each, open the developer tools (F12), the Network tab, reload the page and fill in the table: how many requests there were (a number) and which resource was the heaviest (its name and size). Write the second site’s address in the first cell of its row. In the note, say in one sentence what holds up the first paint on the second site (for example a style sheet or a script), or write “nothing holds it up”. Every “…” has to be replaced.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="render-note">\n      <h2>What the Network tab showed</h2>\n      <table>\n        <tr><th>Site</th><th>Requests</th><th>Heaviest resource</th></tr>\n        <tr class="site"><td>info.cern.ch</td><td class="requests">…</td><td class="heaviest">…</td></tr>\n        <tr class="site"><td class="name">…</td><td class="requests">…</td><td class="heaviest">…</td></tr>\n      </table>\n      <p>What holds up the first paint on the second site: <span id="blocking">…</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="render-note">\n      <h2>What the Network tab showed</h2>\n      <table>\n        <tr><th>Site</th><th>Requests</th><th>Heaviest resource</th></tr>\n        <tr class="site"><td>info.cern.ch</td><td class="requests">1</td><td class="heaviest">the page itself, 1 KB</td></tr>\n        <tr class="site"><td class="name">example.org</td><td class="requests">24</td><td class="heaviest">the main picture, 420 KB</td></tr>\n      </table>\n      <p>What holds up the first paint on the second site: <span id="blocking">a style sheet in the head and a script without defer</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'rows', kind: 'count', selector: '#render-note tr.site', min: 2 },
+				{ id: 'no-blanks', kind: 'text', selector: '#render-note', matches: '^[^…]*$' },
+				{ id: 'requests', kind: 'text', selector: '#render-note td.requests', matches: '^\\s*\\d+\\s*$' },
+				{ id: 'heaviest', kind: 'text', selector: '#render-note td.heaviest', matches: '\\d' },
+				{ id: 'second-site', kind: 'text', selector: '#render-note td.name', matches: '\\S{3,}' },
+				{ id: 'blocking', kind: 'text', selector: '#blocking', matches: '\\S{3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the stages of showing a page in order',
+				items: [
+					'Parsing the HTML and building the tree of elements (the DOM)',
+					'Building the tree of styles (the CSSOM)',
+					'The render tree: what will be visible',
+					'Layout: the size and position of every element',
+					'Painting: filling in the pixels'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each term to what it is',
+				pairs: [
+					['DOM', 'the tree of the page’s elements'],
+					['CSSOM', 'the tree of styling rules'],
+					['Render tree', 'only what will reach the screen'],
+					['Layout', 'working out size and position'],
+					['Painting', 'filling in the pixels']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does the browser paint nothing until the style sheet has arrived?',
+				options: [
+					'So as not to show the page without styling and then abruptly redraw it',
+					'Because styles are the heaviest part of a page',
+					'Because the developer made a mistake'
+				],
+				answer: 0,
+				why: [
+					'Yes. A page without styles would flash up and immediately rearrange itself. That is why CSS blocks painting, and it is kept small.',
+					'No: styles are usually light.',
+					'No: this is deliberate behavior of the browser.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the defer attribute do on a script?',
+				options: [
+					'The script loads in parallel and runs after the page is parsed, without stopping it',
+					'The script is switched off',
+					'The script runs before the page loads'
+				],
+				answer: 0,
+				why: [
+					'Yes. An ordinary script stops the parsing of the page until it has run. With defer, parsing carries on.',
+					'No: the script runs, but later.',
+					'No: on the contrary, after parsing.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can cause a “jumping layout”, where the text shifts as the page loads?',
+				options: [
+					'A picture with no size given',
+					'A font that loaded later and changed the look of the text',
+					'An ad inserted at the top after loading',
+					'A page address that is too short'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: until the picture arrives, the browser doesn’t know how much room to leave, and pushes everything else down.',
+					'Yes: a font with letters of a different width rearranges the lines.',
+					'Yes: an insertion at the top moves everything down.',
+					'No: the address has nothing to do with layout.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put a page’s road in order, from typing the address to the screen',
+				items: ['Finding the server’s address (DNS)', 'Connecting (TCP)', 'Securing the connection (TLS)', 'Request and response (HTTP)', 'Parsing and painting (DOM, CSSOM, layout, paint)']
+			}
+		],
+		cards: [
+			{
+				id: 'net-render-stages',
+				front: 'What stages does a page pass through on its way to the screen?',
+				back: 'Bytes, the DOM (the tree of elements), the CSSOM (the tree of styles), the render tree, layout (size and position), painting (pixels).'
+			},
+			{
+				id: 'net-render-blocking',
+				front: 'What blocks painting and parsing?',
+				back: 'CSS blocks painting (so as not to show bare text). An ordinary script blocks the parsing of the page until it runs. A script with defer doesn’t.'
+			},
+			{
+				id: 'net-render-dom',
+				front: 'What is the DOM?',
+				back: 'The tree of a page’s elements in the browser’s memory. A script can change it, and it is what the Elements tab in the developer tools shows.'
+			},
+			{
+				id: 'net-render-shift',
+				front: 'Where does a “jumping layout” come from?',
+				back: 'From the browser not knowing sizes in advance: pictures without width and height, fonts that load late, ads. Everything else gets shifted.'
+			},
+			{
+				id: 'net-whole-path',
+				front: 'A page’s whole road in one line?',
+				back: 'Address, DNS, TCP, TLS, HTTP request and response, DOM and CSSOM, layout, painting.'
+			}
+		],
+		sources: [
+			{
+				title: 'Populating the page: how browsers work (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/How_browsers_work',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'How browsers work (Tali Garsiel and Paul Irish, web.dev)', url: 'https://web.dev/articles/howbrowserswork', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Inside look at modern web browser, part 3 (Chrome for Developers)', url: 'https://developer.chrome.com/blog/inside-browser-part3', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Critical rendering path (web.dev)', url: 'https://web.dev/articles/critical-rendering-path', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Document Object Model: an introduction (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you know how a page travels the network. What remains is to see how it turns into a picture. And to measure it yourself.',
+			hints: [
+				'Open F12, the Network tab, and reload the page: at the bottom you’ll see the number of requests and the total size.',
+				'To find the heaviest resource, sort the Size column in descending order.',
+				'If you can’t tell what blocks painting, answer honestly: “I didn’t find it” or “nothing holds it up”.'
+			],
+			mistakes: {
+				rows: 'The table should still have two rows with the class site: the first site and yours.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in all the cells and the sentence under the table.',
+				requests: 'The Requests cells should hold a number, for example 24, with no words.',
+				heaviest: 'Describe the heaviest resource together with its size, for example “picture, 420 KB”.',
+				'second-site': 'In the first cell of the second row, write the address of the site you measured.',
+				blocking: 'Say in one sentence what holds up the first paint, or write “nothing holds it up”.'
+			},
+			outro: 'You have been the whole way of a page: from the address to pixels. This is the base of everything that follows: layout, speed, search.'
+		},
+		say: { DOM: 'dom', CSSOM: 'C S S O M', CSS: 'C S S', HTML: 'H T M L', defer: 'defer', UTF: 'U T F', F12: 'F twelve' }
+	};
+</script>
+
+<script>
+	import RenderPipeline from '../../diagrams/RenderPipeline.svelte';
+</script>
+
+## The response has arrived: what next
+
+By now you know how the browser found the server, set up a secure connection and received a response: the code 200 and a body, that is, the bytes of HTML. But bytes aren’t a page yet. The browser still has to turn them into a picture on the screen, and that road is divided into stages too. It is useful to know them, because this is where the “white screen”, when nothing shows for a long time, and the “jumping layout”, when text slides out from under your finger, are born.
+
+The whole chain looks like this:
+
+1. **Bytes into characters.** By the encoding from the `Content-Type` header, the bytes are read as letters.
+2. **Characters into the DOM.** The browser finds the tags and builds from them a tree of elements: the **DOM** (Document Object Model). It does this as data arrives, without waiting for the end of the file.
+3. **CSS into the CSSOM.** When it meets styles, the browser builds a tree from the rules in the same way: the **CSSOM**.
+4. **The render tree.** The DOM and CSSOM are joined into a tree of what will be visible. Elements with the style `display: none` don’t get into it.
+5. **Layout.** For each element the size and place on the page are worked out.
+6. **Painting.** The pixels are filled in, sometimes in layers, and the layers are composited onto the screen.
+
+Experiment on the diagram below: it uses your browser’s real parsers. Change the HTML or CSS and see how the result changes at each stage.
+
+<RenderPipeline />
+
+<details>
+<summary>Check yourself: what is the DOM, and where does it come from?</summary>
+
+The tree of a page’s elements in the browser’s memory. The browser builds it from the HTML as it parses.
+
+</details>
+
+## What stops the pipeline
+
+Not all stages are equally calm. Two important rules:
+
+- **CSS blocks painting.** Until the browser has the styles, it paints nothing, so as not to show bare text and a second later abruptly rearrange it. That is why the styles needed on the first screen are kept small and linked at the very start.
+- **An ordinary script blocks parsing.** When it meets a `<script>`, the browser stops building the DOM, downloads the script, runs it and only then goes on: after all, a script can change the page. To keep it from getting in the way, it is given the attribute `defer` (run after parsing) or `async` (run as soon as it has downloaded).
+
+A white screen often comes from exactly this: a heavy style sheet or script delays the first paint. The lower part of the diagram above shows the order: switch the script type and the way the styles are linked, and see when the first paint happens (the numbers are made up, they show the order, not a measurement).
+
+## The jumping layout
+
+The browser works out layout from what it knows. Until a picture has loaded, it doesn’t know its size and leaves no room. When the picture arrives, everything below it shifts. The same goes for a font that loaded later and turned out wider, and for an ad block inserted at the top. A person reaches for a button, and it slides away.
+
+There is one cure: tell the browser sizes in advance. Pictures have the attributes `width` and `height` for this, and room is reserved for ads and embeds. In the part on quality we’ll see how this is measured, and look at the speed metrics introduced by Google, called Core Web Vitals.
+
+<details>
+<summary>Check yourself: why does a page “jump” as pictures load?</summary>
+
+Until a picture arrives, the browser doesn’t know its size and leaves no room. When it appears, everything else shifts down.
+
+</details>
+
+## Looking for yourself, in the developer tools
+
+The developer tools (F12) have a Network tab. Reload the page with the tab open, and you will see:
+
+- a list of the requests the page made: the page itself, styles, scripts, pictures, fonts;
+- for each, the response code, the type, the size and the time;
+- at the bottom: how many requests, and how much data in all.
+
+That is how you see what exactly makes a page heavy. Sort by size, and the heaviest resources come to the top. For comparison, open the first site in history: it has one request, one page of a kilobyte. Remember the lesson on packets: the 50 kilobyte budget for a modem.
+
+## The whole road in a minute
+
+You have reached the end of the first part. Here is the whole road of a page, which you can now trace:
+
+1. You type the **address** `https://www.example.com/services/`.
+2. **DNS** finds the server’s IP address from the name `www.example.com`.
+3. **TCP** sets up a connection (a three-step handshake), cutting the data into packets.
+4. **TLS** agrees on a key and checks the certificate: the channel is now protected.
+5. **HTTP**: the browser sends the request `GET /services/`, and the server answers with the code `200` and a body.
+6. The browser builds the **DOM** and **CSSOM**, works out the **layout** and **paints** the pixels.
+
+Every step can break, and now you know where to look. The site won’t open at all: DNS or the connection. A security warning: the certificate. A 404 or 500 error: the HTTP response. A white screen or jumps: the rendering stage.
+
+## Practice
+
+You are in the era of 1996, comparing it with today. Open the first site in history in a new tab, and any modern one. For each, look at the Network tab and fill in the table with the number of requests and the heaviest resource. On the second site, find what holds up the first paint: a style sheet at the start of the page, an ordinary script, a big picture.
+
+The practice preview won’t show you the network: the page in it isn’t downloaded over the network, it is filled in whole. That is why you need to open real sites.
+
+## What was wrong with 1996
+
+Pages were then laid out with nested tables, and the browser couldn’t show a table until it had worked out all of its cells: a white screen was normal. Today layout is CSS’s job, and the browser paints a page in parts. In the next part you’ll start writing yourself: HTML, the language a page is built from.

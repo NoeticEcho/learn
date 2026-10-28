@@ -7,8 +7,76 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let phone = $state('+7 000 000-00-00');
+	const W = pick({
+		ru: {
+			phone: '+7 000 000-00-00',
+			host: 'www.example.ru',
+			other: 'www.other-site.ru',
+			guest: 'Анна',
+			path: '/zayavka',
+			who: { bs: 'Браузер → сервер', sb: 'Сервер → браузер', check: 'Браузер проверяет', both: 'Обе стороны' },
+			hello: 'ClientHello: «Хочу говорить с www.example.ru. Умею такие шифры. Вот моя половина общего секрета.»',
+			helloSeen: 'видно: что браузер зашёл на www.example.ru, и список шифров. Содержимое страниц ещё не передано.',
+			serverHello: 'ServerHello: «Выбираю этот шифр. Вот моя половина общего секрета.» Теперь у обеих сторон есть общий секрет, и дальше всё зашифровано.',
+			serverHelloSeen: 'видно: что выбран шифр. Общий секрет подслушать нельзя: по двум половинкам его не восстановить.',
+			certFake: 'Сертификат: «Я www.other-site.ru» (но вы шли на www.example.ru). Подпись, что секретный ключ у меня.',
+			certOk: 'Сертификат: «Я www.example.ru». Подписан удостоверяющим центром. Плюс подпись, что секретный ключ у меня.',
+			certSeen: 'не видно: сертификат уже идёт в зашифрованном виде.',
+			checkFake: 'Имя в сертификате не совпадает с адресом. Браузер останавливается и показывает предупреждение: «Подключение не защищено».',
+			checkOk: 'Проверка: подпись удостоверяющего центра верна, имя совпадает, срок не истёк, центру доверяют. Всё сходится.',
+			unseen: 'не видно.',
+			finished: 'Finished: «Мы оба видели одно и то же рукопожатие.» Начинается обмен данными.',
+			encrypted: 'Зашифрованный запрос с вашими данными.',
+			caption: 'Что видит тот, кто подслушивает',
+			protocol: 'Протокол',
+			fakeCert: 'Сертификат на чужое имя',
+			eavesdropper: 'Подслушивающий:',
+			next: 'Следующий шаг',
+			restart: 'Сначала',
+			plain: 'В HTTP нет рукопожатия: браузер сразу отправляет запрос. Он идёт открытым текстом через Wi-Fi, роутеры и серверы провайдера.',
+			wire: 'Что на проводе у подслушивающего',
+			stopped: 'Соединение остановлено: данные не отправлены.',
+			nothing: 'Пока ничего: данные ещё не отправлены.',
+			readable: 'Читается всё:',
+			readableRest: 'и адрес, и имя, и телефон. Тот, кто сидит на пути, может ещё и изменить ответ, например вставить в страницу рекламу.'
+		},
+		en: {
+			phone: '+44 0000 000000',
+			host: 'www.example.com',
+			other: 'www.other-site.com',
+			guest: 'Anna',
+			path: '/enquiry',
+			who: { bs: 'Browser → server', sb: 'Server → browser', check: 'The browser checks', both: 'Both sides' },
+			hello: 'ClientHello: “I want to talk to www.example.com. I know these ciphers. Here is my half of the shared secret.”',
+			helloSeen: 'visible: that the browser went to www.example.com, and the list of ciphers. No page content has been sent yet.',
+			serverHello: 'ServerHello: “I choose this cipher. Here is my half of the shared secret.” Now both sides have a shared secret, and everything after this is encrypted.',
+			serverHelloSeen: 'visible: that a cipher was chosen. The shared secret can’t be overheard: it can’t be rebuilt from the two halves.',
+			certFake: 'Certificate: “I am www.other-site.com” (but you were going to www.example.com). Plus a signature proving the secret key is mine.',
+			certOk: 'Certificate: “I am www.example.com”. Signed by a certificate authority. Plus a signature proving the secret key is mine.',
+			certSeen: 'not visible: the certificate is already traveling encrypted.',
+			checkFake: 'The name in the certificate doesn’t match the address. The browser stops and shows a warning: “Your connection is not private”.',
+			checkOk: 'The check: the certificate authority’s signature is valid, the name matches, the date hasn’t expired, the authority is trusted. Everything adds up.',
+			unseen: 'not visible.',
+			finished: 'Finished: “We both saw the same handshake.” The exchange of data begins.',
+			encrypted: 'An encrypted request carrying your data.',
+			caption: 'What an eavesdropper sees',
+			protocol: 'Protocol',
+			fakeCert: 'A certificate for another name',
+			eavesdropper: 'Eavesdropper:',
+			next: 'Next step',
+			restart: 'Start over',
+			plain: 'HTTP has no handshake: the browser sends the request at once. It travels as plain text through Wi-Fi, routers and the provider’s servers.',
+			wire: 'What is on the wire for an eavesdropper',
+			stopped: 'The connection was stopped: no data was sent.',
+			nothing: 'Nothing yet: no data has been sent.',
+			readable: 'Everything is readable:',
+			readableRest: 'the address, the name and the phone number. Someone sitting on the path can also change the response, for example by inserting an ad into the page.'
+		}
+	});
+
+	let phone = $state(W.phone);
 	onMount(async () => {
 		try {
 			phone = (await (await import('#lib/learner.ts')).persona()).phone || phone;
@@ -21,7 +89,7 @@
 	let fake = $state(false);
 	let step = $state(0);
 
-	const secret = $derived(`POST /zayavka HTTP/1.1\nHost: www.example.ru\n\nname=Анна&phone=${phone}`);
+	const secret = $derived(`POST ${W.path} HTTP/1.1\nHost: ${W.host}\n\nname=${W.guest}&phone=${phone}`);
 	const noise = (s: string) => {
 		let h = 2166136261;
 		let out = '';
@@ -34,12 +102,12 @@
 
 	type S = { who: string; text: string; seen: string };
 	const handshake = $derived<S[]>([
-		{ who: 'Браузер → сервер', text: 'ClientHello: «Хочу говорить с www.example.ru. Умею такие шифры. Вот моя половина общего секрета.»', seen: 'видно: что браузер зашёл на www.example.ru, и список шифров. Содержимое страниц ещё не передано.' },
-		{ who: 'Сервер → браузер', text: 'ServerHello: «Выбираю этот шифр. Вот моя половина общего секрета.» Теперь у обеих сторон есть общий секрет, и дальше всё зашифровано.', seen: 'видно: что выбран шифр. Общий секрет подслушать нельзя: по двум половинкам его не восстановить.' },
-		{ who: 'Сервер → браузер', text: fake ? 'Сертификат: «Я www.other-site.ru» (но вы шли на www.example.ru). Подпись, что секретный ключ у меня.' : 'Сертификат: «Я www.example.ru». Подписан удостоверяющим центром. Плюс подпись, что секретный ключ у меня.', seen: 'не видно: сертификат уже идёт в зашифрованном виде.' },
-		{ who: 'Браузер проверяет', text: fake ? 'Имя в сертификате не совпадает с адресом. Браузер останавливается и показывает предупреждение: «Подключение не защищено».' : 'Проверка: подпись удостоверяющего центра верна, имя совпадает, срок не истёк, центру доверяют. Всё сходится.', seen: 'не видно.' },
-		{ who: 'Обе стороны', text: 'Finished: «Мы оба видели одно и то же рукопожатие.» Начинается обмен данными.', seen: 'не видно.' },
-		{ who: 'Браузер → сервер', text: 'Зашифрованный запрос с вашими данными.', seen: noise(secret) }
+		{ who: W.who.bs, text: W.hello, seen: W.helloSeen },
+		{ who: W.who.sb, text: W.serverHello, seen: W.serverHelloSeen },
+		{ who: W.who.sb, text: fake ? W.certFake : W.certOk, seen: W.certSeen },
+		{ who: W.who.check, text: fake ? W.checkFake : W.checkOk, seen: W.unseen },
+		{ who: W.who.both, text: W.finished, seen: W.unseen },
+		{ who: W.who.bs, text: W.encrypted, seen: noise(secret) }
 	]);
 	const last = $derived(fake ? 3 : handshake.length - 1);
 	const shown = $derived(handshake.slice(0, Math.min(step, last) + 1));
@@ -52,11 +120,11 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Что видит тот, кто подслушивает</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Протокол">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.protocol}>
 		<button type="button" aria-pressed={!secure} onclick={() => toggle(false)}>HTTP</button>
 		<button type="button" aria-pressed={secure} onclick={() => toggle(true)}>HTTPS (TLS)</button>
-		{#if secure}<label><input type="checkbox" bind:checked={fake} onchange={() => (step = 0)} /> Сертификат на чужое имя</label>{/if}
+		{#if secure}<label><input type="checkbox" bind:checked={fake} onchange={() => (step = 0)} /> {W.fakeCert}</label>{/if}
 	</div>
 
 	{#if secure}
@@ -65,21 +133,21 @@
 				<li class:stop={stopped && i === 3}>
 					<p class="who">{i + 1}. {s.who}</p>
 					<p>{s.text}</p>
-					<p class="eve"><span>Подслушивающий:</span> {s.seen}</p>
+					<p class="eve"><span>{W.eavesdropper}</span> {s.seen}</p>
 				</li>
 			{/each}
 		</ol>
 		<div class="dg-ctl">
-			<button type="button" disabled={step >= last} onclick={() => (step += 1)}>Следующий шаг</button>
-			<button type="button" disabled={step === 0} onclick={() => (step = 0)}>Сначала</button>
+			<button type="button" disabled={step >= last} onclick={() => (step += 1)}>{W.next}</button>
+			<button type="button" disabled={step === 0} onclick={() => (step = 0)}>{W.restart}</button>
 		</div>
 	{:else}
-		<p class="dg-out">В HTTP нет рукопожатия: браузер сразу отправляет запрос. Он идёт открытым текстом через Wi-Fi, роутеры и серверы провайдера.</p>
+		<p class="dg-out">{W.plain}</p>
 	{/if}
 
-	<div class="dh">Что на проводе у подслушивающего</div>
-	<pre class="dg-box dg-mono" aria-live="polite">{#if eavesdrop === null}{secure ? (stopped ? 'Соединение остановлено: данные не отправлены.' : 'Пока ничего: данные ещё не отправлены.') : ''}{:else}{eavesdrop}{/if}</pre>
-	{#if !secure}<p class="dg-out"><strong>Читается всё:</strong> и адрес, и имя, и телефон. Тот, кто сидит на пути, может ещё и изменить ответ, например вставить в страницу рекламу.</p>{/if}
+	<div class="dh">{W.wire}</div>
+	<pre class="dg-box dg-mono" aria-live="polite">{#if eavesdrop === null}{secure ? (stopped ? W.stopped : W.nothing) : ''}{:else}{eavesdrop}{/if}</pre>
+	{#if !secure}<p class="dg-out"><strong>{W.readable}</strong> {W.readableRest}</p>{/if}
 </figure>
 
 <style>

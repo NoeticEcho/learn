@@ -9,23 +9,105 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let html = $state('<h1>Название проекта</h1>\n<p>Описание: кто вы и что делаете.</p>\n<p class="secret">Этот абзац скрыт.</p>');
+	const W = pick({
+		ru: {
+			title: 'Название проекта',
+			desc: 'Описание: кто вы и что делаете.',
+			secret: 'Этот абзац скрыт.',
+			stages: { bytes: 'Байты', dom: 'DOM', cssom: 'CSSOM', render: 'Дерево отрисовки', layout: 'Раскладка', paint: 'Отрисовка' },
+			caption: 'Ваш HTML и CSS по этапам',
+			stage: 'Этап',
+			bytes: 'Сервер присылает не текст, а байты. Вот первые байты вашего HTML в кодировке UTF-8; браузер превращает их обратно в символы:',
+			dom: 'Браузер читает символы, находит теги и строит из них',
+			domB: 'дерево элементов',
+			domC: ', DOM. Вот оно (текст тоже узлы):',
+			cssom1: 'Те же шаги для стилей: из правил CSS строится своё дерево,',
+			cssom2: '. У вас правил:',
+			noRules: 'Правил нет или в CSS ошибка.',
+			render1: 'DOM и CSSOM соединяются в',
+			renderB: 'дерево отрисовки',
+			render2: ': в него попадает только то, что будет видно. Скрытое',
+			render3: 'выпадает.',
+			gone: ' — не попадает: скрыто',
+			layout: 'Для каждого элемента считают размер и место (упрощённо здесь только вид «блок или строчный»). Блок занимает всю строку, строчный идёт внутри текста.',
+			block: 'блок, на всю ширину',
+			inline: 'строчный, по содержимому',
+			paint: 'Наконец, браузер закрашивает пиксели по слоям. Вот ваша страница, отрисованная в безопасной рамке без скриптов:',
+			frame: 'Отрисованная страница',
+			delays: 'Что задерживает первую отрисовку',
+			scriptGroup: 'Скрипт',
+			scriptIn: 'Скрипт в head:',
+			scripts: [['none', 'нет'], ['sync', 'обычный'], ['defer', 'с атрибутом defer']],
+			stylesGroup: 'Стили',
+			stylesIs: 'Стили:',
+			styleOpts: [['inline', 'внутри страницы'], ['link', 'отдельным файлом']],
+			units: 'мс',
+			note: 'Условные числа. Разбор HTML закончится через',
+			syncNote: ' (обычный скрипт остановил разбор на 400 мс)',
+			deferNote: ' (скрипт с defer грузится параллельно и не мешает)',
+			cssNote: '. Стили будут готовы через',
+			linkNote: ' (пока файл не пришёл, браузер ничего не рисует: чтобы не показать страницу без оформления)',
+			first: '. Первая отрисовка:'
+		},
+		en: {
+			title: 'Project title',
+			desc: 'Description: who you are and what you do.',
+			secret: 'This paragraph is hidden.',
+			stages: { bytes: 'Bytes', dom: 'DOM', cssom: 'CSSOM', render: 'Render tree', layout: 'Layout', paint: 'Paint' },
+			caption: 'Your HTML and CSS, stage by stage',
+			stage: 'Stage',
+			bytes: 'The server sends not text but bytes. Here are the first bytes of your HTML in the UTF-8 encoding; the browser turns them back into characters:',
+			dom: 'The browser reads the characters, finds the tags and builds from them a',
+			domB: 'tree of elements',
+			domC: ', the DOM. Here it is (text is nodes too):',
+			cssom1: 'The same steps for styles: from the CSS rules a tree of their own is built, the',
+			cssom2: '. Rules you have:',
+			noRules: 'There are no rules, or the CSS has an error.',
+			render1: 'The DOM and CSSOM are joined into the',
+			renderB: 'render tree',
+			render2: ': only what will be visible gets into it. What is hidden with',
+			render3: 'drops out.',
+			gone: ' — not included: hidden',
+			layout: 'For each element the size and place are worked out (here, in simplified form, only whether it is “block or inline”). A block takes the whole line, and an inline element goes inside the text.',
+			block: 'block, full width',
+			inline: 'inline, by its content',
+			paint: 'Finally the browser fills in the pixels, in layers. Here is your page, painted in a safe frame with no scripts:',
+			frame: 'The painted page',
+			delays: 'What delays the first paint',
+			scriptGroup: 'Script',
+			scriptIn: 'A script in the head:',
+			scripts: [['none', 'none'], ['sync', 'ordinary'], ['defer', 'with the defer attribute']],
+			stylesGroup: 'Styles',
+			stylesIs: 'Styles:',
+			styleOpts: [['inline', 'inside the page'], ['link', 'in a separate file']],
+			units: 'ms',
+			note: 'Made-up numbers. HTML parsing will finish after',
+			syncNote: ' (an ordinary script stopped parsing for 400 ms)',
+			deferNote: ' (a script with defer loads in parallel and doesn’t get in the way)',
+			cssNote: '. The styles will be ready after',
+			linkNote: ' (until the file arrives, the browser paints nothing, so as not to show the page unstyled)',
+			first: '. First paint:'
+		}
+	});
+
+	let html = $state(`<h1>${W.title}</h1>\n<p>${W.desc}</p>\n<p class="secret">${W.secret}</p>`);
 	let css = $state('h1 { color: #8a3b12; }\n.secret { display: none; }');
 	let ready = $state(false);
 	onMount(async () => {
 		ready = true;
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
-			html = `<h1>${esc(p.title)}</h1>\n<p>${esc(p.who)}</p>\n<p class="secret">Этот абзац скрыт.</p>`;
+			html = `<h1>${esc(p.title)}</h1>\n<p>${esc(p.who)}</p>\n<p class="secret">${W.secret}</p>`;
 		} catch {
 			/* the example stays */
 		}
 	});
 	const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-	const stages = ['Байты', 'DOM', 'CSSOM', 'Дерево отрисовки', 'Раскладка', 'Отрисовка'] as const;
-	let stage = $state<(typeof stages)[number]>('DOM');
+	const stages = ['bytes', 'dom', 'cssom', 'render', 'layout', 'paint'] as const;
+	let stage = $state<(typeof stages)[number]>('dom');
 
 	const bytes = $derived.by(() => {
 		const b = new TextEncoder().encode(html).slice(0, 18);
@@ -99,53 +181,53 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Ваш HTML и CSS по этапам</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="ed">
 		<label>HTML<textarea bind:value={html} rows="5" spellcheck="false"></textarea></label>
 		<label>CSS<textarea bind:value={css} rows="5" spellcheck="false"></textarea></label>
 	</div>
-	<div class="dg-ctl" role="tablist" aria-label="Этап">
+	<div class="dg-ctl" role="tablist" aria-label={W.stage}>
 		{#each stages as s, i (s)}
-			<button type="button" role="tab" aria-selected={stage === s} onclick={() => (stage = s)}>{i + 1}. {s}</button>
+			<button type="button" role="tab" aria-selected={stage === s} onclick={() => (stage = s)}>{i + 1}. {W.stages[s]}</button>
 		{/each}
 	</div>
 	<div class="out" role="tabpanel" aria-live="polite">
-		{#if stage === 'Байты'}
-			<p>Сервер присылает не текст, а байты. Вот первые байты вашего HTML в кодировке UTF-8; браузер превращает их обратно в символы:</p>
+		{#if stage === 'bytes'}
+			<p>{W.bytes}</p>
 			<pre class="dg-box dg-mono">{bytes} …</pre>
-		{:else if stage === 'DOM'}
-			<p>Браузер читает символы, находит теги и строит из них <strong>дерево элементов</strong>, DOM. Вот оно (текст тоже узлы):</p>
+		{:else if stage === 'dom'}
+			<p>{W.dom} <strong>{W.domB}</strong>{W.domC}</p>
 			<ul class="tree dg-mono">{#each dom as r, i (i)}<li style="padding-left:{r.depth * 1.2}rem">{r.text}</li>{/each}</ul>
-		{:else if stage === 'CSSOM'}
-			<p>Те же шаги для стилей: из правил CSS строится своё дерево, <strong>CSSOM</strong>. У вас правил: {rules.length}.</p>
-			<ul class="tree dg-mono">{#each rules as r (r.sel)}<li>{r.sel} {'{'} {r.body} {'}'}</li>{:else}<li>Правил нет или в CSS ошибка.</li>{/each}</ul>
-		{:else if stage === 'Дерево отрисовки'}
-			<p>DOM и CSSOM соединяются в <strong>дерево отрисовки</strong>: в него попадает только то, что будет видно. Скрытое <code>display: none</code> выпадает.</p>
-			<ul class="tree dg-mono">{#each tree as r, i (i)}<li class:gone={r.gone} style="padding-left:{r.depth * 1.2}rem">{r.text}{r.gone ? ' — не попадает: скрыто' : ''}</li>{/each}</ul>
-		{:else if stage === 'Раскладка'}
-			<p>Для каждого элемента считают размер и место (упрощённо здесь только вид «блок или строчный»). Блок занимает всю строку, строчный идёт внутри текста.</p>
-			<ul class="tree dg-mono">{#each tree.filter((r) => r.el && !r.gone) as r, i (i)}<li style="padding-left:{r.depth * 1.2}rem">{r.text} — {BLOCK.has(r.el!.tagName.toLowerCase()) ? 'блок, на всю ширину' : 'строчный, по содержимому'}</li>{/each}</ul>
+		{:else if stage === 'cssom'}
+			<p>{W.cssom1} <strong>CSSOM</strong>{W.cssom2} {rules.length}.</p>
+			<ul class="tree dg-mono">{#each rules as r (r.sel)}<li>{r.sel} {'{'} {r.body} {'}'}</li>{:else}<li>{W.noRules}</li>{/each}</ul>
+		{:else if stage === 'render'}
+			<p>{W.render1} <strong>{W.renderB}</strong>{W.render2} <code>display: none</code> {W.render3}</p>
+			<ul class="tree dg-mono">{#each tree as r, i (i)}<li class:gone={r.gone} style="padding-left:{r.depth * 1.2}rem">{r.text}{r.gone ? W.gone : ''}</li>{/each}</ul>
+		{:else if stage === 'layout'}
+			<p>{W.layout}</p>
+			<ul class="tree dg-mono">{#each tree.filter((r) => r.el && !r.gone) as r, i (i)}<li style="padding-left:{r.depth * 1.2}rem">{r.text} — {BLOCK.has(r.el!.tagName.toLowerCase()) ? W.block : W.inline}</li>{/each}</ul>
 		{:else}
-			<p>Наконец, браузер закрашивает пиксели по слоям. Вот ваша страница, отрисованная в безопасной рамке без скриптов:</p>
-			<iframe title="Отрисованная страница" sandbox="" {srcdoc}></iframe>
+			<p>{W.paint}</p>
+			<iframe title={W.frame} sandbox="" {srcdoc}></iframe>
 		{/if}
 	</div>
 
-	<div class="dh">Что задерживает первую отрисовку</div>
-	<div class="dg-ctl" role="group" aria-label="Скрипт">
-		<span>Скрипт в head:</span>
-		{#each [['none', 'нет'], ['sync', 'обычный'], ['defer', 'с атрибутом defer']] as [v, l] (v)}
+	<div class="dh">{W.delays}</div>
+	<div class="dg-ctl" role="group" aria-label={W.scriptGroup}>
+		<span>{W.scriptIn}</span>
+		{#each W.scripts as [v, l] (v)}
 			<button type="button" aria-pressed={script === v} onclick={() => (script = v as typeof script)}>{l}</button>
 		{/each}
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Стили">
-		<span>Стили:</span>
-		{#each [['inline', 'внутри страницы'], ['link', 'отдельным файлом']] as [v, l] (v)}
+	<div class="dg-ctl" role="group" aria-label={W.stylesGroup}>
+		<span>{W.stylesIs}</span>
+		{#each W.styleOpts as [v, l] (v)}
 			<button type="button" aria-pressed={styles === v} onclick={() => (styles = v as typeof styles)}>{l}</button>
 		{/each}
 	</div>
 	<p class="dg-out" aria-live="polite">
-		Условные числа. Разбор HTML закончится через <strong>{t.parseEnd} мс</strong>{script === 'sync' ? ' (обычный скрипт остановил разбор на 400 мс)' : script === 'defer' ? ' (скрипт с defer грузится параллельно и не мешает)' : ''}. Стили будут готовы через <strong>{t.cssReady} мс</strong>{styles === 'link' ? ' (пока файл не пришёл, браузер ничего не рисует: чтобы не показать страницу без оформления)' : ''}. Первая отрисовка: <strong>{t.paint} мс</strong>.
+		{W.note} <strong>{t.parseEnd} {W.units}</strong>{script === 'sync' ? W.syncNote : script === 'defer' ? W.deferNote : ''}{W.cssNote} <strong>{t.cssReady} {W.units}</strong>{styles === 'link' ? W.linkNote : ''}{W.first} <strong>{t.paint} {W.units}</strong>.
 	</p>
 </figure>
 

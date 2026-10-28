@@ -1,0 +1,269 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/01-internet/07-https-tls.svx. */
+	export const metadata = {
+		id: '01-internet/07-https-tls',
+		part: 1,
+		order: 7,
+		title: 'HTTPS and TLS: encryption and trust',
+		definition: 'HTTPS is HTTP inside a TLS channel, which encrypts the data, protects it from tampering and checks the server against a certificate authority’s certificate.',
+		summary:
+			'You’ll see what the padlock in the address bar means, and why browsers frighten visitors without it. Afterwards you can explain the TLS handshake, the role of a certificate and of a certificate authority.',
+		minutes: 20,
+		teaches: ['net-tls', 'net-certificates'],
+		requires: ['net-http-request-response'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'postcard', label: 'password: qwerty', caption: 'HTTP', say: 'HTTP is like a postcard: everyone it passes through can read it on the way. Even the owner of the café’s Wi-Fi.' },
+				{ mood: 'explain', side: 'right', prop: 'lock', caption: 'The handshake', say: 'A key is agreed in front of everyone: each mixes a secret into a shared paint, and only the two know the result.' },
+				{ mood: 'cheer', prop: 'certificate', label: 'example.com', caption: 'HTTPS', say: 'And a certificate signed by a certificate authority proves you are talking to example.com itself.' }
+			]
+		},
+		practice: {
+			id: 'form-and-certificate',
+			title: 'An enquiry form over HTTPS',
+			task: 'In 2010 sites began to accept data from visitors, and now the privacy of that data depends on you. Fix the form: make it send data to a secure address (https instead of http), and give every field a visible caption, a label element (right now the fields are labeled only for screen readers, and a sighted person just sees a word beside them). And in the note about the certificate, write how you will get it (a free automatic certificate, or one from your host) and for how many days it is issued. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <h2>Send an enquiry</h2>\n    <form id="request" action="http://example.com/enquiry" method="post">\n      <p>Name: <input type="text" name="name" aria-label="Name"></p>\n      <p>Phone: <input type="tel" name="phone" aria-label="Phone"></p>\n      <p><button type="submit">{{mainAction.label}}</button></p>\n    </form>\n\n    <aside class="note" data-scaffold id="tls-note">\n      <h2>The certificate</h2>\n      <p id="cert">I’ll get: <span class="how">…</span>. Valid for: <span class="days">…</span> days.</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <h2>Send an enquiry</h2>\n    <form id="request" action="https://example.com/enquiry" method="post">\n      <p><label>Name <input type="text" name="name"></label></p>\n      <p><label>Phone <input type="tel" name="phone"></label></p>\n      <p><button type="submit">{{mainAction.label}}</button></p>\n    </form>\n\n    <aside class="note" data-scaffold id="tls-note">\n      <h2>The certificate</h2>\n      <p id="cert">I’ll get: <span class="how">a free automatic Let’s Encrypt certificate</span>. Valid for: <span class="days">90</span> days.</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'https-action', kind: 'attr', selector: '#request', name: 'action', matches: '^https://' },
+				{ id: 'labels', kind: 'count', selector: '#request label', min: 2 },
+				{ id: 'labelled', kind: 'label' },
+				{ id: 'no-blanks', kind: 'text', selector: '#tls-note', matches: '^[^…]*$' },
+				{ id: 'cert-how', kind: 'text', selector: '#cert .how', matches: '([Aa]utomat|[Hh]ost|Let|ACME|Certbot|[Pp]aid)' },
+				{ id: 'cert-days', kind: 'text', selector: '#cert .days', matches: '^\\s*\\d{1,3}\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the steps of the TLS handshake in order',
+				items: [
+					'The browser says ClientHello: what it can do, and its half of the secret',
+					'The server replies ServerHello: the chosen cipher and its half of the secret',
+					'The server sends its certificate',
+					'The browser checks the certificate',
+					'Both sides confirm the handshake and start encrypting data'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does the browser check in a certificate?',
+				options: [
+					'That the certificate authority’s signature is valid and the authority is trusted',
+					'That the name in the certificate matches the site’s address',
+					'That the date hasn’t expired',
+					'That the site’s content is honest and safe'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the chain of signatures must lead to an authority the browser trusts.',
+					'Yes: a certificate for another name won’t do.',
+					'Yes: an expired certificate counts as invalid.',
+					'No: a certificate doesn’t confirm that. It vouches for the owner of the domain, not for the site’s good faith.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A fraudulent site shows the HTTPS padlock. What does that mean?',
+				options: [
+					'The connection to it is encrypted, but the site itself may still be fraudulent',
+					'The site has been checked and is safe',
+					'The padlock is fake'
+				],
+				answer: 0,
+				why: [
+					'Yes. The padlock says the channel is protected and you are talking to the owner of the domain. What kind of person that owner is, the padlock doesn’t say. Free certificates are issued to fraudsters too.',
+					'No: the padlock is not a check of honesty.',
+					'No: the padlock is real, but it means less than it seems.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each threat to how HTTPS protects against it',
+				pairs: [
+					['Eavesdropping (reading a password over Wi-Fi)', 'encryption: the eavesdropper sees noise'],
+					['Tampering (inserting ads into a page)', 'integrity: a change to the data will be detected'],
+					['Impersonation (someone else’s server under your name)', 'the certificate: the server proves it owns the domain']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does a certificate authority (for example Let’s Encrypt) do?',
+				options: [
+					'Checks that the applicant controls the domain, and signs a certificate',
+					'Stores your site',
+					'Makes sure the site has no viruses'
+				],
+				answer: 0,
+				why: [
+					'Yes. First the authority asks you to prove control of the domain (for example by putting a file on the site or a record in DNS), then it signs the certificate.',
+					'No: the site is stored by hosting.',
+					'No: an authority doesn’t check a site’s content.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Make a form that sends data to https://example.com/enquiry by the post method, with one field labeled “Name”.',
+				starter: '',
+				checks: [
+					{ id: 'form-https', kind: 'attr', selector: 'form', name: 'action', matches: '^https://example\\.com/enquiry' },
+					{ id: 'form-field', kind: 'exists', selector: 'form input' },
+					{ id: 'form-label', kind: 'label' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'net-https-what',
+				front: 'What does HTTPS give you?',
+				back: 'HTTP inside TLS: encryption (it can’t be overheard), integrity (it can’t be changed unnoticed) and a check of the server (it is the domain’s owner).'
+			},
+			{
+				id: 'net-tls-handshake',
+				front: 'How does the TLS handshake work?',
+				back: 'The browser and the server exchange “halves” of a secret and work out a shared key, the server sends a certificate, and the browser checks it. After that the data is encrypted with the shared key.'
+			},
+			{
+				id: 'net-certificate',
+				front: 'What is in a site’s certificate?',
+				back: 'The site’s name, its public key, the expiry date and the signature of a certificate authority.'
+			},
+			{
+				id: 'net-ca',
+				front: 'Whose certificates does a browser trust?',
+				back: 'Those of the certificate authorities on its own list (or the system’s list). A certificate must be signed by an authority on the list, directly or through a chain.'
+			},
+			{
+				id: 'net-lock',
+				front: 'What does the padlock really mean?',
+				back: 'The channel is protected, and you are talking to the owner of the domain. The padlock doesn’t guarantee that the owner is honest.'
+			}
+		],
+		sources: [
+			{ title: 'Transport Layer Security (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'The Illustrated TLS 1.3 Connection', url: 'https://tls13.xargs.org/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'How It Works (Let’s Encrypt)', url: 'https://letsencrypt.org/how-it-works/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Certificate Lifetime Rationale and Plans (Let’s Encrypt)', url: 'https://letsencrypt.org/docs/cert-lifetimes/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Why HTTPS matters (web.dev)', url: 'https://web.dev/articles/why-https-matters', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'HTTPS (Wikipedia)', url: 'https://en.wikipedia.org/wiki/HTTPS', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'The Internet: Encryption & Public Keys (Code.org, “How the internet works”, 5 of 5)', url: 'https://www.youtube.com/watch?v=ZghMPWGXexs', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now your site has a form, which means a visitor trusts you with their details. Let’s protect them.',
+			hints: [
+				'In the address the form sends to, replace http:// with https://: it is enough to change the beginning.',
+				'A field’s caption is made by putting the caption and the input together inside one label element.',
+				'In the note about the certificate, write how you will get it, for example “a free automatic certificate”, and the number of days: for example 90.'
+			],
+			mistakes: {
+				'https-action': 'The form still sends data over http. Change the address in action to https.',
+				labels: 'There are still fewer than two visible label captions. Wrap each field in a <label>, so the caption and the field are together.',
+				labelled: 'Some form field has no caption. Every field must have one.',
+				'no-blanks': 'There is still an ellipsis “…” in the note about the certificate. Replace it.',
+				'cert-how': 'Write how you will get the certificate: for example “free automatic” or “from my host”.',
+				'cert-days': 'A certificate’s validity is written as a number of days, for example 90.'
+			},
+			outro: 'Now a visitor’s data is protected on the way, and every field has a caption. One last step of the part remains: how the browser turns all this into a page.'
+		},
+		say: { HTTPS: 'H T T P S', TLS: 'T L S', SSL: 'S S L', HTTP: 'H T T P', ClientHello: 'client hello', ServerHello: 'server hello', Finished: 'finished', 'Let’s Encrypt': 'lets encrypt', ACME: 'acme', 'Wi-Fi': 'why fy', DNS: 'D N S' }
+	};
+</script>
+
+<script>
+	import TlsHandshake from '../../diagrams/TlsHandshake.svelte';
+</script>
+
+## A postcard and a sealed letter
+
+Plain HTTP is like a postcard: everyone who touches it on the way can read it. That includes the owner of the café’s Wi-Fi, the provider, any station in between. While a site is being read for the news, that is tolerable. But as soon as there is a form asking for a phone number or a password, the postcard becomes dangerous. What’s more, whoever sits on the path can do more than read: they can change things, inserting ads into someone else’s page or slipping a virus into a downloaded file.
+
+**HTTPS** is the same HTTP, but inside a protected channel built by the **TLS** protocol (Transport Layer Security; its former name, SSL, is still heard in conversation). It gives three things:
+
+1. **Encryption**: an eavesdropper sees noise.
+2. **Integrity**: if someone changes the data on the way, it will be detected.
+3. **Checking the server**: you are talking to the owner of the domain, not a fake.
+
+That is why browsers mark HTTP sites as “Not secure”, and a number of features (location, the camera, offline mode) are allowed only on HTTPS. Search engines also count HTTPS as a plus.
+
+<details>
+<summary>Check yourself: what does HTTPS give you besides encryption?</summary>
+
+Integrity (a change to the data on the way won’t go unnoticed) and a check of the server (you are talking to the owner of the domain).
+
+</details>
+
+## How to agree on a secret in front of everyone
+
+Here is a paradox. To encrypt a conversation, both sides need a shared secret key. But how do you agree on one if someone is listening in? The answer was devised by mathematicians in the 1970s, and it is easy to explain with paints.
+
+Suppose we have a tub of yellow paint that everyone knows about. You secretly choose your own paint and mix it with the yellow, and the server does the same with its own. You exchange the resulting mixtures openly. Now each of you adds **your own** secret paint to the other’s mixture, and you both end up with the same color. An eavesdropper sees the yellow tub and two mixtures. They can’t subtract a paint from a mixture.
+
+In the real protocol numbers stand in for paints, but the principle is the same. From the shared secret both sides derive keys, and then encrypt data with a fast cipher.
+
+## The TLS handshake
+
+The whole exchange fits into a few messages. Press “Next step” and watch what the eavesdropper sees. Turn on “A certificate for another name” and see what happens at the check.
+
+<TlsHandshake />
+
+The main thing you’ll see on the diagram: after the second step everything is encrypted, so the certificate and the data itself are no longer visible to an eavesdropper. The whole handshake takes one round trip (older versions of TLS needed two), and the HTTP request itself rides on top of it.
+
+<details>
+<summary>Check yourself: what does an eavesdropper see when data is already traveling over HTTPS?</summary>
+
+Noise: a set of bytes from which nothing can be read without the key. All that is visible is which server the connection goes to.
+
+</details>
+
+## The certificate
+
+Encryption doesn’t answer the question “am I talking to the right one?”. For that there is a **certificate**: an electronic document, like a site’s ID card. It records:
+
+- the name (or names) it was issued for;
+- the site’s **public key** (every site has a pair of keys, public and secret);
+- the validity period;
+- the signature of whoever issued it.
+
+Certificates are issued by a **certificate authority** (CA). Every browser and system has a list of authorities it trusts. A certificate counts as genuine if it is signed by such an authority, directly or through a chain (“the root authority signed an intermediate one, and that signed the site’s certificate”). The browser checks four things: the signature, the name, the date, and that the certificate hasn’t been revoked. Every certificate issued is also recorded in open logs, where anyone can see who got a certificate for which name.
+
+What a certificate confirms: **that you are talking to whoever controls the domain**. What it doesn’t confirm: that the owner of the domain is honest. A certificate for a fraudulent site’s domain is as easy to get as one for yours: the authority checks only control of the domain. So the padlock in the address bar means “the channel is protected”, not “the site is safe”. It is useful to know this difference, and we’ll come back to it in the parts on security and the law.
+
+<details>
+<summary>Check yourself: what does a certificate confirm, and what doesn’t it?</summary>
+
+It confirms that you are talking to the owner of the domain. It doesn’t confirm that the owner is honest or that the site is safe.
+
+</details>
+
+## How to get a certificate
+
+Certificates used to cost money and be ordered by hand. Today there is a free way. The authority Let’s Encrypt issues certificates automatically: a special program on the server proves to the authority that it controls the domain (it puts a particular file on the site, or a particular TXT record in DNS, which you know from the DNS lesson), gets the certificate and renews it.
+
+There are three ways:
+
+- **Your host does it all.** In most hosts’ control panels a certificate is turned on with one button. For a beginner this is the best way.
+- **Automatically on your own server**, with a program such as Certbot.
+- **A paid certificate** from an authority: needed in special cases, more often by corporations.
+
+A certificate’s validity is limited, and it is being shortened step by step so that a stolen certificate is dangerous only briefly. Today at Let’s Encrypt it is 90 days. The authority has announced that from 10 February 2027 the default will be 64 days, and from 16 February 2028 it will be 45 days. The shorter the term, the more important it is that renewal is automatic: nobody can keep up with that rhythm by hand.
+
+Two more things worth knowing. The page and everything in it (pictures, scripts) must be served over HTTPS: one picture over HTTP leaves the protection incomplete, and the browser complains about “mixed content”. And old `http://` addresses should be redirected to `https://` with a 301, as in the HTTP lesson.
+
+## Practice
+
+You are in the era of 2010, and the site begins to accept data. Under the heading is an enquiry form. It has two mistakes: it sends data over `http`, and the fields have no captions, so a screen reader won’t tell a person what to type in each field. Fix both. Then complete the note about the certificate: how you will get it and for how many days.
+
+The form’s button is labeled with your main action from the brief: it is for that that a visitor leaves their details.
+
+## What was wrong with 2010
+
+HTTPS was then used by banks and shops, and everyone else thought it unnecessary and costly. In 2013 mass surveillance of traffic came to light, and in 2015 and 2016 Let’s Encrypt made certificates free and automatic. Today a site without HTTPS is considered faulty, and browsers warn about it themselves.
