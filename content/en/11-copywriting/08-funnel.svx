@@ -1,0 +1,356 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/11-copywriting/08-funnel.svx. */
+	export const metadata = {
+		id: '11-copywriting/08-funnel',
+		part: 11,
+		order: 8,
+		title: 'The funnel, See–Think–Do–Care and RACE',
+		definition: 'A funnel models the path to a purchase on which fewer people remain: top (TOFU), middle (MOFU), bottom (BOFU). See–Think–Do–Care and RACE cut it differently.',
+		summary:
+			'You’ll lay out a visitor’s path in stages with three vocabularies (TOFU, MOFU and BOFU; See–Think–Do–Care; RACE) and see at which stage your project is empty. Afterwards every page of your project is assigned to a stage, and for the empty stages there is a list of the materials that are missing.',
+		minutes: 25,
+		teaches: ['copy-funnel', 'copy-see-think-do-care', 'copy-race'],
+		requires: ['copy-journey-map'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'top|middle|bottom', caption: 'The funnel', say: 'The further along the path, the fewer the people. The top needs teaching material, the bottom needs prices and terms.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'prices', say: 'People don’t climb steps. Someone who finds the price page in search is already at the bottom, skipping the top.' },
+				{ mood: 'hint', prop: 'sheet', label: 'numbers?', say: 'A neat diagram doesn’t mean you know the numbers. Until a counter is connected, the figures in a funnel are guesses.' }
+			]
+		},
+		practice: {
+			id: 'funnel-stages',
+			title: 'The project’s pages by funnel stage',
+			task: 'Lay out the project’s pages by stage. In the table, for each section of the brief write the funnel stage (TOFU, MOFU or BOFU), the See–Think–Do–Care stage (See, Think, Do or Care) and one phrase: what the person decides on this page. Then, in the list “What is missing”, name three materials that don’t exist, for the empty stages: each has a funnel stage, an STDC stage and a title (at least three words). In the end, all the stages must appear in your notes: TOFU, MOFU, BOFU and See, Think, Do, Care. And write on which page the person takes the main action (naming it in the same words as the brief). Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="pages">
+      <h2>The project’s pages and materials by stage</h2>
+      <table id="stages">
+        <tr><th>Page or section</th><th>Funnel stage</th><th>STDC stage</th><th>What the person decides here</th></tr>
+        {{#each sections}}<tr class="page">
+          <td class="page-name">{{.}}</td>
+          <td class="funnel">…</td>
+          <td class="stdc">…</td>
+          <td class="why">…</td>
+        </tr>
+        {{/each}}
+      </table>
+
+      <h3>What is missing</h3>
+      <ul id="missing">
+        <li class="missing"><span class="m-funnel">…</span>, <span class="m-stdc">…</span>: <span class="m-title">…</span></li>
+        <li class="missing"><span class="m-funnel">…</span>, <span class="m-stdc">…</span>: <span class="m-title">…</span></li>
+        <li class="missing"><span class="m-funnel">…</span>, <span class="m-stdc">…</span>: <span class="m-title">…</span></li>
+      </ul>
+      <p>The page where the person takes the main action: <span id="cta-page">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="pages">
+      <h2>The project’s pages and materials by stage</h2>
+      <table id="stages">
+        <tr><th>Page or section</th><th>Funnel stage</th><th>STDC stage</th><th>What the person decides here</th></tr>
+        {{#each sections}}<tr class="page">
+          <td class="page-name">{{.}}</td>
+          <td class="funnel">MOFU</td>
+          <td class="stdc">Think</td>
+          <td class="why">decides whether the project suits them</td>
+        </tr>
+        {{/each}}
+      </table>
+
+      <h3>What is missing</h3>
+      <ul id="missing">
+        <li class="missing"><span class="m-funnel">TOFU</span>, <span class="m-stdc">See</span>: <span class="m-title">an article on how to check your own situation</span></li>
+        <li class="missing"><span class="m-funnel">BOFU</span>, <span class="m-stdc">Do</span>: <span class="m-title">a page with prices, times and booking</span></li>
+        <li class="missing"><span class="m-funnel">BOFU</span>, <span class="m-stdc">Care</span>: <span class="m-title">an email to the customer after the work is done</span></li>
+      </ul>
+      <p>The page where the person takes the main action: <span id="cta-page">Contact: {{mainAction.label}}</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#pages', matches: '^[^…]*$' },
+				{ id: 'page-rows', kind: 'count', selector: '#stages tr.page', min: { brief: 'sections' } },
+				{ id: 'why', kind: 'text', selector: '#stages .why', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'all-funnel', kind: 'text', selector: '#pages', matches: '^(?=[\\s\\S]*TOFU)(?=[\\s\\S]*MOFU)(?=[\\s\\S]*BOFU)[\\s\\S]*\\S' },
+				{
+					id: 'all-stdc',
+					kind: 'text',
+					selector: '#pages',
+					matches: '^(?=[\\s\\S]*(?<![A-Za-z])See(?![A-Za-z]))(?=[\\s\\S]*(?<![A-Za-z])Think(?![A-Za-z]))(?=[\\s\\S]*(?<![A-Za-z])Do(?![A-Za-z]))(?=[\\s\\S]*(?<![A-Za-z])Care(?![A-Za-z]))[\\s\\S]*\\S'
+				},
+				{ id: 'missing', kind: 'count', selector: '#missing .missing', min: 3 },
+				{ id: 'missing-title', kind: 'text', selector: '#missing .m-title', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'cta-page', kind: 'field', selector: '#cta-page', field: 'mainAction.label' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each funnel stage with what the person does',
+				pairs: [
+					['TOFU, the top of the funnel', 'Learns of the problem and looks for general information'],
+					['MOFU, the middle', 'Compares the options and judges whom to trust'],
+					['BOFU, the bottom', 'Decides and makes a request or buys']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the main idea of Avinash Kaushik’s See–Think–Do–Care?',
+				options: [
+					'To divide the audience by the person’s intent, not by what content or channel you have',
+					'To divide the audience by age',
+					'To sell first and think later'
+				],
+				answer: 0,
+				why: [
+					'Yes. Kaushik (2013) insists: See is everyone who might potentially be interested in you, Think those who have an interest, Do those who intend to buy, Care those who are already customers. Each stage has its own goal and its own metric.',
+					'No: age has nothing to do with it, intent divides them.',
+					'No: the scheme is about what a person needs at each stage, not about the order of your actions.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What do the letters RACE stand for (Dave Chaffey, 2010)?',
+				options: [
+					'Reach, Act, Convert, Engage: reach, action, turning into customers, staying in touch after the purchase',
+					'Research, Analyze, Create, Execute',
+					'Rate, Approve, Compare, Enter'
+				],
+				answer: 0,
+				why: [
+					'Yes. RACE is a planning scheme for digital marketing: each stage has its own goals and metrics.',
+					'No: that is an invented expansion.',
+					'No: that is an invented expansion too.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What in a funnel is misleading?',
+				options: [
+					'The assumption that people go strictly from top to bottom',
+					'Forgetting about customers after the purchase',
+					'Showing the place where the most people are lost',
+					'The feeling that one funnel suits all segments'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: in fact people come back, skip steps, leave and return.',
+					'Yes: the funnel ends at the purchase, but the customer remains. That is why STDC and RACE have Care and Engage.',
+					'No: that is exactly the funnel’s strength: it shows where to look for the problem.',
+					'Yes: each segment has its own path and its own stages.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In a funnel, most people are lost between the second and third steps. What do you do?',
+				options: [
+					'Find out what the person saw before leaving and what they were missing, and fix exactly that',
+					'Redo the whole site',
+					'Buy more traffic'
+				],
+				answer: 0,
+				why: [
+					'Yes. A funnel shows the place, and the cause has to be looked for: view the page through the person’s eyes, ask, check the prices and the form.',
+					'No: rebuilding everything without understanding the cause often makes it worse.',
+					'No: more traffic into a leaky funnel is more loss.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the “Care” or “Engage” stage after the purchase for?',
+				options: [
+					'Satisfied customers return and recommend, and that is cheaper than new traffic',
+					'To lengthen the funnel',
+					'For the look of the scheme'
+				],
+				answer: 0,
+				why: [
+					'Yes. Caring for those who are already with you is often the cheapest source of new requests, and honest work after the result also builds trust.',
+					'No: the length of a funnel is not an aim.',
+					'No: stages are there not for looks but for planning work.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'copy-funnel-def',
+				front: 'What is a funnel, and where is it from?',
+				back: 'A narrowing scheme: from the many who learned of you to the few who bought. The idea was tied to AIDA in William Townsend’s book “Bond Salesmanship” (1924).'
+			},
+			{
+				id: 'copy-tofu',
+				front: 'What do TOFU, MOFU and BOFU stand for?',
+				back: 'The top of the funnel (attention, general information), the middle (comparing and choosing), the bottom (decision and action). Each stage has its own content.'
+			},
+			{
+				id: 'copy-stdc',
+				front: 'What is See–Think–Do–Care?',
+				back: 'Avinash Kaushik’s model (2013): it divides the audience by intent: See (they see), Think (they think), Do (they do), Care (customers). Each stage has its own goal and metrics.'
+			},
+			{
+				id: 'copy-race',
+				front: 'What is RACE?',
+				back: 'Reach, Act, Convert, Engage: reach, action, turning into customers, staying in touch after the purchase. Dave Chaffey, Smart Insights, 2010.'
+			},
+			{
+				id: 'copy-funnel-limits',
+				front: 'What is dangerous about a funnel?',
+				back: 'It seems that people move strictly step by step, but in fact they return, skip and leave. A funnel shows where people are lost, but not why.'
+			}
+		],
+		sources: [
+			{ title: 'Marketing funnel (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Marketing_funnel', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'See, Think, Do: a content marketing and measurement business framework (Avinash Kaushik)', url: 'https://www.kaushik.net/avinash/see-think-do-content-marketing-measurement-business-framework/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'AIDA (marketing): the section on the RACE model (Wikipedia)', url: 'https://en.wikipedia.org/wiki/AIDA_(marketing)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A funnel doesn’t have to be a pretty picture. It is there to show you at which stage your project is empty.',
+			hints: [
+				'For each page ask: what does the person decide here? If they are only finding out, it is TOFU (See). If they are choosing, MOFU (Think). If they are deciding to act, BOFU (Do).',
+				'Don’t be afraid that all your pages land in one stage: usually that is how it is. That is why there is a list of what is missing below.',
+				'In the end all seven words must appear in the notes: TOFU, MOFU, BOFU and See, Think, Do, Care. For the missing materials, come up with real titles.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is left somewhere. Fill in the table, the list and the line about the main action.',
+				'page-rows': 'A table row must remain for each section of the brief.',
+				why: 'Describe what the person decides on the page, in at least three words.',
+				'all-funnel': 'One of the stages TOFU, MOFU or BOFU doesn’t appear in the notes. Add a missing material.',
+				'all-stdc': 'One of the stages See, Think, Do, Care doesn’t appear in the notes. Add a missing material.',
+				missing: 'The list “What is missing” must have three materials.',
+				'missing-title': 'The titles of the missing materials must be at least three words.',
+				'cta-page': 'In the line about the main action, write it in the same words as the brief.'
+			},
+			outro: 'Now you can see at which stages your project has content and where it is empty. Next we’ll look at how to measure this and what to count as the main metric.'
+		},
+		say: { TOFU: 'TOE-foo', MOFU: 'MOE-foo', BOFU: 'BOE-foo', STDC: 'S T D C', RACE: 'race', Kaushik: 'KOW-shik', Townsend: 'TOWN-send', Chaffey: 'CHAF-ee' }
+	};
+</script>
+
+<script>
+	import FunnelLeaks from '../../diagrams/FunnelLeaks.svelte';
+</script>
+
+## A path you can see
+
+In the last lesson you drew the customer’s path: stages, touchpoints, places where they leave. Now we give that path the **names** marketers use. Three vocabularies (the funnel, See–Think–Do–Care, RACE) describe the same human path, and you need all three at least to understand colleagues who speak them. Choose whichever is handier for you. And there is one more aim in this lesson: to find the stages at which your project is empty.
+
+## The funnel
+
+**Where from.** The idea that fewer people remain along the path to a purchase is old. The steps a buyer takes were described by the advertising man Elias St. Elmo Lewis (AIDA) as long ago as the end of the nineteenth century. And the funnel picture tied them together, according to Wikipedia, in William Townsend’s book *Bond Salesmanship* (1924). Today the funnel has many names: the purchase funnel, the sales funnel, the marketing funnel, the conversion funnel.
+
+**TOFU, MOFU, BOFU.** These abbreviations came from content and automation marketing, and mean simply the “top”, “middle” and “bottom” of the funnel:
+
+- **TOFU, the top.** The person learns of the problem and looks for general information. What is needed here is **teaching material with no selling**: articles, answers to questions, guides. In the language of the earlier lessons these are readers at the first and second levels of awareness.
+- **MOFU, the middle.** The person knows a solution exists and is choosing. What is needed are **comparisons, a look at the options, examples**: “boundary survey, topographic survey, mortgage survey: which to choose”. This is the third level.
+- **BOFU, the bottom.** The person has almost decided and looks for confirmation and terms: **prices, times, documents, a request form**. The fourth and fifth levels.
+
+**An example with the default persona (the invented Kate Alder).**
+
+- *TOFU:* “How to check for yourself where the boundary of your lot runs”;
+- *MOFU:* “A boundary survey, a topographic survey and a mortgage survey: which to choose in your case”;
+- *BOFU:* “Prices, times, documents and booking a consultation”.
+
+**Where it lets you down.**
+
+- **People don’t climb steps.** They skip: finding a price page in search, a person lands straight in BOFU. They come back and compare. A funnel is a scheme, not a route.
+- **A funnel ends at the purchase.** But the person stays: they come back, they recommend. So the other two schemes add a stage after.
+- **It shows where people are lost, not why.** You can see that many people left between the second and third steps, but the funnel won’t say why. The cause has to be sought through the person’s eyes.
+- **One funnel for everybody.** For different segments (the last lesson) the paths differ.
+
+## See–Think–Do–Care
+
+**Where from.** The American web-analytics specialist Avinash Kaushik, then an analytics evangelist at Google, proposed it in 2013 on his blog Occam’s Razor (he added the Care stage later). The idea is that a funnel splits people by where they are on the **path**, as the company sees it, when they should be split by **intent**.
+
+- **See.** The widest audience: everyone who might be interested in you, even without knowing it.
+- **Think.** Those who have an interest: they search, read, compare.
+- **Do.** Those who intend to buy or to book.
+- **Care.** Those who are already customers: you need a relationship with them, recommendations, repeat business.
+
+The main difference from the funnel: for each stage Kaushik has a **goal and a metric** of its own. For See, for example, you need to reach people without selling to them; for Do, to sell; for Care, to keep them and to win a recommendation. A stage is set by the person’s intent, not by the kind of content, so one and the same page may be Think for some people and Do for others.
+
+**An example.**
+
+- *See:* every landowner in Riverbend;
+- *Think:* those who search for “how to find my lot’s boundary”;
+- *Do:* those who search for “boundary survey cost”;
+- *Care:* former customers: a reminder about their documents, a request for a review (with their consent).
+
+**Where it lets you down.** If you look at the stages just as “reach, interest, purchase”, what remains is a funnel with different words. The point of the model is the distinction of intents, and the Care stage that a funnel usually forgets.
+
+## RACE
+
+**Where from.** Dave Chaffey, founder of Smart Insights, proposed RACE in 2010 as a scheme for **planning digital marketing**: **Reach, Act, Convert, Engage**.
+
+- **Reach.** Attract attention and visitors: search, social media, ads.
+- **Act.** Get the visitor to do something on the site: read, watch, subscribe, ask a question.
+- **Convert.** Turn them into a customer.
+- **Engage.** Keep up the relationship after the purchase, so that they return and recommend.
+
+For each stage Chaffey proposes goals and metrics of his own; his Smart Insights service has the full version, and the Wikipedia article on AIDA mentions RACE in its section on models.
+
+**Where it lets you down.** It is one more funnel, but with “operational” names. It is handy for a year’s work plan, when you need to decide what to do at each stage, and less handy for understanding the person.
+
+## One funnel, three vocabularies
+
+Open the diagram. This is the funnel of an invented site (the numbers are made up): 1,000 people came, and then they are lost at each step. At the top are four buttons: you can label the same funnel in the words of TOFU, MOFU and BOFU, of See–Think–Do–Care and of RACE. Move the sliders and see where the most people are lost.
+
+<FunnelLeaks />
+
+When choosing a vocabulary, keep three questions in mind:
+
+1. **At which stages do I have something to show the person?** If the project has only a “Contact” page and a “Services” page (that is, Do), you lose everyone who is still thinking.
+2. **What do I know about the Care stage?** Many small projects don’t think about it at all, and it is the cheapest.
+3. **Can I measure it?** The details of how to count the steps are in the part on metrics. For now it’s enough to know which numbers you will need: how many came, how many read, how many reached the form, how many made a request.
+
+<details>
+<summary>Check yourself: how does See–Think–Do–Care differ from an ordinary funnel?</summary>
+
+It divides people by intent, not by place on the path, and gives each stage its own goal and metric. Besides, it has a Care stage: caring for those who are already customers.
+
+</details>
+
+## Where the approach itself lets you down
+
+- **False precision.** A neat diagram doesn’t mean you know the numbers. Until you have connected a counter, it is a hypothesis.
+- **Content for every stage as an end in itself.** A small site doesn’t need forty articles. It needs one honest piece for each empty stage.
+- **Bait.** Material for the top of the funnel must be useful in itself. An article “how to check a boundary” that deliberately explains nothing, so that the person comes to you, is bait, not TOFU.
+- **Surveillance.** To measure people’s paths you put in counters and tags. That needs consent and an honest notice (the part on quality and the law). Measure as much as is needed for a decision, not everything.
+
+## Practice
+
+Lay out by stage what the project has, and find what is missing.
+
+1. In the table, for each section of the brief write the **funnel stage** (TOFU, MOFU, BOFU) and the **STDC stage** (See, Think, Do, Care), and one phrase: what the person decides here.
+2. In the list “What is missing” name **three materials** that don’t exist, for the empty stages. Each has a funnel stage, an STDC stage and a title.
+3. Write the page where the person takes the **main action**, and name it in the same words as the brief.
+
+In the end all the stages must appear in the notes. The check watches for that, and whether the materials suit your people is for you to decide: picture the person from “for whom” at each stage and ask what they need to see.
