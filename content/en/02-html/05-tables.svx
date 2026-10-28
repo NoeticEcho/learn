@@ -1,0 +1,425 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/05-tables.svx. */
+	export const metadata = {
+		id: '02-html/05-tables',
+		part: 2,
+		order: 5,
+		title: 'Tables: for data, not for layout',
+		definition: 'A data table is a <table> for rows and columns, such as prices or a timetable, with a <caption> and <th> headers with a scope. It is not for layout.',
+		summary:
+			'A table is for when you really have rows and columns: prices, timetables, a comparison of plans. Afterwards you’ll build a table with headers and a caption, see how it differs from the old table layout, and know where a table belongs.',
+		minutes: 15,
+		teaches: ['html-data-tables'],
+		requires: ['html-legacy-layout', 'html-semantic-elements'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'Survey | from £000', caption: 'A table', say: 'Why is “from £000” a price? It sits in the Price column and the Survey row. Neighbors explain a cell.' },
+				{ mood: 'hmm', say: 'Remove the grid lines. If meaning rests on neighbors, it’s a table. A menu beside text rests on nothing: layout.' },
+				{ mood: 'hint', say: 'Bold type is seen only by eyes. But th with a scope tells a screen reader: this is a header, and here is what it heads.' },
+				{ mood: 'cheer', side: 'right', prop: 'cards', label: 'services: cards', caption: 'Table or cards', say: 'Uniform and made for comparing: a table. Separate, each with its own text: cards.' }
+			]
+		},
+		practice: {
+			id: 'data-table',
+			title: 'A table of terms and prices',
+			task: 'Add a table to the page. Make a section for it with an h2 heading, “Terms and prices” (or your own). Inside it goes a table: first a caption, then a thead with column headers, th elements with the scope col (item, what is included, price), then a tbody. In each row, the name of the item from your brief is a th with the scope row, and the description and price are td. If you have no services or prices, make an “Opening hours” table with the same parts: the columns “Day” and “Hours”. The table must have no presentational attributes (width, border, cellpadding).',
+			era: 2,
+			continues: 'links-images',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'table', kind: 'exists', selector: 'table' },
+				{ id: 'caption', kind: 'exists', selector: 'table > caption' },
+				{ id: 'col-heads', kind: 'count', selector: 'table thead th[scope="col"]', min: 2 },
+				{ id: 'row-heads', kind: 'count', selector: 'table tbody th[scope="row"]', min: { brief: 'items' } },
+				{ id: 'rows', kind: 'field', selector: 'table tbody', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'no-style-attrs', kind: 'count', selector: 'table[width], table[border], table[cellpadding], table[cellspacing], td[width], td[valign], td[bgcolor]', max: 0 },
+				{ id: 'no-nesting', kind: 'count', selector: 'table table', max: 0 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'When is a table the right tool?',
+				options: [
+					'When the data has rows and columns: prices, a timetable, a comparison',
+					'When you need a menu on the left and text on the right',
+					'When you need to line buttons up in a row'
+				],
+				answer: 0,
+				why: [
+					'Yes. A table is for data that has both a “what” and a “which one”: a cell gets its meaning from its row and its column.',
+					'No: that’s layout, and CSS does it. A table for layout is an outdated trick.',
+					'No: CSS lines up a row of buttons, and there is no table meaning here.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a table accessible?',
+				options: [
+					'A caption that says what the table is about',
+					'th headers with a scope attribute',
+					'td cells that were simply made bold instead of being headers',
+					'No nested tables'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a caption announces the topic in advance.',
+					'Yes: scope says what a header applies to: a column (col) or a row (row).',
+					'No: eyes can see bold type, but software can’t tell it is a header.',
+					'Yes: a table inside a table turns reading into a maze.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the parts of a table in the order they appear in the markup',
+				items: ['<table>', '<caption>', '<thead>', '<tbody>']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each table element with its role',
+				pairs: [
+					['caption', 'the title: what the table is about'],
+					['thead', 'the group of header rows'],
+					['th with scope row', 'a row header'],
+					['td', 'a cell of data']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A table doesn’t fit a phone screen. What is the best fix?',
+				options: [
+					'Wrap it in a block that scrolls sideways (overflow-x: auto)',
+					'Shrink the type until it’s unreadable',
+					'Replace the table with a screenshot'
+				],
+				answer: 0,
+				why: [
+					'Yes. The table scrolls sideways while the page stays put. You’ll learn how to do it in CSS in the next part.',
+					'No: what can’t be read is of no use.',
+					'No: neither software, nor a search engine, nor a person using magnification can read a screenshot.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a table: one row of two th headers (“Day”, “Hours”) and one row of two td data cells.',
+				starter: '',
+				checks: [
+					{ id: 'heads', kind: 'count', selector: 'th', min: 2 },
+					{ id: 'data', kind: 'count', selector: 'td', min: 2 },
+					{ id: 'day', kind: 'text', selector: 'th', matches: 'Day' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-table-when',
+				front: 'When do you need a table?',
+				back: 'When the data has both rows and columns: prices, a timetable, a comparison of plans. Never lay out blocks with a table.'
+			},
+			{
+				id: 'html-table-parts',
+				front: 'What is a good table made of?',
+				back: 'A caption, a thead with th scope=col headers, and a tbody of rows: each row has a th scope=row (the row header) and td cells (the data).'
+			},
+			{
+				id: 'html-table-scope',
+				front: 'What does the scope attribute on th do?',
+				back: 'It says what the header applies to: col for a column, row for a row. A screen reader announces a cell together with its headers.'
+			},
+			{
+				id: 'html-table-phone',
+				front: 'What do you do with a wide table on a phone?',
+				back: 'Let it scroll sideways inside its own block. Don’t shrink the type or replace the table with an image.'
+			}
+		],
+		sources: [
+			{
+				title: 'HTML table basics (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'HTML table advanced features and accessibility (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Table_accessibility',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Tables Tutorial (W3C WAI)', url: 'https://www.w3.org/WAI/tutorials/tables/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'Learn HTML: Tables (web.dev)', url: 'https://web.dev/learn/html/tables', licence: 'CC-BY', kind: 'course', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'In the earlier lessons a table was the grid for a page. Now it does what it was made for: it shows data.',
+			hints: [
+				'The skeleton: a table, then a caption saying what is included and what it costs, then a thead with a row of th scope=col headers (item, what is included, price), then a tbody.',
+				'In each row of the body, the first cell is the row header, a th with scope set to row, holding the item’s name. The others are ordinary td cells.',
+				'You don’t need width, border or cellpadding attributes: CSS will style the table later.'
+			],
+			mistakes: {
+				table: 'There is no table on the page. Add a table element in a section of its own.',
+				caption: 'The first thing in the table should be a caption: what the table is about.',
+				'col-heads': 'The thead needs column headers, th elements with scope set to col: at least two.',
+				'row-heads': 'Each data row starts with a row header, a th with scope set to row, holding the item’s name. You need as many rows as you have services or products.',
+				rows: 'The table should contain the names of your services or products from the brief.',
+				'no-style-attrs': 'The table still has presentational attributes (width, border, cellpadding, valign). Remove them: CSS will do the styling.',
+				'no-nesting': 'You don’t need a table inside a table. Keep a single flat table.'
+			},
+			outro: 'That’s a table doing its proper job. It doesn’t hold the page up, it tells the data: to eyes and to a screen reader alike.'
+		},
+		say: { HTML: 'H T M L', scope: 'scope', caption: 'caption', thead: 'T head', tbody: 'T body', colspan: 'col span', rowspan: 'row span', th: 'T H', td: 'T D', CSS: 'C S S' }
+	};
+</script>
+
+<script>
+	import TableReader from '../../diagrams/TableReader.svelte';
+</script>
+
+## A table for data
+
+In the lesson on 1996 you saw tables stand in for a grid. But a table was invented for something else: data that has rows and columns. A timetable, prices, a comparison of plans, a list of documents with dates. In such a table a cell gets its meaning from its row and its column: “from £000” means a price because it sits in the Price column, in the Survey row.
+
+A good test: take away the visible grid. Does the neighborly arrangement still carry meaning? For a menu on the left and text on the right it doesn’t: that’s layout. For a price and a service it does: that’s a table.
+
+## What a table is made of
+
+```html
+<table>
+  <caption>What is included and what it costs</caption>
+  <thead>
+    <tr>
+      <th scope="col">Item</th>
+      <th scope="col">What is included</th>
+      <th scope="col">Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Consultation</th>
+      <td>An hour on your documents</td>
+      <td>£000</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+- `<caption>` is the title: what the table is about. It comes first;
+- `<thead>` and `<tbody>` are the head and the body. There is also `<tfoot>` for totals;
+- `<tr>` is a row;
+- `<th>` is a header cell, and `<td>` is a cell of data;
+- `scope="col"` says the header applies to a column, and `scope="row"` that it applies to a row.
+
+You can merge cells (`colspan`, `rowspan`), but complicated tables are painful for people who use a screen reader. If you can’t do without merging, it may really be two tables.
+
+## What a screen reader says
+
+It’s `th` and `scope` that make a table make sense to someone listening to it. When the reading cursor lands on a cell, the software names the column and row headers along with it. Switch the table type in the diagram and pick cells.
+
+<TableReader />
+
+<details>
+<summary>Check yourself: why use th when you could just make the cell bold?</summary>
+
+Bold type is seen only by eyes. A th with a scope tells software that this is a header, and what it applies to.
+
+</details>
+
+## Table or cards
+
+Not everything that looks like a list should be a table. Choose like this:
+
+- **a table** is for when the data is uniform and needs comparing: prices by plan, a timetable by day;
+- **cards or a list** are for when the items stand alone and each has its own text: the description of a service, a review, a member of staff.
+
+That’s why on our page the services live both in cards (the story) and in a table of prices (the comparison). It isn’t duplication: they are two ways of reading the same thing.
+
+Tables and phones don’t get on well, because the columns don’t fit. The cure is to wrap the table in a block that scrolls sideways, not to shrink the type or turn the table into a picture. You’ll learn exactly how in the CSS part.
+
+## Practice
+
+Add a table of prices or terms to the page. Your data is already there in the cards; carry the name, description and price over from them. If your project has no prices (a club, an event, a subscription service), make an “Opening hours” or “Timetable” table: columns for “Day” and “Time” are real data too.
+
+This version stays in the 2005 era: data tables existed then, and people were already writing `th` and `caption` in them, though many forgot.
+
+## What was wrong with 2005
+
+Data tables and layout tables were mixed up beyond telling apart: a page might have ten of them. Anyone who wanted a real table often fell into a trap: it, too, got nested inside a layout cell. And `th` with `scope` was rare in those days: they were used by those who thought about accessibility, and there were few such authors. Today the table in its true sense is alive, and layout with tables is not.

@@ -1,0 +1,478 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/04-links-images-media.svx. */
+	export const metadata = {
+		id: '02-html/04-links-images-media',
+		part: 2,
+		order: 4,
+		title: 'Links, images and media',
+		definition: 'A link is an <a> element with an address in href. An image is an <img> with its meaning in alt. Video and audio use <video> and <audio>.',
+		summary:
+			'You’ll connect pages and sections to each other, add images that everyone can understand and that don’t slow the page down, and learn how to embed video. Afterwards you’ll write a meaningful alt, tell a relative link from an absolute one, and set up responsive images.',
+		minutes: 25,
+		teaches: ['html-links', 'html-images', 'html-media'],
+		requires: ['html-semantic-elements', 'net-url-anatomy'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'here | here | read more', caption: 'A list of links', say: 'A screen reader reads out a page’s links: “here”, “here”, “read more”. Where do they go? No way to tell.' },
+				{ mood: 'cheer', side: 'right', prop: 'browser', label: 'Price list (PDF, 120 KB)', say: 'Link text should make sense on its own: “Download prices (PDF, 120 KB)”.' },
+				{ mood: 'hmm', prop: 'sheet', label: 'IMG_2043.jpg', caption: 'An image with no alt', say: 'No alt? The screen reader reads the file name: “IMG_2043.jpg”. Decoration gets an empty alt, but the attribute stays.' },
+				{ mood: 'hint', side: 'right', prop: 'editor', label: 'alt: Call', say: 'Is the image a button? Describe the action, not the picture: “Call”, not “telephone receiver”.' }
+			]
+		},
+		practice: {
+			id: 'links-images',
+			title: 'Links and images on your 2005 site',
+			task: 'Carry on with your page. 1) Give the first three sections an id in Latin letters (on the section itself) and turn the menu items into links to them. 2) The main action button (the link with the class button) must lead to the contacts block: make the aside carry the id contacts and the link point to #contacts. 3) Give the header the id top, and in the footer add a “Back to top” link to #top and a link to the privacy notice, privacy.html. 4) Add a photo, foto.jpg, to the first section: an img with alt, width and height. 5) Mark up each credential from the brief as a figure with the image skan.jpg and a figcaption. We have no files, so in place of the images you’ll see their descriptions.',
+			era: 2,
+			continues: 'semantic-page',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          {{#each sections}}<li><a href="#">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#">{{mainAction.label}}</a></p>
+
+        {{#each sections}}<section>
+          <h2>{{.}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        {{/each}}<section>
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'section-ids', kind: 'count', selector: 'section[id]', min: 3 },
+				{ id: 'menu-anchors', kind: 'count', selector: 'nav a[href^="#"]', min: 3 },
+				{ id: 'no-dead-links', kind: 'count', selector: 'a[href="#"]', max: 0 },
+				{ id: 'cta', kind: 'attr', selector: 'a.button', name: 'href', matches: '^#contacts$' },
+				{ id: 'contacts', kind: 'exists', selector: 'aside#contacts' },
+				{ id: 'top', kind: 'exists', selector: '#top' },
+				{ id: 'to-top', kind: 'attr', selector: 'footer a', name: 'href', matches: '^#top$' },
+				{ id: 'privacy', kind: 'attr', selector: 'footer a', name: 'href', matches: '^privacy\\.html$' },
+				{ id: 'has-images', kind: 'count', selector: 'img', min: 1 },
+				{ id: 'alt', kind: 'count', selector: 'img:not([alt])', max: 0 },
+				{ id: 'size', kind: 'count', selector: 'img:not([width]), img:not([height])', max: 0 },
+				{ id: 'figures', kind: 'count', selector: 'figure', min: { brief: 'proofs' } },
+				{ id: 'captions', kind: 'field', selector: 'figcaption', field: 'proofs[].title', when: { brief: 'proofs[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'A page lives at /services/survey.html and contains a link whose href is ../contact.html. Where does it go?',
+				options: ['To /contact.html', 'To /services/contact.html', 'To another website'],
+				answer: 0,
+				why: [
+					'Yes. “../” means “up one level”: from the services folder to the root, where contact.html lives.',
+					'No: the address is worked out from the folder the page sits in, and “../” climbs one level above that folder.',
+					'No: the link has no https:// and no site name, so it stays inside your own site.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which statements about the alt attribute are true?',
+				options: [
+					'A decorative image gets an empty alt, but the attribute is not left out altogether',
+					'alt is shown to people whose image failed to load, and read out by a screen reader',
+					'alt should list as many keywords as possible for search engines',
+					'You don’t need to start alt with “image of” or “picture of”: the screen reader already says it’s an image'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: an empty alt tells a screen reader to skip the image, while a missing attribute makes it read the file name.',
+					'Yes: alt is the image put into words.',
+					'No: a list of words doesn’t describe the image, makes listening tiring and counts as bad practice.',
+					'Yes: write the content straight away, for example “Kate measuring a plot boundary”.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each image attribute with what it is for',
+				pairs: [
+					['alt', 'the image put into words'],
+					['width and height', 'room for the image, so the page doesn’t jump'],
+					['srcset', 'a set of file sizes for the browser to choose from'],
+					['loading set to lazy', 'load the image when it gets near the screen']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which link text is best?',
+				options: ['More about boundary surveys', 'Click here', 'Press'],
+				answer: 0,
+				why: [
+					'Yes. Link text should make sense out of context: people with screen readers often listen to a list of all the links on a page.',
+					'No: “click here” means nothing on its own, and in a list of links you’d hear twenty identical ones.',
+					'No: people know a link is for pressing. The text should say where it goes.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'When do you need a link, <a>, and when a button, <button>?',
+				options: [
+					'A link goes somewhere (to a page, to a place on a page); a button does something (sends a form, opens a dialog)',
+					'They’re the same thing, so it’s a matter of taste',
+					'A button is for text, a link is for images'
+				],
+				answer: 0,
+				why: [
+					'Yes. Going somewhere and doing something are different, and keyboards and screen readers treat them differently. A link and a button can look the same, but that’s a job for CSS.',
+					'No: they behave differently from the keyboard and are announced differently by a screen reader.',
+					'No: neither text nor images decide it.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a link with the text “Email us” that opens an email to hello@example.org',
+				starter: '',
+				checks: [
+					{ id: 'mailto', kind: 'attr', selector: 'a', name: 'href', matches: '^mailto:hello@example\\.org$' },
+					{ id: 'text', kind: 'text', selector: 'a', matches: 'Email us' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-links-kinds',
+				front: 'What kinds of href value are there?',
+				back: 'Relative (contact.html, ../a.html), from the root (/contact.html), absolute (https://…), an anchor (#top), email (mailto:…) and phone (tel:…).'
+			},
+			{
+				id: 'html-links-anchor',
+				front: 'How do you link to a place inside a page?',
+				back: 'Give the element an id (say, prices) and point the link at it with href set to #prices. The page doesn’t reload.'
+			},
+			{
+				id: 'html-images-alt',
+				front: 'How should you write alt?',
+				back: 'Briefly, and about what the image shows: no “image of”, no keywords. A decorative image gets an empty alt (present, but empty).'
+			},
+			{
+				id: 'html-images-size',
+				front: 'Why give an image width and height?',
+				back: 'The browser saves the room in advance, so the page doesn’t jump while loading. It also helps the Core Web Vitals speed measures.'
+			},
+			{
+				id: 'html-images-srcset',
+				front: 'What does srcset do?',
+				back: 'It lists one image in several sizes. The browser picks the one that suits the screen’s width and density.'
+			},
+			{
+				id: 'html-media-video',
+				front: 'How do you embed a video?',
+				back: 'The video element with the controls attribute, a poster, several source elements and a track element for captions. No autoplay with sound.'
+			}
+		],
+		sources: [
+			{
+				title: 'Creating links (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Creating_links',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'HTML images (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Responsive images (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'The video element (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/video',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Images Tutorial (W3C WAI)', url: 'https://www.w3.org/WAI/tutorials/images/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'Learn Images (web.dev)', url: 'https://web.dev/learn/images', licence: 'CC-BY', kind: 'course', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'So far the page isn’t connected to anything: the menu goes nowhere and there isn’t a single image. Let’s connect it and brighten it up.',
+			hints: [
+				'An anchor works as a pair. Give a section an id such as survey, and make the menu link point to it with the href value #survey. Use Latin letters and no spaces.',
+				'The contacts block is an aside with the id contacts. The main action button is the link with the class button and the href value #contacts. Give the header the id top, and put two links in the footer: one to #top and one to privacy.html.',
+				'An image is an img element with src, width, height and an alt that says what it shows. A credential is a figure holding an img with its alt and a figcaption with the name.'
+			],
+			mistakes: {
+				'section-ids': 'You need three sections with an id. Add an id in Latin letters to each of the first three section elements, for example about.',
+				'menu-anchors': 'At least three menu items must be anchor links, with an href that starts with # and names a section id.',
+				'no-dead-links': 'Some links still have the href value # alone and go nowhere. Replace each with a link to a real id.',
+				cta: 'The main action button (the link with the class button) should lead to the contacts block: its href must be #contacts.',
+				contacts: 'You need an aside with the id contacts: the contacts block the button leads to.',
+				top: 'The header needs the id top: the place “Back to top” will lead to.',
+				'to-top': 'The footer needs a “Back to top” link whose href is #top.',
+				privacy: 'The footer needs a link to the privacy notice: its href must be privacy.html.',
+				'has-images': 'Add at least one img image.',
+				alt: 'Every image needs an alt. For a meaningful one it’s a description; for a decorative one it’s an empty alt.',
+				size: 'Every image needs width and height, so the page doesn’t jump while loading.',
+				figures: 'Each credential from your brief is a separate figure.',
+				captions: 'The figcaption of each credential should contain its title from the brief.'
+			},
+			outro: 'Now the sections are connected and the images make sense to everyone. The page looks like a website, not a sheet of paper.'
+		},
+		say: { href: 'H ref', alt: 'alt', srcset: 'source set', figcaption: 'figure caption', JPEG: 'jay peg', PNG: 'P N G', SVG: 'S V G', WebP: 'web P', AVIF: 'A V I F', mailto: 'mail to', tel: 'tel', HTML: 'H T M L', URL: 'U R L' }
+	};
+</script>
+
+<script>
+	import LinkResolver from '../../diagrams/LinkResolver.svelte';
+</script>
+
+## A link: an address and some words
+
+The link is what turned a pile of documents into a web. It’s an `<a>` element (anchor) with an `href` attribute (hypertext reference). Two things matter about it: where it goes and what is written inside it.
+
+**Link text** should make sense on its own. People who use a screen reader often ask it for a list of all the links on a page, and if that list says “click here” and “read more” twenty times over, it’s no use. Write “More about boundary surveys”, “Download prices (PDF, 120 KB)”, “Book a consultation”.
+
+**The address** comes in several kinds. Try the diagram: change the page’s address and the `href` value, and see where the link goes.
+
+<LinkResolver />
+
+The kinds in brief:
+
+- **absolute** is a full address with `https://`: it leads to one particular page wherever you start from. It suits other websites;
+- **relative** is `contact.html` or `../contact.html`: it’s worked out from the address of the current page. It suits links inside your own site, because nothing breaks if you move to another domain;
+- **from the site root** is `/contact.html`: it’s worked out from the home page, not from the current page. It’s handy when pages sit in different folders;
+- **an anchor** is `#contacts`: a place on this same page;
+- **special schemes**: `mailto:kate@riverbend.example` opens an email, and `tel:+440000000000` dials a number.
+
+If a link must open in a new tab, you write `target="_blank"`. Do that only when it’s really needed (to keep someone from losing a form they’re filling in, say), and warn people: an unexpected new window gets in the way of someone using a screen reader. It used to be usual to add `rel="noopener"` to such a link. Modern browsers do that themselves, but the habit does no harm.
+
+<details>
+<summary>Check yourself: why is a relative link better than an absolute one on your own site?</summary>
+
+It isn’t tied to the site’s address, so nothing breaks if you move to another domain or another folder.
+
+</details>
+
+## Anchors: a link to a place on the page
+
+A link doesn’t have to lead to another page. It can lead to a spot on this one. Give the element you want to reach a unique `id`, and write the link with a hash sign: `href="#contacts"`.
+
+```html
+<a href="#contacts">Get in touch</a>
+...
+<aside id="contacts">...</aside>
+```
+
+The browser scrolls the page to the element with that `id`. The rules: an `id` is unique on the page, has no spaces, and is best written in Latin letters. If a link with a hash doesn’t work, the cause is almost always a typo: the `id` and the `href` don’t match.
+
+## Images
+
+An image goes in with the single element `<img>`:
+
+```html
+<img src="foto.jpg" width="160" height="160" alt="Kate measuring a plot boundary">
+```
+
+The right file format is half the job.
+
+- **JPEG** is for photographs: it compresses well but has no transparency;
+- **PNG** is for graphics and screenshots, and it has transparency;
+- **SVG** is for icons and diagrams: a vector image that stays sharp on any screen and weighs a few kilobytes;
+- **WebP and AVIF** are modern formats that compress better than JPEG at the same quality. All modern browsers support them;
+- **GIF** is outdated: for animation today you use video, which weighs about a tenth as much.
+
+### alt: words in place of the image
+
+The `alt` attribute is the image put into words. A screen reader reads it, and the browser shows it if the image fails to load (you’ll see that in the practice, because the files don’t exist). The rules are simple:
+
+- if the image **carries meaning**, describe what is in it and why it’s there: “Kate measuring a plot boundary”, “Map of the route: 200 yards from the bus stop, then turn left”;
+- if it’s **decorative** (a flourish, a background), write an empty `alt=""`. Don’t remove the attribute: without it a screen reader reads out the file name, something like “IMG_2043.jpg”;
+- if the image **works as a link or a button**, describe the action, not the picture: “Call”, not “telephone receiver”;
+- don’t begin with “image of” or “photo of”, because the screen reader already says it’s an image;
+- don’t stuff it with keywords. That hurts both people and search.
+
+<details>
+<summary>Check yourself: what do you write in the alt of a decorative image?</summary>
+
+An empty value: the attribute is there, but has nothing in it. It has to be there, or the screen reader will read out the file name.
+
+</details>
+
+### Sizes and lazy loading
+
+Until an image has loaded, the browser doesn’t know how much room to leave for it. Remember the “jumping layout” from the last lesson of the internet part? You cure it by writing `width` and `height` in pixels yourself. From them the browser works out the proportions in advance and reserves the space. CSS can adjust the real size later.
+
+Images far down the page can wait until the person scrolls near them: `loading="lazy"`. An image on the first screen, by contrast, must never be lazy, or it would hold up the first paint.
+
+### srcset and picture: the right size for every screen
+
+If you send a phone an image 2000 pixels wide, you waste its data. So you prepare one image in several sizes and list them in `srcset`:
+
+```html
+<img src="foto-800.jpg"
+     srcset="foto-480.jpg 480w, foto-800.jpg 800w, foto-1200.jpg 1200w"
+     sizes="(min-width: 60rem) 40rem, 100vw"
+     width="800" height="600" alt="…">
+```
+
+Here `480w` is the file’s width in pixels, and `sizes` hints at how much room the image will take on the page. The browser knows the window’s width and the screen’s density, so it picks a file itself, as in the diagram above. When you need a different format, or a different crop for different screens, you wrap the image in `<picture>` with several `<source>` elements, and the fallback `<img>` stays inside.
+
+A caption for an image is made with the pair `<figure>` and `<figcaption>`: the figure ties the image to its caption.
+
+## Video and audio
+
+The `<video>` and `<audio>` elements are built into the browser:
+
+```html
+<video controls width="640" poster="cover.jpg">
+  <source src="clip.webm" type="video/webm">
+  <source src="clip.mp4" type="video/mp4">
+  <track kind="captions" src="clip.vtt" srclang="en" label="English">
+  Your browser can’t play this video: <a href="clip.mp4">download it</a>.
+</video>
+```
+
+What’s in there:
+
+- `controls` shows the play buttons;
+- `poster` is an image shown before the video starts;
+- several `<source>` elements give the browser a choice of format;
+- `<track>` holds captions. They’re needed by people who are deaf or hard of hearing, and by everyone who watches without sound (on a train, at work);
+- the text inside the element is seen by anyone whose browser can’t play video.
+
+Don’t turn on autoplay with sound: it annoys people and gets in the way of anyone using a screen reader. A video that starts by itself must be silent, and must be possible to stop.
+
+Often a video isn’t kept on your own site but embedded from a video host with an `<iframe>`. That’s convenient, but know the price: your page now talks to someone else’s server, which may collect data about your visitors. That is why the videos in this course open only after a click.
+
+## Practice
+
+Back to your 2005 page. It came out well structured but connected to nothing. Connect it: the menu items should lead to their sections, the main action button to the contacts, and the footer should let people go back to the top and open the privacy notice. Then add a photo and the credentials from the brief.
+
+There are no images in our preview, because it doesn’t go to the network. So in place of each image you’ll see its description, which is a good chance to check that it makes sense on its own. On a real site the files sit next to the page and load. In the project archive you can download, you’ll put your own photos next to it under the same names.
+
+We ask you to connect “at least three” sections, but you can connect them all, which is better for your visitor.
+
+## What was wrong with 2005
+
+Images with no `alt` and no sizes were normal. The page jumped while loading, and for blind users it turned into a string of file names. Links that said “here” and “more” were normal too. None of this was a technical limit. It was habit: when you take it that an image means only what the eye sees, you don’t think about anyone else. Today automated tools check for these habits.

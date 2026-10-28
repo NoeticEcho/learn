@@ -1,0 +1,322 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/02-page-1996.svx. */
+	export const metadata = {
+		id: '02-html/02-page-1996',
+		part: 2,
+		order: 2,
+		title: 'A 1996 page: tables, font and a counter',
+		definition: 'Table layout is the 1990s way of arranging a page in an invisible table and styling text with the <font> and <center> tags. Semantic HTML and CSS pushed it out.',
+		summary:
+			'You’ll build a page the way it was done in 1996: with a table, font tags and a visitor counter. Afterwards you’ll be able to read any old markup and explain why nobody writes it this way anymore.',
+		minutes: 25,
+		teaches: ['html-legacy-layout'],
+		requires: ['html-document-structure', 'html-tags-attributes'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser-1996', label: 'visitor no. 000123', caption: '1996', say: 'HTML had no columns and no margins. It did have the table: rows, cells, a color and a width in pixels.' },
+				{ mood: 'hint', say: 'So slice the page with an invisible table: the menu in one cell, the text in another. And there are your columns!' },
+				{ mood: 'hmm', say: 'For a margin they placed a clear 1 by 1 pixel picture. The screen reader said: “image, image, image”.' },
+				{ mood: 'explain', side: 'right', prop: 'phone', label: '600 px', caption: 'Today', say: 'A 600 pixel table won’t shrink: on a phone you scroll sideways. So looks moved to CSS, and meaning stayed in HTML.' }
+			]
+		},
+		practice: {
+			id: 'page-1996',
+			title: 'Your 1996 site',
+			task: 'Take your first page and turn it into a site as it was built in 1996. Put everything in a table. In the first row, one cell spanning two columns holds the project name in an h1 (white on a dark background, through a font tag). In the second row, the left cell is a menu with links to all the sections, and the right cell holds the description, the main action and a list of the services or products. Set the page’s background color with the bgcolor attribute on body. At the bottom, add a visitor counter picture, counter.gif, with a description in alt. We don’t have the file itself, so the preview shows its description instead of the picture.',
+			era: 1,
+			continues: 'first-page',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{name}}</title>
+  </head>
+  <body>
+    <h1>{{name}}</h1>
+    <p>{{profession}}</p>
+    <p>{{city}}</p>
+    <p><a href="tel:{{phone}}">Call: {{phone}}</a></p>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body bgcolor="#ffffcc" text="#000033" link="#0000cc" vlink="#660099">
+    <center>
+      <table width="600" border="0" cellpadding="8" cellspacing="0">
+        <tr>
+          <td colspan="2" bgcolor="#003366">
+            <h1><font face="Times New Roman" size="6" color="#ffffff">{{name}}</font></h1>
+          </td>
+        </tr>
+        <tr>
+          <td width="150" valign="top" bgcolor="#cccccc">
+            <font size="2">
+              {{#each sections}}<a href="#">{{.}}</a><br>
+              {{/each}}
+            </font>
+          </td>
+          <td valign="top">
+            <font face="Times New Roman" size="3">
+              <p>{{profession}}</p>
+              <p><b>{{mainAction.label}}:</b> <a href="tel:{{phone}}">{{phone}}</a></p>
+              <hr>
+              {{#each items}}<p><b>{{title}}</b><br>{{text}}</p>
+              {{/each}}
+              <hr>
+              <p>{{city}}, <a href="mailto:{{email}}">{{email}}</a></p>
+            </font>
+          </td>
+        </tr>
+      </table>
+      <p><font size="1">You are visitor number</font><br>
+      <img src="counter.gif" width="72" height="20" alt="Visitor counter: 000123"></p>
+    </center>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'table', kind: 'exists', selector: 'table' },
+				{ id: 'font', kind: 'exists', selector: 'font' },
+				{ id: 'body-bg', kind: 'attr', selector: 'body', name: 'bgcolor', matches: '^#' },
+				{ id: 'h1-name', kind: 'field', selector: 'h1', field: 'name' },
+				{ id: 'menu', kind: 'field', selector: 'table a', field: 'sections' },
+				{ id: 'items', kind: 'field', selector: 'table', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'counter', kind: 'attr', selector: 'img', name: 'alt', matches: '\\S' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why were pages laid out with tables in 1996?',
+				options: [
+					'HTML had no other way to put blocks side by side, so the table became a grid',
+					'Tables loaded faster than anything else',
+					'Search engines required it'
+				],
+				answer: 0,
+				why: [
+					'Yes. HTML was designed for scientific papers, not for layouts. The table was the only tool that could place blocks next to each other, and authors used it for something it wasn’t made for.',
+					'No, quite the opposite: browsers often showed nothing of a table until all of it had loaded.',
+					'No: search engines made no demands about layout.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are considered outdated ways of styling today?',
+				options: ['The <font> tag', 'The <center> tag', 'The <p> tag', 'The bgcolor attribute on body'],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: styling was handed to CSS long ago, and modern standards declare font obsolete.',
+					'Yes: CSS does the aligning.',
+					'No: a paragraph is meaning, not styling, and it will be around forever.',
+					'Yes: CSS sets the background color, not an attribute.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What was a spacer GIF?',
+				options: [
+					'A clear 1 × 1 pixel picture, stretched to make empty space',
+					'An animated splash screen shown before you entered a site',
+					'A picture format for counters'
+				],
+				answer: 0,
+				why: [
+					'Yes. HTML had no margins then, so “empty space” was made from an invisible picture given the width and height you needed.',
+					'No: splash screens were a separate fashion, and the design lessons cover them.',
+					'No: a counter was an ordinary picture, while a spacer GIF is invisible.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each table attribute to what it does',
+				pairs: [
+					['colspan', 'the cell spans two columns'],
+					['cellpadding', 'space inside a cell'],
+					['valign', 'the content sticks to the top of the cell'],
+					['bgcolor', 'the cell’s background color']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the events in order of time',
+				items: [
+					'1993: the Mosaic browser shows images right in the page’s text',
+					'1996: CSS 1 becomes a W3C Recommendation',
+					'1997: HTML 4.0 declares font and center deprecated',
+					'2014: HTML5 becomes a W3C Recommendation'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a table with one row and two cells: the word “Menu” in the first, the word “Text” in the second.',
+				starter: '',
+				checks: [
+					{ id: 'table', kind: 'exists', selector: 'table tr td' },
+					{ id: 'two-cells', kind: 'count', selector: 'td', min: 2, max: 2 },
+					{ id: 'menu', kind: 'text', selector: 'td', matches: 'Menu' },
+					{ id: 'text', kind: 'text', selector: 'td', matches: 'Text' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-legacy-why',
+				front: 'Why were sites built on tables in 1996?',
+				back: 'HTML had no way to put blocks side by side, and the table could. It was used as a grid, though it was made for data.'
+			},
+			{
+				id: 'html-legacy-font',
+				front: 'What is wrong with the font and center tags?',
+				back: 'They mix styling with content: to change a color you edit every page. Today styling lives in CSS, and font and center are obsolete.'
+			},
+			{
+				id: 'html-legacy-spacer',
+				front: 'What is a spacer GIF?',
+				back: 'An invisible 1 × 1 picture stretched to the size you need, to make empty space. That’s how margins were made before CSS could do them.'
+			},
+			{
+				id: 'html-legacy-problems',
+				front: 'Name three troubles with table layout',
+				back: 'Content and looks are tangled, fixed widths break on a narrow screen, and a screen reader gets lost in the cells.'
+			}
+		],
+		sources: [
+			{ title: 'Spacer GIF (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Spacer_GIF', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{
+				title: 'HTML 3.2 Reference Specification (W3C, 1997)',
+				url: 'https://www.w3.org/TR/2018/SPSD-html32-20180315/',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{ title: 'The font element, obsolete (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/font', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{
+				title: 'HTML table basics (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to go back to 1996 and build a site the way it was done then. Don’t be surprised if it comes out ugly and awkward: that’s the point.',
+			hints: [
+				'Everything goes inside a <table>. A row is <tr>, a cell is <td>. The first row has one cell with colspan=2, the second has two.',
+				'Put the project name in an <h1>, and inside the h1 wrap it in a <font> tag with color=#ffffff and size=6. The page’s background color is the bgcolor attribute on <body>.',
+				'The counter picture: an <img> tag with src=counter.gif, a width, a height and an alt text such as Visitor counter. There is no file, so you’ll see its description instead of the picture: that is what alt is for.'
+			],
+			mistakes: {
+				table: 'The layout is made with a table: wrap all the content in <table>, the rows in <tr> and the cells in <td>.',
+				font: 'In 1996 styling meant the <font> tag. Put it at least around the name in the heading.',
+				'body-bg': '<body> needs a bgcolor attribute with a color, for example bgcolor=#ffffcc.',
+				'h1-name': 'The h1 heading should hold your project’s name, as in the first lesson.',
+				menu: 'The menu needs an <a> link for every section of your project, inside the table.',
+				items: 'The table should hold the names of your services or products from the brief.',
+				counter: 'The counter picture needs a non-empty alt: it’s the description for anyone who can’t see the picture.'
+			},
+			outro: 'That’s what a site looked like in 1996. Now you know how it was put together, and you’ll see why nobody does it this way anymore.'
+		},
+		say: { HTML: 'H T M L', GIF: 'jif', spacer: 'spacer', font: 'font', colspan: 'col span', bgcolor: 'B G color', CSS: 'C S S', W3C: 'W 3 C' }
+	};
+</script>
+
+<script>
+	import LegacyPage from '../../diagrams/LegacyPage.svelte';
+</script>
+
+## What a site looked like thirty years ago
+
+In the last lesson you wrote a simple page: a heading, paragraphs, a link. But by the mid-nineties sites already looked different, with a colored background, a menu on the left, a banner on top and a visitor counter at the bottom. Where did all that come from, if the HTML of the time had nothing about colors or columns?
+
+The answer is that authors learned to work around the limits. HTML was designed as a language for scientific documents, and it had no columns, no margins and no fonts. What it did have was the table: rows, cells, a background color for a cell, a width in pixels. If you slice a page with an invisible table, put the menu in one cell and the text in another, you get columns. That’s how the table went from a tool for data to a tool for layout.
+
+## The table as a grid
+
+A table is made of rows, `<tr>` (table row), and a row is made of cells, `<td>` (table data). Attributes adjust the looks. These are the ones you’ll meet in old pages and in the practice:
+
+- `width="600"` sets the table’s width in pixels;
+- `cellpadding` and `cellspacing` set the space inside the cells and between them;
+- `colspan="2"` stretches a cell across two columns, which is how a wide banner was made;
+- `valign="top"` sticks the content to the top of the cell;
+- `bgcolor` sets the background color.
+
+Look at the diagram: it shows a page put together this way. Turn on “Show the table grid” and the invisible table becomes visible. Then narrow the window to the size of a phone.
+
+<LegacyPage />
+
+<details>
+<summary>Check yourself: why does a 600 pixel wide table work badly on a phone?</summary>
+
+Its width is fixed in pixels and a table can’t shrink. If the window is narrower than 600 pixels, a horizontal scrollbar appears.
+
+</details>
+
+## Styling with tags
+
+The text in the table had to be colored somehow. For that, HTML 3.2 (1997) fixed a set of styling tags:
+
+- `<font face="..." size="..." color="...">` sets a typeface, a size and a color;
+- `<center>` centers;
+- `<b>` and `<i>` make text bold and italic (we’ll come back to them: they mean something different now);
+- the attributes `bgcolor`, `text` and `link` on `body` color the page and its links.
+
+Notice the principle: the styling is written into the markup itself, next to the text. If you need to change the color of the headings on all fifty pages of a site, you have to open and fix fifty files.
+
+CSS appeared almost at the same time. Its first version became a W3C Recommendation in December 1996, and HTML 4.0 in 1997 declared the `font` and `center` tags deprecated. But for years browsers handled CSS differently, and millions of pages were written the old way for a long time.
+
+## A counter and invisible pictures
+
+Two more tricks of the era.
+
+**The visitor counter.** At the bottom of the page was a picture of digits: “You are visitor number 000123”. A script on the server drew the picture on the fly and added one each time. It was both a boast and real statistics, because authors had no other way to find out how many people had come. We have no server, so in the practice the counter will simply be a picture of digits.
+
+**The spacer GIF.** HTML had no margins either. So people made a transparent picture one pixel by one pixel and stretched it with the `width` and `height` attributes to get empty space of the size they needed. The American designer David Siegel made the trick popular in his book “Creating Killer Web Sites” (1996). A page could hold dozens of these invisible pictures, and a person opening it with a screen reader heard “image, image, image”.
+
+<details>
+<summary>Check yourself: what was a spacer GIF for?</summary>
+
+To get empty space of a given size: HTML had no other way to make a margin then.
+
+</details>
+
+## Why nobody does this anymore
+
+All this worked as long as a site was opened on one kind of screen. Then the approach turned out to have troubles:
+
+1. **Content is tangled with looks.** To recolor a site you have to rewrite every page. A redesign became a building site.
+2. **Fixed widths.** A site designed for a 640 × 480 screen suits neither a big monitor nor a phone.
+3. **No meaning.** To a screen reader and a search engine, the page is a set of cells. They can only guess where the heading, the menu and the main content are.
+4. **Heavy code.** Nested tables, empty pictures and tags around every phrase made pages heavy for a modem.
+5. **Fragility.** Any edit in one cell could break the whole grid.
+
+That’s why in the next lessons you’ll rebuild this page. The meaning (this is a heading, this is a menu) moves into HTML, and the looks (color, width, columns) into CSS.
+
+One honest caveat: table layout has a last refuge. The email programs people read newsletters in still handle CSS the way it was in 2005, and emails are laid out with tables. For a website that is no reason: a site is read by browsers, and they can do everything modern.
+
+<details>
+<summary>Check yourself: name two reasons table layout went away.</summary>
+
+Any two of these: styling is mixed with content, fixed widths break on other screens, there is no meaning for screen readers and search engines, pages are heavy.
+
+</details>
+
+## Practice
+
+Take your first page and turn it into a 1996 site. This is era 1 of your time machine, and its version will be the first in the gallery. Your site needs the counter picture too. We don’t have the file, so the preview shows its description from `alt`: let it say what the picture shows. That way you’ll also see what the attribute is for.
+
+The page won’t be beautiful. That’s fine: you’ve just seen what old sites were made of. In the CSS part you’ll turn it into a modern site, step by step.
+
+## What was wrong with 1996, and what wasn’t
+
+Everything this lesson is about. But some things stayed right. The page was still text: any program could open it, links worked everywhere, and the size was tens of kilobytes. Modern sites weigh hundreds of times more, and in that they may be the ones that lose.

@@ -1,0 +1,542 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/06-forms.svx. */
+	export const metadata = {
+		id: '02-html/06-forms',
+		part: 2,
+		order: 6,
+		title: 'Forms: how a person sends something',
+		definition: 'A form is a <form> element with labeled fields that a visitor fills in to send data to a server. The browser checks it using attributes like required.',
+		summary:
+			'A form turns a visitor into a customer, and your site’s results depend on it. Afterwards you’ll build a form for your project’s main action, label every field, switch on the browser’s validation and add a separate consent box for personal data.',
+		minutes: 30,
+		teaches: ['html-forms', 'html-form-validation'],
+		requires: ['html-links', 'net-http-request-response', 'net-tls'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'Book a consultation', caption: 'The visitor answers', say: 'Until now visitors only read. A form is the one place they answer, and the site’s main action depends on it.' },
+				{ mood: 'hint', side: 'right', prop: 'phone', label: 'tel', say: 'A field’s type tells the browser what to expect: on tel a phone shows digits. A field with no name is never sent.' },
+				{ mood: 'explain', prop: 'server', label: 'check again', say: [{ text: 'The browser won’t send a broken form, but that’s a courtesy, not protection.' }, { who: 'Server', text: 'So I check everything again.' }] },
+				{ mood: 'cheer', side: 'right', prop: 'sheet', label: 'privacy notice', caption: 'Consent', say: 'The person ticks a separate consent box that links to the notice. A box ticked in advance doesn’t count.' }
+			]
+		},
+		practice: {
+			id: 'contact-form',
+			title: 'A form for your 2014 site’s main action',
+			task: 'The 2014 era begins. The page below looks like your 2005 one, and it is already built. Add a form for the project’s main action: a section of its own with an h2 heading, and inside it a form with method post and an action. The fields are a name (type text), a phone number (type tel) and a short description of what the person needs (a textarea). Give every field a label and an autocomplete attribute, and make the name and phone required. Then add a separate consent checkbox for personal data: required, not ticked in advance, with a link to privacy.html. The submit button, type submit, carries the same words as your project’s main action. Point the main action button at the top of the page to the form: its href must be #enquiry.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+                <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+            </p>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'method', kind: 'attr', selector: 'form', name: 'method', matches: '^post$' },
+				{ id: 'action', kind: 'attr', selector: 'form', name: 'action', matches: '\\S' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'types', kind: 'count', selector: 'form input[type="tel"], form input[type="email"]', min: 1 },
+				{ id: 'autocomplete', kind: 'count', selector: 'form input[autocomplete]', min: 2 },
+				{ id: 'required', kind: 'count', selector: 'form input[required]', min: 2 },
+				{ id: 'consent', kind: 'exists', selector: 'form input[type="checkbox"][required]' },
+				{ id: 'consent-clean', kind: 'count', selector: 'form input[type="checkbox"][checked]', max: 0 },
+				{ id: 'policy', kind: 'attr', selector: 'form a', name: 'href', matches: 'privacy' },
+				{ id: 'submit', kind: 'field', selector: 'form button[type="submit"]', field: 'mainAction.label' },
+				{ id: 'few-fields', kind: 'count', selector: 'form input:not([type="checkbox"]):not([type="hidden"]):not([type="submit"]), form select, form textarea', max: 4 },
+				{ id: 'cta', kind: 'attr', selector: 'a.button', name: 'href', matches: '^#enquiry$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why should a field have a label, and not only a placeholder hint?',
+				options: [
+					'A placeholder vanishes as soon as the person starts typing, and a screen reader doesn’t treat it like a label',
+					'A placeholder can’t show text in every language',
+					'Without a label the form won’t send'
+				],
+				answer: 0,
+				why: [
+					'Yes. A hint inside the field shows only while it’s empty, and then the person forgets what was asked. A label is also tied to its field: clicking the text puts the cursor in the field, and a screen reader names the field by its label.',
+					'No: a placeholder shows any text perfectly well.',
+					'No: the form will send without a label. It will just be awkward and inaccessible.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each kind of data with a suitable field type',
+				pairs: [
+					['phone number', 'tel'],
+					['email address', 'email'],
+					['date of a visit', 'date'],
+					['number of items', 'number']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which method should send an enquiry with a name and a phone number?',
+				options: ['POST', 'GET', 'Either, it makes no difference'],
+				answer: 0,
+				why: [
+					'Yes. POST puts the data in the body of the request, not in the address, so it doesn’t sit in the history or the logs as part of a link.',
+					'No: GET puts the data in the address. It lands in the history, in the logs and in any link someone shares. GET suits a search, not an enquiry.',
+					'No: there is a difference, and it concerns security and what can be done with the request.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'When you rely on consent to use personal data, what must the consent box be like?',
+				options: [
+					'Not ticked in advance: the person decides',
+					'Next to a link to the privacy notice',
+					'Hidden in small print at the bottom of the page',
+					'Given by a separate action, not bundled with other terms'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: consent must be a clear action by the person, not a default setting. The GDPR says silence and pre-ticked boxes are not consent.',
+					'Yes: people must be able to find out what will be done with their data, and why.',
+					'No: consent must be informed and clear, not hidden.',
+					'Yes: a request for consent must be clearly distinguishable from other matters, not dissolved in other terms.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Is the browser’s own checking of fields enough (required, type=email)?',
+				options: [
+					'No, the server must check everything again: a request can be sent without going through your form',
+					'Yes, the browser checks it all',
+					'Yes, but only if the form sends by POST'
+				],
+				answer: 0,
+				why: [
+					'Yes. Checking in the browser is a convenience for the person, not protection. Anyone can send a request without your form, so the server checks for itself.',
+					'No: browser checks can be bypassed in a minute.',
+					'No: the method has nothing to do with it.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a required field for an email address, with the label “Email”.',
+				starter: '',
+				checks: [
+					{ id: 'label', kind: 'label' },
+					{ id: 'email', kind: 'exists', selector: 'input[type=email][required]' },
+					{ id: 'text', kind: 'text', selector: 'label', matches: 'Email' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-form-anatomy',
+				front: 'What is a form made of?',
+				back: 'A form element with action (where) and method (how), fields (input, textarea, select) with names, labels, and a submit button.'
+			},
+			{
+				id: 'html-form-label',
+				front: 'How do you label a field?',
+				back: 'With a label tied to the field: the label’s for matches the field’s id. A placeholder is not a replacement for a label.'
+			},
+			{
+				id: 'html-form-types',
+				front: 'Why does input have different types?',
+				back: 'Phone (tel), email (email), date (date), number (number): the browser shows a suitable keyboard and checks the format.'
+			},
+			{
+				id: 'html-form-post',
+				front: 'GET or POST for an enquiry?',
+				back: 'POST: the data goes in the body of the request. GET puts it in the address, where it stays in history and logs. Serve forms only over HTTPS.'
+			},
+			{
+				id: 'html-form-consent',
+				front: 'What does consent to use personal data need?',
+				back: 'Where you rely on consent: a separate box, never ticked in advance, next to a link to the privacy notice, and as easy to withdraw as to give. Details are in part 15.'
+			}
+		],
+		sources: [
+			{
+				title: 'Your first form (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Your_first_form',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Client-side form validation (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Learn Forms (web.dev)', url: 'https://web.dev/learn/forms', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Forms Tutorial (W3C WAI)', url: 'https://www.w3.org/WAI/tutorials/forms/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{
+				title: 'UK GDPR, Article 7: conditions for consent (legislation.gov.uk)',
+				url: 'https://www.legislation.gov.uk/eur/2016/679/article/7',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'Guidelines 05/2020 on consent under the GDPR (EDPB)',
+				url: 'https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Consent (ICO guidance)',
+				url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/lawful-basis/consent/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'California Privacy Protection Agency', url: 'https://cppa.ca.gov/', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A form is where a visitor makes up their mind and does something. Let’s make it pleasant to use, and honest.',
+			hints: [
+				'The skeleton is a form element with an action and the method post. Inside, every field comes paired with a label whose for matches the field’s id.',
+				'For the phone, use the type tel. To help the browser, add autocomplete with the value tel (for the name, the value is name). To make a field compulsory, add required.',
+				'For consent, use a label that wraps a checkbox input with required, and put a link to privacy.html in the same label. Do not add the attribute checked.'
+			],
+			mistakes: {
+				method: 'An enquiry is sent with POST: give the form the method post.',
+				action: 'The form needs an action: the address the data goes to, for example /enquiry.',
+				labels: 'Some field has no label. Tie them together: the label’s for must equal the field’s id.',
+				types: 'The phone or email is still plain text. Give it the type tel or the type email.',
+				autocomplete: 'Add an autocomplete attribute to at least two fields: name and tel.',
+				required: 'At least two fields (name and phone) must be compulsory: add the required attribute.',
+				consent: 'You need a consent box: an input of type checkbox with the required attribute.',
+				'consent-clean': 'The consent box must not be ticked in advance: remove the checked attribute.',
+				policy: 'Next to the box you need a link to the privacy notice: its href must be privacy.html.',
+				submit: 'The submit button’s text should be your main action, worded as it is in the brief.',
+				'few-fields': 'Too many fields. Keep only what your main action needs: up to four fields, not counting checkboxes.',
+				cta: 'The main action button at the top now leads to the form: its href is #enquiry, and the form’s section has the id enquiry.'
+			},
+			outro: 'Now the visitor has a simple way to do what they came for. And to do it honestly: with clear labels and free consent.'
+		},
+		say: { HTML: 'H T M L', GET: 'get', POST: 'post', HTTPS: 'H T T P S', action: 'action', method: 'method', placeholder: 'place holder', autocomplete: 'auto complete', tel: 'tell', GDPR: 'G D P R', ICO: 'I C O', FTC: 'F T C', CCPA: 'C C P A', CPRA: 'C P R A', PECR: 'peck er' }
+	};
+</script>
+
+<script>
+	import FormRequest from '../../diagrams/FormRequest.svelte';
+</script>
+
+## A form: what the site is for
+
+Everything we’ve done so far, the visitor reads. A form is the one place they answer: they leave an enquiry, book, order, subscribe. So the form decides whether the site achieves what it was built for: your main action from the brief.
+
+In 2014, the era we’re in now on the time machine, forms gained a lot. HTML5 brought field types (`email`, `tel`, `date`), built-in validation and the `autocomplete` attribute, and phones learned to show the right keyboard. All of that used to be done with scripts. Now it’s built into the browser.
+
+## What a form is made of
+
+```html
+<form action="/enquiry" method="post">
+  <label for="f-name">What should we call you?</label>
+  <input id="f-name" name="name" type="text" autocomplete="name" required>
+
+  <label for="f-phone">Phone</label>
+  <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+
+  <button type="submit">Book a consultation</button>
+</form>
+```
+
+- `<form>` groups the fields. `action` says where to send the data, and `method` says how: `get` or `post`.
+- `<input>` is a field. Its `type` sets the look and the validation, and its `name` is the name under which the value reaches the server. A field with no `name` is not sent.
+- `<textarea>` is a multi-line field, and `<select>` is a choice from a list.
+- `<label>` is a caption tied to a field: the label has `for="f-name"` and the field has `id="f-name"`. Clicking the label puts the cursor in the field, and a screen reader names the field by its label.
+- `<button type="submit">` sends the form. Write the action on it (“Book”), not just “Send”.
+
+Look at the diagram: the form on the left, and on the right the request the browser will build, with the messages from validation. Switch the method and the field type.
+
+<FormRequest />
+
+<details>
+<summary>Check yourself: which field won’t reach the server?</summary>
+
+A field with no name attribute: the name is what puts the value into the request.
+
+</details>
+
+## GET and POST
+
+**GET** puts the data in the address: `/search?q=boundaries`. That works well for a search: the result can be bookmarked and shared as a link. **POST** puts the data in the body of the request, not in the address. Enquiries, sign-ups and anything that changes something on a server are sent that way. A person’s phone number shouldn’t end up in the browser history or in the address bar.
+
+And of course forms are served, and received, only over HTTPS, or the body of the request can be read on the way. You met this in the lesson on TLS.
+
+How does the server know what to do with the data? We have no server yet, so we simply write `action="/enquiry"`. In the part on servers you’ll see that a program stands behind that address. For static sites with no server of their own, there are ready-made form-handling services.
+
+## Field types, hints and validation
+
+The type tells the browser what kind of data the field expects:
+
+- `type="tel"` is a phone number: on a phone it opens the number pad;
+- `type="email"` is an email address: the browser checks that there is an `@`;
+- `type="date"`, `type="number"`, `type="url"` are a date, a number and a web address.
+
+The `autocomplete` attribute says what kind of data is being asked for: `name`, `tel`, `email`, `street-address`. The browser fills in what it has saved, and the person completes the form in seconds. It is also an accessibility requirement: autofill helps most the people who find typing hard.
+
+You switch validation on with attributes: `required` (the field is compulsory), `minlength`, `pattern`, `min` and `max`. The browser itself won’t let a wrong form go, and shows a message. For simple checks that is enough. But remember the main point: checking in the browser is a convenience, not protection. A request can be sent without going through your form, so the server always checks the data again.
+
+<details>
+<summary>Check yourself: what is autocomplete for?</summary>
+
+The browser fills in saved details, and the person finishes the form faster. For people who find typing hard, it is also a matter of accessibility.
+
+</details>
+
+## Fewer fields, more enquiries
+
+Every field is an obstacle. Ask only for what you can’t do without: to book, that’s a name and a way to reach the person, and the rest can be found out later. Don’t ask for what you already have. Don’t add a “title” or a “postcode” field where it isn’t needed.
+
+Write a field’s label for a person, not for a database. “What should we call you?” is warmer than “Full name”. And on the button say what will happen: “Book a consultation”.
+
+## Consent and personal data
+
+A name and a phone number are personal data: information that can identify a person. If you collect them, you are responsible for them. Under the EU’s General Data Protection Regulation (GDPR) and its UK twin, the UK GDPR, you are a “controller”. Which law applies depends on where your visitors are, not only on where you are: the GDPR also covers a business outside the EU that offers its services to people in the EU. In the United States there is no single federal law for ordinary websites. Instead there are state laws, such as California’s CCPA, as amended by the CPRA, and the FTC polices unfair or deceptive practices. The details are in part 15. In a form, the minimum is this:
+
+- **Know your lawful basis.** The GDPR lists six (Article 6), and consent is only one of them. For an enquiry form, “steps at the request of the person before entering a contract” or “legitimate interests” can fit instead, and then no box is needed. What you always need is to tell people, at the point where you collect their details, who you are, what you do with them and for how long. That is your privacy notice, so **link it from the form**.
+- **When you do rely on consent, it has strict marks.** It must be freely given, specific, informed and unambiguous, shown by a clear affirmative act (Article 4(11)). Recital 32 spells out that silence, pre-ticked boxes and inactivity are not consent, so **never use `checked`**.
+- **Keep it separate and provable.** A request for consent must stand apart from other terms (Article 7(2)), and you must be able to show that the person agreed (Article 7(1)). Anything extra, such as a newsletter, gets its own box, which must be optional (Article 7(4)).
+- **Make it easy to withdraw.** The person can take consent back at any time, and doing so must be as easy as giving it (Article 7(3)). Say how in the notice.
+- **Serve the form over HTTPS.**
+
+Our practice form uses one required box that says the person agrees to their details being used to reply. That is the plainest pattern, and it works because without the details the form cannot do its job. In the US, most states ask for a notice at the point of collection rather than a tick box for a form like this, and a few kinds of data, such as health or precise location, need opt-in in some states. Cookies and similar technologies have a rule of their own in the EU (the ePrivacy Directive) and the UK (PECR): consent before anything that isn’t strictly necessary. Russia’s law on personal data (152-FZ) goes further still, asking for consent that is separate from other terms and kept on record.
+
+This is general information, not legal advice, and it was checked on 28 October 2026. Laws change and differ between places. For a real site, have a lawyer read your consent text and privacy notice, and ask the authority: the Information Commissioner’s Office (ICO) in the UK, your national data protection authority in the EU, and in the US your state attorney general or the FTC.
+
+<details>
+<summary>Check yourself: may a consent box be ticked in advance?</summary>
+
+No. Consent must be a clear action by the person, and a box that was ticked in advance doesn’t count.
+
+</details>
+
+## Practice
+
+You’re starting the 2014 era. The page below looks like your 2005 one, but it’s a new version of the site (on the time machine, each era is built afresh). Add a form for your project’s main action.
+
+If your main action is “call” or “read”, a form is still useful as a fallback: for someone who doesn’t like phoning, it lets them leave a number.
+
+## What was wrong with forms before
+
+Fields were labeled with plain text beside them, checked only by scripts that didn’t work for some people, and the phone number was requested “in any format”. There were no consent boxes at all, and data was collected with no notice. Today the browser and the law ask for more. Both protect the person.

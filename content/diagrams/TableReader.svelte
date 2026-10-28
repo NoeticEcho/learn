@@ -7,12 +7,56 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let rows = $state([
-		{ title: 'Первая услуга', text: 'Что входит', price: 'от 5 000 ₽' },
-		{ title: 'Вторая услуга', text: 'Что входит', price: 'по смете' },
-		{ title: 'Третья услуга', text: 'Что входит', price: 'от 9 000 ₽' }
-	]);
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per
+	// edition, picked by the page's locale.
+	const W = pick({
+		ru: {
+			rows: [
+				{ title: 'Первая услуга', text: 'Что входит', price: 'от 5 000 ₽' },
+				{ title: 'Вторая услуга', text: 'Что входит', price: 'по смете' },
+				{ title: 'Третья услуга', text: 'Что входит', price: 'от 9 000 ₽' }
+			],
+			cols: ['Позиция', 'Что входит', 'Цена'] as readonly [string, string, string],
+			row: 'Строка',
+			caption: 'Таблица с заголовками и без них',
+			view: 'Вид таблицы',
+			withTh: 'С заголовками th и scope',
+			withTd: 'Из одних ячеек td',
+			tableCaption: 'Что входит и сколько стоит',
+			says: 'Диктор говорит:',
+			lq: '«',
+			rq: '»',
+			good1: 'Заголовки столбцов (',
+			good2: ') и строк (',
+			good3: ') дают каждой ячейке контекст. Человек, который слышит одну ячейку, понимает, что это.',
+			bad: 'Без заголовков ячейка это просто значение. Чтобы понять, что «от 5 000 ₽» относится к цене услуги, надо помнить всю таблицу.'
+		},
+		en: {
+			rows: [
+				{ title: 'First service', text: 'What is included', price: 'from £000' },
+				{ title: 'Second service', text: 'What is included', price: 'on quotation' },
+				{ title: 'Third service', text: 'What is included', price: 'from £0,000' }
+			],
+			cols: ['Item', 'What is included', 'Price'] as readonly [string, string, string],
+			row: 'Row',
+			caption: 'A table with headers and without them',
+			view: 'Table type',
+			withTh: 'With th and scope headers',
+			withTd: 'Plain td cells only',
+			tableCaption: 'What is included and what it costs',
+			says: 'The screen reader says:',
+			lq: '“',
+			rq: '”',
+			good1: 'Column headers (',
+			good2: ') and row headers (',
+			good3: ') give every cell its context. A person who hears a single cell still knows what it is.',
+			bad: 'Without headers a cell is just a value. To know that “from £000” is the price of a service, you have to remember the whole table.'
+		}
+	});
+
+	let rows = $state(W.rows);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -23,25 +67,25 @@
 		}
 	});
 
-	const cols = ['Позиция', 'Что входит', 'Цена'] as const;
+	const cols = W.cols;
 	let proper = $state(true);
 	let at = $state<{ r: number; c: 0 | 1 | 2 }>({ r: 0, c: 2 });
 	const cell = (r: number, c: number) => (c === 0 ? rows[r].title : c === 1 ? rows[r].text : rows[r].price);
 	const said = $derived(
-		proper ? `${cols[at.c]}: ${cell(at.r, at.c)}. Строка: ${rows[at.r].title}.` : cell(at.r, at.c)
+		proper ? `${cols[at.c]}: ${cell(at.r, at.c)}. ${W.row}: ${rows[at.r].title}.` : cell(at.r, at.c)
 	);
 	const choose = (r: number, c: number) => (at = { r, c: c as 0 | 1 | 2 });
 </script>
 
 <figure class="dg">
-	<figcaption>Таблица с заголовками и без них</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Вид таблицы">
-		<button type="button" aria-pressed={proper} onclick={() => (proper = true)}>С заголовками th и scope</button>
-		<button type="button" aria-pressed={!proper} onclick={() => (proper = false)}>Из одних ячеек td</button>
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.view}>
+		<button type="button" aria-pressed={proper} onclick={() => (proper = true)}>{W.withTh}</button>
+		<button type="button" aria-pressed={!proper} onclick={() => (proper = false)}>{W.withTd}</button>
 	</div>
 	<div class="wrap">
 		<table>
-			<caption>Что входит и сколько стоит</caption>
+			<caption>{W.tableCaption}</caption>
 			{#if proper}
 				<thead><tr>{#each cols as c (c)}<th scope="col">{c}</th>{/each}</tr></thead>
 			{:else}
@@ -62,12 +106,12 @@
 			</tbody>
 		</table>
 	</div>
-	<p class="dg-out" aria-live="polite">Диктор говорит: <strong>«{said}»</strong></p>
+	<p class="dg-out" aria-live="polite">{W.says} <strong>{W.lq}{said}{W.rq}</strong></p>
 	<p class="dg-out">
 		{#if proper}
-			Заголовки столбцов (<span class="dg-mono">th scope="col"</span>) и строк (<span class="dg-mono">th scope="row"</span>) дают каждой ячейке контекст. Человек, который слышит одну ячейку, понимает, что это.
+			{W.good1}<span class="dg-mono">th scope="col"</span>{W.good2}<span class="dg-mono">th scope="row"</span>{W.good3}
 		{:else}
-			Без заголовков ячейка это просто значение. Чтобы понять, что «от 5 000 ₽» относится к цене услуги, надо помнить всю таблицу.
+			{W.bad}
 		{/if}
 	</p>
 </figure>

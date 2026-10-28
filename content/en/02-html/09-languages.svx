@@ -1,0 +1,548 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/09-languages.svx. */
+	export const metadata = {
+		id: '02-html/09-languages',
+		part: 2,
+		order: 9,
+		title: 'Site languages: lang, hreflang and translation',
+		definition: 'lang is an HTML attribute that gives the language of a page or phrase to screen readers and browsers. hreflang links versions in different languages.',
+		summary:
+			'If a site has two languages, search engines and screen readers must be told which is which, and the addresses must not get tangled. Afterwards you’ll mark up the language of a page and its translations, and you’ll know why machine translation of legal texts is risky.',
+		minutes: 15,
+		teaches: ['html-lang-i18n'],
+		requires: ['html-head-meta', 'html-a11y-basics'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', caption: 'lang is missing', say: 'French read in an English voice is gibberish. The lang attribute on html tells screen readers and browsers the language.' },
+				{ mood: 'explain', side: 'right', prop: 'network', label: 'en and fr', caption: 'hreflang', say: 'A search engine can’t guess that two pages translate each other. Link both ways, or the connection is ignored.' },
+				{ mood: 'hint', prop: 'browser', label: 'Français', say: 'Label the link to another language in that language: “Français”, not a flag or FR. And never redirect people by IP.' },
+				{ mood: 'hmm', side: 'right', prop: 'sheet', label: 'contract', caption: 'Translation', say: 'Machine translation is fine for getting the gist. In a contract one word can change the duties: use a person.' }
+			]
+		},
+		practice: {
+			id: 'languages-hreflang',
+			title: 'The languages of your site',
+			task: 'Mark up the languages of your page from the languages field of your brief. The html element must have lang set to en. In the head, add for every site language a link with rel set to alternate, an hreflang and a full address (for example https://riverbend.example/en/ and https://riverbend.example/ru/), plus an x-default entry for the case when no language fits. If your project has a second language, add a navigation to the header with a link to it: the link carries hreflang and lang for that language. If there is only one language, keep the self-reference and the x-default: the place for a future second language is ready.',
+			era: 4,
+			continues: 'a11y-pass',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'lang', kind: 'lang', equals: 'en' },
+				{ id: 'self', kind: 'exists', selector: 'link[rel="alternate"][hreflang="en"]' },
+				{ id: 'x-default', kind: 'exists', selector: 'link[rel="alternate"][hreflang="x-default"]' },
+				{ id: 'absolute', kind: 'count', selector: 'link[rel="alternate"][hreflang]:not([href^="https://"])', max: 0 },
+				{ id: 'en-version', kind: 'exists', selector: 'link[rel="alternate"][hreflang="ru"]', when: { brief: 'languages', contains: 'ru' } },
+				{ id: 'switch', kind: 'exists', selector: 'nav a[hreflang="ru"][lang="ru"]', when: { brief: 'languages', contains: 'ru' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is the lang attribute on the html element for?',
+				options: [
+					'So a screen reader picks the right pronunciation, and the browser and search engine know the language',
+					'So the browser translates the page automatically',
+					'So the page opens faster'
+				],
+				answer: 0,
+				why: [
+					'Yes. Without lang a screen reader may read your text in the wrong voice. Hyphenation, quotation marks, spell checking and the “translate this page?” offer depend on it too.',
+					'No: a browser may offer a translation but never switches it on by itself. lang only helps it see what to translate.',
+					'No: it makes no difference to speed.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are true about hreflang?',
+				options: [
+					'The connection must be mutual: the English page points to the French one, and the French page points back',
+					'A page also points to itself',
+					'Addresses are written relative, to keep them short',
+					'The x-default entry says what to show if the visitor’s language doesn’t fit'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a search engine ignores a one-way link.',
+					'Yes: in the list of versions every page lists itself too.',
+					'No: the addresses in hreflang are complete, with https://.',
+					'Yes: it is the fallback for everyone else.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each way of separating languages in the address with its name',
+				pairs: [
+					['example.com/fr/', 'subfolder'],
+					['fr.example.com', 'subdomain'],
+					['example.fr for the French version', 'separate domain']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the best way to label the link to the French version?',
+				options: ['Français, with hreflang=fr and lang=fr', 'FR', 'The French flag'],
+				answer: 0,
+				why: [
+					'Yes. The name of a language is written in that language: a person who knows it will find the link even if the rest of the page is unreadable to them. lang=fr makes a screen reader pronounce the word in French.',
+					'No: not everybody understands the code, and a screen reader would spell it out.',
+					'No: a flag means a country, not a language, and a screen reader can’t read it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Should you automatically redirect a visitor to their language by IP address?',
+				options: [
+					'Better to offer, not force: browser language and country don’t always match what a person wants',
+					'Yes, always',
+					'No, never change the language'
+				],
+				answer: 0,
+				why: [
+					'Yes. A person may be traveling, on someone else’s computer, or just want the other version. So offer the switch and keep a language selector.',
+					'No: a forced change of language is annoying, and a search engine may never see the other version.',
+					'No: you can offer one, the point is to leave the choice.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a paragraph in English that contains the French word “bonjour” inside a span, with its lang attribute set to fr.',
+				starter: '',
+				checks: [
+					{ id: 'span-lang', kind: 'attr', selector: 'p span', name: 'lang', matches: '^fr$' },
+					{ id: 'online', kind: 'text', selector: 'p span', matches: 'bonjour' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-lang-attr',
+				front: 'What does lang do?',
+				back: 'It gives the language of a page or a fragment: a screen reader picks the pronunciation, the browser knows hyphenation, quotes and translation, and a search engine knows the language. It goes on html and on fragments in another language.'
+			},
+			{
+				id: 'html-hreflang',
+				front: 'How do you connect translations of a page?',
+				back: 'In the head of every version: link rel=alternate with an hreflang and an href for all versions, itself included, plus x-default. The connection is mutual and the addresses are complete.'
+			},
+			{
+				id: 'html-lang-urls',
+				front: 'How do you separate languages in the address?',
+				back: 'By a subfolder (/en/, /fr/), a subdomain (fr.example.com) or a separate domain. Choose one way and stick to it.'
+			},
+			{
+				id: 'html-lang-mt',
+				front: 'Why is machine translation of a legal text risky?',
+				back: 'Terms mean different things in different countries, and one word can change obligations. Such texts need a translator who knows the subject, and the same person to check them.'
+			}
+		],
+		sources: [
+			{
+				title: 'lang (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/lang',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Declaring language in HTML (W3C)',
+				url: 'https://www.w3.org/International/questions/qa-html-language-declarations',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Tell Google about localized versions of your page',
+				url: 'https://developers.google.com/search/docs/specialty/international/localized-versions',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'A site in two languages is two pages that know about each other. Let’s tell both people and search engines.',
+			hints: [
+				'In the head, for every language: a link with rel set to alternate, hreflang set to the language code (en, then ru for the second language) and a full https address in href.',
+				'For everyone else: the same kind of link with hreflang set to x-default, pointing at the main address. The addresses are complete everywhere.',
+				'The link to the other version goes in a nav with its own aria-label, and carries the same hreflang and lang as the version it leads to.'
+			],
+			mistakes: {
+				lang: 'The html element must have lang set to en.',
+				self: 'The page must point to itself too: a link with rel set to alternate and hreflang set to en.',
+				'x-default': 'Add an x-default entry: a link with rel set to alternate and hreflang set to x-default.',
+				absolute: 'The addresses in hreflang must be complete and start with https://.',
+				'en-version': 'Your site has a second language: it needs its own alternate link with that language in hreflang.',
+				switch: 'Add a link to the second language to the navigation, with hreflang and lang for that language.'
+			},
+			outro: 'Now the pages know about each other, and a screen reader reads every word in the right voice. That is the last step of the 2014 markup. Next we dress the page in CSS.'
+		},
+		say: { HTML: 'H T M L', lang: 'lang', hreflang: 'H ref lang', alternate: 'alternate', 'x-default': 'X default', UTF: 'U T F', ccTLD: 'C C T L D', Français: 'fran-say' }
+	};
+</script>
+
+<script>
+	import HreflangMap from '../../diagrams/HreflangMap.svelte';
+</script>
+
+## The language of a page
+
+A page in English must say so. You put the `lang` attribute on the `html` element in the very first lesson. What is it really for?
+
+- A **screen reader** picks its voice and pronunciation rules by language. French text read in an English voice is gibberish.
+- The **browser** uses it for hyphenation and quotation marks, for spell checking, and to decide whether to offer a translation.
+- A **search engine** uses it to confirm the language of the page.
+
+A language is set on more than the page. If a phrase in another language sits inside English text, give it a `lang` of its own: `<span lang="fr">bonjour</span>`. A screen reader will pronounce the word in French instead of spelling out English letters. A language is given as a two- or three-letter code (`en`, `fr`, `de`), with a region when needed (`en-GB`, `pt-BR`).
+
+<details>
+<summary>Check yourself: why mark a word in another language with lang inside the text?</summary>
+
+So a screen reader reads it in the right voice instead of as a string of English letters.
+
+</details>
+
+## A site in two languages
+
+If your brief has two languages, you have two versions of every page. Three questions: how to tell the addresses apart, how to connect the versions, and how to translate.
+
+### Addresses
+
+Three ways:
+
+- a **subfolder** is `example.com/en/` and `example.com/de/`: the simplest, everything on one domain;
+- a **subdomain** is `de.example.com`: handy if different people run the versions;
+- a **separate domain** is `example.com` and `example.de`: useful for the markets of different countries, but everything has to be run twice.
+
+Choose one way and stick to it. It also helps to name the pages in each version after the language: `/en/services/` and `/de/leistungen/`. The address then reads naturally, and search engines understand it well.
+
+### The connection between versions
+
+A search engine can’t work out by itself that two pages translate each other. You tell it in the `head` of every version:
+
+```html
+<link rel="alternate" hreflang="en" href="https://example.com/en/">
+<link rel="alternate" hreflang="de" href="https://example.com/de/">
+<link rel="alternate" hreflang="x-default" href="https://example.com/">
+```
+
+The rules: the addresses are complete; **the connection is mutual** (if the English page points to the German one, the German page points back to the English one, or the link is ignored); a page lists **itself** too; and the `x-default` entry shows which one to pick when the visitor’s language doesn’t fit. It is a hint to the search engine, not a command. Google documents the rules, and other search engines use these signals differently, so check each one’s webmaster help.
+
+Play with the diagram: change the visitor’s language and the connection.
+
+<HreflangMap />
+
+<details>
+<summary>Check yourself: what happens to a one-way hreflang connection?</summary>
+
+The search engine ignores it. The connection must be mutual: both pages have to point to each other.
+
+</details>
+
+### The switcher
+
+People need a link to the other version in the header. Label it **in its own language**: “Français”, not “FR” and not a flag. A person who knows French will find it even if they can’t understand the rest of the page. Give the link `hreflang="fr"` and `lang="fr"`.
+
+Don’t force a redirect by IP address or browser language: a person may be traveling, abroad or on someone else’s computer. Offer, but leave the choice.
+
+## Translation
+
+Translating an interface (buttons, menus) is easy. Translating real text is much harder, and here is what to know.
+
+- **Machine translation** is good for understanding what a text is about, but not for publishing. Have someone who knows both the subject and the language proofread it.
+- **Legal and professional texts** are a special risk area. The same term means different things in different countries: a job title, a qualification, a document or a kind of expertise has no exact equivalent. A solicitor in England, an attorney in the United States and an avocat in France do not do quite the same job, and a chartered surveyor is not a licensed land surveyor. One word in translation can change an obligation or mislead a client. For experts, lawyers and doctors, give the translation to someone who knows the field, and have it checked.
+- **Not everything needs translating.** Names, titles of documents and addresses are better left as they are and explained.
+
+One last thing: both versions have to be kept up. One language you maintain is better than two, one of them out of date.
+
+## Practice
+
+Mark up the languages of your page. If your brief has one language, still add the self-reference and `x-default`: when the second language comes, the structure is ready. If it has two, add the link to the other version too.
+
+## What was wrong with 2014
+
+Sites in two languages were built as a single page with a script switch and a single address: a search engine saw only one version, and a screen reader read everything in one voice. An automatic translation widget was dropped onto pages with terms and contracts. Today it is better to have two complete versions with mutual links, and a human translation wherever obligations depend on the words.

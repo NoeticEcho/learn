@@ -7,12 +7,47 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let title = $state('Название проекта — чем вы занимаетесь');
-	let description = $state('Кто вы, для кого и что человек получит. Одна-две фразы, в которых есть то, что ищут.');
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			site: 'zarechye.example',
+			title: 'Название проекта — чем вы занимаетесь',
+			description: 'Кто вы, для кого и что человек получит. Одна-две фразы, в которых есть то, что ищут.',
+			caption: 'Одна страница, три превью',
+			ogTitle: 'og:title (если пусто, берётся title)',
+			ogDescription: 'og:description (если пусто, берётся description)',
+			tab: 'Вкладка браузера',
+			serp: 'Поисковая выдача',
+			lengths: (t: number, d: number) => `Длина: title ${t} (около 60 видно), description ${d} (около 155–160).`,
+			messenger: 'Ссылка в мессенджере',
+			image: 'картинка',
+			noImage: 'нет картинки',
+			absolute: 'Адрес картинки должен быть полным, с https://: мессенджер сам по относительному адресу её не найдёт.'
+		},
+		en: {
+			site: 'riverbend.example',
+			title: 'Project name: what you do',
+			description: 'Who you are, who it is for and what a person gets. One or two sentences with the words people search for.',
+			caption: 'One page, three previews',
+			ogTitle: 'og:title (if empty, title is used)',
+			ogDescription: 'og:description (if empty, description is used)',
+			tab: 'Browser tab',
+			serp: 'Search result',
+			lengths: (t: number, d: number) => `Length: title ${t} (about 60 show), description ${d} (about 155 to 160).`,
+			messenger: 'Link in a messenger',
+			image: 'image',
+			noImage: 'no image',
+			absolute: 'The image address must be complete, starting with https://. A messenger cannot find the image from a relative address.'
+		}
+	});
+
+	let title = $state(W.title);
+	let description = $state(W.description);
 	let ogTitle = $state('');
 	let ogDescription = $state('');
-	let image = $state('https://zarechye.example/og.png');
+	let image = $state(`https://${W.site}/og.png`);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -29,37 +64,37 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Одна страница, три превью</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="fields">
 		<label>title <input type="text" bind:value={title} /></label>
 		<label>description <textarea rows="2" bind:value={description}></textarea></label>
-		<label>og:title (если пусто, берётся title) <input type="text" bind:value={ogTitle} /></label>
-		<label>og:description (если пусто, берётся description) <textarea rows="2" bind:value={ogDescription}></textarea></label>
+		<label>{W.ogTitle} <input type="text" bind:value={ogTitle} /></label>
+		<label>{W.ogDescription} <textarea rows="2" bind:value={ogDescription}></textarea></label>
 		<label>og:image <input type="text" bind:value={image} spellcheck="false" /></label>
 	</div>
 	<div class="previews">
 		<div>
-			<div class="dh">Вкладка браузера</div>
+			<div class="dh">{W.tab}</div>
 			<p class="tab">{cut(title, 24)}</p>
 		</div>
 		<div>
-			<div class="dh">Поисковая выдача</div>
+			<div class="dh">{W.serp}</div>
 			<div class="serp">
-				<p class="url">zarechye.example</p>
+				<p class="url">{W.site}</p>
 				<p class="t">{cut(title, 60)}</p>
 				<p class="d">{cut(description, 160)}</p>
 			</div>
-			<p class="note">Длина: title {title.length} (около 60 видно), description {description.length} (около 155–160).</p>
+			<p class="note">{W.lengths(title.length, description.length)}</p>
 		</div>
 		<div>
-			<div class="dh">Ссылка в мессенджере</div>
+			<div class="dh">{W.messenger}</div>
 			<div class="card">
-				<div class="img">{absolute ? 'картинка' : 'нет картинки'}</div>
-				<p class="url">zarechye.example</p>
+				<div class="img">{absolute ? W.image : W.noImage}</div>
+				<p class="url">{W.site}</p>
 				<p class="t">{cut(card.title, 70)}</p>
 				<p class="d">{cut(card.description, 110)}</p>
 			</div>
-			{#if !absolute}<p class="note" role="status">Адрес картинки должен быть полным, с https://: мессенджер сам по относительному адресу её не найдёт.</p>{/if}
+			{#if !absolute}<p class="note" role="status">{W.absolute}</p>{/if}
 		</div>
 	</div>
 </figure>

@@ -1,0 +1,577 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/08-accessibility.svx. */
+	export const metadata = {
+		id: '02-html/08-accessibility',
+		part: 2,
+		order: 8,
+		title: 'Accessibility: a site for everyone',
+		definition: 'Web accessibility is a site’s ability to be used in different ways: with a screen reader, by keyboard, with the sound off. Its basis is WCAG and sound HTML.',
+		summary:
+			'An accessible site is read by people with low vision or hearing loss, by keyboard users and by commuters on a noisy train, and search engines see it better too. Afterwards you’ll check a page against the main WCAG principles, add a “skip to content” link and know when ARIA isn’t needed.',
+		minutes: 25,
+		teaches: ['html-a11y-basics', 'html-aria-first-rule'],
+		requires: ['html-forms', 'html-images', 'html-heading-outline'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'phone', label: 'in bright sun', caption: 'Who needs this', say: 'A child in one arm, a broken mouse, a screen lost in the sun. Everyone has been someone who needs accessibility.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', label: 'Tab  Tab  Tab', say: 'Tab moves focus to the next link or button. The order follows the markup, and the focus outline stays.' },
+				{ mood: 'explain', prop: 'editor', label: 'div role=button', say: 'The role on a div changes only what a screen reader announces. It adds no focus and no Enter key.' },
+				{ mood: 'cheer', side: 'right', caption: 'First rule of ARIA', say: 'A native button takes focus and fires on Enter and Space by itself. Reach for the real element first, ARIA later.' }
+			]
+		},
+		practice: {
+			id: 'a11y-pass',
+			title: 'An accessibility pass',
+			task: 'Go through your page as someone with a keyboard and a screen reader would. 1) Make the first thing in body a link “Skip to content” with href=#main, and give main the id main. 2) Add a hint to the phone field: a short text in a small element with an id, and an aria-describedby attribute on the field. 3) In the form, add a group of radio buttons “When is it best to call?” (radio buttons with labels) wrapped in a fieldset with a legend. 4) Make sure every image has alt, every field has a label, every nav has its own name (aria-label), there are no empty links or buttons, no tabindex above zero and no home-made buttons made from a div.',
+			era: 4,
+			continues: 'head-meta',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+            </p>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'skip', kind: 'exists', selector: 'body > a:first-child[href="#main"]' },
+				{ id: 'main-id', kind: 'exists', selector: 'main#main' },
+				{ id: 'lang', kind: 'lang', equals: 'en' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'alt', kind: 'count', selector: 'img:not([alt])', max: 0 },
+				{ id: 'hint', kind: 'exists', selector: 'input[aria-describedby]' },
+				{ id: 'fieldset', kind: 'exists', selector: 'fieldset > legend' },
+				{ id: 'nav-names', kind: 'count', selector: 'nav:not([aria-label]):not([aria-labelledby])', max: 0 },
+				{ id: 'tabindex', kind: 'count', selector: '[tabindex]:not([tabindex="0"]):not([tabindex="-1"])', max: 0 },
+				{ id: 'native', kind: 'count', selector: '[role="button"], [role="link"], [onclick]', max: 0 },
+				{ id: 'no-empty', kind: 'count', selector: 'a:empty, button:empty', max: 0 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is the first rule of ARIA?',
+				options: [
+					'If a suitable native HTML element exists, use it instead of giving a div a role',
+					'Add aria-label to everything you see',
+					'Every element on the page needs ARIA'
+				],
+				answer: 0,
+				why: [
+					'Yes. A native button already knows how to take focus, respond to the keyboard and call itself a button. ARIA only changes what a screen reader announces and adds no behavior. As the W3C puts it, no ARIA is better than bad ARIA.',
+					'No: extra labels confuse people, and are sometimes read twice or override the visible text.',
+					'No: a well-marked-up page needs ARIA only now and then.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each WCAG principle with its meaning',
+				pairs: [
+					['Perceivable', 'information can be seen or heard: there is alt text, captions, contrast'],
+					['Operable', 'everything can be used from the keyboard, without hurry'],
+					['Understandable', 'text and behavior are predictable, and errors are explained'],
+					['Robust', 'the page works in different browsers and with screen readers']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why put a “Skip to content” link at the very start of the page?',
+				options: [
+					'So a keyboard or screen reader user doesn’t have to tab through the whole menu on every page',
+					'So that search engines find the main content faster',
+					'For looks: it usually carries a little arrow'
+				],
+				answer: 0,
+				why: [
+					'Yes. It comes first in the tab order and jumps straight to main. It is usually hidden until it receives focus.',
+					'No: search has nothing to do with it.',
+					'No: it is functional, not decorative.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are true about the tab order?',
+				options: [
+					'It follows the order of the elements in the markup',
+					'The focus outline must not be removed unless you replace it with something just as visible',
+					'To change the order you set tabindex to 5, 6, 7',
+					'Native links, buttons and fields get focus by themselves'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: that is why the order of the elements in the HTML matters.',
+					'Yes: the outline shows a keyboard user where they are. You can remove it only by replacing it with a better one.',
+					'No: a positive tabindex breaks the natural order, and such a page is impossible to maintain. Put the elements in the right order in the markup instead.',
+					'Yes: a link with an href, a button, an input, a select and a textarea are already in the tab order.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the minimum contrast of ordinary text against its background in WCAG, level AA?',
+				options: ['4.5 to 1', '3 to 1', '7 to 1'],
+				answer: 0,
+				why: [
+					'Yes. Large text needs only 3 to 1, and 7 to 1 is level AAA. You’ll learn how to measure it in the CSS part.',
+					'No: 3 to 1 is for large text and icons, and ordinary text needs more.',
+					'No: 7 to 1 is the stricter level AAA, which isn’t required everywhere.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a button with the text “Open menu” using the native element.',
+				starter: '',
+				checks: [
+					{ id: 'button', kind: 'exists', selector: 'button' },
+					{ id: 'text', kind: 'text', selector: 'button', matches: 'Open menu' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-a11y-why',
+				front: 'Who is accessibility for?',
+				back: 'People with low vision, hearing loss or limited movement, and everyone else in some circumstances: sun on the screen, one free hand, a noisy train. It helps search too.'
+			},
+			{
+				id: 'html-a11y-pour',
+				front: 'What is POUR in WCAG?',
+				back: 'Four principles: Perceivable, Operable, Understandable, Robust.'
+			},
+			{
+				id: 'html-a11y-aria',
+				front: 'What is the first rule of ARIA?',
+				back: 'If a native element has the meaning and behavior you need, use it. ARIA changes only what a screen reader announces and adds no behavior.'
+			},
+			{
+				id: 'html-a11y-focus',
+				front: 'What matters about keyboard focus?',
+				back: 'An order that follows the markup, a visible focus outline, everything reachable without a mouse, and a “skip to content” link at the top.'
+			},
+			{
+				id: 'html-a11y-basics',
+				front: 'Name some quick accessibility wins',
+				back: 'alt on images, a label on every field, headings in order, lang on the page, semantic elements, native buttons, contrast of at least 4.5 to 1.'
+			}
+		],
+		sources: [
+			{
+				title: 'HTML: A good basis for accessibility (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'What is accessibility? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/What_is_accessibility',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Learn Accessibility (web.dev)', url: 'https://web.dev/learn/accessibility', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Web Content Accessibility Guidelines (WCAG) 2.2', url: 'https://www.w3.org/TR/WCAG22/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Using ARIA (W3C)', url: 'https://www.w3.org/TR/using-aria/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'The WebAIM Million: an accessibility analysis of the top 1,000,000 home pages', url: 'https://webaim.org/projects/million/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Guidance on Web Accessibility and the ADA (US Department of Justice)', url: 'https://www.ada.gov/resources/web-guidance/', licence: 'PD', kind: 'docs', lang: 'en' },
+			{
+				title: 'European Accessibility Act (European Commission)',
+				url: 'https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/european-accessibility-act-eaa_en',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Accessibility requirements for public sector websites and apps (GOV.UK)',
+				url: 'https://www.gov.uk/guidance/accessibility-requirements-for-public-sector-websites-and-apps',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'The Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018',
+				url: 'https://www.legislation.gov.uk/uksi/2018/952/contents',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you’ll walk through the page the way a keyboard or screen reader user does. It’s quicker than it sounds, and it shows clearly what needs fixing.',
+			hints: [
+				'The skip link is the very first element in body, an a element whose href is #main. The main element needs the id main.',
+				'A hint for a field: give the input an aria-describedby attribute, and give the small element holding the hint an id. The attribute’s value is that id.',
+				'A group of radio buttons goes in a fieldset whose first child is a legend that names the group, for example “When is it best to call?”.'
+			],
+			mistakes: {
+				skip: 'The first element in body must be a link to #main with the text “Skip to content”.',
+				'main-id': 'The main element needs the id main, so the skip link knows where to go.',
+				lang: 'The html element must have the language set to en.',
+				labels: 'Some field has no label.',
+				alt: 'Every image must have an alt attribute.',
+				hint: 'Add a hint and connect it to the field with aria-describedby.',
+				fieldset: 'Wrap the group of radio buttons in a fieldset with a legend: the caption of the whole group.',
+				'nav-names': 'Every nav needs a name: give it an aria-label such as Site sections.',
+				tabindex: 'There is still a tabindex above zero. Remove it: the markup sets the order.',
+				native: 'There is still a home-made element with a button role or an onclick. Replace it with a native button or a.',
+				'no-empty': 'There is an empty link or a button with no text. It needs a name.'
+			},
+			outro: 'Now the page can be used without a mouse and without sight, and it’s clearer for everyone else too.'
+		},
+		say: { HTML: 'H T M L', WCAG: 'wuh-cag', ARIA: 'AIR-ee-uh', POUR: 'pour', AA: 'double A', AAA: 'triple A', tabindex: 'tab index', fieldset: 'field set', ADA: 'A D A', EAA: 'E A A', WebAIM: 'web A I M' }
+	};
+</script>
+
+<script>
+	import KeyboardTest from '../../diagrams/KeyboardTest.svelte';
+</script>
+
+## Who needs it
+
+Accessibility isn’t “a special version of the site for disabled people”. It means a site that can be used in different ways. Here is who actually reads yours:
+
+- people who **can’t see** the page and listen to it with a screen reader, or read it with their fingers on a braille display;
+- people with **low vision**, who enlarge the text several times over, or who have a color vision deficiency;
+- people who **can’t use a mouse**: after an injury, with a tremor, or just because their other hand is holding a child;
+- people who **can’t hear**, and everyone watching a video with the sound off on a train;
+- people with **cognitive differences**, who need plain text and a calm order.
+
+Each of us has been on this list: in bright sun a phone screen is unreadable, and with a broken arm the mouse is out of reach. A search engine, too, behaves like the most patient blind reader: it can’t see pictures either and follows the markup. That is why accessible pages are almost always easier to find.
+
+Every year the WebAIM Million study automatically checks the home pages of a million sites, and every year the great majority have errors. The most common are low text contrast, images without alt, fields without labels, and empty links and buttons. They are easy to fix, and you already know how: all of them came up in earlier lessons.
+
+## The four principles
+
+The WCAG standard (Web Content Accessibility Guidelines, currently version 2.2) rests on four principles, known by the first letters of their names as POUR:
+
+1. **Perceivable**: information can be seen or heard. An image has `alt`, a video has captions, text has enough contrast.
+2. **Operable**: everything can be used from the keyboard, and nobody is rushed.
+3. **Understandable**: the page language is set, the text is clear, behavior is predictable, and form errors are explained in words.
+4. **Robust**: the page works in different browsers and with different assistive software. The best way to get there is to write correct HTML.
+
+Every requirement has a level: A (the minimum), AA (what is usually required) and AAA (the strictest). Aim for AA.
+
+## What the law says
+
+Accessibility is also a legal matter, and the rules depend on where your visitors and your business are. In outline, as of 28 October 2026:
+
+- **United States.** The Americans with Disabilities Act covers state and local governments (Title II) and businesses open to the public (Title III). The Department of Justice’s position is that this includes their websites, and lawsuits over inaccessible sites are common. WCAG AA is the usual yardstick, and a 2024 rule makes WCAG 2.1 AA the formal standard for state and local government sites.
+- **European Union.** The European Accessibility Act (Directive (EU) 2019/882) has applied since 28 June 2025 to products and services such as e-commerce, banking and e-books, with an exemption for very small service businesses. Conforming to the harmonised standard EN 301 549, which builds on WCAG, is the usual way to show you comply. Public sector sites fall under an earlier directive, 2016/2102.
+- **United Kingdom.** The Equality Act 2010 requires every service provider to make reasonable adjustments for disabled people, which can include changes to a website. Public sector bodies must also meet the Accessibility Regulations 2018, which require a site to be perceivable, operable, understandable and robust and to publish an accessibility statement. The Equality and Human Rights Commission enforces them in England, Scotland and Wales.
+- **For comparison,** Russia has its own national standard for sites, GOST R 52872-2019.
+
+This is general information, not legal advice, and the rules change. For a real site, ask a qualified lawyer, or the authority in your country: in the UK the Equality and Human Rights Commission (for public bodies, the Government Digital Service), in the EU your national market surveillance authority, in the US the Department of Justice’s ADA site, ada.gov.
+
+<details>
+<summary>Check yourself: what does the letter O in POUR stand for?</summary>
+
+Operable: everything can be used from the keyboard, and nobody is rushed.
+
+</details>
+
+## Keyboard: order and focus
+
+Many people use a site without a mouse, with just the Tab key. Tab moves **focus** (the selected element) to the next link, button or field; Shift+Tab moves back; Enter follows a link, and Enter or Space presses a button. What matters:
+
+- the focus order follows the **order of the markup**. So put elements in the HTML in the order people read them, rather than moving them around later with CSS;
+- the focused element must be **visible**: the focus outline shows where you are. You must not remove the default outline (`outline: none`) without replacing it with something just as clear;
+- links, buttons and fields **receive focus by themselves**. A positive `tabindex="5"` isn’t needed: it breaks the natural order. Two values are fine: `tabindex="0"` (make something focusable that wasn’t) and `tabindex="-1"` (take it out of the order but keep it reachable from a script);
+- at the very start of the page comes a **“Skip to content”** link. It leads to `main` and saves pressing Tab twenty times through the menu on every page. It is usually hidden until it receives focus.
+
+Try it yourself: the diagram has three “buttons” that look alike. Tab through them and press Enter and Space.
+
+<KeyboardTest />
+
+<details>
+<summary>Check yourself: why is a native button better than a div with a click handler?</summary>
+
+It gets focus by itself, fires on both Enter and Space, and a screen reader knows it is a button. With a div you would have to add all of that yourself.
+
+</details>
+
+## ARIA: when it’s needed and when it isn’t
+
+**ARIA** (Accessible Rich Internet Applications) is a set of extra attributes that change what a screen reader announces: `role` (the role), `aria-label` (the name), `aria-describedby` (a hint), `aria-current` (the current item), `aria-expanded` (open or closed). It is for complex interfaces that have no native element.
+
+The first rule of ARIA: **if a native HTML element has the meaning and behavior you need, use it**. ARIA only changes how things are announced and adds no behavior: `role="button"` won’t make a div work from the keyboard. And wrong ARIA is worse than none, because it promises a screen reader something that isn’t there. “No ARIA is better than bad ARIA,” says the W3C.
+
+There is a second half to it: **some “complex” interfaces are now native too**. A collapsible block is `<details>` with `<summary>`, a dialog is `<dialog>`, a choice from a list is `<select>`. Use them.
+
+Where ARIA does belong on our page: `aria-label` on a `nav` when the page has more than one; `aria-describedby` to connect a field with its hint; `aria-current="page"` to mark the current menu item.
+
+<details>
+<summary>Check yourself: does a button role on a div make it usable from the keyboard?</summary>
+
+No. The role changes only what a screen reader announces. Focus and the Enter and Space keys would have to be written in a script. It is simpler to use a native button.
+
+</details>
+
+## Practice
+
+You’ll go through the 2014-era page as if it were someone else’s. What’s needed isn’t hard, and you’ll see each fix in the checks. Then, outside our preview, do one more thing: open your page in a browser, press Tab and go through it without touching the mouse. Can you see where focus is? Do you get stuck in the menu? After that, run Lighthouse from the developer tools, the Accessibility category, and see what it finds.
+
+## What was wrong with 2014
+
+Back then accessibility was called “good manners”. Script-driven menus with no keyboard support, “buttons” made of divs, and pale gray text on white were normal. Many sites removed the focus outline because it was “ugly”. Today an inaccessible site can bring a complaint, a lawsuit or a penalty (in the US and the EU this already happens), and WCAG has become the basis of the laws in many countries.

@@ -1,0 +1,366 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/03-semantics-outline.svx. */
+	export const metadata = {
+		id: '02-html/03-semantics-outline',
+		part: 2,
+		order: 3,
+		title: 'Semantic markup and headings',
+		definition: 'Semantic markup is elements like header, nav, main, article, section and footer that name the parts of a page, with headings h1 to h6 in order.',
+		summary:
+			'You’ll replace anonymous blocks and tables with elements that mean something to search engines, to screen readers and to you a year from now. Afterwards you’ll build a page from header, nav, main, article, section and footer, and put the headings in order.',
+		minutes: 25,
+		teaches: ['html-semantic-elements', 'html-heading-outline'],
+		requires: ['html-legacy-layout', 'html-heading'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'div div div div', caption: 'A page of divs', say: 'To the eye it’s a site. To a screen reader it’s identical boxes, with no header, menu or main part to find.' },
+				{ mood: 'cheer', side: 'right', prop: 'flowchart', label: 'header|nav|main|footer', caption: 'Names, not boxes', say: 'Semantic elements color nothing. They only name the parts. And there is one main: it’s what people came for.' },
+				{ mood: 'hint', say: 'Headings work like a table of contents: one h1, then h2 and h3 in order. Pick the level by position, not by letter size.' }
+			]
+		},
+		practice: {
+			id: 'semantic-page',
+			title: 'Your 2005 site: structure instead of tables',
+			task: 'This page is in the spirit of 2005: a grid made of a table, and labels made with font. Rewrite it without tables. Make the header with the name and the menu from header and nav elements (the menu is a ul list with links to all the sections). Put the main content in main, and inside it an h1 heading, then each section as its own section with an h2 heading. Present the services or products as cards: each one an article with an h3 heading, all together in a div with the class cards, and each article with the class card. Put the contacts in an aside, and make the page footer a footer element. Replace the ellipses “…” with your own text.',
+			era: 2,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <table width="100%" cellpadding="8">
+      <tr>
+        <td colspan="2"><font size="6"><b>{{name}}</b></font></td>
+      </tr>
+      <tr>
+        <td width="160" valign="top">
+          {{#each sections}}<a href="#">{{.}}</a><br>
+          {{/each}}
+        </td>
+        <td valign="top">
+          <font size="5"><b>{{name}}</b></font>
+          <p>{{who}}</p>
+          <p><a href="#">{{mainAction.label}}</a></p>
+
+          {{#each sections}}<p><font size="4"><b>{{.}}</b></font></p>
+          <p>…</p>
+
+          {{/each}}<p><font size="4"><b>What we offer</b></font></p>
+          {{#each items}}<p><b>{{title}}</b><br>{{text}} {{price}}</p>
+          {{/each}}
+          <p><font size="4"><b>Get in touch</b></font></p>
+          <p>{{contacts.address}}<br>{{phone}}<br>{{email}}</p>
+        </td>
+      </tr>
+    </table>
+    <p><font size="1">{{name}}, {{city}}</font></p>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          {{#each sections}}<li><a href="#">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#">{{mainAction.label}}</a></p>
+
+        {{#each sections}}<section>
+          <h2>{{.}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        {{/each}}<section>
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-layout', kind: 'noTag', tags: ['table', 'font', 'center'] },
+				{ id: 'header', kind: 'exists', selector: 'header' },
+				{ id: 'menu', kind: 'field', selector: 'nav a', field: 'sections' },
+				{ id: 'one-main', kind: 'count', selector: 'main', min: 1, max: 1 },
+				{ id: 'one-h1', kind: 'count', selector: 'h1', min: 1, max: 1 },
+				{ id: 'h1-name', kind: 'field', selector: 'h1', field: 'name' },
+				{ id: 'sections', kind: 'count', selector: 'main section', min: { brief: 'sections' } },
+				{ id: 'section-headings', kind: 'field', selector: 'section h2', field: 'sections' },
+				{ id: 'levels', kind: 'count', selector: 'h1 + h3, h1 + h4, h2 + h4, h2 + h5, h3 + h5, h4 + h6, main > h3', max: 0 },
+				{ id: 'cards', kind: 'count', selector: 'div.cards > article.card', min: { brief: 'items' } },
+				{ id: 'card-titles', kind: 'field', selector: 'article h3', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'aside', kind: 'field', selector: 'aside', field: 'phone' },
+				{ id: 'footer', kind: 'exists', selector: 'footer' },
+				{ id: 'no-blanks', kind: 'text', selector: 'main', matches: '^[^…]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Which element suits a site’s main menu?',
+				options: ['nav with a list of links', 'div with the class menu', 'section with the heading “Menu”'],
+				answer: 0,
+				why: [
+					'Yes. nav declares: this is navigation. A screen reader lists such areas, and a person goes straight to the menu.',
+					'No: div says nothing about meaning. A class lets you style it, but no program can tell it’s a menu.',
+					'No: a section is a part of the content with a heading, not navigation.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true about headings on a page?',
+				options: [
+					'There is usually one h1, and it says what the whole page is about',
+					'After h2, the next level inside a section is h3, not h5',
+					'You choose a heading’s level by the letter size you like',
+					'People using a screen reader move around the page by its headings'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: it’s the page’s main heading.',
+					'Yes: the levels go in order, with no gaps. That way the structure reads like a table of contents.',
+					'No: CSS sets the letter size. You choose the level by position in the structure, not by looks.',
+					'Yes: it’s one of the most common ways to find what you need quickly.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the elements in their typical order on a page, from top to bottom',
+				items: ['header', 'nav', 'main', 'aside', 'footer']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each element to what it is for',
+				pairs: [
+					['header', 'the header of a page or a section'],
+					['main', 'the main content, one per page'],
+					['article', 'a self-contained piece that makes sense outside the page'],
+					['aside', 'something extra to the main content, such as contacts'],
+					['footer', 'the page footer with an address and links']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'When is a div the right choice?',
+				options: [
+					'When no semantic element fits and you still need to group things, for layout for example',
+					'Always, because it is the most universal',
+					'Never, because it was abolished'
+				],
+				answer: 0,
+				why: [
+					'Yes. A div is a “wrapper with no meaning”, and it’s the honest choice when there is no meaning to give. The problem isn’t the div, it’s using one in place of elements that have meaning.',
+					'No: being universal is exactly the problem. It tells programs nothing.',
+					'No: nobody abolished the div. It’s needed for layout and grouping.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a nav element with a ul list inside it, two li items, each with a link.',
+				starter: '',
+				checks: [
+					{ id: 'nav-list', kind: 'exists', selector: 'nav ul li a' },
+					{ id: 'two', kind: 'count', selector: 'nav li', min: 2 }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'html-semantic-why',
+				front: 'Why use semantic elements instead of div?',
+				back: 'They tell programs what is what: search engines, screen readers, reader mode. And you yourself a year from now. Looks have nothing to do with it.'
+			},
+			{
+				id: 'html-semantic-list',
+				front: 'List the main semantic elements of a page',
+				back: 'header (page header), nav (menu), main (the main content, only one), section (a section with a heading), article (a self-contained piece), aside (something extra), footer (page footer).'
+			},
+			{
+				id: 'html-heading-rules',
+				front: 'How do you put headings in order?',
+				back: 'One h1 per page, h2 for the sections, h3 inside those, with no skipped levels. The level depends on position in the structure, not on letter size.'
+			},
+			{
+				id: 'html-div',
+				front: 'When is a div the right choice?',
+				back: 'When no fitting semantic element exists and you need to group things, for layout for example. It must never replace elements that have meaning.'
+			},
+			{
+				id: 'html-class',
+				front: 'What is the class attribute?',
+				back: 'A name CSS uses to find an element. It means nothing in HTML but is handy in styles: article class=card.'
+			}
+		],
+		sources: [
+			{
+				title: 'Document and website structure (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Document_and_website_structure',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Headings and paragraphs (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Headings_and_paragraphs',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'HTML Living Standard: Sections (WHATWG)', url: 'https://html.spec.whatwg.org/multipage/sections.html', licence: 'CC-BY', kind: 'spec', lang: 'en' },
+			{ title: 'Learn HTML: Semantic HTML (web.dev)', url: 'https://web.dev/learn/html/semantic-html', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'The HTML heading elements (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/Heading_Elements', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [{ title: 'Semantic HTML Tags: HTML5 Semantic Elements Tutorial (Dave Gray)', url: 'https://www.youtube.com/watch?v=kX3TfdUqpuU', licence: 'proprietary-link', kind: 'video', lang: 'en' }],
+		guide: {
+			intro: 'Right now the page is held up by a table, and to a program that’s just a set of cells. Let’s give it its meaning back.',
+			hints: [
+				'First remove table, tr and td. Put the header, the menu, the main content and the footer into header, nav, main and footer.',
+				'The project name in main is the h1. Each section from the menu looks like this: <section><h2>Section name</h2><p>Your text.</p></section>.',
+				'Cards: a <div> with the class cards and, inside it, an <article> with the class card for each service or product, holding an <h3> and a <p>. Put the contacts in an <aside>.'
+			],
+			mistakes: {
+				'no-layout': 'The page still has table, font or center. Those tags have to go entirely: meaning now lives in the elements, and looks will come later from CSS.',
+				header: 'You need a header element: the name and the menu go in it.',
+				menu: 'The menu (inside nav) needs a link for every section of your project.',
+				'one-main': 'The main content lives in one main element. Not more than one and not fewer.',
+				'one-h1': 'The page should have exactly one h1: your project’s name.',
+				'h1-name': 'The h1 should hold the project’s name, as in the first lesson.',
+				sections: 'Each section of your project is a separate section element inside main.',
+				'section-headings': 'Each section needs an h2 heading with the section’s name.',
+				levels: 'Your headings skip a level, for example from h2 straight to h4. Go in order: h1, h2, h3.',
+				cards: 'Services or products are set up like this: a <div> with the class cards, and in it one <article> with the class card for each.',
+				'card-titles': 'Each card needs an h3 heading with the name of a service or product from your brief.',
+				aside: 'Put the contacts in an aside: the phone number from your brief should be inside it.',
+				footer: 'The page footer is a footer element.',
+				'no-blanks': 'Somewhere in the main content a “…” is left. Replace it with your own text.'
+			},
+			outro: 'The page is now clear to more than the eyes. It has landmarks and a table of contents, and that is the basis of everything we’ll do next.'
+		},
+		say: { HTML: 'H T M L', header: 'header', nav: 'nav', main: 'main', article: 'article', section: 'section', aside: 'a side', footer: 'footer', div: 'div', class: 'class', WHATWG: 'what W G', ARIA: 'AH ree-uh' }
+	};
+</script>
+
+<script>
+	import OutlineView from '../../diagrams/OutlineView.svelte';
+</script>
+
+## Markup with meaning
+
+In the last lesson you built a page from a table. To the eye it looked like a site, but to a program it was cells: no heading, no menu, no main part. And a page has other readers besides the eye.
+
+- **A screen reader.** A blind person listens to the page. A good program can list the areas (header, menu, main content, footer) and the headings, and the person jumps between them instead of listening to everything in a row. In WebAIM’s surveys, screen reader users most often say they begin looking for something by going through the headings.
+- **A search engine.** It needs to know what is the main thing on a page and what repeats on every one.
+- **Reader mode and the translator** in a browser pull the main text out of a page if it is marked up by meaning.
+- **You yourself.** Opening the file a year from now, you’ll understand `<nav>` faster than `<div class="m2">`.
+
+Meaning is written with elements. They color nothing and move nothing: CSS will do that. They only name what a piece of the page is.
+
+## The main elements
+
+- `<header>` is the header of a page or a section: a name, a logo, a menu.
+- `<nav>` is navigation: the main menu or another block of links around the site. It’s usually made as a list, because a menu is a list of items.
+- `<main>` is the main content of the page. There is one: it’s what people came for.
+- `<section>` is a section with a heading of its own.
+- `<article>` is a self-contained piece that makes sense outside the page: a service card, a post, a review.
+- `<aside>` is something extra to the main content: contacts, a sidebar, related links.
+- `<footer>` is the page footer: an address, rights, secondary links.
+
+And where there is no meaning, there is still `<div>`, a “box with no meaning”. You need it to group pieces for layout, for example. The problem isn’t that div exists. It’s when it replaces elements that have meaning.
+
+An element can be given a name with the `class` attribute: `<article class="card">`. It means nothing in HTML, but CSS can later use it to find the elements it needs. We use it in this course so that the page is ready for styles.
+
+<details>
+<summary>Check yourself: how many main elements are on a page, and why?</summary>
+
+One: it’s the main content that people came for. A second main would confuse a program that is looking for where the “main part” is.
+
+</details>
+
+## What a program sees
+
+This diagram shows a page the way a program takes it apart: a list of areas and a table of contents made from the headings. Try both examples and edit the markup: delete `main`, change an `h2` to `h4`, add a second `h1`. The diagram will tell you what got worse.
+
+<OutlineView />
+
+<details>
+<summary>Check yourself: what will a program see in a page made entirely of divs?</summary>
+
+Nothing: no areas and no headings. Only flat text that has to be read in a row.
+
+</details>
+
+## A table of contents from headings
+
+Headings from `h1` to `h6` work as a table of contents. They follow simple rules:
+
+1. One `h1` per page: it says what the page is about.
+2. Sections get `h2`. Inside a section, subsections get `h3`, and so on deeper.
+3. The levels go in order. After `h2` you don’t jump to `h4`: the table of contents would have a hole.
+4. You choose the level by position in the structure, not by letter size. If `h3` is too small, that is a job for CSS, not a reason to use `h2`.
+
+There was a temptation to simplify: it was said that in HTML5 you could put an `h1` in every `section` and the browser would work out the level itself. A so-called “document outline algorithm” was planned, but no browser and no screen reader ever supported it, and in 2022 its description was removed from the specification. So you set the levels by hand.
+
+What about `<b>` and `<i>`? For meaning there are `<strong>` (important) and `<em>` (stress emphasis). The tags `b` and `i` stayed, but they now mean only “set in bold” and “set in italics” with no importance attached. Choose by meaning.
+
+<details>
+<summary>Check yourself: can you put an h4 straight after an h2?</summary>
+
+No: a level is skipped, and the table of contents gets a hole. After h2 comes h3.
+
+</details>
+
+## What they did in 2005, and what we do now
+
+In 2005 there were no semantic elements yet: they were invented in HTML5, which only became a Recommendation in 2014. The web standards movement, which had begun earlier (Jeffrey Zeldman, the book “Designing with Web Standards”, 2003), demanded that meaning be separated from looks. Structure was then written from `div` elements with clear names: `<div id="header">`, `<div id="nav">`, `<div id="content">`. It was an attempt to express meaning with what was at hand.
+
+We write a 2005 page with modern elements. The idea is the same as it was then, only the language is richer. That’s a fair trick: in this course we repeat the eras by approach, but we don’t make you write worse than you can.
+
+## Practice
+
+In front of you is a page in the spirit of 2005: a grid made of a table, and labels made with `font`. Rewrite it by meaning. All your details are already in the page: the name, the sections, the services and the contacts. You need to move them into semantic elements and write a couple of sentences about each section in place of the ellipses.
+
+This version goes into era 2 of your time machine, and further on in this era you’ll keep building it up: links, pictures, a table, and in the CSS part the looks.
+
+## What was wrong with 2005
+
+Pages were already split into structure and looks, but the structure was written from nameless `div` elements, and programs still didn’t know where the header was and where the main content was. Several big things were missing too: sites could hardly adapt to a screen, and accessibility was a matter of goodwill. All of that comes in the next eras.

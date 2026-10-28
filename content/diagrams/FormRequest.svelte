@@ -7,9 +7,55 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per
+	// edition, picked by the page's locale.
+	const W = pick({
+		ru: {
+			name: 'Анна',
+			path: 'zayavka',
+			host: 'zarechye.example',
+			caption: 'От формы к запросу',
+			methodLabel: 'Метод отправки',
+			required: 'поля обязательные',
+			typeEmail: 'у контакта type="email"',
+			fName: 'Имя',
+			fMail: 'Почта',
+			fConsent: 'Согласие',
+			consent: 'Согласен на обработку данных',
+			send: 'Отправить (не уйдёт)',
+			requestTitle: 'Запрос, который построит браузер',
+			validation: 'Что говорит проверка в браузере',
+			allGood: 'Все поля в порядке: браузер отправил бы форму.',
+			get: 'GET кладёт данные прямо в адрес: они остаются в истории, в логах сервера и в ссылке, которой можно поделиться. Так хорошо работает поиск, но заявку с телефоном отправлять так нельзя.',
+			post: 'POST кладёт данные в тело запроса, в адресе их нет. Именно так отправляют заявки и всё, что меняет что-то на сервере. Но и тело открыто, если соединение без защиты: поэтому форму отдают только по HTTPS.',
+			encoded: 'Обратите внимание на запись «%40» вместо «@» и «+» вместо пробела: данные формы кодируются, чтобы пройти по адресу без потерь.'
+		},
+		en: {
+			name: 'Anna',
+			path: 'enquiry',
+			host: 'riverbend.example',
+			caption: 'From a form to a request',
+			methodLabel: 'Sending method',
+			required: 'fields are required',
+			typeEmail: 'the contact has type="email"',
+			fName: 'Name',
+			fMail: 'Email',
+			fConsent: 'Consent',
+			consent: 'I agree to my details being used to reply',
+			send: 'Send (it won’t go)',
+			requestTitle: 'The request the browser will build',
+			validation: 'What the browser’s validation says',
+			allGood: 'All fields are fine: the browser would send the form.',
+			get: 'GET puts the data straight into the address. It stays in the history, in the server’s logs and in any link someone shares. That suits a search box, but never an enquiry with a phone number in it.',
+			post: 'POST puts the data in the body of the request, not in the address. That’s how enquiries and anything that changes something on a server are sent. The body is still readable on an unprotected connection, which is why forms are served only over HTTPS.',
+			encoded: 'Notice “%40” in place of “@” and “+” in place of a space: form data is encoded so that it can travel in an address without loss.'
+		}
+	});
 
 	let method = $state<'POST' | 'GET'>('POST');
-	let name = $state('Анна');
+	let name = $state(W.name);
 	let contact = $state('anna@example.org');
 	let kind = $state<'email' | 'text'>('email');
 	let consent = $state(false);
@@ -38,48 +84,44 @@
 	});
 	const request = $derived(
 		method === 'GET'
-			? `GET /zayavka?${params} HTTP/1.1\nHost: zarechye.example`
-			: `POST /zayavka HTTP/1.1\nHost: zarechye.example\nContent-Type: application/x-www-form-urlencoded\nContent-Length: ${new TextEncoder().encode(params).length}\n\n${params}`
+			? `GET /${W.path}?${params} HTTP/1.1\nHost: ${W.host}`
+			: `POST /${W.path} HTTP/1.1\nHost: ${W.host}\nContent-Type: application/x-www-form-urlencoded\nContent-Length: ${new TextEncoder().encode(params).length}\n\n${params}`
 	);
 </script>
 
 <figure class="dg">
-	<figcaption>От формы к запросу</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Метод отправки">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.methodLabel}>
 		<button type="button" aria-pressed={method === 'POST'} onclick={() => (method = 'POST')}>method="post"</button>
 		<button type="button" aria-pressed={method === 'GET'} onclick={() => (method = 'GET')}>method="get"</button>
-		<label><input type="checkbox" bind:checked={required} /> поля обязательные</label>
-		<label><input type="checkbox" checked={kind === 'email'} onchange={(e) => (kind = e.currentTarget.checked ? 'email' : 'text')} /> у контакта type="email"</label>
+		<label><input type="checkbox" bind:checked={required} /> {W.required}</label>
+		<label><input type="checkbox" checked={kind === 'email'} onchange={(e) => (kind = e.currentTarget.checked ? 'email' : 'text')} /> {W.typeEmail}</label>
 	</div>
 	<div class="cols">
 		<form bind:this={form} novalidate onsubmit={(e) => e.preventDefault()}>
-			<label for="fr-name">Имя</label>
-			<input id="fr-name" name="name" type="text" data-label="Имя" {required} bind:value={name} autocomplete="off" />
-			<label for="fr-contact">Почта</label>
-			<input id="fr-contact" name="contact" type={kind} data-label="Почта" {required} bind:value={contact} autocomplete="off" />
-			<label class="chk"><input type="checkbox" name="consent" data-label="Согласие" {required} bind:checked={consent} /> Согласен на обработку данных</label>
-			<button type="submit">Отправить (не уйдёт)</button>
+			<label for="fr-name">{W.fName}</label>
+			<input id="fr-name" name="name" type="text" data-label={W.fName} {required} bind:value={name} autocomplete="off" />
+			<label for="fr-contact">{W.fMail}</label>
+			<input id="fr-contact" name="contact" type={kind} data-label={W.fMail} {required} bind:value={contact} autocomplete="off" />
+			<label class="chk"><input type="checkbox" name="consent" data-label={W.fConsent} {required} bind:checked={consent} /> {W.consent}</label>
+			<button type="submit">{W.send}</button>
 		</form>
 		<div>
-			<div class="dh">Запрос, который построит браузер</div>
+			<div class="dh">{W.requestTitle}</div>
 			<pre class="dg-box dg-mono">{request}</pre>
 		</div>
 	</div>
-	<div class="dh">Что говорит проверка в браузере</div>
+	<div class="dh">{W.validation}</div>
 	{#if messages.length}
 		<ul class="msgs" aria-live="polite">
 			{#each messages as m (m)}<li>{m}</li>{/each}
 		</ul>
 	{:else}
-		<p class="dg-out" aria-live="polite">Все поля в порядке: браузер отправил бы форму.</p>
+		<p class="dg-out" aria-live="polite">{W.allGood}</p>
 	{/if}
 	<p class="dg-out">
-		{#if method === 'GET'}
-			GET кладёт данные прямо в адрес: они остаются в истории, в логах сервера и в ссылке, которой можно поделиться. Так хорошо работает поиск, но заявку с телефоном отправлять так нельзя.
-		{:else}
-			POST кладёт данные в тело запроса, в адресе их нет. Именно так отправляют заявки и всё, что меняет что-то на сервере. Но и тело открыто, если соединение без защиты: поэтому форму отдают только по HTTPS.
-		{/if}
-		Обратите внимание на запись «%40» вместо «@» и «+» вместо пробела: данные формы кодируются, чтобы пройти по адресу без потерь.
+		{method === 'GET' ? W.get : W.post}
+		{W.encoded}
 	</p>
 </figure>
 

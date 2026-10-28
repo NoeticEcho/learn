@@ -1,0 +1,243 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/01-first-page.svx. */
+	export const metadata = {
+		id: '02-html/01-first-page',
+		part: 2,
+		order: 1,
+		title: 'Your first page: tags, a heading, a link',
+		definition: 'HTML is a markup language: tags mark a heading <h1>, a paragraph <p> and a link <a> in a text, and the browser draws the page from those marks.',
+		summary:
+			'You’ll write a web page by hand, with a heading, paragraphs and a link you can call from. Sites looked like this in the early 1990s, and every site is built the same way today.',
+		minutes: 25,
+		teaches: ['html-document-structure', 'html-tags-attributes', 'html-tag', 'html-heading', 'html-paragraph', 'html-link'],
+		requires: ['start-workbench', 'net-rendering-pipeline'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'editor', label: 'Kate Alder, surveyor', caption: 'Just text', say: 'The browser sees one string of text. It can’t tell a heading from a paragraph until the text is marked up.' },
+				{ mood: 'hint', side: 'right', prop: 'editor', label: 'h1  p  a', caption: 'Tags', say: 'Marks go in angle brackets: open, write, close. The opening tag, the text and the closing tag make up an element.' },
+				{ mood: 'hmm', say: 'Forgot to close a tag? No error. The browser quietly finishes the page however it sees fit.' },
+				{ mood: 'cheer', side: 'right', caption: 'Nesting dolls', say: 'Tags nest like dolls: the last one opened is the first one closed.' }
+			]
+		},
+		practice: {
+			id: 'first-page',
+			title: 'Your first page',
+			task: 'Right now the page is a block of plain text. Turn it into a page: put the name in an h1 heading, the description and the city in two p paragraphs, make the phone number a link you can call, and say that the page is in English.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <title>{{name}}</title>\n  </head>\n  <body>\n    {{name}}\n    {{profession}}\n    {{city}}\n    Call: {{phone}}\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{name}}</title>\n  </head>\n  <body>\n    <h1>{{name}}</h1>\n    <p>{{profession}}</p>\n    <p>{{city}}</p>\n    <p><a href="tel:{{phone}}">Call: {{phone}}</a></p>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'h1', kind: 'exists', selector: 'h1' },
+				{ id: 'name-in-h1', kind: 'field', selector: 'h1', field: 'name' },
+				{ id: 'paragraphs', kind: 'count', selector: 'p', min: 2 },
+				{ id: 'tel-link', kind: 'attr', selector: 'a', name: 'href', matches: '^tel:' },
+				{ id: 'lang', kind: 'lang', equals: 'en' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is HTML?',
+				options: [
+					'A markup language: it labels what each part of a text is',
+					'A programming language that calculates and makes decisions',
+					'A program you draw websites in'
+				],
+				answer: 0,
+				why: [
+					'Yes.',
+					'No: HTML calculates nothing. It only tells the browser where the heading, the paragraph and the link are.',
+					'No: HTML isn’t a program but text with marks in it. You can write it in any text editor.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these tags come in pairs, so that a closing tag ends them?',
+				options: ['<p>', '<h1>', '<meta>', '<a>'],
+				answer: [0, 1, 3],
+				why: ['Yes: a paragraph ends with </p>.', 'Yes: a heading ends with </h1>.', 'No: <meta> is a single tag. It has no content and no closing tag.', 'Yes: a link ends with </a>.']
+			},
+			{
+				type: 'order',
+				prompt: 'Put the parts of a document in the order they appear in the file',
+				items: ['<!doctype html>', '<html>', '<head>', '<body>']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each tag to what it means',
+				pairs: [
+					['h1', 'the main heading of the page'],
+					['p', 'a paragraph of text'],
+					['a', 'a link'],
+					['title', 'the page’s name on the browser tab']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What goes in the href attribute to make a link you can call from?',
+				options: ['tel: and the number', 'call: and the number', 'phone= and the number'],
+				answer: 0,
+				why: ['Yes: href starts with tel: followed by the number.', 'No: there is no such address scheme, and the browser won’t understand it.', 'No: href holds an address, not a name=value pair.']
+			},
+			{
+				type: 'code',
+				prompt: 'Write a paragraph with the word “Hello” inside it.',
+				starter: '',
+				checks: [{ id: 'p-hello', kind: 'text', selector: 'p', matches: 'Hello' }]
+			}
+		],
+		cards: [
+			{ id: 'html-tag', front: 'What is a tag?', back: 'A mark in angle brackets, such as <p>. It tells the browser what a piece of text is.' },
+			{ id: 'html-element', front: 'How does an element differ from a tag?', back: 'An element is the opening tag, the content and the closing tag together. <p>Hello</p> is one element made of two tags.' },
+			{ id: 'html-lang', front: 'Why write lang on the html element?', back: 'So that the browser, a screen reader and a search engine know the page’s language and handle it correctly. For English it is lang=en.' },
+			{ id: 'html-tel', front: 'How do you make a link you can call from?', back: 'An a element whose href starts with tel: and continues with the number, for example tel:+440000000000.' }
+		],
+		sources: [
+			{
+				title: 'HTML basics: the syntax (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'The a element (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'HTML Living Standard: introduction (WHATWG)', url: 'https://html.spec.whatwg.org/multipage/introduction.html', licence: 'CC-BY', kind: 'spec', lang: 'en' },
+			{ title: 'Learn HTML: Document structure (web.dev)', url: 'https://web.dev/learn/html/document-structure', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'The lang attribute (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/lang', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [{ title: 'HTML in 100 Seconds (Fireship)', url: 'https://www.youtube.com/watch?v=ok-plXXHlWw', licence: 'proprietary-link', kind: 'video', lang: 'en' }],
+		guide: {
+			intro: 'Right now the page is plain text. The browser can’t tell where the name ends and the phone number begins. Let’s help it.',
+			hints: [
+				'Start with the name: put <h1> before it and </h1> after it.',
+				'Wrap the description and the city in <p> and </p> each: that makes two paragraphs.',
+				'A link you can call from is an a element whose href starts with tel: and continues with the number. The language goes in the first tag: write lang=en on the html element.'
+			],
+			mistakes: {
+				h1: 'There’s no heading yet. Wrap the name in <h1> and </h1>.',
+				'name-in-h1': 'There is a heading, but it should hold the name, exactly as it is in your details.',
+				paragraphs: 'You need at least two <p> paragraphs: for example what you do and where.',
+				'tel-link': 'The phone number isn’t a link yet. Wrap it in an a element whose href is tel: followed by the number.',
+				lang: 'One thing left: say the language by writing lang=en on the html element, in the first tag.'
+			},
+			outro: 'That’s a real web page. A site looked like this in 1991, and every page is built the same way today.'
+		},
+		say: { HTML: 'H T M L', href: 'H ref', doctype: 'doc type', meta: 'meta', charset: 'char set', UTF: 'U T F', tel: 'tel', mailto: 'mail to' }
+	};
+</script>
+
+<script>
+	import TagAnatomy from '#lib/schemas/TagAnatomy.svelte';
+
+	const label = 'The parts of a link element';
+	const parts = [
+		{ code: '<a', name: 'The start of the opening tag', note: 'The letter a stands for anchor, which is what HTML calls a link.' },
+		{ code: 'href="tel:+44 0000 000000"', name: 'The href attribute', note: 'The link’s address. The tel: scheme tells a phone to dial this number.' },
+		{ code: '>', name: 'The end of the opening tag', note: 'The element’s content comes next.' },
+		{ code: 'Call', name: 'The content', note: 'The text a person sees. It’s what they press.' },
+		{ code: '</a>', name: 'The closing tag', note: 'The slash means: the element has ended.' }
+	];
+</script>
+
+## A page is text with marks
+
+Every web page starts as ordinary text. For the browser to know which part of the text is a heading, which is a paragraph and which is a link, the text is marked up: marks are added to it. The language of those marks is called HTML, HyperText Markup Language.
+
+HTML is not a programming language. It calculates nothing and decides nothing. It only says: “this is a heading”, “this is a paragraph”, “this is a link to another page”. The browser reads the marks and draws the page.
+
+<details>
+<summary>Check yourself: what does HTML do?</summary>
+
+It marks the parts of a text so that the browser knows what each one means: a heading, a paragraph, a link.
+
+</details>
+
+## Tag and element
+
+A mark is written in angle brackets and is called a tag. The tag `<p>` opens a paragraph, and the tag `</p>`, with a slash, closes it. All three together, the opening tag, the text and the closing tag, are called an element.
+
+Inside an opening tag there can be attributes: extra details written as `name="value"`. A link’s main attribute is `href`, the address it leads to. Press the parts of the line below to see what it is made of.
+
+<TagAnatomy {label} {parts} />
+
+Some tags are single: they have no content and no closing tag. An example is `<meta>`, which gives the browser background information about the page.
+
+<details>
+<summary>Check yourself: how does an element differ from a tag?</summary>
+
+A tag is one mark in angle brackets. An element is the opening tag, the content and the closing tag together.
+
+</details>
+
+## The skeleton of a document
+
+Every page has the same skeleton:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>The tab’s name</title>
+  </head>
+  <body>
+    Everything visible on the page
+  </body>
+</html>
+```
+
+The first line, `<!doctype html>`, tells the browser: this is modern HTML. The `html` element wraps the whole page, and its `lang` attribute gives the page’s language. A screen reader uses it to choose a pronunciation, and a translator or a search engine uses it to know which language it is dealing with.
+
+The `head` holds what you can’t see on the page itself: the text encoding and the tab’s name in `title`. The `body` holds everything that is visible.
+
+<details>
+<summary>Check yourself: where do you write the tab’s name, in the head or in the body?</summary>
+
+In the head, in the title element. Everything visible on the page goes in the body.
+
+</details>
+
+## A heading, a paragraph, a link
+
+`<h1>` is the page’s main heading, and there is usually one. For subheadings there are `<h2>`, `<h3>` and so on down to `<h6>`. Headings exist for meaning, not for big letters: people and programs use them to understand what a page is made of.
+
+`<p>` is a paragraph. The browser separates paragraphs from one another by itself. But it doesn’t see the line breaks inside your file: until the text is marked up, it all runs together in one line. You’ll see that in the practice.
+
+`<a href="...">` is a link. The address can lead to another page (`https://`), to an email address (`mailto:`) or to a phone number (`tel:`). On a phone, a `tel:` link opens the dialer straight away.
+
+<details>
+<summary>Check yourself: how many h1 elements does a page usually have?</summary>
+
+One: it’s the main heading, and it says what the whole page is about.
+
+</details>
+
+## What the browser forgives
+
+Forgot to close a `</p>`? Put an `<h1>` inside a `<p>`? The browser won’t show an error: it quietly finishes the page however it sees fit. Remember the lesson on how a browser draws a page: from the text it builds a tree of elements, the DOM, and everything in it has to be nested properly. If you make a mistake, the browser repairs the tree itself, and the result may not be what you meant.
+
+So it’s a useful habit to close everything you open, and to nest tags like dolls. The last one opened is the first one closed: `<p>text <a href="...">link</a></p>` is right, and `<p>text <a href="...">link</p></a>` is not. You can check yourself in the “Elements” panel of the developer tools. It shows the tree as it really turned out, not as you wrote it.
+
+## Comments and special characters
+
+Sometimes you want a note to yourself that visitors won’t see. That’s what a comment is for: the browser skips everything between `<!--` and `-->`.
+
+```html
+<!-- The phone number goes here once it is approved -->
+```
+
+And if the text itself needs a less-than sign or an ampersand, you can’t write them as they are: the browser would take `<` for the start of a tag. There are special codes for that: `&lt;` instead of `<`, `&gt;` instead of `>`, `&amp;` instead of `&`. So the phrase “Alder & Sons” looks like `Alder &amp; Sons` in the markup.
+
+## Practice
+
+Below is your first page. It already holds your details, or Kate’s from the example if you haven’t entered your own. Right now it’s plain text, and the browser shows it in one line. Mark it up, and the checks on the right will light up one by one.
+
+## What was wrong with the first pages
+
+As you remember, the first page in history was plain text with links, and that was its strength: any document could be read in any program. The weakness was different. A heading looked like a heading only because the browser decided so, and the author couldn’t change anything: not the color, not the font, not the width. When sites wanted to look good, authors began using markup for things it wasn’t meant for. That’s the next lesson. And what you’ve just done has outlived every era: a heading, a paragraph and a link are still the basis of every page today.

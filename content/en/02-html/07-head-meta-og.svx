@@ -1,0 +1,500 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/02-html/07-head-meta-og.svx. */
+	export const metadata = {
+		id: '02-html/07-head-meta-og',
+		part: 2,
+		order: 7,
+		title: 'The head, meta tags and link previews',
+		definition: 'The head is the invisible part of an HTML page: encoding, viewport, title, description and the Open Graph tags that chat apps build link cards from.',
+		summary:
+			'What you can’t see on a page decides how it is found and how it is shown in search results, in chat apps and on social networks. Afterwards you’ll fill in the title, description, encoding, viewport and Open Graph tags for your own project.',
+		minutes: 20,
+		teaches: ['html-head-meta', 'html-open-graph'],
+		requires: ['html-document-structure', 'net-http-status-headers'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'donâ€™t  cafÃ©', caption: 'No charset', say: 'The first line of the head says how to read the bytes. Without it, quotes and accents can turn into garbage like this.' },
+				{ mood: 'explain', side: 'right', prop: 'phone', label: 'width=device-width', say: 'Without a viewport a phone assumes a screen about 980 pixels wide and shrinks the page. The text gets tiny.' },
+				{ mood: 'hint', prop: 'cards', label: 'og:title  og:image', caption: 'Link preview', say: 'Chat apps build link cards from Open Graph tags. Give the image a full address, because another server builds the card.' },
+				{ mood: 'cheer', say: 'Write head tags for the person who sees the card or snippet. Search engines stopped counting the keywords tag long ago.' }
+			]
+		},
+		practice: {
+			id: 'head-meta',
+			title: 'The invisible part of your page',
+			task: 'Fill in the head of your page. Add the charset and a viewport with the device width. Write a clear title of no more than 60 characters, with your project’s name in it. Add a description meta tag of 50 to 160 characters (who you are and who it is for, from the who and forWhom fields). Add a canonical link and an icon link. Then add Open Graph: og:title, og:description, og:image with a full https:// address, and og:locale written like en_GB. You don’t need your real site address yet: use the placeholder https://riverbend.example/.',
+			era: 4,
+			continues: 'contact-form',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+            </p>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+            </p>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'charset', kind: 'exists', selector: 'meta[charset]' },
+				{ id: 'viewport', kind: 'attr', selector: 'meta[name="viewport"]', name: 'content', matches: 'width=device-width' },
+				{ id: 'title-length', kind: 'text', selector: 'title', matches: '^[\\s\\S]{5,60}$' },
+				{ id: 'title-brief', kind: 'field', selector: 'title', field: 'title' },
+				{ id: 'description', kind: 'attr', selector: 'meta[name="description"]', name: 'content', matches: '^[\\s\\S]{50,160}$' },
+				{ id: 'canonical', kind: 'attr', selector: 'link[rel="canonical"]', name: 'href', matches: '^https://' },
+				{ id: 'icon', kind: 'exists', selector: 'link[rel~="icon"]' },
+				{ id: 'og-title', kind: 'attr', selector: 'meta[property="og:title"]', name: 'content', matches: '\\S' },
+				{ id: 'og-description', kind: 'attr', selector: 'meta[property="og:description"]', name: 'content', matches: '\\S' },
+				{ id: 'og-image', kind: 'attr', selector: 'meta[property="og:image"]', name: 'content', matches: '^https://' },
+				{ id: 'og-locale', kind: 'attr', selector: 'meta[property="og:locale"]', name: 'content', matches: '^[a-z]{2}_[A-Z]{2}$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What happens on a phone if you leave out the viewport meta tag?',
+				options: [
+					'The browser pretends the screen is about 980 pixels wide and shrinks the page',
+					'The page won’t open',
+					'Nothing: the viewport only matters for printing'
+				],
+				answer: 0,
+				why: [
+					'Yes. When phones first appeared, most sites were built for wide screens, so browsers shrank them whole. Without this line your site gets the same treatment: the text turns tiny and responsive layout doesn’t work.',
+					'No: the page opens, only tiny.',
+					'No: it is about phone screens, not about printing.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these belong in the head, that is, aren’t visible on the page itself?',
+				options: ['title', 'meta name=description', 'h1', 'meta property=og:image'],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: it is the name on the browser tab and in the search result.',
+					'Yes: it is the description for search results.',
+					'No: the h1 heading is visible on the page and lives in the body.',
+					'Yes: it is the preview image for chat apps and social networks.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each tag with what it is for',
+				pairs: [
+					['meta charset', 'the text encoding, so letters don’t turn into garbage'],
+					['link rel=canonical', 'the main address of a page that can be reached at several'],
+					['meta property=og:image', 'the preview picture when a link is shared'],
+					['meta name=description', 'the description a search engine may show under the title']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Does the meta description affect where a page ranks in search?',
+				options: [
+					'Not directly, but it affects whether people click the result',
+					'Yes, it is the main ranking factor',
+					'Search engines don’t read it at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. A search engine may use the description as the snippet (the text under the title), and an inviting one earns clicks. It may also replace yours with its own text if that fits the query better.',
+					'No: Google says plainly that the description is not a ranking factor.',
+					'No: they do read it, and often show it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What should the address in og:image look like?',
+				options: [
+					'Complete, with https:// and the site’s name',
+					'Relative, like the links on an ordinary page',
+					'Anything: the chat app will work it out'
+				],
+				answer: 0,
+				why: [
+					'Yes. The preview is built by someone else’s server (the chat app’s or the network’s), which doesn’t have your page at hand. It needs an address the picture can be downloaded from anywhere.',
+					'No: a relative address means nothing without your page.',
+					'No: a chat app won’t guess.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a meta tag whose name is description, with any text in its content attribute that is at least ten characters long.',
+				starter: '',
+				checks: [{ id: 'description', kind: 'attr', selector: 'meta[name=description]', name: 'content', matches: '^[\\s\\S]{10,}$' }]
+			}
+		],
+		cards: [
+			{
+				id: 'html-head-what',
+				front: 'What goes in the head?',
+				back: 'Everything that isn’t shown on the page: the encoding, viewport, title, description, canonical address, icon, styles and Open Graph.'
+			},
+			{
+				id: 'html-head-viewport',
+				front: 'What is meta viewport for?',
+				back: 'width=device-width tells a phone to use the real screen width. Without it the page is shrunk as if the screen were 980 pixels wide.'
+			},
+			{
+				id: 'html-head-title',
+				front: 'How do you write a title and a description?',
+				back: 'title: unique to the page, up to 60 characters, the main point first. description: 50 to 160 characters, written for a person, not a robot.'
+			},
+			{
+				id: 'html-og',
+				front: 'What is Open Graph?',
+				back: 'A set of og:* tags (title, description, image, locale and so on) that chat apps and social networks build a link card from. The image needs a full address.'
+			}
+		],
+		sources: [
+			{
+				title: 'What’s in the head? Web page metadata (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Webpage_metadata',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'The Open Graph protocol', url: 'https://ogp.me/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Learn HTML: Metadata (web.dev)', url: 'https://web.dev/learn/html/metadata', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{
+				title: 'Control your title links and snippets in Google Search',
+				url: 'https://developers.google.com/search/docs/appearance/snippet',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'This is the part of the page a visitor never sees, yet it decides whether you’re found and how you’re shown. Let’s fill it in carefully.',
+			hints: [
+				'The head starts with a meta tag for the charset (utf-8) and one for the viewport, whose content is width=device-width, initial-scale=1.',
+				'The description is a meta tag named description, with your text in its content attribute: 50 to 160 characters. Take pieces from the “who you are” and “who it is for” fields.',
+				'An Open Graph tag is a meta tag with a property such as og:title and your text in content. The image needs a full address: https://riverbend.example/og.png.'
+			],
+			mistakes: {
+				charset: 'The head has no charset meta tag. Put one at the start: utf-8.',
+				viewport: 'You need a viewport meta tag whose content is width=device-width, initial-scale=1.',
+				'title-length': 'The title must not be empty and must be no longer than 60 characters.',
+				'title-brief': 'The title must contain your project’s name, as in your brief.',
+				description: 'You need a description meta tag of 50 to 160 characters: not too short, not too long.',
+				canonical: 'Add a link with rel set to canonical and a full address in href.',
+				icon: 'Add an icon: a link with rel set to icon.',
+				'og-title': 'Add a meta tag with the property og:title and your text in content.',
+				'og-description': 'Add a meta tag with the property og:description and your text in content.',
+				'og-image': 'The og:image address must be complete and start with https://.',
+				'og-locale': 'og:locale is written as a language and a country, for example en_GB.'
+			},
+			outro: 'Now when someone shares your link, it shows up as a card instead of a string of letters, and search engines understand what the page is about.'
+		},
+		say: { HTML: 'H T M L', head: 'head', charset: 'char set', viewport: 'view port', UTF: 'U T F', canonical: 'canonical', 'Open Graph': 'Open Graph', 'og:image': 'O G image', og: 'O G' }
+	};
+</script>
+
+<script>
+	import SnippetPreview from '../../diagrams/SnippetPreview.svelte';
+</script>
+
+## What you can’t see
+
+Open any page and press Ctrl+U (in most browsers that is “view source”), then look at the top. In the `<head>` element there are dozens of lines you never see on screen. They are facts about the page, meant for the browser, for the search engine, and for the chat app you pasted a link into. A good `head` is invisible while all is well, and obvious when it is missing: the link looks bare, the page is tiny, accented letters have turned into question marks.
+
+By the 2014 era a site was no longer just “a page in a browser”. It was shared on social networks and in chat apps, viewed on a phone, found in search. And the `head` says something different to each of those readers.
+
+## What is required
+
+**The encoding.** `<meta charset="utf-8">` is the first line of the head. It says how to read the bytes of the text. Without it, curly quotes and accented letters can turn into garbage, as they often did in the 1990s. UTF-8 is an encoding big enough for every language, and it is used almost everywhere now.
+
+**The viewport.** `<meta name="viewport" content="width=device-width, initial-scale=1">` tells a phone that the page is as wide as the screen. Without it the phone assumes the site was built for a screen about 980 pixels wide and shrinks it whole: tiny text, and responsive layout doesn’t work. Apple introduced this line for the first iPhone in 2007, and every browser reads it now.
+
+**The title.** `<title>` is what you see on the tab, in bookmarks and as the headline of a search result. The rules: every page gets its own, the main point comes first, about 60 characters (search engines cut it off after that), and the project’s name goes at the start or the end, but never a bare “Home”.
+
+**The description.** `<meta name="description" content="…">` is the text a search engine may show under the title. It doesn’t affect the page’s position directly, but it affects whether a person clicks. Write it for a person: who you are, who it is for, what they get. 50 to 160 characters. The search engine may swap your text for its own if that suits the query better.
+
+**The canonical address.** `<link rel="canonical" href="https://…">` tells a search engine which of several addresses for one page is the main one (with `www` and without, with a trailing slash and without).
+
+**The icon.** `<link rel="icon" href="…">` is the small picture on the tab. An SVG icon is good because it stays sharp and weighs a few hundred bytes.
+
+<details>
+<summary>Check yourself: what happens without a viewport?</summary>
+
+The phone assumes the screen is about 980 pixels wide and shrinks the page. The text gets tiny, and the responsive styles don’t apply.
+
+</details>
+
+## How your link looks
+
+When you paste a link into WhatsApp, Slack, iMessage or LinkedIn, the app visits the page itself and builds a card: a picture, a headline and a couple of lines. Where does it get them? From Open Graph tags. Facebook devised this convention in 2010, and almost everyone reads it now (in Russia that includes Telegram and VK). The tags look like `<meta property="og:…" content="…">`:
+
+- `og:title` is the headline of the card;
+- `og:description` is the caption;
+- `og:image` is the picture, usually 1200 × 630 pixels; the address must be **complete**, with `https://`, because someone else’s server builds the preview;
+- `og:type` is the kind of page, most often `website`;
+- `og:locale` is the language and country, written like `en_GB` or `en_US`;
+- `og:url` and `og:site_name` are the address and the name of the site.
+
+With no Open Graph tags, the app takes whatever it finds: the page title and the first picture it comes across, or nothing at all. The result can be embarrassing. Apps also remember a preview for a long time, so after a fix the new card doesn’t appear at once.
+
+Play with how one page looks in three places. The length is cut differently in each, so the whole point has to fit at the start.
+
+<SnippetPreview />
+
+<details>
+<summary>Check yourself: why must the og:image address be complete?</summary>
+
+Because the preview is built by someone else’s server, which doesn’t have your page. A relative address would tell it nothing.
+
+</details>
+
+## Practice
+
+Fill in the head of your page. Take the title and the description from your brief: it has everything you need (who you are, who it is for). If you don’t have a real site address yet, use the placeholder `https://riverbend.example/`: it keeps the addresses in the tags complete.
+
+Notice that the tab icon and the preview image won’t load without their files, because the preview doesn’t go onto the network. Your job right now is to write the right tags.
+
+## What was wrong with 2014
+
+The description and keywords tags used to be written “for the search engine”: `<meta name="keywords">` was stuffed with a hundred words. Search engines stopped counting it long ago (Google said so in 2009), and today the tag is just clutter. Link previews were random at first too: every social network invented its own tags until Open Graph became the common language. Today the rule is simple: write for the person who will read the card, not for a robot.
