@@ -1,0 +1,1076 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/05-static-generators.svx. */
+	export const metadata = {
+		id: '08-cms/05-static-generators',
+		part: 8,
+		order: 5,
+		title: 'Static site generators and Markdown',
+		definition: 'A static site generator is a program that turns Markdown files, data and a shared template into ready HTML files. Only those files go to the server.',
+		summary:
+			'You’ll write pages in Markdown with front matter, watch a generator turn them and a template into plain HTML, and be able to choose between Jekyll, Hugo, Eleventy, Astro and SvelteKit for a job. This is era 5 (2019) of your site: pages by section, a collection made of your services and one shared template.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser-1996', label: 'header × 50 files', caption: 'Before', say: 'The phone number in the header changed. I open fifty files…' },
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'flowchart',
+					label: 'Markdown|template|HTML',
+					caption: 'The build',
+					say: 'The text is in Markdown, the look is in one template. The generator builds ready HTML files from them.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'server',
+					label: 'ready files',
+					caption: 'On the server',
+					say: [
+						{ text: 'And what is on the server?' },
+						{ who: 'Server', text: 'Only finished files. Nothing to break.' }
+					]
+				}
+			]
+		},
+		minutes: 25,
+		teaches: ['cms-markdown-frontmatter', 'cms-static-site-generator', 'cms-ssg-landscape'],
+		requires: ['cms-what-is-cms', 'html-semantic-elements', 'css-responsive', 'net-http-request-response'],
+		practice: {
+			id: 'cms-ssg-project',
+			title: 'A site on a generator: Markdown, a collection and a template',
+			task: 'The page holds a small generator project: settings, a shared template, one Markdown page for each section of your brief, a catalog page and a collection of services. 1) In site.yml write the site’s language (lang: en) and its languages (languages: …, as in the brief). 2) In layout.html take lang from the settings ({{ site.lang | escape }}), add a header with a menu made from the list of pages ({% for p in pages %} … {% endfor %}) and a footer; keep {{ content | strip }}. 3) In each section’s file add a description to the front matter and write the text. 4) In catalog.md print the services with a loop over the collection: {% for item in items %}- **{{ item.title | escape }}**, {{ item.price | escape }} {% endfor %}. The checks read the project’s files, and below you see the built HTML. The double braces in the template carry filters because the course’s editor itself substitutes values into plain braces. Every “…” has to be replaced.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="ssg">
+      <h2>A site project on a generator<\/h2>
+      <p>These are the project’s files, as in a real generator. Edit them right here: the HTML of every page appears below, under “Build result”.<\/p>
+
+      <h3>site.yml: the site’s settings<\/h3>
+      <textarea aria-label="site.yml: the site’s settings" id="cfg" rows="4">title: {{name}}
+lang: …
+languages: …<\/textarea>
+
+      <h3>layout.html: the shared template, one for all pages<\/h3>
+      <textarea aria-label="layout.html: the shared template, one for all pages" id="layout" rows="16"><!doctype html>
+<html lang="…">
+<head>
+<meta charset="utf-8">
+<title>{{ page.title | escape }}<\/title>
+<\/head>
+<body>
+<main>{{ content | strip }}<\/main>
+<\/body>
+<\/html><\/textarea>
+
+      <h3>Pages: one Markdown file per section<\/h3>
+      {{#each sections}}<textarea aria-label="File {{.}}.md" class="md-file" data-collection="pages" data-path="{{.}}.md" rows="7">---
+title: {{.}}
+description: …
+---
+# {{.}}
+
+…<\/textarea>
+      {{/each}}
+      <h3>catalog.md: a catalog page that takes its data from the collection<\/h3>
+      <textarea aria-label="catalog.md: a catalog page that takes its data from the collection" class="md-file" data-collection="pages" data-path="catalog.md" rows="8">---
+title: Catalog
+description: …
+---
+# Catalog
+
+…<\/textarea>
+
+      <h3>The items collection: one file per service or product (the data comes from your brief)<\/h3>
+      {{#each items}}<textarea aria-label="File items/{{title}}.md" class="md-file" data-collection="items" data-path="items/{{title}}.md" rows="5">---
+title: {{title}}
+price: {{price}}
+---
+{{text}}<\/textarea>
+      {{/each}}
+      <h3>Build result<\/h3>
+      <div id="built"><\/div>
+    <\/section>
+
+    <script type="module" data-scaffold id="ssg-build">
+      // A teaching generator (not Jekyll or Hugo): it builds the pages from the fields above and shows the result.
+      // You don’t need to read this block. It is not part of your site.
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/<\/g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      /** “---\\nkey: value\\n---\\ntext” → { data, body }. Values stay strings. */
+      function frontMatter(text) {
+      const m = /^\\s*---\\s*\\n([\\s\\S]*?)\\n---\\s*(?:\\n([\\s\\S]*))?$/.exec(text);
+      if (!m) return { data: {}, body: text, ok: false };
+      const data = {};
+      for (const line of m[1].split('\\n')) {
+      const k = /^([A-Za-z_][\\w-]*):\\s*(.*)$/.exec(line.trim());
+      if (k) data[k[1]] = k[2].replace(/^["']|["']$/g, '');
+      }
+      return { data, body: m[2] ?? '', ok: true };
+      }
+      /** Substitution: loops, {{ path | filter }}. */
+      function liquid(tpl, ctx) {
+      const out = tpl.replace(/\\{%\\s*for\\s+(\\w+)\\s+in\\s+(\\w+)\\s*%\\}([\\s\\S]*?)\\{%\\s*endfor\\s*%\\}/g, (_, v, list, body) =>
+      (Array.isArray(ctx[list]) ? ctx[list] : []).map((item) => liquid(body, { ...ctx, [v]: item })).join('')
+      );
+      return out.replace(/\\{\\{\\s*([\\w.]+)\\s*(?:\\|\\s*(\\w+))?[^}]*\\}\\}/g, (_, path, filter) => {
+      let v = path.split('.').reduce((o, k) => (o == null ? o : o[k]), ctx);
+      if (v == null) v = '';
+      return filter === 'escape' ? esc(v) : String(v).trim();
+      });
+      }
+      const inline = (s) =>
+      s
+      .replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1<\/strong>')
+      .replace(/\\[([^\\]]+)\\]\\(([^)\\s]+)\\)/g, '<a href="$2">$1<\/a>');
+      /** Markdown in miniature: # and ## headings, paragraphs, “- ” lists, **bold**, [link](address). */
+      function markdown(src) {
+      const html = [];
+      let para = [];
+      let list = false;
+      const flush = () => {
+      if (para.length) html.push('<p>' + inline(para.join(' ')) + '<\/p>');
+      para = [];
+      };
+      const close = () => {
+      if (list) html.push('<\/ul>');
+      list = false;
+      };
+      for (const raw of src.split('\\n')) {
+      const line = raw.trim();
+      let m;
+      if (!line) (flush(), close());
+      else if ((m = /^(#{1,3})\\s+(.*)$/.exec(line))) (flush(), close(), html.push(\`<h\${m[1].length}>\${inline(m[2])}<\/h\${m[1].length}>\`));
+      else if ((m = /^[-*]\\s+(.*)$/.exec(line))) (flush(), list || html.push('<ul>'), (list = true), html.push('<li>' + inline(m[1]) + '<\/li>'));
+      else (close(), para.push(line));
+      }
+      flush();
+      close();
+      return html.join('\\n');
+      }
+      /**
+      * Builds one page: front matter, data substituted into the text, Markdown, then the layout.
+      * site: the settings (title, lang...), pages: all pages [{title, path}], collections: { items: [...] }.
+      */
+      function buildPage(layout, site, file, pages, collections) {
+      const fm = frontMatter(file);
+      const ctx = { site, pages, ...collections, page: fm.data };
+      const content = markdown(liquid(fm.body, ctx));
+      return liquid(layout, { ...ctx, content });
+      }
+
+      function config() {
+        const out = {};
+        for (const line of document.getElementById('cfg').value.split('\\n')) {
+          const m = /^([A-Za-z_]\\w*):\\s*(.*)$/.exec(line.trim());
+          if (m) out[m[1]] = m[2];
+        }
+        return out;
+      }
+      function build() {
+        const box = document.getElementById('built');
+        box.replaceChildren();
+        const layout = document.getElementById('layout').value;
+        const files = (kind) => [...document.querySelectorAll('textarea.md-file[data-collection="' + kind + '"]')];
+        const items = files('items').map((t) => frontMatter(t.value).data);
+        const list = files('pages').map((t) => ({ t, title: frontMatter(t.value).data.title || t.dataset.path, path: t.dataset.path.replace(/\\.md$/, '.html') }));
+        for (const p of list) {
+          const html = buildPage(layout, config(), p.t.value, list.map((x) => ({ title: x.title, path: x.path })), { items });
+          const d = document.createElement('details');
+          const s = document.createElement('summary');
+          s.textContent = p.path + ' (' + html.length + ' characters of HTML)';
+          const pre = document.createElement('pre');
+          pre.textContent = html;
+          d.append(s, pre);
+          box.append(d);
+        }
+      }
+      for (const t of document.querySelectorAll('#ssg textarea')) t.addEventListener('input', build);
+      build();
+    <\/script>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not end up in the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="ssg">
+      <h2>A site project on a generator<\/h2>
+      <p>These are the project’s files, as in a real generator. Edit them right here: the HTML of every page appears below, under “Build result”.<\/p>
+
+      <h3>site.yml: the site’s settings<\/h3>
+      <textarea aria-label="site.yml: the site’s settings" id="cfg" rows="4">title: {{name}}
+lang: en
+languages: {{languages}}<\/textarea>
+
+      <h3>layout.html: the shared template, one for all pages<\/h3>
+      <textarea aria-label="layout.html: the shared template, one for all pages" id="layout" rows="16"><!doctype html>
+<html lang="{{ site.lang | escape }}">
+<head>
+<meta charset="utf-8">
+<title>{{ page.title | escape }} | {{ site.title | escape }}<\/title>
+<\/head>
+<body>
+<header><strong>{{ site.title | escape }}<\/strong>
+<nav>{% for p in pages %}<a href="{{ p.path | escape }}">{{ p.title | escape }}<\/a> {% endfor %}<\/nav><\/header>
+<main>{{ content | strip }}<\/main>
+<footer>{{ site.title | escape }}, all rights reserved<\/footer>
+<\/body>
+<\/html><\/textarea>
+
+      <h3>Pages: one Markdown file per section<\/h3>
+      {{#each sections}}<textarea aria-label="File {{.}}.md" class="md-file" data-collection="pages" data-path="{{.}}.md" rows="7">---
+title: {{.}}
+description: A section of the site
+---
+# {{.}}
+
+You write the section’s text here in plain words, and the header and footer are filled in from the template.<\/textarea>
+      {{/each}}
+      <h3>catalog.md: a catalog page that takes its data from the collection<\/h3>
+      <textarea aria-label="catalog.md: a catalog page that takes its data from the collection" class="md-file" data-collection="pages" data-path="catalog.md" rows="8">---
+title: Catalog
+description: Every item from the collection
+---
+# Catalog
+
+{% for item in items %}- **{{ item.title | escape }}**, {{ item.price | escape }}
+{% endfor %}<\/textarea>
+
+      <h3>The items collection: one file per service or product (the data comes from your brief)<\/h3>
+      {{#each items}}<textarea aria-label="File items/{{title}}.md" class="md-file" data-collection="items" data-path="items/{{title}}.md" rows="5">---
+title: {{title}}
+price: {{price}}
+---
+{{text}}<\/textarea>
+      {{/each}}
+      <h3>Build result<\/h3>
+      <div id="built"><\/div>
+    <\/section>
+
+    <script type="module" data-scaffold id="ssg-build">
+      // A teaching generator (not Jekyll or Hugo): it builds the pages from the fields above and shows the result.
+      // You don’t need to read this block. It is not part of your site.
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/<\/g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      /** “---\\nkey: value\\n---\\ntext” → { data, body }. Values stay strings. */
+      function frontMatter(text) {
+      const m = /^\\s*---\\s*\\n([\\s\\S]*?)\\n---\\s*(?:\\n([\\s\\S]*))?$/.exec(text);
+      if (!m) return { data: {}, body: text, ok: false };
+      const data = {};
+      for (const line of m[1].split('\\n')) {
+      const k = /^([A-Za-z_][\\w-]*):\\s*(.*)$/.exec(line.trim());
+      if (k) data[k[1]] = k[2].replace(/^["']|["']$/g, '');
+      }
+      return { data, body: m[2] ?? '', ok: true };
+      }
+      /** Substitution: loops, {{ path | filter }}. */
+      function liquid(tpl, ctx) {
+      const out = tpl.replace(/\\{%\\s*for\\s+(\\w+)\\s+in\\s+(\\w+)\\s*%\\}([\\s\\S]*?)\\{%\\s*endfor\\s*%\\}/g, (_, v, list, body) =>
+      (Array.isArray(ctx[list]) ? ctx[list] : []).map((item) => liquid(body, { ...ctx, [v]: item })).join('')
+      );
+      return out.replace(/\\{\\{\\s*([\\w.]+)\\s*(?:\\|\\s*(\\w+))?[^}]*\\}\\}/g, (_, path, filter) => {
+      let v = path.split('.').reduce((o, k) => (o == null ? o : o[k]), ctx);
+      if (v == null) v = '';
+      return filter === 'escape' ? esc(v) : String(v).trim();
+      });
+      }
+      const inline = (s) =>
+      s
+      .replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1<\/strong>')
+      .replace(/\\[([^\\]]+)\\]\\(([^)\\s]+)\\)/g, '<a href="$2">$1<\/a>');
+      /** Markdown in miniature: # and ## headings, paragraphs, “- ” lists, **bold**, [link](address). */
+      function markdown(src) {
+      const html = [];
+      let para = [];
+      let list = false;
+      const flush = () => {
+      if (para.length) html.push('<p>' + inline(para.join(' ')) + '<\/p>');
+      para = [];
+      };
+      const close = () => {
+      if (list) html.push('<\/ul>');
+      list = false;
+      };
+      for (const raw of src.split('\\n')) {
+      const line = raw.trim();
+      let m;
+      if (!line) (flush(), close());
+      else if ((m = /^(#{1,3})\\s+(.*)$/.exec(line))) (flush(), close(), html.push(\`<h\${m[1].length}>\${inline(m[2])}<\/h\${m[1].length}>\`));
+      else if ((m = /^[-*]\\s+(.*)$/.exec(line))) (flush(), list || html.push('<ul>'), (list = true), html.push('<li>' + inline(m[1]) + '<\/li>'));
+      else (close(), para.push(line));
+      }
+      flush();
+      close();
+      return html.join('\\n');
+      }
+      /**
+      * Builds one page: front matter, data substituted into the text, Markdown, then the layout.
+      * site: the settings (title, lang...), pages: all pages [{title, path}], collections: { items: [...] }.
+      */
+      function buildPage(layout, site, file, pages, collections) {
+      const fm = frontMatter(file);
+      const ctx = { site, pages, ...collections, page: fm.data };
+      const content = markdown(liquid(fm.body, ctx));
+      return liquid(layout, { ...ctx, content });
+      }
+
+      function config() {
+        const out = {};
+        for (const line of document.getElementById('cfg').value.split('\\n')) {
+          const m = /^([A-Za-z_]\\w*):\\s*(.*)$/.exec(line.trim());
+          if (m) out[m[1]] = m[2];
+        }
+        return out;
+      }
+      function build() {
+        const box = document.getElementById('built');
+        box.replaceChildren();
+        const layout = document.getElementById('layout').value;
+        const files = (kind) => [...document.querySelectorAll('textarea.md-file[data-collection="' + kind + '"]')];
+        const items = files('items').map((t) => frontMatter(t.value).data);
+        const list = files('pages').map((t) => ({ t, title: frontMatter(t.value).data.title || t.dataset.path, path: t.dataset.path.replace(/\\.md$/, '.html') }));
+        for (const p of list) {
+          const html = buildPage(layout, config(), p.t.value, list.map((x) => ({ title: x.title, path: x.path })), { items });
+          const d = document.createElement('details');
+          const s = document.createElement('summary');
+          s.textContent = p.path + ' (' + html.length + ' characters of HTML)';
+          const pre = document.createElement('pre');
+          pre.textContent = html;
+          d.append(s, pre);
+          box.append(d);
+        }
+      }
+      for (const t of document.querySelectorAll('#ssg textarea')) t.addEventListener('input', build);
+      build();
+    <\/script>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not end up in the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'ssg-exists', kind: 'exists', selector: '#ssg' },
+				{ id: 'no-blanks', kind: 'text', selector: '#ssg', matches: '^[^…]*$' },
+				{ id: 'cfg-lang', kind: 'text', selector: '#cfg', matches: '(?:^|\\n)lang:\\s*(?:ru|en)\\b' },
+				{ id: 'cfg-languages', kind: 'text', selector: '#cfg', matches: 'languages:\\s*[a-z]{2}' },
+				{ id: 'cfg-bilingual', kind: 'text', selector: '#cfg', matches: 'languages:\\s*[^\\n]*\\ben\\b', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'page-per-section', kind: 'count', selector: 'textarea.md-file[data-collection="pages"]', min: { brief: 'sections' } },
+				{ id: 'sections-named', kind: 'field', selector: 'textarea.md-file[data-collection="pages"]', field: 'sections' },
+				{ id: 'front-title', kind: 'text', selector: 'textarea.md-file[data-collection="pages"]', matches: '^\\s*---\\s*\\n\\s*title:\\s*\\S' },
+				{ id: 'front-description', kind: 'text', selector: 'textarea.md-file[data-collection="pages"]', matches: '\\ndescription:\\s*\\S{3,}' },
+				{ id: 'layout-content', kind: 'text', selector: '#layout', matches: '\\{\\{\\s*content\\s*(?:\\|[^}]*)?\\}\\}' },
+				{ id: 'layout-shared', kind: 'text', selector: '#layout', matches: '(?=[\\s\\S]*<header)(?=[\\s\\S]*<footer)' },
+				{ id: 'layout-nav', kind: 'text', selector: '#layout', matches: '\\{%\\s*for\\s+\\w+\\s+in\\s+pages\\s*%\\}' },
+				{ id: 'layout-lang', kind: 'text', selector: '#layout', matches: '<html[^>]*lang="\\{\\{\\s*site\\.lang' },
+				{
+					id: 'items-loop',
+					kind: 'text',
+					selector: 'textarea.md-file[data-collection="pages"]',
+					matches: '\\{%\\s*for\\s+\\w+\\s+in\\s+items\\s*%\\}[\\s\\S]*\\{\\{\\s*item\\.title',
+					when: { brief: 'items[].title' }
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put in order what a static site generator does during a build',
+				items: [
+					'It reads the Markdown files and the data',
+					'It parses the front matter: the title, the description and the page’s other fields',
+					'It substitutes data into the text and turns Markdown into HTML',
+					'It places the result in the shared template',
+					'It writes the finished HTML files to the folder to be published'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is front matter?',
+				options: [
+					'A block of settings at the top of a Markdown file, between lines of “---”: the title, the description, the date and other fields of the page',
+					'The front part of a template, with the site’s header',
+					'The first paragraph of an article'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is the page’s “passport”: the template takes the title and description from it, and collections are sorted by its fields.',
+					'No: the header is part of the template, not of the content file.',
+					'No: front matter isn’t shown to the visitor. It serves the generator.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What sits on the server of a site made by a generator?',
+				options: [
+					'Ready HTML, CSS and images: ordinary files that a web server hands out',
+					'A database and PHP code that assemble the page for every visitor',
+					'Markdown files that the server turns into HTML on request'
+				],
+				answer: 0,
+				why: [
+					'Yes. The build happens beforehand, on your machine or in a build service. That is why the site is fast and there is nothing on the server to hack.',
+					'No: that describes a dynamic site.',
+					'No: Markdown is turned into HTML at build time, not on request.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each generator to what is worth knowing about it',
+				pairs: [
+					['Jekyll', 'one of the first (2008, Ruby), and what GitHub Pages runs on'],
+					['Hugo', 'a very fast build, and a single executable file (Go)'],
+					['Eleventy', 'flexible, written in JavaScript, with many template languages'],
+					['Astro', 'for content sites, sending almost no JavaScript to the browser'],
+					['SvelteKit', 'a full framework that can also build pages ahead of time']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'When does a static site generator suit worse than an ordinary CMS?',
+				options: [
+					'Several people with no technical skills edit the content daily',
+					'You need customer accounts and orders with constantly changing data',
+					'A thirty-page site that one developer edits once a month',
+					'You need live comments and payment on the site itself, without outside services'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a generator has no familiar admin panel, so people edit files and make changes through Git.',
+					'Yes: accounts and orders are dynamic, and need a server or a service.',
+					'No: this is the best case for a generator: fast, safe and cheap.',
+					'Yes: comments and payment are added through outside services, not from the generator itself.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The phone number in the header has changed. How is it done on a site with a generator?',
+				options: [
+					'One line in the shared template is edited, the site is rebuilt, and the phone changes on every page',
+					'Every page is opened and edited separately',
+					'The phone is edited right on the server, in the finished HTML'
+				],
+				answer: 0,
+				why: [
+					'Yes. The header and footer live in one template: there is one edit, and the build spreads it over all pages.',
+					'No: the template was invented so that you wouldn’t have to.',
+					'No: the finished files are recreated at the next build, and the edit would vanish.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-markdown',
+				front: 'What is Markdown?',
+				back: 'A simple way to write text with markup in ordinary characters: # for a heading, - for a list item, **bold**, [link](address). It turns into HTML. It was invented in 2004, and the strict common version is called CommonMark.'
+			},
+			{
+				id: 'cms-frontmatter',
+				front: 'What is front matter?',
+				back: 'A block of a page’s settings at the top of a Markdown file between lines of “---”: title, description, date and other fields. The template takes them from there, and collections are sorted by them.'
+			},
+			{
+				id: 'cms-ssg-pipeline',
+				front: 'What does a static site generator do?',
+				back: 'During a build it reads Markdown and data, parses the front matter, substitutes the data into a template and writes finished HTML files. Ordinary files remain on the server.'
+			},
+			{
+				id: 'cms-ssg-tradeoffs',
+				front: 'The pros and cons of a static site',
+				back: 'Pros: fast, safe (nothing to hack), cheap or free, history in Git. Cons: no familiar admin panel, dynamic things (forms, search, payment) come from services, and the build grows with the number of pages.'
+			},
+			{
+				id: 'cms-ssg-landscape',
+				front: 'How do Jekyll, Hugo, Eleventy, Astro and SvelteKit differ?',
+				back: 'Jekyll (Ruby, 2008) is the GitHub Pages classic. Hugo (Go) is the fastest. Eleventy (JS) is flexible. Astro (2021) is for content sites with a minimum of JavaScript. SvelteKit is a full framework that can prerender pages.'
+			}
+		],
+		sources: [
+			{ title: 'Markdown Guide: Basic Syntax', url: 'https://www.markdownguide.org/basic-syntax/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'CommonMark: a Markdown reference', url: 'https://commonmark.org/help/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Jekyll: Front Matter', url: 'https://jekyllrb.com/docs/front-matter/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Hugo: Introduction', url: 'https://gohugo.io/about/introduction/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Eleventy Docs', url: 'https://www.11ty.dev/docs/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Astro Docs: Getting started', url: 'https://docs.astro.build/en/getting-started/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Static site generator (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Static_site_generator', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to build a small site the way people build on a generator: the texts in Markdown, the look in one template, and the HTML put together by itself. At the bottom of the page you’ll see the build result.',
+			hints: [
+				'Settings first: lang is the site’s language (en), and languages is the list of languages, as in the brief. Then the template: a header, a footer and lang taken from the settings.',
+				'The template gets the list of pages for the menu by itself: {% for p in pages %}, then a link built from p.path and p.title, then {% endfor %}. Don’t forget to close the loop with the word endfor.',
+				'In the catalog a loop prints the list of services: {% for item in items %}- **{{ item.title | escape }}**, {{ item.price | escape }} and {% endfor %} at the end. Each service must be a separate list item with a hyphen.'
+			],
+			mistakes: {
+				'ssg-exists': 'The project block has gone. It was in the page, so bring it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				'cfg-lang': 'site.yml needs a line lang: en (or ru).',
+				'cfg-languages': 'site.yml needs a line languages: with the list of languages, for example languages: en.',
+				'cfg-bilingual': 'The project has two languages, but languages doesn’t include en. Write languages: en, ru.',
+				'page-per-section': 'You need one Markdown file for each section of the brief. Don’t delete fields.',
+				'sections-named': 'The pages’ titles must match the names of the sections in the brief.',
+				'front-title': 'A page file needs front matter at its start: between lines of “---” a line title: Name.',
+				'front-description': 'The front matter needs a line description: with a short description of the page.',
+				'layout-content': 'The template has no place for the page’s content: {{ content | strip }}.',
+				'layout-shared': 'The template must have a header and a footer: they are the same for every page.',
+				'layout-nav': 'The menu must be built with a loop over the pages: {% for p in pages %} … {% endfor %}.',
+				'layout-lang': 'Take the page’s language from the settings: the html tag’s lang attribute should be {{ site.lang | escape }}.',
+				'items-loop': 'The list of services must be printed by a loop over the collection, not typed in by hand: {% for item in items %}.'
+			},
+			outro: 'Your site is now built from texts and one template. The next step is to give the editing of content to an editor through a friendly admin panel without losing this scheme. That is a “headless” CMS.'
+		},
+		say: {
+			Markdown: 'Markdown',
+			CommonMark: 'Common Mark',
+			Jekyll: 'Jekyll',
+			Hugo: 'Hugo',
+			Eleventy: 'Eleventy',
+			Astro: 'Astro',
+			SvelteKit: 'Svelte Kit',
+			YAML: 'yammel',
+			Liquid: 'Liquid',
+			Git: 'git',
+			'front matter': 'front matter',
+			HTML: 'H T M L',
+			CMS: 'C M S'
+		}
+	};
+</script>
+
+<script>
+	import SsgPipeline from '../../diagrams/SsgPipeline.svelte';
+</script>
+
+## Another way: a site as the result of a build
+
+In the previous lessons a page was put together **on every request**: the server took the content from a database and inserted it into a template. There is another way, which you met in part 6 as “static”: the pages are built **once, beforehand**, and the finished files go on the server. The program that does it is called a **static site generator**. When sites in the 2010s began to be hacked, slowed down and costly to maintain, this approach came back, because such a site has no database and no code on the server, so there is almost nothing to break.
+
+## Markdown: text without HTML
+
+To write pages without typing tags, **Markdown** was invented (John Gruber, 2004). It is a few characters that read well to the eye and turn into HTML:
+
+```markdown
+# A first-level heading
+## A second-level heading
+
+An ordinary paragraph with a **bold** word and a [link](https://example.com).
+
+- a list item
+- another item
+```
+
+Gruber’s rules were described by examples, and different programs understood them differently. So later a strict common version appeared, **CommonMark**. A Markdown file is plain text: any editor opens it, it is stored in Git, and its content isn’t tied to the look. If you change the template tomorrow, the texts are unharmed.
+
+## Front matter: a page’s passport
+
+Above a page’s text goes a small block of settings between lines of three hyphens. It is called **front matter**:
+
+```markdown
+---
+title: Catalog
+description: What we do and what it costs
+---
+# Catalog
+```
+
+It is the page’s “passport”: the title, the description for a search engine, a date, any fields of your own. The template takes them from there (`page.title`), and collections are sorted by them. Jekyll introduced this idea, and now it is almost everywhere.
+
+## What a generator does
+
+Move the diagram below. On the left is Markdown with its front matter, on the right the finished page. The services are printed by a loop over the data.
+
+<SsgPipeline />
+
+A generator’s work fits in five steps: read the files and the data; parse the front matter; substitute the data into the text and turn Markdown into HTML; place the result in the **shared template**; write the finished files to a folder. This work is called the **build**, and it runs on your computer or on a build server. The result is an ordinary folder of HTML, CSS and images that can be put anywhere.
+
+Three ideas that turn up in every generator:
+
+- **The template** (layout) sets the common frame: the header, the menu, the footer. There is one, so the phone number in the header is edited in one place.
+- **Data and collections**: a set of records of one kind (all the services, all the articles). The template goes through them in a loop and prints a list. A new service is a new file, not an edit to a page.
+- **Filters and includes**: small functions in the template (escaping, formatting a date) and reusable pieces of markup.
+
+<details>
+<summary>Check yourself: where does the phone number in the header live, and how many files must be edited to change it?</summary>
+
+In the shared template, one file. After a rebuild the new header appears on every page.
+
+</details>
+
+## Jekyll, Hugo, Eleventy, Astro, SvelteKit
+
+There are hundreds of generators, and the principle is the same. They differ in language, speed and habits. Here are the five most useful to get to know.
+
+| Tool | Where from | Known for |
+|---|---|---|
+| **Jekyll** | 2008, Ruby | a classic, what GitHub Pages runs on; Liquid templates |
+| **Hugo** | 2013, Go | a very fast build of thousands of pages, one executable file |
+| **Eleventy** | 2018, JavaScript | flexible and simple, with many template languages |
+| **Astro** | 2021, JavaScript | made for content sites, sends the browser a minimum of JavaScript |
+| **SvelteKit** | 2020s, JavaScript | a full framework that can build pages ahead of time |
+
+The course you are reading is built the same way. Each lesson is a Markdown file with metadata (what we call front matter here), Svelte components for the live diagrams, and the site is built into a folder of ready HTML files that sits on free hosting. That is SvelteKit in prerender mode.
+
+How to choose? If you just need a site with pages and collections, any will do. People take Hugo for speed on big sites, Eleventy for simplicity, Astro when pages need almost no scripts, and SvelteKit when the site needs live interfaces as well. Getting to know one will help you learn the others.
+
+## What we get, and what we pay
+
+The pros of a static site: **fast** (a ready file is handed out), **safe** (no code or database on the server), **cheap** (hosting for static files is often free), **with a history** (every edit is in Git, and a rollback is one command) and **portable** (the folder can be put anywhere).
+
+The cons:
+
+- **no familiar admin panel**: the editor has to be able to edit files and send changes to Git (later we’ll see how a “headless” CMS makes this easier);
+- **nothing dynamic**: forms, search, comments, payment and customer accounts are added as outside services or functions (lesson 7);
+- **the build grows** with the number of pages: thousands of pages need a fast generator and a clever way of publishing.
+
+## Practice
+
+You are in the era of 2019: “static” is back in fashion, and you move your site onto a generator. The page holds a project of four kinds of files: settings, a shared template, a Markdown page for each section of the brief, and a collection made of your services. Finish the settings and the template (the language, a header with a menu, a footer), fill in the pages, and print the services in the catalog with a loop.
+
+Notice one oddity. The course’s editor itself substitutes your brief’s values into plain double braces, so in the task’s templates there is a harmless filter next to each value: `{{ site.title | escape }}`. In a real Jekyll you would simply write `{{ site.title }}`.
+
+## What was wrong with 2019
+
+The generators of 2019 were wonderful for developers and hard on everyone else. Installing Jekyll on Windows became an ordeal, building a large site took minutes, and an editor had to learn Git to fix one typo. The next steps solved these same problems: fast builders, visual editors on top of Git, and the “headless” CMSs that the next lesson is about.

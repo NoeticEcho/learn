@@ -1,0 +1,909 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/06-headless.svx. */
+	export const metadata = {
+		id: '08-cms/06-headless',
+		part: 8,
+		order: 6,
+		title: 'Headless CMS: when content lives apart from the site',
+		definition: 'A headless CMS is a content system with no website of its own: editors change entries in an admin, and sites and apps get them through an API.',
+		summary: 'You’ll see why a “headless” CMS gives editors a comfortable admin and developers the freedom to choose the site, and compare Strapi, Directus, Sanity, Contentful and Decap by where they keep content (Git, your own server, the cloud) and by price. Afterwards you can describe a content type, add entries and fetch them with a request, as a real site does.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser',
+					label: 'site + admin',
+					caption: 'The monolith',
+					say: [
+						{ text: 'I want a new site on a different engine.' },
+						{ who: 'CMS', text: 'Then the admin goes too. They are one piece.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'network',
+					label: 'API',
+					caption: 'Headless',
+					say: 'Admin and content live in one place, the site in another. Between them only an API, read by a site and an app alike.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'server',
+					label: '/api/items',
+					caption: 'A request',
+					say: [
+						{ text: 'GET /api/items' },
+						{ who: 'CMS', text: 'Here is the JSON. Draw it however you like.' }
+					]
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-headless', 'cms-headless-landscape'],
+		requires: ['cms-content-model', 'cms-static-site-generator', 'server-rest', 'js-fetch'],
+		practice: {
+			id: 'cms-headless-api',
+			title: 'A type, entries and a request to a headless CMS',
+			task: 'The page now gets its services from a request to an “API”, not from HTML. The API is simulated, because the sandbox has no network. 1) In the “Content type” box, replace the “…” with a type for the price field. If your project has a second language, add text fields for it as well, with the language’s two letter code at the end (title_es, text_es). 2) The “Entries” box already holds your services from the brief. Add one more entry in place of the “…” (with title_es and text_es for a second language). 3) In the headless-code script, finish the function load: request the address /api/items with fetch, read the response as JSON, and make a card for each entry (an article with the class card, holding an h3 and a p), then put the cards into .cards. 4) Say where the CMS lives (Git, your own server or the cloud) and why, tying it to the project’s budget and data. The checks read the fields and the script’s text. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards"><\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="headless">
+      <h2>Headless CMS: type, entries and request<\/h2>
+
+      <h3>Content type (this is how the schema looks in the admin)<\/h3>
+      <textarea aria-label="Content type (this is how the schema looks in the admin)" id="schema" rows="12">{
+  "type": "items",
+  "fields": {
+    "title": "string",
+    "text": "text",
+    "price": …
+  }
+}<\/textarea>
+
+      <h3>Entries: the API’s answer at /api/items<\/h3>
+      <textarea aria-label="Entries: the API’s answer at /api/items" id="entries" rows="14">[
+{{#each items}}  { "title": "{{title}}", "text": "{{text}}", "price": "{{price}}" },
+{{/each}}  { "title": "…", "text": "…", "price": "…" }
+]<\/textarea>
+
+      <p>Where the CMS lives: <span id="hosting">…<\/span>, because <span id="hosting-why">…<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fake-api">
+      // A stand-in for a headless CMS’s API (not a real server): a request for /api/items is answered with the entries from the “Entries” box.
+      // The sandbox has no network, so a real request is impossible here. You don’t need to read this block.
+      window.fetch = async (url) => {
+        if (String(url) !== '/api/items') return new Response('Not Found', { status: 404 });
+        await new Promise((r) => setTimeout(r, 250));
+        try {
+          const data = JSON.parse(document.getElementById('entries').value.replace(/,\\s*\\]/g, ']'));
+          return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+          return new Response('Error in the entries JSON: ' + e.message, { status: 500 });
+        }
+      };
+    <\/script>
+
+    <script type="module" id="headless-code">
+      // The page gets the services from the “API” and shows them as cards.
+      async function load() {
+        const cards = document.querySelector('.cards');
+        // 1) request the entries: fetch('/api/items')
+        // 2) read the response as JSON
+        // 3) for each entry make a card (an article with class card, with an h3 and a p inside) and put it in cards
+      }
+      load();
+    <\/script>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards"><\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="headless">
+      <h2>Headless CMS: type, entries and request<\/h2>
+
+      <h3>Content type (this is how the schema looks in the admin)<\/h3>
+      <textarea aria-label="Content type (this is how the schema looks in the admin)" id="schema" rows="12">{
+  "type": "items",
+  "fields": {
+    "title": "string",
+    "title_es": "string",
+    "text": "text",
+    "text_es": "text",
+    "price": "string"
+  }
+}<\/textarea>
+
+      <h3>Entries: the API’s answer at /api/items<\/h3>
+      <textarea aria-label="Entries: the API’s answer at /api/items" id="entries" rows="14">[
+{{#each items}}  { "title": "{{title}}", "text": "{{text}}", "price": "{{price}}" },
+{{/each}}  { "title": "New service", "title_es": "Servicio nuevo", "text": "A short description of the new service", "text_es": "Una descripción breve", "price": "on request" }
+]<\/textarea>
+
+      <p>Where the CMS lives: <span id="hosting">files in Git (Decap)<\/span>, because <span id="hosting-why">the budget is small, one person edits the content once a month, and the entries hold no personal data<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="fake-api">
+      // A stand-in for a headless CMS’s API (not a real server): a request for /api/items is answered with the entries from the “Entries” box.
+      // The sandbox has no network, so a real request is impossible here. You don’t need to read this block.
+      window.fetch = async (url) => {
+        if (String(url) !== '/api/items') return new Response('Not Found', { status: 404 });
+        await new Promise((r) => setTimeout(r, 250));
+        try {
+          const data = JSON.parse(document.getElementById('entries').value.replace(/,\\s*\\]/g, ']'));
+          return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch (e) {
+          return new Response('Error in the entries JSON: ' + e.message, { status: 500 });
+        }
+      };
+    <\/script>
+
+    <script type="module" id="headless-code">
+      // The page gets the services from the “API” and shows them as cards.
+      async function load() {
+        const cards = document.querySelector('.cards');
+        const response = await fetch('/api/items');
+        if (!response.ok) {
+          cards.textContent = 'Could not load the list. Please try again later.';
+          return;
+        }
+        const items = await response.json();
+        cards.replaceChildren(
+          ...items.map((item) => {
+            const card = document.createElement('article');
+            card.className = 'card';
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+            const text = document.createElement('p');
+            text.textContent = item.text;
+            const price = document.createElement('p');
+            price.className = 'price';
+            price.textContent = item.price || '';
+            card.append(title, text, price);
+            return card;
+          })
+        );
+      }
+      load();
+    <\/script>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'headless-exists', kind: 'exists', selector: '#headless' },
+				{ id: 'no-blanks', kind: 'text', selector: '#headless', matches: '^[^…]*$' },
+				{ id: 'schema-type', kind: 'text', selector: '#schema', matches: '"type"\\s*:\\s*"\\w+"' },
+				{
+					id: 'schema-fields',
+					kind: 'text',
+					selector: '#schema',
+					matches: '(?=[\\s\\S]*"title")(?=[\\s\\S]*"text")(?=[\\s\\S]*"price")'
+				},
+				{
+					id: 'schema-languages',
+					kind: 'text',
+					selector: '#schema',
+					matches: '_[a-z]{2}\\b|[lL][oO][cC][aA][lL][eE]|[tT][rR][aA][nN][sS][lL][aA][tT][iI][oO][nN][sS]',
+					when: { brief: 'languages', contains: 'ru' }
+				},
+				{
+					id: 'entries-names',
+					kind: 'text',
+					selector: '#entries',
+					matches: '(?=[\\s\\S]*"title"\\s*:)(?=[\\s\\S]*"text"\\s*:)(?=[\\s\\S]*"price"\\s*:)'
+				},
+				{ id: 'entries-brief', kind: 'field', selector: '#entries', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'entries-filled', kind: 'text', selector: '#entries', matches: '"title"\\s*:\\s*"[^"]{2,}"' },
+				{ id: 'entries-new', kind: 'text', selector: '#entries', matches: '(?:"title"[\\s\\S]*){2,}', when: { brief: 'items[].title' } },
+				{
+					id: 'entries-languages',
+					kind: 'text',
+					selector: '#entries',
+					matches: '"(title|text)_[a-z]{2}"',
+					when: { brief: 'languages', contains: 'ru' }
+				},
+				{ id: 'code-fetch', kind: 'text', selector: '#headless-code', matches: 'fetch\\(\\s*[\'"`]/api/items[\'"`]' },
+				{ id: 'code-json', kind: 'text', selector: '#headless-code', matches: '\\.json\\(\\)' },
+				{ id: 'code-render', kind: 'text', selector: '#headless-code', matches: 'createElement|replaceChildren|append' },
+				{
+					id: 'hosting',
+					kind: 'text',
+					selector: '#hosting',
+					matches: '[gG][iI][tT]|[dD][eE][cC][aA][pP]|[oO][wW][nN] [sS][eE][rR][vV][eE][rR]|[sS][eE][lL][fF]-[hH][oO][sS][tT][eE][dD]|[sS][tT][rR][aA][pP][iI]|[dD][iI][rR][eE][cC][tT][uU][sS]|[cC][lL][oO][uU][dD]|[sS][aA][nN][iI][tT][yY]|[cC][oO][nN][tT][eE][nN][tT][fF][uU][lL]'
+				},
+				{ id: 'hosting-why', kind: 'text', selector: '#hosting-why', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does a “headless” CMS mean?',
+				options: [
+					'It has no website of its own, the “head”: it keeps the content and serves it through an API, and the site is built separately',
+					'It runs without an administrator',
+					'It has no database'
+				],
+				answer: 0,
+				why: [
+					'Yes. The “head” is whatever shows the content to a visitor. It has been cut off, so a site and an app can both show the content.',
+					'No: such a CMS has an admin, and that is its main part.',
+					'No: there is storage, sometimes even plain files in Git.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does separating the content from the site give you?',
+				options: [
+					'A developer is free to choose what to build the site with',
+					'The same content can be shown by a site and by an app',
+					'The admin stays comfortable for the editor',
+					'Nobody has to build the site'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the site can be written with any tool that can read an API.',
+					'Yes: one source, many channels.',
+					'Yes: that is the point. The editor works in a familiar form.',
+					'No, quite the opposite: the site now has to be built, while a monolithic CMS already has one in the form of a theme.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each system to where it keeps the content',
+				pairs: [
+					['Decap CMS', 'files in a Git repository, and an edit is a commit'],
+					['Strapi', 'a database on your own server (or in Strapi’s cloud)'],
+					['Directus', 'your own SQL database, with an admin and an API on top'],
+					['Sanity', 'the provider’s cloud, with an editing studio built into your project'],
+					['Contentful', 'a cloud service, with the content held by the provider']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does a webhook do in the setup of a headless site?',
+				options: [
+					'After an entry is saved, the CMS itself tells the builder “the content has changed, rebuild the site”',
+					'It downloads the entries to the editor’s computer',
+					'It encrypts the entries'
+				],
+				answer: 0,
+				why: [
+					'Yes. A webhook is a callback: an event in one system starts an action in another. More in the next lesson.',
+					'No: it has nothing to do with the editor’s computer.',
+					'No: a webhook encrypts nothing, it only reports an event.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The budget is small, one person edits the content once a month, and the entries hold no personal data. Which way of hosting a headless CMS is the most sensible?',
+				options: [
+					'Files in Git (Decap): no server, no database and no cloud fee',
+					'Your own database on a separate server, with roles set up',
+					'An expensive cloud plan for a team'
+				],
+				answer: 0,
+				why: [
+					'Yes. The simpler the project, the less infrastructure it needs. If the editor can’t work with a Git sign-in, other options are possible, but start simple.',
+					'No: a server, updates and backups are work for features the project does not need.',
+					'No: there is no point paying for a team and for requests when there is one editor.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does moving to a headless CMS cost, compared with WordPress?',
+				options: [
+					'The site has to be built, and one more system has to be maintained and connected to it',
+					'The editor loses the admin',
+					'The content stops being stored in a structured form'
+				],
+				answer: 0,
+				why: [
+					'Yes. Freedom costs work: two parts instead of one, and previews of edits don’t come out of the box.',
+					'No: the admin stays and is sometimes even more comfortable.',
+					'No: structured entries, with types and fields, are the very basis of headless.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-headless-def',
+				front: 'What is a headless CMS?',
+				back: 'A CMS without a website of its own: an editor changes entries in an admin, and sites and apps receive them through an API (REST or GraphQL). The “head” (display) is separated from the “body” (content).'
+			},
+			{
+				id: 'cms-headless-gain',
+				front: 'What does headless give, and what does it cost?',
+				back: 'It gives freedom to choose the tool for the site, one source for many channels and a comfortable admin. It costs a site to build, one more system to maintain, and previews that don’t come out of the box.'
+			},
+			{
+				id: 'cms-headless-hosting',
+				front: 'Three places where a headless CMS keeps its content',
+				back: 'Files in Git (Decap): simple and free. A database on your own server (Strapi, Directus): control, and the data is yours. The cloud (Sanity, Contentful): quick, but the data sits with the provider and the price grows.'
+			},
+			{
+				id: 'cms-headless-query',
+				front: 'How does a site get content from a headless CMS?',
+				back: 'By a request to the API: fetching /api/items returns JSON with entries under the same names as in the type. The site asks either when a page opens or at build time.'
+			},
+			{
+				id: 'cms-headless-lang',
+				front: 'How do you keep two languages in a headless CMS?',
+				back: 'With a field for each language (title_en, title_es) or a translation of the entry linked to the original. In the API they arrive under their own names, and the site picks the right one.'
+			}
+		],
+		sources: [
+			{ title: 'Strapi Docs', url: 'https://docs.strapi.io/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Directus Docs', url: 'https://directus.io/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Sanity Docs', url: 'https://www.sanity.io/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'Decap CMS Docs: Intro',
+				url: 'https://decapcms.org/docs/intro/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Headless content management system (Wikipedia)',
+				url: 'https://en.wikipedia.org/wiki/Headless_content_management_system',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'The content now lives apart from the site, and the site fetches it with a request. Let’s describe a type, add an entry and write the request itself.',
+			hints: [
+				'A type lists fields: a name and a kind of data for each. For the price, the type string works (text, such as “from $000”). For a second language, add the same fields with the language’s code at the end, such as _es.',
+				'The script has three steps: request (fetch), read the JSON (response.json()) and show the cards (createElement and textContent). Don’t forget await: the answer doesn’t come at once.',
+				'Choose the hosting by budget and data. A small project with one editor often does fine with files in Git, and if you need complex relations and control over the data, use your own server.'
+			],
+			mistakes: {
+				'headless-exists': 'The block with the type and entries is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				'schema-type': 'The type has lost the line that names it: type items. Don’t delete it.',
+				'schema-fields': 'The type needs the fields title, text and price: they match a service in the brief.',
+				'schema-languages': 'The project has a second language. Add fields for it to the type, with its two letter code: title_es, text_es.',
+				'entries-names': 'In the entries the fields must be named as in the type: title, text, price.',
+				'entries-brief': 'The entries no longer hold your services’ names. They come from the brief, so don’t delete them.',
+				'entries-filled': 'You need at least one entry with a real title: write it in place of “…”.',
+				'entries-new': 'You need one more entry besides the services from the brief: write your own in place of the line with “…”.',
+				'entries-languages': 'The entries have no fields for the second language: add title_es and text_es to the new entry.',
+				'code-fetch': 'The script has no fetch request for /api/items.',
+				'code-json': 'The response must be read as JSON: await response.json().',
+				'code-render': 'I can’t see where the cards are made. Use createElement with append, or replaceChildren.',
+				hosting: 'Name a hosting option: files in Git, your own server or the cloud.',
+				'hosting-why': 'Explain the choice in a few words: through the budget, the number of editors, the project’s data.'
+			},
+			outro: 'Now your page lives on data rather than on copied text. One question remains: how does an edit in the CMS reach the live site? That is a build triggered by a webhook, and it comes in the next lesson.'
+		},
+		say: {
+			headless: 'head less',
+			CMS: 'C M S',
+			API: 'A P I',
+			REST: 'rest',
+			GraphQL: 'graph Q L',
+			JSON: 'jason',
+			Strapi: 'strap eye',
+			Directus: 'di rec tus',
+			Sanity: 'sanity',
+			Contentful: 'content full',
+			Decap: 'dee cap',
+			Git: 'git',
+			Jamstack: 'jam stack'
+		}
+	};
+</script>
+
+<script>
+	import HeadlessPaths from '../../diagrams/HeadlessPaths.svelte';
+</script>
+
+## When the site and the admin grew together
+
+An ordinary CMS such as WordPress is a **monolith**: the admin, the storage and the site (the theme) are in one program. That is comfortable while you need one site, exactly as it is. But suppose you want to write the site with a modern tool from the last lesson and keep a familiar admin for the editor. Or show the same content on a site and in a mobile app. A monolith can’t do that: its site and its admin are inseparable.
+
+## Without a head
+
+A **headless CMS** cuts the monolith in two. The “head” is whatever shows the content to a visitor: a theme, a site, an app. It is cut off, and the “body” stays: the storage, the admin and an **API** (REST or GraphQL, which we met in part 6). A site, an app or anything else asks the API for the content and draws it however it likes.
+
+What you get:
+
+- **Freedom for the site.** It can be written with any tool that can read an API, for instance the generator from lesson 5.
+- **One source, many channels.** The same entries are shown by a site, an app and a voice assistant.
+- **A comfortable admin** for the editor: a form with fields, not files and Git.
+- **Safety.** The admin and the storage don’t stick out beside the site, and the site itself can be static.
+
+What it costs:
+
+- the site **has to be built**: in WordPress it came in the box;
+- there is **one more system** to maintain and to connect to the site (lesson 7);
+- **previews** of edits (“how will this look?”) don’t work by themselves and have to be set up;
+- the price of cloud services grows with the number of editors and requests.
+
+## A type, entries and a request
+
+Work with a headless CMS starts from the content model of lesson 1. For a service you create a **type** (also called a content type or a schema): a list of fields and their kinds.
+
+```json
+{
+  "type": "items",
+  "fields": { "title": "string", "text": "text", "price": "string" }
+}
+```
+
+The editor fills in a form built from this schema and saves **entries**. The site asks the API for them, and the answer is JSON with the same field names:
+
+```js
+const response = await fetch('/api/items');
+const items = await response.json();   // [{ title: '…', text: '…', price: '…' }, …]
+```
+
+You know this request from part 5. A site makes it either in the browser when a page opens, or at build time, and puts the result into finished HTML (this is what generators do, lesson 7). For two languages, the fields are repeated (`title_en`, `title_es`) or the entry gets a translation linked to the original. In the API they arrive under their own names, and the site picks the right one.
+
+<details>
+<summary>Check yourself: what changes on the site if the price is corrected in the CMS?</summary>
+
+The price changes in the entry itself. The site sees the new one when it makes its next request or when it is rebuilt, depending on the setup. The editor changes the text, and nobody touches the site’s code.
+
+</details>
+
+## Where the content lives: five systems and three places
+
+There are dozens of systems, but the easiest way to compare them is by the main question: **where is the content stored?** Choose an option in the diagram and follow the path of a single edit.
+
+<HeadlessPaths />
+
+- **Files in Git: Decap CMS** (formerly Netlify CMS). The admin edits Markdown and JSON files right in the site’s repository, and every edit is a commit. There are no servers, the price is zero and the history is in Git. It suits small projects.
+- **A database on your own server: Strapi and Directus.** **Strapi** is written in JavaScript: you describe types with the mouse, and it gives you an API at once. **Directus** sits on top of an ordinary SQL database (remember part 7) and shows it in an admin with an API. The data is yours, and roles and relations can be complex. The server, the updates and the security are on you.
+- **The cloud: Sanity and Contentful.** **Sanity** offers a “studio” for editors built into your project, and a query language of its own. **Contentful** is a cloud service for large teams. The start is quick, previews and teamwork are built in, and the provider stores the content. For a project with personal data that raises a question (part 7), and the price grows with the project.
+
+We state no prices: they change, and the place to look is the service’s own site.
+
+## How to choose
+
+Three questions, as before: **how many editors there are and who they are**, **what the budget is**, and **what data** the entries hold. One editor and a small budget: Decap, or even plain files. Complex relations, roles and control over where the data lives (in a region you choose, say): your own server. Many editors, a quick start, and no data about people in the entries: the cloud. The decision is made in lesson 8, together with the rest.
+
+## Practice
+
+You are in 2022: the site and the content have moved apart into different services. Describe a content type for a service, add an entry and write a request that shows the services on the page. The server is simulated, because the sandbox has no network, but the request is exactly the one a real server would get. Pick where your CMS would live, and explain the choice.
+
+## What was wrong with 2022
+
+The cloud services are usually American companies, and their content sits on servers you don’t control. If the entries hold personal data, you are still the one responsible: the GDPR’s rules on transfers outside the EU, and the US state privacy laws, make “where is it stored, and who processes it?” a question to answer before you choose. Many providers let you pick a region and sign a data processing agreement; ask for both. This is general information, not legal advice. Russian teams meet the same question in its strictest form, because Russian law requires personal data of Russian citizens to be stored in Russia, so they often install open systems such as Strapi or Directus on their own servers. Ask yourself in advance where the data lies, and who could stop handing it over.

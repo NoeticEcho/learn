@@ -1,0 +1,839 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/08-choosing.svx. */
+	export const metadata = {
+		id: '08-cms/08-choosing',
+		part: 8,
+		order: 8,
+		title: 'How to choose: a decision tree for your project',
+		definition: 'Choosing a CMS or generator starts with five questions: who edits, how often, what else is needed, the budget and the languages. A custom CMS comes last.',
+		summary: 'You’ll get a working method for choosing among a site builder, WordPress, an all-in-one commerce platform, a generator and a headless CMS by five questions about your brief, and for defending the choice to a client or to yourself. Afterwards you have a decision card: the choice, two options set aside with reasons, and the condition for reconsidering. You’ll also learn when not to build a CMS of your own.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'cards',
+					label: 'WP? Wix? Hugo?',
+					caption: 'Where to start',
+					say: 'Not “what is trendy”, but five questions: who edits, how often, what else is needed, the budget, the languages.'
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'my own CMS',
+					caption: 'The temptation',
+					say: [
+						{ text: 'I’ll write my own CMS, it’s easier for me.' },
+						{ who: 'Experience', text: 'Roles, versions, backups, security… That is years, not a weekend.' }
+					]
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'reconsider: when…',
+					caption: 'The card',
+					say: 'The choice is written down with its reasons. And beside it: the condition under which we’ll reconsider.'
+				}
+			]
+		},
+		minutes: 15,
+		teaches: ['cms-choosing-stack'],
+		requires: ['cms-wordpress-maintenance', 'cms-tilda', 'cms-bitrix', 'cms-ssg-landscape', 'cms-jamstack'],
+		practice: {
+			id: 'cms-decision-card',
+			title: 'A decision card for your project',
+			task: 'Fill in the decision card. 1) Who edits the content, and how often. 2) What handles the project’s main action (a form, a payment, a booking): a service, a plugin or a function of your own. 3) How the texts are stored in the project’s languages (a field for each language, a translation of the entry, copies of pages). 4) The budget. 5) Choose a stack and explain how the choice follows from the answers above. 6) Name two options you set aside, with a reason for each: the reasons must not repeat each other. 7) Write the condition under which you would reconsider the decision. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="card">
+      <h2>Decision card: what to build the project’s site with<\/h2>
+      <dl>
+        <dt>Project<\/dt><dd>{{name}}: {{who}}<\/dd>
+        <dt>Who edits the content<\/dt><dd id="editor">…<\/dd>
+        <dt>How often<\/dt><dd id="freq">…<\/dd>
+        <dt>The main action, “{{mainAction.label}}”: what handles it<\/dt><dd id="action-by">…<\/dd>
+        <dt>Languages ({{languages}}) and how the texts are stored<\/dt><dd id="langs">…<\/dd>
+        <dt>Budget<\/dt><dd id="budget">…<\/dd>
+        <dt>Chosen stack<\/dt><dd id="stack">…<\/dd>
+        <dt>Why it fits<\/dt><dd id="why">…<\/dd>
+      <\/dl>
+      <table id="rejected">
+        <tr><th>Option set aside<\/th><th>Why it was set aside<\/th><\/tr>
+        <tr class="rejected"><td class="option">…<\/td><td class="reason">…<\/td><\/tr>
+        <tr class="rejected"><td class="option">…<\/td><td class="reason">…<\/td><\/tr>
+      <\/table>
+      <p>When I will reconsider the decision: <span id="revisit">…<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="card">
+      <h2>Decision card: what to build the project’s site with<\/h2>
+      <dl>
+        <dt>Project<\/dt><dd>{{name}}: {{who}}<\/dd>
+        <dt>Who edits the content<\/dt><dd id="editor">the owner, without technical knowledge<\/dd>
+        <dt>How often<\/dt><dd id="freq">once a month<\/dd>
+        <dt>The main action, “{{mainAction.label}}”: what handles it<\/dt><dd id="action-by">a contact form from the builder: enquiries arrive by email, and the site has no server code of its own<\/dd>
+        <dt>Languages ({{languages}}) and how the texts are stored<\/dt><dd id="langs">a field for each language (title, title_es), and in a builder the pages in a second language are made as copies with the same layout<\/dd>
+        <dt>Budget<\/dt><dd id="budget">small: a subscription and a domain, with no separate developer<\/dd>
+        <dt>Chosen stack<\/dt><dd id="stack">website builder (Squarespace or Wix)<\/dd>
+        <dt>Why it fits<\/dt><dd id="why">the owner edits it once a month, the main action is a simple form, and the budget is small: a builder is the quickest and cheapest, and there is nothing to maintain<\/dd>
+      <\/dl>
+      <table id="rejected">
+        <tr><th>Option set aside<\/th><th>Why it was set aside<\/th><\/tr>
+        <tr class="rejected"><td class="option">WordPress<\/td><td class="reason">updates, backups and security would fall on the owner, and the project does not need what plugins offer<\/td><\/tr>
+        <tr class="rejected"><td class="option">static site generator and Markdown<\/td><td class="reason">an owner without Git would find editing files awkward, and the project has no developer<\/td><\/tr>
+      <\/table>
+      <p>When I will reconsider the decision: <span id="revisit">if the project needs user accounts or custom logic, or if the subscription starts to cost more than hosting plus a specialist’s time<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'card-exists', kind: 'exists', selector: '#card' },
+				{ id: 'no-blanks', kind: 'text', selector: '#card', matches: '^[^…]*$' },
+				{
+					id: 'editor',
+					kind: 'text',
+					selector: '#editor',
+					matches: '[oO][wW][nN][eE][rR]|[eE][dD][iI][tT][oO][rR]|[dD][eE][vV][eE][lL][oO][pP][eE][rR]|[tT][eE][aA][mM]|[mM][yY][sS][eE][lL][fF]|[iI] |[wW][eE] |[fF][oO][uU][nN][dD][eE][rR]|[cC][lL][iI][eE][nN][tT]'
+				},
+				{
+					id: 'frequency',
+					kind: 'text',
+					selector: '#freq',
+					matches: '[oO][nN][cC][eE]|[tT][wW][iI][cC][eE]|[wW][eE][eE][kK]|[mM][oO][nN][tT][hH]|[dD][aA][iI][lL][yY]|[eE][vV][eE][rR][yY]|[yY][eE][aA][rR]|[qQ][uU][aA][rR][tT][eE][rR]|[rR][aA][rR][eE]|[oO][fF][tT][eE][nN]|[dD][aA][yY]'
+				},
+				{ id: 'action-by', kind: 'text', selector: '#action-by', matches: '\\S+\\s+\\S+\\s+\\S+' },
+				{
+					id: 'languages-storage',
+					kind: 'text',
+					selector: '#langs',
+					matches: '[fF][iI][eE][lL][dD]|[tT][rR][aA][nN][sS][lL][aA][tT][iI][oO][nN]|_[a-z]{2}|[cC][oO][pP]([yY]|[iI][eE][sS])|[pP][aA][gG][eE]|[lL][aA][nN][gG][uU][aA][gG][eE]|[oO][nN][eE]|[sS][iI][nN][gG][lL][eE]'
+				},
+				{
+					id: 'languages-bilingual',
+					kind: 'text',
+					selector: '#langs',
+					matches: '[fF][iI][eE][lL][dD]|[tT][rR][aA][nN][sS][lL][aA][tT][iI][oO][nN]|_[a-z]{2}|[cC][oO][pP]([yY]|[iI][eE][sS])|[pP][aA][gG][eE]',
+					when: { brief: 'languages', contains: 'ru' }
+				},
+				{
+					id: 'stack-named',
+					kind: 'text',
+					selector: '#stack',
+					matches: '[bB][uU][iI][lL][dD][eE][rR]|[wW][iI][xX]|[sS][qQ][uU][aA][rR][eE][sS][pP][aA][cC][eE]|[wW][eE][bB][fF][lL][oO][wW]|[wW][oO][rR][dD][pP][rR][eE][sS][sS]|[sS][hH][oO][pP][iI][fF][yY]|[bB][iI][tT][rR][iI][xX]|[gG][eE][nN][eE][rR][aA][tT][oO][rR]|[hH][uU][gG][oO]|[jJ][eE][kK][yY][lL][lL]|[eE][lL][eE][vV][eE][nN][tT][yY]|[aA][sS][tT][rR][oO]|[sS][vV][eE][lL][tT][eE][kK][iI][tT]|[hH][eE][aA][dD][lL][eE][sS][sS]|[sS][tT][rR][aA][pP][iI]|[dD][iI][rR][eE][cC][tT][uU][sS]|[sS][aA][nN][iI][tT][yY]|[dD][eE][cC][aA][pP]|[aA][pP][pP]'
+				},
+				{
+					id: 'stack-why',
+					kind: 'text',
+					selector: '#why',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[eE][dD][iI][tT][oO][rR]|[oO][wW][nN][eE][rR]|[eE][dD][iI][tT]|[oO][fF][tT][eE][nN]|[oO][nN][cC][eE]|[wW][eE][eE][kK]|[mM][oO][nN][tT][hH]|[bB][uU][dD][gG][eE][tT]|[dD][aA][tT][aA]|[fF][oO][rR][mM]))'
+				},
+				{ id: 'rejected-two', kind: 'count', selector: '#rejected tr.rejected', min: 2 },
+				{ id: 'rejected-reasons', kind: 'text', selector: '#rejected td.reason', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{
+					id: 'revisit',
+					kind: 'text',
+					selector: '#revisit',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[iI][fF]|[wW][hH][eE][nN]|[oO][nN][cC][eE]|[aA][sS] [sS][oO][oO][nN] [aA][sS]))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What questions do you start with when choosing a CMS or a generator?',
+				options: [
+					'Who edits the content, how often, what is needed besides pages, what the budget is and how many languages there are',
+					'Which system is the most popular',
+					'Which one looks the nicest in a theme directory'
+				],
+				answer: 0,
+				why: [
+					'Yes. Everything depends on the answers: a comfortable admin is for people who edit often and don’t write code, while rare edits are fine with files.',
+					'No: popularity tells you what many people need, not what you need.',
+					'No: the look can be changed, but the structure of the content and its upkeep are hard to change.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A landing page with one form, edited by the owner once a month, on a small budget. What is most likely to fit?',
+				options: ['A website builder such as Squarespace or Wix', 'A headless CMS and a generator', 'A custom CMS built to order'],
+				answer: 0,
+				why: [
+					'Yes. The task is simple, the owner edits, and there is nothing to maintain. The builder’s limits don’t get in this project’s way.',
+					'No: two systems and a build for a landing page is extra work.',
+					'No: this is the costliest answer to the simplest task.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Documentation for developers: lots of pages, edited by developers, once a month. What is sensible?',
+				options: [
+					'A static site generator and Markdown in Git: fast, safe, and edits through Git are familiar',
+					'WordPress with a dozen plugins',
+					'An online shop on a commerce platform'
+				],
+				answer: 0,
+				why: [
+					'Yes. The team already has Git, the content rarely changes, and there is almost nothing to maintain.',
+					'No: maintaining WordPress will not pay off in this project.',
+					'No: there is no shop here at all.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Why shouldn’t you write a CMS of your own?',
+				options: [
+					'A CMS is a lot of dull but necessary work: users and roles, versions and drafts, a media library, backups, security, updates',
+					'Whoever wrote it becomes the only person who understands it, and when they leave, the system is left without an owner',
+					'Ready-made systems have had years of testing and close vulnerabilities faster',
+					'The law forbids custom CMSs'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the most visible part, the editing form, is a small share of the work.',
+					'Yes: an agency’s “home made” CMS often turns out to be a trap, both for the agency and for the client.',
+					'Yes: security takes constant effort, and shared projects spread it across a community.',
+					'No: there is no such law, it is a matter of cost and risk.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put in order what to try first when the site needs a new feature',
+				items: [
+					'Configure what you already have (settings, a ready-made block)',
+					'Take a ready-made plugin or service',
+					'Assemble it from ready-made parts',
+					'Write your own, and only after measuring that nothing else will do'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does the decision card have a line “when I will reconsider the decision”?',
+				options: [
+					'The choice is right for today’s project, and projects grow: a condition named in advance lets you change course in time instead of putting up with it',
+					'To avoid making a decision now',
+					'So the client can cancel the work'
+				],
+				answer: 0,
+				why: [
+					'Yes. A condition such as “user accounts appear” or “edits stop” makes the decision a conscious one, not a dogma.',
+					'No: the decision is made, and the line only names the change after which it will stop fitting.',
+					'No: it is about changing the stack, not about canceling the work.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-choose-questions',
+				front: 'Which five questions decide the choice of a stack?',
+				back: 'Who edits the content, how often, what is needed besides pages (a form, a shop, accounts), what the budget is and how many languages there are. The rest follows from them.'
+			},
+			{
+				id: 'cms-choose-map',
+				front: 'What suits which project?',
+				back: 'A site builder: a simple site edited by its owner. WordPress: an editor needs an admin and plugins. A commerce platform (Shopify, or 1C-Bitrix in Russia): a big catalog and back-office systems. A generator: rare edits, a developer. Headless: frequent edits by different people. An app: user accounts.'
+			},
+			{
+				id: 'cms-choose-own',
+				front: 'Why not write your own CMS?',
+				back: 'Roles, versions, a media library, backups, security and updates are years of work that communities have already done and tested. A custom CMS becomes a trap when its author leaves.'
+			},
+			{
+				id: 'cms-choose-order',
+				front: 'In what order do you solve a problem before writing your own?',
+				back: 'Configure what exists, then take a ready-made plugin or service, then assemble it from ready-made parts, and only after measuring write your own.'
+			},
+			{
+				id: 'cms-choose-revisit',
+				front: 'Why have a line “when I will reconsider”?',
+				back: 'A decision is right for today’s project. A condition named in advance (accounts appeared, edits stopped, the subscription got dearer) lets you change course in time.'
+			}
+		],
+		sources: [
+			{
+				title: 'HTTP Archive Web Almanac 2024: CMS',
+				url: 'https://almanac.httparchive.org/en/2024/cms',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Jamstack.org: what is Jamstack',
+				url: 'https://jamstack.org/',
+				licence: 'proprietary-link',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'Squarespace Help Center', url: 'https://help.squarespace.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Wix Help Center', url: 'https://support.wix.com/en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'WordPress.org Documentation',
+				url: 'https://wordpress.org/documentation/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Joel Spolsky: Things You Should Never Do, Part I',
+				url: 'https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'The last step of the part: pull everything into one deliberate choice. Five answers about your project, one stack, two set aside, and the condition under which you’ll change your mind.',
+			hints: [
+				'First answer the questions about the project (who edits, how often, what handles the main action, the languages, the budget). The choice follows from the answers, not the other way round.',
+				'When you explain the choice, name at least two of the answers above, for example “the owner edits once a month and the budget is small”.',
+				'For the two options you set aside, find different reasons: one might cost too much, another might be awkward for the editor.'
+			],
+			mistakes: {
+				'card-exists': 'The card is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				editor: 'Say who edits the content: the owner, an editor, a developer or a team.',
+				frequency: 'Write how often the content is edited, for example “once a month”.',
+				'action-by': 'Say what handles the main action: a service, a plugin or a function, in at least three words.',
+				'languages-storage': 'Say how the texts are stored in the project’s languages: a field for each language, a translation of the entry, or copies of pages.',
+				'languages-bilingual': 'The project has two languages: write how the texts are stored in them (a field for each language or a translation of the entry).',
+				'stack-named': 'Name the chosen stack: a site builder, WordPress, a commerce platform, a generator, headless or an app.',
+				'stack-why': 'Explain the choice at some length, through the answers above: who edits, how often, the budget.',
+				'rejected-two': 'You need two options set aside. Don’t delete the table’s rows.',
+				'rejected-reasons': 'Each option set aside needs a reason of its own, in at least a few words.',
+				revisit: 'Name the condition for reconsidering: “if…” or “when…”.'
+			},
+			outro: 'The card is ready: the choice is written down with its reasons and with the condition under which to reconsider it. That finishes the part on CMSs. Next the site gets its infrastructure: hosting, domains and certificates.'
+		},
+		say: {
+			CMS: 'C M S',
+			Squarespace: 'square space',
+			Wix: 'wicks',
+			WordPress: 'word press',
+			Shopify: 'shop eye fy',
+			Markdown: 'mark down',
+			Git: 'git',
+			headless: 'head less',
+			Jamstack: 'jam stack',
+			Bitrix: 'bit rix'
+		}
+	};
+</script>
+
+<script>
+	import StackTree from '../../diagrams/StackTree.svelte';
+</script>
+
+## A method instead of taste
+
+We have looked at five paths: WordPress, a site builder, an all-in-one commerce platform, a static site generator and a headless CMS. What remains is how to choose. The answer is not about taste or fashion. The choice follows from **five questions about your project**, and you already know how each one works:
+
+1. **Who edits the content?** The owner with no technical knowledge, an editor on a team, or a developer? (Lesson 1.)
+2. **How often?** Every day, once a week, once a month, twice a year? That decides whether you need a comfortable admin. (Lesson 1.)
+3. **What is needed besides pages?** A contact form, a shop, user accounts? Each is either part of the platform, or plugged in as a service, or means an app of your own. (Lessons 4 and 7.)
+4. **What is the budget?** The money at the start, a subscription every year, and the time for upkeep. (Lessons 3 and 4.)
+5. **How many languages?** One language is simplest. Two need a field for each language, or translations of entries. (Lesson 1.)
+
+Click the ready-made projects in the diagram and change the answers: you’ll see how the decision shifts. It is not the truth, it is a way to see the logic.
+
+<StackTree />
+
+One more thing belongs next to the budget: **where the data will live**. A site builder, a form service or a cloud CMS keeps your visitors’ details on someone else’s servers. If you collect personal data, the GDPR (for visitors in Europe) and the US state privacy laws expect you to know where it is stored and who processes it. Ask each provider for a data processing agreement and a choice of region. This is general information, not legal advice. Russia takes the strictest line, requiring the personal data of its citizens to be stored in Russia, which is one reason Russian teams so often host their own systems.
+
+## A summary of the paths
+
+| Path | Who edits | Cost of owning | Control | Where it breaks |
+|---|---|---|---|---|
+| Site builder | the owner | a subscription | low | leaving the platform, custom logic |
+| WordPress | an editor | time for upkeep | high | updates, plugins, security |
+| Commerce platform (Shopify, 1C-Bitrix) | a team with a developer | a plan or license, and a developer | high | the price, the need for specialists |
+| Static site generator | a developer | almost free | complete | awkward for an editor without Git |
+| Headless and a generator | editors and a developer | two systems | complete | complexity, previews |
+| Your own app | a team | the highest | complete | long and costly |
+
+## When not to build your own CMS
+
+The most tempting option for a developer is “I’ll write my own, it’s easier for me.” It is almost always a mistake, and here is why.
+
+**A CMS is mostly dull work.** The editing form is a small part. The rest is users and roles, passwords and account recovery, drafts and versions, a media library that crops and compresses images, fields for SEO, several languages, previews, backups, protection from break-ins, dependency updates, and a log of changes. Ready-made systems have all of it and have been through thousands of projects, while you would need at least a year of work and endless upkeep.
+
+**A “home made” CMS becomes a trap.** In the 2000s many studios wrote their own systems for clients. While the author is at the studio, all is well. When they leave, the system is left without an owner, nobody updates it, holes are found in it, and the client has nowhere to move to. The client becomes a hostage.
+
+**There is an order in which to look for a solution.** First **configure** what you have. Then **take something ready-made**: a plugin, a service, a block. Then **assemble from ready-made parts** (a generator plus a headless CMS, say). And **write your own** only after you have measured that nothing else will do. The order works beyond CMSs: nobody writes their own **authentication**, **payments**, **search** or **email delivery** either (part 6 says the same of authentication).
+
+There are exceptions: when the CMS is your product, when the project has a unique data model and a team to maintain it, and when you are learning. And the cheapest “custom CMS” is Markdown files in Git: the texts sit as files, and edits are commits. You don’t have to write it, it is already made.
+
+<details>
+<summary>Check yourself: what would you try before writing your own?</summary>
+
+Configure what you have, then take a ready-made plugin or service, then assemble from ready-made parts. You write your own last, and only if you have measured that nothing else will work.
+
+</details>
+
+## Not locking yourself in
+
+A good choice can be changed. Three habits help. **Keep the content in a portable form**: Markdown, JSON, an SQL export, not only in a platform’s closed editor. **Don’t change page addresses without need**: addresses are the memory of search engines and of other people’s links. And **check the exit in advance**: once a year, export the site and see what you could carry away.
+
+## Practice
+
+You are in 2022, but looking at everything at once. Gather what you learned in this part into a decision card: who edits and how often, what handles the main action, how the languages are stored, the budget, the chosen stack and two options set aside with different reasons. End with the condition under which you would reconsider the decision.
+
+## What was wrong with choosing by habit
+
+Choosing “because I know it” or “because that is our agency’s platform” ruined projects, because nobody predicted how a platform would change. The three habits (reasons, options set aside, a condition for reconsidering) turn the choice from a bet into a decision that can be checked and corrected.

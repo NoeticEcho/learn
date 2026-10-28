@@ -1,0 +1,808 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/08-cms/07-jamstack-deploy.svx. */
+	export const metadata = {
+		id: '08-cms/07-jamstack-deploy',
+		part: 8,
+		order: 7,
+		title: 'Jamstack: the build, the CDN and the webhook',
+		definition: 'Jamstack is an approach where pages are built ahead and served from a CDN, while dynamic parts come from APIs and services. A webhook picks up CMS edits.',
+		summary: 'You’ll sketch the path “edit in the CMS, webhook, build, deploy to a CDN” for your own site, and see what is fast and safe in such a setup and what needs separate services (forms, search, payments, accounts). This is the era of 2022. The CDN gets a short mention here and a full one in part 9.',
+		comic: {
+			panels: [
+				{
+					mood: 'explain',
+					prop: 'flowchart',
+					label: 'CMS|webhook|build|CDN',
+					caption: 'The path of an edit',
+					say: 'The editor pressed “Publish”, a webhook woke the build, and the finished site went out to the CDN.'
+				},
+				{
+					mood: 'cheer',
+					side: 'right',
+					prop: 'server',
+					label: 'v12 is live',
+					caption: 'The build failed',
+					say: [
+						{ text: 'The build failed!' },
+						{ who: 'Site', text: 'I didn’t notice. The last version is still up.' }
+					]
+				},
+				{
+					mood: 'hmm',
+					prop: 'envelope',
+					label: 'contact form',
+					caption: 'What about dynamic parts?',
+					say: 'An outside service or a function takes the enquiry. The site can’t send email itself: it is a set of files.'
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['cms-jamstack', 'cms-build-webhook-rebuild'],
+		requires: ['cms-headless', 'cms-static-site-generator'],
+		practice: {
+			id: 'cms-deploy-scheme',
+			title: 'The deployment scheme of your site',
+			task: 'Describe how an edit to the content reaches your project’s site. 1) In the table, for the four steps (content source, build, deploy, delivery), write what happens and where or by whom it is done. Mention the webhook where an edit starts the build. 2) Say which outside service or function handles the visitor’s main action (a form, a booking, a payment), given that the site has no server code of its own. 3) Say where visitors’ personal data will land, and what storing it requires under the GDPR and US state privacy laws. 4) Name a way to roll back a bad publish. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="scheme">
+      <h2>The site’s deployment scheme<\/h2>
+      <table id="steps">
+        <tr><th>Step<\/th><th>What happens<\/th><th>Where and who<\/th><\/tr>
+        <tr class="step source"><td class="name">Content source<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+        <tr class="step build"><td class="name">Build<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+        <tr class="step deploy"><td class="name">Deploy<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+        <tr class="step serve"><td class="name">Delivery to visitors<\/td><td class="what">…<\/td><td class="where">…<\/td><\/tr>
+      <\/table>
+      <p id="action">The visitor’s main action, “{{mainAction.label}}”, is handled by: <span id="action-by">…<\/span><\/p>
+      <p>Where visitors’ personal data lands, and what storing it requires under the GDPR and US state privacy laws: <span id="action-pd">…<\/span><\/p>
+      <p>How to roll back a bad publish: <span id="rollback">…<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="scheme">
+      <h2>The site’s deployment scheme<\/h2>
+      <table id="steps">
+        <tr><th>Step<\/th><th>What happens<\/th><th>Where and who<\/th><\/tr>
+        <tr class="step source"><td class="name">Content source<\/td><td class="what">the editor changes entries in a headless CMS; after saving, the CMS sends a webhook to the builder<\/td><td class="where">the CMS, edited by the owner<\/td><\/tr>
+        <tr class="step build"><td class="name">Build<\/td><td class="what">the generator, started by the webhook, asks the API for the content and rebuilds every page<\/td><td class="where">a build service (CI), which starts by itself<\/td><\/tr>
+        <tr class="step deploy"><td class="name">Deploy<\/td><td class="what">the finished folder is uploaded to the host and switched on as a whole, in one step<\/td><td class="where">a static host such as Netlify, Vercel or Cloudflare Pages<\/td><\/tr>
+        <tr class="step serve"><td class="name">Delivery to visitors<\/td><td class="what">pages are delivered from the nearest copy, and the cache is cleared after a deploy<\/td><td class="where">the host’s CDN<\/td><\/tr>
+      <\/table>
+      <p id="action">The visitor’s main action, “{{mainAction.label}}”, is handled by: <span id="action-by">an outside form service: the form sends the enquiry to it and it forwards the enquiry to my email, so the site needs no server code of its own<\/span><\/p>
+      <p>Where visitors’ personal data lands, and what storing it requires under the GDPR and US state privacy laws: <span id="action-pd">the enquiries sit with the form service and in my email; under the GDPR and state privacy laws I need a provider that signs a data processing agreement and stores the data in a region I choose (the EU or the US), and consent and a privacy notice go next to the form<\/span><\/p>
+      <p>How to roll back a bad publish: <span id="rollback">in the host’s dashboard I switch back to the previous built version, which takes seconds, and then I fix the entry and publish again<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'scheme-exists', kind: 'exists', selector: '#scheme' },
+				{ id: 'no-blanks', kind: 'text', selector: '#scheme', matches: '^[^…]*$' },
+				{ id: 'four-steps', kind: 'count', selector: '#steps tr.step', min: 4 },
+				{ id: 'steps-described', kind: 'text', selector: '#steps td.what', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{
+					id: 'webhook',
+					kind: 'text',
+					selector: '#steps',
+					matches: '[wW][eE][bB][hH][oO][oO][kK]|[tT][rR][iI][gG][gG][eE][rR]|[cC][oO][mM][mM][iI][tT]'
+				},
+				{
+					id: 'serve-cdn',
+					kind: 'text',
+					selector: '#steps tr.serve td.where',
+					matches: '[cC][dD][nN]|[dD][eE][lL][iI][vV][eE][rR]|[sS][eE][rR][vV][eE]|[pP][aA][gG][eE][sS]|[hH][oO][sS][tT]|[nN][eE][tT][lL][iI][fF][yY]|[vV][eE][rR][cC][eE][lL]|[cC][lL][oO][uU][dD][fF][lL][aA][rR][eE]|[sS][eE][rR][vV][eE][rR]'
+				},
+				{
+					id: 'action-external',
+					kind: 'text',
+					selector: '#action-by',
+					matches: '[sS][eE][rR][vV][iI][cC][eE]|[fF][uU][nN][cC][tT][iI][oO][nN]|[fF][oO][rR][mM][sS][pP][rR][eE][eE]|[nN][eE][tT][lL][iI][fF][yY]|[sS][tT][rR][iI][pP][eE]|[pP][aA][yY][pP][aA][lL]|[sS][hH][oO][pP][iI][fF][yY]|[cC][rR][mM]|[cC][lL][oO][uU][dD]|[eE][mM][aA][iI][lL]|[tT][eE][lL][eE][gG][rR][aA][mM]|[bB][oO][tT]|[oO][uU][tT][sS][iI][dD][eE]|[eE][xX][tT][eE][rR][nN][aA][lL]|[pP][lL][aA][tT][fF][oO][rR][mM]|[tT][hH][iI][rR][dD]'
+				},
+				{
+					id: 'pd-where',
+					kind: 'text',
+					selector: '#action-pd',
+					matches: '(?=[\\s\\S]*(?:[eE][uU]|[uU][sS]|[uU][nN][iI][tT][eE][dD] [sS][tT][aA][tT][eE][sS]|[eE][uU][rR][oO][pP][eE]|[gG][dD][pP][rR]|[rR][eE][gG][iI][oO][nN]|[sS][tT][aA][tT][eE]|[cC][oO][uU][nN][tT][rR][yY]|[pP][rR][iI][vV][aA][cC][yY]))(?=[\\s\\S]*(?:[sS][eE][rR][vV][eE][rR]|[sS][tT][oO][rR]|[sS][eE][rR][vV][iI][cC][eE]|[pP][lL][aA][tT][fF][oO][rR][mM]|[cC][rR][mM]|[eE][mM][aA][iI][lL]|[fF][uU][nN][cC][tT][iI][oO][nN]|[pP][rR][oO][vV][iI][dD][eE][rR]))'
+				},
+				{
+					id: 'rollback-way',
+					kind: 'text',
+					selector: '#rollback',
+					matches: '(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+)(?=[\\s\\S]*(?:[rR][oO][lL][lL]|[pP][rR][eE][vV][iI][oO][uU][sS]|[eE][aA][rR][lL][iI][eE][rR]|[vV][eE][rR][sS][iI][oO][nN]|[rR][eE][vV][eE][rR][tT]|[sS][wW][iI][tT][cC][hH]))'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the path of an edit in order, from the editor to the visitor',
+				items: [
+					'The editor presses “Publish” in the CMS',
+					'The CMS sends the builder a webhook',
+					'The generator rebuilds the site from the content in the API',
+					'The finished folder is deployed to the host',
+					'The CDN refreshes its copies and clears the old cache'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The build of a new version of the site failed with an error. What does a visitor see?',
+				options: [
+					'The previous version: a new one goes live only after a successful build, and as a whole',
+					'A blank screen',
+					'Half the pages new and half old'
+				],
+				answer: 0,
+				why: [
+					'Yes. This kind of deploy is called atomic: the site switches from one complete version to another, so there is no “half broken” state.',
+					'No: this is exactly what such a setup does not allow, unless you switch on a failed build by hand.',
+					'No: versions are never mixed, the switch happens all at once.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are added to a static site from outside services, because the site has no server code of its own?',
+				options: ['Receiving form submissions', 'Site search', 'Payments', 'Laying out the pages'],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: a form service or a function receives the data and forwards it to an inbox.',
+					'Yes: search is built on a service, or on a ready index that is built along with the site (lesson 6 of part 7).',
+					'Yes: a payment service takes the payment, and the site only sends the visitor there.',
+					'No: laying out the pages is exactly what the generator does itself.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is a rollback in this setup?',
+				options: [
+					'Switching the site to the previous version that is already built: nothing is rebuilt, and it takes seconds',
+					'Rebuilding the whole site from scratch',
+					'Deleting the entry in the CMS'
+				],
+				answer: 0,
+				why: [
+					'Yes. Hosts keep earlier builds, so a rollback is a switch. Afterwards you fix the entry and publish again.',
+					'No: the build is usually the slowest part, and a rollback does not repeat it.',
+					'No: the entry stays, and what changes is the version of the site the visitor sees.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A site has ten thousand pages, and every edit rebuilds all of them. What is the weak spot?',
+				options: [
+					'Build time grows with the number of pages, so an edit takes a long time to reach visitors',
+					'The site becomes unsafe',
+					'It stops opening on phones'
+				],
+				answer: 0,
+				why: [
+					'Yes. This is the main limit of building ahead of time. It is handled with fast generators and by rebuilding only the pages that changed.',
+					'No: safety does not depend on size.',
+					'No: phones have nothing to do with it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What do all the things called Jamstack really have in common?',
+				options: [
+					'Pages are built ahead of time and served by a CDN, while dynamic parts come from APIs and outside services',
+					'Every site is written in JavaScript and stored in a database',
+					'Any site that has a form'
+				],
+				answer: 0,
+				why: [
+					'Yes. The word was coined in the 2010s (J for JavaScript, A for APIs, M for markup) and became the name of an architectural approach: separate the display from the data and the logic.',
+					'No: there is no database here at all, and the language does not define the approach.',
+					'No: almost every site has a form.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'cms-jamstack-def',
+				front: 'What is Jamstack?',
+				back: 'An approach where pages are built ahead of time and served through a CDN, while the dynamic parts (forms, search, payments) come from APIs and outside services. The word was coined in the 2010s (JavaScript, APIs, Markup) and popularized by Mathias Biilmann of Netlify.'
+			},
+			{
+				id: 'cms-webhook-rebuild',
+				front: 'How does an edit in the CMS reach the site?',
+				back: 'The editor saves an entry, the CMS sends a webhook, the builder asks the API for the content and rebuilds the site, the new version is deployed and switched on as a whole, and the CDN refreshes its copies.'
+			},
+			{
+				id: 'cms-atomic-deploy',
+				front: 'What are an atomic deploy and a rollback?',
+				back: 'A new version of the site goes live as a whole and only after a successful build, so if something fails the visitor still sees the previous one. A rollback is a switch to the previous built version, in seconds.'
+			},
+			{
+				id: 'cms-jamstack-services',
+				front: 'What does a static site lack, and where does it come from?',
+				back: 'Server code. Forms, search, comments, payments and user accounts come from outside services or functions. The visitors’ personal data goes to them, so you need consent and an answer to where it is stored.'
+			},
+			{
+				id: 'cms-jamstack-limit',
+				front: 'What is the main limit of building ahead of time?',
+				back: 'Build time grows with the number of pages, and every edit rebuilds the site. Big sites need fast generators and a rebuild of only what changed.'
+			}
+		],
+		sources: [
+			{
+				title: 'Jamstack.org: what is Jamstack',
+				url: 'https://jamstack.org/',
+				licence: 'proprietary-link',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Cloudflare Pages docs',
+				url: 'https://developers.cloudflare.com/pages/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Cloudflare Pages: rollbacks',
+				url: 'https://developers.cloudflare.com/pages/configuration/rollbacks/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'web.dev: Content delivery networks (CDN)',
+				url: 'https://web.dev/articles/content-delivery-networks',
+				licence: 'CC-BY',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'GitHub Pages docs', url: 'https://docs.github.com/en/pages', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Netlify docs', url: 'https://docs.netlify.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [
+			{
+				title: 'An introduction to the JAMstack (jondjones)',
+				url: 'https://www.youtube.com/watch?v=xBOjwRjE7u8',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'Now you set out how an edit in the CMS becomes a live site, from the webhook to the visitor. Alongside, we’ll decide who takes the enquiries when the site has no server of its own.',
+			hints: [
+				'The table has four steps: where the content comes from, who builds, where the finished site is deployed and where it is served from. In “What happens”, mention the webhook where the build starts by itself.',
+				'On a static site the enquiries are taken by an outside form service or a function. It receives the personal data too, so you need consent and an answer to “where is this stored?”.',
+				'A rollback is a switch to the previous built version in the host’s dashboard. Say where you would do it.'
+			],
+			mistakes: {
+				'scheme-exists': 'The block with the scheme is gone. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				'four-steps': 'The table must keep its four steps.',
+				'steps-described': 'In the “What happens” column describe each step in at least four or five words.',
+				webhook: 'The webhook is not mentioned anywhere: it starts the build after an edit in the CMS.',
+				'serve-cdn': 'For delivery, write where it happens: a CDN or a static host.',
+				'action-external': 'Say which outside service or function handles the visitor’s main action.',
+				'pd-where': 'Say where the personal data will land, and what storing it requires under the GDPR and state privacy laws.',
+				'rollback-way': 'Name a way to roll back: for instance, switch to the previous built version.'
+			},
+			outro: 'The deployment scheme is ready: from an edit to the visitor, and back again if something goes wrong. One lesson is left in this part: how to choose among all these paths for your own project.'
+		},
+		say: {
+			Jamstack: 'jam stack',
+			CDN: 'C D N',
+			CMS: 'C M S',
+			API: 'A P I',
+			CI: 'C I',
+			Netlify: 'net li fy',
+			Cloudflare: 'cloud flare',
+			GitHub: 'git hub',
+			Pages: 'pages',
+			GDPR: 'G D P R'
+		}
+	};
+</script>
+
+<script>
+	import ReleasePipeline from '../../diagrams/ReleasePipeline.svelte';
+</script>
+
+## What Jamstack is
+
+The word was coined in the 2010s: **J**avaScript, **A**PIs and **M**arkup. It was made popular by Mathias Biilmann, a founder of Netlify, in a talk in 2016. Today the Jamstack.org site describes the approach like this: **the display of a page is separated from the data and the logic, and the logic you need and third party services are plugged in through APIs**. The word “Jamstack” has become less fashionable in marketing, but the idea has stayed. It is also called the “composable” web.
+
+In practice this means three things, and you already know each of them:
+
+1. **Pages are built ahead of time** (lesson 5): ready HTML files sit on the server.
+2. **They are served through a CDN** (a network of servers around the world: the nearest copy hands out the page quickly; details in part 9).
+3. **Dynamic parts come from outside**: the content from the API of a headless CMS (lesson 6), and forms, search and payments from services or short functions.
+
+## The path of an edit to the visitor
+
+The most important mechanism here is how an edit in the CMS reaches the live site. That is why the webhook, the build and the rollback are worth seeing live. Press “Publish”, step through, and break any stage.
+
+<ReleasePipeline />
+
+What to notice.
+
+- A **webhook** is a “phone call”: the CMS itself tells the builder “the content has changed”. Without it, someone would have to start the build by hand.
+- The **deploy is atomic**: a new version goes live as a whole, and only after a successful build. That is why a failed build does not break the site: the visitor keeps seeing the previous version. Even on a live site there is no “half updated” state.
+- A **rollback** is a switch to the previous built version. Hosts keep them, and going back takes seconds. After that you fix the entry in peace and publish again.
+- **Time grows with the size of the site.** For two hundred pages a build takes under a minute, and for ten thousand it is noticeable. That is the limit of building ahead of time: every edit rebuilds everything. The answers are fast generators, rebuilding only the pages that changed, and pages built on request and then cached (a hybrid that modern frameworks can do).
+
+<details>
+<summary>Check yourself: what does a visitor see if the build failed?</summary>
+
+The previous version. A new version goes live only after a successful build, and as a whole, so the site stays on the last working one.
+
+</details>
+
+## What such a site lacks
+
+A static site has no server code: it can’t take a form by itself, search a database or accept a payment. There are three ways around that, and you have met them already:
+
+- **An outside service.** A form service takes the form (and forwards it to email, a spreadsheet or a messenger), a payment service takes the payment, and search is built as an index that is generated along with the site, or as a service.
+- **A short function.** A “serverless” function (see part 9) runs on request, takes the data and does something with it. It is server code all the same, only small, and without a server you have to manage.
+- **Your own API.** If there is a lot of logic (user accounts, orders), you need a real server, and the site stops being purely static. That is fine: Jamstack is not a dogma, it is a way to move to a server only what needs it.
+
+And here the topic of lesson 7 in part 7 comes back. Any outside service that takes an enquiry receives **visitors’ personal data**. You are still the one responsible. You need **consent** and a privacy notice next to the form, and an answer to “where does the service store the enquiries, and in which country?”. Under the GDPR, sending data outside the EU needs a legal basis, and the US state privacy laws (California’s, for instance) expect a contract with a service provider and honest notices. In practice you pick a provider that signs a data processing agreement and lets you choose where the data is stored. Make that choice on the scheme, not by accident. This is general information, not legal advice: for your own case, ask a privacy attorney or your data protection authority.
+
+## Practice
+
+You are in 2022: the site is built from the CMS by a webhook and sits on a CDN. Describe the deployment scheme of your project in four steps (source, build, deploy, delivery), name the service or function that handles the visitor’s main action, say where the personal data will land, and how you would roll back a bad publish.
+
+## What was wrong with the older way
+
+The first “edit, then rebuild” setups needed a developer to start the build by hand and copy the files over FTP: one careless move and the site was half updated. A host’s atomic deploys, a one-click rollback and webhooks removed that manual mistake and many others.
