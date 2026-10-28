@@ -1,0 +1,325 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/10-writing/04-microcopy.svx. */
+	export const metadata = {
+		id: '10-writing/04-microcopy',
+		part: 10,
+		order: 4,
+		title: 'Microcopy and UX writing',
+		definition: 'Microcopy is the short text of an interface: button labels, field labels and hints, error messages. The work of writing it is called UX writing.',
+		summary:
+			'You’ll learn to write buttons, field labels and hints, error messages and the reply after sending, so that a visitor knows what to do and what happens next. Afterwards your project’s form has all of these texts, and beside it a clear consent to the use of the data.',
+		minutes: 20,
+		teaches: ['texts-microcopy'],
+		requires: ['texts-info-style', 'html-forms'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'Submit', caption: 'A button', say: 'Submit what? Where to? What happens next? A button has to answer “what happens if I press it?”' },
+				{ mood: 'explain', side: 'right', prop: 'browser', label: 'Book a consultation', say: 'A verb plus what the person gets. Now it’s clear what will happen after the press.' },
+				{ mood: 'hint', prop: 'browser', label: 'missing digits', caption: 'An error', say: 'A good error stands by the field: what happened and what to do. “The number is missing digits. Write it in full.”' },
+				{ mood: 'cheer', side: 'right', caption: 'After sending', say: 'Did it arrive, what next, and when? If you wrote “we’ll call before 6 p.m.”, then call before 6 p.m.' }
+			]
+		},
+		practice: {
+			id: 'microcopy-form',
+			title: 'The texts of the main-action form',
+			task: 'The form for your project’s main action is built, but no words are written in it. Fill in the form’s headline (an h2 with the class form-title), the labels of the two fields (in label elements), a hint under each field (a span with the class hint), the consent text (a label with the class consent) and the button text, which must name the main action from the brief. In the note “What the site will say” write three error messages (the class error) and the message after sending (the class success), which gives a time. The errors must not contain the words “invalid”, “incorrect” or “wrong”, or error numbers. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <main>\n      <form id="request">\n        <h2 class="form-title">…</h2>\n        <p>\n          <label for="f-name">…</label><br>\n          <input id="f-name" name="name" type="text" autocomplete="name"><br>\n          <span class="hint">…</span>\n        </p>\n        <p>\n          <label for="f-phone">…</label><br>\n          <input id="f-phone" name="phone" type="tel" autocomplete="tel"><br>\n          <span class="hint">…</span>\n        </p>\n        <p>\n          <input id="f-consent" name="consent" type="checkbox">\n          <label for="f-consent" class="consent">…</label>\n        </p>\n        <button type="submit">Submit</button>\n      </form>\n    </main>\n\n    <aside class="note" data-scaffold id="states">\n      <h2>What the site will say</h2>\n      <p class="error">…</p>\n      <p class="error">…</p>\n      <p class="error">…</p>\n      <p class="success">…</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <main>\n      <form id="request">\n        <h2 class="form-title">{{mainAction.label}}: tell us what you need</h2>\n        <p>\n          <label for="f-name">What should we call you</label><br>\n          <input id="f-name" name="name" type="text" autocomplete="name"><br>\n          <span class="hint">A first name is enough, whichever you prefer.</span>\n        </p>\n        <p>\n          <label for="f-phone">Phone number</label><br>\n          <input id="f-phone" name="phone" type="tel" autocomplete="tel"><br>\n          <span class="hint">For example, +1 555 000 0000. We’ll call to give you a time.</span>\n        </p>\n        <p>\n          <input id="f-consent" name="consent" type="checkbox">\n          <label for="f-consent" class="consent">I agree to you using my name and phone number to contact me about this request. More in the privacy notice.</label>\n        </p>\n        <button type="submit">{{mainAction.label}}</button>\n      </form>\n    </main>\n\n    <aside class="note" data-scaffold id="states">\n      <h2>What the site will say</h2>\n      <p class="error">The number is missing some digits. Write the whole phone number, for example +1 555 000 0000.</p>\n      <p class="error">We don’t know what to call you. Type your first name, one word is enough.</p>\n      <p class="error">Without the tick we can’t save your details. Tick the box and press the button again.</p>\n      <p class="success">Request received. We’ll call you today before 6 p.m. If we can’t reach you, we’ll send a text message.</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#request', matches: '^[^…]*$' },
+				{ id: 'no-blanks-states', kind: 'text', selector: '#states', matches: '^[^…]*$' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'form-title', kind: 'text', selector: '#request .form-title', matches: '^\\s*\\S+(?:\\s+\\S+){1,}' },
+				{ id: 'button-action', kind: 'field', selector: '#request button', field: 'mainAction.label' },
+				{ id: 'hints', kind: 'count', selector: '#request .hint', min: 2 },
+				{ id: 'consent-text', kind: 'text', selector: '#request label.consent', matches: '(?:[Uu]s(?:e|ing)|[Pp]rocess|[Ss]tor(?:e|ing)|[Kk]eep)' },
+				{ id: 'consent-box', kind: 'count', selector: '#request input[type="checkbox"]', min: 1 },
+				{ id: 'consent-unchecked', kind: 'count', selector: '#request input[type="checkbox"][checked]', max: 0 },
+				{ id: 'errors', kind: 'count', selector: '#states .error', min: 3 },
+				{ id: 'error-words', kind: 'text', selector: '#states', matches: '^(?![\\s\\S]*(?:[Ii]nvalid|[Ii]ncorrect|[Ww]rong|[Ee]rror \\d|[Ee]rror code|[Vv]alidation error))[\\s\\S]*\\S' },
+				{ id: 'error-how', kind: 'text', selector: '#states .error', matches: '^\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'success-when', kind: 'text', selector: '#states .success', matches: '(?:\\d|[Tt]oday|[Tt]omorrow|hour|minute|business day|within)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What should the submit button of a form say?',
+				options: [
+					'The name of the action the person is taking: “Book a consultation”',
+					'“Submit”, because it’s what people are used to',
+					'“OK”, to keep it short'
+				],
+				answer: 0,
+				why: [
+					'Yes. A button names the action and the result. The test: finish the sentence “I want to…” with the button’s name, and it should sound natural.',
+					'No: “Submit” says what the form does, not what the person gets. That’s a programmer’s language.',
+					'No: “OK” says nothing at all. A named action is best.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What should a good error message contain?',
+				options: [
+					'What exactly is wrong',
+					'What to do to fix it',
+					'An error number for the developer',
+					'An example of the right format, if there is one',
+					'A hint that the user is to blame'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: the person has to understand what happened.',
+					'Yes: without it they stay stuck where they are.',
+					'No: an error number is for a programmer. It tells a person nothing; if it’s needed, put it small after the plain text.',
+					'Yes: an example answers half the questions.',
+					'No: a reproach (“you entered it incorrectly”) fixes nothing and annoys people. Describe the situation, not the person.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why shouldn’t a hint inside the field (a placeholder) replace the field’s label?',
+				options: [
+					'The hint disappears when the person starts typing, and they’re left to guess what the field is for',
+					'Hints inside a field are forbidden by the standard',
+					'Because it’s too pretty'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is also pale and hard to read, and screen readers don’t always announce it. A label should stand beside the field and stay visible.',
+					'No: they’re not forbidden. They’re fine for an example, but not for a label.',
+					'No, it’s about usability, not looks.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match the bad text with the good one',
+				pairs: [
+					['Error 422', 'The number is missing some digits. Write the whole phone number'],
+					['Submit', 'Book a consultation'],
+					['Form submitted', 'Request received. We’ll call you today before 6 p.m.'],
+					['Please enter valid data', 'Write the whole phone number, for example +1 555 000 0000']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A pop-up’s decline button is labeled “No thanks, I don’t like saving money”. What is this?',
+				options: [
+					'A dark pattern: the person is shamed for declining, so that they’ll stay',
+					'Honest humor',
+					'Ordinary politeness'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is called “confirmshaming”. An honest decline is neutral: “No, thanks”.',
+					'No: a joke at the expense of a person who declined is not a joke.',
+					'No: politeness doesn’t shame.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the parts of an error message in the order that is easiest to read',
+				items: [
+					'What happened (“The number is missing some digits”)',
+					'What to do (“Write the whole phone number”)',
+					'An example of the right format (“+1 555 000 0000”)'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'texts-microcopy',
+				front: 'What is microcopy?',
+				back: 'The short text of an interface: a button, a field label, a hint, an error, a confirmation. By Nielsen Norman Group’s account it informs, helps people act, or influences a choice.'
+			},
+			{
+				id: 'texts-button-label',
+				front: 'What do you put on a button?',
+				back: 'The action and the result, not “Submit”: “Book a consultation”. The test: “I want to…” plus the button’s name.'
+			},
+			{
+				id: 'texts-error-message',
+				front: 'What makes a good error message?',
+				back: 'What’s wrong, what to do, an example of the format. No code, no reproach, next to the field, and what was typed isn’t erased.'
+			},
+			{
+				id: 'texts-label-not-placeholder',
+				front: 'A label or a hint inside the field?',
+				back: 'A label above the field: it stays visible. A hint inside the field disappears as you type, so use it for an example.'
+			},
+			{
+				id: 'texts-confirmation',
+				front: 'What do you say after a form is sent?',
+				back: 'That the request is received, what happens next, when, and how to get in touch if something goes wrong.'
+			}
+		],
+		sources: [
+			{ title: 'UX Copy Sizes: Long, Short, and Micro (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/ux-copy-sizes/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'The 3 I’s of Microcopy (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/3-is-of-microcopy/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'UX Writing Study Guide (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/ux-writing-study-guide/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Error message (GOV.UK Design System)', url: 'https://design-system.service.gov.uk/components/error-message/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Understanding SC 3.3.3: Error Suggestion (W3C WAI)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Google developer documentation style guide', url: 'https://developers.google.com/style', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Deceptive Patterns, formerly “dark patterns” (Harry Brignull)', url: 'https://deceptive.design/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Regulation (EU) 2022/2065, the Digital Services Act (EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg/2022/2065/oj', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A form is where a visitor decides whether to trust you or close the tab. Let’s write the words for it.',
+			hints: [
+				'The button text must contain the main action from the brief in the same words. If in the brief it reads “Book a consultation”, write exactly that.',
+				'An error message answers two questions: what is wrong and what to do. Add an example of the format.',
+				'In the message after sending, give a time: “today before 6 p.m.”, “within the business day”, “in 15 minutes”.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is left in the form. Fill in the headline, the labels, the hints and the consent text.',
+				'no-blanks-states': 'An ellipsis “…” is left in the note “What the site will say”.',
+				labels: 'Every field needs a label in a label element, tied to the field by for and id.',
+				'form-title': 'The form’s headline must be at least two words.',
+				'button-action': 'The button must name the main action from the brief in the same words, not “Submit”.',
+				hints: 'You need two hints under the fields (a span with the class hint).',
+				'consent-text': 'The consent text should say what is done with the data: that you agree to it being used, stored or processed, and for what.',
+				'consent-box': 'The consent must be a separate tick box (an input of type checkbox), not part of the button.',
+				'consent-unchecked': 'The consent box must not be ticked in advance. Remove the checked attribute.',
+				errors: 'You need three error messages with the class error.',
+				'error-words': 'The error messages still have the words “invalid”, “incorrect” or “wrong”, or an error number. Describe what is the matter without reproach.',
+				'error-how': 'At least one error message is too short. Write what is wrong and what to do, in at least six words.',
+				'success-when': 'The message after sending has no time. Say when you’ll reply: “today before 6 p.m.” or “within an hour”.'
+			},
+			outro: 'Now the form talks to a person, not to a programmer. Next we’ll decide in what voice all of this is said.'
+		},
+		say: { UX: 'U X', writing: 'writing', placeholder: 'placeholder', confirmshaming: 'confirm-shaming', 'NN/g': 'N N G' }
+	};
+</script>
+
+<script>
+	import FormBeforeAfter from '../../diagrams/FormBeforeAfter.svelte';
+</script>
+
+## The smallest texts
+
+The label on a button, the explanation under a field, the line “Something went wrong”, the word “Done”: texts of this size are called **microcopy**. They are written with no less care than articles, and read more often, because nobody can get through a form without reading them. The profession that does this is called **UX writing**, “writing for the interface”; government services, for example the UK’s GOV.UK, call it “content design”.
+
+Nielsen Norman Group’s researchers distinguish three jobs of microcopy. It **informs** (a headline, a hint), **helps people act** (a field label, the text of an error) and **influences a choice** (a call to action, a slogan). All three meet in a request form, where a person decides whether to trust you.
+
+This is an important place. A page can be skimmed, a visitor may not finish a paragraph, but a form is either filled in or not. If they didn’t understand what happens after the button, or got the message “Error 422”, they leave. Often this is the site’s last contribution to whether you get a message or a phone call. And the good news is that work on microcopy is cheap: a few lines, and the result shows at once.
+
+<details>
+<summary>Check yourself: what are the three jobs of microcopy?</summary>
+
+To inform, to help people act (labels, errors), and to influence a choice (a call to action).
+
+</details>
+
+## A button names the action
+
+The most noticeable line of a form is the button. The word on it should answer “what will happen when I press it?” “Submit” answers “what will the form do”: it will send the data. But the person needs to know what they will get: they’ll book, order or ask a question.
+
+A practical rule: **a verb plus what the person gets**. “Book a consultation”, “Request a call”, “Get a quote”, “Join the club”. The test: put the name after the words “I want to…”. “I want to book a consultation” sounds right. “I want to submit” doesn’t.
+
+You have already thought of this phrase: it’s written in the brief as the main action. The button, the headline of the form and the link from the home page name it the same way. That way a person going from the home page to the form never stumbles on a new word.
+
+Two more rules. **There is one main-action button**: beside it “Cancel” or “Back” are made quieter, not just as bright. And **dangerous actions are named plainly**: “Delete request”, not “Yes”. A window asking “Are you sure?” with “Yes” and “No” makes people read the question again.
+
+<details>
+<summary>Check yourself: how do you check that a button is labeled well?</summary>
+
+Finish the sentence “I want to…” with the button’s name. If it sounds natural (“I want to book a consultation”), the label is good.
+
+</details>
+
+## Labels and hints
+
+Every field needs a label. It stands above the field or beside it and **stays visible** while the person types. There is a common trap here: the label is written inside the field in gray type (a **placeholder**), and the job is considered done. But as soon as the person starts typing, the label vanishes and they no longer remember what it was. Gray type is hard to read, and screen readers don’t always announce it. A hint inside the field can stay as an **example** (+1 555 000 0000), but not in place of a label.
+
+The second hint stands under the field and answers “why are you asking for this?” Phone: “We’ll call to give you a time”. Email: “We’ll write when it’s ready. No mailing list”. People give more readily what they understand the reason for. And if you can’t explain why a field is needed, maybe it isn’t: the shorter the form, the more people get to the end. We’ll come back to this in the part on persuasion, with the Fogg model.
+
+Make labels conversational questions or short nouns: “What should we call you” instead of “Full name” (if you don’t need the surname), “Phone number” instead of “Contact details”. Mark what’s required in words: “(optional)” or an asterisk with an explanation at the top of the form. An asterisk with no explanation says nothing.
+
+<details>
+<summary>Check yourself: what is wrong with writing a label only inside the field?</summary>
+
+It disappears when the person starts typing, it is hard to read, and it isn’t always available to screen readers. A label should stay visible above the field.
+
+</details>
+
+## Error messages
+
+An error is the most unpleasant thing that happens in a form, and the words decide whether the person fixes it or leaves. A good message has three parts:
+
+1. **What happened.** “The number is missing some digits.”
+2. **What to do.** “Write the whole phone number.”
+3. **An example**, if there is a format. “For example, +1 555 000 0000.”
+
+What shouldn’t be in it: **codes** (“Error 422” is a programmer’s language; the code can stay, small, at the end for support), **reproach** (“you entered it incorrectly”; describe the situation, not the person) and **officialese** (“an invalid value has been entered in the field”). Don’t write in capitals or use many exclamation marks: the person is upset enough.
+
+Three technical conditions. The message stands beside the field, not only at the top of the page. It doesn’t rely on a single color: a red border with no words can’t be seen by someone who is color-blind or blind. And what was typed isn’t erased: nothing is worse than filling in a whole form again because of one digit. The accessibility standard WCAG asks for exactly this: identify the error in text and, where possible, suggest a fix (success criteria 3.3.1 and 3.3.3, linked in the sources). The GOV.UK Design System has a well-tested pattern for the same thing.
+
+Compare two versions of one form in the diagram. Switch the moment to “Error in the phone” and tap a text: the diagram explains what is wrong with it and what was done.
+
+<FormBeforeAfter />
+
+<details>
+<summary>Check yourself: what are the three parts of a good error message?</summary>
+
+What happened, what to do, and an example of the right format.
+
+</details>
+
+## After sending, and beside the consent
+
+When a person has pressed the button, they wait: “did it arrive or not?” The message after sending answers three questions:
+
+- **Did it arrive.** “Request received.”
+- **What next, and when.** “We’ll call you today before 6 p.m.”
+- **What if not.** “If we can’t reach you, we’ll send a text. Changed your mind? Call us.”
+
+A time in such a message is a promise, and promises have to be kept. Don’t write “shortly” if in fact you reply every other day: an honest deadline offends less than a broken one.
+
+Now the consent. The form collects a name and a phone number, which are **personal data**, and the law cares how you use them. The full legal side comes in the sixth lesson and in part 15. For microcopy, remember three things:
+
+1. **Consent, where you rely on it, is a separate act**, a tick box. Not a phrase like “By clicking the button you agree…” that can’t be declined.
+2. **The box is unticked by default.** A box ticked in advance counts as a dark pattern (more in the part on persuasion): the form makes the decision for the person. Under the GDPR and the UK GDPR consent must be a clear affirmative act, and pre-ticked boxes are named as not valid (Recital 32); the EU’s top court said so in the Planet49 case in 2019.
+3. **The text is clear without a lawyer.** “I agree to you using my name and phone number to contact me about this request. More in the privacy notice.” It says what for, why and where to read more.
+
+A caution that matters: under the GDPR a contact form often doesn’t need consent at all, because answering the person’s enquiry can rest on another lawful basis. Then a plain notice beside the form does the job. In the US, most state laws ask for a notice at the point of collection rather than a tick box. Russia’s law (152-FZ) leans harder on consent and, since 2025, wants it as a separate document. This is general information, not legal advice: have a lawyer read your consent wording, or ask your data protection authority (in the UK the ICO).
+
+<details>
+<summary>Check yourself: what should the message after a request is sent contain?</summary>
+
+That the request is received, what happens next and when, and what to do if contact doesn’t happen.
+
+</details>
+
+## When microcopy lets you down
+
+- **Cuteness in the wrong place.** A joke in a “Couldn’t save” window irritates a person who has lost their data. Lightness is right when nothing is breaking, and we’ll talk about tone later.
+- **Shaming.** A decline button that says “No thanks, I don’t like saving money” is a technique called *confirmshaming*: the person is shamed for their decision. An honest decline is neutral: “No, thanks”.
+- **Invented urgency.** “Only two places left!” when there are no places and never will be. This is deceit, and such techniques are looked at in detail ahead. Regulators treat them the same way: the US FTC’s 2022 report on dark patterns names fake urgency, and the EU’s Digital Services Act (Article 25) bans online platforms from interfaces that deceive or manipulate users.
+- **Too short.** Cut for clarity, not to count words. The message “Error” is short and useless.
+
+<details>
+<summary>Check yourself: why is “No thanks, I don’t like saving money” a bad button label?</summary>
+
+It shames the person for declining, so that they’ll stay. An honest decline button is neutral: “No, thanks”.
+
+</details>
+
+## Practice
+
+In the preview is your project’s main-action form: the fields are there, the words are not. Fill them in.
+
+1. The **form headline** in an `h2` with the class `form-title`: name the action.
+2. The **labels of two fields** in `label` elements and the **hints** under them in a `span` with the class `hint`: why you are asking for this data.
+3. The **consent text** in a `label` with the class `consent`: what for, why, where to read more. Don’t tick the box.
+4. The **button text** for the main action from the brief, in the same words.
+5. In the note **“What the site will say”**: three error messages and the message after sending, with a time.
+
+The preview won’t show error messages: on a real page a script shows them, like the phone hint in the [lesson on progressive enhancement](../../05-javascript/08-progressive-enhancement/). For now it’s enough to write them and check them against the list: what is wrong, what to do, an example.
