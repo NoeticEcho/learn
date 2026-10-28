@@ -1,0 +1,330 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/08-next.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const items = [
+		'The site opens over https, and http redirects to it',
+		'Addresses with and without www open, and the main one is chosen',
+		'Images have alt, and fields have labels',
+		'Text contrast is at least 4.5, and the page works with the Tab key',
+		'One h1, and the headings go in order',
+		'Every fact and number is backed up, and none are invented',
+		'The form: a privacy policy, https, consent where it is needed, data in a region I chose',
+		'No outside scripts and no keys in the code',
+		'It opens fast on a phone: image sizes, page weight',
+		'Pages have a title, a description and a link preview',
+		'Backups and monitoring are set up, and the restore is tested',
+		'The counter and cookies are described in the policy, with a consent choice where the law asks (if there are any)'
+	];
+	const plan = (v) => `<section data-scaffold id="launch">
+      <h2>Launch and the first thirty days</h2>
+      <table id="checklist">
+        <thead><tr><th>Checklist item</th><th>Status: “yes”, “not needed” or “by Nov 15”</th></tr></thead>
+        <tbody>
+${items.map((t, i) => `          <tr class="item"><td>${t}</td><td class="st">${v.st[i]}</td></tr>`).join('\n')}
+        </tbody>
+      </table>
+      <p id="metric">The main metric: ${v.metric}</p>
+      <ol id="plan30">
+        <li>Week 1: ${v.weeks[0]}</li>
+        <li>Week 2: ${v.weeks[1]}</li>
+        <li>Week 3: ${v.weeks[2]}</li>
+        <li>Week 4: ${v.weeks[3]}</li>
+      </ol>
+      <p>What I will study next:</p>
+      <ul id="topics">
+        <li>${v.topics[0]}</li>
+        <li>${v.topics[1]}</li>
+        <li>${v.topics[2]}</li>
+      </ul>
+    </section>`;
+
+	const stRe = '^\\s*(?:yes|not needed|by\\s+(?:[A-Z][a-z]{2,8}\\.?\\s+\\d{1,2}|\\d{1,2}\\s+[A-Z][a-z]{2,8}|\\d{1,2}[./-]\\d{1,2}))\\s*$';
+	const topicRe = '\\S+\\s+\\S+\\s+\\S+';
+
+	export const metadata = {
+		id: '16-ai/08-next',
+		part: 16,
+		order: 8,
+		title: 'The internet of intelligence, the launch and where to go next',
+		definition: 'The internet of intelligence is a network where AI agents act beside people and a site becomes a conversation and a service; a direction, not a fact.',
+		summary:
+			'You have come from a first page to the agentic web. Afterwards you’ll see where the web may be heading and what stays valuable in any scenario, go through a launch checklist, make a plan for the first thirty days with a metric tied to your project’s main action, and choose three topics to study next.',
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser-1996', label: 'tables and font', caption: '1996', say: 'You began with tables and a counter. Since then your site has worn eight outfits, and the word “book” is the same.' },
+				{ mood: 'hmm', side: 'right', prop: 'network', label: 'people and agents', caption: 'Next', say: 'Where the web goes, nobody knows for sure. Clean markup, your facts and your understanding will stay valuable.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'checklist', caption: 'The launch', say: 'Go through the list, set a metric, choose three topics. And show the site to people: they need it.' }
+			]
+		},
+		minutes: 30,
+		teaches: ['future-internet-of-intelligence', 'future-next-steps'],
+		requires: ['future-iskin-flow', 'future-agentic-web', 'quality-prelaunch-checklist', 'metrics-dashboard'],
+		practice: {
+			id: 'future-launch-plan',
+			title: 'A launch checklist, a thirty-day plan and three topics',
+			task: 'Draw the conclusion. 1) In the checklist, against each of the twelve items, enter an honest status: “yes”, “not needed” or a date for the fix in the form “by Nov 15”. There must be no red items with no date. 2) Name the main metric and its target number, tying it to the project’s main action in the words of the brief (for example, the number of inquiries a week). 3) Lay out the four weeks after the launch: in the first the launch and setting up the metric’s count, and the rest at least four words each. 4) Choose three topics to study next, each at least three words and from the topics of the course. Every “…” has to be replaced.',
+			era: 8,
+			files: files({
+				lang: 'en',
+				scaffold: plan({ st: items.map(() => '…'), metric: '…', weeks: ['…', '…', '…', '…'], topics: ['…', '…', '…'] })
+			}),
+			solution: files({
+				lang: 'en',
+				scaffold: plan({
+					st: ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'by Nov 15', 'yes', 'by Nov 20', 'not needed'],
+					metric: 'at least 5 inquiries a week for the action “{{mainAction.label}}” by the end of the first month, counted by the number of forms sent.',
+					weeks: [
+						'I publish the site, set up the counter and check the main action on a phone',
+						'I go through the page with Tab and read the text aloud, and fix what I find',
+						'I look at where people come from and where they leave the page',
+						'I write a first piece on the questions the visitors asked me'
+					],
+					topics: ['metrics and visitor behavior', 'SEO and getting into AI answers', 'law and personal data on a site']
+				})
+			}),
+			checks: [
+				{ id: 'launch', kind: 'exists', selector: '#launch' },
+				{ id: 'no-blanks', kind: 'text', selector: '#launch', matches: '^[^…]*$' },
+				{ id: 'items', kind: 'count', selector: '#checklist tbody tr.item', min: 12 },
+				...items.map((_, i) => ({ id: `item-${i + 1}`, kind: 'text', selector: `#checklist tbody tr:nth-of-type(${i + 1}) td.st`, matches: stRe })),
+				{ id: 'metric-action', kind: 'field', selector: '#metric', field: 'mainAction.label' },
+				{ id: 'metric-number', kind: 'text', selector: '#metric', matches: '\\d' },
+				{ id: 'week-1', kind: 'text', selector: '#plan30 li:nth-child(1)', matches: 'launch|publish|deploy|check|metric|counter|analytics' },
+				{ id: 'week-2', kind: 'text', selector: '#plan30 li:nth-child(2)', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'week-3', kind: 'text', selector: '#plan30 li:nth-child(3)', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'week-4', kind: 'text', selector: '#plan30 li:nth-child(4)', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'topic-1', kind: 'text', selector: '#topics li:nth-child(1)', matches: topicRe },
+				{ id: 'topic-2', kind: 'text', selector: '#topics li:nth-child(2)', matches: topicRe },
+				{ id: 'topic-3', kind: 'text', selector: '#topics li:nth-child(3)', matches: topicRe }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does “the last textbook of the pre-AI era” mean?',
+				options: [
+					'It was written when AI had not yet become an ordinary tool of work, and it teaches what lets you direct an AI instead of believing in magic',
+					'AI will destroy the profession of web developer after it',
+					'There will be no more textbooks after it'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is the authors’ working formula, not a prediction. From now on people will learn and build together with AI, but understanding what a prompt, a page, data, accessibility and the law are remains what separates directing from believing.',
+					'No: it is not a forecast about professions, and there is no such claim.',
+					'No: it is about a change in the way of working, not the end of learning.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is likely to stay valuable in any scenario for the web’s development?',
+				options: [
+					'Clean meaningful markup and accessibility',
+					'Your own domain, your own data and honest facts',
+					'The ability to set a task and to check the result',
+					'Any single builder you sit in today'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: people, search engines and agents all need it.',
+					'Yes: what you own outlives a change of tools.',
+					'Yes: that is the main skill beside an AI.',
+					'No: tools change within months, and being tied to one is risky.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A problem turned up in the launch checklist, and it can’t be fixed today. How do you write it down?',
+				options: [
+					'A status with a date (“by Nov 15”) and an owner: a red item with no date is forgotten',
+					'Write “yes”, so the checklist looks clean',
+					'Throw the item out of the list'
+				],
+				answer: 0,
+				why: [
+					'Yes. An honest status with a date turns a problem into a task. A checklist with a lie in it is worse than none.',
+					'No: that is fooling yourself, and the visitors pay.',
+					'No: the problem won’t go away.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which metric suits the first thirty days of a project?',
+				options: [
+					'The number of inquiries for the main action (“Book a consultation”) a week: it shows whether visitors do what the site is for',
+					'The number of visitors at any price, even if they don’t press the main button',
+					'The number of pretty blocks on the page'
+				],
+				answer: 0,
+				why: [
+					'Yes. The metric is tied to the main action, and then growth in visitors that doesn’t lead to inquiries shows at once.',
+					'No: visitors with no action are a vanity metric.',
+					'No: prettiness is not a measure of results.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the first thirty days after the launch in order',
+				items: [
+					'Publish the site, set up the counter and check the main action on a phone',
+					'Go through the page with Tab, read the text aloud and fix what you find',
+					'Look at where people come from and where they leave',
+					'Write a piece on the questions the visitors asked'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-ioi',
+				front: 'What is the “internet of intelligence”?',
+				back: 'A working name for a direction: a network where AI agents act beside people, the interface becomes a conversation and an action, and a site turns from a page into a service. It is a forecast, not a fact: nobody knows the timing or the forms.'
+			},
+			{
+				id: 'future-always-valuable',
+				front: 'What stays valuable in any scenario?',
+				back: 'Clean markup and accessibility, your own domain and data, honest facts you can check, the ability to set a task and check the result, an understanding of what happens under the hood.'
+			},
+			{
+				id: 'future-launch-honest',
+				front: 'How do you keep a launch checklist honestly?',
+				back: 'For every item, “yes”, “not needed” or a date for the fix. A red item with no date counts as not done. It is better to launch later than with a lie in the list.'
+			},
+			{
+				id: 'future-30-days',
+				front: 'What do you do in the first thirty days?',
+				back: 'The launch and a counter, a check of the main action, a look at where people come from and where they leave, a piece on the visitors’ questions. One metric, tied to the main action.'
+			}
+		],
+		sources: [
+			{ title: 'MDN: Learn web development', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'web.dev: Learn', url: 'https://web.dev/learn', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'The Modern JavaScript Tutorial (javascript.info)', url: 'https://javascript.info/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'CS50x: Introduction to Computer Science (Harvard)', url: 'https://cs50.harvard.edu/x/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'web.dev: Web Vitals', url: 'https://web.dev/articles/vitals', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Google Search Central: SEO Starter Guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Anthropic: Building effective agents', url: 'https://www.anthropic.com/engineering/building-effective-agents', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The last practical step: an honest checklist, a plan for the first thirty days and three topics for the future. Don’t fit the answers: “by Nov 15” is better than an invented “yes”.',
+			hints: [
+				'In the checklist’s status column, write exactly “yes”, “not needed” or “by Nov 15” (a date as a month and a day). Nothing more.',
+				'The metric is tied to the project’s main action: name it in the words of the brief and give a number, for example “at least 5 inquiries a week”.',
+				'The first week: the launch, the counter, a check of the action on a phone. The rest at least four words each.',
+				'Three topics: from the topics of the course, each at least three words, for example “metrics and behavior”, “SEO and AI answers”, “law and personal data”.'
+			],
+			mistakes: {
+				launch: 'The block “Launch and the first thirty days” (the section whose id is launch) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				items: 'The checklist should still have twelve items.',
+				...Object.fromEntries(items.map((t, i) => [`item-${i + 1}`, `Item ${i + 1} (“${t}”): the status is only “yes”, “not needed” or a date such as “by Nov 15”.`])),
+				'metric-action': 'The metric should name the project’s main action in the words of the brief.',
+				'metric-number': 'The metric needs a target number.',
+				'week-1': 'The first week is about the launch, the counter or checking the main action.',
+				'week-2': 'The second week: at least four words.',
+				'week-3': 'The third week: at least four words.',
+				'week-4': 'The fourth week: at least four words.',
+				'topic-1': 'The first topic: at least three words.',
+				'topic-2': 'The second topic: at least three words.',
+				'topic-3': 'The third topic: at least three words.'
+			},
+			outro: 'You have finished the road. The site is yours, it has a metric and a plan, and you know what to learn next. What is left is the most important thing: show it to people.'
+		},
+		say: {
+			AI: 'A I',
+			SEO: 'S E O',
+			GEO: 'G E O',
+			LCP: 'L C P',
+			NoeticEcho: 'noetic echo',
+			CS50x: 'C S fifty X',
+			MDN: 'M D N',
+			Tab: 'tab',
+			www: 'double you double you double you',
+			alt: 'alt',
+			h1: 'H one',
+			https: 'H T T P S',
+			cookie: 'cookie'
+		}
+	};
+</script>
+
+<script>
+	import EraReplay from '../../diagrams/EraReplay.svelte';
+</script>
+
+## What you can do now
+
+Look back. You began with how the internet works and came to a network in which AI agents walk beside people. On the way you built your site eight times: with tables, with a separate stylesheet, in WordPress, responsively, from Markdown, on a headless CMS, with an AI builder and finally through an interview. You know how DNS and a certificate work, what a request and a response are, how a browser draws a page, why data and rights matter, how to write for a screen, how a story and persuasion are built, how to measure and how to check someone else’s output.
+
+This set goes by different names, but its essence is one: you **understand what a site is made of**. And that, as this whole part has shown, is what separates a person who directs an AI from a person who believes in magic. The magic ends at the first invented number, the first key in the code, the first form with no privacy policy. Understanding doesn’t.
+
+## “The last textbook of the pre-AI era”
+
+The authors of this textbook call it the last textbook of the pre-AI era. This is a **working formula, not a prophecy**. It means this: the textbook was written when AI had not yet become an ordinary tool for any work on a site, and so it teaches everything, from the very start. From now on people will learn and build together with AI: models will write what you used to write by hand. But a person still needs to know **what** to ask for, **how** to check it and **what** to answer for. That is what the whole course is for.
+
+It doesn’t mean that professions will vanish, that AI will do it all itself, or that there will be no more textbooks. Nobody knows exactly how work on sites will change, and all that can honestly be said is that it already has.
+
+## The internet of intelligence: a direction, not a forecast
+
+A working name for where this may be heading is the **internet of intelligence**. The idea, in a few lines.
+
+- **From pages to conversation and action.** People more and more ask and delegate instead of searching and clicking. An answer is put together from many sources, and an agent takes the action on a person’s behalf.
+- **From a site to a service.** A site as a set of pages is joined by what it can do: book, choose, calculate. This is what you decided in the lesson on agents: which doors to open.
+- **People and agents in one network.** The agents of projects, people and services make agreements with each other (A2A, MCP). Trust grows in importance: who is this, what may it do, does a person confirm.
+- **A lot generated, little checked.** When a page can be had in a minute, the value moves to what can’t be generated: living people, facts that can be checked, real work, responsibility.
+
+All these are **directions, not guarantees**. Which protocols survive, which products vanish, how far agents become visitors: none of that can be forecast honestly. A year ago this textbook did not have half the names from the last lessons. So instead of a forecast, a more useful question is: **what stays valuable in any scenario?**
+
+- **Clean meaningful markup and accessibility.** People, search engines and agents all need it. No scenario makes a page of `div` better than a page with real headings.
+- **Your own domain and your own data.** What you own outlives changes of builders, platforms and fashionable words.
+- **Honest facts that can be checked.** The more noise, the more precious what can be verified.
+- **The ability to set a task and check the result.** This is the main skill beside an AI.
+- **Understanding.** It carries over to any next tool.
+
+<details>
+<summary>Check yourself: why is the “internet of intelligence” called a direction and not a forecast?</summary>
+
+Because it is unknown which protocols and products will survive, and how far agents will become visitors. You can talk about lines of movement and about what is lasting, but not about timing and forms.
+
+</details>
+
+## The prologue, but now yours
+
+In the prologue you saw your site pass through the eras, one after another. Then it was a show. Now it is your work: eight versions lie in the gallery side by side. Move the slider: the words and the main action are the same in every era, and only the clothes and the tools changed. That is the answer to the question of what in your work stays the same.
+
+<EraReplay />
+
+## The launch checklist
+
+Before you show the site to people, go through the list. It is gathered from the whole course: HTTPS and the domain, accessibility, meaningful markup, facts, the form and the law, outside scripts and keys, speed, link previews, backups and monitoring, the counter and cookies. For every item there are three honest answers: **“yes”**, **“not needed”** (if the item isn’t in your project) or **a date for the fix** (“by Nov 15”). An item that is “no” with no date is a red item: the site isn’t launched with it. It is better to launch later than with a lie in the list.
+
+## The first thirty days, and the main metric
+
+After the launch the site isn’t finished, it is only beginning. Choose **one main metric**, tied to the project’s main action: for example, the number of inquiries for the action “Book a consultation” a week. The number of visitors with no inquiries is a vanity metric: it grows while the business doesn’t. Set a target number and look at it every week.
+
+The plan for the month is simple. **Week 1**: publish, set up the counter, check the main action on a phone. **Week 2**: go through the page with the Tab key, read the text aloud, fix what you find. **Week 3**: look at where people come from and where they leave. **Week 4**: write a first piece on the questions visitors asked you. Don’t overcomplicate: a simple plan you carry out is better.
+
+## Where to go next
+
+The course covered a lot and exhausted nothing. Choose **three topics** where you wanted more depth or that pay off for your project. Some signposts.
+
+- **Metrics and behavior**, if you want to understand what happens on the site.
+- **SEO and getting into AI answers**, if you need visitors from search.
+- **Law and personal data**, if you have forms and clients.
+- **JavaScript and your first serious project**, if you’ve felt like writing code yourself.
+- **A design system**, if there will be several sites.
+- **Text, copywriting and stories**, if you want the site to persuade.
+
+Where to go for material. **MDN’s Learn web development** and **web.dev/learn** are open courses from the makers of the standards and the browsers. **The Modern JavaScript Tutorial** (javascript.info) teaches the language itself in depth. Harvard’s **CS50x** is an open course on the basics of programming. And read the documentation of any tool at its makers’: it is more exact than any retelling, this one included. All the links are in the sources, and you can come back to them from any lesson.
+
+And one last thing. The textbook is open: the texts are under the CC BY-SA 4.0 license, the code under Apache-2.0, and the repository is on GitHub at NoeticEcho/learn. It is a NoeticEcho project; follow it at open.noeticecho.space. If you find a mistake, an inaccuracy or an out-of-date date (and in fast-changing fields there will be some), report it: it is the only way to make the book better.
+
+## Practice
+
+Draw the conclusion for your project. Go through the checklist of twelve items and enter an honest status for each: “yes”, “not needed” or a date. Name the main metric with a number and lay out four weeks. Choose three topics to study.
+
+The check reads your record: it will make sure every item has an allowed status (a red one with no date won’t pass), that the metric is tied to the main action, that the plan is four weeks and that there are three topics. Nobody can check the honesty of the answers except you. If the site isn’t ready yet, write down the dates and come back. The course will wait.
+
+## What was wrong with 2025
+
+In 2025 it seemed that learning how a site is built was no longer needed: an AI would do it all. By the end of the year the opposite had become clearer: those who understood what to ask for and how to check got sites they could trust, and the rest got fast pages with invented numbers. Speed became cheap, and understanding stayed expensive. This book taught the second.

@@ -1,0 +1,354 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/07-iskin-capstone.svx. */
+	import { page, baseCssEn } from '../../diagrams/practice-kit.ts';
+
+	const log = (v) => `<section data-scaffold id="cap">
+      <h2>The final review log</h2>
+      <ol id="cap-log">
+${v.log.map((x) => `        <li>${x}</li>`).join('\n')}
+      </ol>
+      <p id="cap-cat">What I checked: ${v.cat}</p>
+      <p id="cap-verdict">Whether the site is ready to launch, and what is left for a person: ${v.verdict}</p>
+    </section>`;
+
+	const generated = `      <h1>{{name}}</h1>
+      <p class="big">We are a team of professionals who are always happy to help you reach new heights!!!</p>
+      <p><a class="button" href="#form">{{mainAction.label}}</a></p>
+      <img class="hero" src="/images/portrait-4000x3000.jpg">
+      <img class="below" src="/images/office.jpg" alt="A workplace" width="640" height="480">
+      {{#each sections}}<div class="title">{{.}}</div>
+      <p>The “{{.}}” section tells about our work. <a href="#form">Read more</a></p>
+      {{/each}}
+      <h4>What we offer</h4>
+      <p>{{#each items}}{{title}}<br>{{/each}}</p>
+      <p class="note">Price data is current at the date of publication.</p>
+      <form id="form" action="https://api.example.com/leads" method="post">
+        <input name="phone" placeholder="Phone">
+        <button>SEND!!!</button>
+      </form>
+      <link rel="stylesheet" href="https://fonts.example-fonts.com/css?family=Display">
+      <script src="https://cdn.example-cdn.com/jquery.js"><\/script>`;
+
+	const reviewed = `      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#form">{{mainAction.label}}</a></p>
+      <img class="hero" src="/images/portrait.jpg" alt="Portrait: {{name}}" width="640" height="480">
+      <img class="below" src="/images/office.jpg" alt="A workplace" width="640" height="480" loading="lazy">
+      {{#each sections}}<h2>{{.}}</h2>
+      <p>The “{{.}}” section: what is in it and why you need it.</p>
+      {{/each}}
+      <h2>What we offer</h2>
+      <ul>
+        {{#each items}}<li>{{title}}</li>
+        {{/each}}
+      </ul>
+      <p class="note">Prices are current at the date of publication.</p>
+      <form id="form" action="https://api.example.com/leads" method="post">
+        <p><label for="f-phone">Phone</label> <input id="f-phone" name="phone" type="tel" autocomplete="tel" required></p>
+        <button type="submit">{{mainAction.label}}</button>
+      </form>`;
+
+	const css = (color) => baseCssEn + `\n.note {\n  color: ${color};\n}\n`;
+
+	const li = (n) => ({ id: `log-${n}`, kind: 'text', selector: `#cap-log li:nth-child(${n})`, matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' });
+
+	export const metadata = {
+		id: '16-ai/07-iskin-capstone',
+		part: 16,
+		order: 7,
+		title: 'Capstone with Iskin: an interview, a site and a critical review',
+		definition: 'An interview with Iskin is a conversation where an AI asks about the brief’s fields and builds a site and a service from the answers; a person checks it.',
+		summary:
+			'Iskin doesn’t wait for a prompt but asks about your business and builds a site and a service from the answers. Afterwards you’ll know how such an interview works and what it settles and what it leaves to you, and you’ll check “Iskin’s draft” on your own project with everything you’ve learned: accessibility, meaningful markup, text and speed. The result of the work: the mistakes found and fixed, and an honest answer on whether the site is ready.',
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'interview', caption: 'Iskin asks', say: 'Iskin doesn’t wait for a prompt, it asks about every field of the brief. No answer? Say so: it won’t make one up.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'a draft', say: 'A first draft is always raw: headings out of order, no alt, gray text on white. Finding all that is your job.' },
+				{ mood: 'cheer', prop: 'cards', label: '4 checks', caption: 'Your role', say: 'Accessibility, the meaning of the markup, text, speed. What doesn’t pass, you fix. That is your understanding at work.' }
+			]
+		},
+		minutes: 40,
+		teaches: ['future-iskin-flow', 'future-capstone-review'],
+		requires: ['future-review-ai-output', 'future-agentic-web', 'future-builder-pipeline', 'quality-a11y-audit', 'quality-core-web-vitals'],
+		practice: {
+			id: 'future-iskin-review',
+			title: 'Review “Iskin’s draft” on your own project',
+			task: 'Iskin assembled a draft page from your brief, but it has mistakes of four kinds. Fix them right in the code and in the styles. Accessibility: the image needs alt, the field needs a label, and the gray .note text is too pale (contrast of at least 4.5, the color is set in styles.css). Meaningful markup: one h1, the section names must be h2 headings (now a div, and then an h4), and the list of offers a real ul list instead of lines with br. Text: remove the empty formulas and exclamation marks, in place of the generic “Read more” write something clear without those words, and put the name of the main action from the brief on the form’s button. Speed: every image gets width and height, the lower image loading=lazy and the main (hero) one not lazy, and no outside scripts or fonts. Write at least six finds in the log and say whether the site is ready to launch. Every “…” has to be replaced.',
+			era: 8,
+			files: { 'index.html': page({ lang: 'en', main: generated, scaffold: log({ log: ['…', '…', '…', '…', '…', '…'], cat: '…', verdict: '…' }) }), 'styles.css': css('#b0b0b0') },
+			solution: {
+				'index.html': page({
+					lang: 'en',
+					main: reviewed,
+					scaffold: log({
+						log: [
+							'The gray text in the note was barely visible, so I made the color darker and brought the contrast above 4.5',
+							'The main image had no alt and no size, so I added a description and a width and height',
+							'The section names were divs and then an h4, so I changed them to proper h2 headings in order',
+							'The offers were separated by br, so I made a real ul list with li items',
+							'I removed the empty formulas, the exclamation marks and the faceless “Read more” from the text',
+							'I removed the outside script and font and set deferred loading on the lower image'
+						],
+						cat: 'accessibility (alt, labels, contrast), semantics (h1, h2, the list), text (no formulas or exclamations), speed (image sizes, lazy, no outside resources).',
+						verdict: 'the form and the proof are still a person’s job, so the site is not fully ready to launch: first I proofread the facts, check the consent and the policy and go through the page with the Tab key.'
+					})
+				}),
+				'styles.css': css('#595959')
+			},
+			checks: [
+				{ id: 'cap', kind: 'exists', selector: '#cap' },
+				{ id: 'no-blanks', kind: 'text', selector: '#cap', matches: '^[^…]*$' },
+				{ id: 'one-h1', kind: 'count', selector: 'h1', min: 1, max: 1 },
+				{ id: 'no-h4', kind: 'count', selector: 'h4', max: 0 },
+				{ id: 'h2-sections', kind: 'count', selector: 'h2', min: { brief: 'sections' } },
+				{ id: 'no-fake-titles', kind: 'count', selector: '.title', max: 0 },
+				{ id: 'real-list', kind: 'count', selector: 'main ul li', min: { brief: 'items' } },
+				{ id: 'no-br', kind: 'count', selector: 'main p br', max: 0 },
+				{ id: 'img-alt', kind: 'count', selector: 'img:not([alt])', max: 0 },
+				{ id: 'img-size', kind: 'count', selector: 'img:not([width]), img:not([height])', max: 0 },
+				{ id: 'img-lazy', kind: 'attr', selector: 'img.below', name: 'loading', matches: '^lazy$' },
+				{ id: 'hero-not-lazy', kind: 'count', selector: 'img.hero[loading="lazy"]', max: 0 },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'contrast-note', kind: 'contrast', selector: '.note', min: 4.5 },
+				{ id: 'button-text', kind: 'field', selector: 'form button', field: 'mainAction.label' },
+				{ id: 'no-exclaim', kind: 'text', selector: 'main', matches: '^(?![\\s\\S]*!)' },
+				{ id: 'no-fluff', kind: 'text', selector: 'main', matches: '^(?![\\s\\S]*(?:new heights|happy to help|professionals))' },
+				{ id: 'no-more', kind: 'text', selector: 'main', matches: '^(?![\\s\\S]*(?:Read more|Learn more|Click here))' },
+				{ id: 'no-third-party', kind: 'count', selector: '[src^="http"], link[href^="http"]', max: 0 },
+				li(1),
+				li(2),
+				li(3),
+				li(4),
+				li(5),
+				li(6),
+				{ id: 'cat-a11y', kind: 'text', selector: '#cap-cat', matches: 'accessib' },
+				{ id: 'cat-semantics', kind: 'text', selector: '#cap-cat', matches: 'semantic|markup|heading' },
+				{ id: 'cat-text', kind: 'text', selector: '#cap-cat', matches: 'text|wording|copy' },
+				{ id: 'cat-speed', kind: 'text', selector: '#cap-cat', matches: 'speed|performance|weight|image|lazy' },
+				{ id: 'verdict', kind: 'text', selector: '#cap-verdict', matches: '^\\s*\\S+(?:\\s+\\S+){9,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does an interview with Iskin differ from a prompt to a builder?',
+				options: [
+					'It asks the questions about the brief’s fields itself and makes nothing up: what you don’t know stays empty and is marked for you',
+					'It guesses the answers from the project’s name',
+					'It doesn’t need a brief, because it knows everything itself'
+				],
+				answer: 0,
+				why: [
+					'Yes. This is the technique from the lesson on prompts taken all the way: instead of filling gaps with a template, the other party asks. The quality of the site depends on the quality of the answers, not on the eloquence of a prompt.',
+					'No: guessing is the very template you were guarding against.',
+					'No: the brief is exactly what the interview fills in.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does Iskin leave for a person to decide?',
+				options: [
+					'The truth of the facts and the proof',
+					'The text of the privacy policy and consent (together with an attorney)',
+					'Connecting payment',
+					'The color of the button'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: only you know the truth about you.',
+					'Yes: whether the text is enough for the law is for a person to judge.',
+					'Yes: money is connected deliberately, through a ready-made service.',
+					'No: that is a matter of design, and it can go to an AI with a check by eye.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each sign in the draft with the area of the review',
+				pairs: [
+					['gray text on white, a contrast of 2 to 1', 'accessibility'],
+					['section names in a div, and then an h4', 'the semantics of the markup'],
+					['“We’re always happy to help you reach new heights!!!”', 'text'],
+					['an image with no width and height, an outside script on the page', 'speed']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The first, biggest image on the page was given loading=lazy. Is that good?',
+				options: [
+					'No: the main image is visible at once and decides how fast the page shows, so it can’t be deferred; deferred loading is for images below the first screen',
+					'Yes: lazy always speeds things up',
+					'It affects nothing'
+				],
+				answer: 0,
+				why: [
+					'Yes. Deferring is for what lies beyond the first screen. If you defer the main image, the most visible element appears later, and the LCP figure gets worse.',
+					'No: it doesn’t always speed things up, only for images off the first screen.',
+					'No: it does affect it, and noticeably.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of the final review in a sensible order',
+				items: [
+					'Go through the interview and fill in the brief with no invented answers',
+					'Get a draft of the site and the service',
+					'Check the facts and the proof against the brief',
+					'Check accessibility, meaningful markup and the text',
+					'Check speed and outside resources',
+					'Decide whether the site is ready, and write down what is left for a person'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-iskin-what',
+				front: 'What is an interview with Iskin?',
+				back: 'A conversation in which an AI asks about the brief’s fields (what you do, for whom, the main action, sections, offers, proof, contacts and prohibitions, tone), writes the answers into the brief and builds a site and a service. What you don’t know stays empty.'
+			},
+			{
+				id: 'future-iskin-leaves',
+				front: 'What is left for a person after the interview?',
+				back: 'The truth of the facts, the policy and consent (with an attorney), payment through a ready-made service, the decision to publish. And the review: accessibility, meaningful markup, text, speed.'
+			},
+			{
+				id: 'future-capstone-four',
+				front: 'The four areas of the final review',
+				back: 'Accessibility (alt, labels, contrast, Tab), semantics (one h1, h2 in order, real lists), text (no empty formulas or exclamations), speed (image sizes, lazy below the first screen, no outside resources).'
+			},
+			{
+				id: 'future-lazy-hero',
+				front: 'What do you defer, and what not?',
+				back: 'loading=lazy goes on images below the first screen. The main image is visible at once and loads at once: deferring it worsens LCP.'
+			}
+		],
+		sources: [
+			{ title: 'W3C WAI: Images tutorial', url: 'https://www.w3.org/WAI/tutorials/images/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'MDN: Accessibility, HTML', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'web.dev: Optimize Largest Contentful Paint', url: 'https://web.dev/articles/optimize-lcp', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'web.dev: Web Vitals', url: 'https://web.dev/articles/vitals', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Anthropic: Building effective agents', url: 'https://www.anthropic.com/engineering/building-effective-agents', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'W3C: Web Content Accessibility Guidelines (WCAG) 2.2', url: 'https://www.w3.org/TR/WCAG22/', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is the final review. Iskin built a draft from your brief, but it isn’t perfect. Go through four areas: accessibility, meaningful markup, text, speed. Write every find in the log.',
+			hints: [
+				'Accessibility: the main image needs alt, the phone field a label (with for and id), and .note a darker color (contrast of at least 4.5, the fix is in styles.css).',
+				'Semantics: one h1; the section names as h2 instead of div and h4; the offers as ul with li, with no br.',
+				'Text: remove “always happy to help you reach new heights”, every exclamation mark and the words “Read more”. The form’s button is named for the main action from the brief.',
+				'Speed: every image gets width and height; the lower image loading=lazy, the main one not; remove the outside script and font. Six finds in the log.'
+			],
+			mistakes: {
+				cap: 'The block “The final review log” (the section whose id is cap) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'one-h1': 'The page should have exactly one h1 heading.',
+				'no-h4': 'An h4 heading is left: after h2 comes h3, not h4. Change it to h2.',
+				'h2-sections': 'Every section from the brief should be an h2 heading.',
+				'no-fake-titles': 'There are still “headings” made of a div with the class title. Replace them with real h2.',
+				'real-list': 'The offers should be a ul list with li items, one per offer.',
+				'no-br': 'There are still br line breaks inside a paragraph. Make a real list.',
+				'img-alt': 'Some image has no alt.',
+				'img-size': 'Every image needs the attributes width and height.',
+				'img-lazy': 'The lower image (class below) needs loading=lazy.',
+				'hero-not-lazy': 'The main image (class hero) can’t be deferred: remove loading=lazy from it.',
+				labels: 'Some form field has no label.',
+				'contrast-note': 'The .note text is too pale: make the color darker in styles.css, with a contrast of at least 4.5.',
+				'button-text': 'The form’s button should be named for the project’s main action in the words of the brief.',
+				'no-exclaim': 'There are exclamation marks left in the text. Remove them.',
+				'no-fluff': 'There are empty formulas left in the text (“happy to help”, “new heights”, “professionals”).',
+				'no-more': 'The words “Read more” don’t say where the link leads. Replace them with clear text.',
+				'no-third-party': 'An outside script or font from an external server is left. Remove it.',
+				'log-1': 'The first log entry: at least four words.',
+				'log-2': 'The second log entry: at least four words.',
+				'log-3': 'The third log entry: at least four words.',
+				'log-4': 'The fourth log entry: at least four words.',
+				'log-5': 'The fifth log entry: at least four words.',
+				'log-6': 'The sixth log entry: at least four words.',
+				'cat-a11y': 'Under “What I checked”, name accessibility.',
+				'cat-semantics': 'Under “What I checked”, name semantics or meaningful markup.',
+				'cat-text': 'Under “What I checked”, name the text.',
+				'cat-speed': 'Under “What I checked”, name speed.',
+				verdict: 'Say whether the site is ready to launch and what is left for a person: at least ten words.'
+			},
+			outro: 'You checked someone else’s work the way an understanding person does: by area, with a log and an honest verdict. One lesson is left: where the web is heading and what to do next.'
+		},
+		say: {
+			Iskin: 'iskin',
+			alt: 'alt',
+			h1: 'H one',
+			h2: 'H two',
+			h4: 'H four',
+			LCP: 'L C P',
+			lazy: 'lazy',
+			label: 'label',
+			Tab: 'tab',
+			width: 'width',
+			height: 'height',
+			WCAG: 'wee cag'
+		}
+	};
+</script>
+
+<script>
+	import IskinInterview from '../../diagrams/IskinInterview.svelte';
+</script>
+
+## From a prompt to someone who asks
+
+Recall the path of this part. First you described a site to a builder and got a template. Then you learned to set a task as a brief, to check the output and to assemble a pipeline with checks. A logical step remains: **not to wait for a prompt, but to ask**. We saw it in the [lesson on prompts as briefs](../03-prompts-as-briefs/) as the technique “let the model ask back”: if data is missing, let it ask questions instead of making things up.
+
+That is how **Iskin** works: the name this textbook gives to such a conversation partner. It doesn’t take one long prompt but conducts an **interview** on the brief’s fields, writes down the answers, and then builds from them a site and a service “turnkey”: the structure, the text, the code and whatever the main action needs (a form and a receiver of requests, a booking, an order). In the prologue you saw it in the last frame: Echo asks the next question of the interview.
+
+A caveat about what is real here. In the textbook the interview and the build are shown in a **teaching mode**: the questions are written in advance, no model runs, and the page shows what the interviewer would do with your answers. For the real abilities of the Iskin project, see the NoeticEcho site. But you can apply the principle right now with any model: ask it to put questions about the fields of your brief before it writes a single line.
+
+## Eight questions
+
+Every question of the interview has a **reason**, and it is tied to a field of the brief. What you do: from it come the heading and the first paragraph (otherwise there would be a slogan). For whom: it decides the words and the order. What the visitor must do: this is the main action the page is built around. Which sections: the structure and the menu. What you offer: the content of the cards (offers must not be invented). What you back it up with: proof is taken only from here, and if there is none, there is no block. How to reach you and what must not be published: contacts and prohibitions you decide. And in what voice you speak, by two of your own sentences.
+
+A good answer is specific and honest. And the main rule of the interview is: **“I don’t know” is an acceptable answer**. A good interviewer won’t fill a gap for you: in that place there will be an empty field with a note for you, and it will not be on the page.
+
+Go through the interview in the diagram. Your own brief is filled in, and it can be edited. Press “I don’t know” on any question and see what changes in the result.
+
+<IskinInterview />
+
+<details>
+<summary>Check yourself: what does Iskin do if you answered “I don’t know” to the question about proof?</summary>
+
+It leaves the place empty and doesn’t invent proof. There will be no block of proof on the page, and in the list for you there will be a note that it needs to be added.
+
+</details>
+
+## What gets built, and what stays with you
+
+From the answers a **site** is built (the structure from your sections, the text from your facts and in your tone, the code) and a **service** for the main action: for booking, a form, a calendar and emails; for a request, a form, a receiver and a notice; for an order, a catalog and payment through a ready-made service. The same things you built by hand in the parts on servers, data and infrastructure.
+
+But Iskin doesn’t decide everything, and that is right. What stays with you: **the truth of the facts** (only you know it), **the policy and consent** (you agree the text with an attorney), **money** (you connect payment deliberately, through a ready-made service), **publishing** (whether to go live is for you to decide after the review). And above all **the review**. Any build made by an AI is only a draft until a person has checked it.
+
+## The final review: four areas
+
+The review from the [lesson on checking AI output](../04-review-ai-output/) becomes wider here. After the facts, security and law that you can already check come four areas that you learned about in the parts on HTML, CSS and quality.
+
+**Accessibility.** A meaningful image has `alt`, every field has a `label`, the text has enough contrast (at least 4.5 to 1 for ordinary size), and the page can be gone through with the Tab key. This is what separates a “button” made of a div and gray text on white from a real page.
+
+**Meaningful markup.** One `h1`, the section names as `h2`, and no jumps of level (after `h2` comes `h3`, not `h4`). Offers in a real `ul` list, not in lines with `br`. If a page looks right but is built as a heap of `div`, then for screen readers and for agents it is empty.
+
+**Text.** No empty formulas (“we’d be glad to help you reach new heights”), no exclamation marks, no faceless “Read more” (a link should say where it leads). The button’s label names your project’s action. It is the same [plain, informative style](../../10-writing/02-info-style/) as in the part on text.
+
+**Speed.** Every image has `width` and `height` (otherwise the page “jumps” when the image loads). `loading="lazy"` goes only on images below the first screen, while the main image is visible at once and should load at once: if it is deferred, the most visible element appears later and the LCP figure (the time the main content appears) gets worse. And no outside scripts or fonts without need: each is one more server, one more request and a question for the policy.
+
+<details>
+<summary>Check yourself: why isn’t the main image deferred with lazy loading?</summary>
+
+It is visible at once, and deferring its load delays the most visible element of the page: LCP gets worse. Deferred loading is for images below the first screen.
+
+</details>
+
+## Practice
+
+The capstone. In front of you is your project’s site, as an AI would build it: a heading, a button, two images, the sections, the offers, a note and a form. It has mistakes of all four kinds, and something has to be fixed in the styles. Fix everything in the code and in `styles.css`, and in the log write at least six finds (what you found and how you fixed it) and say which areas you checked. At the end, answer honestly: is the site ready to launch, and what is left for a person?
+
+The check reads the code and the styles: it will find whether any `h4` is left, images with no `alt`, empty formulas, outside resources, and whether the contrast is enough. But it won’t go through the page with the Tab key and won’t read the text the way you do. After it, do that yourself: press Tab and look at where the focus goes, and then read the text aloud.
+
+## What was wrong with 2025
+
+In 2025 an AI’s draft was taken for a finished site: it looked modern, and that was enough. Now it is clear that the real work begins after generating: to check, to fix, to answer for the result. Someone who has been through this book can do it: you know how a page should be built and why. That is the human part of the work.
