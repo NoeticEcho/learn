@@ -37,7 +37,7 @@ function body(file: string): string {
 		.replace(/\]\([^)]*\)/g, ']');
 }
 
-const SKIP = /^(practice\.(files|solution|checks)|sources|videos|say|id$)/;
+const SKIP = /^(practice\.(id|continues|files|solution|checks)|sources|videos|say|id$)/;
 function words(value: unknown, path = ''): string[] {
 	if (SKIP.test(path)) return [];
 	if (typeof value === 'string') return [value];
