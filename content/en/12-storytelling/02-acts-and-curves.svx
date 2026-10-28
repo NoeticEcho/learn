@@ -1,0 +1,302 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/02-acts-and-curves.svx. */
+	export const metadata = {
+		id: '12-storytelling/02-acts-and-curves',
+		part: 12,
+		order: 2,
+		title: 'Three acts, Freytag’s pyramid and Duarte’s zigzag',
+		definition: 'Three acts are setup, confrontation and resolution. Freytag’s pyramid plots tension rising and falling; Duarte’s zigzag alternates what is with what could be.',
+		summary:
+			'You’ll learn to break a story into setup, confrontation and resolution, to see where tension rises and falls, and to choose whether to start at the beginning or in the middle. Afterwards you have the arc of your home page, leading to your main action.',
+		minutes: 25,
+		teaches: ['story-three-act', 'story-freytag-pyramid', 'story-in-medias-res', 'story-sparkline'],
+		requires: ['story-narrative-transport'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'setup|conflict|resolution', caption: 'Three acts', say: 'A story has a beginning, a middle and an end. Without movement, readers stop waiting to see what happens next.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', label: 'background', caption: 'In medias res', say: 'If “since 2010” is duller than the visitor’s trouble, start with the trouble. The page must still be clear at once.' },
+				{ mood: 'cheer', caption: 'Duarte’s zigzag', say: 'Don’t only describe the problem, and don’t only promise. A strong text alternates “what is” with “what could be”.' }
+			]
+		},
+		practice: {
+			id: 'story-arc',
+			title: 'The arc of your home page',
+			task: 'Lay out your home page as a story in five lines: exposition, rising action, climax, falling action, resolution. The climax is the section where the visitor sees the solution; name one of your site’s sections in it. The resolution leads to your main action and contains its label word for word. In at least one line mention a service or product from the brief. Then choose whether the page starts “at the beginning” or “in the middle”, and say why. Replace every “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="arc">
+      <h2>The arc of the home page</h2>
+      <p>The resolution we want: <strong class="goal">{{mainAction.label}}</strong></p>
+      <ol>
+        <li class="beat exp">…</li>
+        <li class="beat rise">…</li>
+        <li class="beat climax">…</li>
+        <li class="beat fall">…</li>
+        <li class="beat end">…</li>
+      </ol>
+      <p>The page starts <span id="arc-start">…</span>, because <span id="arc-why">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="arc">
+      <h2>The arc of the home page</h2>
+      <p>The resolution we want: <strong class="goal">{{mainAction.label}}</strong></p>
+      <ol>
+        <li class="beat exp">First screen: the person sees that their problem gets solved here.</li>
+        <li class="beat rise">Their trouble grows: waiting is no longer an option. “{{items.0.title}}” helps here.</li>
+        <li class="beat climax">In the “{{sections.0}}” section they see the solution and realize it’s within reach.</li>
+        <li class="beat fall">Then come the proof and the answers to their doubts.</li>
+        <li class="beat end">The outcome: they feel calm, and the page offers “{{mainAction.label}}”.</li>
+      </ol>
+      <p>The page starts <span id="arc-start">in the middle</span>, because <span id="arc-why">the visitor’s trouble is more interesting than our background</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'five-beats', kind: 'count', selector: '#arc li.beat', min: 5, max: 5 },
+				{ id: 'no-blanks', kind: 'text', selector: '#arc', matches: '^[^…]*$' },
+				{ id: 'end-goal', kind: 'field', selector: '#arc li.end', field: 'mainAction.label' },
+				{ id: 'climax-section', kind: 'field', selector: '#arc li.climax', field: 'sections', min: 1 },
+				{ id: 'beats-fact', kind: 'field', selector: '#arc li.beat', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'start-choice', kind: 'text', selector: '#arc-start', matches: '(?:at|from)\\s+the\\s+(?:beginning|start)|in\\s+the\\s+middle' },
+				{ id: 'start-why', kind: 'text', selector: '#arc-why', matches: '\\S+\\s+\\S+\\s+\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the steps of Freytag’s pyramid in order',
+				items: ['Exposition', 'Rising action', 'Climax', 'Falling action', 'Resolution']
+			},
+			{
+				type: 'single',
+				prompt: 'How is a story divided into three acts?',
+				options: [
+					'Setup, confrontation, resolution',
+					'Beginning, end, advertisement',
+					'Headline, body, signature'
+				],
+				answer: 0,
+				why: [
+					'Yes. In film the acts usually take roughly a quarter, a half and a quarter of the running time, but that is a rule of thumb, not a law.',
+					'No: an advertisement is not part of a story’s structure.',
+					'No: those are parts of a page, not acts.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does “in medias res” mean?',
+				options: [
+					'Starting a story in the middle of the events, and telling what came before later',
+					'Writing only about the media',
+					'Never finishing a story'
+				],
+				answer: 0,
+				why: [
+					'Yes: the phrase comes from Roman poetics (Horace) and means “into the middle of things”.',
+					'No: it has nothing to do with the media.',
+					'No: the story still ends. Only the order of telling changes.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of Freytag’s pyramid?',
+				options: [
+					'Gustav Freytag described it in the 19th century, analyzing five-act drama',
+					'It describes every story, without exceptions',
+					'On a site, its steps can be matched to parts of a page',
+					'The climax comes at the very end'
+				],
+				answer: [0, 2],
+				why: [
+					'Yes: that was 1863, and an analysis of classical drama.',
+					'No: it models one tradition. Some stories have no single peak, and we’ll meet them later.',
+					'Yes: that is exactly our practice.',
+					'No: after the climax come the falling action and the resolution.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the idea of Duarte’s zigzag?',
+				options: [
+					'Alternate “what is” with “what could be”, and end on the better version',
+					'Set the text out in a zigzag on the page',
+					'First praise yourself, then criticize competitors'
+				],
+				answer: 0,
+				why: [
+					'Yes: the reader sees the gap between today and what is wanted, and wants to close it.',
+					'No: it concerns the order of ideas, not the layout.',
+					'No: comparing yourself with competitors has nothing to do with it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'When is it worth starting a page “in the middle”?',
+				options: [
+					'When the very beginning of the story (the company background) is duller than the visitor’s moment of trouble',
+					'Always, because it’s more modern',
+					'Never, because a site can’t do that'
+				],
+				answer: 0,
+				why: [
+					'Yes. But the first seconds must still make clear what the page is about and who it’s for.',
+					'No: if the beginning holds an important fact, such as a place or a deadline, keep the straight order.',
+					'No: you can, as long as the first screen stays clear.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-three-acts', front: 'What are the three acts of a story?', back: 'Setup, confrontation and resolution. In film they take roughly a quarter, a half and a quarter of the time, but the proportions are conventional.' },
+			{ id: 'story-freytag', front: 'What is Freytag’s pyramid made of?', back: 'Exposition, rising action, climax, falling action and resolution. It is an analysis of classical five-act drama, not a law for every story.' },
+			{ id: 'story-medias-res', front: 'What is in medias res?', back: 'Starting in the middle of the events, in the thick of it, and giving the backstory later, once the reader is interested.' },
+			{ id: 'story-duarte', front: 'What is Duarte’s zigzag?', back: 'Alternating “what is” with “what could be”, ending on the better version. The gap between them moves the reader to act.' }
+		],
+		sources: [
+			{ title: 'Freytag’s pyramid (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Freytag%27s_pyramid', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Three-act structure (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Three-act_structure', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'In medias res (Wikipedia)', url: 'https://en.wikipedia.org/wiki/In_medias_res', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Poetics (Aristotle), on Wikipedia', url: 'https://en.wikipedia.org/wiki/Poetics_(Aristotle)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Nancy Duarte: The secret structure of great talks (TED)', url: 'https://www.ted.com/talks/nancy_duarte_the_secret_structure_of_great_talks', licence: 'link-only', kind: 'video', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you’ll lay out the story of your home page step by step: from meeting a visitor to the button. This isn’t text for the site, it’s the plan the text will be written from.',
+			hints: [
+				'Start from the end: the resolution is your button. Copy its label into the last line word for word.',
+				'The climax is the section where the visitor sees the solution. Name one of your site’s sections in it.',
+				'If you don’t know where to start, ask yourself: what is more interesting to someone new, background on you or their own trouble?'
+			],
+			mistakes: {
+				'five-beats': 'The arc needs exactly five lines with the class beat.',
+				'no-blanks': 'There’s still an ellipsis “…” somewhere. Replace it with your own words.',
+				'end-goal': 'The last line must contain your button’s label word for word (it’s at the top, under “The resolution we want”).',
+				'climax-section': 'In the climax, name one of your site’s sections by the name it has in the brief.',
+				'beats-fact': 'In at least one line, mention a service or product by its name from the brief.',
+				'start-choice': 'After “The page starts”, write either “at the beginning” or “in the middle”.',
+				'start-why': 'Explain your choice in at least three words.'
+			},
+			outro: 'Now you have the arc of the page. The next lesson shows the best-known form, the hero’s journey, and asks the big question: who is the hero on your site?'
+		},
+		say: { Freytag: 'FRY-tag', Duarte: 'doo-AR-tee', TED: 'ted' }
+	};
+</script>
+
+<script>
+	import ArcShaper from '../../diagrams/ArcShaper.svelte';
+</script>
+
+## Why a story needs a shape
+
+When you read a story, you keep waiting to find out what happens next. If nothing happens, you get bored. If everything happens at once, you get tired. A good story manages that waiting: first it introduces, then it builds tension, then it releases it. That sequence is called an **arc**, and it is useful for a site for two reasons. First, it makes it easier to decide what goes first on a page and what goes third. Second, it reminds you that a page needs an ending: the action everything leads to.
+
+This lesson has three ways of looking at an arc and one trick for starting it.
+
+## Three acts
+
+The simplest form: a story has a beginning, a middle and an end. Aristotle already said so in the *Poetics*, as something obvious: a whole is what has a beginning, a middle and an end. Screenwriters turned the idea into **three acts**, and the screenwriting teacher Syd Field popularized it in 1979.
+
+1. **Act one, setup.** We meet the person and their world, and we see that something is wrong or missing. By the end of the act the person decides to act.
+2. **Act two, confrontation.** They try, obstacles get in the way, and the stakes rise. This is the longest act, about half the story.
+3. **Act three, resolution.** The main clash and its outcome. The world is in order again, but differently.
+
+The proportions “a quarter, a half, a quarter” are quoted for screenplays, and they are only a rule of thumb. For a site the order matters more: **first understand who and what it is about, then believe the solution works, then take a step**.
+
+<details>
+<summary>Check yourself: which act is the longest, and why?</summary>
+
+The second, confrontation. Events pile up in it and tension grows. If it’s cut short, the resolution doesn’t land.
+
+</details>
+
+## Freytag’s pyramid
+
+In 1863 the German writer Gustav Freytag took apart the structure of five-act drama (his book is *Die Technik des Dramas*, “The Technique of Drama”) and drew tension as a pyramid: it climbs to a peak and then falls. Five steps:
+
+1. **Exposition.** The introduction: who, where, what’s going on.
+2. **Rising action.** Complications, obstacles, growing tension.
+3. **Climax.** The highest point, the turn.
+4. **Falling action.** The consequences of the turn.
+5. **Resolution.** The outcome, a new balance.
+
+Freytag was describing the drama of his own time, so the pyramid shouldn’t be taken as a law for every story. Many stories have one peak, many have several, and some have none at all (a later lesson shows such an example). But as a map for a home page it works. Try the diagram: move the dots of the pyramid and see which part of a page matches each.
+
+<ArcShaper />
+
+On a page, the steps look like this. Exposition is the first screen. Rising action is the visitor’s problem becoming more noticeable. The climax is the section where they see the solution, with the button beside it. Falling action is “how it works” and the proof. Resolution is the call to action and the last line.
+
+<details>
+<summary>Check yourself: what on a page corresponds to the climax?</summary>
+
+The moment the visitor sees that their trouble can be solved, with the main action right beside it.
+
+</details>
+
+## From the middle: in medias res
+
+The Latin phrase **in medias res** (“into the middle of things”) comes from the Roman poet Horace, who praised Homer for opening the *Iliad* in the tenth year of the Trojan War rather than at the birth of its hero. The trick is simple: start with the most tense scene, and give the backstory afterward.
+
+On a site that means: if your background (“we’ve been in business since 2010”) is duller than the visitor’s trouble (“a neighbor moved the fence and you don’t know whose land it is”), start with the trouble. The background goes in brackets, or lower down. The diagram above can switch between the two orders.
+
+There are two limits. First, in the first seconds it must still be clear what the page is about and who it’s for, so the scene mustn’t be mysterious. Second, if the beginning holds a fact that decides whether a person stays (a place, a price, a deadline), don’t hide it.
+
+<details>
+<summary>Check yourself: when is the straight order better than starting in the middle?</summary>
+
+When the beginning holds a fact the visitor needs at once: a place, a deadline, a price, a condition.
+
+</details>
+
+## Duarte’s zigzag
+
+Nancy Duarte, a specialist in public speaking and presentation design, noticed that strong speeches don’t go in a straight line. They **alternate two states**: “what is” (a situation we don’t accept) and “what could be” (the wish), and they end on the better one. The result is a zigzag. The gap between the two lines creates tension, and the ending shows where to go. She mapped well-known speeches this way, among them Martin Luther King’s “I Have a Dream” (her TED talk is in the sources), and she wrote the method up in her book *Resonate*.
+
+For a site this idea turns into a simple rule: **don’t only describe the problem, and don’t only describe the result, but show them in turn**. “What is: for three months you can’t tell where your boundary runs. What could be: the plan shows every marker.” Two or three such pairs, and the last “after” is tied to your button.
+
+<details>
+<summary>Check yourself: how does Duarte’s zigzag differ from a plain list of benefits?</summary>
+
+It sets “what is” against “what could be” in turn, so the difference shows. A list of benefits shows only the good.
+
+</details>
+
+## Practice
+
+Take your project’s home page and write out its arc in five lines.
+
+- **Exposition:** what is visible on the first screen.
+- **Rising action:** which trouble or wish of the visitor grows, and how your service or product (name it from the brief) takes part.
+- **Climax:** the section of the site where the visitor sees the solution. Name the section as it is named in your brief.
+- **Falling action:** what you use to back the solution up.
+- **Resolution:** your button’s label, word for word.
+
+Then answer one question: will you start “at the beginning” or “in the middle”, and why? If you chose “in the middle”, write down which scene will come first.
+
+## When structure gets in the way
+
+An arc is for telling a story, not for a whole page. A price table or a form shouldn’t “rise” and “fall”: people there are looking for an answer. And don’t force every page into five steps. If a page is short, three acts are enough: what the trouble is, how we solve it, what to do now.

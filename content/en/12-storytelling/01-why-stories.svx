@@ -1,0 +1,313 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/01-why-stories.svx. */
+	export const metadata = {
+		id: '12-storytelling/01-why-stories',
+		part: 12,
+		order: 1,
+		title: 'Why stories work',
+		definition: 'A story is events that happen to someone and are linked by causes: who, what happened, how it ended. Absorption in a story is called narrative transportation.',
+		summary:
+			'You’ll see how a story differs from a list of facts and why people read it differently, and you’ll learn to spot where a story helps a page and where it gets in the way. Afterwards you replace one list on your site with a short scene.',
+		minutes: 20,
+		teaches: ['story-narrative-transport', 'story-story-vs-list'],
+		requires: ['start-brief-fields'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'bread from 6 a.m.', caption: 'Two flyers for one café', say: 'Same facts, list and scene. A list gets skimmed. A scene usually gets finished: people want to know what happened next.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'a baker at the oven', say: 'You can picture a person at an oven. You can’t picture “high quality”. The picture is what people remember.' },
+				{ mood: 'hint', prop: 'browser', label: 'prices and hours', caption: 'Where a story gets in the way', say: 'Someone in a hurry needs an answer, not a tale. Before you add a story, ask: can they find the answer fast?' }
+			]
+		},
+		practice: {
+			id: 'story-scene',
+			title: 'A scene instead of a list',
+			task: 'One section of your site is just a list right now. Before the list, write a “scene” in the paragraph: one to three sentences saying who came with what trouble, what you did, and how it ended. The scene needs a number, a date or a place, and it must not contain judgments such as “best” or “unique”. Leave the list under the scene. Replace the ellipsis “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <section id="story-section">
+      <h2>{{sections.1}}</h2>
+      <p class="scene">…</p>
+      <ul>
+        {{#each items}}<li>{{title}}: {{text}}</li>
+        {{/each}}
+      </ul>
+    </section>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <section id="story-section">
+      <h2>{{sections.1}}</h2>
+      <p class="scene">A customer came to us after 3 months of trying to sort it out alone. We solved it in two weeks, and now they get on with their own work in peace.</p>
+      <ul>
+        {{#each items}}<li>{{title}}: {{text}}</li>
+        {{/each}}
+      </ul>
+    </section>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'scene-exists', kind: 'exists', selector: '#story-section p.scene' },
+				{ id: 'scene-before-list', kind: 'exists', selector: '#story-section p.scene + ul' },
+				{ id: 'no-blanks', kind: 'text', selector: '#story-section p.scene', matches: '^[^…]+$' },
+				{ id: 'scene-length', kind: 'text', selector: '#story-section p.scene', matches: '^[\\s\\S]{60,}$' },
+				{ id: 'scene-short', kind: 'text', selector: '#story-section p.scene', matches: '^[^.!?]*(?:[.!?]+[^.!?]*){0,3}$' },
+				{ id: 'scene-fact', kind: 'text', selector: '#story-section p.scene', matches: '\\d' },
+				{ id: 'scene-plain', kind: 'text', selector: '#story-section p.scene', matches: '^(?![\\s\\S]*(?:[Bb]est|[Uu]nique|#\\s?1|[Ww]orld-class|[Ll]eading|[Ss]tate-of-the-art))[\\s\\S]*$' },
+				{ id: 'list-stays', kind: 'count', selector: '#story-section li', min: { brief: 'items' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What do psychologists call “narrative transportation”?',
+				options: [
+					'The state of being so absorbed in a story that you briefly “move” into its world and stop picking at it',
+					'Sending a text from one server to another',
+					'Translating a story from one language into another'
+				],
+				answer: 0,
+				why: [
+					'Yes. Attention, images and feelings are busy with the plot, so the reader has less energy left to argue with the author.',
+					'No: “transport” is figurative here. It describes the reader’s state.',
+					'No: translation has nothing to do with it.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What helps a scene stick in memory?',
+				options: [
+					'A specific person and place',
+					'A chain of “first this, and because of that, this”',
+					'Ten adjectives in a row',
+					'One exact number or date'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a reader can picture a person, but not an abstraction.',
+					'Yes: causes link the events, and linked events are easier to retell.',
+					'No: a string of judgments paints no picture and reads like an ad.',
+					'Yes: an exact detail makes a scene believable.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each part of a site with what it usually needs',
+				pairs: [
+					['An “About” page', 'a short story with facts'],
+					['A price table', 'a table: compare quickly and find what you need'],
+					['A contact form', 'clear field labels, no plot'],
+					['A before-and-after case study', 'a story with numbers']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Articles often say “people remember stories 22 times better than facts”. How should you treat that number?',
+				options: [
+					'With caution: it’s repeated everywhere without a study behind it, and all that is reliably known is that a story is usually remembered better than a bare list',
+					'It’s a proven law, so you can put it on your site',
+					'The number is exact, but only for children'
+				],
+				answer: 0,
+				why: [
+					'Yes. A good habit: if a number has no source, don’t repeat it as a fact.',
+					'No: most people who quote it can’t find the study it came from.',
+					'No: no source says that. It would be one more invented addition.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which of these openings is a scene?',
+				options: [
+					'We love our work and take pride in the result.',
+					'In October a neighbor moved his fence a yard over, and for three weeks Irene couldn’t tell where her land began.',
+					'Our company is a market leader with years of experience.'
+				],
+				answer: 1,
+				why: [
+					'No: that’s a judgment, with no person and no event in it.',
+					'Yes: a person, a time, an event and a consequence.',
+					'No: that’s boasting without a single fact.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of a short scene on a page in order',
+				items: ['Name the person and the place', 'Show what happened', 'Show how it ended', 'Put the list of facts under the scene']
+			}
+		],
+		cards: [
+			{
+				id: 'story-transport',
+				front: 'What is narrative transportation?',
+				back: 'Absorption in a story: attention, images and feelings are busy with the plot. An absorbed reader argues less with the author and takes in the story’s idea more readily.'
+			},
+			{
+				id: 'story-vs-list',
+				front: 'How does a story differ from a list of facts?',
+				back: 'A story has a person, an event and a causal link. A list gives separate facts, while a story ties them together so they’re easy to retell.'
+			},
+			{
+				id: 'story-where-helps',
+				front: 'Where does a story help on a site, and where does it get in the way?',
+				back: 'It helps on an “About” page, in case studies and at the top of a page. It gets in the way in prices, contacts, forms and legal text, where people look for an answer, not a plot.'
+			},
+			{
+				id: 'story-22-times',
+				front: 'Is it true that stories are remembered 22 times better?',
+				back: 'The number is repeated with no reliable source. All that’s safe to say is that a story is usually remembered better than a bare list.'
+			}
+		],
+		sources: [
+			{
+				title: 'Green, Appel (2024): Narrative transportation, how stories shape beliefs (preprint, PDF)',
+				url: 'https://mcm.uni-wuerzburg.de/fileadmin/06110300/2024/Pdfs/Green___Appel__2024__Advances_Preprint.pdf',
+				licence: 'proprietary-link',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'Storytelling (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Storytelling', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Made to Stick, on the book by Chip and Dan Heath (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Made_to_Stick', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Scrolling and Attention (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/scrolling-and-attention/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'F-Shaped Pattern of Reading on the Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'One section of your site is just list items so far. Let’s put a small scene in front of them: a person, an event, an ending.',
+			hints: [
+				'A scene isn’t an ad, it’s a case. Picture one person, and say what they came with and how it ended.',
+				'You need something concrete: a number, a date or a place. For example “3 months”, “in March”, “on the waterfront”.',
+				'If the text runs past three sentences, cut whatever the scene can do without. Take out “best” and “unique” too.'
+			],
+			mistakes: {
+				'scene-exists': 'There’s no scene paragraph: the page needs a p element with the class scene.',
+				'scene-before-list': 'The scene must stand right before the list, not after it.',
+				'no-blanks': 'The ellipsis “…” is still in the scene. Replace it with your own text.',
+				'scene-length': 'The scene is too short: it has to hold a person, an event and an ending.',
+				'scene-short': 'The scene is longer than three sentences. Cut what you can.',
+				'scene-fact': 'There isn’t a single number in the scene: add a number, a date or a length of time.',
+				'scene-plain': 'A judgment such as “best” or “unique” is still in the scene. Show a fact instead of a verdict.',
+				'list-stays': 'The list under the scene has to stay: it has as many items as your brief.'
+			},
+			outro: 'Now the section opens with something alive, and the list stays for people who want the details. Next you’ll see how stories are built: acts, rise and fall.'
+		},
+		say: { NN: 'N N', PDF: 'P D F' }
+	};
+</script>
+
+<script>
+	import ListOrStory from '../../diagrams/ListOrStory.svelte';
+</script>
+
+## The same set of facts
+
+Picture two flyers for one café. The first says: “Opened in 2019. Bread from 6 a.m. Beans roasted on site. View of the river. Fourteen kinds of coffee.” The second says: “In March 2019 the owner lit the oven in the basement for the first time, and the neighbors arrived before the bread had cooled, following the smell.” The second has fewer facts. It’s also the one you’ll probably remember.
+
+A **story** is events that happen to someone and are linked by causes. It has three things: a **person** (or a group of people), **what happened to them**, and **how it ended**. A list of facts needs none of that: you can shuffle the items and the meaning stays the same. In a story, the order decides everything.
+
+Try it on yourself. The diagram below gives the same six facts as a list and as a scene. Read one version, hide it, and answer the questions from memory.
+
+<ListOrStory />
+
+One person, one time, proves nothing. You already know the questions, for a start. But give the list version to one friend and the scene to another, and ask them both tomorrow. That is usually how the difference shows.
+
+<details>
+<summary>Check yourself: what is the shortest story made of?</summary>
+
+A person, an event and an ending, linked by causes. If the items can be shuffled without losing meaning, it’s a list.
+
+</details>
+
+## What happens to the reader
+
+Psychologists call the state of an engrossed reader **narrative transportation**: attention, imagination and feelings are busy with the plot, and the world around steps back for a while. You know this yourself: you look up from a book and realize you’ve missed your stop.
+
+Two findings matter for a website. Both are summarized by Melanie Green and Markus Appel in a 2024 review, which is in the sources.
+
+1. Absorbed readers on average **argue less** with a text. When your head is busy with “what happens next?”, there is less left for “is that even true?”. This is a tendency, not a law: a well-written ad doesn’t always work either.
+2. They more readily **accept the idea** the story carries, and they remember the details better. That holds for invented stories too, which is why a story is not evidence. It only brings the idea closer.
+
+An important rule follows from the second point. A story persuades more strongly than a list, so the author’s responsibility is greater. An invented “client” with a happy ending on an expert’s site is not a technique, it’s deception. We come back to this in the lessons on the case study and on ethics.
+
+<details>
+<summary>Check yourself: why does an absorbed reader argue less?</summary>
+
+Their attention is taken up by the plot, so less is left for objections. It’s a tendency, not a guarantee.
+
+</details>
+
+## Why a story is remembered
+
+Three reasons, which the authors of books on making ideas “sticky” lean on (Chip and Dan Heath, *Made to Stick*).
+
+- **Images.** You can picture a person at an oven. You can’t picture “high quality”.
+- **Causes.** An event that follows from another is easier to retell than a set of unconnected items. You’ll repeat almost word for word the chain “the neighbor moved the fence, so she ordered a survey, so the court accepted the plan”.
+- **Feeling.** Surprise, worry and relief keep a memory better than an even list does.
+
+One caution is worth remembering. Articles on storytelling often quote a figure such as “a story is remembered 22 times better than a fact”. Its source is unclear, and there is usually no reliable study behind it. If a number can’t be confirmed, it’s better not to write it on a site or a slide. For your work, the true part is enough: a story is usually remembered better than a bare list.
+
+<details>
+<summary>Check yourself: what do you do with the figure “22 times better”?</summary>
+
+Don’t repeat it as a fact: it has no reliable source. “Usually better” is enough.
+
+</details>
+
+## Where a story is needed and where it gets in the way
+
+People come to a site with different intentions, and a story doesn’t help all of them. The researchers at Nielsen Norman Group showed long ago that visitors skim a page rather than read it through, and expect what they need to turn up quickly. A simple rule follows: **a story belongs where a person is deciding whether to trust you, and not where they are carrying out a task**.
+
+| Part of a site | What the person needs | What fits |
+|---|---|---|
+| Top of a page | to see whether they’re in the right place | one scene or one clear sentence |
+| “About”, “About me” | to decide whether you can be trusted | a short story with facts |
+| Case studies | to see how it works | a story with numbers |
+| Prices, terms | to compare and calculate | a table or a list |
+| Contacts, a form | to call or write | clear labels, no plot |
+| Legal text | to learn their rights | exact wording |
+
+A good test before you add a story: “If a person is in a hurry, can they find the answer without reading the story?” If not, the story belongs lower on the page, or on a page of its own.
+
+<details>
+<summary>Check yourself: does a price table need a story?</summary>
+
+No. A person looking at prices is comparing and counting. They need numbers and terms, and a plot would only slow them down.
+
+</details>
+
+## Practice
+
+Your brief has sections and content. Choose a section of the page that has a list: in the check, that is the second section of your brief, and the list in it is made of your items. Right now it looks like an inventory. Write a scene of one to three sentences before it.
+
+- **Who.** A person from those you’re building the site for. “A landowner”, “a student” or “a neighbor from the waterfront” is enough: you don’t need to invent names, and you must not name real people.
+- **What happened.** What trouble or wish they came with, and what you did.
+- **How it ended.** The result, ideally with a number, a date or a place: “in two weeks”, “in March”, “on the waterfront”.
+
+Don’t write “we’re the best” or “a unique approach”. Show a fact and leave the conclusion to the reader. If a scene is hard to invent, take a real case from your work and remove everything that could identify the person.
+
+## What was wrong with 2019
+
+In 2019 sites built with static-page generators were fast and clean, but the “About us” page usually carried a line such as “We are a dynamic, fast-growing company with a team of dedicated professionals”. Such a line can be pasted onto any site and lose nothing, which is the sign of a list of judgments with no scene. Today search engines and readers alike spot text written “for everyone” more easily, since models write it now too. A live scene with a real detail is still the cheapest way to show there are real people behind a site.

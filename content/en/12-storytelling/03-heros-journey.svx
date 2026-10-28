@@ -1,0 +1,294 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/03-heros-journey.svx. */
+	export const metadata = {
+		id: '12-storytelling/03-heros-journey',
+		part: 12,
+		order: 3,
+		title: 'The hero’s journey: who is the hero on your site',
+		definition: 'The hero’s journey is Campbell’s pattern of stories, in Vogler’s twelve steps: a hero leaves the familiar world, faces trials and returns changed.',
+		summary:
+			'You’ll meet the best-known pattern of stories, Campbell’s and Vogler’s hero’s journey, and its main use for a site: the visitor is the hero, and the project is the mentor. Afterwards you have your client’s path laid out in this pattern.',
+		minutes: 25,
+		teaches: ['story-heros-journey'],
+		requires: ['story-three-act'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'We’re the best', caption: 'Who is the hero?', say: 'A common mistake: making yourself the hero of the site. The hero is the visitor, who has a problem or a goal.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'mentor', say: 'Your project is the mentor: it knows the way. Prove it with a fact, not an adjective, and give a clear first step.' },
+				{ mood: 'hint', prop: 'flowchart', label: 'leave|initiation|return', caption: '12 steps', say: 'Vogler fitted Campbell’s path into three acts. For a site, the roles matter more: who is the hero, who is the mentor?' }
+			]
+		},
+		practice: {
+			id: 'story-journey',
+			title: 'Your client’s journey',
+			task: 'The hero of this story is your visitor, not you. Fill in the three lines “before they meet us”: ordinary world, call, refusal (what makes them hesitate). These three lines must not contain “we”, “our” or “us”. Then the lines “meeting and path”: the mentor (name your service or product from the brief in it), the threshold (your button’s label, word for word), the reward and the elixir (how the hero’s life has changed). Replace every “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="journey">
+      <h2>The client’s path as a hero’s journey</h2>
+      <p>The hero: <strong class="hero">{{forWhom}}</strong></p>
+      <p>The mentor: <strong>{{title}}</strong></p>
+      <h3>Before they meet the mentor</h3>
+      <ol class="before">
+        <li class="ordinary">…</li>
+        <li class="call">…</li>
+        <li class="refusal">…</li>
+      </ol>
+      <h3>Meeting and path</h3>
+      <ol class="path" start="4">
+        <li class="mentor">…</li>
+        <li class="threshold">…</li>
+        <li class="reward">…</li>
+        <li class="elixir">…</li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="journey">
+      <h2>The client’s path as a hero’s journey</h2>
+      <p>The hero: <strong class="hero">{{forWhom}}</strong></p>
+      <p>The mentor: <strong>{{title}}</strong></p>
+      <h3>Before they meet the mentor</h3>
+      <ol class="before">
+        <li class="ordinary">Lives an ordinary life and keeps putting off a question that has bothered them for a long time.</li>
+        <li class="call">Something happens, and putting it off is no longer possible.</li>
+        <li class="refusal">Hesitates: it’s expensive, it’s confusing, and maybe it will sort itself out.</li>
+      </ol>
+      <h3>Meeting and path</h3>
+      <ol class="path" start="4">
+        <li class="mentor">Finds a mentor who knows cases like this and offers “{{items.0.title}}”.</li>
+        <li class="threshold">Takes the first step: presses “{{mainAction.label}}”.</li>
+        <li class="reward">Gets a clear answer and a plan for what to do next.</li>
+        <li class="elixir">Goes back to their own affairs at ease, and tells others how they settled it.</li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'hero-is-customer', kind: 'field', selector: '#journey .hero', field: 'forWhom' },
+				{ id: 'no-blanks', kind: 'text', selector: '#journey', matches: '^[^…]*$' },
+				{ id: 'no-we', kind: 'text', selector: '#journey ol.before', matches: '^(?![\\s\\S]*(?:^|[^A-Za-z’\'])(?:[Ww]e|[Oo]ur|[Oo]urs|[Uu]s)(?:[^A-Za-z]|$))[\\s\\S]*$' },
+				{ id: 'refusal-doubt', kind: 'text', selector: '#journey li.refusal', matches: '^\\s*(\\S+\\s+){3}\\S+' },
+				{ id: 'mentor-service', kind: 'field', selector: '#journey li.mentor', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'threshold-action', kind: 'field', selector: '#journey li.threshold', field: 'mainAction.label' },
+				{ id: 'elixir-change', kind: 'text', selector: '#journey li.elixir', matches: '^\\s*(\\S+\\s+){4}\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Who wrote about the “monomyth” the hero’s journey grew from?',
+				options: ['Joseph Campbell, in The Hero with a Thousand Faces (1949)', 'Aristotle, in the Poetics', 'Nancy Duarte, in her book Resonate'],
+				answer: 0,
+				why: [
+					'Yes. Campbell compared the myths of many peoples and described one shared path: departure, initiation, return.',
+					'No: Aristotle spoke of a beginning, a middle and an end.',
+					'No: Duarte proposed the zigzag between “what is” and “what could be”.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What did Christopher Vogler do?',
+				options: [
+					'He cut Campbell’s pattern down to twelve steps and adapted it for film and screenwriters',
+					'He invented StoryBrand',
+					'He described the five-step pyramid'
+				],
+				answer: 0,
+				why: [
+					'Yes: first in a memo for a studio, then in the book The Writer’s Journey.',
+					'No: StoryBrand was proposed by Donald Miller.',
+					'No: the pyramid was described by Freytag.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the first steps of the hero’s journey in order',
+				items: ['Ordinary world', 'Call to adventure', 'Refusal of the call', 'Meeting with the mentor', 'Crossing the threshold']
+			},
+			{
+				type: 'single',
+				prompt: 'Who is made the hero of a story on a site?',
+				options: [
+					'The visitor: a person with a problem and a goal of their own',
+					'The site’s author, telling how they built the company',
+					'The company itself, as an organization'
+				],
+				answer: 0,
+				why: [
+					'Yes: we all see the world from the position of the hero of our own life. A person who sees themselves in a story pays attention.',
+					'No: a founder’s story is useful, but as proof of experience, not as the main plot.',
+					'No: an organization isn’t a person, and it’s hard to feel for.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each step of the hero’s journey with what corresponds to it on a site',
+				pairs: [
+					['Ordinary world', 'a first screen with a recognizable situation'],
+					['Refusal of the call', 'a section answering objections'],
+					['Mentor', 'your project, brief and knowledgeable'],
+					['Threshold', 'the main action']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is the hero’s journey pattern not compulsory?',
+				options: [
+					'It is one model, grown out of a particular tradition; not every good story follows it',
+					'It was banned long ago',
+					'It only works for children’s cartoons'
+				],
+				answer: 0,
+				why: [
+					'Yes. The next lesson looks at who objects to it, and at other shapes.',
+					'No: nothing is banned.',
+					'No: the pattern is used in adult film and in advertising too, but it isn’t needed everywhere.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-monomyth', front: 'What is the monomyth?', back: 'The shared pattern of myths that Joseph Campbell described in 1949: leaving the ordinary world, initiation through trials, return with a gift.' },
+			{ id: 'story-vogler-12', front: 'Vogler’s twelve steps, in brief?', back: 'Ordinary world, call, refusal, mentor, threshold, tests, approach to the cave, the ordeal, reward, road back, resurrection, return with the elixir.' },
+			{ id: 'story-customer-hero', front: 'Who is the hero on a site, and who is the mentor?', back: 'The hero is the visitor, who has a problem and a goal. The project is the mentor: it knows the way, gives a plan and helps.' },
+			{ id: 'story-we-trap', front: 'What is the most common mistake in using the hero’s journey?', back: 'Making yourself the hero (“we founded, we grew, we won”). Then the visitor finds no place in the story for themselves.' }
+		],
+		sources: [
+			{ title: 'Hero’s journey (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Hero%27s_journey', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Monomyth (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Monomyth', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'The Writer’s Journey, on Christopher Vogler’s book (Wikipedia)', url: 'https://en.wikipedia.org/wiki/The_Writer%27s_Journey:_Mythic_Structure_for_Writers', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'The Hero with a Thousand Faces, on Campbell’s book (Wikipedia)', url: 'https://en.wikipedia.org/wiki/The_Hero_with_a_Thousand_Faces', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'What makes a hero? (Matthew Winkler, TED-Ed)', url: 'https://www.youtube.com/watch?v=Hhk4N9A0oCA', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now you’ll turn the usual picture around: the hero will be your visitor, not your project. You’ll be the mentor, the one who gives them a plan.',
+			hints: [
+				'The first three lines are about the hero before they meet you. Write about them: what they do, what has happened, why they hesitate.',
+				'The word “we” is banned from those three lines: the hero hasn’t met you yet, and you haven’t entered the story.',
+				'In the second part, name your service in the mentor line and your button in the threshold line, word for word.'
+			],
+			mistakes: {
+				'hero-is-customer': 'The “hero” line has to stay: it holds your site’s audience from the brief.',
+				'no-blanks': 'There’s an ellipsis “…” left. Fill in every line.',
+				'no-we': 'One of the first three lines uses “we”, “our” or “us”. Rewrite it about the hero: they act, and you haven’t appeared yet.',
+				'refusal-doubt': 'Describe the hero’s doubt in at least four words: what they fear or aren’t sure of.',
+				'mentor-service': 'In the mentor line, name your service or product by its name from the brief.',
+				'threshold-action': 'The threshold line must contain your button’s label word for word.',
+				'elixir-change': 'Write the last line in at least five words: what has changed in the hero’s life.'
+			},
+			outro: 'You’ve laid out your client’s journey and left yourself the mentor’s part. That swap is one of the strongest moves in persuasive writing. Next we’ll see why the pattern shouldn’t be taken as a law.'
+		},
+		say: { Campbell: 'CAMP-bul', Vogler: 'VOH-gler', monomyth: 'MON-oh-myth' }
+	};
+</script>
+
+<script>
+	import HeroJourney from '../../diagrams/HeroJourney.svelte';
+</script>
+
+## The monomyth
+
+In 1949 the American mythologist Joseph Campbell published *The Hero with a Thousand Faces*. He compared the myths and legends of many peoples and noticed one shared movement: the hero leaves the familiar world, passes trials in a strange one, wins a prize and comes home changed. He called this common form the **monomyth** (“one myth”). It has three parts: **separation**, **initiation** and **return**.
+
+Campbell wrote about myths, not screenplays. But filmmakers and writers were captivated by the book, George Lucas among them, who has said it helped shape *Star Wars*. In the 1980s Christopher Vogler, a story analyst for Hollywood studios, retold it for film: first in a memo for colleagues, later in the book *The Writer’s Journey*. He kept **twelve steps**. Many films and novels are now analyzed with them, and after them, so are the texts of brands.
+
+<details>
+<summary>Check yourself: what are the three parts of the monomyth?</summary>
+
+Separation from the ordinary world, initiation (trials and reward), and return.
+
+</details>
+
+## The twelve steps
+
+The steps fall onto the three acts from the last lesson.
+
+**Act one: the ordinary world and departure.**
+1. **Ordinary world.** The hero lives as they always have. We see what they lack.
+2. **Call to adventure.** An event happens that makes the old life unworkable.
+3. **Refusal of the call.** The hero hesitates, or is afraid.
+4. **Meeting with the mentor.** Someone appears who has experience, advice or a tool.
+5. **Crossing the threshold.** The hero decides to take the first step.
+
+**Act two: initiation.**
+6. **Tests, allies, enemies.**
+7. **Approach to the inmost cave.** Preparing for the hardest part.
+8. **The ordeal.** The deciding moment.
+9. **Reward.** The hero gets what they set out for.
+
+**Act three: return.**
+10. **The road back.**
+11. **Resurrection.** The last test: the hero proves they have changed.
+12. **Return with the elixir.** The hero comes home changed, and brings something of use.
+
+Press the circles on the diagram: each step has a meaning in a story and a place on a site. At the bottom of the diagram, the hero and the mentor from your brief are filled in.
+
+<HeroJourney />
+
+<details>
+<summary>Check yourself: which step matches the main-action button?</summary>
+
+Crossing the threshold: the moment the hero decides to take the first step.
+
+</details>
+
+## Who is the hero here
+
+For a site, this pattern holds one valuable idea, and it concerns roles, not structure. The most common mistake in company stories is making yourself the hero: “We founded, we grew, we won an award”. But readers look at the world from the position of the hero of their own life. They need a story with a place for them in it.
+
+So a sensible casting looks like this.
+
+- **The hero** is the visitor. They have a problem or a goal.
+- **The mentor** is your project. It knows the way and can help. It doesn’t have to win itself: a mentor has few scenes in a story, but each one matters.
+- **The elixir** is what the hero takes home (a result, peace of mind, freedom).
+
+Donald Miller’s book *Building a StoryBrand*, which you met in the [StoryBrand lesson](../../11-copywriting/05-storybrand/), uses the same casting; in the [lesson on the page skeleton](../06-storybrand-page/) it becomes the order of sections. Here it is enough to take away this: **write about what happens to the client, and enter the story when they already need help**.
+
+It’s easy to be a mentor in only two cases: you show that you know the path (a fact, a document, experience, not adjectives), and you give the hero a clear first step. The rest they have to walk themselves, and that is not your weakness: nobody likes a story in which the mentor does everything for the hero.
+
+<details>
+<summary>Check yourself: how can you tell you’ve cast yourself as the hero?</summary>
+
+The text is full of “we” and “our company”, and the visitor appears only at the end, or not at all.
+
+</details>
+
+## Practice
+
+Take the hero from your brief: your audience is already filled in on the page. Fill in their path.
+
+- **Before they meet you** (three lines, no “we”): ordinary world, call, refusal.
+- **Meeting and path**: a mentor line that names your service or product, a threshold line with your button’s label, the reward and the elixir.
+
+Write in short, lived-in sentences. You don’t have to invent drama: an ordinary case is enough.
+
+## What next
+
+The pattern is beautiful, but it has many critics. In the next lesson you’ll meet a simpler version, Dan Harmon’s story circle, and find out what people object to in the hero’s journey and which stories are built differently.

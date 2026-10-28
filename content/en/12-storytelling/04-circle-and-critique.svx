@@ -1,0 +1,340 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/04-circle-and-critique.svx. */
+	export const metadata = {
+		id: '12-storytelling/04-circle-and-critique',
+		part: 12,
+		order: 4,
+		title: 'Harmon’s circle and the critique of the hero’s journey',
+		definition: 'The story circle is Dan Harmon’s eight-step version of the hero’s journey: a hero wants something, goes into the unknown, pays for it and returns changed.',
+		summary:
+			'You’ll learn to use a simpler pattern, Dan Harmon’s circle, and find out what people object to in the hero’s journey and which stories are built differently. Afterwards you can say honestly where a pattern helps your project and where it is better set aside.',
+		minutes: 25,
+		teaches: ['story-story-circle', 'story-heros-journey-critique'],
+		requires: ['story-heros-journey'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'you|need|go|search', caption: 'Harmon’s circle', say: 'Eight steps instead of twelve: you, need, go, search, find, take, return, change.' },
+				{ mood: 'hmm', side: 'right', prop: 'sheet', label: 'take', say: 'Finding costs something. “Simple and effortless” convinces no one. Name the time and decisions, and people believe you.' },
+				{ mood: 'hint', caption: 'The critique', say: 'The pattern is accused of picking its examples. Use it as questions, and check them against facts.' }
+			]
+		},
+		practice: {
+			id: 'story-circle',
+			title: 'The story circle of your client',
+			task: 'Fill in the eight steps of the circle for the hero from your brief. The first two steps (“you” and “need”) don’t need “we”, “our” or “us”: your project isn’t in the story yet. In steps three to six, name your service or product from the brief. The last step describes the hero’s change, not a call such as “call us” or “order now”. At the end, say honestly where this pattern doesn’t fit your project. Replace every “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="circle">
+      <h2>Your client’s story circle</h2>
+      <p>The hero: <strong class="hero">{{forWhom}}</strong></p>
+      <ol class="home">
+        <li class="step you">…</li>
+        <li class="step need">…</li>
+      </ol>
+      <ol class="crossing" start="3">
+        <li class="step go">…</li>
+        <li class="step search">…</li>
+        <li class="step find">…</li>
+        <li class="step take">…</li>
+      </ol>
+      <ol class="back" start="7">
+        <li class="step return">…</li>
+        <li class="step change">…</li>
+      </ol>
+      <p>Where this pattern doesn’t fit my project: <span id="circle-limit">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="circle">
+      <h2>Your client’s story circle</h2>
+      <p>The hero: <strong class="hero">{{forWhom}}</strong></p>
+      <ol class="home">
+        <li class="step you">A person lives an ordinary life with an unsettled question at the back of their mind.</li>
+        <li class="step need">They want clarity at last, without spending their nerves on it.</li>
+      </ol>
+      <ol class="crossing" start="3">
+        <li class="step go">They ask for help for the first time and describe where they stand.</li>
+        <li class="step search">With a guide they work out which service they need: “{{items.0.title}}”.</li>
+        <li class="step find">They get a clear result and a plan of action.</li>
+        <li class="step take">They pay in time and money, and accept that some decisions will be theirs to make.</li>
+      </ol>
+      <ol class="back" start="7">
+        <li class="step return">They go back to their usual affairs.</li>
+        <li class="step change">Now they know what to do, and no longer put off questions like this one.</li>
+      </ol>
+      <p>Where this pattern doesn’t fit my project: <span id="circle-limit">it’s an ordinary service with no dramatic victory, so the story isn’t about heroics</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'hero-guard', kind: 'field', selector: '#circle .hero', field: 'forWhom' },
+				{ id: 'eight-steps', kind: 'count', selector: '#circle li.step', min: 8, max: 8 },
+				{ id: 'no-blanks', kind: 'text', selector: '#circle', matches: '^[^…]*$' },
+				{ id: 'no-we-early', kind: 'text', selector: '#circle ol.home', matches: '^(?![\\s\\S]*(?:^|[^A-Za-z])(?:[Ww]e|[Oo]ur|[Oo]urs|[Uu]s)(?:[^A-Za-z]|$))[\\s\\S]*$' },
+				{ id: 'project-in-middle', kind: 'field', selector: '#circle ol.crossing', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'change-not-ad', kind: 'text', selector: '#circle li.change', matches: '^(?![\\s\\S]*(?:[Cc]all (?:us|now|today)|[Oo]rder (?:now|today)|[Bb]uy (?:now|today)|[Bb]ook (?:now|today|a|your)|[Ss]ign up|[Ss]ubscribe|[Cc]ontact us|[Gg]et in touch|[Vv]isit us|[Jj]oin us))\\s*(\\S+\\s+){4}\\S+' },
+				{ id: 'limit', kind: 'text', selector: '#circle-limit', matches: '^\\s*(\\S+\\s+){4}\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the steps of Harmon’s circle in order',
+				items: ['You', 'Need', 'Go', 'Search', 'Find', 'Take', 'Return', 'Change']
+			},
+			{
+				type: 'single',
+				prompt: 'What makes Harmon’s circle handier than Vogler’s twelve steps?',
+				options: [
+					'It’s shorter: eight steps instead of twelve, and easy to retell in one paragraph',
+					'It’s always more accurate',
+					'It was invented specially for websites'
+				],
+				answer: 0,
+				why: [
+					'Yes. Harmon, a TV writer, boiled the pattern down to eight steps so he could sketch an episode quickly.',
+					'No: shorter doesn’t mean more accurate. It’s just simpler.',
+					'No: it was invented for television series.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which objections to the “monomyth” do researchers raise?',
+				options: [
+					'Campbell picked myths to fit the pattern and passed over those that don’t',
+					'The pattern rests mostly on male experience',
+					'The pattern was banned by law',
+					'It pays little attention to the differences between the cultures the myths come from'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: folklorists call this selection bias in the sources.',
+					'Yes: this is one of the main objections, and models such as the “heroine’s journey” answer it.',
+					'No: nothing is banned.',
+					'Yes: the pattern merges things that each culture understood differently.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does Ursula K. Le Guin say about stories in “The Carrier Bag Theory of Fiction”?',
+				options: [
+					'A story can be seen as a bag or basket that gathers people and things, not only as an arrow to a victory over an enemy',
+					'A story should be as short as possible',
+					'The hero must always die'
+				],
+				answer: 0,
+				why: [
+					'Yes: she objects to the habit of counting only the tale of a duel and a victory as a “real” story.',
+					'No: length isn’t discussed.',
+					'No: the essay says nothing of the kind.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why shouldn’t you use the pattern as a template for a company’s story?',
+				options: [
+					'If everyone writes the same “obstacle, victory, return”, readers recognize the template and stop believing it',
+					'Because templates are too complicated',
+					'Because companies never meet obstacles'
+				],
+				answer: 0,
+				why: [
+					'Yes. The pattern is good as a set of questions (“what really happened?”), not as a mold to pour facts into.',
+					'No: the pattern is simple. The trouble is that the results all look alike.',
+					'No: obstacles do happen, but not all of them deserve drama.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is Kurt Vonnegut’s “Man in a Hole” shape?',
+				options: [
+					'Someone gets into trouble, gets out of it, and ends up better off than at the start',
+					'A story about a miner',
+					'A story in which nothing ever goes wrong'
+				],
+				answer: 0,
+				why: [
+					'Yes: on his graph of good and ill fortune, the line dips and then climbs above where it began.',
+					'No: the name is a picture of the shape, not a subject.',
+					'No: a story with no trouble at all would just be a flat line.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is Maureen Murdock’s “heroine’s journey”?',
+				options: [
+					'A response to the monomyth: a path in which inner change and restoring wholeness matter, not only victory',
+					'Another name for Harmon’s circle',
+					'A scheme of women’s price plans on a site'
+				],
+				answer: 0,
+				why: [
+					'Yes: her 1990 book proposes different steps from Campbell’s.',
+					'No: Harmon described his circle separately, as a screenwriter’s tool.',
+					'No: it is about stories, not prices.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-harmon-8', front: 'What are the eight steps of Harmon’s circle?', back: 'You, need, go, search, find, take, return, change. The upper half of the circle is the familiar, the lower half the unknown.' },
+			{ id: 'story-monomyth-critique', front: 'What is the main criticism of the monomyth?', back: 'Folklorists point to myths chosen to fit the pattern, to neglect of cultural differences, and to an emphasis on male experience.' },
+			{ id: 'story-carrier-bag', front: 'What is Le Guin’s “carrier bag theory” of fiction?', back: 'The idea that a story can be a container that gathers people and things into a whole, not a spear flying to a victory over an enemy.' },
+			{ id: 'story-formula-trap', front: 'Why is the hero’s journey template dangerous for brands?', back: 'The stories come out alike, and the facts get bent to fit the pattern. It’s better to use it as a set of questions than as a mold.' }
+		],
+		sources: [
+			{ title: 'Dan Harmon’s story circle (StudioBinder)', url: 'https://www.studiobinder.com/blog/dan-harmon-story-circle/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Dan Harmon, “Story circle” section (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Dan_Harmon', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Hero’s journey, criticism by folklorists (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Hero%27s_journey', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Heroine’s journey (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Heroine%27s_journey', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Dancing at the Edge of the World, Le Guin’s collection with the carrier bag essay (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Dancing_at_the_Edge_of_the_World', licence: 'CC-BY-SA', kind: 'book', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Kurt Vonnegut on the Shapes of Stories', url: 'https://www.youtube.com/watch?v=oP3c1h8v2ZQ', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now you’ll walk the same story around a shorter circle, and then say honestly where the pattern is too small for you. The second part matters as much as the first.',
+			hints: [
+				'Steps 1 and 2 are about the hero before they meet you. The words “we”, “our” and “us” don’t belong there.',
+				'Your service enters in steps 3 to 6: name it the way the brief does.',
+				'The last step is about what changed in the hero’s life. Calls such as “call us” or “order now” don’t belong to it.'
+			],
+			mistakes: {
+				'hero-guard': 'The “hero” line has to stay where it is.',
+				'eight-steps': 'The circle needs exactly eight steps.',
+				'no-blanks': 'There’s an ellipsis “…” left somewhere. Replace it with words.',
+				'no-we-early': 'Steps 1 and 2 use “we”, “our” or “us”. The project isn’t there yet: write only about the hero.',
+				'project-in-middle': 'In steps three to six, name your service or product by its name in the brief.',
+				'change-not-ad': 'The last step must describe the hero’s change in at least five words, and must not be a call to action.',
+				limit: 'Write at least five words on where the pattern doesn’t fit your project.'
+			},
+			outro: 'Now you have two paths for one client, one of twelve steps and one of eight. You can see that neither is a law: both are questions. Next come three short forms that fit in a paragraph.'
+		},
+		say: { Harmon: 'HAR-mun', Vogler: 'VOH-gler', 'Le Guin': 'luh GWIN', Vonnegut: 'VON-uh-gut' }
+	};
+</script>
+
+<script>
+	import StoryCircle from '../../diagrams/StoryCircle.svelte';
+</script>
+
+## Eight steps instead of twelve
+
+Dan Harmon, a TV writer and the creator of *Community* and *Rick and Morty*, developed his own simplification of the hero’s journey while he was struggling with scripts, and later wrote it up for the Channel 101 community he co-founded. He cut the pattern down to eight steps arranged in a circle. We retell them in our own words, using the labels people commonly give them:
+
+1. **You.** The hero in a zone of comfort.
+2. **Need.** They want something.
+3. **Go.** They enter an unfamiliar situation.
+4. **Search.** They adapt, and look around.
+5. **Find.** They get what they wanted.
+6. **Take.** Getting it costs them dearly.
+7. **Return.** They go back to where they began.
+8. **Change.** They are back, and changed.
+
+A horizontal line cuts the circle. Above it is the familiar, below it the unknown. On step three the hero goes below the line, and on step seven they come back up. Harmon likes the circle because it can be tested with questions: “What does the hero want? What stands in the way? How does it end?” If any step has no answer, the story has a hole in it.
+
+Try it on the diagram. Press the steps and see which place in Vogler’s journey each roughly matches, and which question to ask about your visitor.
+
+<StoryCircle />
+
+<details>
+<summary>Check yourself: which step of the circle is the most “expensive” for the hero?</summary>
+
+The sixth, “take”: having got what they wanted, the hero pays for it. Without that step a story reads like an advertisement in which everything comes free.
+
+</details>
+
+## When the circle helps
+
+The circle is especially good in two cases.
+
+- **When you need to sketch a client’s story fast.** Eight lines take an hour. Twelve steps are heavier.
+- **When you need to find a hole.** If you can’t say what your visitor wants (step 2) or what they pay (step 6), you don’t understand them yet.
+
+And an honest word about the sixth step: advertising has a particular weakness for skipping it. “Simple and effortless” convinces nobody, because everything you find costs something. If you write that a client has to spend time or make a decision, people believe you more.
+
+## What the hero’s journey is criticized for
+
+The pattern is so widespread that it is worth knowing what researchers think of it. We retell objections listed in the encyclopedia articles linked at the end.
+
+**Picking the examples.** Folklorists, the scholars who study oral traditions, noted that Campbell took the stories that fit his pattern and passed over those that didn’t. Among the critics are the folklorists Alan Dundes and Barre Toelken. For us the conclusion is this: the pattern describes many stories, but not “all” of them and not “necessarily”.
+
+**One culture posing as all.** The myths of different peoples are merged into one pattern, and what mattered to each people is lost: context, meaning, ritual.
+
+**Male experience.** Leaving, a duel, a victory, coming home with a trophy describe only one kind of path. In 1990 the American psychotherapist Maureen Murdock proposed other steps in her book *The Heroine’s Journey*, where inner change and the restoring of wholeness count as much as outer victories. Other versions followed, such as Valerie Frankel’s. Note that these are additions and objections, not a final answer.
+
+**The carrier bag.** The writer Ursula K. Le Guin, in her essay “The Carrier Bag Theory of Fiction” (1986, collected in *Dancing at the Edge of the World*), reminds us that the first tool of humankind was probably not a spear but a container for what was gathered: a basket, a bag. A story, too, can be a bag in which people, things and events are carried and shown in relation to each other, not only the hero’s arrow flying to a victory over an enemy. Le Guin objects to the habit of counting only the tale of a duel as the “real” story.
+
+**Sameness.** In practice, the problem that matters most for a site is a different one: if every company tells how its founder met a problem, found a solution and now “helps thousands”, the reader recognizes the template before they finish the first line. A template is good for checking, but bad as a form.
+
+<details>
+<summary>Check yourself: what does Le Guin offer in place of the story-as-arrow?</summary>
+
+The story as a bag: a tale that gathers people, things and events into a whole, with no main duel.
+
+</details>
+
+## Shapes with no peak, and Vonnegut
+
+The novelist Kurt Vonnegut once proposed, half joking, that stories have shapes you can draw. Put time on one axis and the hero’s fortune, from ill to good, on the other, and a story becomes a line. Some lines are simple. In **“Man in a Hole”** someone gets into trouble, gets out, and ends up better off than they started. In **“Boy Meets Girl”** a person finds something wonderful, loses it, and gets it back. He also pointed out that life itself is hard to read this way, because we often can’t tell good news from bad, and that a story with a clear line is a comfort. His lecture is in the videos below.
+
+For a site this has one practical use. A case study is almost always a Man in a Hole: a client in trouble, a way out, and a better place than before. Draw that line before you write it, and check that the dip is real. A case study without a dip is a flat line, and nobody reads it.
+
+<details>
+<summary>Check yourself: what is a “Man in a Hole” story?</summary>
+
+Someone falls into trouble, gets out, and finishes better off than they began. Most case studies have this shape.
+
+</details>
+
+## What to do with all this
+
+Three simple rules.
+
+1. **Use a pattern as a set of questions.** “What does my client want? What stands in the way? What do they pay? What changed?” These questions help you understand the client.
+2. **Check with facts.** Every step should rest on something real: a case, a number, a document. A pattern doesn’t replace material.
+3. **Choose the shape by the material.** You have one vivid case with a turn: take the pyramid or the hero’s journey. You have a calm service with no drama and many different people: think of the “bag” form, or of the Japanese form with no conflict that the next lesson covers.
+
+<details>
+<summary>Check yourself: how do you use a pattern without ending up with a story like everyone else’s?</summary>
+
+As a set of questions for your own material, not as a mold to pour facts into. And check each step against a real case or a number.
+
+</details>
+
+## Practice
+
+Walk the circle for the hero from your brief.
+
+- Write steps 1 and 2 without “we”, “our” or “us”.
+- Your service enters in steps 3 to 6. Name it the way the brief does.
+- Step 8 is the change in the hero’s life, not a call to action.
+- At the end, say in one sentence where the pattern doesn’t fit your project. This isn’t a box-ticking exercise: answers like these are what later point to the right shape.
+
+## What patterns leave out
+
+All the patterns in this lesson were invented by people who wanted to explain how stories work, often after the stories were written. If your story works well without a pattern, check it against one, but don’t break it.

@@ -7,16 +7,81 @@
 <script lang="ts">
 	import './shared.css';
 
-	const steps = [
-		{ n: 'Ты', says: 'Герой в своей зоне комфорта.', vogler: 'Обычный мир', ask: 'Кто этот человек и как выглядит его обычный день?' },
-		{ n: 'Нужда', says: 'Ему чего-то хочется или не хватает.', vogler: 'Зов, отказ', ask: 'Чего он хочет, чего ему не хватает?' },
-		{ n: 'Уход', says: 'Он входит в незнакомую ситуацию.', vogler: 'Наставник, порог', ask: 'С чего он начинает и с кем встречается?' },
-		{ n: 'Поиск', says: 'Он приспосабливается, учится, ищет.', vogler: 'Испытания, союзники', ask: 'Что ему приходится освоить?' },
-		{ n: 'Находка', says: 'Он получает то, чего хотел.', vogler: 'Главное испытание, награда', ask: 'Что он получил?' },
-		{ n: 'Цена', says: 'Находка обходится дорого.', vogler: 'Воскрешение (частично)', ask: 'От чего пришлось отказаться, что потерять, во что вложиться?' },
-		{ n: 'Возвращение', says: 'Он возвращается туда, откуда начал.', vogler: 'Дорога назад', ask: 'Куда он возвращается?' },
-		{ n: 'Перемена', says: 'Он вернулся другим.', vogler: 'Возвращение с эликсиром', ask: 'Чем он теперь отличается?' }
-	];
+	import { pick } from '#lib/i18n/index.ts';
+
+	const W = pick({
+		ru: {
+			steps: [
+				{ n: 'Ты', says: 'Герой в своей зоне комфорта.', vogler: 'Обычный мир', ask: 'Кто этот человек и как выглядит его обычный день?' },
+				{ n: 'Нужда', says: 'Ему чего-то хочется или не хватает.', vogler: 'Зов, отказ', ask: 'Чего он хочет, чего ему не хватает?' },
+				{ n: 'Уход', says: 'Он входит в незнакомую ситуацию.', vogler: 'Наставник, порог', ask: 'С чего он начинает и с кем встречается?' },
+				{ n: 'Поиск', says: 'Он приспосабливается, учится, ищет.', vogler: 'Испытания, союзники', ask: 'Что ему приходится освоить?' },
+				{ n: 'Находка', says: 'Он получает то, чего хотел.', vogler: 'Главное испытание, награда', ask: 'Что он получил?' },
+				{ n: 'Цена', says: 'Находка обходится дорого.', vogler: 'Воскрешение (частично)', ask: 'От чего пришлось отказаться, что потерять, во что вложиться?' },
+				{ n: 'Возвращение', says: 'Он возвращается туда, откуда начал.', vogler: 'Дорога назад', ask: 'Куда он возвращается?' },
+				{ n: 'Перемена', says: 'Он вернулся другим.', vogler: 'Возвращение с эликсиром', ask: 'Чем он теперь отличается?' }
+			],
+			caption: 'Круг истории и другие формы',
+			group: 'Вид схемы',
+			circle: 'Круг Хармона',
+			shapes: 'Три формы',
+			ring: 'Восемь шагов круга',
+			known: 'привычное',
+			unknown: 'неизвестное',
+			stepLabel: (k: number, n: string) => `Шаг ${k}: ${n}`,
+			vo: 'У Воглера этому примерно соответствует: ',
+			ask: 'Вопрос про вашего посетителя: ',
+			back: 'Назад',
+			next: 'Дальше',
+			circleNote: '{W.circleNote}',
+			lineAlt: 'Линия, поднимающаяся к вершине и спадающая',
+			circleAlt: 'Замкнутый круг',
+			bagAlt: 'Мешок с несколькими предметами',
+			line: 'Линия к вершине.',
+			lineText: ' Пирамида Фрейтага, три акта: конфликт растёт и разрешается.',
+			circ: 'Круг.',
+			circText: ' Хармон, путь героя: уходим и возвращаемся другими.',
+			bag: 'Мешок.',
+			bagText: ' Так Урсула Ле Гуин называла рассказ, который собирает людей и вещи в целое, без главного поединка.',
+			shapesNote: '{W.shapesNote}'
+		},
+		en: {
+			steps: [
+				{ n: 'You', says: 'The hero in their comfort zone.', vogler: 'Ordinary world', ask: 'Who is this person, and what does an ordinary day look like for them?' },
+				{ n: 'Need', says: 'They want something, or something is missing.', vogler: 'Call, refusal', ask: 'What do they want? What are they missing?' },
+				{ n: 'Go', says: 'They enter an unfamiliar situation.', vogler: 'Mentor, threshold', ask: 'Where do they start, and whom do they meet?' },
+				{ n: 'Search', says: 'They adapt, learn, look around.', vogler: 'Tests, allies', ask: 'What do they have to learn?' },
+				{ n: 'Find', says: 'They get what they wanted.', vogler: 'The ordeal, reward', ask: 'What did they get?' },
+				{ n: 'Take', says: 'Getting it costs them dearly.', vogler: 'Resurrection (in part)', ask: 'What did they have to give up, lose, or invest?' },
+				{ n: 'Return', says: 'They go back to where they began.', vogler: 'The road back', ask: 'Where do they go back to?' },
+				{ n: 'Change', says: 'They are back, and changed.', vogler: 'Return with the elixir', ask: 'How are they different now?' }
+			],
+			caption: 'The story circle and other shapes',
+			group: 'View of the diagram',
+			circle: 'Harmon’s circle',
+			shapes: 'Three shapes',
+			ring: 'The eight steps of the circle',
+			known: 'the familiar',
+			unknown: 'the unknown',
+			stepLabel: (k: number, n: string) => `Step ${k}: ${n}`,
+			vo: 'In Vogler’s journey this roughly matches: ',
+			ask: 'A question about your visitor: ',
+			back: 'Back',
+			next: 'Next',
+			circleNote: 'Above the line is the familiar, below it the unknown. Steps 3 and 7 are the crossings: going down, and coming back up.',
+			lineAlt: 'A line rising to a peak and falling',
+			circleAlt: 'A closed circle',
+			bagAlt: 'A bag with several objects in it',
+			line: 'A line to a peak.',
+			lineText: ' Freytag’s pyramid, the three acts: conflict rises and is resolved.',
+			circ: 'A circle.',
+			circText: ' Harmon, the hero’s journey: we leave and come back changed.',
+			bag: 'A bag.',
+			bagText: ' Ursula K. Le Guin’s name for a story that gathers people and things into a whole, with no central duel.',
+			shapesNote: 'This is not a contest between shapes. Any of the three often suits a project’s story: look at what your material really has.'
+		}
+	});
+	const steps = W.steps;
 	let i = $state(0);
 
 	type Shape = 'circle' | 'shapes';
@@ -33,25 +98,25 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Круг истории и другие формы</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Вид схемы">
-		<button type="button" aria-pressed={view === 'circle'} onclick={() => (view = 'circle')}>Круг Хармона</button>
-		<button type="button" aria-pressed={view === 'shapes'} onclick={() => (view = 'shapes')}>Три формы</button>
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.group}>
+		<button type="button" aria-pressed={view === 'circle'} onclick={() => (view = 'circle')}>{W.circle}</button>
+		<button type="button" aria-pressed={view === 'shapes'} onclick={() => (view = 'shapes')}>{W.shapes}</button>
 	</div>
 
 	{#if view === 'circle'}
 		<div class="wrap">
-			<svg viewBox="0 0 260 240" role="group" aria-label="Восемь шагов круга">
+			<svg viewBox="0 0 260 240" role="group" aria-label={W.ring}>
 				<circle {cx} {cy} r={R} class="ring" fill="none" />
 				<line x1={cx - R - 8} y1={cy} x2={cx + R + 8} y2={cy} class="line" />
-				<text x={cx} y={cy - 8} text-anchor="middle" font-size="11">привычное</text>
-				<text x={cx} y={cy + 18} text-anchor="middle" font-size="11">неизвестное</text>
+				<text x={cx} y={cy - 8} text-anchor="middle" font-size="11">{W.known}</text>
+				<text x={cx} y={cy + 18} text-anchor="middle" font-size="11">{W.unknown}</text>
 				{#each steps as st, k (st.n)}
 					{@const p = pos(k)}
 					<g
 						role="button"
 						tabindex="0"
-						aria-label="Шаг {k + 1}: {st.n}"
+						aria-label={W.stepLabel(k + 1, st.n)}
 						aria-pressed={k === i}
 						onclick={() => (i = k)}
 						onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && ((i = k), e.preventDefault())}
@@ -63,40 +128,40 @@
 			</svg>
 			<div aria-live="polite">
 				<p class="dg-out"><strong>{i + 1}. {s.n}.</strong> {s.says}</p>
-				<p class="dg-out">У Воглера этому примерно соответствует: {s.vogler}.</p>
-				<p class="dg-out">Вопрос про вашего посетителя: {s.ask}</p>
+				<p class="dg-out">{W.vo}{s.vogler}.</p>
+				<p class="dg-out">{W.ask}{s.ask}</p>
 				<div class="dg-ctl">
-					<button type="button" onclick={() => (i = (i + 7) % 8)}>Назад</button>
-					<button type="button" onclick={() => (i = (i + 1) % 8)}>Дальше</button>
+					<button type="button" onclick={() => (i = (i + 7) % 8)}>{W.back}</button>
+					<button type="button" onclick={() => (i = (i + 1) % 8)}>{W.next}</button>
 				</div>
 			</div>
 		</div>
-		<p class="dg-out">Круг выше линии это знакомое, ниже линии неизвестное. Шаги 3 и 7 это пересечения: уход вниз и возвращение вверх.</p>
+		<p class="dg-out">{W.circleNote}</p>
 	{:else}
 		<div class="shapes">
 			<div class="dg-box">
-				<svg viewBox="0 0 120 70" role="img" aria-label="Линия, поднимающаяся к вершине и спадающая">
+				<svg viewBox="0 0 120 70" role="img" aria-label={W.lineAlt}>
 					<polyline points="5,60 45,35 70,8 95,40 115,60" fill="none" class="curve" />
 				</svg>
-				<p><strong>Линия к вершине.</strong> Пирамида Фрейтага, три акта: конфликт растёт и разрешается.</p>
+				<p><strong>{W.line}</strong>{W.lineText}</p>
 			</div>
 			<div class="dg-box">
-				<svg viewBox="0 0 120 70" role="img" aria-label="Замкнутый круг">
+				<svg viewBox="0 0 120 70" role="img" aria-label={W.circleAlt}>
 					<circle cx="60" cy="35" r="26" fill="none" class="curve" />
 				</svg>
-				<p><strong>Круг.</strong> Хармон, путь героя: уходим и возвращаемся другими.</p>
+				<p><strong>{W.circ}</strong>{W.circText}</p>
 			</div>
 			<div class="dg-box">
-				<svg viewBox="0 0 120 70" role="img" aria-label="Мешок с несколькими предметами">
+				<svg viewBox="0 0 120 70" role="img" aria-label={W.bagAlt}>
 					<path d="M35,25 Q60,5 85,25 L95,60 L25,60 Z" fill="none" class="curve" />
 					<circle cx="50" cy="45" r="5" class="item" />
 					<circle cx="68" cy="50" r="5" class="item" />
 					<circle cx="60" cy="38" r="4" class="item" />
 				</svg>
-				<p><strong>Мешок.</strong> Так Урсула Ле Гуин называла рассказ, который собирает людей и вещи в целое, без главного поединка.</p>
+				<p><strong>{W.bag}</strong>{W.bagText}</p>
 			</div>
 		</div>
-		<p class="dg-out">Это не соревнование форм. Для истории проекта часто подойдёт любая из трёх: смотрите, что в вашем материале есть на самом деле.</p>
+		<p class="dg-out">{W.shapesNote}</p>
 	{/if}
 </figure>
 

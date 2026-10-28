@@ -26,6 +26,9 @@ const NAMES = new Set([
 // Added by part 16: names of AI tools that a heading carries.
 for (const n of ['Framer']) NAMES.add(n);
 
+// Added by part 12 (storytelling): the storytellers and schools a heading names.
+for (const n of ['Freytag’s', 'Duarte’s', 'Aristotle', 'Aristotle’s', 'Harmon’s', 'Vonnegut', 'Vonnegut’s']) NAMES.add(n);
+
 function body(file: string): string {
 	// the module and instance scripts open the file, each closed by a `</script>` at a line's start
 	let prose = readFileSync(file, 'utf8').trimStart();
