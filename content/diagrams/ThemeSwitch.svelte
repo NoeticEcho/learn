@@ -8,6 +8,63 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			vars: 'Переменные: один блок значений, много мест применения',
+			hue: 'Оттенок',
+			radius: 'Скругление',
+			space: 'Отступ',
+			dark: 'тёмная тема',
+			cardTitle: 'Карточка услуги',
+			cardText: 'Цвет, отступ и скругление берутся из переменных через',
+			book: 'Записаться',
+			out1: 'Чтобы сделать тему тёмной, мы не переписали ни одно правило карточки, а только поменяли значения переменных в одном месте.',
+			layers: 'Слои: что сильнее',
+			selector: 'Селектор',
+			specificity: 'Специфичность',
+			layer: 'Слой',
+			layerOf: (sel: string) => `Слой правила ${sel}`,
+			none: 'вне слоёв',
+			earliest: 'base (самый ранний)',
+			latest: 'utilities (самый поздний)',
+			colours: { red: 'красный', blue: 'синий', green: 'зелёный' } as Record<string, string>,
+			linkIs: 'Ссылка будет цвета',
+			won: 'победило правило',
+			becauseNone: ', потому что оно вне слоёв, а такое правило сильнее любого слоя',
+			becauseShared: ', потому что его слой общий со всеми, и решила специфичность',
+			becauseLater: ', потому что его слой поздний, и слой побеждает независимо от специфичности',
+			declared: 'Порядок слоёв объявлен один раз:'
+		},
+		en: {
+			vars: 'Variables: one block of values, many places that use it',
+			hue: 'Hue',
+			radius: 'Corner radius',
+			space: 'Spacing',
+			dark: 'dark theme',
+			cardTitle: 'Service card',
+			cardText: 'Color, spacing and corner radius all come from variables through',
+			book: 'Book a call',
+			out1: 'To make the theme dark we didn’t rewrite a single card rule. We only changed the variables’ values, in one place.',
+			layers: 'Layers: what wins',
+			selector: 'Selector',
+			specificity: 'Specificity',
+			layer: 'Layer',
+			layerOf: (sel: string) => `Layer of the rule ${sel}`,
+			none: 'no layer',
+			earliest: 'base (earliest)',
+			latest: 'utilities (latest)',
+			colours: { red: 'red', blue: 'blue', green: 'green' } as Record<string, string>,
+			linkIs: 'The link will be',
+			won: 'the winner is',
+			becauseNone: ', because it is outside every layer, and an unlayered rule beats any layer',
+			becauseShared: ', because every rule shares its layer, so specificity decided',
+			becauseLater: ', because its layer is later, and a later layer wins whatever the specificity',
+			declared: 'The layer order is declared once:'
+		}
+	});
 
 	let hue = $state(210);
 	let radius = $state(8);
@@ -23,51 +80,51 @@
 	type L = 'none' | 'base' | 'components' | 'utilities';
 	const order: L[] = ['base', 'components', 'utilities'];
 	const rules = $state<{ sel: string; spec: number; colour: string; layer: L }[]>([
-		{ sel: '#cta', spec: 100, colour: 'красный', layer: 'base' },
-		{ sel: '.button', spec: 10, colour: 'синий', layer: 'utilities' },
-		{ sel: 'a', spec: 1, colour: 'зелёный', layer: 'none' }
+		{ sel: '#cta', spec: 100, colour: 'red', layer: 'base' },
+		{ sel: '.button', spec: 10, colour: 'blue', layer: 'utilities' },
+		{ sel: 'a', spec: 1, colour: 'green', layer: 'none' }
 	]);
-	const hex: Record<string, string> = { красный: '#b83226', синий: '#1f5fae', зелёный: '#2a7448' };
+	const hex: Record<string, string> = { red: '#b83226', blue: '#1f5fae', green: '#2a7448' };
 	const rank = (l: L) => (l === 'none' ? 99 : order.indexOf(l));
 	const win = $derived(rules.reduce((w, r) => (rank(r.layer) > rank(w.layer) || (rank(r.layer) === rank(w.layer) && r.spec > w.spec) ? r : w)));
 </script>
 
 <figure class="dg">
-	<figcaption>Переменные: один блок значений, много мест применения</figcaption>
+	<figcaption>{W.vars}</figcaption>
 	<div class="ctl">
-		<label>Оттенок: <strong>{hue}°</strong><input type="range" min="0" max="360" bind:value={hue} aria-label="Оттенок" /></label>
-		<label>Скругление: <strong>{radius}px</strong><input type="range" min="0" max="24" bind:value={radius} aria-label="Скругление" /></label>
-		<label>Отступ: <strong>{space}rem</strong><input type="range" min="0.5" max="2" step="0.25" bind:value={space} aria-label="Отступ" /></label>
-		<label class="chk"><input type="checkbox" bind:checked={dark} /> тёмная тема</label>
+		<label>{W.hue}: <strong>{hue}°</strong><input type="range" min="0" max="360" bind:value={hue} aria-label={W.hue} /></label>
+		<label>{W.radius}: <strong>{radius}px</strong><input type="range" min="0" max="24" bind:value={radius} aria-label={W.radius} /></label>
+		<label>{W.space}: <strong>{space}rem</strong><input type="range" min="0.5" max="2" step="0.25" bind:value={space} aria-label={W.space} /></label>
+		<label class="chk"><input type="checkbox" bind:checked={dark} /> {W.dark}</label>
 	</div>
 	<div class="cols">
 		<pre class="dg-box dg-mono">{code}</pre>
 		<div class="preview" style="{vars} --radius: {radius}px; --space: {space}rem">
 			<div class="card">
-				<div class="dh">Карточка услуги</div>
-				<p>Цвет, отступ и скругление берутся из переменных через <code>var()</code>.</p>
-				<a href="#top" class="btn" onclick={(e) => e.preventDefault()}>Записаться</a>
+				<div class="dh">{W.cardTitle}</div>
+				<p>{W.cardText} <code>var()</code>.</p>
+				<a href="#top" class="btn" onclick={(e) => e.preventDefault()}>{W.book}</a>
 			</div>
 		</div>
 	</div>
-	<p class="dg-out">Чтобы сделать тему тёмной, мы не переписали ни одно правило карточки, а только поменяли значения переменных в одном месте.</p>
+	<p class="dg-out">{W.out1}</p>
 
-	<div class="dh sub">Слои: что сильнее</div>
+	<div class="dh sub">{W.layers}</div>
 	<div class="wrap">
 		<table>
-			<thead><tr><th scope="col">Селектор</th><th scope="col">Специфичность</th><th scope="col">color</th><th scope="col">Слой</th></tr></thead>
+			<thead><tr><th scope="col">{W.selector}</th><th scope="col">{W.specificity}</th><th scope="col">color</th><th scope="col">{W.layer}</th></tr></thead>
 			<tbody>
 				{#each rules as r, i (r.sel)}
 					<tr class:win={win === r}>
 						<th scope="row" class="dg-mono">{r.sel}</th>
 						<td class="dg-mono">{r.spec >= 100 ? '(1, 0, 0)' : r.spec >= 10 ? '(0, 1, 0)' : '(0, 0, 1)'}</td>
-						<td>{r.colour}</td>
+						<td>{W.colours[r.colour]}</td>
 						<td>
-							<select aria-label="Слой правила {r.sel}" bind:value={rules[i].layer}>
-								<option value="none">вне слоёв</option>
-								<option value="base">base (самый ранний)</option>
+							<select aria-label={W.layerOf(r.sel)} bind:value={rules[i].layer}>
+								<option value="none">{W.none}</option>
+								<option value="base">{W.earliest}</option>
 								<option value="components">components</option>
-								<option value="utilities">utilities (самый поздний)</option>
+								<option value="utilities">{W.latest}</option>
 							</select>
 						</td>
 					</tr>
@@ -76,8 +133,8 @@
 		</table>
 	</div>
 	<p class="dg-out" aria-live="polite">
-		Ссылка будет цвета <strong style="color: {hex[win.colour]}">{win.colour}</strong>: победило правило <span class="dg-mono">{win.sel}</span>{win.layer === 'none' ? ', потому что оно вне слоёв, а такое правило сильнее любого слоя' : `, потому что его слой ${rules.every((r) => r === win || rank(r.layer) === rank(win.layer)) ? 'общий со всеми, и решила специфичность' : 'поздний, и слой побеждает независимо от специфичности'}`}.
-		Порядок слоёв объявлен один раз: <span class="dg-mono">@layer base, components, utilities;</span>
+		{W.linkIs} <strong style="color: {hex[win.colour]}">{W.colours[win.colour]}</strong>: {W.won} <span class="dg-mono">{win.sel}</span>{win.layer === 'none' ? W.becauseNone : rules.every((r) => r === win || rank(r.layer) === rank(win.layer)) ? W.becauseShared : W.becauseLater}.
+		{W.declared} <span class="dg-mono">@layer base, components, utilities;</span>
 	</p>
 </figure>
 

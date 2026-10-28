@@ -8,8 +8,87 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let text = $state('Пятнадцать лет измеряю землю и объясняю суду, где на самом деле проходит граница. Сначала инженер, потом юрист: поэтому вижу спор и в координатах, и в законе. Хорошая строка читается без усилий: глаз не теряет начало следующей.');
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			sample:
+				'Пятнадцать лет измеряю землю и объясняю суду, где на самом деле проходит граница. Сначала инженер, потом юрист: поэтому вижу спор и в координатах, и в законе. Хорошая строка читается без усилий: глаз не теряет начало следующей.',
+			tooShort: 'коротковата: глаз слишком часто прыгает на следующую строку',
+			tooLong: 'слишком длинная: трудно найти начало следующей строки',
+			comfortable: 'комфортная: от 45 до 80 знаков',
+			pass: 'проходит',
+			fail: 'не проходит',
+			caption: 'Размер, интерлиньяж и ширина строки',
+			size: 'Размер:',
+			sizeLabel: 'Размер шрифта',
+			leading: 'Интерлиньяж:',
+			leadingLabel: 'Межстрочный интервал',
+			measure: 'Ширина строки:',
+			measureLabel: 'Ширина строки в знаках',
+			font: 'Шрифт',
+			serif: 'С засечками (Georgia)',
+			sans: 'Без засечек (system-ui)',
+			line: 'Строка',
+			chars: 'знаков:',
+			leadingTight: 'тесновато, строки слипаются',
+			leadingLoose: 'слишком свободно, текст рассыпается',
+			leadingGood: 'хорошо: примерно от 1,4 до 1,7',
+			contrastHead: 'Контраст текста и фона',
+			fgColour: 'Цвет текста',
+			bgColour: 'Цвет фона',
+			pairsLabel: 'Примеры пар',
+			chip: 'Аа',
+			on: 'на',
+			demo: 'Так выглядит обычный текст этой пары цветов, а ниже крупный.',
+			big: 'Крупный текст',
+			contrast: 'Контраст:',
+			to1: 'к 1',
+			normal: 'Обычный текст:',
+			large: 'Крупный текст (от 24px, или от 19px жирным):',
+			hex: 'Цвет пишите шестью знаками, например #4a5560.'
+		},
+		en: {
+			sample:
+				'For fifteen years I have measured land and explained to courts where a boundary really runs. A surveyor first and a lawyer second, I see a dispute both in coordinates and in law. A good line reads without effort: the eye never loses the start of the next one.',
+			tooShort: 'a little short, so the eye jumps to the next line too often',
+			tooLong: 'too long, so it is hard to find the start of the next line',
+			comfortable: 'comfortable, between 45 and 80 characters',
+			pass: 'passes',
+			fail: 'fails',
+			caption: 'Size, line height and line length',
+			size: 'Size:',
+			sizeLabel: 'Font size',
+			leading: 'Line height:',
+			leadingLabel: 'Line height',
+			measure: 'Line length:',
+			measureLabel: 'Line length in characters',
+			font: 'Typeface',
+			serif: 'Serif (Georgia)',
+			sans: 'Sans serif (system-ui)',
+			line: 'A line of',
+			chars: 'characters:',
+			leadingTight: 'a little tight, the lines run together',
+			leadingLoose: 'too loose, the text falls apart',
+			leadingGood: 'good, roughly 1.4 to 1.7',
+			contrastHead: 'Contrast of text and background',
+			fgColour: 'Text color',
+			bgColour: 'Background color',
+			pairsLabel: 'Example pairs',
+			chip: 'Aa',
+			on: 'on',
+			demo: 'This is how ordinary text looks in this pair of colors, and below it large text.',
+			big: 'Large text',
+			contrast: 'Contrast:',
+			to1: 'to 1',
+			normal: 'Normal text:',
+			large: 'Large text (from 24px, or from 19px bold):',
+			hex: 'Write the color with six digits, for example #4a5560.'
+		}
+	});
+
+	let text = $state(W.sample);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -24,7 +103,7 @@
 	let measure = $state(65);
 	let family = $state<'serif' | 'sans'>('serif');
 	const fonts = { serif: 'Georgia, "Times New Roman", serif', sans: 'system-ui, -apple-system, "Segoe UI", sans-serif' };
-	const verdict = $derived(measure < 45 ? 'коротковата: глаз слишком часто прыгает на следующую строку' : measure > 80 ? 'слишком длинная: трудно найти начало следующей строки' : 'комфортная: от 45 до 80 знаков');
+	const verdict = $derived(measure < 45 ? W.tooShort : measure > 80 ? W.tooLong : W.comfortable);
 
 	let fg = $state('#4a5560');
 	let bg = $state('#ffffff');
@@ -45,7 +124,7 @@
 		const [hi, lo] = a > b ? [a, b] : [b, a];
 		return (hi + 0.05) / (lo + 0.05);
 	});
-	const ok = (min: number) => (ratio !== null && ratio >= min ? 'проходит' : 'не проходит');
+	const ok = (min: number) => (ratio !== null && ratio >= min ? W.pass : W.fail);
 	const pairs = [
 		['#4a5560', '#ffffff'],
 		['#8a8f94', '#ffffff'],
@@ -56,39 +135,39 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Размер, интерлиньяж и ширина строки</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="ctl">
-		<label>Размер: <strong>{size}px</strong><input type="range" min="14" max="26" bind:value={size} aria-label="Размер шрифта" /></label>
-		<label>Интерлиньяж: <strong>{leading.toFixed(2)}</strong><input type="range" min="1" max="2" step="0.05" bind:value={leading} aria-label="Межстрочный интервал" /></label>
-		<label>Ширина строки: <strong>{measure}ch</strong><input type="range" min="25" max="110" bind:value={measure} aria-label="Ширина строки в знаках" /></label>
+		<label>{W.size} <strong>{size}px</strong><input type="range" min="14" max="26" bind:value={size} aria-label={W.sizeLabel} /></label>
+		<label>{W.leading} <strong>{leading.toFixed(2)}</strong><input type="range" min="1" max="2" step="0.05" bind:value={leading} aria-label={W.leadingLabel} /></label>
+		<label>{W.measure} <strong>{measure}ch</strong><input type="range" min="25" max="110" bind:value={measure} aria-label={W.measureLabel} /></label>
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Шрифт">
-		<button type="button" aria-pressed={family === 'serif'} onclick={() => (family = 'serif')}>С засечками (Georgia)</button>
-		<button type="button" aria-pressed={family === 'sans'} onclick={() => (family = 'sans')}>Без засечек (system-ui)</button>
+	<div class="dg-ctl" role="group" aria-label={W.font}>
+		<button type="button" aria-pressed={family === 'serif'} onclick={() => (family = 'serif')}>{W.serif}</button>
+		<button type="button" aria-pressed={family === 'sans'} onclick={() => (family = 'sans')}>{W.sans}</button>
 	</div>
 	<div class="scroll">
 		<p class="sample" style="font-family: {fonts[family]}; font-size: {size}px; line-height: {leading}; max-width: {measure}ch">{text}</p>
 	</div>
-	<p class="dg-out" aria-live="polite">Строка {measure} знаков: <strong>{verdict}</strong>. Интерлиньяж: {leading < 1.3 ? 'тесновато, строки слипаются' : leading > 1.8 ? 'слишком свободно, текст рассыпается' : 'хорошо: примерно от 1,4 до 1,7'}.</p>
+	<p class="dg-out" aria-live="polite">{W.line} {measure} {W.chars} <strong>{verdict}</strong>. {W.leading} {leading < 1.3 ? W.leadingTight : leading > 1.8 ? W.leadingLoose : W.leadingGood}.</p>
 
-	<div class="dh">Контраст текста и фона</div>
+	<div class="dh">{W.contrastHead}</div>
 	<div class="ctl">
-		<label>Цвет текста <input type="text" bind:value={fg} spellcheck="false" aria-label="Цвет текста" size="9" /></label>
-		<label>Цвет фона <input type="text" bind:value={bg} spellcheck="false" aria-label="Цвет фона" size="9" /></label>
+		<label>{W.fgColour} <input type="text" bind:value={fg} spellcheck="false" aria-label={W.fgColour} size="9" /></label>
+		<label>{W.bgColour} <input type="text" bind:value={bg} spellcheck="false" aria-label={W.bgColour} size="9" /></label>
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Примеры пар">
+	<div class="dg-ctl" role="group" aria-label={W.pairsLabel}>
 		{#each pairs as [a, b] (a + b)}
-			<button type="button" onclick={() => ((fg = a), (bg = b))}><span class="chip" style="color: {a}; background: {b}">Аа</span> {a} на {b}</button>
+			<button type="button" onclick={() => ((fg = a), (bg = b))}><span class="chip" style="color: {a}; background: {b}">{W.chip}</span> {a} {W.on} {b}</button>
 		{/each}
 	</div>
-	<p class="demo" style="color: {fg}; background: {bg}">Так выглядит обычный текст этой пары цветов, а ниже крупный.</p>
-	<p class="demo big" style="color: {fg}; background: {bg}">Крупный текст</p>
+	<p class="demo" style="color: {fg}; background: {bg}">{W.demo}</p>
+	<p class="demo big" style="color: {fg}; background: {bg}">{W.big}</p>
 	{#if ratio !== null}
 		<p class="dg-out" aria-live="polite">
-			Контраст: <strong>{ratio.toFixed(2)} к 1</strong>. Обычный текст: AA {ok(4.5)}, AAA {ok(7)}. Крупный текст (от 24px, или от 19px жирным): AA {ok(3)}, AAA {ok(4.5)}.
+			{W.contrast} <strong>{ratio.toFixed(2)} {W.to1}</strong>. {W.normal} AA {ok(4.5)}, AAA {ok(7)}. {W.large} AA {ok(3)}, AAA {ok(4.5)}.
 		</p>
 	{:else}
-		<p class="dg-out" role="status">Цвет пишите шестью знаками, например #4a5560.</p>
+		<p class="dg-out" role="status">{W.hex}</p>
 	{/if}
 </figure>
 

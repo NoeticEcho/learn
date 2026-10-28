@@ -1,0 +1,611 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/02-box-model-floats.svx. */
+	export const metadata = {
+		id: '03-css/02-box-model-floats',
+		part: 3,
+		order: 2,
+		title: 'The box model, units and float layout',
+		definition: 'The box model is how CSS treats every element as a box: the content, inner space (padding), a border and outer space (margin).',
+		summary:
+			'Every element has content, inner space, a border and outer space, and half the oddities of layout come from them. Afterwards you’ll be able to work out the size of a block, choose between px, rem and percentages, and read an old float layout.',
+		minutes: 30,
+		teaches: ['css-box-model', 'css-units', 'css-floats-legacy'],
+		requires: ['css-cascade'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'editor', label: 'width: 200px', caption: 'Set 200, got 250', say: 'I wrote a width of 200, and the block came out wider. Where did the extra pixels go?' },
+				{ mood: 'explain', side: 'right', caption: 'Boxes inside boxes', say: 'Content, padding, border, margin. By default width measures the content only. Padding and border are added on top.' },
+				{ mood: 'cheer', prop: 'editor', label: 'box-sizing: border-box', say: 'With border-box, width measures the whole block. Padding of 20 in a block 300 wide takes 40 and leaves 260 for text.' }
+			]
+		},
+		practice: {
+			id: 'float-columns',
+			title: 'Two columns with float, like 2005',
+			task: 'Put the main content and the contact details side by side. 1) Give every block box-sizing: border-box (on html, with the rest inheriting it). 2) Limit the width of .layout with max-width and center it with automatic side margins, margin: 0 auto. 3) Make main the left column (float: left, with a width in percent) and aside the right one (float: right) with some inner space. 4) Give the footer clear: both, so that it doesn’t slide in beside the columns. Write the sizes of spaces and widths in relative units: rem and percentages.',
+			era: 2,
+			continues: 'separate-css',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What is on offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: how the site looks.
+   HTML says what is what, and CSS says how it looks.
+   The palette here suits a calm project; yours will be your own. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What is on offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: how the site looks.
+   HTML says what is what, and CSS says how it looks.
+   The palette here suits a calm project; yours will be your own. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+
+/* Layout: two columns made with float, the way it was done in 2005. */
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.layout {
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main {
+  float: left;
+  width: 68%;
+}
+
+aside {
+  float: right;
+  width: 28%;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+footer {
+  clear: both;
+}
+`
+			},
+			checks: [
+				{ id: 'border-box', kind: 'style', selector: 'html', prop: 'box-sizing', equals: 'border-box' },
+				{ id: 'layout-width', kind: 'style', selector: '.layout', prop: 'max-width', matches: '^(?!none$).+' },
+				{ id: 'main-float', kind: 'style', selector: 'main', prop: 'float', matches: '^(left|right)$' },
+				{ id: 'aside-float', kind: 'style', selector: 'aside', prop: 'float', matches: '^(left|right)$' },
+				{ id: 'aside-padding', kind: 'style', selector: 'aside', prop: 'padding-top', matches: '^(?!0px$|0$).+' },
+				{ id: 'footer-clear', kind: 'style', selector: 'footer', prop: 'clear', matches: '^(both|left|right)$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'A block has width: 200px; padding: 20px; border: 5px solid, and box-sizing: content-box is in force. How wide is the block on the page (not counting margins)?',
+				options: ['250px', '200px', '245px'],
+				answer: 0,
+				why: [
+					'Yes: 200 for the content, plus 20 of padding on each side (40), plus 5 of border on each side (10), makes 250.',
+					'No: 200 is the width of the content alone. The padding and border are added on top.',
+					'No: the border is 5 pixels on each side, so 10, not 5.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The same block now has box-sizing: border-box. How wide is it on the page?',
+				options: ['200px', '250px', '160px'],
+				answer: 0,
+				why: [
+					'Yes. With border-box the width you give is the whole block: the border and padding are already inside it, and the content gets 200 − 40 − 10 = 150.',
+					'No: you’d get 250 with content-box.',
+					'No: 160 is what you get by subtracting only the padding and forgetting the border.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A block with width: 100% and padding: 20px, under box-sizing: content-box, sits inside a container 600px wide. What happens?',
+				options: [
+					'The block ends up 40px wider than the container and sticks out past the edge',
+					'The block fits exactly',
+					'The browser shrinks the padding by itself'
+				],
+				answer: 0,
+				why: [
+					'Yes: 100% applies to the content, and 40 pixels of padding are added on top. This is the old trouble that border-box cures.',
+					'No: with content-box the padding is added to the width.',
+					'No: the browser never shrinks anything by itself. It does exactly what is written.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each unit to what it is measured against',
+				pairs: [
+					['px', 'a fixed pixel, which depends on nothing'],
+					['rem', 'the font size of the root element (usually 16px)'],
+					['em', 'the font size of the current element'],
+					['%', 'the size of the parent'],
+					['vw', 'the width of the browser window']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are true about float today?',
+				options: [
+					'It stays in use for wrapping text around an image',
+					'It was used to make page columns until flexbox and grid arrived',
+					'A floated element stays in the flow, and its parent wraps around it by itself',
+					'To keep a footer from sliding in beside the columns, you give it clear'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: that is what it was made for.',
+					'Yes: that is how layout was done until about 2014.',
+					'No: float takes the element out of the flow, and the parent collapses unless you use clear or a clearfix.',
+					'Yes: clear: both says “sit below every floated block”.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a rule inside <style> that makes a block with the class box 50% wide and pushes it to the left with float, and add the block itself.',
+				starter: '',
+				checks: [
+					{ id: 'box', kind: 'exists', selector: '.box' },
+					{ id: 'float', kind: 'style', selector: '.box', prop: 'float', equals: 'left' },
+					{ id: 'width', kind: 'style', selector: '.box', prop: 'width', matches: '^(50%|\\d+(\\.\\d+)?px)$' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-box',
+				front: 'What is a block made of?',
+				back: 'Content, inner space (padding), a border and outer space (margin). They nest inside one another like a set of nesting dolls.'
+			},
+			{
+				id: 'css-border-box',
+				front: 'Why use box-sizing: border-box?',
+				back: 'So that width means the whole block, padding and border included, not just the content. The block is then the size you wrote, and 100% doesn’t stick out past the edge.'
+			},
+			{
+				id: 'css-units',
+				front: 'Which unit should you use?',
+				back: 'Type and spacing in rem (they respect the reader’s settings), widths in % or ch, thin lines in px, and the height of the screen in vh, with care.'
+			},
+			{
+				id: 'css-float',
+				front: 'What are float and clear?',
+				back: 'float pushes a block to the left or right, and everything else wraps around it. clear: both puts a block below the floated ones. Columns made with float were a trick of the 2000s; today flexbox or grid makes them.'
+			}
+		],
+		sources: [
+			{ title: 'The box model (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Box_model', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Floats (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Floats', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Box model (web.dev)', url: 'https://web.dev/learn/css/box-model', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'CSS values and units (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Values_and_units', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'In Search of the Holy Grail (A List Apart, 2006)', url: 'https://alistapart.com/article/holygrail/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Holy grail (web design) (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Holy_grail_(web_design)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now your page is stretched into one column across the whole screen. Let’s put the main content and the contact details side by side, as they did in 2005.',
+			hints: [
+				'The foundation first: html { box-sizing: border-box; } and *, *::before, *::after { box-sizing: inherit; }. Then a width means the whole block.',
+				'The columns: main { float: left; width: 68%; } and aside { float: right; width: 28%; }. The two add up to less than a hundred percent, which leaves a gap.',
+				'The footer slides in beside the columns until it has footer { clear: both; }. To limit the width of the page and center it: .layout { max-width: 62.5rem; margin: 0 auto; }.'
+			],
+			mistakes: {
+				'border-box': 'html needs box-sizing: border-box; the other elements inherit it through *, *::before, *::after { box-sizing: inherit; }.',
+				'layout-width': 'The .layout block has no limit on its width. Set max-width, for example 62.5rem (that is 1000 pixels).',
+				'main-float': 'main should be a column: float: left (or right).',
+				'aside-float': 'aside should be the second column: float: right (or left).',
+				'aside-padding': 'The side column has no inner space. Set padding.',
+				'footer-clear': 'The footer needs clear: both, or it will slide in beside the columns.'
+			},
+			outro: 'The columns stand side by side, and the footer is at the bottom. You just did it the way sites were made for ten years. Now it’s clear why flexbox came as such a relief.'
+		},
+		say: { CSS: 'C S S', 'box-sizing': 'box sizing', 'border-box': 'border box', 'content-box': 'content box', clearfix: 'clear fix', rem: 'rem', em: 'em', vw: 'V W', px: 'pixels' }
+	};
+</script>
+
+<script>
+	import BoxModel from '../../diagrams/BoxModel.svelte';
+	import FloatDemo from '../../diagrams/FloatDemo.svelte';
+</script>
+
+## Every element is a box
+
+To the browser, every element on the page is a rectangular box. The box has four layers, like a set of nesting dolls, counting from the inside:
+
+1. the **content** (text, an image);
+2. **padding**: the inner space from the content to the border;
+3. **border**: the frame;
+4. **margin**: the outer space, the distance to the neighbors. It is transparent and paints nothing.
+
+All the oddities, such as “I set the width to 200 and the block came out 250”, grow from here. By default (this is called `box-sizing: content-box`) the width you write applies **only to the content**, and the padding and border are added on top. That is how it was counted from the very start, but in the 2000s it was so irritating that first Internet Explorer counted it differently (the “human” way), and then the standard admitted it too: you can choose `box-sizing: border-box`, and then the width means the whole block.
+
+Turn the sliders and switch the mode.
+
+<BoxModel />
+
+That is why almost every stylesheet starts like this:
+
+```css
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+```
+
+The asterisk `*` means “all elements”. We give the root `border-box` and ask everyone to inherit it, so any single block can still be put back the old way when needed.
+
+<details>
+<summary>Check yourself: a block has width: 300px, padding: 20px and border-box. How much width is left for the content?</summary>
+
+260 pixels: 300 minus 20 of padding on each side. There is no border in this example.
+
+</details>
+
+## Units: what is compared with what
+
+- **px**: the pixel. A fixed size that depends on nothing. Good for thin lines (a 1px border).
+- **rem**: the font size of the root element. It is 16px by default, but a person can enlarge the font in the browser’s settings, and every `rem` grows with it. That is why text sizes and spacing are written in `rem`. The site then listens to its reader.
+- **em**: the font size of the current element. Useful for spacing that should grow with the text (inside a button, say), but nested `em` values multiply, and that causes a lot of confusion. Start with `rem`.
+- **%**: a share of the parent’s size. For the width of columns.
+- **vw and vh**: a share of the width and the height of the window. Take them with care: on a phone the height of the window changes as you scroll.
+- **ch**: the width of the digit “0” in the current font. Ideal for the width of a line of text: `max-width: 65ch`.
+
+One rule worth remembering: **don’t set a font size in px on html or body**. That cancels the reader’s setting.
+
+## Float: how columns were made
+
+It began with a picture in a text: the property `float: left` pushes a block to the left edge, and the text wraps around it on the right. In the mid-2000s, when layout had only tables, which had long been considered bad manners, authors took float and made columns of it: `float: left` on the main block and `float: right` on the side one.
+
+The trick has a price. A floated block is “taken out” of the flow, and a parent that holds nothing but floated blocks collapses to zero height. The footer that comes next tries to take the space beside the columns. The cure was `clear: both` on the footer, or a clever “clearfix” on the parent. Try it on the diagram: tick and untick the boxes.
+
+<FloatDemo />
+
+The fashion had its peak too. In 2006 the article “In Search of the Holy Grail” (in A List Apart) described how to make three columns: a fluid one in the middle, fixed ones at the sides, and the main content first in the source code. It took a dozen clever rules, and the whole “holiness” was that it couldn’t be done any other way. Eight years later the same task came down to a few lines of flexbox. You’ll meet float in any old site: now you know where it comes from and why it is there.
+
+<details>
+<summary>Check yourself: why does the footer slide in beside floated columns?</summary>
+
+A floated block is taken out of the flow, and the next element behaves as if the columns weren’t there. To make the footer sit lower, give it clear: both.
+
+</details>
+
+## Practice
+
+You’re in the era of 2005. Your page is already dressed, and right now it is stretched into one column. Make two columns with float, the same way they were made then. Don’t be alarmed if the footer first ends up in the wrong place: fixing that is exactly what the `clear` property is for.
+
+The widths of the columns, in percent, should add up to less than a hundred: that leaves a gap between them. Percentages and rem are no accident in this exercise: they let the page stretch and shrink. Fixed widths in pixels are worse: on a phone such a page will stick out past the screen.
+
+## What was wrong with 2005
+
+Columns made with float held together on conventions and “hacks”: put a picture that was too wide inside a column, and the whole layout fell apart. A fixed width of 960 pixels (for screens of 1024 × 768) was considered the standard, and on a phone such sites had to be enlarged with your fingers. You’ll rebuild this site in the era of 2014, when flexbox, grid and responsive design arrive.

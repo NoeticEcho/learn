@@ -7,6 +7,41 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			caption: 'Из чего сделан блок',
+			content: 'Содержимое',
+			legendMargin: 'margin: внешний отступ, ничего не закрашивает',
+			legendBorder: 'border: рамка',
+			legendPadding: 'padding: отступ внутри рамки',
+			legendContent: 'содержимое',
+			youWrote: 'Вы написали',
+			contentBox: (w: number, p: number, b: number, outer: number, total: number) =>
+				`и это ширина только содержимого. Блок целиком: ${w} + 2×${p} (padding) + 2×${b} (border) = <strong>${outer}px</strong>, а вместе с внешними отступами занимает в строке <strong>${total}px</strong>.`,
+			borderBox: (w: number, p: number, b: number, content: number, total: number) =>
+				`и это ширина блока целиком: рамка и внутренний отступ уже в ней. Содержимому остаётся ${w} − 2×${p} − 2×${b} = <strong>${content}px</strong>, а вместе с внешними отступами блок занимает в строке <strong>${total}px</strong>.`,
+			therefore: 'Поэтому в начале любого стилевого файла пишут',
+			therefore2: ': размер блока такой, как вы написали, и расчёты не удивляют.'
+		},
+		en: {
+			caption: 'What a block is made of',
+			content: 'Content',
+			legendMargin: 'margin: the outer space, which paints nothing',
+			legendBorder: 'border: the frame',
+			legendPadding: 'padding: the space inside the frame',
+			legendContent: 'the content',
+			youWrote: 'You wrote',
+			contentBox: (w: number, p: number, b: number, outer: number, total: number) =>
+				`and that is the width of the content alone. The whole block is ${w} + 2×${p} (padding) + 2×${b} (border) = <strong>${outer}px</strong>, and with its margins it takes <strong>${total}px</strong> of the line.`,
+			borderBox: (w: number, p: number, b: number, content: number, total: number) =>
+				`and that is the width of the whole block: the border and the padding are already inside it. What is left for the content is ${w} − 2×${p} − 2×${b} = <strong>${content}px</strong>, and with its margins the block takes <strong>${total}px</strong> of the line.`,
+			therefore: 'That is why every stylesheet starts with',
+			therefore2: ': the block is the size you wrote, and the sums hold no surprises.'
+		}
+	});
 
 	let width = $state(240);
 	let padding = $state(16);
@@ -20,7 +55,7 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Из чего сделан блок</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="ctl">
 		<label>width: <strong>{width}px</strong><input type="range" min="120" max="320" bind:value={width} aria-label="width" /></label>
 		<label>padding: <strong>{padding}px</strong><input type="range" min="0" max="40" bind:value={padding} aria-label="padding" /></label>
@@ -34,26 +69,26 @@
 	<div class="stage">
 		<div class="margin" style="padding: {margin}px">
 			<div class="box" style="width: {width}px; padding: {padding}px; border-width: {border}px; box-sizing: {sizing}">
-				<div class="content">Содержимое {content}px</div>
+				<div class="content">{W.content} {content}px</div>
 			</div>
 		</div>
 	</div>
 	<ul class="legend">
-		<li><span class="sw m"></span> margin: внешний отступ, ничего не закрашивает</li>
-		<li><span class="sw b"></span> border: рамка</li>
-		<li><span class="sw p"></span> padding: отступ внутри рамки</li>
-		<li><span class="sw c"></span> содержимое</li>
+		<li><span class="sw m"></span> {W.legendMargin}</li>
+		<li><span class="sw b"></span> {W.legendBorder}</li>
+		<li><span class="sw p"></span> {W.legendPadding}</li>
+		<li><span class="sw c"></span> {W.legendContent}</li>
 	</ul>
 	<p class="dg-out" aria-live="polite">
-		Вы написали <span class="dg-mono">width: {width}px</span>
+		{W.youWrote} <span class="dg-mono">width: {width}px</span>
 		{#if sizing === 'content-box'}
-			и это ширина только содержимого. Блок целиком: {width} + 2×{padding} (padding) + 2×{border} (border) = <strong>{outer}px</strong>, а вместе с внешними отступами занимает в строке <strong>{total}px</strong>.
+			{@html W.contentBox(width, padding, border, outer, total)}
 		{:else}
-			и это ширина блока целиком: рамка и внутренний отступ уже в ней. Содержимому остаётся {width} − 2×{padding} − 2×{border} = <strong>{content}px</strong>, а вместе с внешними отступами блок занимает в строке <strong>{total}px</strong>.
+			{@html W.borderBox(width, padding, border, content, total)}
 		{/if}
 	</p>
 	<p class="dg-out">
-		Поэтому в начале любого стилевого файла пишут <span class="dg-mono">box-sizing: border-box</span>: размер блока такой, как вы написали, и расчёты не удивляют.
+		{W.therefore} <span class="dg-mono">box-sizing: border-box</span>{W.therefore2}
 	</p>
 </figure>
 

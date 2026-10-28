@@ -1,0 +1,542 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/01-selectors-cascade.svx. */
+	export const metadata = {
+		id: '03-css/01-selectors-cascade',
+		part: 3,
+		order: 1,
+		title: 'Selectors and the cascade: styles in a separate file',
+		definition: 'CSS is the language that styles a page from a separate file. A selector picks elements, and the cascade decides which rule wins.',
+		summary:
+			'You’ll keep the look of a page apart from its content, and find out why “my rule doesn’t work”. Afterwards you’ll be able to link a stylesheet, pick the elements you want and predict which of two rules wins.',
+		minutes: 30,
+		teaches: ['css-selectors', 'css-cascade', 'css-specificity', 'css-separate-stylesheets'],
+		requires: ['html-semantic-elements', 'html-tags-attributes'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'editor', label: 'a { color: red }', caption: 'My rule does nothing', say: 'I wrote: links are red. But the link in the menu is green. Why?' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'importance|selector|order', say: 'The browser climbs a ladder: importance, then specificity, then file order. The higher the rung, the stronger the rule.' },
+				{ mood: 'cheer', caption: 'The more precise rule wins', say: 'nav a is more precise than a: (0, 0, 2) against (0, 0, 1). Style with classes and your rules stay easy to override.' }
+			]
+		},
+		practice: {
+			id: 'separate-css',
+			title: 'The first styling of your 2005 site',
+			task: 'Dress your page. 1) In the head, link the stylesheet: a link element whose rel is stylesheet and whose href is styles.css. 2) In styles.css give body a font with a fallback (Georgia, serif or another), a text color and a background color that suit your project’s tone. 3) Give the header .site-header a background color and a text color with good contrast. 4) Give the button link .button a background and a text color. 5) Give the cards .card inner space (padding) and a border. Don’t use the style attribute: all the styling lives in styles.css.',
+			era: 2,
+			continues: 'data-table',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What is on offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: how the site looks.
+   HTML says what is what, and CSS says how it looks. */
+
+body {
+  margin: 0;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What is on offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: how the site looks.
+   HTML says what is what, and CSS says how it looks.
+   The palette here suits a calm project; yours will be your own. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+`
+			},
+			checks: [
+				{ id: 'link', kind: 'exists', selector: 'link[rel="stylesheet"][href="styles.css"]' },
+				{ id: 'no-inline', kind: 'count', selector: '[style]', max: 0 },
+				{ id: 'font-stack', kind: 'style', selector: 'body', prop: 'font-family', matches: '(serif|sans-serif|monospace|system-ui)\\s*$' },
+				{ id: 'text-contrast', kind: 'contrast', selector: 'body', min: 4.5 },
+				{ id: 'header-colour', kind: 'style', selector: '.site-header', prop: 'background-color', matches: '^(?!rgba\\(0, 0, 0, 0\\)$).+' },
+				{ id: 'header-contrast', kind: 'contrast', selector: '.site-header', min: 4.5 },
+				{ id: 'button-colour', kind: 'style', selector: 'a.button', prop: 'background-color', matches: '^(?!rgba\\(0, 0, 0, 0\\)$).+' },
+				{ id: 'button-contrast', kind: 'contrast', selector: 'a.button', min: 4.5 },
+				{ id: 'card-padding', kind: 'style', selector: '.card', prop: 'padding-top', matches: '^(?!0px$|0$).+', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why move the styling into a separate styles.css file?',
+				options: [
+					'One file styles every page, so the look of the whole site changes in one place',
+					'The page loads faster on any site',
+					'Otherwise the styles won’t work at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. That was Håkon Lie’s idea in 1994: meaning in HTML, looks in the styles. As a bonus, the browser keeps the file and doesn’t download it again for every page.',
+					'No: speed depends on size. A separate file speeds nothing up by itself, though the cache helps.',
+					'No: styles can be written right in the page, but then you have to copy them into every page.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A paragraph has the class note and the id intro. Three rules apply to it: p { color: red }, .note { color: blue } and #intro { color: green }. What color is it?',
+				options: ['Green', 'Blue', 'Red'],
+				answer: 0,
+				why: [
+					'Yes. An id selector beats a class selector, and a class beats a tag. The order of the lines doesn’t matter here.',
+					'No: a class beats a tag, but loses to an id.',
+					'No: a tag selector is the weakest of the three.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Two rules of equal strength color the same element differently. Which one wins?',
+				options: [
+					'The one lower in the file',
+					'The one higher in the file',
+					'The browser picks at random'
+				],
+				answer: 0,
+				why: [
+					'Yes. When specificity is equal, order decides: the last word goes to whichever rule comes later.',
+					'No: order works the other way round.',
+					'No: the cascade has strict rules, and chance isn’t one of them.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which properties are inherited from the parent by default?',
+				options: ['color (the text color)', 'font-family (the typeface)', 'margin (outer space)', 'border (the frame)'],
+				answer: [0, 1],
+				why: [
+					'Yes: a text color set on body reaches all its descendants.',
+					'Yes: the typeface also passes down the tree.',
+					'No: margin belongs to the block itself and isn’t passed on.',
+					'No: a border belongs only to its own element.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each selector to what it picks',
+				pairs: [
+					['.card', 'every element with the class card'],
+					['#top', 'the one element with the id top'],
+					['nav a', 'links inside nav, at any depth'],
+					['h2, h3', 'both h2 and h3']
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a rule inside <style> that colors every paragraph blue, and add a paragraph saying “Hello”.',
+				starter: '',
+				checks: [
+					{ id: 'p', kind: 'text', selector: 'p', matches: 'Hello' },
+					{ id: 'blue', kind: 'style', selector: 'p', prop: 'color', matches: '^(blue|rgb\\(0, 0, 255\\))$' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-idea',
+				front: 'What is the idea behind CSS?',
+				back: 'Keep looks apart from meaning: HTML says what is what, and CSS, in a separate file, says how it looks. Håkon Lie proposed it in 1994.'
+			},
+			{
+				id: 'css-link',
+				front: 'How do you link a stylesheet?',
+				back: 'In the head, with a link element: rel is stylesheet and href is styles.css. Don’t put styles in the style attribute: they can’t be reused.'
+			},
+			{
+				id: 'css-rule',
+				front: 'What is a CSS rule made of?',
+				back: 'A selector (who), curly braces, and inside them pairs of “property: value;”. For example: .card { padding: 1rem; }.'
+			},
+			{
+				id: 'css-cascade-order',
+				front: 'How does the cascade decide which rule wins?',
+				back: '!important first, then specificity (an id beats a class, a class beats a tag), and when that is equal, the rule lower in the file.'
+			},
+			{
+				id: 'css-inherit',
+				front: 'What is inheritance?',
+				back: 'Some properties (color, font-family) pass down to descendants. Spacing and borders don’t. That is why the typeface and text color are set on body.'
+			}
+		],
+		sources: [
+			{ title: 'Getting started with CSS (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Getting_started', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Handling conflicts (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Handling_conflicts', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Specificity (web.dev)', url: 'https://web.dev/learn/css/specificity', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Cascading HTML Style Sheets: A Proposal (Håkon Wium Lie, 1994)', url: 'https://www.w3.org/People/howcome/p/cascade.html', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'CSS Cascading and Inheritance Level 5 (W3C)', url: 'https://www.w3.org/TR/css-cascade-5/', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [
+			{ title: 'CSS Specificity explained (Kevin Powell)', url: 'https://www.youtube.com/watch?v=c0kfcP_nD9E', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'So far the page has been bare: meaning and nothing else. Now you’ll give it a look, and all of the work happens in a new file.',
+			hints: [
+				'The link goes in the head: a link element whose rel is stylesheet and whose href is styles.css. The styling itself you write in the styles.css tab.',
+				'A rule looks like this: .site-header { background-color: #1d5c63; color: #ffffff; }. The dot in a selector means “an element with this class”.',
+				'The contrast between text and background must be at least 4.5 to 1: dark text on light, or the other way round. Gray on gray won’t pass.'
+			],
+			mistakes: {
+				link: 'The stylesheet isn’t linked. The head needs a link element whose rel is stylesheet and whose href is styles.css.',
+				'no-inline': 'Some element still has a style attribute. Move its styling into styles.css and delete the attribute.',
+				'font-stack': 'body needs a font-family with a fallback at the end, for example Georgia, serif or system-ui, sans-serif.',
+				'text-contrast': 'The text color and the page background are too close. You need a contrast of at least 4.5 to 1: set color and background-color on body.',
+				'header-colour': 'The header (class site-header) has no background color yet. Set background-color.',
+				'header-contrast': 'The text in the header is hard to read on its background. Choose a text color with a contrast of at least 4.5 to 1.',
+				'button-colour': 'The button link (class button) has no background color. Set background-color.',
+				'button-contrast': 'The button’s text is hard to read on its background. You need a contrast of at least 4.5 to 1.',
+				'card-padding': 'The card (class card) has no inner space. Set padding.'
+			},
+			outro: 'That is how a page got its face, and you didn’t change a single line of HTML to do it. That is the point of a separate stylesheet.'
+		},
+		say: { CSS: 'C S S', HTML: 'H T M L', 'styles.css': 'styles dot C S S', id: 'I D', IE: 'I E' }
+	};
+</script>
+
+<script>
+	import Specificity from '../../diagrams/Specificity.svelte';
+</script>
+
+## Looks apart from meaning
+
+In the first part you built a page from meaningful elements, and in the browser it looks like a page from a textbook: black on white, blue links, Times New Roman. That is a “page without styling”, and it is how search engines and screen readers see your page today. Now let’s give it a look. There is a separate language for that: **CSS**, Cascading Style Sheets.
+
+The idea of separating looks from meaning came in October 1994, before Netscape 2 existed. It was proposed by Håkon Wium Lie, an engineer at CERN and a colleague of Tim Berners-Lee. He called the styles “cascading” because several sources style a page at once (the browser, the reader, the site’s author), and someone has to decide whose word counts most. You’ll work through that “ladder of priorities” in this lesson. CSS 1 became a W3C Recommendation in December 1996, but for years browsers understood it in different ways, and it only became truly usable in the mid-2000s. In 2003 the CSS Zen Garden appeared: one HTML page, hundreds of unlike designs.
+
+## Three ways to add styles
+
+1. **A separate file.** In the head, a line: `<link rel="stylesheet" href="styles.css">`. Every page of the site links to the one file, so the look changes in one place, and the browser saves the file instead of downloading it again. This is what nearly everyone does.
+2. **A `<style>` element** in the head. The styles sit in the page itself. It suits a small example, or styles for a single page.
+3. **A `style="…"` attribute** on an element. The styling sits right on the element. This is the worst way: the rule can’t be reused, it beats almost everything else and it upsets the order. Use it rarely (for example, when a script works out the value).
+
+Remember the lesson on rendering: CSS blocks painting until the browser has it. So the stylesheet is linked right at the start and kept small.
+
+## A rule and a selector
+
+A CSS rule has a **selector** (who) and, in curly braces, pairs of **“property: value;”** (what to do):
+
+```css
+.card {
+  padding: 1rem;
+  border: 1px solid #c9c4b6;
+}
+```
+
+The main selectors:
+
+- **by tag**: `p`, `h2` and `a` mean every element of that kind;
+- **by class**: `.card` means every element with `class="card"`. This is the main tool: you can give any element a class and use it as many times as you like;
+- **by id**: `#top` means the one element with `id="top"`;
+- **descendant**: `nav a` means links inside `nav`, at any depth; **direct child**: `ul > li`;
+- **list**: `h2, h3` means both;
+- **by state**: `a:hover` (under the pointer), `a:focus-visible` (in focus, when you work from the keyboard), `li:first-child`;
+- **by attribute**: `a[href^="tel:"]` means links whose address starts with “tel:”.
+
+<details>
+<summary>Check yourself: what does the selector .card pick?</summary>
+
+Every element on the page with the class `card`. Unlike an id, a class can be used many times.
+
+</details>
+
+## Inheritance
+
+Some properties pass from a parent to its descendants on their own: **text color**, **typeface**, font size, line height. That is why you set the typeface and text color of a page once, on `body`, rather than on every paragraph. Other properties aren’t inherited: spacing and borders belong to the block itself, and its children don’t get them. It would be odd if a border around a paragraph appeared around every word as well.
+
+## The cascade: who wins
+
+When several rules act on one element, the browser decides by a ladder:
+
+1. **Importance and origin.** A rule with `!important` beats ordinary ones. Better not to use it: it breaks the ladder, and the only way to fight it is with another one.
+2. **Specificity.** The more precise the selector, the stronger it is. It is counted with three numbers: (ids, classes, tags). `#cta` is (1, 0, 0), `.button` is (0, 1, 0) and `nav a` is (0, 0, 2). They are compared from left to right: one id beats any number of classes, and one class beats any number of tags.
+3. **Order.** If the strength is equal, the rule lower in the file wins.
+
+This is how a rule usually “doesn’t work”: you wrote `a { color: red }` for a link, but somewhere above it `nav a { color: green }`, at (0, 0, 2), turned out stronger. Or you wrote the rule higher up than it needed to be. Try it on the diagram: the rules color the same link, and the diagram counts who wins. Change the selectors and tick the `!important` boxes.
+
+<Specificity />
+
+Practical rules that people follow today:
+
+- style with **classes** and keep specificity low, so rules are easy to override;
+- don’t style by `id`: it is too strong, and only another id can override it;
+- don’t nest selectors deeper than two or three levels;
+- keep `!important` for extreme cases. In the lesson on modern CSS you’ll meet a better tool: layers, which replace most of these fights.
+
+<details>
+<summary>Check yourself: which is stronger, one id or ten classes?</summary>
+
+One id. Specificity is compared from left to right, and one id (1, 0, 0) beats any number of classes (0, 10, 0).
+
+</details>
+
+## A palette by tone
+
+Your brief has a “tone” field. It will tell you what to build the palette from: two or three colors and a neutral. Here are some starting points. You can change the numbers, but check the contrast (you’ll learn how in the lesson on color):
+
+| Tone | What it feels like | A palette idea |
+|---|---|---|
+| Businesslike | composure, trust | navy, gray, white; a serif typeface in the headings |
+| Warm | care, comfort | terracotta and a cream background, dark brown text |
+| Bold | energy | an almost black background or text, and one bright accent |
+| Calm | clarity, air | a muted green or teal on a light warm background |
+
+## Practice
+
+You’re in 2005. The page is built from meaning, and now it needs dressing. The stylesheet `styles.css` is already waiting for you in the second tab. Link it in the `head`, then style the `body`, the header, the button and the cards in turn. Resist the temptation to write `style="…"` right on an element: the check will notice, and you’ll lose the point of the exercise.
+
+In the header, the text has to be readable on its background. Choose colors to suit your tone: a program will check the contrast.
+
+## What was wrong with 2005
+
+The main trouble wasn’t CSS, but browsers. Internet Explorer 6, by far the most widely used, read CSS in its own way, and authors wrote “hacks” (clever lines that one browser understood and the others ignored) and conditional comments for different versions. The fashionable “web 2.0” style, with its glossy gradients, shadows and rounded buttons, has gone too: it was tied to the way images were drawn then. What remains is what still works: HTML for meaning, CSS for looks, and classes as the language between them.

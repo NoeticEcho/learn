@@ -1,0 +1,1010 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/08-motion.svx. */
+	export const metadata = {
+		id: '03-css/08-motion',
+		part: 3,
+		order: 8,
+		title: 'Animation and motion, with respect for people',
+		definition: 'CSS animation is change over time, made with transitions and @keyframes. The prefers-reduced-motion query tones it down for people it harms.',
+		summary:
+			'A little motion shows what happened, and too much gets in the way and can even harm people with vestibular disorders. Afterwards you’ll make smooth transitions and an entrance animation, and respect the “reduce motion” setting.',
+		minutes: 20,
+		teaches: ['css-transitions-animations', 'css-reduced-motion'],
+		requires: ['css-custom-properties', 'html-a11y-basics'],
+		comic: {
+			panels: [
+				{ mood: 'cheer', prop: 'browser', label: 'the button lifted', caption: '200 milliseconds', say: 'Good motion is a gesture: the button lifted a little, so you know you can press it.' },
+				{ mood: 'hmm', side: 'right', prop: 'phone', label: 'reduce motion', say: 'Slides and parallax make some people dizzy. For them every system has a “reduce motion” setting.' },
+				{ mood: 'hint', prop: 'editor', label: 'prefers-reduced-motion', say: 'The site reads the setting: drop the slides and zooms, keep the fades and color changes. Motion belongs to the reader.' }
+			]
+		},
+		practice: {
+			id: 'motion',
+			title: 'Motion on your site: the cherry on top of the 2025 era',
+			task: 'Add motion that helps. 1) Give the .button a smooth transition: transition-property made only of transform and a color (not all, and not any size), transition-duration about 0.2s, and on :hover let the button lift slightly (transform). 2) Give the .card elements an entrance animation: @keyframes rise (from transparent and a little lower to visible), animation-name, and an animation-duration no longer than a second. 3) Write an @media (prefers-reduced-motion: reduce) block: remove the movement (no transform on hover), and for the cards swap the animation for a gentle fade with no slide. Check that block yourself in the developer tools: the checks can’t see it.',
+			era: 7,
+			continues: 'modern-css',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What’s included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We’ll call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Briefly, what do you need</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to my personal data being processed, as described in the <a href="privacy.html">privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of a document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* Layers: the order is declared once, at the top. A later layer beats an earlier one,
+   and anything outside the layers beats every layer. */
+@layer reset, base, components, utilities;
+
+/* Tokens: every design decision's value in one place. */
+:root {
+  --color-text: #1d2430;
+  --color-bg: #ffffff;
+  --color-surface: #f3f5f8;
+  --color-accent: #1a4d8f;
+  --color-on-accent: #ffffff;
+  --space: 1rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Dark theme: only the tokens’ values change. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e8ecf2;
+    --color-bg: #11161d;
+    --color-surface: #1b2330;
+    --color-accent: #8fb8f0;
+    --color-on-accent: #0b1a2e;
+  }
+}
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  body {
+    font: 1.0625rem/1.6 var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: var(--space);
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+
+    & a {
+      color: inherit;
+    }
+
+    & .brand {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    & nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-areas:
+      "main"
+      "aside";
+    gap: 2rem;
+    max-width: 62.5rem;
+    margin: 0 auto;
+    padding: 1.5rem var(--space);
+
+    @media (min-width: 48rem) {
+      grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+      grid-template-areas: "main aside";
+    }
+
+    & main {
+      grid-area: main;
+    }
+
+    & aside {
+      grid-area: aside;
+    }
+  }
+
+  .cards {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space);
+  }
+
+  .card {
+    padding: var(--space);
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+
+    & h3 {
+      margin-top: 0;
+    }
+
+    @container (min-width: 40rem) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: var(--space);
+    }
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+    border-radius: 0.25rem;
+    text-decoration: none;
+  }
+
+  .site-footer {
+    padding: var(--space);
+    background-color: var(--color-surface);
+  }
+}
+
+@layer utilities {
+  .skip {
+    position: absolute;
+    left: -999px;
+
+    &:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+    }
+  }
+}
+
+/* :has(): styling by content. Outside the layers, so it beats any layer. */
+section:has(.cards) {
+  padding-top: calc(var(--space) * 1.5);
+  padding-bottom: calc(var(--space) * 1.5);
+}
+
+form:has(input:user-invalid) button[type="submit"] {
+  opacity: 0.7;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What’s included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We’ll call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Briefly, what do you need</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to my personal data being processed, as described in the <a href="privacy.html">privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of a document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* Layers: the order is declared once, at the top. A later layer beats an earlier one,
+   and anything outside the layers beats every layer. */
+@layer reset, base, components, utilities;
+
+/* Tokens: every design decision's value in one place. */
+:root {
+  --color-text: #1d2430;
+  --color-bg: #ffffff;
+  --color-surface: #f3f5f8;
+  --color-accent: #1a4d8f;
+  --color-on-accent: #ffffff;
+  --space: 1rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Dark theme: only the tokens’ values change. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e8ecf2;
+    --color-bg: #11161d;
+    --color-surface: #1b2330;
+    --color-accent: #8fb8f0;
+    --color-on-accent: #0b1a2e;
+  }
+}
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  body {
+    font: 1.0625rem/1.6 var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: var(--space);
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+
+    & a {
+      color: inherit;
+    }
+
+    & .brand {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    & nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-areas:
+      "main"
+      "aside";
+    gap: 2rem;
+    max-width: 62.5rem;
+    margin: 0 auto;
+    padding: 1.5rem var(--space);
+
+    @media (min-width: 48rem) {
+      grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+      grid-template-areas: "main aside";
+    }
+
+    & main {
+      grid-area: main;
+    }
+
+    & aside {
+      grid-area: aside;
+    }
+  }
+
+  .cards {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space);
+  }
+
+  .card {
+    padding: var(--space);
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+
+    & h3 {
+      margin-top: 0;
+    }
+
+    @container (min-width: 40rem) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: var(--space);
+    }
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+    border-radius: 0.25rem;
+    text-decoration: none;
+  }
+
+  .site-footer {
+    padding: var(--space);
+    background-color: var(--color-surface);
+  }
+}
+
+@layer utilities {
+  .skip {
+    position: absolute;
+    left: -999px;
+
+    &:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+    }
+  }
+}
+
+/* :has(): styling by content. Outside the layers, so it beats any layer. */
+section:has(.cards) {
+  padding-top: calc(var(--space) * 1.5);
+  padding-bottom: calc(var(--space) * 1.5);
+}
+
+form:has(input:user-invalid) button[type="submit"] {
+  opacity: 0.7;
+}
+
+/* Motion: a short response on the button, and the cards appearing. */
+.button {
+  transition-property: transform, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.card {
+  animation-name: rise;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+/* Reduce motion: no movement, but keep the gentle appearance. */
+@media (prefers-reduced-motion: reduce) {
+  .button:hover {
+    transform: none;
+  }
+
+  .card {
+    animation-name: appear;
+  }
+}
+`
+			},
+			checks: [
+				{ id: 'button-transition', kind: 'style', selector: 'a.button', prop: 'transition-property', matches: '^(?!all$).+' },
+				{ id: 'button-cheap', kind: 'style', selector: 'a.button', prop: 'transition-property', matches: '^(?!.*(width|height|top|left|right|bottom|margin|padding)).+' },
+				{ id: 'button-duration', kind: 'style', selector: 'a.button', prop: 'transition-duration', matches: '^(?!0s$).+' },
+				{ id: 'card-animation', kind: 'style', selector: '.card', prop: 'animation-name', matches: '^(?!none$).+', when: { brief: 'items[].title' } },
+				{ id: 'card-short', kind: 'style', selector: '.card', prop: 'animation-duration', matches: '^(0?\\.\\d+|1)s$', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is prefers-reduced-motion: reduce?',
+				options: [
+					'A person’s “reduce motion” setting in their system: a site can read it and remove unnecessary motion',
+					'A battery-saving mode that the browser switches on by itself',
+					'A property that slows down every animation on the page'
+				],
+				answer: 0,
+				why: [
+					'Yes. It’s turned on by people who get dizzy from sliding, zooming and spinning, and by people who are simply distracted by motion. A site should respect it.',
+					'No: it has nothing to do with the battery.',
+					'No: it isn’t a property you set. It’s a condition you test, to choose which styles apply.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which properties are cheap to animate (the browser doesn’t recalculate the layout)?',
+				options: ['transform', 'opacity', 'width', 'top and left'],
+				answer: [0, 1],
+				why: [
+					'Yes: the graphics card handles transform.',
+					'Yes: so it does transparency.',
+					'No: changing the width makes the browser recalculate the layout on every frame, and the animation stutters.',
+					'No: positioning with top and left recalculates the layout too. To slide something, use transform: translate.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A visitor has turned on “reduce motion”. What is the right thing to do on the site?',
+				options: [
+					'Remove sliding, zooming and spinning, but keep gentle fades and color changes',
+					'Turn every animation and transition down to zero',
+					'Nothing: it’s a phone setting'
+				],
+				answer: 0,
+				why: [
+					'Yes. “Less motion” doesn’t mean “no feedback at all”: a color change or a fade does no harm, and it helps people see what happened.',
+					'No: without a transition a button changes with a jerk, and it’s harder to see what happened.',
+					'No: the setting exists on computers too, and sites read it everywhere.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match the easing curve with where it fits',
+				pairs: [
+					['ease-out', 'an element appearing: fast at the start, slow at the end'],
+					['ease-in', 'an element leaving: it speeds up toward the end'],
+					['linear', 'even movement: a loading indicator'],
+					['ease', 'the all-purpose default curve']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A scrolling ticker on a page moves by itself for more than five seconds. What does WCAG require?',
+				options: [
+					'Give people a way to stop it, pause it or hide it',
+					'Nothing, it’s a matter of taste',
+					'Make it half as fast'
+				],
+				answer: 0,
+				why: [
+					'Yes. Success criterion 2.2.2 asks for a control on anything that moves by itself for over five seconds next to other content: attention shouldn’t be held hostage by motion.',
+					'No: for people with attention difficulties or cognitive disabilities it’s a serious obstacle.',
+					'No: speed doesn’t settle it. People need a choice.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a button with the class b and a rule for it: transition-property: transform; transition-duration: 0.2s.',
+				starter: '',
+				checks: [
+					{ id: 'b', kind: 'exists', selector: 'button.b' },
+					{ id: 'property', kind: 'style', selector: '.b', prop: 'transition-property', equals: 'transform' },
+					{ id: 'duration', kind: 'style', selector: '.b', prop: 'transition-duration', equals: '0.2s' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-motion-why',
+				front: 'What is motion for on a site?',
+				back: 'To show what happened (a button pressed, a block appeared) and where things came from. Too much motion distracts, and for some people it does harm.'
+			},
+			{
+				id: 'css-motion-cheap',
+				front: 'What should you animate, and what not?',
+				back: 'Animate transform and opacity: they’re cheap. Don’t animate width, height, top or left: they make the browser recalculate the layout on every frame.'
+			},
+			{
+				id: 'css-motion-reduced',
+				front: 'How do you respect prefers-reduced-motion?',
+				back: '@media (prefers-reduced-motion: reduce): remove sliding, zooming, spinning and parallax, and keep gentle fades and color changes.'
+			},
+			{
+				id: 'css-motion-wcag',
+				front: 'What does WCAG say about motion?',
+				back: 'Motion lasting over 5 seconds can be stopped (2.2.2), nothing flashes more than three times a second (2.3.1), and motion triggered by interaction can be turned off (2.3.3).'
+			}
+		],
+		sources: [
+			{
+				title: 'Using CSS transitions (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions/Using_CSS_transitions',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'prefers-reduced-motion (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Animations (web.dev)', url: 'https://web.dev/learn/css/animations', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'prefers-reduced-motion: sometimes less movement is better (web.dev)', url: 'https://web.dev/articles/prefers-reduced-motion', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{
+				title: 'Understanding SC 2.3.3: Animation from Interactions (W3C)',
+				url: 'https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'Understanding SC 2.2.2: Pause, Stop, Hide (W3C)',
+				url: 'https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Now the page gets a little motion: a response on the button and an entrance for the cards. After that we’ll look after the people the motion bothers.',
+			hints: [
+				'Transition: .button { transition-property: transform, background-color; transition-duration: 0.2s; } and .button:hover { transform: translateY(-2px); }.',
+				'Animation: @keyframes rise { from { opacity: 0; transform: translateY(0.75rem); } to { opacity: 1; transform: none; } }, and on .card: animation-name: rise; animation-duration: 0.5s;.',
+				'For people with “reduce motion”: @media (prefers-reduced-motion: reduce) { .button:hover { transform: none; } } and a different animation with no slide, such as @keyframes appear.'
+			],
+			mistakes: {
+				'button-transition': 'The button has no specific transition: transition-property mustn’t be all. List the properties: transform, background-color.',
+				'button-cheap': 'transition-property still has sizes or positions in it. Animate transform and color, not width, height, top or left.',
+				'button-duration': 'The button’s transition has no duration yet: set transition-duration, for example 0.2s.',
+				'card-animation': 'The cards have no animation yet: set an animation-name that points at a @keyframes rule.',
+				'card-short': 'The cards’ animation is too long or has no duration: animation-duration should be no more than a second, for example 0.5s.'
+			},
+			outro: 'The motion now works for meaning, not for effect. Check the “reduce motion” block yourself in the developer tools: it’s the one part the checks can’t see.'
+		},
+		say: { CSS: 'C S S', transition: 'transition', transform: 'transform', opacity: 'opacity', '@keyframes': 'keyframes', 'prefers-reduced-motion': 'prefers reduced motion', WCAG: 'wuh cag', hover: 'hover' }
+	};
+</script>
+
+<script>
+	import MotionLab from '../../diagrams/MotionLab.svelte';
+</script>
+
+## Why a site needs motion
+
+Good motion works like a gesture: a button lifts a little, so you can press it; a block slides in from the side, so that’s where it came from. It shows what happened and where things came from, and it explains an interface without words. Bad motion distracts, slows things down and, for many people, simply does harm: sliding, zooming, spinning and parallax (when the background and foreground move at different speeds) make people with vestibular disorders dizzy and sick. So this lesson’s rule is: **add motion that explains something, and let people turn it down**.
+
+## Transitions
+
+A **transition** smoothly changes a property’s value when it changes:
+
+```css
+.button {
+  transition-property: transform, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  background-color: var(--color-accent);
+}
+```
+
+Now when you hover, the button doesn’t jump but lifts smoothly. There are three parts: **what** changes (`transition-property`), **how long** it takes (`duration`) and **how** it moves (`timing-function`, the speed curve). For an interface’s response, 150 to 300 milliseconds is enough: shorter is imperceptible, and longer makes people wait. The `ease-out` curve (fast at the start, slow at the end) suits things appearing, `ease-in` suits things leaving, and `linear` suits even movement (a loading indicator).
+
+**Don’t write `transition: all`**: the transition would start smoothly changing everything, including things you didn’t expect. List the properties.
+
+## Animation
+
+When you need not “from one state to another” but a sequence of frames of your own, you use **keyframes**:
+
+```css
+@keyframes rise {
+  from { opacity: 0; transform: translateY(0.75rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+.card {
+  animation-name: rise;
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+}
+```
+
+`@keyframes` describes what happens to what, and the `animation-*` properties attach it to an element. Use repeating and endless animations (`animation-iteration-count: infinite`) with great care: they distract all the time.
+
+**What to animate.** Animate `transform` (moving, scaling, rotating) and `opacity`: the graphics card handles them, and the page stays smooth. But `width`, `height`, `top`, `left` and `margin` make the browser recalculate the layout on every frame, so the animation stutters and uses up battery. Try it all in the diagram.
+
+<MotionLab />
+
+<details>
+<summary>Check yourself: why is transform: translate better than left for sliding something?</summary>
+
+The graphics card handles transform without recalculating the layout. With left, the browser has to work out the layout again on every frame.
+
+</details>
+
+## Respect: prefers-reduced-motion
+
+Almost every system has a “reduce motion” switch in its settings. People turn it on when motion harms or bothers them. The browser passes that setting to the site, and CSS can read it:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .button:hover {
+    transform: none;
+  }
+
+  .card {
+    animation-name: appear; /* only a gentle fade, no slide */
+  }
+}
+```
+
+What exactly should go? “Reduce motion” doesn’t mean “remove all feedback”. Remove **movement, scaling, spinning, parallax and autoplay**. Keep **gentle fades and color changes**: they do no harm and still help people see what happened. Don’t turn every transition down to zero.
+
+What the standard says. WCAG requires that anything that moves by itself for more than five seconds, next to other content, can be stopped, paused or hidden (success criterion 2.2.2). Nothing on a page may flash more than three times a second, since that can trigger a seizure in people with photosensitive epilepsy (2.3.1). And motion that interaction triggers, such as parallax on scroll, can be turned off (2.3.3, level AAA).
+
+<details>
+<summary>Check yourself: what do you keep for a person who has “reduce motion” on?</summary>
+
+The gentle fades and color changes. Remove the movement, scaling, spinning and parallax.
+
+</details>
+
+## Practice
+
+Add motion to your 2025-era page. The button gets a response, and the cards appear. Then, most important of all, you’ll write the block for “reduce motion”.
+
+A warning, as in the lesson on responsive layout: the checks see computed values, and they can’t see a `prefers-reduced-motion` block. Check it yourself. In Chrome, open the developer tools and the “Rendering” tab (the “⋮” menu, then “More tools”), and find the option “Emulate CSS media feature prefers-reduced-motion”. Choose “reduce” and reload the page: the cards should appear without sliding, and the button shouldn’t lift when you hover.
+
+The 2025-era page is saved in the gallery. If you have “reduce motion” on, you’ll see it in its quiet version. Check both: with motion and without.
+
+## What was wrong before
+
+Motion on websites has been through several eras. In the days of Flash (the 2000s), sites opened with intros you couldn’t skip. The scrolling `<marquee>` and the flashing `<blink>` were part of HTML itself, and were declared obsolete long ago. From the 2010s sites were decorated with parallax and huge animations, and the complaints of nausea grew so many that in 2017 Safari was the first to add `prefers-reduced-motion`, with the other browsers following. The main lesson of this story: motion belongs to the reader, not the author.

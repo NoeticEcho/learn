@@ -7,6 +7,43 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			caption: 'Показать и спрятать плавно',
+			duration: 'Длительность',
+			seconds: 'с',
+			curve: 'Кривая',
+			reduce: 'Уменьшить движение',
+			hide: 'Спрятать',
+			show: 'Показать',
+			curveLabel: (c: string) => `Кривая скорости: ${c}`,
+			speed: 'скорость',
+			time: 'время',
+			card: 'Карточка',
+			comment: 'только плавное появление, без перемещения',
+			reducedOut: 'Без движения остаётся только плавное появление. Именно так просят делать людей, которым перемещения и вращения вредят: появление и исчезновение они переносят нормально.',
+			normalOut: 'Анимируйте transform и opacity: браузер делает это на видеокарте, не пересчитывая раскладку. Ширина, высота и отступы заставили бы его перестраивать всю страницу на каждом кадре.'
+		},
+		en: {
+			caption: 'Show and hide smoothly',
+			duration: 'Duration',
+			seconds: 's',
+			curve: 'Easing curve',
+			reduce: 'Reduce motion',
+			hide: 'Hide',
+			show: 'Show',
+			curveLabel: (c: string) => `Speed curve: ${c}`,
+			speed: 'speed',
+			time: 'time',
+			card: 'Card',
+			comment: 'only a gentle fade, no movement',
+			reducedOut: 'Without movement, only the gentle fade is left. That is what people ask for when sliding and spinning harm them: they cope with things fading in and out.',
+			normalOut: 'Animate transform and opacity: the browser does that on the graphics card, without recalculating the layout. Width, height and margins would make it rebuild the whole page on every frame.'
+		}
+	});
 
 	const curves: Record<string, [number, number, number, number]> = {
 		ease: [0.25, 0.1, 0.25, 1],
@@ -25,39 +62,39 @@
 		`transition-property: ${reduced ? 'opacity' : 'transform, opacity'}; transition-duration: ${duration}s; transition-timing-function: ${easing}; opacity: ${shown ? 1 : 0}; transform: ${reduced ? 'none' : shown ? 'translateX(0)' : 'translateX(-4rem)'}`
 	);
 	const code = $derived(
-		`.card {\n  transition-property: ${reduced ? 'opacity' : 'transform, opacity'};\n  transition-duration: ${duration}s;\n  transition-timing-function: ${easing};\n}\n${reduced ? '\n@media (prefers-reduced-motion: reduce) {\n  /* только плавное появление, без перемещения */\n}' : ''}`
+		`.card {\n  transition-property: ${reduced ? 'opacity' : 'transform, opacity'};\n  transition-duration: ${duration}s;\n  transition-timing-function: ${easing};\n}\n${reduced ? `\n@media (prefers-reduced-motion: reduce) {\n  /* ${W.comment} */\n}` : ''}`
 	);
 </script>
 
 <figure class="dg">
-	<figcaption>Показать и спрятать плавно</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="grid">
 		<div>
 			<div class="dg-ctl">
-				<label>Длительность: <strong>{duration.toFixed(2)} с</strong><input type="range" min="0.1" max="1.5" step="0.05" bind:value={duration} aria-label="Длительность" /></label>
+				<label>{W.duration}: <strong>{duration.toFixed(2)} {W.seconds}</strong><input type="range" min="0.1" max="1.5" step="0.05" bind:value={duration} aria-label={W.duration} /></label>
 			</div>
-			<div class="dg-ctl" role="group" aria-label="Кривая">
+			<div class="dg-ctl" role="group" aria-label={W.curve}>
 				{#each Object.keys(curves) as c (c)}<button type="button" aria-pressed={easing === c} onclick={() => (easing = c)}>{c}</button>{/each}
 			</div>
 			<div class="dg-ctl">
-				<label><input type="checkbox" bind:checked={reduced} /> Уменьшить движение</label>
-				<button type="button" onclick={() => (shown = !shown)}>{shown ? 'Спрятать' : 'Показать'}</button>
+				<label><input type="checkbox" bind:checked={reduced} /> {W.reduce}</label>
+				<button type="button" onclick={() => (shown = !shown)}>{shown ? W.hide : W.show}</button>
 			</div>
 		</div>
-		<svg viewBox="-8 -8 116 116" role="img" aria-label="Кривая скорости: {easing}">
+		<svg viewBox="-8 -8 116 116" role="img" aria-label={W.curveLabel(easing)}>
 			<rect x="0" y="0" width="100" height="100" fill="none" stroke="currentColor" stroke-opacity="0.25" />
 			<path d={path} fill="none" stroke="currentColor" stroke-width="3" />
-			<text x="2" y="-1" font-size="8">скорость</text>
-			<text x="70" y="108" font-size="8">время</text>
+			<text x="2" y="-1" font-size="8">{W.speed}</text>
+			<text x="70" y="108" font-size="8">{W.time}</text>
 		</svg>
 	</div>
-	<div class="stage"><div class="box" {style}>Карточка</div></div>
+	<div class="stage"><div class="box" {style}>{W.card}</div></div>
 	<pre class="dg-box dg-mono">{code}</pre>
 	<p class="dg-out" aria-live="polite">
 		{#if reduced}
-			Без движения остаётся только плавное появление. Именно так просят делать людей, которым перемещения и вращения вредят: появление и исчезновение они переносят нормально.
+			{W.reducedOut}
 		{:else}
-			Анимируйте transform и opacity: браузер делает это на видеокарте, не пересчитывая раскладку. Ширина, высота и отступы заставили бы его перестраивать всю страницу на каждом кадре.
+			{W.normalOut}
 		{/if}
 	</p>
 </figure>

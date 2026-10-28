@@ -1,0 +1,941 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/07-modern-css.svx. */
+	export const metadata = {
+		id: '03-css/07-modern-css',
+		part: 3,
+		order: 7,
+		title: 'Modern CSS: variables, nesting, :has() and layers',
+		definition: 'Modern CSS is a set of newer features (variables, nesting, :has() and @layer) that replaced preprocessors and scripts.',
+		summary:
+			'Today’s CSS does things that once needed preprocessors and scripts. Afterwards you’ll gather values into variables, nest rules, style a block by what it contains with :has(), and put your styles in order with layers.',
+		minutes: 30,
+		teaches: ['css-custom-properties', 'css-nesting', 'css-has-selector', 'css-cascade-layers'],
+		requires: ['css-specificity', 'css-color', 'css-container-queries'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'styles.css', caption: 'The accent in thirty places', say: 'I want a different accent color. Now I have to hunt for it all over the file.' },
+				{ mood: 'explain', side: 'right', prop: 'editor', label: '--color-accent', say: 'Name the value by its role and put it in :root. Then one line changes the color, not thirty.' },
+				{ mood: 'cheer', prop: 'browser', label: 'prefers-color-scheme: dark', say: 'A dark theme almost for free: only the variables’ values change. Card and button rules stay as they are.' }
+			]
+		},
+		practice: {
+			id: 'modern-css',
+			title: 'Your site, rewritten in modern CSS',
+			task: 'This is the same page you finished last time, but its styles have the values “hard-wired” in. Rewrite them the modern way. 1) On :root, declare the variables --color-text, --color-bg, --color-surface, --color-accent and --space, and use them through var() instead of the repeated values. 2) Dark theme: inside @media (prefers-color-scheme: dark), change only the variables’ values, and add a meta tag named color-scheme with the content light dark to the head. 3) Declare the order of the layers at the top of the file, @layer reset, base, components, utilities;, and sort your rules into them. 4) Nest the .site-header and .card rules with &. 5) Put the section:has(.cards) rule with its inner padding outside the layers, so that it beats any layer.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What’s included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We’ll call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Briefly, what do you need</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to my personal data being processed, as described in the <a href="privacy.html">privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of a document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the 2014 site’s base (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screen: we add, we don’t take away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own space, not the window’s. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What’s included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We’ll call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Briefly, what do you need</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to my personal data being processed, as described in the <a href="privacy.html">privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of a document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* Layers: the order is declared once, at the top. A later layer beats an earlier one,
+   and anything outside the layers beats every layer. */
+@layer reset, base, components, utilities;
+
+/* Tokens: every design decision's value in one place. */
+:root {
+  --color-text: #1d2430;
+  --color-bg: #ffffff;
+  --color-surface: #f3f5f8;
+  --color-accent: #1a4d8f;
+  --color-on-accent: #ffffff;
+  --space: 1rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Dark theme: only the tokens’ values change. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e8ecf2;
+    --color-bg: #11161d;
+    --color-surface: #1b2330;
+    --color-accent: #8fb8f0;
+    --color-on-accent: #0b1a2e;
+  }
+}
+
+@layer reset {
+  html {
+    box-sizing: border-box;
+    font-size: 100%;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  body {
+    font: 1.0625rem/1.6 var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: var(--space);
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+
+    & a {
+      color: inherit;
+    }
+
+    & .brand {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    & nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+  }
+
+  .layout {
+    display: grid;
+    grid-template-areas:
+      "main"
+      "aside";
+    gap: 2rem;
+    max-width: 62.5rem;
+    margin: 0 auto;
+    padding: 1.5rem var(--space);
+
+    @media (min-width: 48rem) {
+      grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+      grid-template-areas: "main aside";
+    }
+
+    & main {
+      grid-area: main;
+    }
+
+    & aside {
+      grid-area: aside;
+    }
+  }
+
+  .cards {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space);
+  }
+
+  .card {
+    padding: var(--space);
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+
+    & h3 {
+      margin-top: 0;
+    }
+
+    @container (min-width: 40rem) {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: var(--space);
+    }
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--color-on-accent);
+    background-color: var(--color-accent);
+    border-radius: 0.25rem;
+    text-decoration: none;
+  }
+
+  .site-footer {
+    padding: var(--space);
+    background-color: var(--color-surface);
+  }
+}
+
+@layer utilities {
+  .skip {
+    position: absolute;
+    left: -999px;
+
+    &:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+    }
+  }
+}
+
+/* :has(): styling by content. Outside the layers, so it beats any layer. */
+section:has(.cards) {
+  padding-top: calc(var(--space) * 1.5);
+  padding-bottom: calc(var(--space) * 1.5);
+}
+
+form:has(input:user-invalid) button[type="submit"] {
+  opacity: 0.7;
+}
+`
+			},
+			checks: [
+				{ id: 'var-text', kind: 'style', selector: ':root', prop: '--color-text', matches: '\\S' },
+				{ id: 'var-bg', kind: 'style', selector: ':root', prop: '--color-bg', matches: '\\S' },
+				{ id: 'var-surface', kind: 'style', selector: ':root', prop: '--color-surface', matches: '\\S' },
+				{ id: 'var-accent', kind: 'style', selector: ':root', prop: '--color-accent', matches: '\\S' },
+				{ id: 'var-space', kind: 'style', selector: ':root', prop: '--space', matches: '\\S' },
+				{ id: 'color-scheme', kind: 'attr', selector: 'meta[name="color-scheme"]', name: 'content', matches: 'light dark' },
+				{ id: 'has', kind: 'style', selector: 'section:has(.cards)', prop: 'padding-top', matches: '^(?!0px$|0$).+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does color: var(--color-accent) do?',
+				options: [
+					'It reads the value of the variable --color-accent: change the variable and the color changes everywhere it’s used',
+					'It copies the color once, when the page loads',
+					'It declares a new variable'
+				],
+				answer: 0,
+				why: [
+					'Yes. CSS variables are live: the browser works them out as it goes, and they inherit, so changing a few values can switch a whole theme.',
+					'No: the value is read every time, and it can have different values in different parts of the page.',
+					'No: you declare a variable like this: --color-accent: #1a4d8f; (with two hyphens). var() only reads.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A rule outside any layer and a rule inside @layer components color the same element differently. The layered rule has the higher specificity. Which wins?',
+				options: [
+					'The rule outside the layers',
+					'The rule in the layer, because its selector is more specific',
+					'The order in the file decides'
+				],
+				answer: 0,
+				why: [
+					'Yes. Rules outside any layer beat every layer, and specificity isn’t compared between a layer and “no layer”. That’s why unlayered rules are the strongest.',
+					'No: between layers and unlayered rules the layer is looked at first. Specificity only decides inside one layer.',
+					'No: the order in the file decides last, when everything else is equal.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can CSS variables do that a preprocessor’s variables can’t?',
+				options: [
+					'Change in the browser: different blocks can have different values',
+					'Be read and changed from JavaScript',
+					'Inherit down the tree',
+					'Disappear at build time: the browser gets only the finished values'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: just redefine the variable on the block you want.',
+					'Yes: that’s how a theme switcher works, for example.',
+					'Yes: they inherit, like the text color does.',
+					'No: that describes a preprocessor’s variables, such as Sass. CSS variables stay in the browser and stay live.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the layers in order from weakest to strongest, if the order was declared as @layer reset, base, components, utilities;',
+				items: ['reset', 'base', 'components', 'utilities']
+			},
+			{
+				type: 'single',
+				prompt: 'What does the selector section:has(.cards) select?',
+				options: [
+					'A section that contains an element with the class cards',
+					'The .cards element inside a section',
+					'A section whose own class is cards'
+				],
+				answer: 0,
+				why: [
+					'Yes. :has() picks a parent by what lies inside it, something CSS couldn’t do at all before.',
+					'No: that would be the descendant selector section .cards.',
+					'No: that would be section.cards.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Declare a variable --brand with the value #1a4d8f on :root, and color the text of a paragraph with it through var(--brand). Add a paragraph with the word “Hello”.',
+				starter: '',
+				checks: [
+					{ id: 'p', kind: 'text', selector: 'p', matches: 'Hello' },
+					{ id: 'var', kind: 'style', selector: ':root', prop: '--brand', matches: '#1a4d8f' },
+					{ id: 'use', kind: 'style', selector: 'p', prop: 'color', matches: '^(var\\(--brand\\)|rgb\\(26, 77, 143\\))$' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-vars',
+				front: 'How do you declare and use a CSS variable?',
+				back: 'Declare: --color-accent: #1a4d8f; (usually on :root). Use: color: var(--color-accent). Variables stay live in the browser and inherit.'
+			},
+			{
+				id: 'css-dark-theme',
+				front: 'How do you make a dark theme?',
+				back: 'Put every color in a variable, and let @media (prefers-color-scheme: dark) change only the variables’ values on :root. Add a color-scheme meta tag with the content light dark.'
+			},
+			{
+				id: 'css-nesting',
+				front: 'What is nesting in CSS?',
+				back: 'A rule inside a rule: .card { & h3 { … } &:hover { … } }. The & stands for the parent selector. It used to take a preprocessor.'
+			},
+			{
+				id: 'css-has',
+				front: 'What does :has() do?',
+				back: 'It selects a parent by its contents: section:has(.cards), form:has(:invalid). CSS had no parent selector before.'
+			},
+			{
+				id: 'css-layers',
+				front: 'What is @layer, and how do layers compete?',
+				back: '@layer reset, base, components, utilities; declares the order once. A later layer beats an earlier one whatever the specificity, and rules outside any layer beat them all.'
+			}
+		],
+		sources: [
+			{
+				title: 'Using CSS custom properties (variables) (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables/Using_CSS_custom_properties',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: ':has() CSS pseudo-class (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/:has', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: '@layer (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/@layer', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'CSS nesting (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Nesting (web.dev)', url: 'https://web.dev/learn/css/nesting', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'CSS Cascading and Inheritance Level 5: cascade layers (W3C)', url: 'https://www.w3.org/TR/css-cascade-5/', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now let’s turn your styles into a tidy, modern file. First the values go into variables, then comes the dark theme, then layers and a couple of other new tricks.',
+			hints: [
+				'Variables are declared on :root as pairs, --name: value;. You use one like this: color: var(--color-text). The names start with two hyphens.',
+				'Dark theme: @media (prefers-color-scheme: dark) { :root { --color-text: #e8ecf2; --color-bg: #11161d; } }. You don’t touch the card rules.',
+				':has(): section:has(.cards) { padding-top: 1.5rem; }. Put it outside the @layer blocks and it beats any layer.'
+			],
+			mistakes: {
+				'var-text': 'There’s no variable --color-text on :root yet. Declare it: :root { --color-text: #1d2430; }.',
+				'var-bg': 'There’s no variable --color-bg on :root yet (the page color).',
+				'var-surface': 'There’s no variable --color-surface on :root yet (the color of cards and the footer).',
+				'var-accent': 'There’s no variable --color-accent on :root yet (the color of buttons and links).',
+				'var-space': 'There’s no variable --space on :root yet: it’s the base spacing.',
+				'color-scheme': 'The head needs a meta tag named color-scheme with the content light dark. It tells the browser the site has both themes.',
+				has: 'The :has() rule isn’t working. Check that you have section:has(.cards) { padding-top: … } and that it sits outside every @layer.'
+			},
+			outro: 'The file is shorter, clearer and has a dark theme. That’s modern CSS: variables, layers and nesting instead of tricks and preprocessors.'
+		},
+		say: { CSS: 'C S S', ':root': 'root', 'prefers-color-scheme': 'prefers color scheme', 'color-scheme': 'color scheme', ':has()': 'has', Sass: 'sass', '@layer': 'at layer', JavaScript: 'JavaScript' }
+	};
+</script>
+
+<script>
+	import ThemeSwitch from '../../diagrams/ThemeSwitch.svelte';
+</script>
+
+## The new era: CSS in 2025
+
+So far you’ve written CSS the way it was written in 2005 and 2014. But the language hasn’t stood still. In the last few years browsers have learned to do what once needed preprocessors (Sass, Less) and scripts. This lesson is about how people write CSS today. It belongs to our 2025 era: the page is the same, but the styles are rewritten.
+
+We’re interested in four new things.
+
+## Variables
+
+**Custom properties**, also called “CSS variables”, are declared with two hyphens and read through `var()`:
+
+```css
+:root {
+  --color-text: #1d2430;
+  --color-accent: #1a4d8f;
+  --space: 1rem;
+}
+
+.button {
+  color: white;
+  background-color: var(--color-accent);
+  padding: var(--space);
+}
+```
+
+`:root` is the `html` element itself, so variables declared there are visible across the whole page. The advantages:
+
+- **the value lives in one place.** Want a different accent color? Change one line, not thirty;
+- **they’re live.** Unlike a preprocessor’s variables, CSS variables stay in the browser. You can redefine them on any block (a card inside a dark block gets different colors) and change them from JavaScript;
+- **they inherit** down the tree, like the text color does.
+
+A good rule is to name variables by **role**, not by value: `--color-accent`, not `--blue`. Then in a year the accent can turn green and the name will still be true. Named values like these are called **design tokens**, and we’ll take them apart later, in the part on design systems.
+
+A **dark theme** with variables is almost free: every color goes through a variable, and `@media (prefers-color-scheme: dark)` changes only their values. The rules for cards and buttons don’t need touching at all. In the `head` you also write `<meta name="color-scheme" content="light dark">`, which tells the browser the site has two themes, so that it doesn’t flash white while loading.
+
+Move the sliders in the diagram: one card, the same rules, and the look changes because of the values. Below it there’s more about layers.
+
+<ThemeSwitch />
+
+<details>
+<summary>Check yourself: why is --color-accent a better name than --blue?</summary>
+
+Because a role lasts longer than a value: tomorrow the accent may turn green, and the name will still be true.
+
+</details>
+
+## Nesting
+
+Before, to write the rules for a card and its insides you had to repeat the selector: `.card { … }`, `.card h3 { … }`, `.card:hover { … }`. Now you nest the rules inside each other:
+
+```css
+.card {
+  padding: var(--space);
+
+  & h3 {
+    margin-top: 0;
+  }
+
+  &:hover {
+    background-color: var(--color-surface);
+  }
+}
+```
+
+The `&` means “the parent selector”. Nesting makes the file shorter and gathers everything about the card in one place. Don’t nest deeper than two or three levels: long chains hurt readability and specificity.
+
+## :has(): a parent by its child
+
+The `:has()` selector selects an element **by what lies inside it**. CSS had no parent selector at all, and this trick used to seem impossible:
+
+```css
+section:has(.cards) { padding-block: 1.5rem; }          /* a section that has cards in it */
+form:has(input:invalid) button { opacity: 0.7; }        /* the button in a form that has an invalid field */
+label:has(input:checked) { font-weight: 600; }           /* the label of a ticked checkbox */
+```
+
+`:has()` has worked in all browsers since the end of 2023. It’s one of the most useful new features: much of what used to be done with a script is now done by CSS.
+
+<details>
+<summary>Check yourself: what will form:has(input:invalid) select?</summary>
+
+A form with at least one invalid field inside it. You can use it to style the button, for example.
+
+</details>
+
+## Layers
+
+The more CSS there is, the more often rules fight: remember the cascade from the first lesson. The fight ended with `!important` and ever longer selectors. **Layers** (`@layer`) set the order in advance:
+
+```css
+@layer reset, base, components, utilities;
+```
+
+One line at the top of the file declares the layers from weakest to strongest. Then each rule goes into its own layer:
+
+```css
+@layer base {
+  a { color: var(--color-accent); }
+}
+
+@layer components {
+  .button { color: var(--color-on-accent); }
+}
+```
+
+The rule is simple. **A later layer beats an earlier one, whatever the specificity.** Specificity decides only inside one layer. And rules **outside any layer beat every layer**: so keep unlayered styles for exceptions, and put the bulk of your CSS into layers. You can try this by hand at the bottom of the diagram above.
+
+This saves you from the “specificity war”: a `#cta` selector in the `base` layer can’t beat a plain `.button` from the `utilities` layer. Layers reached browsers in 2022.
+
+<details>
+<summary>Check yourself: which is stronger, a rule outside the layers or a rule from the last layer?</summary>
+
+The rule outside the layers. It beats every layer, even the latest.
+
+</details>
+
+## Practice
+
+You’re starting the 2025 era. We’ve given you the page and the styles: it’s the result you finished in the last lesson (if you saved your own styles, you can paste them in). Your job is to turn the styles into modern ones: variables on `:root`, a dark theme, layers, nesting and `:has()`.
+
+The checks here can see the variables, the `color-scheme` tag and the `:has()` rule. They can’t see layers, nesting or the dark theme, because the browser hands them only computed values. Check those three by eye: open the developer tools and find your layers in the “Styles” pane, and turn on the dark theme in the “Rendering” panel (the option “Emulate CSS media feature prefers-color-scheme”).
+
+## What was wrong with 2014
+
+Back then it was almost impossible to write a big stylesheet without Sass or Less: you needed variables, nesting and mixins. A preprocessor turned your file into plain CSS on the server, and the browser saw only the finished result. Today the browser can do half of that itself. The other half of the problem was specificity and `!important`, until layers replaced them.

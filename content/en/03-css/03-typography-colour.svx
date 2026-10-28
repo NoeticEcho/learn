@@ -1,0 +1,700 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/03-typography-colour.svx. */
+	export const metadata = {
+		id: '03-css/03-typography-colour',
+		part: 3,
+		order: 3,
+		title: 'Typography and color',
+		definition: 'Typography is the set of rules that make text easy to read: typeface, size, line height and line length. Colors are checked by WCAG contrast.',
+		summary:
+			'Most of a page is text, and the typeface, size, line height and color decide whether anyone reads it. Afterwards you’ll be able to choose a typeface and a line length, write colors in modern formats and check contrast against WCAG.',
+		minutes: 30,
+		teaches: ['css-typography', 'css-web-fonts', 'css-color', 'css-contrast'],
+		requires: ['css-units', 'css-cascade'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'gray on white', caption: 'Looks refined', say: 'Light gray on white looks elegant. It is also harder to read than it seems.' },
+				{ mood: 'explain', side: 'right', prop: 'certificate', label: 'AA: 4.5 to 1', say: [{ text: 'You can’t judge contrast by eye. #767676 on white gives 4.54, and #777777 gives 4.48.' }, { who: 'WCAG AA', text: 'It needs at least 4.5 to 1.' }] },
+				{ mood: 'hint', caption: 'Count, don’t trust your eyes', say: 'Readable text rests on numbers: 16 pixels or more, line height 1.4 to 1.7 with no unit, lines under 80 characters.' }
+			]
+		},
+		practice: {
+			id: 'type-and-colour',
+			title: 'Readable text for your 2005 site',
+			task: 'Make the text readable. 1) On body: a font size of at least 16 pixels (better 1.125rem) and a line-height of 1.4 or more. 2) Give the headings h1, h2 and h3 another typeface, with a fallback at the end of the list, and their own line-height. 3) Limit the line length in the main text: for main p and main li set a max-width in characters (ch), about 65. 4) Check the contrast: the main text, the button and the footer must each give at least 4.5 to 1 against their own background.',
+			era: 2,
+			continues: 'float-columns',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What is on offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: how the site looks.
+   HTML says what is what, and CSS says how it looks.
+   The palette here suits a calm project; yours will be your own. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+
+/* Layout: two columns made with float, the way it was done in 2005. */
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.layout {
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main {
+  float: left;
+  width: 68%;
+}
+
+aside {
+  float: right;
+  width: 28%;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+footer {
+  clear: both;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main>
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#contacts">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What is on offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: how the site looks.
+   HTML says what is what, and CSS says how it looks.
+   The palette here suits a calm project; yours will be your own. */
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #1f2a33;
+  background-color: #f6f4ee;
+}
+
+a {
+  color: #1d5c63;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+nav ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+  margin-right: 1rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #1d5c63;
+  background-image: linear-gradient(#2b7a84, #1d5c63);
+  border: 1px solid #14464c;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #e6e2d6;
+}
+
+/* Layout: two columns made with float, the way it was done in 2005. */
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+.layout {
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main {
+  float: left;
+  width: 68%;
+}
+
+aside {
+  float: right;
+  width: 28%;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #c9c4b6;
+}
+
+footer {
+  clear: both;
+}
+
+/* Typography: headings in another typeface, lines no longer than 65 characters. */
+
+h1,
+h2,
+h3 {
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.2;
+}
+
+main p,
+main li {
+  max-width: 65ch;
+}
+
+.price {
+  color: #4a5560;
+  font-size: 0.9375rem;
+}
+`
+			},
+			checks: [
+				{ id: 'body-size', kind: 'style', selector: 'body', prop: 'font-size', matches: '^(1[6-9]|[2-9]\\d)(\\.\\d+)?px$' },
+				{ id: 'line-height', kind: 'style', selector: 'body', prop: 'line-height', matches: '^(1\\.[4-9]\\d*|[2-9](\\.\\d+)?|(2[2-9]|[3-9]\\d)(\\.\\d+)?px)$' },
+				{ id: 'heading-font', kind: 'style', selector: 'h1', prop: 'font-family', matches: '(serif|sans-serif|monospace|system-ui)\\s*$' },
+				{ id: 'measure', kind: 'style', selector: 'main p', prop: 'max-width', matches: '^(?!none$).+' },
+				{ id: 'contrast-body', kind: 'contrast', selector: 'body', min: 4.5 },
+				{ id: 'contrast-button', kind: 'contrast', selector: 'a.button', min: 4.5 },
+				{ id: 'contrast-footer', kind: 'contrast', selector: 'footer', min: 4.5 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is a sensible minimum size for body text read on a screen?',
+				options: ['16 pixels (1rem) and up', '12 pixels', '10 pixels'],
+				answer: 0,
+				why: [
+					'Yes. 16px is the size browsers are built around by default, and below it eyes tire. Many people choose 17 or 18.',
+					'No: 12px is too small today. It is hard to read on a phone, and readers have to zoom in by hand.',
+					'No: 10px can be read only with strain. It dates from small screens with a high resolution, and it was never meant for reading.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does line-height: 1.5 mean, with no unit?',
+				options: [
+					'The distance between lines is one and a half times the font size',
+					'One and a half pixels between lines',
+					'One and a half centimeters between lines'
+				],
+				answer: 0,
+				why: [
+					'Yes. A number with no unit is multiplied by the element’s font size, so the line height grows with the text. This is the best way to set it.',
+					'No: with no unit it isn’t pixels, it is a multiplier.',
+					'No: a screen has no centimeters you could take as they are.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What line length counts as comfortable to read?',
+				options: ['About 45 to 75 characters', 'About 120 characters', 'About 20 characters'],
+				answer: 0,
+				why: [
+					'Yes. Typographers call this the “measure”: Robert Bringhurst held about 66 characters to be ideal. In CSS that is max-width: 65ch.',
+					'No: in a line that long, the eye loses the start of the next one.',
+					'No: in a line that short, the eye jumps from line to line too often.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which pairs of colors give a contrast of at least 4.5 to 1?',
+				options: [
+					'#767676 on white',
+					'#777777 on white',
+					'#1f2a33 on #f6f4ee',
+					'#8a8f94 on white'
+				],
+				answer: [0, 2],
+				why: [
+					'Yes: 4.54 to 1, the lightest gray that still passes on white.',
+					'No: 4.48 to 1, short by a hair. That is why “by eye” doesn’t work here: you have to count.',
+					'Yes: about 13 to 1.',
+					'No: about 3.3 to 1, good only for large text.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each entry to its meaning',
+				pairs: [
+					['font-display: swap', 'show the fallback typeface at once, then swap in the loaded one'],
+					['unicode-range', 'load only the characters you need, for example the Latin ones'],
+					['WOFF2', 'a compressed font file format for the web'],
+					['font-family: Georgia, serif', 'if Georgia is missing, take any serif typeface']
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a rule that sets paragraph text to 18 pixels, dark gray #333333 on a white background, and add a paragraph saying “Hello”.',
+				starter: '',
+				checks: [
+					{ id: 'text', kind: 'text', selector: 'p', matches: 'Hello' },
+					{ id: 'size', kind: 'style', selector: 'p', prop: 'font-size', equals: '18px' },
+					{ id: 'contrast', kind: 'contrast', selector: 'p', min: 4.5 }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-type-basics',
+				front: 'What are the numbers for readable text?',
+				back: 'A size of 16px (1rem) or more, a line height of 1.4 to 1.7 with no unit, a line length of 45 to 75 characters (max-width: 65ch) and a contrast of at least 4.5 to 1.'
+			},
+			{
+				id: 'css-font-stack',
+				front: 'How do you set a typeface?',
+				back: 'With a list that has fallbacks: font-family: Georgia, serif. At the end comes a generic family (serif, sans-serif, system-ui), so the text is never left without a typeface.'
+			},
+			{
+				id: 'css-web-fonts',
+				front: 'How do you add a typeface of your own?',
+				back: '@font-face with a woff2 file and font-display: swap; the file must have the characters your text uses. Better to keep the font on your own site than to take it from someone else’s server.'
+			},
+			{
+				id: 'css-color-formats',
+				front: 'What formats can a color be written in?',
+				back: 'Hex (#1d5c63), rgb(29 92 99), hsl(186 55% 25%) and the modern oklch(45% 0.07 200). All of them work; hsl and oklch are handier for choosing shades.'
+			},
+			{
+				id: 'css-contrast',
+				front: 'How much contrast does WCAG AA need?',
+				back: '4.5 to 1 for ordinary text, and 3 to 1 for large text (from 24px, or from 18.66px bold) and for icons. The stricter level, AAA, needs 7 to 1 and 4.5 to 1.'
+			}
+		],
+		sources: [
+			{ title: 'Fundamental text and font styling (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Fundamentals', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Web fonts (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Text_styling/Web_fonts', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Color (web.dev)', url: 'https://web.dev/learn/css/color', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Best practices for fonts (web.dev)', url: 'https://web.dev/articles/font-best-practices', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Understanding SC 1.4.3: Contrast (Minimum) (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Practical Typography (Matthew Butterick)', url: 'https://practicaltypography.com/', licence: 'link-only', kind: 'book', lang: 'en' },
+			{ title: 'What is personal data? (ICO)', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/personal-information-what-is-it/what-is-personal-data/', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The page is dressed, but it isn’t comfortable to read yet. Let’s work on the text: size, line height, line length and contrast.',
+			hints: [
+				'Add font-size: 1.125rem; and line-height: 1.6; to body. The line height needs no unit.',
+				'For the line: main p, main li { max-width: 65ch; }. For the headings: h1, h2, h3 { font-family: system-ui, sans-serif; }.',
+				'For contrast: dark text on light, or light text on dark. If you’re unsure, run the pair through the calculator on the diagram above.'
+			],
+			mistakes: {
+				'body-size': 'The text size on body is under 16 pixels. Set at least 1rem, better 1.125rem.',
+				'line-height': 'body has no suitable line height: set line-height to at least 1.4, better 1.6.',
+				'heading-font': 'The headings need a font-family with a generic family at the end, for example sans-serif.',
+				measure: 'The line length isn’t limited. For main p, main li set a max-width in characters, for example 65ch.',
+				'contrast-body': 'The main text is hard to read on its background: the contrast is under 4.5 to 1. Darken the text or lighten the background.',
+				'contrast-button': 'The text on the button is hard to read on its background: the contrast is under 4.5 to 1.',
+				'contrast-footer': 'The text in the footer is hard to read on its background: the contrast is under 4.5 to 1.'
+			},
+			outro: 'Now the page is a pleasure to read. Typeface, line height, line length and contrast are quiet work, and people notice it only when it is missing.'
+		},
+		say: { CSS: 'C S S', 'font-family': 'font family', 'font-face': 'font face', 'font-display': 'font display', 'line-height': 'line height', WOFF2: 'woff two', WCAG: 'wuh cag', AA: 'double A', AAA: 'triple A', hex: 'hex', rgb: 'R G B', hsl: 'H S L', oklch: 'ok L C H', 'sans-serif': 'sans serif', ch: 'C H', px: 'pixels', rem: 'rem', GDPR: 'G D P R', ICO: 'I C O', IP: 'I P' }
+	};
+</script>
+
+<script>
+	import TypeLab from '../../diagrams/TypeLab.svelte';
+</script>
+
+## Text is the interface
+
+Most of any site is text, and how it is set decides whether people read to the end. Typography isn’t about beauty at all: it is the rules by which text stops getting in the way of reading. A few words we’ll use:
+
+- **typeface**: a family of letterforms such as Georgia; a **font** is one particular style of it (bold, italic);
+- **size**: how big the letters are;
+- **leading**, or line height: the distance between lines (`line-height` in CSS);
+- **measure**: the length of a line, in characters;
+- **serifs**: the small “feet” on the letters of some typefaces; typefaces without them are called **sans serif**.
+
+## Size, line height and measure
+
+Three numbers that make text readable:
+
+- **A body text size of 16 pixels or more** (`1rem` and up). Any less and the reader will zoom in with their fingers on a phone. Many people choose `1.125rem` (18px).
+- **A line height of 1.4 to 1.7** times the size of the letters, set as a **number with no unit**: `line-height: 1.6`. Then it grows with the text. Headings get less, about 1.2: short lines don’t need as much air.
+- **A line length of 45 to 75 characters.** Robert Bringhurst, in *The Elements of Typographic Style*, calls 66 ideal. A line that is too long loses the reader on the way back, and one that is too short chops up the sentence. In CSS that is `max-width: 65ch` (the `ch` unit is the width of a zero in the current font, which is roughly one character).
+
+Turn the sliders on the diagram. It is your own text.
+
+<TypeLab />
+
+<details>
+<summary>Check yourself: why is line height set as a number with no unit?</summary>
+
+A number with no unit is multiplied by the element’s font size, so the line height grows and shrinks with the text. A value in pixels would stay the same.
+
+</details>
+
+## Typefaces
+
+A typeface is set with a **list**: `font-family: Georgia, "Times New Roman", serif;`. The browser takes the first one the reader has, and if they have none of them, it turns to the last item, a generic family (`serif`, `sans-serif`, `monospace` or `system-ui`, the system’s own typeface). That last one is always needed: without it, the text could be left with no typeface at all.
+
+In the 1990s every computer had the same few fonts (Arial, Times, Courier), authors used only those, and so they were called “web safe”. Georgia and Verdana were designed by Matthew Carter specially for the screen and released in 1996, and for ten years they were the favorites of the web.
+
+Today you can add any typeface with `@font-face`:
+
+```css
+@font-face {
+  font-family: "Riverbend Serif";
+  src: url("riverbend-serif.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+```
+
+What matters here:
+
+- **the characters you need**: the typeface must have every character your text uses, accented letters (é, ü), curly quotes, the £ sign. Without them a fallback typeface fills the gaps, and the text turns patchy. Check the character set before you choose. A site in another script needs a typeface that has that script;
+- **woff2**: a compressed format that all modern browsers understand;
+- **`font-display: swap`**: until the file has loaded, the fallback typeface is shown, and then it is replaced. Without it the text is invisible until the font arrives (remember the blank screen from the first part);
+- **`unicode-range`** lets you load only the characters you need, for example a Latin subset. Another script needs a subset of its own;
+- **your own files, not someone else’s server**: a typeface linked from the Google Fonts servers makes every visitor’s browser contact a third party, and that sends the visitor’s IP address to it. This costs speed, and it is also a data protection matter, because an IP address can be personal data under the GDPR and the UK GDPR. In January 2022 the Regional Court of Munich ordered the owner of a website to pay a visitor €100 in damages for exactly this, and to stop doing it without consent (case 3 O 17493/20). One German judgment isn’t a rule for everyone, but a file kept next to your site removes the question, and it loads faster and does not depend on anyone else. This is general information, not legal advice: for a real site, ask a lawyer or your data protection authority (in the UK, the ICO). Part 15 returns to the subject.
+
+Our preview has no network, so the typefaces in the exercise are the system’s own. That is no loss: a good system set (Georgia, `system-ui`) looks excellent and weighs not a byte.
+
+<details>
+<summary>Check yourself: why end font-family with a generic family such as serif?</summary>
+
+So the text always has a typeface: if none of the listed ones is there, the browser takes any typeface of the right kind.
+
+</details>
+
+## Color
+
+A color in CSS can be written in several ways, and all of them mean the same thing:
+
+- `#1d5c63`: **hex**, the hexadecimal notation and the most common;
+- `rgb(29 92 99)`: the amounts of red, green and blue;
+- `hsl(186 55% 25%)`: the hue (an angle on the color wheel), the saturation and the lightness. Handier for choosing: to get a darker shade, change the third number;
+- `oklch(45% 0.07 200)`: a modern notation in which lightness is “honest”: the same lightness numbers look equally light. All modern browsers understand it, and it is good for palettes.
+
+A palette doesn’t need many colors. Four roles are enough: **text**, **background**, **surface** (cards, header) and **accent** (button, link), plus neutrals. Three shades is good, five is a lot.
+
+## Contrast
+
+Contrast is the ratio of the brightness of the text to the brightness of its background. It is measured by a number from 1 (identical) to 21 (black on white), and the WCAG standard asks for these at level AA:
+
+- **4.5 to 1** for ordinary text;
+- **3 to 1** for large text (from 24px, or from 18.66px bold) and for icons and the borders of fields;
+- level AAA is stricter: 7 to 1 and 4.5 to 1.
+
+You can’t judge contrast by eye: the pair #767676 on white passes (4.54), and #777777 doesn’t (4.48), though you couldn’t tell them apart. So count. The commonest accessibility error on the web, according to the yearly WebAIM study, is light gray text on white. The calculator on the diagram above will help you choose a pair.
+
+And one more thing: don’t carry meaning by **color alone**. Roughly one man in twelve sees red and green differently, so “required fields are marked in red” doesn’t work for him. Add an asterisk or a label.
+
+<details>
+<summary>Check yourself: what is the minimum contrast for ordinary text under WCAG AA?</summary>
+
+4.5 to 1. For large text, 3 to 1 is enough.
+
+</details>
+
+## Practice
+
+This is your 2005 page from the last lesson, with two columns made with float. The text has to become readable: size, line height, measure and contrast. Choose the typeface to suit your project’s tone: serifs in the headings for a businesslike tone, a larger sans serif for a bold one. The main thing is that the contrast checks pass after your changes.
+
+Write colors however you like: hex, `rgb()` or `hsl()`. If you want to try `oklch()`, the browser understands it too, but the exercise’s contrast check can read only the familiar notations, and an unusual format will make it report an unknown color.
+
+## What was wrong with 2005
+
+Text was set small: Verdana at 10 to 11px was the norm, because screens were small and every pixel was guarded. Gray on gray looked refined. Headings and logos were often made as images to get a favorite typeface, and then neither a screen reader nor a search engine could read them, and zooming in meant a blurry picture. The contrast checks will remind you of all this.

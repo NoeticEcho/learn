@@ -1,0 +1,772 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/04-flexbox.svx. */
+	export const metadata = {
+		id: '03-css/04-flexbox',
+		part: 3,
+		order: 4,
+		title: 'Flexbox: laying things out in a row or a column',
+		definition: 'Flexbox is a CSS layout mode that lines up the children of an element in a row or a column and shares out the space along a main axis and a cross axis.',
+		summary:
+			'Most menus, rows of cards and page headers today are built with flex. Afterwards you’ll be able to align items along both axes, share out the space, and build a menu that wraps on a narrow screen.',
+		minutes: 25,
+		teaches: ['css-flexbox'],
+		requires: ['css-box-model', 'css-floats-legacy'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'editor', label: 'display: flex', caption: 'A menu on two lines', say: 'The parent says display: flex, and its children line up in a row. Everything else hangs on two axes.' },
+				{ mood: 'hint', side: 'right', prop: 'flowchart', label: 'one|two|three', say: 'Along the main axis, justify-content does the work. Across it, align-items does.' },
+				{ mood: 'hmm', prop: 'editor', label: 'flex-direction: column', caption: 'The axis turned', say: 'Set column and the axes swap. Now justify-content runs top to bottom. This is where everyone gets mixed up.' }
+			]
+		},
+		practice: {
+			id: 'flex-layout',
+			title: 'The layout of your 2014 site, in flexbox',
+			task: 'The era of 2014 begins: a flat look, and a layout built with flexbox instead of float. The page is yours, and the base styles (a reset and typography) are already in styles.css. 1) Link styles.css to the page with a link element in the head. 2) The header .site-header: display: flex, wrapping lines, items centered on the cross axis, and a gap. 3) Both menus (header nav ul): flex, wrapping, with a gap. 4) The page wrapper .layout: flex, wrapping, with a gap; the main block gets flex: 2 1 28rem and the side block flex: 1 1 14rem. 5) The cards .cards: flex, wrapping, with a gap, and every .card gets flex: 1 1 14rem. Float isn’t needed anywhere.',
+			era: 4,
+			continues: 'languages-hreflang',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during office hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Your task in brief</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="privacy.html">privacy policy</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during office hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Your task in brief</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="privacy.html">privacy policy</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  flex: 2 1 28rem;
+  min-width: 0;
+}
+
+.layout aside {
+  flex: 1 1 14rem;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card {
+  flex: 1 1 14rem;
+}
+`
+			},
+			checks: [
+				{ id: 'link', kind: 'exists', selector: 'link[rel="stylesheet"]' },
+				{ id: 'header-flex', kind: 'style', selector: '.site-header', prop: 'display', matches: '^(flex|inline-flex)$' },
+				{ id: 'menu-flex', kind: 'style', selector: 'header nav ul', prop: 'display', matches: '^(flex|inline-flex)$' },
+				{ id: 'menu-wrap', kind: 'style', selector: 'header nav ul', prop: 'flex-wrap', equals: 'wrap' },
+				{ id: 'layout-flex', kind: 'style', selector: '.layout', prop: 'display', matches: '^(flex|inline-flex)$' },
+				{ id: 'cards-flex', kind: 'style', selector: '.cards', prop: 'display', matches: '^(flex|inline-flex)$', when: { brief: 'items[].title' } },
+				{ id: 'cards-wrap', kind: 'style', selector: '.cards', prop: 'flex-wrap', equals: 'wrap', when: { brief: 'items[].title' } },
+				{ id: 'cards-gap', kind: 'style', selector: '.cards', prop: 'gap', matches: '^(?!normal$|0px$|0$).+', when: { brief: 'items[].title' } },
+				{ id: 'no-float', kind: 'style', selector: 'main', prop: 'float', matches: '^(none)?$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Along which axis does justify-content work?',
+				options: ['The main axis (left to right by default)', 'The cross axis', 'Always the horizontal one'],
+				answer: 0,
+				why: [
+					'Yes. justify-content spreads items along the main axis, and align-items along the cross axis. Which axis is the main one depends on flex-direction.',
+					'No: align-items works along the cross axis.',
+					'No: with flex-direction: column the main axis is vertical, and justify-content spreads items from top to bottom.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A container has flex-direction: column. Which property centers its items horizontally?',
+				options: ['align-items: center', 'justify-content: center', 'text-align: center on every item'],
+				answer: 0,
+				why: [
+					'Yes. In a column the main axis is vertical, so the horizontal one has become the cross axis, and align-items controls it.',
+					'No: justify-content now works vertically.',
+					'No: text-align centers the text inside a block, not the block itself.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each property with what it does',
+				pairs: [
+					['flex-wrap: wrap', 'items that don’t fit move to the next line'],
+					['gap', 'space between items, with no extra margin after the last one'],
+					['flex: 1 1 14rem', 'can grow, can shrink, wants a width of 14rem'],
+					['justify-content: space-between', 'first and last item at the edges, the rest spread evenly between them']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which jobs is flexbox good at?',
+				options: [
+					'A menu that wraps on a narrow screen',
+					'Centering a block on both axes',
+					'A header with the name on the left and the menu on the right',
+					'A complex page grid where rows and columns depend on each other'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: flex-wrap and gap do it in two lines.',
+					'Yes: align-items and justify-content solved a problem that was thought hard for years.',
+					'Yes: justify-content: space-between.',
+					'No: that’s a job for grid, which controls rows and columns at the same time (the next lesson).'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the danger of the order property, which changes the order of items in a flex container?',
+				options: [
+					'It changes only how things look: keyboard and screen reader order stay the same, so they drift away from what the eyes see',
+					'It breaks the page in older browsers',
+					'It slows the page down'
+				],
+				answer: 0,
+				why: [
+					'Yes. Focus follows the order of the markup while the eyes see another order, and the person gets lost. Set the order in the HTML itself.',
+					'No: every browser understands order.',
+					'No: it has no effect on speed.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a container with the class row that holds three div blocks, styled with display: flex and a gap of 1rem between the blocks.',
+				starter: '',
+				checks: [
+					{ id: 'three', kind: 'count', selector: '.row > div', min: 3 },
+					{ id: 'flex', kind: 'style', selector: '.row', prop: 'display', equals: 'flex' },
+					{ id: 'gap', kind: 'style', selector: '.row', prop: 'gap', matches: '^(1rem|16px)' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-flex-axes',
+				front: 'What are the main axis and the cross axis in flexbox?',
+				back: 'The main axis follows flex-direction (left to right by default), and the cross axis is perpendicular to it. justify-content works along the main axis, align-items along the cross axis.'
+			},
+			{
+				id: 'css-flex-container',
+				front: 'Which properties does a flex container have?',
+				back: 'display: flex, flex-direction, flex-wrap, justify-content, align-items and gap. They control how the children are laid out.'
+			},
+			{
+				id: 'css-flex-item',
+				front: 'What does flex: 1 1 14rem mean?',
+				back: 'flex-grow 1 (it can grow), flex-shrink 1 (it can shrink) and flex-basis 14rem (the width it wants). Together they make cards that wrap onto the next line by themselves.'
+			},
+			{
+				id: 'css-flex-when',
+				front: 'When do you use flexbox, and when grid?',
+				back: 'Flexbox for a single row or column (a menu, a header, a row of cards). Grid for rows and columns together (a page layout, a grid of cards).'
+			}
+		],
+		sources: [
+			{
+				title: 'Flexbox (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{ title: 'Flexbox (web.dev)', url: 'https://web.dev/learn/css/flexbox', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'A complete guide to flexbox (CSS-Tricks)', url: 'https://css-tricks.com/snippets/css/a-guide-to-flexbox/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'CSS Flexible Box Layout Module Level 1', url: 'https://www.w3.org/TR/css-flexbox-1/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Flexbox Froggy: a game', url: 'https://flexboxfroggy.com/', licence: 'link-only', kind: 'course', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Learn flexbox the easy way (Kevin Powell)', url: 'https://www.youtube.com/watch?v=u044iM9xsWU', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'In 2014 pages were laid out differently: no float, no tables. Let’s build the header, the menus and the cards with flexbox.',
+			hints: [
+				'Start by linking styles.css in the head, with a link element: rel is stylesheet and href is styles.css. Until you do, none of the rules will work.',
+				'Every flex layout starts with display: flex on the parent. To make items wrap on a narrow screen, add flex-wrap: wrap. For the space between them, add gap: 1rem.',
+				'The main and side blocks: .layout main { flex: 2 1 28rem; } and .layout aside { flex: 1 1 14rem; }. The main column is twice as wide as the side one, and moves to a new line when space runs out.'
+			],
+			mistakes: {
+				link: 'The stylesheet isn’t linked yet: the head needs a link element with rel set to stylesheet and href set to styles.css.',
+				'header-flex': 'The header .site-header needs display: flex.',
+				'menu-flex': 'Both menus (header nav ul) must be flex containers: display: flex.',
+				'menu-wrap': 'The menu should wrap on a narrow screen: flex-wrap: wrap.',
+				'layout-flex': 'The .layout wrapper needs display: flex, so the main and side blocks sit next to each other.',
+				'cards-flex': 'The cards block .cards needs display: flex.',
+				'cards-wrap': 'The cards should move to the next line when they run out of room: flex-wrap: wrap.',
+				'cards-gap': 'The cards need a gap between them, for example gap: 1rem.',
+				'no-float': 'The main element still has a float. Remove it: the layout is flexbox now.'
+			},
+			outro: 'That’s the layout of the 2014 era: no floats, no tables. Notice how much simpler it is than last time.'
+		},
+		say: { CSS: 'C S S', flexbox: 'flex box', flex: 'flex', 'flex-wrap': 'flex wrap', 'flex-direction': 'flex direction', 'justify-content': 'justify content', 'align-items': 'align items', gap: 'gap', order: 'order', grid: 'grid' }
+	};
+</script>
+
+<script>
+	import FlexPlayground from '../../diagrams/FlexPlayground.svelte';
+</script>
+
+## A new era, a new layout
+
+You’ve reached 2014. Most sites now open on phones, screen widths vary wildly, and float as a layout tool has worn everyone out. This is when browsers gain **flexbox** (the Flexible Box Layout). The first drafts of the specification date from 2009, and the final form you’ll use now settled around 2012 to 2014. It became common once every major browser supported it. For our practice that means no tables and no floating blocks: rows and columns line themselves up.
+
+## The container and its items
+
+Flexbox works like this: you declare a parent to be a **flex container**, and its children become **flex items**, which line up in a row or a column.
+
+```css
+.menu {
+  display: flex;
+  gap: 1rem;
+}
+```
+
+Two lines, and the menu items stand in a row with space between them. Now two ideas that everything else rests on:
+
+- the **main axis** is the direction the items run in. By default it goes left to right (`flex-direction: row`). Say `column`, and it goes top to bottom;
+- the **cross axis** is perpendicular to the main one.
+
+And two properties for the two axes: `justify-content` spreads items along the **main** axis, and `align-items` aligns them along the **cross** axis. When the direction changes, the axes swap places, and the properties swap jobs with them. That is the one thing people mix up here. Play with the diagram: change the direction and watch.
+
+<FlexPlayground />
+
+<details>
+<summary>Check yourself: what changes if flex-direction goes from row to column?</summary>
+
+The main axis becomes vertical, so justify-content spreads items from top to bottom, and align-items aligns them horizontally.
+
+</details>
+
+## Container properties
+
+- `display: flex` turns flexbox on;
+- `flex-direction: row | column` (and `-reverse`) says which way the items run;
+- `flex-wrap: wrap` lets items move to the next line. Without it everything stays on one line and, if there isn’t enough room, shrinks or spills past the edge;
+- `justify-content: flex-start | center | flex-end | space-between | space-around` spreads items along the main axis;
+- `align-items: stretch | flex-start | center | flex-end` aligns them on the cross axis. The default, `stretch`, makes items as tall as their row, which is why cards in one row have equal heights;
+- `gap: 1rem` is the space between items. It used to be done with margins, and you had to fight the extra margin after the last item. `gap` has worked for flexbox in all modern browsers since 2021.
+
+## Item properties
+
+The main property of an item is `flex`, a shorthand for three values:
+
+```css
+.card {
+  flex: 1 1 14rem;
+}
+```
+
+These are **flex-grow** (can it grow and take free space?), **flex-shrink** (can it shrink?) and **flex-basis** (the size it would like before growing or shrinking). `flex: 1 1 14rem` reads: “I want a width of 14rem, but I can grow to fill the row and I can shrink.” That is how you get cards that wrap onto the next line by themselves: four in a row on a wide screen, one on a phone, without a single line about the screen.
+
+There is also `align-self` (align one item differently) and `order` (change the order). Be careful with the second: it changes only how things look, while the keyboard and screen reader order stays the same. Eyes and narrator part ways. It’s better to change the order of the items in the HTML itself.
+
+Three ready-made tricks are worth remembering:
+
+- a header with the name on the left and the menu on the right: `justify-content: space-between`;
+- centering a block on both axes (a task once thought a joke): `justify-content: center; align-items: center`;
+- pushing one item to the right: `margin-left: auto`.
+
+<details>
+<summary>Check yourself: what does flex: 1 1 14rem do?</summary>
+
+The item wants a width of 14rem, but it can grow to fill the free space and shrink if there isn’t enough.
+
+</details>
+
+## Practice
+
+A new era, a new page: in 2014 your site is built from scratch, but with no styling yet. Your `styles.css` already holds the base, what people in 2014 called a “reset”: sizes, fonts, colors. Your job is the layout.
+
+Because every era is built from scratch, the stylesheet has to be linked again. It’s the same line as in 2005. After that you lay out the header, the menus, the main and side blocks and the cards with flexbox. Try the result yourself: drag the edge of the browser window and check that the menus and cards wrap instead of spilling over the edge.
+
+## What was wrong with 2014
+
+The new layout was good, but it was still written in “desktop” sizes: widths in pixels, images with no fallback size. In the next lessons you’ll make it responsive. There was another catch: the first flexbox had two different syntaxes, and Internet Explorer 10 understood a third, so authors wrote every variant one after another. That habit left with those browsers.

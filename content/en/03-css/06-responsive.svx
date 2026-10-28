@@ -1,0 +1,855 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/06-responsive.svx. */
+	export const metadata = {
+		id: '03-css/06-responsive',
+		part: 3,
+		order: 6,
+		title: 'Responsive layout: media queries and container queries',
+		definition: 'Responsive design is one site that adapts to any screen with media queries. Container queries adapt a component to the width of its parent.',
+		summary:
+			'A site gets opened on a phone, a laptop and a big monitor, and most often on a phone. Afterwards you’ll be able to work mobile first, choose breakpoints by content, and use container queries so a component adapts to its own place.',
+		minutes: 30,
+		teaches: ['css-responsive', 'css-media-queries', 'css-container-queries'],
+		requires: ['css-grid', 'html-head-meta'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'm.example.com', caption: 'Two copies of a site', say: 'First, people built a separate mobile site at another address. Two copies, and you had to fix both.' },
+				{ mood: 'explain', side: 'right', prop: 'phone', label: 'one site', caption: '2010', say: 'Ethan Marcotte suggested another way: one site, one HTML, and the look adapts to the screen.' },
+				{ mood: 'hint', prop: 'editor', label: '@media (min-width: 48rem)', say: 'Mobile first: simple rules for the phone, then add more for wide screens with min-width. Nothing to undo.' }
+			]
+		},
+		practice: {
+			id: 'responsive-page',
+			title: 'A responsive 2014 site: mobile first',
+			task: 'Make the page responsive. 1) Make sure the head has a viewport meta tag (width=device-width). 2) Rewrite the layout mobile first: the base rules for .layout are a single column (two areas, main and aside, one under the other), and a media query @media (min-width: 48rem) adds the two columns. 3) Images must not spill off the screen: img { max-width: 100%; height: auto }. 4) The main action button .button is comfortable for a finger: min-height of at least 2.75rem (44 pixels). 5) Give the cards block .cards container-type: inline-size and write @container (min-width: 40rem) { .card { … } }: a wide card lays out in two columns, a narrow one stays vertical.',
+			era: 4,
+			continues: 'grid-layout',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during office hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Your task in brief</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="privacy.html">privacy policy</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+  grid-template-areas: "main aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during office hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Your task in brief</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="privacy.html">privacy policy</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			checks: [
+				{ id: 'viewport', kind: 'attr', selector: 'meta[name="viewport"]', name: 'content', matches: 'width=device-width' },
+				{ id: 'layout-grid', kind: 'style', selector: '.layout', prop: 'display', equals: 'grid' },
+				{ id: 'image-fluid', kind: 'style', selector: 'img', prop: 'max-width', equals: '100%' },
+				{ id: 'touch-target', kind: 'style', selector: 'a.button', prop: 'min-height', matches: '^(4[4-9]|[5-9]\\d|\\d{3,})(\\.\\d+)?px$' },
+				{ id: 'container', kind: 'style', selector: '.cards', prop: 'container-type', matches: '^(inline-size|size)$', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'What does responsive layout consist of, in Ethan Marcotte’s definition (2010)?',
+				options: [
+					'A fluid grid: widths in proportions, not pixels',
+					'Flexible images that shrink with their column',
+					'Media queries that change the rules on different screens',
+					'A separate mobile site at another address'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the columns stretch and shrink.',
+					'Yes: img { max-width: 100% } is still needed on every site.',
+					'Yes: media queries rearrange the layout when ordinary shrinking isn’t enough.',
+					'No: a separate “mobile” site such as m.example.com is exactly what responsive design replaced: one address and one HTML for every screen.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does “mobile first” mean in CSS?',
+				options: [
+					'The main rules are written for a narrow screen, and wide screens get more through @media (min-width: …)',
+					'You build the mobile app first and the website second',
+					'The site is shown only on phones'
+				],
+				answer: 0,
+				why: [
+					'Yes. The mobile browser gets simple, light code, and the extras go to those who can carry them. The phone doesn’t parse extra rules or undo them.',
+					'No: this is about the order you write styles in, not about apps.',
+					'No: wide screens are supported too, just added on top.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you choose breakpoints (the widths at which the layout rearranges)?',
+				options: [
+					'By content: where the layout starts to break',
+					'By the sizes of popular phones and tablets',
+					'One breakpoint at 1024 pixels'
+				],
+				answer: 0,
+				why: [
+					'Yes. Drag the window wider, and where the line gets too long or the cards stretch too far, add a breakpoint. There are too many devices to follow.',
+					'No: device sizes change every year, while your content stays.',
+					'No: a single breakpoint has nothing behind it, and it goes stale with the first new screen.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does a container query, @container, differ from a media query, @media?',
+				options: [
+					'It looks at the width of the parent container, not the window, so a component adapts to its own place',
+					'It works only on phones',
+					'It’s the same thing under another name'
+				],
+				answer: 0,
+				why: [
+					'Yes. The same card in a wide column and in a narrow side column behaves differently in one and the same window.',
+					'No: it has nothing to do with the device.',
+					'No: the difference is fundamental, and it lies in what the condition looks at.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the viewport meta tag, with width=device-width and initial-scale=1, for?',
+				options: [
+					'So a phone shows the page at its true width instead of shrinking it like a “wide” screen, and media queries work',
+					'To forbid zooming the page',
+					'For search engines'
+				],
+				answer: 0,
+				why: [
+					'Yes. Without it a phone pretends its screen is about 980 pixels wide, and none of your media queries fire.',
+					'No: forbidding zoom harms people with poor sight, and you shouldn’t do it.',
+					'No: search engines read it as one sign of a mobile-friendly page, but it is the browser that needs it first.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a block with the class wrap that is declared a width container (container-type: inline-size), with a paragraph inside it that says Hello.',
+				starter: '',
+				checks: [
+					{ id: 'wrap', kind: 'exists', selector: '.wrap p' },
+					{ id: 'container', kind: 'style', selector: '.wrap', prop: 'container-type', matches: '^(inline-size|size)$' },
+					{ id: 'text', kind: 'text', selector: '.wrap p', matches: 'Hello' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-responsive-parts',
+				front: 'What are the three ingredients of responsive layout?',
+				back: 'A fluid grid (proportions, not pixels), flexible images (max-width: 100%) and media queries. Ethan Marcotte coined the term in 2010.'
+			},
+			{
+				id: 'css-mobile-first',
+				front: 'What is mobile first?',
+				back: 'The base styles are written for a narrow screen, and wide screens get more through @media (min-width: …). The phone gets simple code, and nothing has to be undone.'
+			},
+			{
+				id: 'css-breakpoints',
+				front: 'How do you place breakpoints?',
+				back: 'By content: where the layout starts to break, put a breakpoint. Not by phone models. Write them in rem so they respect the reader’s font size.'
+			},
+			{
+				id: 'css-container-queries',
+				front: 'What is a container query?',
+				back: 'container-type: inline-size on the parent and @container (min-width: …) on the descendant: the component adapts to the width of its own place, not the window.'
+			},
+			{
+				id: 'css-touch-target',
+				front: 'How big should a button be for a finger?',
+				back: 'About 44 × 44 pixels (2.75rem), as Apple’s guidelines and WCAG 2.5.5 recommend. The WCAG 2.2 minimum at level AA is 24 pixels.'
+			}
+		],
+		sources: [
+			{
+				title: 'Responsive design (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_design',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'CSS container queries (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Container queries (web.dev)', url: 'https://web.dev/learn/css/container-queries', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Responsive web design basics (web.dev)', url: 'https://web.dev/articles/responsive-web-design-basics', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Responsive web design (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Responsive_web_design', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now the page looks good on a laptop. But most of your visitors will arrive on a phone. Let’s make it comfortable everywhere.',
+			hints: [
+				'The head needs the viewport meta tag, with width=device-width and initial-scale=1. It has been there since earlier lessons: check that it didn’t get lost.',
+				'Mobile first: .layout starts as a single column, with the areas main and aside one under the other. The two-column look goes inside @media (min-width: 48rem) { … }.',
+				'The container query: give .cards container-type: inline-size, then write @container (min-width: 40rem) { .card { display: grid; grid-template-columns: 1fr auto; } }.'
+			],
+			mistakes: {
+				viewport: 'The head needs the viewport meta tag, with content set to width=device-width, initial-scale=1.',
+				'layout-grid': 'The .layout must stay a grid: display: grid.',
+				'image-fluid': 'Images should shrink with their column: img { max-width: 100%; height: auto; }.',
+				'touch-target': 'The .button is too short. A finger needs at least 44 pixels: min-height: 2.75rem.',
+				container: 'The cards block needs container-type: inline-size, or the container query doesn’t know whose width to look at.'
+			},
+			outro: 'The page now adapts to the screen and to its own place. Check it live: open it in a browser and drag the window. Good layout doesn’t break anywhere.'
+		},
+		say: { CSS: 'C S S', viewport: 'view port', 'mobile first': 'mobile first', media: 'media', 'min-width': 'min width', container: 'container', 'container-type': 'container type', 'max-width': 'max width', rem: 'rem', px: 'pixels' }
+	};
+</script>
+
+<script>
+	import ResponsiveFrame from '../../diagrams/ResponsiveFrame.svelte';
+</script>
+
+## One site for every screen
+
+In 2007 the iPhone arrived, and sites that looked fine on a laptop suddenly found themselves on a screen several times smaller. At first people built a separate mobile site at another address, such as `m.example.com`, and kept two copies. That was expensive and confusing. In 2010 the American designer Ethan Marcotte described another path and called it **responsive web design**: one site, one HTML, and the look adapts to the screen. It has three parts:
+
+1. a **fluid grid**: column widths in proportions, not pixels;
+2. **flexible images**, which shrink together with their column: `img { max-width: 100%; height: auto; }`;
+3. **media queries**: rules that switch on at a certain width.
+
+Two conventions joined them. The **viewport**: the line `<meta name="viewport" content="width=device-width, initial-scale=1">`, which you know from the lesson on the head. Without it a phone shrinks the page as if it were a “wide” screen, and media queries don’t fire. And **mobile first**, an idea of Luke Wroblewski’s (2009 to 2011): begin not from the desktop look but from the mobile one.
+
+## Mobile first and media queries
+
+In practice, mobile first means the main rules are written for the **narrow screen**, and for wide screens you **add** to them:
+
+```css
+/* for everyone: one column */
+.layout {
+  display: grid;
+  grid-template-areas: "main" "aside";
+  gap: 2rem;
+}
+
+/* from 48rem (768px) and wider: add two columns */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+```
+
+Why this way round and not the other? The phone gets simple code and has nothing to undo, and the extras arrive only on screens that can carry them. The condition `min-width` reads “this wide or wider”.
+
+Other rules: **choose breakpoints by content, not by device.** Drag the window wider, and where the line gets too long and the cards too stretched, put a breakpoint. There are thousands of phone models and they keep changing, while your content stays. **Write sizes in `rem`:** then the breakpoints respect the reader’s font setting. And remember that responsive isn’t only about width: there is height, orientation, and the settings a person chooses (`prefers-color-scheme`, `prefers-reduced-motion`), which come in the next lessons.
+
+Try it yourself: move the width and watch what happens to this page. Inside the frame are real media queries.
+
+<ResponsiveFrame />
+
+<details>
+<summary>Check yourself: why does mobile first use min-width and not max-width?</summary>
+
+The main rules are for the narrow screen, and min-width adds the extras where there is more room. The phone never has to undo anything.
+
+</details>
+
+## Container queries: adapting to your own place
+
+A media query looks at the **window**. But a component doesn’t know where it will be put: the same card can end up in a wide main column and in a narrow side column, and they share one window. Until recently there was no answer, and you had to write different classes for each place.
+
+In 2022 and 2023 **container queries** arrived in all browsers: a component looks at the width of its parent.
+
+```css
+.cards {
+  container-type: inline-size;
+}
+
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+}
+```
+
+You declare the parent to be a “container” (`container-type: inline-size`, by width), and the descendant asks: “is the container wider than 40rem?” If so, the card lays out in two columns. If not, it stays vertical. Now the card can go anywhere and chooses its own look. See the diagram above: it has two identical cards in one window, and they behave differently.
+
+Note that a container can’t be the same element that changes. The rules inside `@container` apply to the container’s descendants, not to the container itself.
+
+<details>
+<summary>Check yourself: how is a container query better than a media query for a card?</summary>
+
+It looks at the width of its own place, not the window, so one card in a wide and a narrow column of the same window picks its own look.
+
+</details>
+
+## Fingers and eyes
+
+Responsive also means comfortable to touch. A button has to be big enough for a finger: about **44 by 44 pixels** (`min-height: 2.75rem`). That is what Apple’s guidelines and WCAG at level AAA recommend; the minimum in WCAG 2.2 at level AA is 24 pixels. Buttons need a gap between them. The main action of your project should be visible without scrolling on a phone screen, and the button at the top of the page does that.
+
+## Practice
+
+Make the page responsive. The preview has a width you can look at, but there is a more reliable way: open the developer tools (F12) and switch on device mode (the phone icon, Ctrl+Shift+M). There you can pick a phone and drag the width from 320 pixels.
+
+A warning: the checks in the exercise see your page at a single width, so they can’t tell whether you wrote `@media`, or in which direction. They check what is visible at any width: the viewport, flexible images, the size of the button and the cards container. Watch the media query yourself by dragging the window.
+
+## What was wrong with 2014
+
+In 2014 “responsive” often meant “squeeze the desktop look”: columns stacked, the menu in a hamburger, and the extras hidden with `display: none`. The text was still too small, and images still loaded at full size. The habit of writing “desktop first, then undo everything” gave the world thousands of pages where the phone parses rules that are cancelled straight away.

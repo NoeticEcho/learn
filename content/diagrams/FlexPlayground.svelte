@@ -6,6 +6,30 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	const W = pick({
+		ru: {
+			caption: 'Главная и поперечная оси',
+			justify: 'justify-content (по главной оси)',
+			align: 'align-items (по поперечной оси)',
+			narrow: 'узкий контейнер',
+			mainRow: 'слева направо',
+			mainColumn: 'сверху вниз',
+			reversed: ' наоборот'
+		},
+		en: {
+			caption: 'The main axis and the cross axis',
+			justify: 'justify-content (along the main axis)',
+			align: 'align-items (along the cross axis)',
+			narrow: 'narrow container',
+			mainRow: 'left to right',
+			mainColumn: 'top to bottom',
+			reversed: ', reversed'
+		}
+	});
+
+	const ru = pick({ ru: true, en: false });
 
 	const dirs = ['row', 'row-reverse', 'column', 'column-reverse'];
 	const justs = ['flex-start', 'center', 'flex-end', 'space-between', 'space-around'];
@@ -25,24 +49,24 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Главная и поперечная оси</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="grid">
 		<div>
 			<div class="dh">flex-direction</div>
 			<div class="dg-ctl" role="group" aria-label="flex-direction">
 				{#each dirs as v (v)}<button type="button" aria-pressed={direction === v} onclick={() => (direction = v)}>{v}</button>{/each}
 			</div>
-			<div class="dh">justify-content (по главной оси)</div>
+			<div class="dh">{W.justify}</div>
 			<div class="dg-ctl" role="group" aria-label="justify-content">
 				{#each justs as v (v)}<button type="button" aria-pressed={justify === v} onclick={() => (justify = v)}>{v}</button>{/each}
 			</div>
-			<div class="dh">align-items (по поперечной оси)</div>
+			<div class="dh">{W.align}</div>
 			<div class="dg-ctl" role="group" aria-label="align-items">
 				{#each aligns as v (v)}<button type="button" aria-pressed={align === v} onclick={() => (align = v)}>{v}</button>{/each}
 			</div>
 			<div class="dg-ctl">
 				<label><input type="checkbox" bind:checked={wrap} /> flex-wrap: wrap</label>
-				<label><input type="checkbox" bind:checked={narrow} /> узкий контейнер</label>
+				<label><input type="checkbox" bind:checked={narrow} /> {W.narrow}</label>
 				<label>gap: <strong>{gap}px</strong><input type="range" min="0" max="32" bind:value={gap} aria-label="gap" /></label>
 			</div>
 		</div>
@@ -59,7 +83,11 @@
 		</div>
 	</div>
 	<p class="dg-out" aria-live="polite">
-		Главная ось идёт {isRow ? 'слева направо' : 'сверху вниз'}{direction.endsWith('reverse') ? ' наоборот' : ''}: по ней работает <span class="dg-mono">justify-content</span>. Поперечная ось перпендикулярна ей: по ней работает <span class="dg-mono">align-items</span>. Смените <span class="dg-mono">flex-direction</span>, и оси поменяются местами вместе со своими свойствами.
+		{#if ru}
+			Главная ось идёт {isRow ? W.mainRow : W.mainColumn}{direction.endsWith('reverse') ? W.reversed : ''}: по ней работает <span class="dg-mono">justify-content</span>. Поперечная ось перпендикулярна ей: по ней работает <span class="dg-mono">align-items</span>. Смените <span class="dg-mono">flex-direction</span>, и оси поменяются местами вместе со своими свойствами.
+		{:else}
+			The main axis runs {isRow ? W.mainRow : W.mainColumn}{direction.endsWith('reverse') ? W.reversed : ''}, and <span class="dg-mono">justify-content</span> does its work along it. The cross axis is perpendicular to it, and <span class="dg-mono">align-items</span> works along that one. Change <span class="dg-mono">flex-direction</span> and the axes swap places, together with the properties that follow them.
+		{/if}
 	</p>
 </figure>
 

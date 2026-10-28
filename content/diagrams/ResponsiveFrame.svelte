@@ -9,15 +9,63 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
-	let title = $state('Первая услуга');
-	let price = $state('от 5 000 ₽');
+	const W = pick({
+		ru: {
+			service: 'Первая услуга',
+			price: 'от 5 000 ₽',
+			onRequest: 'по договорённости',
+			project: 'Название проекта',
+			main: 'Основной блок',
+			side: 'Сбоку',
+			caption: 'Одна страница на разных экранах',
+			width: 'Ширина окна',
+			widthLabel: 'Ширина окна в пикселях',
+			typical: 'Типичные ширины',
+			frame: 'Страница на выбранной ширине',
+			query: 'Медиазапрос',
+			fired: 'сработал, два столбца',
+			notFired: 'не сработал, один столбец',
+			cardMain: 'Карточка в основном блоке: контейнер около',
+			cardSide: 'Карточка сбоку: контейнер около',
+			threshold: 'а порог контейнерного запроса 416 px (26rem)',
+			horizontal: 'горизонтальная',
+			vertical: 'вертикальная',
+			note: 'Окно одно, а карточки ведут себя по-разному: каждая смотрит на ширину своего места. В этом разница между медиазапросом и контейнерным запросом.'
+		},
+		en: {
+			service: 'First service',
+			price: 'from £000',
+			onRequest: 'on quotation',
+			project: 'Project name',
+			main: 'Main block',
+			side: 'Side',
+			caption: 'One page on different screens',
+			width: 'Window width',
+			widthLabel: 'Window width in pixels',
+			typical: 'Typical widths',
+			frame: 'The page at the chosen width',
+			query: 'The media query',
+			fired: 'applies, two columns',
+			notFired: 'does not apply, one column',
+			cardMain: 'The card in the main block: the container is about',
+			cardSide: 'The card in the side column: the container is about',
+			threshold: 'and the container query’s threshold is 416 px (26rem)',
+			horizontal: 'horizontal',
+			vertical: 'vertical',
+			note: 'There is one window, yet the cards behave differently: each looks at the width of its own place. That is the difference between a media query and a container query.'
+		}
+	});
+
+	let title = $state(W.service);
+	let price = $state(W.price);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
 			if (p.items?.[0]) {
 				title = p.items[0].title;
-				price = p.items[0].price || 'по договорённости';
+				price = p.items[0].price || W.onRequest;
 			}
 		} catch {
 			/* the example stays */
@@ -38,7 +86,7 @@ h2{margin:0 0 .5rem;font-size:1rem}
 @container (min-width:26rem){.card{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:1rem}}`;
 	const card = $derived(`<div class="slot"><div class="card"><h3>${esc(title)}</h3><p class="price">${esc(price)}</p></div></div>`);
 	const srcdoc = $derived(
-		`<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><style>${css}</style><header>Название проекта</header><div class="layout"><main><h2>Основной блок</h2>${card}</main><aside><h2>Сбоку</h2>${card}</aside></div>`
+		`<!doctype html><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><style>${css}</style><header>${W.project}</header><div class="layout"><main><h2>${W.main}</h2>${card}</main><aside><h2>${W.side}</h2>${card}</aside></div>`
 	);
 
 	const wide = $derived(width >= 768);
@@ -49,23 +97,23 @@ h2{margin:0 0 .5rem;font-size:1rem}
 </script>
 
 <figure class="dg">
-	<figcaption>Одна страница на разных экранах</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
 		<label>
-			Ширина окна: <strong>{width} px</strong>
-			<input type="range" min="320" max="1280" step="10" bind:value={width} aria-label="Ширина окна в пикселях" />
+			{W.width}: <strong>{width} px</strong>
+			<input type="range" min="320" max="1280" step="10" bind:value={width} aria-label={W.widthLabel} />
 		</label>
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Типичные ширины">
+	<div class="dg-ctl" role="group" aria-label={W.typical}>
 		{#each marks as m (m)}<button type="button" aria-pressed={width === m} onclick={() => (width = m)}>{m}</button>{/each}
 	</div>
-	<div class="stage"><iframe title="Страница на выбранной ширине" sandbox="" style="width: {width}px" {srcdoc}></iframe></div>
+	<div class="stage"><iframe title={W.frame} sandbox="" style="width: {width}px" {srcdoc}></iframe></div>
 	<ul class="dg-out report">
-		<li>Медиазапрос <span class="dg-mono">min-width: 48rem</span> (768 px): <strong>{wide ? 'сработал, два столбца' : 'не сработал, один столбец'}</strong>.</li>
-		<li>Карточка в основном блоке: контейнер около {mainW} px, а порог контейнерного запроса 416 px (26rem): <strong>{mainW >= 416 ? 'горизонтальная' : 'вертикальная'}</strong>.</li>
-		<li>Карточка сбоку: контейнер около {asideW} px: <strong>{asideW >= 416 ? 'горизонтальная' : 'вертикальная'}</strong>.</li>
+		<li>{W.query} <span class="dg-mono">min-width: 48rem</span> (768 px): <strong>{wide ? W.fired : W.notFired}</strong>.</li>
+		<li>{W.cardMain} {mainW} px, {W.threshold}: <strong>{mainW >= 416 ? W.horizontal : W.vertical}</strong>.</li>
+		<li>{W.cardSide} {asideW} px: <strong>{asideW >= 416 ? W.horizontal : W.vertical}</strong>.</li>
 	</ul>
-	<p class="dg-out">Окно одно, а карточки ведут себя по-разному: каждая смотрит на ширину своего места. В этом разница между медиазапросом и контейнерным запросом.</p>
+	<p class="dg-out">{W.note}</p>
 </figure>
 
 <style>

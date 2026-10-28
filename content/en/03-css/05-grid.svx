@@ -1,0 +1,823 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/03-css/05-grid.svx. */
+	export const metadata = {
+		id: '03-css/05-grid',
+		part: 3,
+		order: 5,
+		title: 'Grid: a two-dimensional layout',
+		definition: 'CSS Grid is a two-dimensional layout mode: the container describes rows and columns, and its children fall into cells and named areas by themselves.',
+		summary:
+			'When you need rows and columns together, flexbox gets awkward, and grid solves the problem with one rule. Afterwards you’ll be able to describe a page layout with named areas and build a grid of cards that picks its own number of columns.',
+		minutes: 30,
+		teaches: ['css-grid'],
+		requires: ['css-flexbox'],
+		comic: {
+			panels: [
+				{ mood: 'explain', caption: 'A row, or a grid?', say: 'A menu, a header, an icon with a label: one row, so flexbox. When you need rows and columns together, call grid.' },
+				{ mood: 'hint', side: 'right', prop: 'phone', label: 'one column', say: 'repeat(auto-fit, minmax(14rem, 1fr)): the grid decides how many columns. Four on a wide screen, one on a narrow one.' },
+				{ mood: 'cheer', prop: 'editor', label: 'grid-template-areas', say: 'You can draw a layout in words: header, main, aside. For a phone, rewrite the words and leave the HTML alone.' }
+			]
+		},
+		practice: {
+			id: 'grid-layout',
+			title: 'The page layout and the card grid, in grid',
+			task: 'Let’s replace the hand-set widths with a grid. 1) On .layout, swap flex for display: grid, give it columns (for example minmax(0, 2fr) minmax(14rem, 1fr)) and name its areas with grid-template-areas: one row with main, then aside. 2) Put main into its area with grid-area: main, and aside into its area with grid-area: aside. 3) The cards .cards: display: grid, columns repeat(auto-fit, minmax(14rem, 1fr)), and a gap. Remove the flex properties from the cards and the layout: they have no job left.',
+			era: 4,
+			continues: 'flex-layout',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during office hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Your task in brief</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="privacy.html">privacy policy</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  flex: 2 1 28rem;
+  min-width: 0;
+}
+
+.layout aside {
+  flex: 1 1 14rem;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card {
+  flex: 1 1 14rem;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#zayavka">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="foto.jpg" width="160" height="160" alt="Photo: {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="zayavka">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/zayavka" method="post">
+            <p>
+              <label for="f-name">What should we call you</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during office hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is a good time to call</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">Your task in brief</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="privacy.html">privacy policy</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="skan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy policy</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+  grid-template-areas: "main aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+`
+			},
+			checks: [
+				{ id: 'layout-grid', kind: 'style', selector: '.layout', prop: 'display', equals: 'grid' },
+				{ id: 'layout-columns', kind: 'style', selector: '.layout', prop: 'grid-template-columns', matches: '^(?!none$).+' },
+				{ id: 'layout-areas', kind: 'style', selector: '.layout', prop: 'grid-template-areas', matches: '^(?!none$).+' },
+				{ id: 'main-area', kind: 'style', selector: 'main', prop: 'grid-area', matches: '^(?!auto).+' },
+				{ id: 'cards-grid', kind: 'style', selector: '.cards', prop: 'display', equals: 'grid', when: { brief: 'items[].title' } },
+				{ id: 'cards-columns', kind: 'style', selector: '.cards', prop: 'grid-template-columns', matches: '^(?!none$).+', when: { brief: 'items[].title' } },
+				{ id: 'cards-gap', kind: 'style', selector: '.cards', prop: 'gap', matches: '^(?!normal$|0px$|0$).+', when: { brief: 'items[].title' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each job with the tool that suits it better',
+				pairs: [
+					['A menu of five links in a row', 'flexbox: a single line'],
+					['A page layout: header, main, side, footer', 'grid: a layout by areas'],
+					['A grid of cards that picks its own number of columns', 'grid: auto-fit and minmax'],
+					['Aligning an icon and its label inside a button', 'flexbox: alignment along an axis']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does grid-template-columns: 2fr 1fr mean?',
+				options: [
+					'Two columns: the first is twice as wide as the second, and together they share all the free space',
+					'Two columns that are 2 and 1 pixel wide',
+					'Three columns'
+				],
+				answer: 0,
+				why: [
+					'Yes: fr (a fraction) is a share of the free space. There are three shares in all, and the first column gets two of them.',
+					'No: fr isn’t pixels, it’s a share of the space that is left.',
+					'No: the declaration has two columns.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)) do?',
+				options: [
+					'It makes as many columns as fit at a minimum of 14rem each, and stretches them to fill the free space',
+					'It always makes exactly 14 columns',
+					'It makes every column exactly 14rem wide and leaves the rest empty'
+				],
+				answer: 0,
+				why: [
+					'Yes. A wide screen gets several columns and a narrow one gets one: no media query and no hand-set number.',
+					'No: 14rem is a width, not a number of columns.',
+					'No: because of 1fr the columns stretch, they don’t stay at 14rem.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of grid-template-areas?',
+				options: [
+					'You draw the layout in words in quotes, one string per row',
+					'Items are placed into areas with grid-area',
+					'For a narrow screen you can rewrite the areas without touching the HTML',
+					'The order of items in the HTML has to match what is on screen, or nothing works'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the strings header header and main aside draw a layout with two columns.',
+					'Yes: grid-area: main puts an element into the area with that name.',
+					'Yes: new areas inside a media query are enough, and that is the strength of the method.',
+					'No: grid-area lets you place an element anywhere. But keyboard order follows the HTML, so it’s unwise to let the two drift far apart.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you set the space between the columns and rows of a grid?',
+				options: ['gap', 'margin on every item', 'padding on the container'],
+				answer: 0,
+				why: [
+					'Yes: gap has worked in grid from the start, and in flexbox too.',
+					'No: that’s the old way, and it leaves an extra margin after the last item.',
+					'No: padding insets from the container’s edges, not between the cells.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a container with the class g that holds six div blocks, styled with display: grid, three equal columns repeat(3, 1fr) and gap: 1rem.',
+				starter: '',
+				checks: [
+					{ id: 'six', kind: 'count', selector: '.g > div', min: 6 },
+					{ id: 'grid', kind: 'style', selector: '.g', prop: 'display', equals: 'grid' },
+					{ id: 'cols', kind: 'style', selector: '.g', prop: 'grid-template-columns', matches: '^(?!none$).+' },
+					{ id: 'gap', kind: 'style', selector: '.g', prop: 'gap', matches: '^(1rem|16px)' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'css-grid-what',
+				front: 'When do you use grid, and when flexbox?',
+				back: 'Grid for rows and columns at once (a page layout, a grid of cards). Flexbox for a single line (a menu, a header, an icon with a label).'
+			},
+			{
+				id: 'css-grid-fr',
+				front: 'What is fr?',
+				back: 'A share of the free space: columns of 2fr 1fr divide what is left in the proportion two to one.'
+			},
+			{
+				id: 'css-grid-autofit',
+				front: 'How do you make a grid that changes its number of columns by itself?',
+				back: 'grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)): as many columns as fit at a minimum of 14rem, stretched to fill the free space.'
+			},
+			{
+				id: 'css-grid-areas',
+				front: 'What is grid-template-areas?',
+				back: 'A layout drawn with area names in quotes, plus grid-area on the items. To rearrange the layout for a narrow screen, you rewrite only the areas.'
+			}
+		],
+		sources: [
+			{
+				title: 'CSS grid layout (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Grids',
+				licence: 'CC-BY-SA',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Basic concepts of grid layout (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout/Basic_concepts_of_grid_layout',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Grid (web.dev)', url: 'https://web.dev/learn/css/grid', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'A complete guide to grid (CSS-Tricks)', url: 'https://css-tricks.com/snippets/css/complete-guide-grid/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Grid Garden: a game', url: 'https://cssgridgarden.com/', licence: 'link-only', kind: 'course', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Learn CSS Grid the easy way (Kevin Powell)', url: 'https://www.youtube.com/watch?v=rg7Fvvl3taU', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Flexbox lines things up on one line. Now the page layout and the cards have to be arranged in two directions at once, and that’s what grid is for.',
+			hints: [
+				'The container: .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr); grid-template-areas: one row naming main and aside; gap: 2rem; }.',
+				'The children: .layout main { grid-area: main; } and .layout aside { grid-area: aside; }. The name in grid-area has to match the name in the areas string.',
+				'The cards: .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }. The flex property on .card isn’t needed any more.'
+			],
+			mistakes: {
+				'layout-grid': 'The .layout needs display: grid instead of flex.',
+				'layout-columns': 'The layout has no columns yet: grid-template-columns, for example minmax(0, 2fr) minmax(14rem, 1fr).',
+				'layout-areas': 'Draw the layout with areas: grid-template-areas with one row, main then aside.',
+				'main-area': 'The main block needs an area: grid-area: main.',
+				'cards-grid': 'The cards block .cards needs display: grid.',
+				'cards-columns': 'The cards have no columns yet: repeat(auto-fit, minmax(14rem, 1fr)).',
+				'cards-gap': 'The cards need a gap between them, for example 1rem.'
+			},
+			outro: 'The page is described by a grid: the layout in words, and cards that pick their own number of columns. This is the top of layout, and what’s left is to make it responsive.'
+		},
+		say: { CSS: 'C S S', grid: 'grid', fr: 'F R', 'grid-template-columns': 'grid template columns', 'grid-template-areas': 'grid template areas', 'grid-area': 'grid area', minmax: 'min max', repeat: 'repeat', 'auto-fit': 'auto fit', gap: 'gap', flexbox: 'flex box' }
+	};
+</script>
+
+<script>
+	import GridPlayground from '../../diagrams/GridPlayground.svelte';
+</script>
+
+## Rows and columns together
+
+Flexbox lines items up on a single line: a row or a column. But a page layout and a grid of cards are made of rows and columns at once. For those there is **grid**. It reached browsers later than flexbox, in 2017, so on our time machine 2014 to 2019 is a single era of responsive layout, and we’ll use the most modern tool.
+
+In grid you describe the grid on the container, and the children fall into the cells by themselves:
+
+```css
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+```
+
+Three equal columns with space between them. The main words:
+
+- a **track** is one column or one row;
+- a **line** is the boundary between tracks (lines are numbered from one);
+- a **cell** is the crossing of a row and a column;
+- an **area** is a rectangle made of several cells.
+
+## The fr unit and the functions
+
+- **fr** (fraction) is a share of the free space. `2fr 1fr` makes two columns, the first twice as wide as the second;
+- `repeat(3, 1fr)` means “three times 1fr”;
+- `minmax(14rem, 1fr)` means “no narrower than 14rem, but stretch to fill the free space”;
+- `auto-fit` inside `repeat()` means “as many columns as fit”.
+
+Put together, `repeat(auto-fit, minmax(14rem, 1fr))` gives a grid that decides its own number of columns: four on a wide screen, one on a narrow one, and no media query at all. Move the slider on the diagram and see.
+
+<GridPlayground />
+
+Notice `minmax(0, 2fr)` in the layout. A column of `1fr` has a hidden problem: it won’t shrink below its content, so one long word can push the column out past the edge. `minmax(0, …)` allows it to shrink.
+
+<details>
+<summary>Check yourself: what does repeat(auto-fit, minmax(14rem, 1fr)) mean?</summary>
+
+As many columns as fit at a minimum width of 14rem, stretched to fill the free space. The number of columns works itself out.
+
+</details>
+
+## A layout in words: areas
+
+The most vivid trick in grid is to describe a layout as text.
+
+```css
+.page {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-areas:
+    "header header"
+    "main   aside"
+    "footer footer";
+}
+
+.page > header { grid-area: header; }
+.page > main   { grid-area: main; }
+```
+
+The layout reads like a drawing, with words as the names of the areas. To rearrange it for a phone, you only rewrite `grid-template-areas` (one word per row) and leave the HTML alone. For our page we’ll draw just the main block and the side block.
+
+A warning about order. Grid lets you place a block anywhere, whatever its position in the HTML, but keyboard order and screen reader order follow the markup. If the picture drifts far from the HTML order, a keyboard user will jump around the page. Keep the HTML in the order a person should read it.
+
+## Flexbox or grid
+
+A simple rule: **one row or one column** means flexbox, and **rows and columns together** means grid. A menu, a header, an icon with a label: flexbox. A page layout, a grid of cards, a gallery: grid. They nest inside each other: grid for the frame of the page, flexbox inside a card. When in doubt, ask yourself: do I need items in different rows to line up in shared columns? If yes, grid.
+
+<details>
+<summary>Check yourself: what do you pick for a row of five menu items, and what for a grid of cards?</summary>
+
+Flexbox for the menu, because it’s one row. Grid for the cards, because they need rows and columns together.
+
+</details>
+
+## Practice
+
+You’re continuing the 2014 site. The flexbox layout works, but now you’ll replace it with grid. The layout needs columns and areas, and the cards need one line with `auto-fit`. The checks look at the properties of the containers, and at whether the main block has an area of its own.
+
+Drag the width of the window: the cards change their number of columns by themselves. Then compare: how many lines did you write for the layout in flexbox, and how many in grid? What became clearer?
+
+## What was wrong with 2014
+
+Before grid, people counted columns by hand: “this column is 31.5 percent and that one 65.5, because the rest is the gutter.” Frameworks such as Bootstrap offered a ready twelve-column grid and a crowd of `col-md-4` classes, and the markup turned into layers of wrappers. Today the grid lives in CSS, and the HTML stays meaningful.

@@ -7,36 +7,71 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			caption: 'Две колонки на float',
+			float: 'float у колонок',
+			clear: 'clear: both у подвала',
+			clearfix: 'clearfix у контейнера',
+			main: 'Основное: главная колонка с текстом страницы. Её высота зависит от текста.',
+			side: 'Боковая: контакты',
+			foot: 'Подвал',
+			stacked: 'Без float блоки идут друг под другом: каждый занимает всю строку. Колонок нет.',
+			collapsed:
+				'Колонки встали рядом, но контейнер (пунктир) схлопнулся: float «вынимает» блок из потока, и контейнеру не на что опереться. Подвал полез наверх и обтекает колонки. Включите clear или clearfix.',
+			cleared: 'Подвал получил clear: both и встал под обеими колонками. Контейнер при этом всё ещё схлопнут, и его рамка или фон не охватят колонки.',
+			fixed: 'Clearfix заставляет контейнер охватить свои плавающие блоки, и подвал оказывается под ними. Это и есть старый приём: для колонок он пригождался десять лет.',
+			today: 'Сегодня колонки делают flexbox и grid, где такой возни нет. А float остался для своей первой задачи: чтобы текст обтекал картинку.'
+		},
+		en: {
+			caption: 'Two columns made with float',
+			float: 'float on the columns',
+			clear: 'clear: both on the footer',
+			clearfix: 'clearfix on the container',
+			main: 'Main: the main column with the text of the page. Its height depends on the text.',
+			side: 'Side: contact details',
+			foot: 'Footer',
+			stacked: 'Without float the blocks sit one under another: each takes the whole line. There are no columns.',
+			collapsed:
+				'The columns now sit side by side, but the container (dashed) has collapsed: float takes a block out of the flow, so the container has nothing to rest on. The footer has climbed up and wraps around the columns. Turn on clear or clearfix.',
+			cleared: 'The footer has clear: both and sits below both columns. The container is still collapsed, though, so its border or background will not reach around the columns.',
+			fixed: 'The clearfix makes the container reach around its floated blocks, so the footer lands below them. That is the old trick, and for ten years it was how columns were made.',
+			today: 'Today flexbox and grid make columns, with none of this fuss. Float stays for its first job: letting text wrap around an image.'
+		}
+	});
 	let floated = $state(true);
 	let clear = $state(false);
 	let fix = $state(false);
 </script>
 
 <figure class="dg">
-	<figcaption>Две колонки на float</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
-		<label><input type="checkbox" bind:checked={floated} /> float у колонок</label>
-		<label><input type="checkbox" bind:checked={clear} /> clear: both у подвала</label>
-		<label><input type="checkbox" bind:checked={fix} /> clearfix у контейнера</label>
+		<label><input type="checkbox" bind:checked={floated} /> {W.float}</label>
+		<label><input type="checkbox" bind:checked={clear} /> {W.clear}</label>
+		<label><input type="checkbox" bind:checked={fix} /> {W.clearfix}</label>
 	</div>
 	<div class="wrap" class:fix>
 		<div class="cols" class:floated>
-			<div class="a">Основное: главная колонка с текстом страницы. Её высота зависит от текста.</div>
-			<div class="b">Боковая: контакты</div>
+			<div class="a">{W.main}</div>
+			<div class="b">{W.side}</div>
 		</div>
-		<div class="foot" class:clear>Подвал</div>
+		<div class="foot" class:clear>{W.foot}</div>
 	</div>
 	<p class="dg-out" aria-live="polite">
 		{#if !floated}
-			Без float блоки идут друг под другом: каждый занимает всю строку. Колонок нет.
+			{W.stacked}
 		{:else if !clear && !fix}
-			Колонки встали рядом, но контейнер (пунктир) схлопнулся: float «вынимает» блок из потока, и контейнеру не на что опереться. Подвал полез наверх и обтекает колонки. Включите clear или clearfix.
+			{W.collapsed}
 		{:else if clear && !fix}
-			Подвал получил clear: both и встал под обеими колонками. Контейнер при этом всё ещё схлопнут, и его рамка или фон не охватят колонки.
+			{W.cleared}
 		{:else}
-			Clearfix заставляет контейнер охватить свои плавающие блоки, и подвал оказывается под ними. Это и есть старый приём: для колонок он пригождался десять лет.
+			{W.fixed}
 		{/if}
-		Сегодня колонки делают flexbox и grid, где такой возни нет. А float остался для своей первой задачи: чтобы текст обтекал картинку.
+		{W.today}
 	</p>
 </figure>
 

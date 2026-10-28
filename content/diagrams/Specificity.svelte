@@ -9,23 +9,81 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the diagram's words are in `W`, one
+	// entry per edition. The colours are kept as internal ids; the person sees their names.
+	const W = pick({
+		ru: {
+			colours: { red: 'красный', blue: 'синий', green: 'зелёный', orange: 'оранжевый' } as Record<string, string>,
+			presets: ['Класс против тега', 'Id против класса', 'Поровну: решает порядок', '!important'],
+			cta: 'Записаться',
+			notSelector: 'не селектор',
+			noMatch: 'не подходит к ссылке',
+			wins: 'побеждает',
+			lostImportant: 'проиграло: у соперника !important',
+			lostSpec: 'проиграло: у соперника специфичность выше',
+			lostOrder: 'проиграло: при равной специфичности побеждает правило ниже по файлу',
+			caption: 'Все правила красят одну и ту же ссылку',
+			element: 'Элемент:',
+			inside: 'внутри',
+			oneProp: 'У каждого правила одно свойство:',
+			presetsLabel: 'Готовые наборы',
+			th: ['№', 'Селектор', 'color', '!important', 'Счёт (id, класс, тег)', 'Итог'],
+			selectorOf: (n: number) => `Селектор правила ${n}`,
+			colourOf: (n: number) => `Цвет правила ${n}`,
+			importantOf: (n: number) => `!important у правила ${n}`,
+			add: 'Добавить правило',
+			removeLast: 'Убрать последнее',
+			linkIs: 'Ссылка будет цвета:',
+			rule: 'правило',
+			none: 'Ни одно правило не подходит, и ссылка останется цвета по умолчанию.',
+			order: 'Порядок такой: сначала !important, потом специфичность, потом то, что ниже по файлу.'
+		},
+		en: {
+			colours: { red: 'red', blue: 'blue', green: 'green', orange: 'orange' } as Record<string, string>,
+			presets: ['Class against tag', 'Id against class', 'A tie: order decides', '!important'],
+			cta: 'Book now',
+			notSelector: 'not a selector',
+			noMatch: 'does not match the link',
+			wins: 'wins',
+			lostImportant: 'loses: the rival has !important',
+			lostSpec: 'loses: the rival is more specific',
+			lostOrder: 'loses: on equal specificity the later rule wins',
+			caption: 'Every rule colors the same link',
+			element: 'The element:',
+			inside: 'inside',
+			oneProp: 'Each rule sets one property:',
+			presetsLabel: 'Ready-made sets',
+			th: ['No.', 'Selector', 'color', '!important', 'Count (id, class, tag)', 'Result'],
+			selectorOf: (n: number) => `Selector of rule ${n}`,
+			colourOf: (n: number) => `Color of rule ${n}`,
+			importantOf: (n: number) => `!important on rule ${n}`,
+			add: 'Add a rule',
+			removeLast: 'Remove the last one',
+			linkIs: 'The link will be',
+			rule: 'rule',
+			none: 'No rule matches, so the link keeps its default color.',
+			order: 'The order is: !important first, then specificity, then whatever comes later in the file.'
+		}
+	});
 
 	type Rule = { id: number; selector: string; value: string; important: boolean };
-	const colours: Record<string, string> = { красный: '#b83226', синий: '#1f5fae', зелёный: '#2a7448', оранжевый: '#9c5508' };
+	const colours: Record<string, string> = { red: '#b83226', blue: '#1f5fae', green: '#2a7448', orange: '#9c5508' };
 	let uid = 10;
 	const mk = (selector: string, value: string, important = false): Rule => ({ id: uid++, selector, value, important });
 	const presets: { name: string; rules: () => Rule[] }[] = [
-		{ name: 'Класс против тега', rules: () => [mk('nav a', 'зелёный'), mk('.button', 'синий'), mk('a', 'красный')] },
-		{ name: 'Id против класса', rules: () => [mk('#cta', 'оранжевый'), mk('header nav .button', 'синий')] },
-		{ name: 'Поровну: решает порядок', rules: () => [mk('.button', 'красный'), mk('nav a', 'зелёный'), mk('a.button', 'синий')] },
-		{ name: '!important', rules: () => [mk('a', 'красный', true), mk('#cta', 'синий')] }
+		{ name: W.presets[0], rules: () => [mk('nav a', 'green'), mk('.button', 'blue'), mk('a', 'red')] },
+		{ name: W.presets[1], rules: () => [mk('#cta', 'orange'), mk('header nav .button', 'blue')] },
+		{ name: W.presets[2], rules: () => [mk('.button', 'red'), mk('nav a', 'green'), mk('a.button', 'blue')] },
+		{ name: W.presets[3], rules: () => [mk('a', 'red', true), mk('#cta', 'blue')] }
 	];
 	let rules = $state<Rule[]>(presets[0].rules());
 	let ready = $state(false);
 	let el: HTMLElement | null = null;
 	onMount(() => {
 		const header = document.createElement('header');
-		header.innerHTML = '<nav><a class="button" id="cta" href="#">Записаться</a></nav>';
+		header.innerHTML = `<nav><a class="button" id="cta" href="#">${W.cta}</a></nav>`;
 		el = header.querySelector('a');
 		ready = true;
 	});
@@ -82,21 +140,21 @@
 		});
 	});
 	const why = (x: (typeof rows)[number]) => {
-		if (!x.ok) return 'не селектор';
-		if (!x.hit) return 'не подходит к ссылке';
-		if (winner && x.r.id === winner.r.id) return 'побеждает';
-		if (winner && x.r.important !== winner.r.important) return 'проиграло: у соперника !important';
+		if (!x.ok) return W.notSelector;
+		if (!x.hit) return W.noMatch;
+		if (winner && x.r.id === winner.r.id) return W.wins;
+		if (winner && x.r.important !== winner.r.important) return W.lostImportant;
 		const c = winner ? cmp(x.s, winner.s) : 0;
-		return c < 0 ? 'проиграло: у соперника специфичность выше' : 'проиграло: при равной специфичности побеждает правило ниже по файлу';
+		return c < 0 ? W.lostSpec : W.lostOrder;
 	};
 </script>
 
 <figure class="dg">
-	<figcaption>Все правила красят одну и ту же ссылку</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<p class="dg-out">
-		Элемент: <span class="dg-mono">&lt;a class="button" id="cta"&gt;</span> внутри <span class="dg-mono">nav</span> внутри <span class="dg-mono">header</span>. У каждого правила одно свойство: <span class="dg-mono">color</span>.
+		{W.element} <span class="dg-mono">&lt;a class="button" id="cta"&gt;</span> {W.inside} <span class="dg-mono">nav</span> {W.inside} <span class="dg-mono">header</span>. {W.oneProp} <span class="dg-mono">color</span>.
 	</p>
-	<div class="dg-ctl" role="group" aria-label="Готовые наборы">
+	<div class="dg-ctl" role="group" aria-label={W.presetsLabel}>
 		{#each presets as p (p.name)}
 			<button type="button" onclick={() => (rules = p.rules())}>{p.name}</button>
 		{/each}
@@ -104,19 +162,19 @@
 	<div class="wrap">
 		<table>
 			<thead>
-				<tr><th scope="col">№</th><th scope="col">Селектор</th><th scope="col">color</th><th scope="col">!important</th><th scope="col">Счёт (id, класс, тег)</th><th scope="col">Итог</th></tr>
+				<tr>{#each W.th as h (h)}<th scope="col">{h}</th>{/each}</tr>
 			</thead>
 			<tbody>
 				{#each rows as x, i (x.r.id)}
 					<tr class:win={winner?.r.id === x.r.id} class:off={!x.hit}>
 						<th scope="row">{i + 1}</th>
-						<td><input type="text" aria-label="Селектор правила {i + 1}" bind:value={x.r.selector} spellcheck="false" /></td>
+						<td><input type="text" aria-label={W.selectorOf(i + 1)} bind:value={x.r.selector} spellcheck="false" /></td>
 						<td>
-							<select aria-label="Цвет правила {i + 1}" bind:value={x.r.value}>
-								{#each Object.keys(colours) as c (c)}<option>{c}</option>{/each}
+							<select aria-label={W.colourOf(i + 1)} bind:value={x.r.value}>
+								{#each Object.keys(colours) as c (c)}<option value={c}>{W.colours[c]}</option>{/each}
 							</select>
 						</td>
-						<td><input type="checkbox" aria-label="!important у правила {i + 1}" bind:checked={x.r.important} /></td>
+						<td><input type="checkbox" aria-label={W.importantOf(i + 1)} bind:checked={x.r.important} /></td>
 						<td class="dg-mono">{x.ok ? `(${x.s.join(', ')})` : '—'}</td>
 						<td>{why(x)}</td>
 					</tr>
@@ -125,16 +183,16 @@
 		</table>
 	</div>
 	<div class="dg-ctl">
-		<button type="button" onclick={() => (rules = [...rules, mk('.button', 'красный')])}>Добавить правило</button>
-		{#if rules.length > 1}<button type="button" onclick={() => (rules = rules.slice(0, -1))}>Убрать последнее</button>{/if}
+		<button type="button" onclick={() => (rules = [...rules, mk('.button', 'red')])}>{W.add}</button>
+		{#if rules.length > 1}<button type="button" onclick={() => (rules = rules.slice(0, -1))}>{W.removeLast}</button>{/if}
 	</div>
 	<p class="dg-out" aria-live="polite">
 		{#if winner}
-			Ссылка будет цвета: <strong class="swatch" style="color: {colours[winner.r.value]}">{winner.r.value}</strong> (правило {winner.order + 1}: <span class="dg-mono">{winner.r.selector}</span>).
+			{W.linkIs} <strong class="swatch" style="color: {colours[winner.r.value]}">{W.colours[winner.r.value]}</strong> ({W.rule} {winner.order + 1}: <span class="dg-mono">{winner.r.selector}</span>).
 		{:else}
-			Ни одно правило не подходит, и ссылка останется цвета по умолчанию.
+			{W.none}
 		{/if}
-		Порядок такой: сначала !important, потом специфичность, потом то, что ниже по файлу.
+		{W.order}
 	</p>
 </figure>
 
