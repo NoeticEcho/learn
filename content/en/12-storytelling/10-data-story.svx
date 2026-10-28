@@ -1,0 +1,309 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/10-data-story.svx. */
+	export const metadata = {
+		id: '12-storytelling/10-data-story',
+		part: 12,
+		order: 10,
+		title: 'A story told with data: the conclusion headline and one accent',
+		definition: 'Data storytelling joins numbers, a conclusion and a way of showing them: the title states the point, one accent marks the key, text describes it.',
+		summary:
+			'You’ll learn to turn numbers into a story: choose the main point, put it in the title, highlight one thing and make the chart accessible to people who can’t see it. Afterwards you have a chart of your own data with a conclusion in the title and a text alternative.',
+		minutes: 25,
+		teaches: ['story-data-story'],
+		requires: ['story-three-act'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'by quarter', caption: 'A caption as a title', say: '“Time to settle a matter, by quarter” just labels the axes. So what is the conclusion?' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'the conclusion', say: 'Better: “Now it takes two weeks, not half a year”. Two numbers can simply be written large: no chart needed.' },
+				{ mood: 'hint', prop: 'sheet', label: 'scale from zero', caption: 'Honesty', say: 'Bars start at zero: a cut scale turns three percent into a cliff. And meaning must not rest on color alone.' }
+			]
+		},
+		practice: {
+			id: 'story-data',
+			title: 'A chart with a conclusion',
+			task: 'Build a bar chart from your project’s numbers (times, prices, counts). Label the rows with the names of your services or products from the brief, and write a value in each. The chart title must be a conclusion with a number or a comparison, not the names of the axes. Highlight one bar with color and leave the others gray. Give a source and a date, and write a text alternative in one or two sentences. Replace every “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <style>
+      body { color: #1f2933; background: #ffffff; font-family: sans-serif; }
+      .bars { list-style: none; padding: 0; }
+      .bar-row { display: flex; gap: 0.75rem; align-items: center; margin: 0.4rem 0; }
+      .label { flex: 0 0 14rem; color: #1f2933; }
+      .bar { display: block; height: 1.1rem; background: #7b8794; }
+      .bar.accent { background: #b43403; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <figure id="chart">
+        <figcaption class="headline">…</figcaption>
+        <ul class="bars">
+          <li class="bar-row"><span class="label">…</span><span class="bar" style="width: 20%"></span><span class="value">…</span></li>
+          <li class="bar-row"><span class="label">…</span><span class="bar" style="width: 40%"></span><span class="value">…</span></li>
+          <li class="bar-row"><span class="label">…</span><span class="bar" style="width: 60%"></span><span class="value">…</span></li>
+        </ul>
+        <p class="source">Source: …</p>
+        <p class="alt" id="chart-alt">…</p>
+      </figure>
+    </main>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <style>
+      body { color: #1f2933; background: #ffffff; font-family: sans-serif; }
+      .bars { list-style: none; padding: 0; }
+      .bar-row { display: flex; gap: 0.75rem; align-items: center; margin: 0.4rem 0; }
+      .label { flex: 0 0 14rem; color: #1f2933; }
+      .bar { display: block; height: 1.1rem; background: #7b8794; }
+      .bar.accent { background: #b43403; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <figure id="chart">
+        <figcaption class="headline">The fastest service takes 2 days, and the slowest takes 10 times longer</figcaption>
+        <ul class="bars">
+          <li class="bar-row"><span class="label">{{items.0.title}}</span><span class="bar accent" style="width: 10%"></span><span class="value">2 days</span></li>
+          <li class="bar-row"><span class="label">{{items.1.title}}</span><span class="bar" style="width: 50%"></span><span class="value">10 days</span></li>
+          <li class="bar-row"><span class="label">{{items.0.title}} and {{items.1.title}}</span><span class="bar" style="width: 100%"></span><span class="value">20 days</span></li>
+        </ul>
+        <p class="source">Source: our own figures for 2025.</p>
+        <p class="alt" id="chart-alt">The time runs from 2 days for the fastest service to 20 days for the slowest: a tenfold difference.</p>
+      </figure>
+    </main>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#chart', matches: '^[^…]*$' },
+				{ id: 'headline-conclusion', kind: 'text', selector: '#chart figcaption.headline', matches: '^(?=[\\s\\S]*(?:\\d|times|twice|half|halved|doubled|tripled|shorter|faster|cheaper|longer|fewer|more|less|fell|rose|grew|dropped|cut|reduced|cheapest|fastest|slowest))\\s*(\\S+\\s+){3}\\S+' },
+				{ id: 'rows', kind: 'count', selector: '#chart li.bar-row', min: 3 },
+				{ id: 'labels-from-brief', kind: 'field', selector: '#chart .label', field: 'items[].title', min: 2, when: { brief: 'items[].title' } },
+				{ id: 'values-have-numbers', kind: 'text', selector: '#chart ul.bars', matches: '^(?=[\\s\\S]*\\d)' },
+				{ id: 'one-accent', kind: 'count', selector: '#chart .bar.accent', min: 1, max: 1 },
+				{ id: 'source', kind: 'text', selector: '#chart p.source', matches: '^\\s*Source:\\s*\\S+[\\s\\S]*\\d' },
+				{ id: 'alt-text', kind: 'text', selector: '#chart-alt', matches: '^(?=[\\s\\S]*\\d)\\s*(\\S+\\s+){7}\\S+' },
+				{ id: 'label-contrast', kind: 'contrast', selector: '#chart .label', min: 4.5 }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Which chart title is better?',
+				options: [
+					'“Time to settle a matter, by quarter”',
+					'“Settling a matter now takes two weeks, down from half a year”',
+					'“Chart”'
+				],
+				answer: 1,
+				why: [
+					'No: that names the axes, and readers have to draw the conclusion themselves.',
+					'Yes: the title says what to see. The chart proves it.',
+					'No: that tells nobody anything.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What helps readers see the main thing on a chart quickly?',
+				options: [
+					'One color accent, everything else neutral',
+					'Labels right at the bars',
+					'Ten different colors for beauty',
+					'Removing needless lines and frames'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: the eye goes straight to what is highlighted.',
+					'Yes: no need to jump between a bar and a legend.',
+					'No: when everything is highlighted, nothing is.',
+					'Yes: less noise, and the point shows.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of preparing a data story in order',
+				items: ['Choose one point', 'Choose a fitting chart', 'Remove the clutter and highlight the key', 'Write the conclusion title and the text alternative']
+			},
+			{
+				type: 'single',
+				prompt: 'Why does a chart need a text alternative?',
+				options: [
+					'So the conclusion is available to people who can’t see the chart: screen reader users, or anyone with images switched off',
+					'To make the page longer',
+					'It is only needed for search engines'
+				],
+				answer: 0,
+				why: [
+					'Yes: the alternative repeats the gist of the chart in words. It also helps anyone who is simply in a hurry. WCAG 1.1.1 asks for it.',
+					'No: the aim isn’t length but access.',
+					'No: search engines benefit too, but the point is people.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Where should the scale of a bar chart start?',
+				options: [
+					'At zero: otherwise a small difference looks huge',
+					'At any number, as long as it looks good',
+					'At the maximum'
+				],
+				answer: 0,
+				why: [
+					'Yes: a truncated scale on bars distorts the impression, and it is a well-known trick of misleading charts.',
+					'No: truncating the scale misleads.',
+					'No: the bars could not be compared that way.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match the chart to the question',
+				pairs: [
+					['Compare several quantities', 'bars'],
+					['Show change over time', 'a line'],
+					['Show two numbers', 'two large numbers in the text'],
+					['Give exact values', 'a table']
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-data-headline', front: 'What should a chart title be like?', back: 'A conclusion: “The time fell by two thirds”, not the names of the axes. The chart proves the conclusion.' },
+			{ id: 'story-data-accent', front: 'How many accents does a chart have?', back: 'One (a color or a frame). The rest is neutral, with labels at the bars themselves and no needless lines.' },
+			{ id: 'story-data-alt', front: 'Why a text alternative?', back: 'So the conclusion is available to those who can’t see the chart, and to hurried readers. One or two sentences with the main number.' },
+			{ id: 'story-data-honest', front: 'How do you avoid misleading with a chart?', back: 'Bars start at zero, the same measure in “before” and “after”, the source and date beside it, and no picking of only convenient points.' }
+		],
+		sources: [
+			{ title: 'storytelling with data: Cole Nussbaumer Knaflic’s blog', url: 'https://www.storytellingwithdata.com/blog', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Datawrapper Blog: how to make charts and data stories', url: 'https://www.datawrapper.de/blog/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Misleading graph (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Misleading_graph', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Complex images, text alternatives (W3C WAI)', url: 'https://www.w3.org/WAI/tutorials/images/complex/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Understanding WCAG 2.2: non-text content (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Understanding WCAG 2.2: use of color (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [
+			{ title: 'How to turn data into stories (storytelling with data)', url: 'https://www.youtube.com/watch?v=Hfx1X9WSGYQ', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now you’ll turn a few numbers into a story: with a conclusion in the title, one accent and a description in words for people who can’t see the picture.',
+			hints: [
+				'First decide what you want to say. Then write it as the title: “…three times faster”, “…the best value”.',
+				'Label the rows with the names of your services or products and write each value. Fit the bar lengths to the numbers: the largest is 100%.',
+				'The accent is one bar with the class accent. Leave the others gray. The alternative repeats the conclusion in words, with the main number.'
+			],
+			mistakes: {
+				'no-blanks': 'There’s an ellipsis “…” left somewhere. Fill in all the labels, values and the title.',
+				'headline-conclusion': 'The title must be a conclusion: at least four words with a number or a comparison (“10 times”, “longer”, “fell”).',
+				rows: 'The chart needs at least three rows.',
+				'labels-from-brief': 'Label at least two rows with names of services or products from your brief.',
+				'values-have-numbers': 'The rows need numerical values.',
+				'one-accent': 'There must be exactly one highlighted bar: the class accent on one bar.',
+				source: 'Give a source and a date or year: “Source: …, 2025”.',
+				'alt-text': 'Write the alternative in at least eight words, with the main number.',
+				'label-contrast': 'The labels are hard to read: dark text on a light background gives the needed contrast.'
+			},
+			outro: 'Now your numbers speak instead of lying in a table. The next lesson is about showing a long story by scrolling without losing people who dislike animation.'
+		},
+		say: { W3C: 'W 3 C', WAI: 'way', WCAG: 'wuh-KAG' }
+	};
+</script>
+
+<script>
+	import DataThreeWays from '../../diagrams/DataThreeWays.svelte';
+</script>
+
+## Numbers don’t speak for themselves
+
+Every project has numbers: times, prices, how much was done. It is easy to put them in a table, and they will lie there until the reader works out what they mean. **Data storytelling** is three things together: the data itself, the **conclusion** (what it is about) and the presentation (how it is shown). Books on it give different formulas, and the best known is Cole Nussbaumer Knaflic’s *storytelling with data* (2015), but the point is the same: a chart should hold an idea, and the reader shouldn’t have to hunt for it.
+
+Look at the diagram: the same five numbers are shown in three ways.
+
+<DataThreeWays />
+
+<details>
+<summary>Check yourself: how do the first and second presentations differ?</summary>
+
+The second has a conclusion in the title and one accent. In the first, readers look for the main thing themselves.
+
+</details>
+
+## Step 1: one idea
+
+Start with a question: “What should a person take away from this picture?” The answer should be one sentence. If there are two, they are two charts.
+
+A good chart title is a **conclusion**, not a caption for the axes.
+
+- Weak: “Time to settle a matter, by quarter”.
+- Stronger: “Settling a matter now takes two weeks, down from half a year”.
+
+A reader who has read the title already knows the answer. The chart is there so they can be sure.
+
+## Step 2: a fitting shape
+
+Not every number needs drawing. A short rule for a site.
+
+- **Two numbers.** Write them large in the text: “it was 6 months, now it’s 2 weeks”. A chart is excess.
+- **Comparing several quantities.** Bars: readers compare their lengths fastest.
+- **Change over time.** A line, or bars by year.
+- **Exact values.** A table.
+
+Pie charts with many slices read worse than bars: comparing angles is harder than comparing lengths.
+
+## Step 3: remove the clutter, highlight one thing
+
+A good chart is like a good photograph: there is little in it that isn’t needed. What can go: frames, a grid, depth (“3D”), a legend if the labels can sit right at the bars. What stays: the numbers and the names.
+
+Then highlight **one thing**: with color, a frame or an arrow. The highlighted part draws the eye, and the gray rest serves as background. If three bars are highlighted, you have highlighted everything, which means nothing.
+
+## Step 4: honesty
+
+A chart persuades faster than text, and that is easy to abuse. A few rules.
+
+- **The scale of bars starts at zero.** If you “cut off” the start of the scale, a three percent difference looks like a cliff. That is how misleading charts are made.
+- **Compare the same thing.** Measure “time before” and “time after” in the same way.
+- **Show the source and the date.** “Our figures, 2025, 40 requests”.
+- **Don’t pick convenient points.** If you show the best month and say nothing of the others, the reader works it out later.
+- **Small samples.** Don’t write “on average” over ten cases. Write “in ten cases”.
+
+In the US, the FTC treats a chart in an advertisement like any other claim: it must not mislead, and you need evidence for what it implies. In the UK, the CAP Code asks the same of numbers and charts in marketing. This is general information, not legal advice.
+
+<details>
+<summary>Check yourself: why mustn’t the scale of bars be “cut”?</summary>
+
+The length of a bar reads as the size of a quantity. A cut scale makes a small difference huge and misleads the reader.
+
+</details>
+
+## Step 5: access
+
+Some readers won’t see the chart: a person with low vision, a screen reader user, someone whose image didn’t load. They need a **text alternative**: one or two sentences with the main number (“The time fell from 180 days to 14: 13 times shorter”). Detailed tables and complex charts are covered by the W3C in its guide to complex images (the link is at the end), and the Web Content Accessibility Guidelines ask for the alternative (success criterion 1.1.1). In the US the ADA is often applied to websites through these guidelines, and in the EU the European Accessibility Act points to the same standard; the quality and law part comes back to this.
+
+Remember color, too. If a value is given by color alone (“the bad ones are in red”), a person with a color vision deficiency won’t see it (criterion 1.4.1). Add a label or another shape. Labels must have enough contrast.
+
+In the practice you will build the chart not as a picture but with ordinary page elements: bars and labels. Every program can see it, it reads without loading anything, and it can be checked.
+
+## Practice
+
+Build a bar chart about your project.
+
+1. **Numbers.** Take the times, prices or counts of your services or products. Don’t invent exact figures if you don’t know them: for a practice page, estimates are fine, but say so in the source.
+2. **Rows.** Label each bar with the name of your service from the brief and write its value. Set the length as a percentage of the largest.
+3. **Title.** A conclusion with a number or a comparison.
+4. **Accent.** One. The class `accent` on one bar.
+5. **Source and date.**
+6. **Alternative.** One or two sentences with the main number.
+
+If numbers don’t suit your project, take imaginary ones, but mark them in the source, as is done in the diagram above.

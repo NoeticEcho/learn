@@ -1,0 +1,332 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/09-case-study.svx. */
+	export const metadata = {
+		id: '12-storytelling/09-case-study',
+		part: 12,
+		order: 9,
+		title: 'The case study: STAR, and before and after',
+		definition: 'A case study is a working case told as proof, in the STAR form: situation, task, action, result. A “before and after” compares one and the same quantity.',
+		summary:
+			'You’ll learn to present a working case as proof: situation, task, action, result and an honest “before and after”. Afterwards you have one case study of your service from which the client can’t be identified, and you know what a case study must never reveal.',
+		minutes: 30,
+		teaches: ['story-case-study'],
+		requires: ['story-abt', 'story-brand-story'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'situation|task|steps|result', caption: 'A STAR case', say: 'What the person came with, what had to be done, what you did, how it ended. Give the result a number if there is one.' },
+				{ mood: 'hint', side: 'right', prop: 'sheet', label: 'before / after', say: 'Name only what you measured. No number? Say so. And write “in this case”, not “this is what you’ll get”.' },
+				{ mood: 'hmm', prop: 'lock', label: 'no names', caption: 'The first rule', say: 'A case study is a real person’s story. Remove the name, phone, address. Doing no harm beats a good story.' }
+			]
+		},
+		practice: {
+			id: 'story-case',
+			title: 'A case study of your service',
+			task: 'Fill in one entry of a “Cases” collection, as in a headless CMS: title, a service from your brief, situation, task, at least three actions, result, term and a “before and after” block. Include no personal data: no names, phone numbers, emails, addresses, case numbers or parcel numbers. The result is measurable (a number, a time) or honestly described without a number. Leave the main-action button. Replace every “…”.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <article class="case" id="case" data-collection="cases">
+        <h2 class="case-title">…</h2>
+        <p>Service: <span id="case-service">…</span></p>
+        <dl>
+          <dt>Situation</dt>
+          <dd class="situation">…</dd>
+          <dt>Task</dt>
+          <dd class="task">…</dd>
+          <dt>Actions</dt>
+          <dd class="actions">
+            <ol>
+              <li>…</li>
+              <li>…</li>
+              <li>…</li>
+            </ol>
+          </dd>
+          <dt>Result</dt>
+          <dd class="result">…</dd>
+          <dt>Term</dt>
+          <dd class="term">…</dd>
+        </dl>
+        <div class="before-after">
+          <p class="before">Before: …</p>
+          <p class="after">After: …</p>
+        </div>
+        <p><a class="cta" href="#contact">{{mainAction.label}}</a></p>
+      </article>
+    </main>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <article class="case" id="case" data-collection="cases">
+        <h2 class="case-title">A question that hung for half a year and closed in two weeks</h2>
+        <p>Service: <span id="case-service">{{items.0.title}}</span></p>
+        <dl>
+          <dt>Situation</dt>
+          <dd class="situation">A person came with a question they had tried unsuccessfully to settle on their own for about half a year.</dd>
+          <dt>Task</dt>
+          <dd class="task">Work through the documents and prepare a result that would be accepted without objection.</dd>
+          <dt>Actions</dt>
+          <dd class="actions">
+            <ol>
+              <li>We collected and cross-checked all the documents.</li>
+              <li>We went to the site and took the necessary measurements.</li>
+              <li>We prepared the report and explained it step by step.</li>
+            </ol>
+          </dd>
+          <dt>Result</dt>
+          <dd class="result">The question was closed and the result accepted the first time (no number: the outcome itself wasn’t measured).</dd>
+          <dt>Term</dt>
+          <dd class="term">14 days.</dd>
+        </dl>
+        <div class="before-after">
+          <p class="before">Before: half a year of uncertainty and 6 fruitless visits.</p>
+          <p class="after">After: one clear result and a plan for what comes next.</p>
+        </div>
+        <p><a class="cta" href="#contact">{{mainAction.label}}</a></p>
+      </article>
+    </main>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#case', matches: '^[^…]*$' },
+				{ id: 'service-from-brief', kind: 'field', selector: '#case-service', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'star-four', kind: 'count', selector: '#case dd.situation, #case dd.task, #case dd.actions, #case dd.result', min: 4 },
+				{ id: 'situation', kind: 'text', selector: '#case dd.situation', matches: '^\\s*(\\S+\\s+){7}\\S+' },
+				{ id: 'task', kind: 'text', selector: '#case dd.task', matches: '^\\s*(\\S+\\s+){5}\\S+' },
+				{ id: 'actions', kind: 'count', selector: '#case dd.actions li', min: 3 },
+				{ id: 'result-measured', kind: 'text', selector: '#case dd.result', matches: '\\d|[Nn]o number|[Nn]ot measured|[Ww]ithout a number' },
+				{ id: 'term', kind: 'text', selector: '#case dd.term', matches: '\\d' },
+				{ id: 'before', kind: 'text', selector: '#case p.before', matches: '^\\s*Before:\\s*(\\S+\\s+){3}\\S+' },
+				{ id: 'after', kind: 'text', selector: '#case p.after', matches: '^\\s*After:\\s*(\\S+\\s+){3}\\S+' },
+				{ id: 'no-personal-data', kind: 'text', selector: '#case', matches: '^(?![\\s\\S]*(?:@|\\+?\\d[\\d\\s()-]{8,}\\d|[Cc]ase\\s*(?:No\\.?|#|number)|\\bAPN\\b|[Pp]arcel\\s*(?:No\\.?|number|#|ID)|\\b\\d+\\s+[A-Z][a-z]+(?:\\s[A-Z][a-z]+)?\\s+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Way|Court|Ct)\\b))[\\s\\S]*$' },
+				{ id: 'cta-guard', kind: 'field', selector: '#case a.cta', field: 'mainAction.label' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the parts of a case study in STAR order',
+				items: ['Situation', 'Task', 'Action', 'Result']
+			},
+			{
+				type: 'single',
+				prompt: 'Where does the STAR pattern come from?',
+				options: [
+					'From interview technique: telling a case from experience in four parts',
+					'From advertising of the 1950s',
+					'From the HTML standard'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is used for résumés and for case studies on sites because it forces an answer to “what was there, what was done, how did it end”.',
+					'No: the pattern comes from behavioral interviews and the assessment of experience.',
+					'No: it has nothing to do with HTML.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these must not stay in a case study without the person’s consent?',
+				options: [
+					'The client’s first and last name',
+					'A phone number, an email, an address',
+					'A parcel number and a court case number',
+					'The general phrase “a landowner in the suburbs”'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: a name identifies a person directly.',
+					'Yes: these are direct identifiers.',
+					'Yes: with these numbers a person can be found in public records.',
+					'No: a generalization is safe, as long as the combination of details still can’t point to the person.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What counts as personal data under the GDPR?',
+				options: [
+					'Any information relating to an identified or identifiable person, directly or indirectly',
+					'Only passport data',
+					'Only what the person signed themselves'
+				],
+				answer: 0,
+				why: [
+					'Yes (Article 4(1)): including indirect details by which a person can be identified. So “anonymize” means removing the indirect clues too.',
+					'No: the definition is far wider than a passport.',
+					'No: a signature is not needed for data to count as personal.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you honestly describe a result if there is no number?',
+				options: [
+					'Say the result wasn’t measured with a number, and describe the outcome in words',
+					'Invent a plausible number',
+					'Don’t mention the result'
+				],
+				answer: 0,
+				why: [
+					'Yes: an honest “we didn’t measure it” earns more trust than a handsome figure.',
+					'No: invented numbers are deception, and in advertising they can also break the rules.',
+					'No: without a result a case study loses its point.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A case study shows an unusually good result. What do the FTC’s Endorsement Guides expect of an ad that uses it?',
+				options: [
+					'Either substantiation that it is typical, or a clear disclosure of the generally expected result; “results not typical” alone isn’t enough',
+					'Nothing, if the case is real',
+					'Only a small-print disclaimer at the bottom of the page'
+				],
+				answer: 0,
+				why: [
+					'Yes: 16 CFR 255.2(b). The point is to avoid promising a typical result the ad can’t support.',
+					'No: a real case can still mislead if it suggests a result most people won’t get.',
+					'No: a disclosure has to be clear and conspicuous, and fine print doesn’t qualify.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-star', front: 'What is STAR?', back: 'Situation, Task, Action, Result. Four questions to ask of a working case.' },
+			{ id: 'story-before-after', front: 'How do you make a “before and after” honest?', back: 'Compare one and the same quantity (a time, a number of visits), name only what was measured, and if there is no number, say so.' },
+			{ id: 'story-anonymise', front: 'What do you remove from a case study?', back: 'The name, phone, email, address, case numbers and parcel numbers, and also rare combinations of details by which the person could be recognized.' },
+			{ id: 'story-case-no-guarantee', front: 'Can you write that the result is always like this?', back: 'No. One case is not a guarantee. Write “in this case”, not “this is what you’ll get”.' }
+		],
+		sources: [
+			{ title: 'Situation, task, action, result (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Situation,_task,_action,_result', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'GDPR Article 4: definitions, including “personal data”', url: 'https://gdpr-info.eu/art-4-gdpr/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'GDPR Recital 26: anonymous information', url: 'https://gdpr-info.eu/recitals/no-26/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'ICO: anonymisation guidance (UK)', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-sharing/anonymisation/about-this-guidance/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: '16 CFR Part 255: Guides concerning the use of endorsements and testimonials in advertising (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-255', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: '45 CFR 164.514: HIPAA de-identification (eCFR)', url: 'https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-C/part-164/subpart-E/section-164.514', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Attorney–client privilege (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Attorney%E2%80%93client_privilege', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you’ll present one working case as proof. Two things matter: the facts, and the safety of the people you write about.',
+			hints: [
+				'Take a real or typical case of your service. Four parts: situation, task, actions (at least three), result.',
+				'A result with a number (a time, a count) is best. If there is no number, write “no number” and describe the outcome in words.',
+				'Read the text as a stranger: could I find the person from it? Remove names, addresses, case numbers and phones.'
+			],
+			mistakes: {
+				'no-blanks': 'There’s an ellipsis “…” left somewhere. Fill in all the fields.',
+				'service-from-brief': 'The “Service” field has to hold a service or product from your brief.',
+				'star-four': 'The case study must keep four fields: situation, task, actions, result.',
+				situation: 'Describe the situation in more detail: at least eight words.',
+				task: 'Describe the task in at least six words.',
+				actions: 'You need at least three actions, as a list.',
+				'result-measured': 'The result needs a figure or an honest “no number”. Describe how it ended.',
+				term: 'The “Term” field needs a figure: how many days, weeks or months.',
+				before: 'In the “Before:” line, describe the position before the work in at least four words.',
+				after: 'In the “After:” line, describe the position after the work in at least four words.',
+				'no-personal-data': 'The case study still holds data that could lead to a person: an email, a phone number, an address, a case number or a parcel number. Remove them.',
+				'cta-guard': 'The main-action button has to stay on the page.'
+			},
+			outro: 'You have a case study from which the client can’t be identified. It speaks for you better than the words “experienced” and “reliable”. Next we look at how to tell numbers.'
+		},
+		say: { STAR: 'star', GDPR: 'G D P R', CMS: 'C M S', HIPAA: 'HIP-uh', FTC: 'F T C' }
+	};
+</script>
+
+<script>
+	import CaseFrame from '../../diagrams/CaseFrame.svelte';
+</script>
+
+## Proof in the form of a story
+
+We have said it already: a story persuades more strongly than a list because it ties events together. A **case study** is such a story about a working case, one that serves as proof: “here is what we did for someone like you”. Good case studies often persuade better than any assurances, because they show the process and the result.
+
+But a case study is also a responsibility. You are publishing the story of a real person, and readers believe you exactly as far as you are precise in it. So two things are needed: **an honest form** and **the safety of the people you write about**.
+
+## The STAR form
+
+A simple framework for a case study is called **STAR**, from the first letters of four words: **S**ituation, **T**ask, **A**ction, **R**esult.
+
+1. **Situation.** What the person came with. Who they are (in general terms) and what position they were in.
+2. **Task.** What had to be done and what stood in the way: a deadline, a law, a constraint.
+3. **Action.** What you did. Three or four steps, each with a clear reason.
+4. **Result.** How it ended. With a number, if there is one.
+
+The framework wasn’t invented for sites: it is used for telling stories in job interviews, because it forces an answer to “what was there, what did I do, how did it end”. For a case study on a site it is worth adding a **term** and a **“before and after”**.
+
+<details>
+<summary>Check yourself: what are the four parts of STAR?</summary>
+
+Situation, task, action, result.
+
+</details>
+
+## “Before and after”
+
+The shortest proof is a pair: **“Before:”** and **“After:”**. But the pair has a condition: you must compare **one and the same quantity**. “Before: half a year of uncertainty. After: 14 days” is comparable. “Before: hard. After: good” says nothing.
+
+Three rules for an honest “before and after”.
+
+- **Name only what you measured.** A time, a number of visits, a sum.
+- **If there is no number, say so:** “the result wasn’t measured with a number; the matter was closed the first time”.
+- **Don’t promise the same result to another person.** Write “in this case”, not “this is what you’ll get”. In the US, the FTC’s Endorsement Guides (16 CFR 255.2(b)) expect that when an ad shows a result that isn’t what most people can expect, it either has proof the result is typical or clearly discloses the result people can generally expect; a “results not typical” label alone no longer does the job. In the UK, the CAP Code asks that claims can be backed by evidence. For many professions a guarantee of a result is not allowed in advertising at all, and the ethics lesson comes back to this.
+
+Play with the diagram below: the slider moves the figures from “before” to “after”. In the lower part, paste in the text of a case study and see what the program thinks is risky.
+
+<CaseFrame />
+
+<details>
+<summary>Check yourself: what can you write if the result has no number?</summary>
+
+Say honestly “no number” and describe the outcome in words. An invented number is worse.
+
+</details>
+
+## What a case study must not carry
+
+A case study is the story of a real person, so the first rule is **do no harm to them**. Under the EU and UK GDPR, personal data is any information relating to an identified or identifiable person, directly or indirectly (Article 4(1)), and data counts as anonymous only if the person can no longer be identified by any means reasonably likely to be used (Recital 26). In the US there is no single law, but state privacy laws such as the California Consumer Privacy Act use a similar idea, and health information has its own rule: HIPAA lists the identifiers that must go before health data is treated as de-identified (45 CFR 164.514). A practical rule follows: **publish only a case study from which the person can’t be recognized, or one you have the person’s written consent to publish**.
+
+What to remove.
+
+- **Direct identifiers:** first and last name, phone, email, address.
+- **Numbers in public records:** a court case number, a parcel number, a document number. With them a person can be found in a minute.
+- **Indirect clues:** a rare profession, a small village, an exact date, an unusual situation. A set of such details can identify a person as easily as a name does.
+- **Photographs and documents**, if anything on them is visible.
+
+Replace the details with a generalization: “a landowner in the suburbs”, “in spring”, “in a trial court”.
+
+Some professions have stricter rules. In the US, a lawyer’s duty of confidentiality is broader than the courtroom privilege: under ABA Model Rule 1.6 and its state versions, a lawyer may not reveal information relating to a client’s representation without informed consent, even if parts of it are public record. Doctors and other health professionals face HIPAA. If you are a lawyer, a notary, a doctor or an expert witness, show the text to a specialist in your own profession before publishing a case study. This lesson gives landmarks, not legal advice; for your own case, ask your state bar or professional board, or, for data protection, the ICO in the UK or your state attorney general in the US.
+
+<details>
+<summary>Check yourself: why isn’t it enough to remove the client’s name?</summary>
+
+A person can also be recognized from a case number, an address and a combination of rare details. Everything that identifies them, directly or indirectly, has to go.
+
+</details>
+
+## Practice
+
+Fill in one entry of a “Cases” collection, as is done in a headless CMS: an entry has fields, and the page shows them.
+
+1. **Title and service.** Take the service from your brief.
+2. **Situation and task.** In your own words, without details that could identify the person.
+3. **Actions.** At least three steps.
+4. **Result and term.** With a number, or an honest “no number”.
+5. **Before and after.** The same quantity.
+6. **A check.** Reread it as a stranger: could the person be found from the text?
