@@ -281,6 +281,8 @@ export function speak(s: string, lex: Lexicon, say: Record<string, string> = {})
 	out = applyMap(out, lex.words); // the parts of a domain, now words of their own
 	out = speakYears(out);
 	out = speakPercents(out);
+	// «152-эф-зэ», «HTML5-страница»: a number fused to letters by a hyphen is said with a pause
+	out = out.replace(/(?<=\d)-(?=\p{L})|(?<=\p{L})-(?=\d)/gu, ' ');
 	out = out.replace(/(\d)\s?(px|rem|em|fr|vh|vw|ch|ms|КБ|kB|KB|МБ|MB|ГБ|GB)(?![\p{L}\p{N}])/gu, (m, d: string, u: string) => `${d} ${UNITS[u.toLowerCase()] ?? u}`);
 	out = out.replace(/(?<![\p{L}\p{N}])F(\d{1,2})(?![\p{L}\p{N}])/gu, 'эф $1');
 	const keep = new Set(lex.keep);

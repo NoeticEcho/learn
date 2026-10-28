@@ -138,7 +138,7 @@ describe('the script', () => {
 		expect(said).toContain('деловой: что чувствуется: собранность, доверие.');
 		expect(said).toContain('ди-эн-эс');
 		expect(said).toContain('ссылку,');
-		expect(said).toContain('тегом аш один внутри');
+		expect(said).toContain('тэгом аш один внутри');
 		expect(said).not.toContain('Задание практики');
 	});
 	test('the body starts after the scripts', () => {
@@ -209,4 +209,9 @@ describe('the listening test', () => {
 test('every Russian lesson file is a lesson', () => {
 	const files = readdirSync('content/ru', { recursive: true, encoding: 'utf8' }).filter((f) => f.endsWith('.svx'));
 	expect(files.length).toBe(loadContent().lessons.length);
+});
+
+test('a number fused to letters by a hyphen is said with a pause, and a year keeps its suffix', () => {
+	expect(speak('Закон 152-ФЗ.', lex, { ФЗ: 'эф-зэ' })).toBe('Закон 152 эф-зэ.');
+	expect(speak('В 1990-х годах тег был главным.', lex)).toBe('В тысяча девятьсот девяностых годах тэг был главным.');
 });
