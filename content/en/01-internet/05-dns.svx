@@ -1,0 +1,273 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/01-internet/05-dns.svx. */
+	export const metadata = {
+		id: '01-internet/05-dns',
+		part: 1,
+		order: 5,
+		title: 'DNS: from the resolver to the root and back',
+		definition: 'DNS is a distributed system that turns a site’s name, such as example.com, into a server’s IP address. Answers are cached for the TTL given in the record.',
+		summary:
+			'You’ll see how a name becomes an address, and why a site can “not open” for a few hours after a record changes. Afterwards you can read DNS records and you know what a TTL is.',
+		minutes: 25,
+		teaches: ['net-dns-resolution', 'net-dns-records'],
+		requires: ['net-domain-names'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'server', label: 'root server', caption: 'Echo plays the resolver', say: [{ text: 'Where does example.com live?' }, { who: 'Root server', text: 'No idea. Ask the .com zone’s servers.' }] },
+				{ mood: 'explain', side: 'right', prop: 'server', label: '.com zone', say: [{ who: '.com zone server', text: 'I don’t know either, but I know who does: here is this domain’s server.' }] },
+				{ mood: 'cheer', prop: 'server', label: '203.0.113.10', say: [{ who: 'Domain server', text: '203.0.113.10' }, { text: 'I’ll remember it for TTL seconds. That’s why a moved site’s new address doesn’t show up at once.' }] }
+			]
+		},
+		practice: {
+			id: 'dns-table',
+			title: 'The DNS records of your domain',
+			task: 'In 2010 the site and the email became separate services, and each got a record of its own. Complete the table: the site is already there (an A record), so add a CNAME record for www, an MX record for email and a TXT record to prove you own the domain. In each row, write a number of seconds in the ttl cell. And explain in one sentence when it is worth lowering a TTL. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n    <p>The project’s email: {{email}}. Its messages are received through an MX record.</p>\n\n    <aside class="note" data-scaffold id="dns">\n      <h2>DNS records</h2>\n      <table>\n        <tr><th>Type</th><th>Name</th><th>Value</th><th>TTL, s</th></tr>\n        <tr class="rec"><td class="type">A</td><td>@</td><td>203.0.113.10</td><td class="ttl">3600</td></tr>\n      </table>\n      <p>When to lower the TTL: <span id="ttl-why">…</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n    <p>The project’s email: {{email}}. Its messages are received through an MX record.</p>\n\n    <aside class="note" data-scaffold id="dns">\n      <h2>DNS records</h2>\n      <table>\n        <tr><th>Type</th><th>Name</th><th>Value</th><th>TTL, s</th></tr>\n        <tr class="rec"><td class="type">A</td><td>@</td><td>203.0.113.10</td><td class="ttl">3600</td></tr>\n        <tr class="rec"><td class="type">CNAME</td><td>www</td><td>example.com.</td><td class="ttl">3600</td></tr>\n        <tr class="rec"><td class="type">MX</td><td>@</td><td>10 mail.example.com.</td><td class="ttl">3600</td></tr>\n        <tr class="rec"><td class="type">TXT</td><td>@</td><td>site-verification=abc123</td><td class="ttl">300</td></tr>\n      </table>\n      <p>When to lower the TTL: <span id="ttl-why">a day before moving the site to another server, so the old address is forgotten quickly</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#dns', matches: '^[^…]*$' },
+				{ id: 'record-a', kind: 'text', selector: '#dns td.type', matches: '^\\s*(A|AAAA)\\s*$' },
+				{ id: 'record-cname', kind: 'text', selector: '#dns td.type', matches: '^\\s*CNAME\\s*$' },
+				{ id: 'record-mx', kind: 'text', selector: '#dns td.type', matches: '^\\s*MX\\s*$' },
+				{ id: 'record-txt', kind: 'text', selector: '#dns td.type', matches: '^\\s*TXT\\s*$' },
+				{ id: 'ttl-count', kind: 'count', selector: '#dns td.ttl', min: 4 },
+				{ id: 'ttl-numbers', kind: 'text', selector: '#dns td.ttl', matches: '^\\s*\\d+\\s*$' },
+				{ id: 'ttl-why', kind: 'text', selector: '#ttl-why', matches: '\\S{3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the parties to a DNS query in the order they are asked, when nothing is cached',
+				items: ['The browser asks the resolver', 'The resolver asks a root server', 'The resolver asks the zone’s server (for example .com)', 'The resolver asks the domain’s authoritative server']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each DNS record type to what it holds',
+				pairs: [
+					['A', 'the server’s IPv4 address'],
+					['AAAA', 'the server’s IPv6 address'],
+					['CNAME', 'an alias: this name leads to another name'],
+					['MX', 'the server that accepts the domain’s email'],
+					['TXT', 'free text: for example proof of ownership']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does TTL mean in a DNS record?',
+				options: [
+					'How many seconds an answer may be kept in a cache without asking again',
+					'After how many seconds the site will switch off',
+					'How many requests a second the server can take'
+				],
+				answer: 0,
+				why: [
+					'Yes. TTL (time to live) tells everyone who remembered an answer when to forget it and ask again.',
+					'No: TTL has nothing to do with how the site itself works.',
+					'No: it is about the cache, not the load.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You changed the site’s address, but a friend’s browser still “can’t open it”, or opens the old one. Why?',
+				options: [
+					'Their provider or browser still remembers the old answer, and remembered it for the TTL',
+					'The site is broken',
+					'The news of the change travels by mail'
+				],
+				answer: 0,
+				why: [
+					'Yes. Nobody broadcasts news of a change: every resolver keeps the old answer until the TTL runs out. This is called “DNS propagation”, though in fact caches are simply expiring.',
+					'No: everything can work for you while they have an old record in the cache.',
+					'No: nothing is sent out.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Where can a remembered DNS answer be kept?',
+				options: ['In the browser', 'In the operating system', 'In the provider’s resolver or a public resolver', 'In the root server, for each site separately'],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the browser keeps a cache of its own.',
+					'Yes: the system has a cache too.',
+					'Yes: a resolver serves thousands of people and remembers answers for all of them.',
+					'No: a root server remembers nothing about individual sites, it only knows who is responsible for the zones.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is the TTL lowered in advance before a site is moved to another server?',
+				options: [
+					'So that by the time of the move the old answers in caches expire quickly and everyone soon sees the new address',
+					'So the site opens faster',
+					'To save money on hosting'
+				],
+				answer: 0,
+				why: [
+					'Yes. It has to be lowered in advance, by at least the old TTL: otherwise caches will still hold old answers with a long lifetime.',
+					'No: a short TTL actually slows things slightly and increases the number of queries.',
+					'No: it makes no difference to the price of hosting.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'net-dns-what',
+				front: 'What does DNS do?',
+				back: 'It turns a name (example.com) into an address (203.0.113.10). It is the network’s distributed “phone book”.'
+			},
+			{
+				id: 'net-dns-path',
+				front: 'Whom does a DNS query pass through?',
+				back: 'The browser, the resolver, a root server, the zone’s server (.com), the domain’s authoritative server. Each one points to whom to ask next.'
+			},
+			{
+				id: 'net-dns-records',
+				front: 'What DNS records are there, and what is in them?',
+				back: 'A and AAAA: the server’s address; CNAME: an alias; MX: the mail server; TXT: text (for example proof of ownership); NS: the domain’s servers.'
+			},
+			{
+				id: 'net-dns-ttl',
+				front: 'What is a TTL, and when is it lowered?',
+				back: 'The time an answer is kept in a cache, in seconds. Before a site is moved, the TTL is lowered in advance so the old address is forgotten quickly.'
+			},
+			{
+				id: 'net-dns-propagation',
+				front: 'Why does a site open the old way for several hours after a record changes?',
+				back: 'Resolvers and browsers keep the old answer until the TTL runs out. Nobody broadcasts news of a change.'
+			}
+		],
+		sources: [
+			{ title: 'DNS (MDN glossary)', url: 'https://developer.mozilla.org/en-US/docs/Glossary/DNS', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'RFC 1034: Domain Names, Concepts and Facilities', url: 'https://www.rfc-editor.org/rfc/rfc1034', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Domain Name System (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Domain_Name_System', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Root Name Servers (IANA)', url: 'https://www.iana.org/domains/root/servers', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'How DNS Works (a comic by DNSimple)', url: 'https://dnsimple.com/comics/how-dns-works/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'The Internet: IP Addresses & DNS (Code.org, “How the internet works”, 3 of 5)', url: 'https://www.youtube.com/watch?v=5o8CwafCxnU', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'You are in 2010: the site and the email now live in different places, and each needs a record of its own in DNS. Let’s write them.',
+			hints: [
+				'A table row has four cells: type, name, value and ttl. In the ttl cell write a number of seconds, for example 3600.',
+				'You need rows with the types CNAME, MX and TXT. Write the type in the cell with the class type, in capital letters.',
+				'When to lower a TTL is hinted at by the diagram above: before a move, in advance.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				'record-a': 'There is no A record for the site. It was in the starting table: don’t delete it.',
+				'record-cname': 'There is no CNAME record. It makes www.your-domain lead to the same place as the domain itself.',
+				'record-mx': 'There is no MX record. Without it, email sent to your domain’s address won’t arrive.',
+				'record-txt': 'There is no TXT record. It is usually asked for to prove you own the domain.',
+				'ttl-count': 'Every record should have a ttl cell: you need at least four.',
+				'ttl-numbers': 'A TTL must be a number of seconds: for example 3600. There is no need to write words.',
+				'ttl-why': 'Explain in one sentence when a TTL is worth lowering.'
+			},
+			outro: 'Now your domain has a full set of records. Next we’ll look at what exactly the browser says to the server once the address is found: that is HTTP.'
+		},
+		say: { DNS: 'D N S', TTL: 'T T L', TLD: 'T L D', CNAME: 'C name', MX: 'M X', TXT: 'T X T', NS: 'N S', IPv4: 'I P v four', IPv6: 'I P v six', IANA: 'eye ana', RFC: 'R F C', nslookup: 'N S lookup', dig: 'dig' }
+	};
+</script>
+
+<script>
+	import DnsWalk from '../../diagrams/DnsWalk.svelte';
+</script>
+
+## The network’s phone book
+
+Computers find each other by IP address, while people remember names. We need a “phone book” that, given the name `example.com`, gives the address `203.0.113.10`. That book is called **DNS** (Domain Name System).
+
+At first such a book was one file: a list of “name, address” pairs, sent to everyone. By the early 1980s the network had grown so much that the file couldn’t be updated in time, and in 1983 DNS was invented. It is not one huge book but a **distributed** one: no single server knows everything, each knows a piece and can point to whom to go to next.
+
+## The path of one query
+
+When you type `www.example.com`, this is what happens. Move through the diagram below and watch how the path changes when part of the answer is already cached.
+
+<DnsWalk />
+
+Here are the parties, in order.
+
+1. **The browser and the system.** They first look in their own memory: perhaps the address is already known. If not, the system asks a resolver.
+2. **The resolver.** This is an intermediary that walks through DNS for you. It is usually your provider’s server, but you can also use public ones: Google (`8.8.8.8`), Cloudflare (`1.1.1.1`), Quad9 (`9.9.9.9`). A resolver can ask and remember.
+3. **The root servers.** This is the very top of the tree. They don’t know the address of your site, but they know **who is responsible for each zone**: `.com`, `.org`, `.uk`. There are thirteen root “names” (from `a` to `m`), run by twelve organizations, and behind each name stand hundreds of servers around the world.
+4. **The zone’s servers** (TLD). The `.com` zone’s server doesn’t know the site’s address either, but it knows **which servers are responsible for the domain** `example.com`.
+5. **The authoritative server** of the domain. It sits with your hosting provider or registrar and holds the domain’s **real records**. It is the one that gives the address.
+
+Notice that each step only points to whom to ask next. This technique is called delegation, and it is why DNS works across the whole planet.
+
+The resolver keeps the answer and gives it to everyone who later asks the same thing. That is why the root servers are asked relatively rarely: caches do most of the work.
+
+<details>
+<summary>Check yourself: does a root server know the address of your site?</summary>
+
+No. It only knows which servers are responsible for the zone (for example .com), and sends the resolver on.
+
+</details>
+
+## What is stored in records
+
+Records are the lines in a domain’s “book”. Each has a type, a name, a value and a TTL. The main types are:
+
+- **A**: the server’s IPv4 address. This is the record used to find the site.
+- **AAAA**: the same for an IPv6 address.
+- **CNAME**: an alias. A CNAME record named `www` with the value `example.com` says: “ask about `www` as you would about `example.com`”. Such a record can’t be put on the bare domain itself (that is called the root of the domain, and is written with the sign `@`).
+- **MX**: the mail server. When someone writes to `name@example.com`, the sender asks DNS where to deliver the message. An MX has a number, its priority: the smaller it is, the earlier the server is tried.
+- **TXT**: free text. It is used to prove ownership of a domain (“put this code in a TXT record”), and also to publish rules for checking email, so that messages don’t land in spam.
+- **NS**: which servers are responsible for the domain.
+
+Why this matters: a site and email have **different records**. The site can live with one company and the email with another. It is exactly this separation that you’ll set out in the practice.
+
+<details>
+<summary>Check yourself: which record decides where the email goes?</summary>
+
+MX. It names the domain’s mail server.
+
+</details>
+
+## TTL: the shelf life
+
+Every record has a number, the **TTL** (time to live): how many seconds an answer may be kept in a cache. Typical values: 300 seconds (5 minutes), 3600 (an hour), 86400 (a day).
+
+This is a trade-off.
+
+- **A long TTL**: fewer queries, and the address is found faster. But a change to the record takes a long time to reach everyone.
+- **A short TTL**: changes take effect quickly. But resolvers have to ask again more often.
+
+Now it is clear why, after a site’s address changes, some people get the new one and others “can’t open it” or get the old one. Nobody broadcasts news of the change. Each resolver simply keeps the old answer until its time runs out. This is called “DNS propagation”, though in fact caches are just expiring. That is why, before a site is moved, the TTL is lowered in advance (by at least the old TTL), the move is made, and then the value is put back.
+
+<details>
+<summary>Check yourself: when does it make sense to lower a TTL?</summary>
+
+In advance, before moving a site to another server, so that old answers expire quickly.
+
+</details>
+
+## How to look for yourself
+
+Every system has a command that asks DNS. In a Windows, macOS or Linux terminal:
+
+```
+nslookup example.com
+```
+
+The answer shows the address the resolver returned. There is also a more detailed command, `dig example.com` (not on Windows by default), which shows the records, their TTLs and the server that answered. And there are online services that ask DNS from different places around the world.
+
+An important caveat: an ordinary DNS query is not encrypted, and your provider sees which names you ask for. Encrypted variants exist, DNS over HTTPS and over TLS, which browsers and systems are gradually turning on.
+
+## Practice
+
+You are in the era of 2010. The site and the email have become separate services, and each needs a record. Complete the table of your domain’s records: next to the A record for the site, add a CNAME for `www`, an MX for email and a TXT to prove ownership. For each, write the TTL in seconds, and explain in one sentence when it is worth lowering.
+
+Your project’s email address is filled in on the page: it is exactly its messages that the MX record must receive. If your email is with someone else’s service (for example a free mailbox), the MX record is still worth knowing about: for email on your own domain, it is required.
+
+## What was wrong with 2010
+
+DNS records were then edited by hand, in the hosting control panel, and a mistake in a single character took a site or its email down for hours, until the cache expired. Today panels can suggest and check records, and services such as CDNs manage DNS automatically. But the principle is the same, and you need to understand it so as not to guess “why everything broke”.

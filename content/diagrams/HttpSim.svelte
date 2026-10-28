@@ -7,67 +7,129 @@
 <script lang="ts">
 	import './shared.css';
 
+	import { pick } from '#lib/i18n/index.ts';
+
 	type Res = { status: number; text: string; headers: [string, string][]; body: string };
+	const W = pick({
+		ru: {
+			host: 'www.example.ru',
+			lang: 'ru',
+			p: { services: '/uslugi/', servicesBare: '/uslugi', old: '/staryj-razdel', missing: '/net-takoj', admin: '/admin/', form: '/zayavka' },
+			bodies: {
+				broken: 'Что-то пошло не так на сервере',
+				received: 'Заявка принята, мы свяжемся с вами',
+				postOnly: 'Сюда можно только отправлять данные',
+				methodNo: 'Метод не поддерживается',
+				home: 'Главная страница',
+				services: 'Услуги',
+				admin: 'Сюда вход закрыт',
+				missing: 'Такой страницы нет'
+			},
+			meaning: {
+				200: 'Всё хорошо, вот страница.',
+				301: 'Страница переехала навсегда. Новый адрес в заголовке Location, и браузер сам пойдёт по нему.',
+				403: 'Сервер понял запрос, но вам туда нельзя.',
+				404: 'Такой страницы на сервере нет.',
+				405: 'Так обращаться к этому адресу нельзя. В заголовке Allow сказано, как можно.',
+				500: 'Сервер сломался. Вы тут ни при чём.'
+			} as Record<number, string>,
+			classes: { ok: 'Успех', move: 'Переадресация', client: 'Ошибка клиента (запрос)', server: 'Ошибка сервера' } as Record<string, string>,
+			caption: 'Попросите страницу у сайта',
+			methodGroup: 'Метод запроса',
+			pathGroup: 'Путь',
+			broke: 'Сервер сломался',
+			request: 'Запрос',
+			browserRequest: 'Запрос браузера',
+			response: 'Ответ',
+			serverResponse: 'Ответ сервера'
+		},
+		en: {
+			host: 'www.example.com',
+			lang: 'en',
+			p: { services: '/services/', servicesBare: '/services', old: '/old-section', missing: '/no-such-page', admin: '/admin/', form: '/enquiry' },
+			bodies: {
+				broken: 'Something went wrong on the server',
+				received: 'Request received, we will be in touch',
+				postOnly: 'Data can only be sent here',
+				methodNo: 'Method not supported',
+				home: 'Home page',
+				services: 'Services',
+				admin: 'Access here is closed',
+				missing: 'There is no such page'
+			},
+			meaning: {
+				200: 'All is well, here is the page.',
+				301: 'The page has moved for good. The new address is in the Location header, and the browser will follow it by itself.',
+				403: 'The server understood the request, but you may not go there.',
+				404: 'There is no such page on the server.',
+				405: 'You can’t address this URL that way. The Allow header says how you can.',
+				500: 'The server broke. It is nothing you did.'
+			} as Record<number, string>,
+			classes: { ok: 'Success', move: 'Redirection', client: 'Client error (the request)', server: 'Server error' } as Record<string, string>,
+			caption: 'Ask a site for a page',
+			methodGroup: 'Request method',
+			pathGroup: 'Path',
+			broke: 'The server is broken',
+			request: 'Request',
+			browserRequest: 'The browser’s request',
+			response: 'Response',
+			serverResponse: 'The server’s response'
+		}
+	});
 	const html = (s: string) => `<!doctype html>… ${s} …`;
 	const site = (method: string, path: string, broken: boolean): Res => {
-		if (broken) return { status: 500, text: 'Internal Server Error', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html('Что-то пошло не так на сервере') };
+		const { p, bodies } = W;
+		if (broken) return { status: 500, text: 'Internal Server Error', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html(bodies.broken) };
 		const ok = (body: string): Res => ({ status: 200, text: 'OK', headers: [['Content-Type', 'text/html; charset=utf-8'], ['Content-Length', String(body.length * 2)], ['Cache-Control', 'max-age=3600']], body });
 		const moved = (to: string): Res => ({ status: 301, text: 'Moved Permanently', headers: [['Location', to], ['Content-Length', '0']], body: '' });
-		if (path === '/zayavka') {
-			if (method === 'POST') return { status: 200, text: 'OK', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html('Заявка принята, мы свяжемся с вами') };
-			return { status: 405, text: 'Method Not Allowed', headers: [['Allow', 'POST']], body: html('Сюда можно только отправлять данные') };
+		if (path === p.form) {
+			if (method === 'POST') return { status: 200, text: 'OK', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html(bodies.received) };
+			return { status: 405, text: 'Method Not Allowed', headers: [['Allow', 'POST']], body: html(bodies.postOnly) };
 		}
-		if (method !== 'GET') return { status: 405, text: 'Method Not Allowed', headers: [['Allow', 'GET, HEAD']], body: html('Метод не поддерживается') };
-		if (path === '/') return ok(html('Главная страница'));
-		if (path === '/uslugi/') return ok(html('Услуги'));
-		if (path === '/uslugi') return moved('/uslugi/');
-		if (path === '/staryj-razdel') return moved('/uslugi/');
-		if (path === '/admin/') return { status: 403, text: 'Forbidden', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html('Сюда вход закрыт') };
-		return { status: 404, text: 'Not Found', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html('Такой страницы нет') };
+		if (method !== 'GET') return { status: 405, text: 'Method Not Allowed', headers: [['Allow', 'GET, HEAD']], body: html(bodies.methodNo) };
+		if (path === '/') return ok(html(bodies.home));
+		if (path === p.services) return ok(html(bodies.services));
+		if (path === p.servicesBare) return moved(p.services);
+		if (path === p.old) return moved(p.services);
+		if (path === p.admin) return { status: 403, text: 'Forbidden', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html(bodies.admin) };
+		return { status: 404, text: 'Not Found', headers: [['Content-Type', 'text/html; charset=utf-8']], body: html(bodies.missing) };
 	};
 
-	const paths = ['/', '/uslugi/', '/uslugi', '/staryj-razdel', '/net-takoj', '/admin/', '/zayavka'];
+	const paths = ['/', W.p.services, W.p.servicesBare, W.p.old, W.p.missing, W.p.admin, W.p.form];
 	let method = $state('GET');
-	let path = $state('/uslugi');
+	let path = $state(W.p.servicesBare);
 	let broken = $state(false);
 	const res = $derived(site(method, path, broken));
 	const group = $derived(res.status < 300 ? 'ok' : res.status < 400 ? 'move' : res.status < 500 ? 'client' : 'server');
-	const meaning: Record<number, string> = {
-		200: 'Всё хорошо, вот страница.',
-		301: 'Страница переехала навсегда. Новый адрес в заголовке Location, и браузер сам пойдёт по нему.',
-		403: 'Сервер понял запрос, но вам туда нельзя.',
-		404: 'Такой страницы на сервере нет.',
-		405: 'Так обращаться к этому адресу нельзя. В заголовке Allow сказано, как можно.',
-		500: 'Сервер сломался. Вы тут ни при чём.'
-	};
-	const classes = { ok: 'Успех', move: 'Переадресация', client: 'Ошибка клиента (запрос)', server: 'Ошибка сервера' } as const;
+	const meaning = W.meaning;
+	const classes = W.classes;
 </script>
 
 <figure class="dg">
-	<figcaption>Попросите страницу у сайта</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Метод запроса">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.methodGroup}>
 		{#each ['GET', 'POST', 'DELETE'] as m (m)}
 			<button type="button" aria-pressed={method === m} onclick={() => (method = m)}>{m}</button>
 		{/each}
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Путь">
+	<div class="dg-ctl" role="group" aria-label={W.pathGroup}>
 		{#each paths as p (p)}
 			<button type="button" class="dg-mono" aria-pressed={path === p} onclick={() => (path = p)}>{p}</button>
 		{/each}
 	</div>
-	<label><input type="checkbox" bind:checked={broken} /> Сервер сломался</label>
+	<label><input type="checkbox" bind:checked={broken} /> {W.broke}</label>
 
 	<div class="two">
-		<section aria-label="Запрос">
-			<div class="dh">Запрос браузера</div>
+		<section aria-label={W.request}>
+			<div class="dh">{W.browserRequest}</div>
 			<pre class="dg-box dg-mono">{method} {path} HTTP/1.1
-Host: www.example.ru
+Host: {W.host}
 Accept: text/html
-Accept-Language: ru
+Accept-Language: {W.lang}
 User-Agent: Mozilla/5.0 …</pre>
 		</section>
-		<section aria-label="Ответ" aria-live="polite">
-			<div class="dh">Ответ сервера</div>
+		<section aria-label={W.response} aria-live="polite">
+			<div class="dh">{W.serverResponse}</div>
 			<pre class="dg-box dg-mono">HTTP/1.1 <span class="st {group}">{res.status} {res.text}</span>
 {#each res.headers as [k, v] (k)}{k}: {v}
 {/each}

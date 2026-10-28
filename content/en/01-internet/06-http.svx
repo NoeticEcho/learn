@@ -1,0 +1,292 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/01-internet/06-http.svx. */
+	export const metadata = {
+		id: '01-internet/06-http',
+		part: 1,
+		order: 6,
+		title: 'HTTP: requests, responses, status codes and headers',
+		definition: 'HTTP is the protocol by which a browser sends a request and a server replies with a status code (200, 301, 404, 500), headers and a body.',
+		summary:
+			'You’ll see how a browser asks for a page and what the server answers. Afterwards you can read a request and a response in the developer tools, tell 200, 301, 404 and 500 apart, and know what the main headers do.',
+		minutes: 25,
+		teaches: ['net-http-request-response', 'net-http-status-headers'],
+		requires: ['net-dns-resolution'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'GET /services/', caption: 'The request', say: 'The browser asks politely: please give me the page /services/.' },
+				{ mood: 'hmm', side: 'right', prop: 'server', label: '404 Not Found', caption: 'The response', say: [{ who: 'Server', text: '404. There is no such page.' }, { text: 'That isn’t rude, it’s a code.' }] },
+				{ mood: 'hint', prop: 'server', label: '200 OK', say: '200: here it is. 301: it moved, the new address is in the Location header. 500: the server itself broke.' }
+			]
+		},
+		practice: {
+			id: 'moves-and-404',
+			title: 'A map of moves and a 404 page',
+			task: 'You rebuilt the site, and the addresses of the sections changed. Fill in the map of moves: for each section, write the old address, the new address (both start with a slash, in Latin letters) and the code 301. Then complete the 404 page: explain that there is no such page, and put in a link to the section that leads to your site’s main action. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="moves">\n      <h2>Map of moves</h2>\n      <table>\n        <tr><th>Section</th><th>Old address</th><th>New address</th><th>Code</th></tr>\n        {{#each sections}}<tr class="move"><td>{{.}}</td><td class="old">…</td><td class="new">…</td><td class="code">…</td></tr>\n        {{/each}}\n      </table>\n    </aside>\n\n    <aside class="note" data-scaffold id="not-found">\n      <h2>The 404 page</h2>\n      <p>…</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="moves">\n      <h2>Map of moves</h2>\n      <table>\n        <tr><th>Section</th><th>Old address</th><th>New address</th><th>Code</th></tr>\n        {{#each sections}}<tr class="move"><td>{{.}}</td><td class="old">/old-section</td><td class="new">/section</td><td class="code">301</td></tr>\n        {{/each}}\n      </table>\n    </aside>\n\n    <aside class="note" data-scaffold id="not-found">\n      <h2>The 404 page</h2>\n      <p>We don’t have that page. But we do have what you came for: <a href="/contact">{{mainAction.label}}</a>.</p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'moves-count', kind: 'count', selector: '#moves tr.move', min: 3 },
+				{ id: 'no-blanks-moves', kind: 'text', selector: '#moves', matches: '^[^…]*$' },
+				{ id: 'old-paths', kind: 'text', selector: '#moves td.old', matches: '^\\s*/[a-z0-9/_.-]*\\s*$' },
+				{ id: 'new-paths', kind: 'text', selector: '#moves td.new', matches: '^\\s*/[a-z0-9/_.-]*\\s*$' },
+				{ id: 'code-301', kind: 'text', selector: '#moves td.code', matches: '^\\s*301\\s*$' },
+				{ id: 'no-blanks-404', kind: 'text', selector: '#not-found', matches: '^[^…]*$' },
+				{ id: '404-text', kind: 'text', selector: '#not-found p', matches: '\\S{3,}' },
+				{ id: '404-link', kind: 'attr', selector: '#not-found a', name: 'href', matches: '^(/|#)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each response code to its meaning',
+				pairs: [
+					['200', 'all is well, here is the page'],
+					['301', 'the page has moved for good'],
+					['404', 'there is no such page'],
+					['500', 'an error on the server’s side']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does 301 differ from 302?',
+				options: [
+					'301: a permanent move, 302: a temporary one',
+					'301 is for images, 302 is for pages',
+					'It doesn’t, they are the same'
+				],
+				answer: 0,
+				why: [
+					'Yes. Search engines and browsers remember a 301 and treat the new address as the main one. A 302 says “go there for now”, and the old address stays.',
+					'No: both apply to any resource.',
+					'No: the difference is in the promise: for good, or for a while.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the parts of an HTTP response in the order they come',
+				items: ['The status line (HTTP/1.1 200 OK)', 'The headers (Content-Type: …)', 'A blank line', 'The body (the page itself)']
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these is an HTTP header?',
+				options: ['Content-Type: text/html', 'Location: /services/', 'Accept-Language: en', '<h1>Services</h1>'],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: it says what exactly is in the response body.',
+					'Yes: the address the page moved to.',
+					'Yes: with this header the browser says which language it prefers.',
+					'No: that is the page’s content already, the response body.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does a request have a Host header?',
+				options: [
+					'Many sites can live on one server, and Host says whose site is wanted',
+					'So the server knows who you are',
+					'So the page opens faster'
+				],
+				answer: 0,
+				why: [
+					'Yes. Hundreds of sites are often tied to one IP address. Host tells the server which of them you want.',
+					'No: the server sees your address anyway.',
+					'No: it has no effect on speed.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is wrong with a “nothing found” page that answers with the code 200?',
+				options: [
+					'Search engines and programs take it for a real page, although there isn’t one. The code should be 404',
+					'Nothing, that is how it’s done',
+					'It opens more slowly'
+				],
+				answer: 0,
+				why: [
+					'Yes. The code tells machines the truth: there is no page. A page that says “not found” with a 200 confuses search engines.',
+					'No: the code is part of the message, and it must match the text.',
+					'No: speed has nothing to do with it.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a link with the word “Contact” that leads to the address /contact',
+				starter: '',
+				checks: [
+					{ id: 'a-kontakty', kind: 'attr', selector: 'a', name: 'href', matches: '^/contact' },
+					{ id: 'a-text', kind: 'text', selector: 'a', matches: 'Contact' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'net-http-what',
+				front: 'What is HTTP?',
+				back: 'A “request and response” protocol: the browser asks for a page, the server answers. The client always speaks first.'
+			},
+			{
+				id: 'net-http-parts',
+				front: 'What are an HTTP request and response made of?',
+				back: 'A first line (method and path; code and explanation), headers, a blank line, a body.'
+			},
+			{
+				id: 'net-http-codes',
+				front: 'What do the code groups 2xx, 3xx, 4xx and 5xx mean?',
+				back: '2xx: success. 3xx: redirection (301 permanent, 302 temporary). 4xx: an error in the request (404 no such page, 403 not allowed). 5xx: a server error.'
+			},
+			{
+				id: 'net-http-headers',
+				front: 'Name some important headers and what they do',
+				back: 'Host: whose site. Content-Type: what is in the body. Location: where the page moved to. Cache-Control: how long to keep it. Accept-Language: the language.'
+			},
+			{
+				id: 'net-http-404',
+				front: 'What should a 404 page be like?',
+				back: 'It has the code 404 (not 200), a clear text and a link to what matters: search, the home page or the key action.'
+			}
+		],
+		sources: [
+			{
+				title: 'An overview of HTTP (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'HTTP response status codes (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'HTTP headers (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'RFC 9110: HTTP Semantics', url: 'https://www.rfc-editor.org/rfc/rfc9110', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'HTTP (Wikipedia)', url: 'https://en.wikipedia.org/wiki/HTTP', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [
+			{ title: 'The Internet: HTTP & HTML (Code.org, “How the internet works”, 4 of 5)', url: 'https://www.youtube.com/watch?v=kBXQZMmiA4s', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'You rebuilt the site, and the addresses of the sections changed. So that the old links don’t die, you need a map of moves and a tidy 404 page.',
+			hints: [
+				'In each table row three cells need filling: the old address (class old), the new one (class new) and the code (class code). The code is 301 everywhere.',
+				'Addresses are written in Latin letters and start with a slash: /old-services and /services.',
+				'The link on the 404 page is an a element with an href starting with a slash. Take the link’s text from your project’s main action.'
+			],
+			mistakes: {
+				'moves-count': 'The table should have at least three rows with the class move: one for each section.',
+				'no-blanks-moves': 'There is still an ellipsis “…” in the map of moves. Fill in all the cells.',
+				'old-paths': 'An old address must start with a slash and be written in Latin letters: for example /old-services.',
+				'new-paths': 'A new address must start with a slash and be written in Latin letters: for example /services.',
+				'code-301': 'The code for a permanent move is 301. Enter the number with no words.',
+				'no-blanks-404': 'There is still an ellipsis “…” on the 404 page. Replace it with text.',
+				'404-text': 'Write a clear sentence on the 404 page: that there is no such page.',
+				'404-link': 'You need a link to the section with the main action: its address must start with a slash.'
+			},
+			outro: 'Now old links don’t die, and a lost visitor lands not in a dead end but at what matters. That is HTTP being considerate.'
+		},
+		say: { HTTP: 'H T T P', HTTPS: 'H T T P S', GET: 'get', POST: 'post', Host: 'host', Location: 'location', 'Content-Type': 'content type', 'Cache-Control': 'cache control', RFC: 'R F C', URL: 'U R L', QUIC: 'quick' }
+	};
+</script>
+
+<script>
+	import HttpSim from '../../diagrams/HttpSim.svelte';
+</script>
+
+## A conversation by the rules
+
+When the browser knows the server’s address (in the last lessons we saw how), it sets up a connection and says its first sentence. The language the conversation runs in is called **HTTP** (HyperText Transfer Protocol). It is very simple by design: the client asks, the server answers. Always in that order: the server sends nothing on its own until it is asked. And the server doesn’t remember what you talked about a minute ago: every request is new to it (programmers call this being stateless).
+
+In the first versions HTTP was plain text that you can read with your eyes. That is why we can see all of it.
+
+## The request
+
+Here is the request a browser sends when you open the services page:
+
+```
+GET /services/ HTTP/1.1
+Host: www.example.com
+Accept: text/html
+Accept-Language: en
+User-Agent: Mozilla/5.0 …
+```
+
+The first line says exactly what is being asked: the **method** (`GET`, “give”), the **path** (`/services/`) and the protocol version. Next come **headers**: “name: value” pairs that give details. `Host` names the site that is wanted: hundreds of sites can be tied to one server, and without this header it wouldn’t know whose is wanted. `Accept-Language` says which language you prefer. `User-Agent` says what kind of program is asking.
+
+There are two main methods. `GET` asks to receive something, and that is how pages and pictures are opened. `POST` sends something to the server, for example the data of a form. There are others (`PUT`, `DELETE`, `HEAD`), and we’ll meet them in the part on the server.
+
+If a request sends something, after the headers comes a blank line and the **body**: the data itself.
+
+## The response
+
+The server replies on the same pattern:
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 5120
+Cache-Control: max-age=3600
+
+<!doctype html>
+<html lang="en"> …
+```
+
+The first line: the version, the **status code** and its short name. Then headers. Then a blank line and the **body**: the page itself, a picture or whatever was asked for. The body is what the browser draws.
+
+Try it yourself: choose a method and an address, and the “server” of a small site will answer.
+
+<HttpSim />
+
+<details>
+<summary>Check yourself: what is an HTTP response made of?</summary>
+
+A status line (version, code, explanation), headers, a blank line and a body.
+
+</details>
+
+## Status codes
+
+The code in the response’s first line is the most important thing: it says whether it worked. The numbers are grouped by their first digit:
+
+- **2xx: success.** `200 OK`: all is well, here is the page.
+- **3xx: redirection.** Look somewhere else. `301 Moved Permanently`: the page has moved for good, and the new address is in the `Location` header. `302 Found`: moved for the time being. `304 Not Modified`: nothing has changed since last time, so use your copy from memory.
+- **4xx: a request error.** You asked for the wrong thing. `404 Not Found`: there is no such page. `403 Forbidden`: you may not go there. `405 Method Not Allowed`: you can’t address this URL that way. `410 Gone`: the page existed and was deliberately removed. `429 Too Many Requests`: you are asking too often.
+- **5xx: a server error.** It broke on their side, not yours. `500 Internal Server Error`: something went wrong. `502`, `503`, `504`: the server is unavailable, overloaded, or didn’t get an answer from another one.
+
+You needn’t memorize them all. It is enough to remember the groups: a two is good, a three is go there, a four is your mistake, a five is our mistake.
+
+<details>
+<summary>Check yourself: is a 503 a request error or a server error?</summary>
+
+A server error: it is unavailable or overloaded. The 5xx group always means “it broke on the server’s side”.
+
+</details>
+
+## Headers worth knowing
+
+There are many headers, and the full list is huge. These are the ones that will be useful first:
+
+- `Content-Type`: what is in the response body (`text/html`, `image/png`, `application/json`) and in which encoding.
+- `Location`: where the page moved to, with the codes 301 and 302.
+- `Cache-Control`: how long a response may be kept in memory so it doesn’t have to be asked for again. This speeds up repeat visits.
+- `Content-Encoding`: whether the response is compressed (gzip or br). A compressed response weighs several times less.
+- `Set-Cookie` and `Cookie`: this is how a site remembers you between requests, for example that you are logged in.
+- `Accept-Language`: which language you prefer. A multilingual site can choose the right one by it.
+
+You can look at all these headers yourself. Open the developer tools (F12), the Network tab, reload the page and click any request: you will see exactly what we’ve been talking about, with real values.
+
+## The versions of HTTP
+
+Over its life the protocol was updated, but the meaning stayed the same: “request, response, codes, headers”. HTTP/1.1 (1997) was text-based and opened several connections. HTTP/2 (2015) became binary and lets many requests share one connection. HTTP/3 (2022) replaced TCP with a new transport, QUIC, which runs over UDP and recovers faster from loss. Pages don’t change because of this: for a site’s author there is no difference, and the browser and the server agree on the version themselves. The general rules are written in the document RFC 9110, which is in the sources.
+
+## Practice
+
+You are in the era of 2010. Your site was rebuilt, and the addresses of the sections changed. If you simply throw out the old addresses, every link to them (from search, from social networks, from other people’s emails) will lead to a 404. To avoid that, you set up a redirect: the old address answers with the code 301 and the new address in the Location header.
+
+Fill in the map of moves: for each section of your project, the old address, the new address and the code 301. The sections are filled in from the brief. Then complete the 404 page: explain that there is no such page, and put in a link to the section that leads to your site’s main action. A person who lands on a 404 shouldn’t be left in a dead end.
+
+## What was wrong with 2010
+
+Many sites then answered a request for a missing page with the code 200 and the text “nothing found”: search engines took such pages for real ones. For a person it goes unnoticed, but for a machine it is a lie. A good 404 page tells the truth in the code and in the text, to the person and to the machine.
