@@ -58,18 +58,20 @@
 		min-height: 4.5rem;
 		overflow: hidden;
 	}
+	/* The share is a bar along the bottom of the screen, not a wash behind its words: under the
+	   text, on Ink, the wash took the first screen's lines below 4.5:1 (axe, QA pass 28.10.2026). */
 	.heat {
 		position: absolute;
-		inset: 0 auto 0 0;
+		inset: auto auto 0 0;
+		height: 0.5rem;
 		width: var(--w);
 		background: var(--accent-measure);
-		opacity: 0.35;
 	}
 	.body {
 		position: relative;
 		display: grid;
 		gap: 2px;
-		padding: var(--space-3);
+		padding: var(--space-3) var(--space-3) calc(var(--space-3) + 0.5rem);
 	}
 	.cta {
 		font-weight: var(--weight-medium);

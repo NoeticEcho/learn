@@ -128,6 +128,8 @@
 	.dh.atom {
 		margin: 0;
 		font-size: 1rem;
+		/* the mock page's own ink, not the diagram title's theme colour (on Ink that was light on light) */
+		color: inherit;
 	}
 	.cta {
 		display: inline-block;
