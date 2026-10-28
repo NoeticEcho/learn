@@ -8,8 +8,13 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
 
-	const initial = `server {
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words, the example config and
+	// the pretend disk are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			initial: `server {
     listen 80;
     server_name example.ru;
     root /var/www/site;
@@ -28,11 +33,73 @@
     location / {
         try_files $uri $uri/ =404;
     }
-}`;
+}`,
+			disk: ['index.html', 'uslugi.html', 'kontakty.html', '404.html'],
+			urls: ['/', '/uslugi.html', '/kontakty.html', '/staraya-stranica', '/net-takoj', '/api/items', '/uslugi.html/'],
+			start: '/net-takoj',
+			okApp: 'OK (ответ приложения)',
+			errorPage: (page: string) => `Отдана страница ошибки ${page} с кодом 404.`,
+			noErrorPage: 'Своей страницы 404 в конфиге нет: будет стандартная страница сервера.',
+			noLocation: 'правила location нет, работает умолчание сервера',
+			moved: 'Сервер сказал: ищите по новому адресу (заголовок Location).',
+			proxied: (target: string) => `Запрос передан приложению ${target}. Что ответит оно, сервер не решает.`,
+			via: 'прокси',
+			served: (file: string, root: string) => `Отдан файл ${file} из папки ${root}.`,
+			caption: 'Спросите сервер по вашему конфигу',
+			confLabel: 'Конфиг (его можно править)',
+			reset: 'Вернуть пример',
+			disks: 'Файлы на диске в папке сайта:',
+			urlGroup: 'Адрес в запросе',
+			matched: 'Сработало правило:',
+			note: 'Это модель: настоящий nginx понимает гораздо больше директив и порядок поиска правил у него тоньше. Здесь только то, что нужно уроку.'
+		},
+		en: {
+			initial: `server {
+    listen 80;
+    server_name example.com;
+    root /var/www/site;
+    index index.html;
+
+    error_page 404 /404.html;
+
+    location = /old-page {
+        return 301 /services.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}`,
+			disk: ['index.html', 'services.html', 'contact.html', '404.html'],
+			urls: ['/', '/services.html', '/contact.html', '/old-page', '/no-such-page', '/api/items', '/services.html/'],
+			start: '/no-such-page',
+			okApp: 'OK (the app’s answer)',
+			errorPage: (page: string) => `The error page ${page} was sent, with status 404.`,
+			noErrorPage: 'The config has no page of its own for 404, so the server’s default page is shown.',
+			noLocation: 'no location rule matches, so the server’s default applies',
+			moved: 'The server said: look at the new address (the Location header).',
+			proxied: (target: string) => `The request was passed to the app at ${target}. What the app answers is not the server’s decision.`,
+			via: 'proxy',
+			served: (file: string, root: string) => `The file ${file} was sent from the folder ${root}.`,
+			caption: 'Ask the server, using your config',
+			confLabel: 'Config (you can edit it)',
+			reset: 'Restore the example',
+			disks: 'Files on the disk, in the site’s folder:',
+			urlGroup: 'Address in the request',
+			matched: 'The rule that matched:',
+			note: 'This is a model. Real nginx understands many more directives, and its way of choosing a rule is subtler. Only what the lesson needs is here.'
+		}
+	});
+
+	const initial = W.initial;
 	let conf = $state(initial);
-	const disk = ['index.html', 'uslugi.html', 'kontakty.html', '404.html'];
-	const urls = ['/', '/uslugi.html', '/kontakty.html', '/staraya-stranica', '/net-takoj', '/api/items', '/uslugi.html/'];
-	let url = $state('/net-takoj');
+	const disk = W.disk;
+	const urls = W.urls;
+	let url = $state(W.start);
 
 	type Loc = { exact: boolean; path: string; body: string };
 	type Answer = { status: number; text: string; rule: string; note: string; headers: [string, string][] };
@@ -59,7 +126,7 @@
 				status: 404,
 				text: 'Not Found',
 				rule,
-				note: page ? `Отдана страница ошибки ${c.errorPage} с кодом 404.` : 'Своей страницы 404 в конфиге нет: будет стандартная страница сервера.',
+				note: page ? W.errorPage(c.errorPage!) : W.noErrorPage,
 				headers: [['Content-Type', 'text/html']]
 			};
 		};
@@ -67,18 +134,18 @@
 		const exact = c.locs.find((l) => l.exact && l.path === path);
 		const prefix = c.locs.filter((l) => !l.exact && path.startsWith(l.path)).sort((a, b) => b.path.length - a.path.length)[0];
 		const loc = exact ?? prefix;
-		const rule = loc ? `location ${loc.exact ? '= ' : ''}${loc.path}` : 'правила location нет, работает умолчание сервера';
+		const rule = loc ? `location ${loc.exact ? '= ' : ''}${loc.path}` : W.noLocation;
 		const body = loc?.body ?? '';
 		const ret = body.match(/return\s+(\d{3})\s+(\S+);/);
 		if (ret) {
 			const code = Number(ret[1]);
 			const names: Record<number, string> = { 301: 'Moved Permanently', 302: 'Found' };
-			return { status: code, text: names[code] ?? 'Redirect', rule, note: `Сервер сказал: ищите по новому адресу (заголовок Location).`, headers: [['Location', ret[2]]] };
+			return { status: code, text: names[code] ?? 'Redirect', rule, note: W.moved, headers: [['Location', ret[2]]] };
 		}
 		const proxy = body.match(/proxy_pass\s+(\S+);/);
-		if (proxy) return { status: 200, text: 'OK (ответ приложения)', rule, note: `Запрос передан приложению ${proxy[1]}. Что ответит оно, сервер не решает.`, headers: [['Via', 'прокси']] };
+		if (proxy) return { status: 200, text: W.okApp, rule, note: W.proxied(proxy[1]), headers: [['Via', W.via]] };
 		const tf = body.match(/try_files\s+([^;]+);/);
-		const serve = (file: string): Answer => ({ status: 200, text: 'OK', rule, note: `Отдан файл ${file} из папки ${c.root}.`, headers: [['Content-Type', 'text/html']] });
+		const serve = (file: string): Answer => ({ status: 200, text: 'OK', rule, note: W.served(file, c.root), headers: [['Content-Type', 'text/html']] });
 		const candidates = tf ? tf[1].trim().split(/\s+/) : ['$uri', '$uri/', '=404'];
 		for (const cand of candidates) {
 			if (cand.startsWith('=')) return notFound(rule);
@@ -93,15 +160,15 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Спросите сервер по вашему конфигу</figcaption>
-	<label class="conf">Конфиг (его можно править)
+	<figcaption>{W.caption}</figcaption>
+	<label class="conf">{W.confLabel}
 		<textarea class="dg-mono" rows="19" bind:value={conf} spellcheck="false"></textarea>
 	</label>
 	<div class="dg-ctl">
-		<button type="button" onclick={() => (conf = initial)}>Вернуть пример</button>
+		<button type="button" onclick={() => (conf = initial)}>{W.reset}</button>
 	</div>
-	<p class="disk">Файлы на диске в папке сайта: <code>{disk.join(', ')}</code></p>
-	<div class="dg-ctl" role="group" aria-label="Адрес в запросе">
+	<p class="disk">{W.disks} <code>{disk.join(', ')}</code></p>
+	<div class="dg-ctl" role="group" aria-label={W.urlGroup}>
 		{#each urls as u (u)}
 			<button type="button" class="dg-mono" aria-pressed={url === u} onclick={() => (url = u)}>GET {u}</button>
 		{/each}
@@ -109,10 +176,10 @@
 	<div class="dg-box answer" aria-live="polite">
 		<p class="line"><strong class="st {group}">{res.status} {res.text}</strong></p>
 		{#each res.headers as [k, v] (k)}<p class="dg-mono">{k}: {v}</p>{/each}
-		<p>Сработало правило: <code>{res.rule}</code>.</p>
+		<p>{W.matched} <code>{res.rule}</code>.</p>
 		<p>{res.note}</p>
 	</div>
-	<p class="note">Это модель: настоящий nginx понимает гораздо больше директив и порядок поиска правил у него тоньше. Здесь только то, что нужно уроку.</p>
+	<p class="note">{W.note}</p>
 </figure>
 
 <style>

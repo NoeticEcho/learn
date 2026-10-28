@@ -1,0 +1,677 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/02-static-dynamic.svx. */
+	export const metadata = {
+		id: '06-server/02-static-dynamic',
+		part: 6,
+		order: 2,
+		title: 'Static and dynamic',
+		definition: 'A static page is built in advance and served to everyone as the same file. A dynamic page is built by the server at the moment of the request, for one visitor.',
+		summary:
+			'One page is handed out as a ready file, and another is built by the server for each visitor. Afterwards you understand what each approach costs (speed, money, security, possibilities) and you can decide where your project gets by with static files and where it needs a server.',
+		minutes: 20,
+		teaches: ['server-static-vs-dynamic'],
+		requires: ['server-web-server', 'html-document-structure'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'index.html', caption: 'Static', say: 'Static is the sandwich in the display case: made earlier, the same for all. Fast, cheap, hard to break.' },
+				{ mood: 'hmm', side: 'right', prop: 'server', label: 'code and database', caption: 'Dynamic', say: 'Dynamic is a sandwich made to order: built when asked for, so everyone gets their own. We pay in speed.' },
+				{ mood: 'hint', prop: 'sheet', label: 'Anna’s basket', caption: 'Never in a shared cache', say: 'A cache suits pages that are the same for all. Serve a basket from it and Ben sees what Anna bought.' },
+				{ mood: 'cheer', say: 'The rule: start with static, and add dynamic only where you can’t do without it.' }
+			]
+		},
+		practice: {
+			id: 'server-classify',
+			title: 'What is static on your site, and what is dynamic',
+			task: 'Fill in the table in the block “Static or dynamic”. 1) For each section from your brief, and for the list of offers, the enquiry form and the visitor login, write one word in the column “Static or dynamic” (static or dynamic) and, in the column “Why”, the reason in a sentence or two. 2) The enquiry form needs a server side or an intermediary service: say so in its reason. 3) In the paragraph about the database, answer whether your project needs one, and give a reason. 4) In the paragraph about caching, say what is cached and what makes a dynamic page faster. Every “…” must be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="classify">
+      <h2>Static or dynamic</h2>
+      <table>
+        <tr><th>Part of the site</th><th>Static or dynamic</th><th>Why</th></tr>
+        {{#each sections}}<tr class="part"><td>{{.}}</td><td class="kind">…</td><td class="why">…</td></tr>
+        {{/each}}
+        <tr class="part items"><td>List of offers</td><td class="kind">…</td><td class="why">…</td></tr>
+        <tr class="part form"><td>Enquiry form</td><td class="kind">…</td><td class="why">…</td></tr>
+        <tr class="part login"><td>Visitor login</td><td class="kind">…</td><td class="why">…</td></tr>
+      </table>
+      <p id="db">Do I need a database: …</p>
+      <p id="cache">Caching: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="classify">
+      <h2>Static or dynamic</h2>
+      <table>
+        <tr><th>Part of the site</th><th>Static or dynamic</th><th>Why</th></tr>
+        {{#each sections}}<tr class="part"><td>{{.}}</td><td class="kind">static</td><td class="why">The text of a section rarely changes, so it is served as a ready file.</td></tr>
+        {{/each}}
+        <tr class="part items"><td>List of offers</td><td class="kind">static</td><td class="why">The list rarely changes: when I edit the site it is rebuilt, and everything lies there as ready files.</td></tr>
+        <tr class="part form"><td>Enquiry form</td><td class="kind">dynamic</td><td class="why">An enquiry has to be received and passed to the owner, so a server or an intermediary service must do that.</td></tr>
+        <tr class="part login"><td>Visitor login</td><td class="kind">dynamic</td><td class="why">A login checks a password and remembers a person, and that is the server’s work; it isn’t needed yet, but with it the site would become dynamic.</td></tr>
+      </table>
+      <p id="db">Do I need a database: later. Right now the content rarely changes and fits in files, so a database isn’t needed; enquiries go to email through an intermediary service. If a login or orders appear, a database will be needed to store people and enquiries.</p>
+      <p id="cache">Caching: the pages are static, so they are cached whole: a Cache-Control header and a CDN hand out the ready file without troubling the server, and the dynamic part (the form) should not be cached.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{ id: 'classify-section', kind: 'exists', selector: '#classify' },
+				{ id: 'no-blanks', kind: 'text', selector: '#classify', matches: '^[^…]*$' },
+				{ id: 'part-per-section', kind: 'count', selector: '#classify tr.part', min: { brief: 'sections' } },
+				{ id: 'sections-named', kind: 'field', selector: '#classify tr.part', field: 'sections' },
+				{ id: 'kinds-words', kind: 'text', selector: '#classify td.kind', matches: '^\\s*(?:[Ss]tatic|[Dd]ynamic)\\s*$' },
+				{ id: 'form-dynamic', kind: 'text', selector: '#classify tr.form td.kind', matches: '[Dd]ynamic' },
+				{ id: 'form-needs-server', kind: 'text', selector: '#classify tr.form td.why', matches: 'server|intermediary|service|function|backend' },
+				{ id: 'login-dynamic', kind: 'text', selector: '#classify tr.login td.kind', matches: '[Dd]ynamic' },
+				{ id: 'reasons', kind: 'text', selector: '#classify td.why', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{ id: 'db-answer', kind: 'text', selector: '#db', matches: '^(?=[\\s\\S]*[Dd]atabase)(?=[\\s\\S]*(?:because|since|so that|so |[Ii]f |until|as long as|for now|[Rr]ight now))' },
+				{ id: 'cache-answer', kind: 'text', selector: '#cache', matches: '[Cc]ach|Cache-Control|CDN' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does a static page differ from a dynamic one?',
+				options: [
+					'A static page lies on the server as a ready file, and a dynamic one is built afresh by the server for each request',
+					'A static page has no images',
+					'A dynamic page always has animation'
+				],
+				answer: 0,
+				why: [
+					'Yes. The point isn’t how the page looks but where and when it gets its final form: in advance (static) or at the moment of the request (dynamic).',
+					'No: a static page can have as many images as you like. Static is about how a page is produced, not what is in it.',
+					'No: animation happens in the browser and has nothing to do with this division.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these are usually dynamic, meaning they need code on the server?',
+				options: [
+					'The basket of one particular customer',
+					'Search results on the site',
+					'The text of an “About us” page that changes once a year',
+					'The page you see after logging in to your account'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: each customer has their own basket, and it is kept on the server.',
+					'Yes: the answer depends on what was searched for, and it is built at the moment of the request.',
+					'No: a text like that is simpler to serve as a ready file and update when it is edited.',
+					'Yes: after login the page shows the data of exactly that person.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is a static site usually faster, cheaper and safer than a dynamic one?',
+				options: [
+					'Serving a ready file is simpler than running code and a database, and there is almost nothing on the server to break',
+					'Because static is always prettier',
+					'Because static needs no server at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. The answer is ready in advance, so it can go into a cache and be handed out through a CDN. There is no code, no database and no passwords on the server: fewer places for an attacker to get in.',
+					'No: looks have nothing to do with it.',
+					'No: a server is needed, but a very simple one that only hands out files. Often the host or a CDN does it for you.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put in order the steps a request to a dynamic page goes through',
+				items: [
+					'The server receives the request and finds the right code',
+					'The code asks the database',
+					'The database returns the data',
+					'The code builds an HTML page from the data',
+					'The server sends the page to the visitor'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a dynamic page faster?',
+				options: [
+					'A cache of ready pages or pieces of them',
+					'Indexes in the database',
+					'A cache of database queries',
+					'More images on the page'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: if a page doesn’t change for a few minutes, it can be built once and handed out ready.',
+					'Yes: an index lets the database find a record at once instead of going through them all.',
+					'Yes: the same query isn’t repeated, and the answer comes from memory.',
+					'No: extra images slow a page down, they don’t speed it up.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A static site needs an enquiry form. How can you add one without a server of your own?',
+				options: [
+					'Send the form’s data to an intermediary service (a form backend) or a cloud function, which forwards the enquiry by email',
+					'You can’t: a form is impossible without a server of your own',
+					'Save the enquiries in a file on the visitor’s computer'
+				],
+				answer: 0,
+				why: [
+					'Yes. Receiving data still takes somebody’s server, but not necessarily yours: a form backend or a function in the cloud takes that job. This approach is called Jamstack.',
+					'No: ready-made services solve exactly this task.',
+					'No: you will never get a file from a visitor’s computer.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-static',
+				front: 'What is a static page?',
+				back: 'A ready file that the server simply hands out. Its form is fixed in advance. It is fast, cheap, easy to cache and safe, because there is no code or database on the server.'
+			},
+			{
+				id: 'server-dynamic',
+				front: 'What is a dynamic page?',
+				back: 'A page that code on the server builds for each request, from the database, the user or the search. It is needed when the answer depends on the person or on fresh data.'
+			},
+			{
+				id: 'server-tradeoffs',
+				front: 'What do you pay for dynamic?',
+				back: 'Speed (code and a database on every request), money (a server with room to spare), security (more places to attack) and complexity (updates, monitoring and backups).'
+			},
+			{
+				id: 'server-cache',
+				front: 'How do you make a dynamic page faster?',
+				back: 'Cache: the whole page, pieces of it, or database queries. Serve the static parts (images, styles) separately and through a CDN. Add indexes in the database.'
+			},
+			{
+				id: 'server-form-static',
+				front: 'How do you put a form on a static site?',
+				back: 'Through an intermediary service (a form backend) or a cloud function: the form sends the data to it, and it forwards the enquiry to email or a messenger. No server of your own is needed.'
+			}
+		],
+		sources: [
+			{
+				title: 'Introduction to the server side (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Introduction',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Client-Server overview, static and dynamic sites (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/First_steps/Client-Server_overview',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Jamstack.org: what is Jamstack?',
+				url: 'https://jamstack.org/',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Prevent unnecessary network requests with the HTTP Cache (web.dev)',
+				url: 'https://web.dev/articles/http-cache',
+				licence: 'CC-BY',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'This isn’t about technique but about a decision. For each part of your site, say whether a ready file is enough or code on the server is needed, and explain why.',
+			hints: [
+				'In the column “Static or dynamic” write one word: static or dynamic. In “Why” write a couple of sentences: does it change often, and does it depend on the visitor?',
+				'For the enquiry form say it straight: it needs a server or an intermediary service, because the data has to be received and passed on.',
+				'About the database, answer yes or no and give a reason: what is stored and how often it changes. If there is no application and no login, a database is usually not needed.',
+				'About the cache: what exactly is cached (pages, images, answers) and with which header or service (Cache-Control, a CDN).'
+			],
+			mistakes: {
+				'classify-section': 'The block “Static or dynamic” (the section with id classify) is gone. Put it back.',
+				'no-blanks': 'There are still dots “…” left. Replace every one.',
+				'part-per-section': 'There must be at least as many tr rows with class part as there are sections in your brief.',
+				'sections-named': 'The table must hold the names of all your sections from the brief.',
+				'kinds-words': 'In the column “Static or dynamic” write one word: static or dynamic.',
+				'form-dynamic': 'The enquiry form is dynamic: the data has to be received by a server.',
+				'form-needs-server': 'In the reason for the form, say that a server or an intermediary service is needed.',
+				'login-dynamic': 'The visitor login is dynamic: a server checks the password.',
+				reasons: 'The column “Why” needs real sentences of at least four words.',
+				'db-answer': 'In the paragraph about the database, answer whether it is needed and explain: “because…”, “until…”.',
+				'cache-answer': 'In the paragraph about caching, say what is cached: use the words cache, Cache-Control or CDN.'
+			},
+			outro: 'Now you can say, for each part of your site, why it is static or dynamic. It is the most useful thing to know about servers: whether you need one at all.'
+		},
+		say: {
+			Jamstack: 'jam stack',
+			CDN: 'C D N',
+			Cache: 'cash',
+			'Cache-Control': 'cash control',
+			HTML: 'H T M L'
+		}
+	};
+</script>
+
+<script>
+	import TwoPipelines from '../../diagrams/TwoPipelines.svelte';
+</script>
+
+## Ready or built
+
+When you open a page, it could have got its final form in one of two ways.
+
+A **static page** is built in advance. It is a file lying on the server, and the server hands it out as it is, the same to everybody. You have written such pages all through this course: an `index.html` opened in a browser is static.
+
+A **dynamic page** is built at the moment of the request. The server receives the request and runs a program. The program looks at who is asking and what for (which user, what they searched, what is in their basket), takes the data from a database and builds HTML out of it. Two visitors who open the same address may see different things.
+
+The difference isn’t whether a page is pretty or has animation (that happens in the browser). It is **when** the page gets its final form: in advance, or on request.
+
+## What static gives you
+
+- **Speed.** Handing out a ready file is faster than running code and asking a database. A file can go into a cache (more on that below) and be handed out through a network of servers around the world (a CDN, covered in the part on infrastructure), so it sits close to every visitor.
+- **Price.** Serving files is almost free, and often included in hosting. The load grows, and the bill hardly does.
+- **Security.** There is no code on the server to hack, no database to steal and no passwords. There is almost nothing to attack.
+- **Simplicity.** There is nothing to update, monitor or mend at three in the morning.
+
+## What dynamic gives you
+
+- Pages that depend on the person: an account, a basket, “your orders”.
+- Fresh data without re-uploading the site: stock levels, exchange rates, timetables.
+- Receiving data: enquiries, comments, payments.
+- Search and filters over a large catalog.
+- Login and roles: who may do what.
+
+You pay for this: in speed (code and a database on every request), in money (a server with room for the peak load), in security (more places to attack: code, a database, passwords) and in attention (updates, backups, monitoring).
+
+Look at the same load handled both ways. As the number of visitors grows, the difference shows:
+
+<TwoPipelines />
+
+## Cache: how to make dynamic fast
+
+A dynamic page can be made much faster if it isn’t built afresh for every visitor. That is the job of a **cache**: a memory where the ready answer waits in case it is asked for again.
+
+- A page that is the same for everybody and changes once every few minutes is built once and handed out ready. The `Cache-Control` header (you met it in the lesson on HTTP) allows both the browser and intermediate servers to keep the answer.
+- Database queries that repeat are cached separately, in fast memory.
+- Images, styles and scripts are served separately, as static files, through a CDN.
+- In the database itself you build **indexes**: a kind of table of contents, so that the right record is found at once instead of going through them all.
+
+A page that depends on the person (a basket, an account) must not be cached, or only with great care: otherwise one person will see another’s page. It is one of the nastiest mistakes on the web.
+
+## Static goes further than it seems
+
+In recent years an approach called **Jamstack** has appeared: the site is built in advance into static files (that is the part on site generators, still ahead), and whatever needs a server is plugged in as ready-made services and cloud functions. An enquiry form, for example, is sent to an intermediary service that forwards it to your email: no server of your own, and the site stays static.
+
+The conclusion for your choice is simple: **start with static, and add dynamic only where you can’t do without it.** Most business-card sites, landing pages and blogs live very well without a server of their own.
+
+<details>
+<summary>Check yourself: why can’t a basket be cached like an “About us” page?</summary>
+
+The “About us” page is the same for everyone, and a basket is different for each person. If a cached basket of one visitor is shown to another, the second sees someone else’s purchases.
+
+</details>
+
+## Practice
+
+You are on a site from 2010: the age of content management systems (WordPress, Drupal) had begun, when sites started to be built from a database on every request. Decide which parts of your project really need that.
+
+Fill in the table: for each section of your brief, and for the list of offers, the enquiry form and the visitor login, write “static” or “dynamic” and a reason. Notice that an enquiry form can’t be purely static: somebody has to receive the data. Then answer whether your project needs a database, and what you will cache. An honest “not yet” is a good answer too.
+
+## What was wrong with 2010
+
+In the 2000s a content management system and a database were treated as the normal thing for any site, even a business card of five pages. Every page view started PHP, which went to the database for the same five paragraphs as yesterday and the day before. Business-card sites opened slowly, fell over when visitors flocked in, and were broken into through holes in the system and its plugins (often found out about only after the break-in).
+
+What stays right is the idea that dynamic is for places where the answer depends on the person and on fresh data. What doesn’t depend on them is better handed out as a ready file.

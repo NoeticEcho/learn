@@ -7,6 +7,54 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words, and the prices in each
+	// edition's currency (the figures are illustrative either way), are in `W`.
+	const W = pick({
+		ru: {
+			caption: 'Тот же поток посетителей, два способа',
+			visitors: 'Посетителей в минуту:',
+			cache: 'перед динамической страницей стоит кэш',
+			staticLabel: 'Статическая страница',
+			staticHead: 'Статика: файл, часто из кэша',
+			staticFlow: ['запрос → ', 'файл', ' → ответ'],
+			dynamicLabel: 'Динамическая страница',
+			dynamicHead: 'Динамика: код и база',
+			dynamicFlow: ['запрос → код → ', 'база', ' → HTML → ответ'],
+			ms: 'мс',
+			staticNum: (ms: number, cost: string) => `≈ ${ms} мс · серверов: 0 (раздаёт хостинг или CDN) · ≈ ${cost} в месяц сверх хостинга`,
+			dynamicNum: (ms: number, servers: number, cost: string) => `на одном сервере ≈ ${ms} мс · чтобы держать нагрузку без очереди, нужно серверов: ${servers} (≈ ${cost} в месяц)`,
+			money: (n: number) => `${n.toLocaleString('ru-RU')} ₽`,
+			server: 1500,
+			cacheCost: 500,
+			over: 'Один сервер уже не справляется: очередь запросов растёт, посетители ждут. Нужны кэш или больше серверов (а значит, и больше денег).',
+			cached: 'Кэш делает динамическую страницу почти такой же быстрой: большая часть ответов отдаётся готовой.',
+			plain: 'При небольшом потоке разница заметна, но терпима. Она растёт вместе с числом посетителей.',
+			note: 'Цифры условные: они показывают форму кривой, а не замер. В жизни всё зависит от кода, базы и железа.'
+		},
+		en: {
+			caption: 'The same stream of visitors, two ways',
+			visitors: 'Visitors per minute:',
+			cache: 'a cache stands in front of the dynamic page',
+			staticLabel: 'Static page',
+			staticHead: 'Static: a file, often from a cache',
+			staticFlow: ['request → ', 'file', ' → response'],
+			dynamicLabel: 'Dynamic page',
+			dynamicHead: 'Dynamic: code and a database',
+			dynamicFlow: ['request → code → ', 'database', ' → HTML → response'],
+			ms: 'ms',
+			staticNum: (ms: number, cost: string) => `≈ ${ms} ms · servers: 0 (the host or a CDN hands it out) · ≈ ${cost} a month on top of hosting`,
+			dynamicNum: (ms: number, servers: number, cost: string) => `on one server ≈ ${ms} ms · to carry the load without a queue you need ${servers} server${servers === 1 ? '' : 's'} (≈ ${cost} a month)`,
+			money: (n: number) => `£${n.toLocaleString('en-GB')}`,
+			server: 15,
+			cacheCost: 5,
+			over: 'One server can no longer cope: the queue of requests grows and visitors wait. You need a cache or more servers (and so more money).',
+			cached: 'A cache makes the dynamic page almost as fast: most answers go out ready-made.',
+			plain: 'With a small stream the difference is noticeable but tolerable. It grows with the number of visitors.',
+			note: 'The figures are illustrative: they show the shape of the curve, not a measurement. In real life it all depends on the code, the database and the hardware.'
+		}
+	});
 
 	let visitors = $state(200); // per minute
 	let cache = $state(false);
@@ -20,38 +68,38 @@
 		return Math.round(base + over * (cache ? 0.2 : 0.9));
 	});
 	const servers = $derived(Math.max(1, Math.ceil(visitors / (cache ? capacity * 8 : capacity))));
-	const rub = $derived({ static: 0, dynamic: servers * 1500 + (cache ? 500 : 0) });
+	const cost = $derived({ static: 0, dynamic: servers * W.server + (cache ? W.cacheCost : 0) });
 	const pct = (ms: number) => Math.min(100, Math.round((ms / 1500) * 100));
 </script>
 
 <figure class="dg">
-	<figcaption>Тот же поток посетителей, два способа</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
-		<label>Посетителей в минуту: {visitors}
+		<label>{W.visitors} {visitors}
 			<input type="range" min="10" max="4000" step="10" bind:value={visitors} />
 		</label>
-		<label><input type="checkbox" bind:checked={cache} /> перед динамической страницей стоит кэш</label>
+		<label><input type="checkbox" bind:checked={cache} /> {W.cache}</label>
 	</div>
 	<div class="two">
-		<section aria-label="Статическая страница">
-			<div class="dh">Статика: файл, часто из кэша</div>
-			<p class="flow">запрос → <b>файл</b> → ответ</p>
+		<section aria-label={W.staticLabel}>
+			<div class="dh">{W.staticHead}</div>
+			<p class="flow">{W.staticFlow[0]}<b>{W.staticFlow[1]}</b>{W.staticFlow[2]}</p>
 			<div class="bar"><span class="fill" style="width:{pct(staticMs)}%"></span></div>
-			<p class="num">≈ {staticMs} мс · серверов: 0 (раздаёт хостинг или CDN) · ≈ {rub.static} ₽ в месяц сверх хостинга</p>
+			<p class="num">{W.staticNum(staticMs, W.money(cost.static))}</p>
 		</section>
-		<section aria-label="Динамическая страница">
-			<div class="dh">Динамика: код и база</div>
-			<p class="flow">запрос → код → <b>база</b> → HTML → ответ</p>
+		<section aria-label={W.dynamicLabel}>
+			<div class="dh">{W.dynamicHead}</div>
+			<p class="flow">{W.dynamicFlow[0]}<b>{W.dynamicFlow[1]}</b>{W.dynamicFlow[2]}</p>
 			<div class="bar"><span class="fill dyn" style="width:{pct(dynamicMs)}%"></span></div>
-			<p class="num">на одном сервере ≈ {dynamicMs} мс · чтобы держать нагрузку без очереди, нужно серверов: {servers} (≈ {rub.dynamic.toLocaleString('ru-RU')} ₽ в месяц)</p>
+			<p class="num">{W.dynamicNum(dynamicMs, servers, W.money(cost.dynamic))}</p>
 		</section>
 	</div>
 	<p class="dg-out" aria-live="polite">
-		{#if dynamicMs > 600}Один сервер уже не справляется: очередь запросов растёт, посетители ждут. Нужны кэш или больше серверов (а значит, и больше денег).
-		{:else if cache}Кэш делает динамическую страницу почти такой же быстрой: большая часть ответов отдаётся готовой.
-		{:else}При небольшом потоке разница заметна, но терпима. Она растёт вместе с числом посетителей.{/if}
+		{#if dynamicMs > 600}{W.over}
+		{:else if cache}{W.cached}
+		{:else}{W.plain}{/if}
 	</p>
-	<p class="note">Цифры условные: они показывают форму кривой, а не замер. В жизни всё зависит от кода, базы и железа.</p>
+	<p class="note">{W.note}</p>
 </figure>
 
 <style>

@@ -1,0 +1,461 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/01-web-server.svx. */
+	export const metadata = {
+		id: '06-server/01-web-server',
+		part: 6,
+		order: 1,
+		title: 'What a web server is',
+		definition: 'A web server is a program that takes an HTTP request and answers with a ready file or an application’s result. The best known are Apache, nginx and Caddy.',
+		summary:
+			'Between the browser and a file on a disk stands a program: the server accepts the connection, reads the request, finds the answer and sends it. Afterwards you can read a short nginx config, you know what a reverse proxy is, and you can explain how Apache, nginx and Caddy differ.',
+		minutes: 25,
+		teaches: ['server-web-server', 'server-reverse-proxy'],
+		requires: ['net-http-request-response', 'net-url-anatomy', 'net-dns-resolution'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'server', label: ':443 listening', caption: 'Ports 80 and 443', say: 'A web server is a program, not a machine. It sits on a port and waits for somebody to knock.' },
+				{ mood: 'hint', side: 'right', prop: 'flowchart', label: 'request|file|app|response', say: 'It reads every request and decides: take a ready file, or ask an application that builds the page.' },
+				{ mood: 'cheer', prop: 'server', label: 'reverse proxy', say: [{ text: 'A reverse proxy is the restaurant host: guests talk only to them, and the cooks in the kitchen never meet a guest.' }, { who: 'Proxy', text: 'I’ll take HTTPS. I’ll serve the images.' }] }
+			]
+		},
+		practice: {
+			id: 'server-config',
+			title: 'A server for your project’s pages: addresses, 404 and a move',
+			task: 'There is no real server in the sandbox, so you write the config as text and test it in the diagram above (it understands some nginx directives). Add the lesson’s scaffold to the end of the body (a section with id set to server holding a table, a pre with id set to conf and a paragraph with id set to role) and fill it in. 1) In the table, one tr with class set to route for each section from your brief: the section’s name, an address in lowercase letters starting with a slash (td class set to url) and an .html file (td class set to file). 2) In the pre, write a server { … } config with root, index index.html, error_page 404 /404.html, a location with return 301 from an old address to a new one, and a location / with try_files $uri $uri/ =404. 3) In the paragraph, say which server you chose and why (nginx, Caddy or Apache), and whether a reverse proxy is needed in front of an application. Every “…” must be replaced.',
+			era: 1,
+			continues: 'page-1996',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body bgcolor="#ffffcc" text="#000033" link="#0000cc" vlink="#660099">
+    <center>
+      <table width="600" border="0" cellpadding="8" cellspacing="0">
+        <tr>
+          <td colspan="2" bgcolor="#003366">
+            <h1><font face="Times New Roman" size="6" color="#ffffff">{{name}}</font></h1>
+          </td>
+        </tr>
+        <tr>
+          <td width="150" valign="top" bgcolor="#cccccc">
+            <font size="2">
+              {{#each sections}}<a href="#">{{.}}</a><br>
+              {{/each}}
+            </font>
+          </td>
+          <td valign="top">
+            <font face="Times New Roman" size="3">
+              <p>{{profession}}</p>
+              <p><b>{{mainAction.label}}:</b> <a href="tel:{{phone}}">{{phone}}</a></p>
+              <hr>
+              {{#each items}}<p><b>{{title}}</b><br>{{text}}</p>
+              {{/each}}
+              <hr>
+              <p>{{city}}, <a href="mailto:{{email}}">{{email}}</a></p>
+            </font>
+          </td>
+        </tr>
+      </table>
+      <p><font size="1">You are visitor number</font><br>
+      <img src="counter.gif" width="72" height="20" alt="Visitor counter: 000123"></p>
+    </center>
+
+    <section data-scaffold id="server">
+      <h2>The site’s server</h2>
+      <table>
+        <tr><th>Section</th><th>Address</th><th>File</th></tr>
+        {{#each sections}}<tr class="route"><td>{{.}}</td><td class="url">…</td><td class="file">…</td></tr>
+        {{/each}}
+      </table>
+      <pre id="conf">…<\/pre>
+      <p id="role">…</p>
+    </section>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body bgcolor="#ffffcc" text="#000033" link="#0000cc" vlink="#660099">
+    <center>
+      <table width="600" border="0" cellpadding="8" cellspacing="0">
+        <tr>
+          <td colspan="2" bgcolor="#003366">
+            <h1><font face="Times New Roman" size="6" color="#ffffff">{{name}}</font></h1>
+          </td>
+        </tr>
+        <tr>
+          <td width="150" valign="top" bgcolor="#cccccc">
+            <font size="2">
+              {{#each sections}}<a href="#">{{.}}</a><br>
+              {{/each}}
+            </font>
+          </td>
+          <td valign="top">
+            <font face="Times New Roman" size="3">
+              <p>{{profession}}</p>
+              <p><b>{{mainAction.label}}:</b> <a href="tel:{{phone}}">{{phone}}</a></p>
+              <hr>
+              {{#each items}}<p><b>{{title}}</b><br>{{text}}</p>
+              {{/each}}
+              <hr>
+              <p>{{city}}, <a href="mailto:{{email}}">{{email}}</a></p>
+            </font>
+          </td>
+        </tr>
+      </table>
+      <p><font size="1">You are visitor number</font><br>
+      <img src="counter.gif" width="72" height="20" alt="Visitor counter: 000123"></p>
+    </center>
+
+    <section data-scaffold id="server">
+      <h2>The site’s server</h2>
+      <table>
+        <tr><th>Section</th><th>Address</th><th>File</th></tr>
+        {{#each sections}}<tr class="route"><td>{{.}}</td><td class="url">/section.html</td><td class="file">section.html</td></tr>
+        {{/each}}
+      </table>
+      <pre id="conf">server {
+    listen 80;
+    server_name example.com;
+    root /var/www/site;
+    index index.html;
+
+    error_page 404 /404.html;
+
+    location = /old-page {
+        return 301 /section.html;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}<\/pre>
+      <p id="role">This runs on nginx: it accepts requests, serves the files, shows its own 404 page and redirects the old address. My site has no application yet, so no reverse proxy is needed; when one appears, nginx will stand in front of it and pass requests on with proxy_pass.</p>
+    </section>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'server-section', kind: 'exists', selector: '#server' },
+				{ id: 'no-blanks', kind: 'text', selector: '#server', matches: '^[^…]*$' },
+				{ id: 'route-per-section', kind: 'count', selector: '#server tr.route', min: { brief: 'sections' } },
+				{ id: 'sections-named', kind: 'field', selector: '#server tr.route', field: 'sections' },
+				{ id: 'urls', kind: 'text', selector: '#server td.url', matches: '^\\s*/[a-z0-9/_.-]*\\s*$' },
+				{ id: 'files', kind: 'text', selector: '#server td.file', matches: '^\\s*[a-z0-9_-]+\\.html\\s*$' },
+				{ id: 'conf-root', kind: 'text', selector: '#conf', matches: '\\broot\\s+/\\S+;' },
+				{ id: 'conf-index', kind: 'text', selector: '#conf', matches: '\\bindex\\s+index\\.html\\s*;' },
+				{ id: 'conf-locations', kind: 'text', selector: '#conf', matches: 'location[\\s\\S]*location\\s' },
+				{ id: 'conf-try-files', kind: 'text', selector: '#conf', matches: 'try_files\\s+\\$uri[^;]*=404\\s*;' },
+				{ id: 'conf-404', kind: 'text', selector: '#conf', matches: 'error_page\\s+404\\s+/\\S+;' },
+				{ id: 'conf-301', kind: 'text', selector: '#conf', matches: 'return\\s+301\\s+/\\S+;' },
+				{ id: 'role-server', kind: 'text', selector: '#role', matches: 'nginx|Caddy|Apache|Angie' },
+				{ id: 'role-proxy', kind: 'text', selector: '#role', matches: 'proxy|application|\\bapp\\b' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each program with its description',
+				pairs: [
+					['Apache HTTP Server', 'the oldest of the three, from 1995, configured in files and in a .htaccess file in any folder'],
+					['nginx', 'made in Russia by Igor Sysoev in 2004 to handle a great many connections at once'],
+					['Caddy', 'written in Go, and gets and renews its own HTTPS certificate'],
+					['reverse proxy', 'a server in front of an application: it takes requests from the network and passes them on']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the line proxy_pass http://127.0.0.1:3000; do inside location /api/ ?',
+				options: [
+					'It passes requests for /api/ to the application listening on port 3000 of the same computer',
+					'It serves a file named 3000',
+					'It closes port 3000 to visitors'
+				],
+				answer: 0,
+				why: [
+					'Yes. nginx acts as a go-between: it takes the request from the internet, forwards it to the application, gets the answer and hands it to the visitor. The application itself stays out of sight.',
+					'No: proxy_pass has nothing to do with files. Files are served by root together with try_files.',
+					'No: the application’s port stays open, but only to the server itself. A visitor can reach it only through nginx.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The address /old-page has moved for good to /section.html. What goes in the config?',
+				options: [
+					'return 301 /section.html; in the location for that address',
+					'return 404; in the location for that address',
+					'Nothing: the browser will work it out'
+				],
+				answer: 0,
+				why: [
+					'Yes. The code 301 says “moved permanently” and names the new address in the Location header. Browsers and search engines remember the new address.',
+					'No: 404 means “there is no such page”, and visitors and links to the old address are lost.',
+					'No: a browser can’t know where a page went until the server tells it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps a server takes on receiving a request in order',
+				items: [
+					'Accept the connection on port 80 or 443',
+					'Read the request: method, path, the Host header',
+					'Find the matching rule (location) in the config',
+					'Take a file from the disk, or pass the request to an application',
+					'Send the response with a status code and headers'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is nginx usually asked to do when it stands in front of an application?',
+				options: [
+					'Accept HTTPS and decrypt the traffic',
+					'Serve images and styles without troubling the application',
+					'Compress responses and cache what can be cached',
+					'Write the application’s own code'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the certificate and the encryption are easier to keep in one place, and the application gets an already decrypted request.',
+					'Yes: sending a ready file costs nginx many times less than running the application.',
+					'Yes: compression and a cache save both traffic and the application’s time.',
+					'No: developers write the application. nginx only accepts requests and passes them on.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does try_files $uri $uri/ =404; mean?',
+				options: [
+					'Look for a file at the address first, then a folder, and if there is neither, answer 404',
+					'Answer 404 first, then look for a file',
+					'Go through the files one by one and send them all'
+				],
+				answer: 0,
+				why: [
+					'Yes. The rule tries the options in order and puts the answer last. Thanks to =404 an address that doesn’t exist honestly gets a 404, and not the home page.',
+					'No: the order is the other way round. The checks go from left to right.',
+					'No: exactly one response is sent, the first that fits.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-what',
+				front: 'What does a web server do?',
+				back: 'It is a program on a computer with a public address. It accepts a connection on port 80 or 443, reads the HTTP request, finds the answer (a file or the result of an application) and sends it with a status code.'
+			},
+			{
+				id: 'server-trio',
+				front: 'How do Apache, nginx and Caddy differ?',
+				back: 'Apache (1995): flexible, configured in files and in .htaccess. nginx (2004, Sysoev): fast with many connections, often placed in front of an application. Caddy (2015): simple, and gets HTTPS certificates itself.'
+			},
+			{
+				id: 'server-conf',
+				front: 'What does a simple nginx config consist of?',
+				back: 'A server block: listen, server_name, root (the site’s folder), index, error_page, and location blocks with rules for addresses: return 301 for a move, try_files for files, proxy_pass for an application.'
+			},
+			{
+				id: 'server-proxy',
+				front: 'What is a reverse proxy, and what is it for?',
+				back: 'A server that stands in front of an application and passes requests to it. It takes over HTTPS, static files, compression, caching and protection, and the application stays hidden.'
+			},
+			{
+				id: 'server-404-config',
+				front: 'How do you set up “not found” correctly on a server?',
+				back: 'try_files … =404 plus error_page 404 /404.html: a visitor sees a clear page, and machines get an honest 404 code instead of a 200.'
+			}
+		],
+		sources: [
+			{
+				title: 'What is a web server? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_web_server',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'nginx: Beginner’s Guide',
+				url: 'https://nginx.org/en/docs/beginners_guide.html',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Caddy Documentation',
+				url: 'https://caddyserver.com/docs/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Apache HTTP Server: Getting Started',
+				url: 'https://httpd.apache.org/docs/current/getting-started.html',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Web server: market share, from Netcraft (Wikipedia)',
+				url: 'https://en.wikipedia.org/wiki/Web_server#Market_share',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'The NGINX Crash Course (Laiture)',
+				url: 'https://www.youtube.com/watch?v=7VAI73roXaY',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'We won’t start a real server, but you’ll write a config like the ones on thousands of sites. First a table of addresses, then the config itself, then a few words on choosing a server. Test the config in the diagram above.',
+			hints: [
+				'The scaffold: a section with id set to server holding a table with a header row, a pre with id set to conf and a paragraph with id set to role. There must be one tr with class set to route for each section of your brief.',
+				'An address is lowercase and starts with a slash: /services.html, and the file the same way: services.html. The section names stay in the first column.',
+				'The config: server { listen 80; server_name example.com; root /var/www/site; index index.html; error_page 404 /404.html; location = /old-page { return 301 /services.html; } location / { try_files $uri $uri/ =404; } }',
+				'In the paragraph, name the server (nginx, Caddy or Apache) and say whether you need a proxy: if there is no application, you don’t.'
+			],
+			mistakes: {
+				'server-section': 'The section with id set to server is missing. Paste the lesson’s scaffold.',
+				'no-blanks': 'There are still dots “…” in the server block. Replace every one.',
+				'route-per-section': 'There must be at least as many tr rows with class set to route as there are sections in your brief.',
+				'sections-named': 'The first column of the route rows must hold the names of your sections from the brief.',
+				urls: 'An address is lowercase and starts with a slash: /services.html.',
+				files: 'A file is lowercase and ends in .html: services.html.',
+				'conf-root': 'The config needs the site’s folder: root /var/www/site;',
+				'conf-index': 'The folder needs a home page: index index.html;',
+				'conf-locations': 'You need at least two location blocks: one for the move, one for the rest of the site.',
+				'conf-try-files': 'In location / write try_files $uri $uri/ =404; so that an address that doesn’t exist gets a 404.',
+				'conf-404': 'You need a page of your own for the error: error_page 404 /404.html;',
+				'conf-301': 'A move needs the code 301: return 301 /new-address;',
+				'role-server': 'In the paragraph, name the server: nginx, Caddy or Apache.',
+				'role-proxy': 'In the paragraph, say whether a reverse proxy is needed in front of an application (or that there is no application).'
+			},
+			outro: 'Now your pages have addresses, an answer of their own for “not found” and an honest move. A config like this could go onto a server almost as it is, with the paths changed.'
+		},
+		say: {
+			Apache: 'a-patchy',
+			nginx: 'engine X',
+			Caddy: 'caddy',
+			Angie: 'angie',
+			proxy_pass: 'proxy pass',
+			location: 'location',
+			try_files: 'try files',
+			error_page: 'error page',
+			htaccess: 'H T access',
+			HTTPS: 'H T T P S',
+			W3Techs: 'W 3 techs'
+		}
+	};
+</script>
+
+<script>
+	import ConfigSim from '../../diagrams/ConfigSim.svelte';
+</script>
+
+## Between the browser and the file
+
+You know that a browser asks a server for a page, and you know how it finds the server’s address. Now let’s see who sits at the other end. The word “server” is misleading: it names both the computer in a data center and the program that runs on it. We need the program: the **web server**.
+
+Its job looks like this. It listens on a port (80 for HTTP, 443 for HTTPS) and waits for connections. When a request comes in, it reads it (the method, the path and the `Host` header you met in the lesson on HTTP), decides what to answer, and sends the response with a status code. Most often “what to answer” means one of two things: **take a ready file** from a disk, or **ask an application** that builds the page for this request. This whole part of the course is about those two choices.
+
+## Three servers to begin with
+
+- **Apache HTTP Server** (since 1995) is the oldest. In the 1990s it was a synonym for “web server”, and it still runs much of the “shared hosting” where you pay a few pounds a month and get a folder for your files. It is flexible: settings can go into a `.htaccess` file right in the site’s folder and take effect without a restart. The price of that flexibility is speed when a great many visitors arrive at once.
+- **nginx** (pronounced “engine X”, since 2004) was made in Russia by Igor Sysoev for the Rambler portal, to cope with tens of thousands of simultaneous connections. It is more economical than Apache and excellent at serving files, and it became the standard **reverse proxy**: it is put in front of applications. Today it is one of the most widely used servers in the world (W3Techs and Netcraft publish current figures, and the Wikipedia article in the sources summarizes them). It has forks too, such as the Russian Angie.
+- **Caddy** (since 2015) is written in Go and wins people over with simplicity: a short settings file, and it gets and renews the HTTPS certificate by itself. For a small project it is the easiest start.
+
+There are others (IIS from Microsoft, LiteSpeed), but the principle is the same everywhere and the configs look alike. Learn to read one and you can read the rest.
+
+## What a config looks like
+
+A server behaves as its **config** says: a text file of rules. Here is a complete example for nginx. It is small, and every line reads like plain English.
+
+```nginx
+server {
+    listen 80;                      # listen on port 80
+    server_name example.com;        # for a site with this name (from the Host header)
+    root /var/www/site;             # where the site's files are
+    index index.html;               # what to serve at the address "/"
+
+    error_page 404 /404.html;       # a page of our own for "not found"
+
+    location = /old-page {          # one exact address
+        return 301 /services.html;  # moved here for good
+    }
+
+    location /api/ {                # everything that starts with /api/
+        proxy_pass http://127.0.0.1:3000;   # pass it to the application
+    }
+
+    location / {                    # all other addresses
+        try_files $uri $uri/ =404;  # a file? a folder? otherwise 404
+    }
+}
+```
+
+The key word is `location`: a rule for an address. With the exact sign `=` it matches only one address; without it, it matches every address that begins with it, and when several match, the longest match wins. Inside a rule come the actions: `return 301` answers with a move, `try_files` looks for a file in order and puts `=404` last, and `proxy_pass` hands the request to an application.
+
+Try it: change the config and ask for different addresses. The diagram works out the answer from these rules and names the rule that fired.
+
+<ConfigSim />
+
+<details>
+<summary>Check yourself: why does try_files end with =404?</summary>
+
+So that an address that doesn’t exist gets an honest “not found”. Without it the server might send the home page, or an empty response with the code 200, and both the visitor and the search engine would be misled.
+
+</details>
+
+## The reverse proxy
+
+An application (more on it in the next lessons) usually listens on a port of its own, and it isn’t done to expose it straight to the internet. In front of it stands a server called a **reverse proxy**: it takes requests from the network, forwards them to the application, receives the answer and hands it to the visitor. It is “reverse” because an ordinary proxy works on the visitor’s side and hides the visitor, while this one works on the site’s side and hides the site.
+
+Why have such a go-between:
+
+- it accepts **HTTPS**: the certificate and the encryption live in one place, and the application receives an already decrypted request;
+- it serves **images, styles and scripts** itself: sending a ready file costs it many times less than running the application;
+- it **compresses** responses and **caches** what can be cached;
+- it shields the application from slow clients and from excess requests;
+- behind one address it can keep **several** applications.
+
+If there is no application and the site is static, no proxy is needed: the server hands out the files itself.
+
+## Practice
+
+You are on a site from 1996. Back then a site was a folder of files, and the server handed them out as they were. Imagine that your project’s pages sit in such a folder. You need to give each section an address of its own, set up a “not found” page with an honest 404 code, and make a move from an old address to a new one with the code 301.
+
+There is no real server in the sandbox, so you write the config as text and test it in the diagram above, and afterwards you can use it almost unchanged. Paste this scaffold at the end of the page (before `</body>`):
+
+```html
+<section data-scaffold id="server">
+  <h2>The site’s server</h2>
+  <table>
+    <tr><th>Section</th><th>Address</th><th>File</th></tr>
+    <tr class="route"><td>First section</td><td class="url">…</td><td class="file">…</td></tr>
+  </table>
+  <pre id="conf">…</pre>
+  <p id="role">…</p>
+</section>
+```
+
+Add table rows so that there is one for each section of your brief, and replace every `…`. There is nothing magic in `data-scaffold`; it is just a mark for the course, and the block won’t end up in the site you download.
+
+## What was wrong with 1996
+
+In 1996 a site really was a folder, and often nobody configured the server at all. The “not found” page was the default gray one with technical English on it, old addresses simply stopped working, and links to them led nowhere. The same page opened with and without `www`, and search engines counted it as two different pages. Server errors gave away the version of the program and even paths on the disk, which were better hidden.
+
+What stays true is the main thing: every address should have a clear answer. What is new is that today ten lines of config are enough for it, and every one of them can be seen and read.

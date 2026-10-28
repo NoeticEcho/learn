@@ -1,0 +1,698 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/04-languages.svx. */
+	export const metadata = {
+		id: '06-server/04-languages',
+		part: 6,
+		order: 4,
+		title: 'Why each language has its own niche',
+		definition: 'A server language is chosen for the task, not for fashion. PHP, Python, Java, Go, Node.js and the rest each have their own strengths and pool of specialists.',
+		summary:
+			'PHP, Python, Ruby, Java, C#, Go, JavaScript (Node), Elixir and Rust are not rivals in one ring: each has its own history and its own strength. Afterwards you choose a language for the task and not for fashion, and you weigh the market of specialists where you live.',
+		minutes: 30,
+		teaches: ['server-language-niches'],
+		requires: ['server-cgi', 'server-app-server'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'cards', label: 'PHP Python Go Elixir', say: 'Which language is best? Is a hammer better than a screwdriver? Each language has its own job and its own trade-offs.' },
+				{ mood: 'explain', side: 'right', prop: 'phone', caption: 'Erlang at Ericsson', say: 'A chat needs thousands of calls at once. Ericsson built Erlang for phone exchanges, and Elixir runs on its machine.' },
+				{ mood: 'hint', prop: 'sheet', label: 'who fixes it next year?', say: 'Start with the task, count the people, pick the boring option. A language many people write is cheaper than a rare one.' }
+			]
+		},
+		practice: {
+			id: 'server-language-choice',
+			title: 'Which language to take for your project',
+			task: 'Weigh three languages on six criteria and choose one. 1) The table has three rows tr with class lang: the first cell holds the language’s name (PHP, Python, Go, Node.js, Elixir and so on), the next six hold scores from 1 to 5 (5 is better: fast to start, high speed, lots of concurrency, a rich ecosystem, easy to hire people, a low barrier to entry), and the last holds the total. 2) In the paragraph “Choice” name the language and explain the choice with facts about your project: name one of your sections and a feature (a form, a list, a login). 3) In the paragraph “Specialists” write where you would look for people. 4) In the paragraph “I’ll revisit the choice if” name a situation that would change the decision. Every “…” must be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="language-choice">
+      <h2>Choosing a server language</h2>
+      <table>
+        <tr><th>Language</th><th>Start-up speed</th><th>Run speed</th><th>Concurrency</th><th>Ecosystem</th><th>Hiring</th><th>Entry barrier</th><th>Total</th></tr>
+        <tr class="lang"><td class="name">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="total">…</td></tr>
+        <tr class="lang"><td class="name">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="total">…</td></tr>
+        <tr class="lang"><td class="name">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="score">…</td><td class="total">…</td></tr>
+      </table>
+      <p id="choice">Choice: …</p>
+      <p id="hiring">Specialists: …</p>
+      <p id="revisit">I’ll revisit the choice if: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="language-choice">
+      <h2>Choosing a server language</h2>
+      <table>
+        <tr><th>Language</th><th>Start-up speed</th><th>Run speed</th><th>Concurrency</th><th>Ecosystem</th><th>Hiring</th><th>Entry barrier</th><th>Total</th></tr>
+        <tr class="lang"><td class="name">PHP</td><td class="score">5</td><td class="score">3</td><td class="score">2</td><td class="score">5</td><td class="score">4</td><td class="score">4</td><td class="total">23</td></tr>
+        <tr class="lang"><td class="name">Python (Django)</td><td class="score">4</td><td class="score">3</td><td class="score">3</td><td class="score">5</td><td class="score">5</td><td class="score">5</td><td class="total">25</td></tr>
+        <tr class="lang"><td class="name">Go</td><td class="score">3</td><td class="score">5</td><td class="score">5</td><td class="score">3</td><td class="score">3</td><td class="score">3</td><td class="total">22</td></tr>
+      </table>
+      <p id="choice">Choice: PHP. The project has a section “{{sections.0}}”, pages of text and one enquiry form, so there is little dynamic content, there are no live connections, and above all hosting and specialists are ready. The speed of execution doesn’t decide anything here.</p>
+      <p id="hiring">Specialists: PHP developers are easy to find through job boards and freelance communities, and a studio or an independent developer can set up WordPress for the project.</p>
+      <p id="revisit">I’ll revisit the choice if long connections appear (a chat, live notifications) or a heavy flow of requests: then I’ll look at Go, Node.js or Elixir.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{ id: 'choice-section', kind: 'exists', selector: '#language-choice' },
+				{ id: 'no-blanks', kind: 'text', selector: '#language-choice', matches: '^[^…]*$' },
+				{ id: 'three-languages', kind: 'count', selector: '#language-choice tr.lang', min: 3 },
+				{ id: 'language-names', kind: 'text', selector: '#language-choice td.name', matches: 'PHP|Python|Ruby|Java|C#|Go|JavaScript|Node|Elixir|Rust|Kotlin' },
+				{ id: 'scores', kind: 'text', selector: '#language-choice td.score', matches: '^\\s*[1-5]\\s*$' },
+				{ id: 'totals', kind: 'text', selector: '#language-choice td.total', matches: '^\\s*\\d{1,2}\\s*$' },
+				{ id: 'choice-reasoned', kind: 'text', selector: '#choice', matches: '^(?=[\\s\\S]*(?:PHP|Python|Ruby|Java|C#|Go|JavaScript|Node|Elixir|Rust|Kotlin))(?=[\\s\\S]*(?:because|since|so |which means|means))' },
+				{ id: 'choice-uses-brief', kind: 'field', selector: '#choice', field: 'sections', min: 1 },
+				{ id: 'hiring', kind: 'text', selector: '#hiring', matches: 'find|hire|hiring|job board|communit|freelanc|studio|recruit|vacanc|agenc' },
+				{ id: 'revisit', kind: 'text', selector: '#revisit', matches: '^(?=[\\s\\S]*(?:if|when|once))(?=[\\s\\S]*\\S{4,})' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'You need a business-card site and you choose WordPress. Which language comes “in the box”?',
+				options: ['PHP', 'Rust', 'Elixir'],
+				answer: 0,
+				why: [
+					'Yes. WordPress is written in PHP, like Drupal and Joomla. When you choose a content management system, you choose its language too.',
+					'No: none of the popular systems for business-card sites is written in Rust.',
+					'No: Elixir is chosen for other jobs, such as chats and event streams.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each language with its typical niche',
+				pairs: [
+					['PHP', 'sites on content management systems, and cheap hosting'],
+					['Python', 'fast development, data and neural networks, the Django framework'],
+					['Go', 'simple fast services that take many requests at once'],
+					['Elixir', 'chats and event streams: thousands of connections on one machine'],
+					['Rust', 'places where extreme speed and memory safety matter']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is worth weighing when you choose a language for a project?',
+				options: [
+					'What the project has to do (forms, a chat, calculations)',
+					'Who you can hire, and how fast',
+					'Where the project will live (which hosting supports the language)',
+					'Which language is in the news right now'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the task sets the demands on speed, concurrency and the shape of the server.',
+					'Yes: a language nobody can write will cost more than any other.',
+					'Yes: cheap hosting often runs only PHP, and other languages need a server of their own.',
+					'No: fashion passes quickly, and the project stays.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Rust is faster than PHP. Why does almost nobody choose it for a business-card site?',
+				options: [
+					'Speed of execution isn’t the bottleneck of a business card, while the high entry barrier and the lack of ready-made systems cost a lot',
+					'Rust can’t work over a network',
+					'Rust is banned on hosting services'
+				],
+				answer: 0,
+				why: [
+					'Yes. The bottleneck of an ordinary site is the network, the database and development, not the speed of the language. It doesn’t pay to buy speed you don’t need with extra complexity.',
+					'No: it can, and fast network services are written in it.',
+					'No: nothing bans it. It is just less often preinstalled on cheap hosting.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How is the choice of Elixir for chats and notification systems explained?',
+				options: [
+					'It runs on the Erlang virtual machine, built for phone systems: a great many light parallel processes, and resilience to failures',
+					'It is the most widespread language in the world',
+					'It runs right in the browser'
+				],
+				answer: 0,
+				why: [
+					'Yes. Erlang was invented at Ericsson for phone exchanges, where millions of calls go on at once and must not be cut off. Elixir (2011) gives a modern language on top of the same machine.',
+					'No: it is niche, and specialists are few, especially in some markets.',
+					'No: what runs in the browser is JavaScript.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does “entry barrier” mean in a table where 5 is the best score?',
+				options: [
+					'5: easy to start, little knowledge and few tools needed at once',
+					'5: the language is very hard',
+					'5: the language is the fastest'
+				],
+				answer: 0,
+				why: [
+					'Yes. We agreed that a bigger number is always better for the project. For the entry barrier that means “low”, so it is easy to start.',
+					'No: then a five would be a bad score, and in the table every criterion works the same way.',
+					'No: speed of execution is a column of its own.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-niche-php',
+				front: 'Where does PHP live, and why?',
+				back: 'Sites on content management systems: WordPress, Drupal, Laravel (and 1C-Bitrix in Russia). Cheap hosting, the “one request, one process” model, a huge ecosystem and many specialists. It is weaker where long connections are needed.'
+			},
+			{
+				id: 'server-niche-python-ruby',
+				front: 'What are Python and Ruby known for on the server?',
+				back: 'Python (Django, Flask, FastAPI): fast development, data and neural networks. Ruby (Rails, 2004): speed in building products, “convention over configuration”. Both are slower than Go or Java, but enough for most sites.'
+			},
+			{
+				id: 'server-niche-jvm',
+				front: 'Where are Java and C# used?',
+				back: 'Enterprise systems, banks, big portals. Strict typing, mature frameworks (Spring, .NET), many specialists. A high entry barrier and a heavy start for a project.'
+			},
+			{
+				id: 'server-niche-go-node',
+				front: 'What are Go and Node.js good for?',
+				back: 'Go (Google, 2009): simplicity, speed, easy concurrency; Docker and Kubernetes are written in it. Node.js (2009): one language on the server and in the browser, the huge npm ecosystem, quick prototypes and live connections.'
+			},
+			{
+				id: 'server-niche-elixir-rust',
+				front: 'What are Elixir and Rust chosen for?',
+				back: 'Elixir (on the Erlang VM): chats, event streams, resilience, but few specialists. Rust: top speed and memory safety for services where that matters, but a high entry barrier.'
+			}
+		],
+		sources: [
+			{
+				title: 'Stack Overflow Developer Survey 2025: technology',
+				url: 'https://survey.stackoverflow.co/2025/technology',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'PHP: popularity and usage statistics, from W3Techs (Wikipedia)',
+				url: 'https://en.wikipedia.org/wiki/PHP#Popularity_and_usage_statistics',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'The Go programming language: documentation',
+				url: 'https://go.dev/doc/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Elixir: introduction',
+				url: 'https://elixir-lang.org/getting-started/introduction.html',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Node.js: about Node.js',
+				url: 'https://nodejs.org/en/about',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'The Rust Programming Language (the book)',
+				url: 'https://doc.rust-lang.org/book/',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'There is no right answer here, but there is a reasoned one. Score three languages on six criteria, choose one and explain the choice by what your project needs.',
+			hints: [
+				'Pick three languages from the list, for example PHP, Python and Go or Node.js. Put the names in the first column of the rows.',
+				'Scores run from 1 to 5, where 5 is better for the project. Add the six numbers in the last column.',
+				'In the paragraph “Choice” name the language and lean on the project: “I have a section …, a form, a list …, so …”. The word “because” will help.',
+				'Specialists are found through job boards, communities, studios and freelancers. And the choice is worth revisiting if, say, a chat appears or the load jumps.'
+			],
+			mistakes: {
+				'choice-section': 'The block “Choosing a server language” (the section with id language-choice) is gone. Put it back.',
+				'no-blanks': 'There are still dots “…” left. Replace every one.',
+				'three-languages': 'The table needs at least three rows with the class lang.',
+				'language-names': 'The first column needs the name of a language: PHP, Python, Go, Node.js, Elixir and so on.',
+				scores: 'Scores are numbers from 1 to 5.',
+				totals: 'In the last column write the sum of the numbers: a whole number.',
+				'choice-reasoned': 'In the paragraph “Choice” name the language and explain: “because…”, “since…”.',
+				'choice-uses-brief': 'When you explain the choice, name one of your project’s sections: lean on your project, not on taste.',
+				hiring: 'In the paragraph “Specialists” say where you would look for people: job boards, communities, studios, freelancers.',
+				revisit: 'Name a situation in which the choice should be revisited: “if…”, “when…”.'
+			},
+			outro: 'You made the choice from the facts of your project, not from fashion, and you know the conditions in which it is worth revisiting. That is how an experienced developer decides.'
+		},
+		say: {
+			PHP: 'P H P',
+			Python: 'python',
+			Ruby: 'ruby',
+			Java: 'java',
+			'C#': 'C sharp',
+			Go: 'go',
+			Node: 'node',
+			'Node.js': 'node J S',
+			Elixir: 'elixir',
+			Rust: 'rust',
+			Django: 'jango',
+			Rails: 'rails',
+			Laravel: 'larravel',
+			Erlang: 'erlang',
+			Kubernetes: 'koo-ber-net-eez',
+			Docker: 'docker',
+			Ericsson: 'ericsson',
+			Spring: 'spring',
+			Phoenix: 'phoenix',
+			npm: 'N P M'
+		}
+	};
+</script>
+
+<script>
+	import LanguageRadar from '../../diagrams/LanguageRadar.svelte';
+</script>
+
+## “What should I write the server in?”
+
+It is the commonest question of beginners and clients, and the commonest wrong answer is “in the best one”. There is no best language for a server, just as there is no best tool: a hammer is not better than a screwdriver. Each language has its own age, its own makers, the tasks it was made for and an ecosystem of its own. Choosing a language is not choosing between “good” and “bad”. It is choosing between different compromises.
+
+So it helps to know why each language appeared. Below are nine: the ones servers are really written in today.
+
+## Nine languages and what they are for
+
+**PHP** (1995) was made for the web and still does that job better than many. WordPress, Drupal, MediaWiki (the engine of Wikipedia) and Laravel are built on it, and in Russia 1C-Bitrix too. Its trumps: cheap hosting everywhere, the “one request, one process” model, and a huge number of specialists and ready-made solutions. Its weak spot is long connections (a chat), and the language carries the baggage of its early mistakes.
+
+**Python** (1991) reads almost like English, so it is quick to learn and quick to write. For the web it has Django (Instagram is built on it), Flask and FastAPI. Its main strength is data, analytics and neural networks, which are almost all written in Python, so when a site needs AI, it is close at hand. It is slower than many, but for most sites the speed of the language is not the bottleneck.
+
+**Ruby** (1995) became famous through the Rails framework (2004), which taught the world to build web products in weeks, on the principle of “convention over configuration”. GitHub, Shopify and Basecamp are built on Rails. Today it is less fashionable and specialists are fewer than for the big languages, but it is still good for launching a product fast.
+
+**Java** (1995) and **C#** (2000, Microsoft) became the languages of big corporations: strict typing, mature platforms (Spring, .NET), high reliability and many specialists. Banks, insurers and big portals often stand on them. The price is a high entry barrier and a heavy start for a project; for a business-card site it is a cannon to shoot a sparrow.
+
+**Go** (Google, 2009) was made for server work: a simple language that compiles fast, runs fast and does many things at once without effort. Docker and Kubernetes are written in it. It is good for services where speed and easy operation matter.
+
+**JavaScript on the server**, that is **Node.js** (2009), lets you write both the page and the server in one language and use the huge npm registry of packages. It is good for prototypes, for live connections (chats, notifications) and when the team already writes JavaScript.
+
+**Elixir** (2011, José Valim) runs on the Erlang virtual machine, which was made in the 1980s at Ericsson for telephone exchanges. There millions of calls go on at once, and the failure of one must not cut off the others. From its ancestors Elixir inherited an enormous number of light parallel processes and resilience to errors. Chats, notification systems and event streams are written in it (the messaging service of Discord is built that way). The price is a small community and few specialists.
+
+**Rust** (Mozilla, 2010) is chosen when extreme speed and safe work with memory are needed: separate high-load parts of systems are written in it (at Cloudflare and Discord). Its entry barrier is the highest of the nine, and for an ordinary site it is almost always overkill.
+
+## How to compare them
+
+For a comparison it helps to take **six criteria**:
+
+1. **Project start**: how fast you can get a working site.
+2. **Run speed**: how many requests one machine handles.
+3. **Concurrency**: how convenient it is to hold many connections at once.
+4. **Ecosystem**: how many ready libraries, systems and answers to questions there are.
+5. **Hiring**: how easy it is to find people, and what they cost.
+6. **Entry barrier**: how hard it is to begin. We agree that the easier it is, the higher the score, so that a five means “good for the project” everywhere.
+
+Hiring depends on where you are. Worldwide, the Stack Overflow Developer Survey 2025 shows JavaScript (66% of respondents), Python (58%), Java (29%) and C# (28%) far ahead of PHP (19%), Go (16%) and Rust (15%), with Ruby (6%) and Elixir (3%) small. In Russia the picture is a little different: PHP, Java and JavaScript are easy to find there, and C# and Ruby are harder. The diagram below scores the hiring axis worldwide and lets you switch to the Russian market for comparison.
+
+Pick two languages and look at their “radar”. The scores are the author’s judgments, not measurements, but the shape of the polygon shows how the languages differ:
+
+<LanguageRadar />
+
+<details>
+<summary>Check yourself: why does Rust score highest for run speed, and yet almost nobody chooses it for a business-card site?</summary>
+
+The speed of the language isn’t the bottleneck of a business card. The bottlenecks there are the network, the database and the time of development. The high entry barrier and the shortage of ready-made systems make Rust an expensive choice where its speed isn’t needed.
+
+</details>
+
+## How to choose
+
+Three rules cut out most bad decisions.
+
+1. **Start with the task, not the language.** A site on a content management system, a shop, a chat and a service with calculations all need different things. For sites on WordPress or Drupal the question is settled in advance: it is PHP. For a chat with thousands of connections it is more likely Node.js, Go or Elixir.
+2. **Count the people.** In a year the site will need somebody to fix it. A language that hundreds of people in your town write is cheaper than a language with a dozen specialists, even if the second is technically better. Look at your own market: ask local studios, job boards and meetups what they use.
+3. **Choose boring when you can.** The speed of a language rarely decides a site’s fate. What decides is how fast you launched, how easy it is to maintain and whether you can find help. And boring, proven and widespread is a good choice.
+
+And remember: a language is not forever. A project can start in one and move a part to another when the task changes. That is why the practice asks you not only to choose but also to name the situation in which you would revisit the choice.
+
+## Practice
+
+You are on a site from 2022: servers are no longer bought but rented by subscription, and the language is chosen for the task. Take three languages from the list and weigh them on the six criteria for your project. You can take the scores from the radar or set your own: your project may shift the weight of the criteria. Work out the total yourself.
+
+Then choose one and explain the choice. Not “I like it”, but “the project has such a section and such a form, so it needs this”. Say where you would look for specialists, and name the situation that would change the decision. That is three sentences, and they are worth more than the table.
+
+## What was wrong with 2022
+
+In the 2000s people chose by language, not by task. “We’re a Java company” meant that even a business card of five pages was built on a heavy enterprise platform. “We’re on Ruby” meant admiration for the speed of development and bewilderment about why anyone needs others. By the 2010s a generation of developers had grown up for whom the language was a matter of belonging, and arguments about it looked like arguments about football clubs.
+
+Today’s mature approach is more modest: a language is a tool chosen for the task, and new languages (Go, Rust, Elixir) have taken their niches without pushing out the old. PHP, whose death has been announced since the 2000s, still serves a large share of the sites in the world (W3Techs publishes the figure monthly, and the Wikipedia article on PHP in the sources keeps a recent summary).

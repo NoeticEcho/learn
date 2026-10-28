@@ -1,0 +1,667 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/06-server/03-cgi-php-app-servers.svx. */
+	export const metadata = {
+		id: '06-server/03-cgi-php-app-servers',
+		part: 6,
+		order: 3,
+		title: 'From CGI to PHP and application servers',
+		definition: 'CGI is a way for a web server to start a new program for every request. PHP put code right inside HTML, and an application server keeps a program running.',
+		summary:
+			'CGI started a program for every request, PHP put the code inside the page, and application servers keep the program alive and sit behind nginx. Afterwards you can explain why WordPress is written in PHP while a chat or a game runs on Node.js or Elixir.',
+		minutes: 25,
+		teaches: ['server-cgi', 'server-php-model', 'server-app-server'],
+		requires: ['server-static-vs-dynamic', 'net-http-request-response'],
+		comic: {
+			panels: [
+				{ era: 1, mood: 'hmm', prop: 'server', label: 'cgi-bin', caption: '1993: CGI', say: 'CGI: for every request the server starts a new program. It answers and vanishes. A thousand guests, a thousand launches.' },
+				{ era: 1, mood: 'explain', side: 'right', prop: 'editor', label: 'code inside HTML', caption: '1995: PHP', say: 'PHP puts code right in the page. The script runs, then everything is forgotten: each request starts on a clean sheet.' },
+				{ mood: 'cheer', prop: 'server', label: 'always running', caption: 'Application server', say: [{ who: 'App', text: 'I remember how many of you came.' }, { text: 'A chat or a game needs a living program. The price: memory leaks and careful restarts.' }] }
+			]
+		},
+		practice: {
+			id: 'server-request-path',
+			title: 'The path of a request to a page of your project',
+			task: 'Describe how a request for a page of one section passes through your server. 1) In the numbered list steps there are four items (class step): the server, the handler (PHP or an application), the database, the response. Name a section from your brief in them. 2) In the paragraph “Model” explain the difference between “a process per request” and “a living application”, and say which you chose for the project. 3) In the paragraph “Cache” say where to put a cache and what it stores. 4) In the paragraph about PHP hosting say whether it suits a project of your kind and why. Every “…” must be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="request-path">
+      <h2>The path of a request to a section’s page</h2>
+      <ol id="steps">
+        <li class="step">…</li>
+        <li class="step">…</li>
+        <li class="step">…</li>
+        <li class="step">…</li>
+      </ol>
+      <p id="model">Model: …</p>
+      <p id="cache-place">Cache: …</p>
+      <p id="php-hosting">PHP hosting: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="request-path">
+      <h2>The path of a request to a section’s page</h2>
+      <ol id="steps">
+        <li class="step">The browser asks for the address of the section “{{sections.0}}”. The web server (nginx) accepts the request and, by a location rule, passes it to the handler.</li>
+        <li class="step">The handler (PHP-FPM or an application) receives the request, finds the right section by the address and runs the code.</li>
+        <li class="step">The code asks the database for the text of the section and the list of offers.</li>
+        <li class="step">The code builds HTML from the data, and the server sends the visitor a response with the code 200.</li>
+      </ol>
+      <p id="model">Model: a “process per request” and a “living application” differ in that in the first the code starts afresh for every request, and in the second the program lives all the time. For this project I chose the first: it is simpler and suits cheap hosting.</p>
+      <p id="cache-place">Cache: the ready page of a section is kept on the disk or in memory for a few minutes. It stores the built HTML, so the code and the database don’t run on every visit.</p>
+      <p id="php-hosting">PHP hosting: it suits a project of this kind because it is cheap, and any provider can install WordPress, which runs on PHP. The downside is that PHP is poor at keeping permanent connections, as a chat needs.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{ id: 'path-section', kind: 'exists', selector: '#request-path' },
+				{ id: 'no-blanks', kind: 'text', selector: '#request-path', matches: '^[^…]*$' },
+				{ id: 'four-steps', kind: 'count', selector: '#steps li.step', min: 4 },
+				{ id: 'step-words', kind: 'text', selector: '#steps', matches: '^(?=[\\s\\S]*server)(?=[\\s\\S]*(?:handler|PHP|application|code))(?=[\\s\\S]*database)(?=[\\s\\S]*(?:response|answer))' },
+				{ id: 'names-section', kind: 'field', selector: '#steps', field: 'sections', min: 1 },
+				{ id: 'model-chosen', kind: 'text', selector: '#model', matches: '^(?=[\\s\\S]*process)(?=[\\s\\S]*applicat)(?=[\\s\\S]*(?:chose|chosen|choose|suits|fits))' },
+				{ id: 'cache-place', kind: 'text', selector: '#cache-place', matches: '^(?=[\\s\\S]*[Cc]ache)(?=[\\s\\S]*(?:stor|kept|keeps|holds))' },
+				{ id: 'php-hosting', kind: 'text', selector: '#php-hosting', matches: '^(?=[\\s\\S]*PHP)(?=[\\s\\S]*hosting)(?=[\\s\\S]*(?:because|since|as it|downside|upside|plus|minus|drawback))' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each approach with how it works',
+				pairs: [
+					['CGI', 'a new program is started for every request, answers and dies'],
+					['PHP', 'code is put right into the page, and every request starts on a clean sheet'],
+					['PHP-FPM', 'a pool of ready worker processes: the interpreter isn’t started afresh'],
+					['application server', 'one living program that takes many requests and keeps shared memory']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is CGI not suitable for sites with many visitors?',
+				options: [
+					'Each request starts a new process, which is expensive: the server spends more time starting than answering',
+					'CGI can’t serve HTML',
+					'CGI works only by email'
+				],
+				answer: 0,
+				why: [
+					'Yes. Starting a program for every request eats time and memory. That is why people came up with keeping ready workers (FastCGI, PHP-FPM) and with never killing the program at all (application servers).',
+					'No: CGI can serve HTML; it was the first way to make a dynamic site.',
+					'No: it has nothing to do with email. It is an interface between a web server and a program.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why are WordPress and Drupal written in PHP, and not in Python or Go?',
+				options: [
+					'PHP was on every cheap host, and its “one request, one process” model is simple for sites built from a database',
+					'Other languages can’t work with databases',
+					'PHP is the fastest language there is'
+				],
+				answer: 0,
+				why: [
+					'Yes. In the 2000s PHP was installed at every provider, it was easy to deploy, and the model of “build the page and forget” suited websites perfectly. That is how an ecosystem arose that can’t be replaced now.',
+					'No: they all can. The reason was availability and history.',
+					'No: it is not outstanding for speed. Modern PHP is well optimized, but it is not a record holder.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A chat or an online game more often uses Node.js, Go or Elixir than classic PHP. Why?',
+				options: [
+					'They need long connections and shared state in memory, and PHP forgets everything after each request',
+					'A chat can’t be written in PHP',
+					'Those languages don’t need a server'
+				],
+				answer: 0,
+				why: [
+					'Yes. A chat holds an open connection with every visitor and sends messages to all of them at once: it needs a living program. PHP’s model is awkward for that, although technically it can be got round.',
+					'No: it can, but awkwardly, and you would first have to add extra tools.',
+					'No: server code is always needed. The question is how it is built.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the approaches in the order the ideas appeared',
+				items: [
+					'CGI: a program for every request',
+					'PHP: code inside the page',
+					'FastCGI and PHP-FPM: a pool of ready processes',
+					'Application servers: one living program (on Node.js, for example)'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What happens to a PHP script’s variables after the page has been sent?',
+				options: [
+					'They disappear: the next request starts on a clean sheet, so state is kept in the database, a session or a cache',
+					'They stay in memory until the server restarts',
+					'They are passed to the next visitor'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is the most important property of the “one request, one process” model: no shared state between requests, and so little chance of memory leaks and odd bugs. The price is having to keep everything you need outside.',
+					'No: that is how application servers behave, and they are the ones that get memory leaks.',
+					'No: that never happens, and a good thing too, or visitors would see each other.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'server-cgi',
+				front: 'What is CGI?',
+				back: 'The Common Gateway Interface (1993): an agreement on how a web server starts a program and gives it the request. A new program for every request. It worked, but was expensive under heavy load.'
+			},
+			{
+				id: 'server-php-model',
+				front: 'How does the PHP model work?',
+				back: 'A request arrives, PHP runs the script from start to finish, sends the page and forgets everything. The next request starts on a clean sheet. It is simple and reliable, but state has to be kept in the database, a session or a cache.'
+			},
+			{
+				id: 'server-fpm',
+				front: 'What is PHP-FPM?',
+				back: 'A manager of a pool of ready PHP processes: nginx hands the request to a free one without starting the interpreter afresh. It is faster than CGI, and the “clean sheet per request” model stays.'
+			},
+			{
+				id: 'server-app-server',
+				front: 'What is an application server?',
+				back: 'A program that runs all the time and takes requests itself (often behind nginx): Node.js, Python behind WSGI or ASGI, Elixir with Phoenix, Java. Shared memory and long connections, but you must watch for leaks.'
+			},
+			{
+				id: 'server-why-php',
+				front: 'Why are WordPress and Drupal written in PHP?',
+				back: 'PHP was on every cheap host, it is easy to deploy, and the model of “build the page and forget” suits websites. The ecosystem of plugins and specialists that grew up makes it hard to change the language.'
+			}
+		],
+		sources: [
+			{
+				title: 'RFC 3875: The Common Gateway Interface (CGI) version 1.1',
+				url: 'https://www.rfc-editor.org/rfc/rfc3875',
+				licence: 'link-only',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'PHP Manual: introduction',
+				url: 'https://www.php.net/manual/en/introduction.php',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'PHP Manual: FastCGI Process Manager (FPM)',
+				url: 'https://www.php.net/manual/en/install.fpm.php',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'PHP: popularity and usage statistics, from W3Techs (Wikipedia)',
+				url: 'https://en.wikipedia.org/wiki/PHP#Popularity_and_usage_statistics',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'Django: how to deploy (WSGI and ASGI)',
+				url: 'https://docs.djangoproject.com/en/stable/howto/deployment/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Imagine a person has opened one of the pages of your site. Tell, step by step, who does what while they wait, and where a cache could save work.',
+			hints: [
+				'Four items: the server accepts the request, the handler (PHP or an application) receives it, the code goes to the database, HTML is built and the response goes out. In one of the items name a section from your brief.',
+				'In the paragraph about the model: a “process per request” starts afresh for every request (PHP), and a “living application” runs all the time (Node.js, Elixir). Say which you choose, and why.',
+				'A cache goes on the ready page: it stores the built HTML for a few minutes.',
+				'About PHP hosting: an upside (it is cheap, and WordPress runs on it) and a downside (long connections are awkward).'
+			],
+			mistakes: {
+				'path-section': 'The block “The path of a request” (the section with id request-path) is gone. Put it back.',
+				'no-blanks': 'There are still dots “…” left. Replace every one.',
+				'four-steps': 'The list steps needs at least four items with the class step.',
+				'step-words': 'The steps must mention the server, the handler or the code, the database and the response.',
+				'names-section': 'Name at least one section of your brief in the steps.',
+				'model-chosen': 'In the paragraph “Model” explain the difference between a “process per request” and a “living application”, and say what you chose (“I chose”, “suits”).',
+				'cache-place': 'In the paragraph “Cache” say where it stands and what it stores.',
+				'php-hosting': 'In the paragraph about PHP hosting give an upside or a downside and explain: “because…”, “downside…”.'
+			},
+			outro: 'Now you can say without hesitation what happens in the second before a page opens. It will help when you choose hosting and when you talk to a developer.'
+		},
+		say: {
+			CGI: 'C G I',
+			PHP: 'P H P',
+			FPM: 'F P M',
+			'PHP-FPM': 'P H P F P M',
+			WSGI: 'whiskey',
+			ASGI: 'az-gee-eye',
+			Node: 'node',
+			'Node.js': 'node J S',
+			Elixir: 'elixir',
+			WordPress: 'word press',
+			Django: 'jango',
+			FastCGI: 'fast C G I',
+			RFC: 'R F C'
+		}
+	};
+</script>
+
+<script>
+	import RequestModels from '../../diagrams/RequestModels.svelte';
+</script>
+
+## How the server learned to think
+
+We left off with the fact that a dynamic page needs code that builds it at the moment of the request. But code on a server can be run in different ways, and almost everything depends on the choice: speed, the price of hosting, what can be built. Three ways appeared one after another, and all three are alive today.
+
+## CGI: a new program for every request
+
+The first sites were static. To let a page depend on the request, **CGI** (the Common Gateway Interface) was invented in 1993. The idea is simple: when a web server receives a request for a certain address, it doesn’t look for a file but **starts a program**, hands it the request (the address, the parameters, the headers) and sends the visitor whatever the program prints. The program can be written in anything: Perl (most often), C, shell. The rules of the conversation are written down in the standard RFC 3875.
+
+It was a brilliant idea: the server no longer knows anything about your task, it just starts a program. But the drawbacks showed at once. Starting a program is expensive: the system creates a process, loads the interpreter and reads the code, and then it all gets destroyed, and for the next request everything is repeated. With ten visitors a minute that is bearable. With thousands, the server spends more time starting than answering.
+
+## PHP: code inside the page
+
+In 1995 Rasmus Lerdorf, a Danish-Canadian programmer, wrote a set of small programs for his own pages, and **PHP** grew out of it. Its main idea is that code goes right into the HTML:
+
+```php
+<h1>Hello, <?php echo $name; ?></h1>
+```
+
+The server runs the insertions and sends the finished page. For a beginner it was paradise: you write a page as usual and, where you need to, you put in some code. PHP quickly became the language of “sites built from a database”, and its hosting cost pennies and was available at every provider. WordPress, Drupal and Joomla are built on it, and so are 1C-Bitrix in Russia and Magento for shops, which means an enormous share of the sites in the world.
+
+PHP’s model is very simple: **every request starts on a clean sheet.** The script runs from start to finish, the page is sent, and all the variables are forgotten. The next request knows nothing about the previous one. It is a limitation, but also a protection: there is nothing to pile up, mistakes don’t accumulate in memory, and one request can’t spoil another. Whatever has to be remembered between requests (who is logged in, what is in the basket) is kept outside: in the database, in a session file, in a cache.
+
+To avoid starting PHP afresh for every request, as CGI did, **FastCGI** was invented, and for PHP its implementation is **PHP-FPM** (the FastCGI Process Manager). It is a pool of ready processes: nginx hands the request to a free one, which runs the script, sends the answer, forgets the variables and waits for the next. The interpreter no longer has to be started, and the “clean sheet” stays.
+
+## Application servers: a program that doesn’t die
+
+For many tasks the clean sheet gets in the way. A chat holds an open connection with every visitor and has to send messages to all of them at once. An online game remembers where the players are. A dashboard with live graphs follows a stream of events. These need a program that **runs all the time**, keeps shared state in memory and takes requests itself.
+
+That is how **application servers** are built: Node.js, which runs JavaScript (since 2009), Python applications behind the WSGI and ASGI interfaces (Django stands on them), Java and C#, Go, Elixir with the Phoenix framework, Ruby on Rails. The application is started once and takes requests by the thousand, and in front of it stands the nginx you already know, as a reverse proxy.
+
+The price of a living program is a set of cares that PHP doesn’t have: memory leaks (forgotten state piles up), the need to restart the application carefully when it is updated, and race conditions (when two requests change the same data at once). That is why, for ordinary sites “with a form and a database”, PHP’s model is still reasonable, and an application server is chosen when permanent connections or heavy processing are needed.
+
+Look at the three designs side by side. Send a few requests and watch the counter:
+
+<RequestModels />
+
+<details>
+<summary>Check yourself: why does the counter in PHP start from zero on every request?</summary>
+
+The script runs afresh for each request, and its variables don’t survive its end. To remember something between requests, it is written to the database, a session or a cache.
+
+</details>
+
+## Why it turned out this way
+
+A language is rarely chosen on its merits. In the 2000s cheap hosting came with PHP, so WordPress appeared, so thousands of specialists and plugins appeared, so it pays to write the next site in PHP. This chain is called the ecosystem effect, and a statement like “Python is better” can’t undo it.
+
+The opposite is true too: a language with a living application is chosen when the task needs it. That is the subject of the next lesson.
+
+## Practice
+
+You are on a site from 2010, in the age of content management systems. Take the page of a section of your project and describe, step by step, what happens to a request for it: who accepts it, who builds the page, where the data comes from and how the response goes back.
+
+Then answer three questions. Which model do you choose (a process per request or a living application), and why. Where would you put a cache, and what would it store. And does cheap PHP hosting suit your project. For a business card, a shop or a blog the answer is more often yes, and for a chat or a game no.
+
+## What was wrong with 2010
+
+CGI scripts were written straight into the `cgi-bin` folder, and any mistake in one turned into a hole in the server: the request’s parameters went straight into commands, and the scripts ran with the server’s rights. The first PHP suffered from the same: code and markup mixed in one file, the database password right in the page, and `register_globals` let anyone set any variable through the address. A generation of sites in the 2000s was written like that, which is how PHP got its reputation as an unsafe language.
+
+Today’s PHP is quite different: it has types, frameworks (Laravel, Symfony) and strict rules. And the “one request, one process” model, which then looked like a flaw, is now considered a virtue: it is simple, reliable and scales well just by adding servers.
