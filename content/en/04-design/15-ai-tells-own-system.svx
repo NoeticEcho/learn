@@ -1,0 +1,414 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/15-ai-tells-own-system.svx. */
+	export const metadata = {
+		id: '04-design/15-ai-tells-own-system',
+		part: 4,
+		order: 15,
+		title: 'The tells of a template page, and a small design system of your own',
+		definition: 'The tells of a template page are defaults: slogans, a violet gradient, three identical cards. A small design system made for the project works against them.',
+		summary:
+			'You’ll see which tricks give away a template page (a violet gradient, identical cards with emoji, slogans, invented numbers) and learn to replace them with your own. Afterwards you assemble a small system of your own from tokens, a scale, components and a reference, and check that the page looks like yours.',
+		minutes: 35,
+		teaches: ['design-ai-tells', 'design-own-system'],
+		requires: ['design-handoff', 'design-ds-governance', 'design-outdated-vs-modern', 'design-design-system'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'Innovative solutions', caption: 'The default page', say: 'A violet gradient, three cards, round numbers: “trusted by”. You have seen this page before.' },
+				{ mood: 'explain', side: 'right', caption: 'Why', say: 'With no guidance the likeliest choice wins, which is the most common. It isn’t only AI: templates did this too.' },
+				{ mood: 'hint', prop: 'cards', label: 'quality reliability', say: 'Three cards, “Quality, Reliability, Innovation”, and not one of your services. Use the real items from your brief.' },
+				{ mood: 'cheer', side: 'right', prop: 'sheet', label: 'passport', caption: 'Your own system', say: 'Principles, tokens, components, a reference: rules you can hand to a person, an AI, or yourself in half a year.' }
+			]
+		},
+		practice: {
+			id: 'design-own-system',
+			title: 'Make a template page your own',
+			task: 'This home page is built from template decisions, as a builder would make it by default. Rewrite it. 1) In the note, mark at least five tells of a template, saying where on the page each is. 2) The h1 heading is your project’s name, and the subheading says who it is for (no “innovative solutions” and no “new heights”). 3) The main-action button .cta is labeled with an action from your project. 4) The cards in the features block are your project’s items, with no emoji; the introductory paragraph p under the block’s heading is specific too. 5) In the proof block put evidence from your project (documents, work, people), with no invented numbers such as “10k+” or “99.9%”. 6) In styles.css define the tokens --accent, --surface, --text, --font-body and --space-4 on :root; remove the gradient from .hero and the font Inter; the body text and the button must have contrast of at least 4.5. Every “…” has to be replaced.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="hero" id="hero">
+      <h1>Innovative solutions for your business</h1>
+      <p>We help you reach new heights. Your trusted partner in the world of technology.</p>
+      <a class="cta" href="#start">Get Started</a>
+    </header>
+    <section id="features">
+      <h2>Why choose us</h2>
+      <p class="lead">We do everything for your success.</p>
+      <div class="cards">
+        <div class="card"><span>🚀</span><h3>Innovation</h3><p>Modern approaches for your success.</p></div>
+        <div class="card"><span>⚡</span><h3>Quality</h3><p>High standards in everything.</p></div>
+        <div class="card"><span>✨</span><h3>Reliability</h3><p>We are always by your side.</p></div>
+      </div>
+    </section>
+    <section id="proof">
+      <h2>Trusted by</h2>
+      <p>10k+ happy clients · 99.9% · 24/7</p>
+    </section>
+
+    <aside class="note" data-scaffold id="report">
+      <h2>The tells of a template that I found</h2>
+      <ol>
+        <li class="tell">…</li>
+        <li class="tell">…</li>
+        <li class="tell">…</li>
+        <li class="tell">…</li>
+        <li class="tell">…</li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the page */
+body {
+  font-family: Inter, sans-serif;
+  margin: 0;
+  text-align: center;
+}
+.hero {
+  background-image: linear-gradient(135deg, #6d28d9, #2563eb);
+  color: #ffffff;
+  padding: 3rem 1rem;
+}
+.cta {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  background-color: #ffffff;
+  color: #a78bfa;
+  text-decoration: none;
+}
+.cards {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+.card {
+  padding: 1rem;
+  border-radius: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+section {
+  padding: 2rem 1rem;
+  color: #9ca3af;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="hero" id="hero">
+      <h1>{{title}}</h1>
+      <p>{{who}}. For: {{forWhom}}</p>
+      <a class="cta" href="#contacts">{{mainAction.label}}</a>
+    </header>
+    <section id="features">
+      <h2>What we do</h2>
+      <p class="lead">{{profession}}</p>
+      <div class="cards">
+        {{#each items}}<div class="card"><h3>{{title}}</h3><p>{{text}}</p></div>
+        {{/each}}
+      </div>
+    </section>
+    <section id="proof">
+      <h2>Evidence</h2>
+      <ul>{{#each proofs}}<li>{{title}}</li>{{/each}}</ul>
+    </section>
+
+    <aside class="note" data-scaffold id="report">
+      <h2>The tells of a template that I found</h2>
+      <ol>
+        <li class="tell">A violet-to-blue gradient in the header</li>
+        <li class="tell">A slogan in the heading instead of a name</li>
+        <li class="tell">A generic “Get Started” button</li>
+        <li class="tell">Three identical cards with emoji</li>
+        <li class="tell">Invented numbers in the “Trusted by” block</li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the page */
+:root {
+  --accent: #0b5cad;
+  --surface: #faf9f7;
+  --text: #1c1b19;
+  --font-body: Literata, Georgia, serif;
+  --space-4: 16px;
+}
+body {
+  font-family: var(--font-body);
+  background: #faf9f7;
+  color: #1c1b19;
+  margin: 0;
+}
+.hero {
+  padding: calc(var(--space-4) * 3) var(--space-4);
+}
+.cta {
+  display: inline-block;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+}
+.cards {
+  display: flex;
+  gap: var(--space-4);
+}
+.card {
+  padding: var(--space-4) 0;
+  border-top: 2px solid #c9c4ba;
+}
+section {
+  padding: calc(var(--space-4) * 2) var(--space-4);
+}
+`
+			},
+			checks: [
+				{ id: 'tells', kind: 'count', selector: '#report li.tell', min: 5 },
+				{ id: 'tell-place', kind: 'text', selector: '#report li.tell', matches: '\\S{3,}\\s+\\S{3,}' },
+				{ id: 'no-blanks', kind: 'text', selector: '#report', matches: '^[^…]*$' },
+				{ id: 'h1-title', kind: 'field', selector: 'h1', field: 'title' },
+				{ id: 'hero-for-whom', kind: 'field', selector: '#hero', field: 'forWhom' },
+				{ id: 'no-slogans', kind: 'text', selector: '#hero', matches: '^(?![\\s\\S]*([Ii]nnovati|trusted partner|new heights|tailored|personali[sz]ed approach))[\\s\\S]*$' },
+				{ id: 'cta-label', kind: 'field', selector: 'a.cta', field: 'mainAction.label' },
+				{ id: 'cards-items', kind: 'field', selector: '#features', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'no-emoji', kind: 'text', selector: '#features', matches: '^(?![\\s\\S]*[\\u{1F300}-\\u{1FAFF}\\u2728\\u26A1])[\\s\\S]*$' },
+				{ id: 'proof-real', kind: 'field', selector: '#proof', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{ id: 'no-invented-stats', kind: 'text', selector: '#proof', matches: '^(?![\\s\\S]*(\\d+\\s?[kK]\\+|99[.,]9))[\\s\\S]*$' },
+				{ id: 'token-accent', kind: 'style', selector: ':root', prop: '--accent', matches: '\\S' },
+				{ id: 'token-surface', kind: 'style', selector: ':root', prop: '--surface', matches: '\\S' },
+				{ id: 'token-text', kind: 'style', selector: ':root', prop: '--text', matches: '\\S' },
+				{ id: 'token-font', kind: 'style', selector: ':root', prop: '--font-body', matches: '\\S' },
+				{ id: 'token-space', kind: 'style', selector: ':root', prop: '--space-4', matches: '^\\s*\\d+(\\.\\d+)?(px|rem)\\s*$' },
+				{ id: 'no-gradient', kind: 'style', selector: '.hero', prop: 'background-image', matches: '^(none)?$' },
+				{ id: 'no-inter', kind: 'style', selector: 'body', prop: 'font-family', matches: '^(?![\\s\\S]*Inter)' },
+				{ id: 'text-contrast', kind: 'contrast', selector: '#features p', min: 4.5 },
+				{ id: 'cta-contrast', kind: 'contrast', selector: 'a.cta', min: 4.5 }
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'Which of these are tells of a template page?',
+				options: ['A violet-to-blue gradient on the first screen', 'Three identical cards with emoji and words like “Quality, Reliability, Innovation”', 'A heading with the project’s name and who it is for', 'Invented numbers (“10k+ clients, 99.9%”)'],
+				answer: [0, 1, 3],
+				why: ['Yes: the default gradient is found on thousands of pages.', 'Yes: such cards suit any business, which means no business.', 'No: this is exactly what sets your own page apart from a template.', 'Yes: invented numbers undermine trust once somebody checks them.']
+			},
+			{
+				type: 'single',
+				prompt: 'Where does the “template” look of pages made by AI come from?',
+				options: [
+					'A model chooses the likeliest, that is the most common, decision in its training data: with no guidance from you the result is “the middle”',
+					'It was programmed to do exactly that',
+					'An AI can’t do otherwise'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is called “distributional convergence”: with no direction, a model gives the safest and most familiar thing. Any template does the same.',
+					'No: nobody wrote in the violet gradient, it is simply statistically common.',
+					'No: with clear guidance (tokens, fonts, examples) the result changes noticeably.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What cures “template-ness” best?',
+				options: [
+					'Specifics: your words, your evidence, your own tokens and one bold decision',
+					'More animation and effects',
+					'A different color of gradient'
+				],
+				answer: 0,
+				why: [
+					'Yes. A template can’t know your words and your story.',
+					'No: effects add no meaning and will age faster.',
+					'No: another gradient is still the default gradient.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each tell with what to replace it with',
+				pairs: [
+					['The slogan “Innovative solutions”', 'the project’s name and who it is for'],
+					['The button “Get Started”', 'the main action from the brief'],
+					['Three cards with emoji', 'the project’s real items'],
+					['“10k+ clients”', 'real evidence: documents, work, people']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of assembling your small system in order',
+				items: ['Principles and the system passport', 'Tokens in three layers and a dark theme', 'The type scale and the spacing step', 'Components with states', 'A reference with a version and a changelog']
+			},
+			{
+				type: 'single',
+				prompt: 'If a page passes all the checks for the tells of a template, can it be called good?',
+				options: [
+					'No: that is necessary but not sufficient; it also needs legibility, accessibility and usefulness to the visitor',
+					'Yes: there is nothing else to check',
+					'No, you need to add one more gradient'
+				],
+				answer: 0,
+				why: [
+					'Yes. The absence of tells means the page isn’t a template, not that it has succeeded.',
+					'No: contrast, focus, speed and meaning remain.',
+					'No: that is exactly a tell.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-tells-list', front: 'What are the tells of a template page?', back: 'A violet-to-blue gradient, the default font, a slogan instead of a name, three identical cards with emoji, invented numbers, everything centered with the same shadow.' },
+			{ id: 'design-tells-cause', front: 'Where do the tells come from?', back: 'From “distributional convergence”: with no guidance a model (and any template) chooses the most common decision. It is cured by specifics.' },
+			{ id: 'design-tells-fix', front: 'What do you replace the tells with?', back: 'Your own words and evidence from the project, your own tokens and font, one bold decision, real items in place of “Quality, Reliability”.' },
+			{ id: 'design-own-checklist', front: 'What does a small system of your own consist of?', back: 'Principles, tokens in three layers with a dark theme, a type and spacing scale, five or six components with states, a reference with a version and a changelog.' },
+			{ id: 'design-tells-enough', front: 'Is it enough to remove the tells?', back: 'No. It is necessary but not sufficient: legibility, accessibility and usefulness to the visitor are needed too.' }
+		],
+		sources: [
+			{ title: 'Improving frontend design through Skills (Anthropic)', url: 'https://claude.com/blog/improving-frontend-design-through-skills', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Deceptive Patterns (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/deceptive-patterns/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Awwwards: the award and its jury (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Awwwards', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Learn Design (web.dev)', url: 'https://web.dev/learn/design/', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'Photos as Web Content (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/photos-as-web-content/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is a home page that a builder might produce by default. Almost every line has a tell of a template. Let’s find five and replace them with your own.',
+			hints: [
+				'First find the tells: the gradient, the slogan in the heading, the Get Started button, the emoji in the cards, numbers like 10k+. Write five in the note, each with its place.',
+				'Let the h1 heading name your project, and the subheading say who it is for. Build the cards from your items, and in the evidence block put real documents or work.',
+				'In styles.css define the tokens on :root and remove the gradient and the font Inter. Dark text on a light background, and a dark background with white text on the button.'
+			],
+			mistakes: {
+				tells: 'The note needs at least five tells of a template.',
+				'tell-place': 'Describe each tell in words, saying where on the page it is.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.',
+				'h1-title': 'The h1 heading must be your project’s name.',
+				'hero-for-whom': 'The first screen must say who the project is for.',
+				'no-slogans': 'Template slogans (“innovative solutions”, “new heights”) are still on the first screen. Write specifically.',
+				'cta-label': 'The main-action button must name an action from your project.',
+				'cards-items': 'The cards must be your project’s items.',
+				'no-emoji': 'Emoji are still in the block of cards. Remove them.',
+				'proof-real': 'The evidence block must hold your real evidence from the project.',
+				'no-invented-stats': 'The invented numbers (“10k+”, “99.9%”) must go.',
+				'token-accent': ':root needs a variable --accent.',
+				'token-surface': ':root needs a variable --surface.',
+				'token-text': ':root needs a variable --text.',
+				'token-font': ':root needs a variable --font-body.',
+				'token-space': ':root needs a variable --space-4 in px or rem.',
+				'no-gradient': 'The gradient must come off the .hero header: background-image.',
+				'no-inter': 'The font Inter is still the default. Set a font of your own through --font-body.',
+				'text-contrast': 'The text in the cards is too light for the background: contrast of at least 4.5.',
+				'cta-contrast': 'The label of the button is hard to see against its background: contrast of at least 4.5 is needed.'
+			},
+			outro: 'The page has stopped being “any page”. Check one last thing: press Tab and make sure the button’s focus is visible. Then compare with your system passport from the sixth lesson: is everything in it there now?'
+		},
+		say: { AI: 'A I', Inter: 'inter', Get: 'get', Started: 'started', Awwwards: 'awards', Anthropic: 'an-throp-ic', CSS: 'C S S', HTML: 'H T M L', Tab: 'tab', NN: 'N N' }
+	};
+</script>
+
+<script>
+	import AiTells from '../../diagrams/AiTells.svelte';
+</script>
+
+## A page you have already seen
+
+Open ten sites of small companies and startups from recent years. A good share of them have one and the same page: a violet-to-blue gradient, a big centered heading, three identical cards with icons, a “trusted by” block with round numbers, and rounded buttons with a big shadow. This is no conspiracy: it is what comes out when decisions are made “by default”.
+
+It is especially easy to see in pages made by AI builders. In Anthropic’s article on improving the frontend code that Claude writes, it is put like this: with no guidance a model gives a predictable middle: fonts such as Inter, purple gradients on white, standard components and restrained animation. The cause is in the design itself: a model chooses the likeliest option, and the likeliest is the most common. The authors call it “distributional convergence”. The article is in the sources.
+
+Two conclusions matter.
+
+1. **It isn’t only AI.** The same tells were in Bootstrap templates ten years ago and on thousands of pages on ready-made themes. AI simply makes such pages faster and in greater numbers.
+2. **The tells are a symptom.** The real cause is that the page has nothing specific in it: none of your words, none of your evidence, none of your decisions. That is exactly why it can’t be told apart from a thousand others.
+
+<details>
+<summary>Check yourself: why do pages made with no guidance look alike?</summary>
+
+With no guidance the likeliest, and so the most common, decision is chosen. The result is “the middle”, the same for everyone.
+
+</details>
+
+## Eight tells and what to replace them with
+
+Press the switches: each tell is replaced by something taken from your brief. Notice that the page did not become “prettier” through ornament: it became **more specific**.
+
+<AiTells />
+
+More about the tells.
+
+**Words.**
+- **A slogan instead of a name.** “Innovative solutions for your business” suits any business, which means none. Replace it with the name and the point: “what” and “for whom”.
+- **Empty words.** “A personal approach”, “a trusted partner”, “reach new heights”. They promise nothing, and the reader knows it. In their place a fact (remember the plain, informative style).
+- **A generic button** (“Get Started”). The label should name an action from your project.
+
+**Content.**
+- **Three cards “Quality, Reliability, Innovation”.** Not one of your services. Replace them with your project’s real items.
+- **Invented numbers** (“10k+ clients, 99.9%”). They can’t be checked or read without distrust. In their place real evidence: documents, work, people. What must not be invented you will read about in more detail in the part on law and advertising.
+- **Stock photos and made-up testimonials.** A single testimonial from “John, Director” with no surname and no company is also a tell.
+
+**Look.**
+- **The “default” gradient.** The trouble is not that a gradient is bad but that it isn’t yours.
+- **The default font,** with everything centered.
+- **One shadow and one rounding for everything.** When everything has the same soft shadow, there is no hierarchy.
+
+**Structure.** Always the same chain: a header, three cards, testimonials, three pricing plans, a call to action, a footer. If your project isn’t about pricing plans, why have them?
+
+## How not to be caught
+
+More often than not it isn’t “fixes” that help but a few decisions made in advance. They are also the basis of your system:
+
+1. **Principles.** The three rules you wrote in the passport in the sixth lesson. They suggest what the page will not have.
+2. **Your own tokens.** A color, a font and a spacing step chosen for the tone of your brief, not by default.
+3. **One bold decision.** The authors of guidance on frontend design advise choosing one cohesive manner and keeping to it: one dominant color with sharp accents, an expressive font, a contrast of sizes. Not a set of effects, but one decision.
+4. **Real materials.** Photographs of real people and of work, real evidence. They are the one thing that can’t be generated for you.
+5. **Checking.** The tells are checked against a list, as now, and then legibility, contrast and focus.
+
+## A small design system of your own: the part in review
+
+Everything you have done in this part adds up to a system. Check yourself against the list:
+
+1. **A passport** with principles and limits (lesson 6).
+2. **Tokens in three layers** and a dark theme (lesson 11).
+3. **A type scale and a spacing step** (lessons 3 and 4).
+4. **Color with checked contrast** (lesson 5).
+5. **Components with states:** a button and a card (lesson 12).
+6. **A reference** with a version and a changelog (lesson 13).
+7. **A handoff specification** for the first screen (lesson 14).
+8. **A check for the tells of a template** (this lesson).
+
+The textbook itself has such a system too: the tokens in the `design/` folder are gathered in layers, the colors have roles and comments about contrast, and the pages go through an automatic accessibility check. You can open `design/tokens.css` and recognize in it what you have done yourself.
+
+If you have done the whole list, you have what most small sites do not: **rules** to build on from here, which you can hand to a person, an AI builder, or yourself in half a year.
+
+<details>
+<summary>Check yourself: is it enough to remove all the tells for a page to be good?</summary>
+
+No: it is necessary but not sufficient. Legibility, accessibility and usefulness to the visitor are needed too.
+
+</details>
+
+## Practice
+
+Before you is a home page “by default”. Find at least five tells in it and write them in the note, saying where each is. Then rewrite it: real words from your brief in place of slogans, real items in place of cards with emoji, real evidence in place of invented numbers. In `styles.css` define your own tokens and remove the gradient and the default font.
+
+And one last check, which you do by hand: press Tab and make sure the button’s focus is visible. It can’t be done automatically, and it must not be skipped.
+
+## What was wrong with 2025
+
+In 2025 such pages became mass-produced: a builder gave out a site in a minute, and almost nobody changed it. Readers got used to the tells and stopped noticing such pages at all. What became valuable then was exactly specificity: real photographs, named people, facts that can be checked. That is why the part on AI begins with how not to give away the main thing: your words and your decisions.
