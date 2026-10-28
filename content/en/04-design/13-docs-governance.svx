@@ -1,0 +1,387 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/13-docs-governance.svx. */
+	export const metadata = {
+		id: '04-design/13-docs-governance',
+		part: 4,
+		order: 13,
+		title: 'Documenting and governing a system: the component page, versions, contributions',
+		definition: 'Design system documentation says when and how to use each component. Governance is the rules for change: statuses, versions, deprecation and contributions.',
+		summary:
+			'You’ll learn to describe a component so that people can use it without asking questions, and to govern a system after launch: statuses, versions, contributions, deprecation. Afterwards you have a reference page for your project’s button.',
+		minutes: 30,
+		teaches: ['design-ds-docs', 'design-ds-governance'],
+		requires: ['design-atomic-design', 'design-component'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'Button', say: 'A good button takes an hour. For others to use it takes another day, to write when to take it and how.' },
+				{ mood: 'hint', side: 'right', prop: 'sheet', label: 'when not to use', say: 'The most valuable part of a page is “when not to use”. It prevents bad decisions.' },
+				{ mood: 'explain', prop: 'flowchart', label: '1.4.2|1.5.0|2.0.0', caption: 'SemVer', say: 'A patch fixes, a minor adds, a major breaks. Renamed a token or made the button bigger? That is a major.' },
+				{ mood: 'cheer', side: 'right', caption: 'Deprecation', say: 'A part isn’t deleted in a day. Mark it deprecated, name the replacement, log it, and remove it in a major version.' }
+			]
+		},
+		practice: {
+			id: 'design-ds-reference',
+			title: 'A reference page for your project’s button',
+			task: 'Write a component page on the model you saw in GOV.UK. Fill in every section for the main-action button. 1) “When to use” and “When not to use”, one phrase each. 2) Variants (at least two) and states (at least four), as lists. 3) “Wording”: a rule for the label, and the label of your project’s button (it must appear in the text). 4) “Accessibility”. 5) A “Code” block: a markup example in pre and code, and a live example of the button beside it. 6) A status (experimental, stable or deprecated), a version of the form 1.0.0, a changelog of at least two entries with dates, and a deprecation rule: what you will tell people, and how, before anything is removed. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}: the system reference</h1>
+
+      <article id="ref">
+        <h2>The main-action button</h2>
+        <p>Status: <span class="status">…</span>. Version: <span class="version">…</span></p>
+        <p><a class="btn" href="#contacts">{{mainAction.label}}</a></p>
+
+        <h3>When to use</h3>
+        <p id="when-use">…</p>
+        <h3>When not to use</h3>
+        <p id="when-not">…</p>
+        <h3>Variants</h3>
+        <ul id="variants"><li>…</li></ul>
+        <h3>States</h3>
+        <ul id="states"><li>…</li></ul>
+        <h3>Wording</h3>
+        <p id="wording">…</p>
+        <h3>Accessibility</h3>
+        <p id="a11y">…</p>
+        <h3>Code</h3>
+        <pre><code>…</code></pre>
+        <h3>Changes</h3>
+        <ul class="changelog"><li>…</li></ul>
+        <p>Deprecation rule: <span id="deprecation">…</span></p>
+      </article>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 8px;
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+pre {
+  padding: 1rem;
+  background: #eceae5;
+  overflow-x: auto;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}: the system reference</h1>
+
+      <article id="ref">
+        <h2>The main-action button</h2>
+        <p>Status: <span class="status">stable</span>. Version: <span class="version">1.0.0</span></p>
+        <p><a class="btn" href="#contacts">{{mainAction.label}}</a></p>
+
+        <h3>When to use</h3>
+        <p id="when-use">For the single main action on a screen.</p>
+        <h3>When not to use</h3>
+        <p id="when-not">For secondary actions: use a link for those.</p>
+        <h3>Variants</h3>
+        <ul id="variants"><li>primary (filled)</li><li>secondary (outlined)</li></ul>
+        <h3>States</h3>
+        <ul id="states"><li>default</li><li>hover</li><li>focus</li><li>disabled</li></ul>
+        <h3>Wording</h3>
+        <p id="wording">The label describes the action and begins with a verb: “{{mainAction.label}}”.</p>
+        <h3>Accessibility</h3>
+        <p id="a11y">The target is at least 44 pixels, the contrast at least 4.5, and the focus is visible.</p>
+        <h3>Code</h3>
+        <pre><code>&lt;a class="btn" href="#contacts"&gt;Label&lt;/a&gt;</code></pre>
+        <h3>Changes</h3>
+        <ul class="changelog"><li>2026-10-27: first version, 1.0.0</li><li>2026-10-28: added the “disabled” state</li></ul>
+        <p>Deprecation rule: <span id="deprecation">before removing anything we say so in the changelog and keep the old part for two versions</span></p>
+      </article>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 8px;
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+pre {
+  padding: 1rem;
+  background: #eceae5;
+  overflow-x: auto;
+}
+`
+			},
+			checks: [
+				{ id: 'live-example', kind: 'field', selector: '#ref a.btn', field: 'mainAction.label' },
+				{ id: 'status', kind: 'text', selector: '#ref .status', matches: 'experimental|trial|stable|deprecated' },
+				{ id: 'version', kind: 'text', selector: '#ref .version', matches: '^\\s*\\d+\\.\\d+\\.\\d+\\s*$' },
+				{ id: 'when-use', kind: 'text', selector: '#when-use', matches: '\\S{3,}\\s+\\S{3,}' },
+				{ id: 'when-not', kind: 'text', selector: '#when-not', matches: '\\S{3,}\\s+\\S{3,}' },
+				{ id: 'variants', kind: 'count', selector: '#variants li', min: 2 },
+				{ id: 'states', kind: 'count', selector: '#states li', min: 4 },
+				{ id: 'wording', kind: 'field', selector: '#wording', field: 'mainAction.label' },
+				{ id: 'a11y', kind: 'text', selector: '#a11y', matches: '\\S{3,}\\s+\\S{3,}' },
+				{ id: 'code', kind: 'text', selector: '#ref pre code', matches: 'class=.btn' },
+				{ id: 'changelog', kind: 'count', selector: '#ref ul.changelog li', min: 2 },
+				{ id: 'changelog-dates', kind: 'text', selector: '#ref ul.changelog li', matches: '\\d{4}-\\d{2}-\\d{2}|\\d{1,2}\\s+[A-Za-z]+\\s+\\d{4}' },
+				{ id: 'deprecation', kind: 'text', selector: '#deprecation', matches: '\\S{3,}\\s+\\S{3,}' },
+				{ id: 'no-blanks', kind: 'text', selector: '#ref', matches: '^[^…]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'What should a component page have in good documentation?',
+				options: ['When to use and when not to use', 'Variants and states', 'A code example and a live example', 'Only a pretty picture with no explanation'],
+				answer: [0, 1, 2],
+				why: ['Yes: a person’s most frequent questions.', 'Yes: without them a developer invents the states.', 'Yes: an example you can copy and see.', 'No: a picture without rules doesn’t help you decide.']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each change with the kind of version',
+				pairs: [
+					['Renamed a token that was referred to', 'major (breaks)'],
+					['Added a new component', 'minor (adds)'],
+					['Fixed an invisible focus in the dark theme', 'patch (fixes)']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is “deprecation” in a system?',
+				options: [
+					'A warning that a part will soon be removed: it is marked, a replacement is named, and it is kept for a few versions',
+					'The instant removal of a part',
+					'An automatic update of the look of pages'
+				],
+				answer: 0,
+				why: [
+					'Yes. That way people have time to move, and the system doesn’t break other people’s pages in one day.',
+					'No: instant removal is a break with no warning.',
+					'No: deprecation has nothing to do with the look of pages.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put a component’s life in a system in order',
+				items: ['Experimental: tried in one place', 'Accepted into the system after checking against criteria', 'Stable: used and maintained', 'Deprecated: marked, a replacement named', 'Removed in the next major version']
+			},
+			{
+				type: 'single',
+				prompt: 'What does GOV.UK say about the labels of buttons?',
+				options: [
+					'Write them in sentence case and describe the action: “Save and continue”',
+					'Write them in capital letters so they stand out',
+					'Always write “OK”'
+				],
+				answer: 0,
+				why: [
+					'Yes. A label should name the action, not be abstract.',
+					'No: labels are written as ordinary text, without shouting.',
+					'No: “OK” doesn’t say what will happen.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is a changelog for?',
+				options: [
+					'So that people see what changed and what they will have to fix before they update',
+					'So that the system looks more serious',
+					'So that a search engine finds the page'
+				],
+				answer: 0,
+				why: [
+					'Yes. A changelog is part of the agreement with those who use the system.',
+					'No: the point is not looks but trust.',
+					'No: it has nothing to do with search.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-docs-page', front: 'What is on a component page?', back: 'The purpose, when to use it and when not, the anatomy, variants, states, wording, accessibility, a code example and a live example, a status and a changelog.' },
+			{ id: 'design-docs-semver', front: 'How are a system’s versions numbered?', back: 'Major.minor.patch (SemVer): a major breaks other people’s work, a minor adds, a patch fixes. Renaming a token or removing a part is a major.' },
+			{ id: 'design-docs-deprecate', front: 'What is the right way to remove a part?', back: 'Mark it deprecated, name the replacement, record it in the changelog and keep it for a few versions. Only then remove it, in a major version.' },
+			{ id: 'design-gov-lifecycle', front: 'What statuses can a part of a system have?', back: 'Experimental, stable, deprecated. GOV.UK has two statuses, trial and stable, and deprecation is a separate decision. In Carbon experimental work lives in Carbon Labs.' },
+			{ id: 'design-docs-contribution', front: 'How does a system accept something new?', back: 'By contribution criteria: GOV.UK takes proposals and checks them against its contribution criteria (useful and unique), and Carbon requires a development lifecycle and a component checklist.' }
+		],
+		sources: [
+			{ title: 'GOV.UK Design System: Button (a model component page)', url: 'https://design-system.service.gov.uk/components/button/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'GOV.UK Design System: Contribution criteria', url: 'https://design-system.service.gov.uk/community/contribution-criteria/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'GOV.UK Design System: Component lifecycle statuses', url: 'https://design-system.service.gov.uk/community/component-lifecycle-statuses/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Carbon: how to contribute', url: 'https://carbondesignsystem.com/contributing/get-started/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Semantic Versioning 2.0.0', url: 'https://semver.org/', licence: 'CC-BY', kind: 'spec', lang: 'en' },
+			{ title: 'Keep a Changelog: how to keep a changelog', url: 'https://keepachangelog.com/en/1.1.0/', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Storybook: documentation', url: 'https://storybook.js.org/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now your button has no description. Let’s write the component page the way GOV.UK does: when to take it, when not to, what states, how to word it.',
+			hints: [
+				'Begin with the short sections: “when to use” and “when not to use”, one phrase each. Then variants and states, as lists.',
+				'In “Wording” write the rule and put your button’s label in quotation marks. In the “Code” block you need a markup example: in pre and code, with the class btn.',
+				'Take the status from these words (experimental, stable, deprecated), and write the version as 1.0.0. In the changelog each entry begins with a date, for example 2026-10-27.'
+			],
+			mistakes: {
+				'live-example': 'A live example must sit beside it: an a.btn button with your project’s label.',
+				status: 'The status must be one of these words: experimental, trial, stable or deprecated.',
+				version: 'The version must be of the form 1.0.0: three numbers with points between them.',
+				'when-use': 'Describe when to use the button: at least a phrase of two words.',
+				'when-not': 'Describe when not to use the button.',
+				variants: 'You need at least two variants, each in its own li.',
+				states: 'You need at least four states, each in its own li.',
+				wording: 'The “Wording” section must have the label of your main-action button.',
+				a11y: 'Write at least one phrase about accessibility: target size, contrast, focus.',
+				code: 'The “Code” block needs a markup example: pre and code with class btn.',
+				changelog: 'The changelog needs at least two entries.',
+				'changelog-dates': 'Each entry of the changelog must contain a date, for example 2026-10-27.',
+				deprecation: 'Write the deprecation rule: what you will tell people before removing anything.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.'
+			},
+			outro: 'Now your button has a passport: anyone who takes it on knows when and how. This is how real documentation of a system begins.'
+		},
+		say: { GOV: 'gov', UK: 'U K', Carbon: 'carbon', Labs: 'labs', SemVer: 'sem-ver', Storybook: 'story book', changelog: 'change log', deprecation: 'dep-re-kay-shun', component: 'component', lifecycle: 'life cycle', statuses: 'statuses', Contribution: 'contribution', criteria: 'cry-teer-ee-a', pre: 'pre', code: 'code', GitHub: 'git hub' }
+	};
+</script>
+
+<script>
+	import SemverLab from '../../diagrams/SemverLab.svelte';
+</script>
+
+## A system that can’t be used doesn’t exist
+
+A good button can be made in an hour. For others to use it takes another day: to describe when to take it and how. Without a description a person either asks the author or makes a button of their own. A design system lives exactly as long as its documentation is clear.
+
+The second half of the lesson is about what happens after launch. A system doesn’t end at its release: changes have to be made to it, and the people who use it must have guarantees. These are agreed in advance, and it is called the **governance** of a system.
+
+## The component page
+
+Open the button page of GOV.UK from the sources. It is a model, and it shows what a good description is made of.
+
+- **A name and a live example.** You see the component at once, not a retelling.
+- **When to use.** One or two phrases about the purpose: to start an application or to save what was entered.
+- **How it works.** Rules for use: the label, the alignment, ways to include it in markup.
+- **Variants.** GOV.UK’s button has several: default, start, secondary, warning, inverse (for dark backgrounds), disabled, and a button group. Each has its own example and code.
+- **Wording.** A rule for labels: write button text in sentence case and describe the action (“Save and continue”, not “OK”).
+- **Research.** A short note with evidence: for example, that, in GOV.UK’s testing, green start buttons got more clicks.
+- **Changes.** A history of versions and a link to help improve the page.
+
+The principles it stands on:
+
+1. **Answer the person’s question at the moment of work.** “Which button should I use for this?”, “Can I use a secondary one here?”
+2. **Show, don’t only tell.** A live example and code that can be copied.
+3. **Write “when not to use”.** It is the most valuable part: it prevents bad decisions.
+4. **Keep the documentation next to the code.** In one repository, in Markdown, and then it is changed along with the component. Big systems have a showcase tool for this: Storybook shows every component in all its states and works as living documentation.
+
+<details>
+<summary>Check yourself: which part of a component page is the most valuable?</summary>
+
+“When not to use”: it prevents bad decisions. And next to it a live example and the states.
+
+</details>
+
+## Status and life cycle
+
+Not everything in a system is equally reliable. So every part can have a **status**.
+
+- **Experimental.** Tried in one place, and the rules may change. In GOV.UK this status is called “trial”: the part is released to gather feedback, and it becomes stable after six months if no negative feedback arrives. Carbon has a separate space for such work, Carbon Labs (for now only for IBM staff).
+- **Stable.** Accepted into the system and maintained.
+- **Deprecated.** Marked: it will soon be removed, and the replacement is named.
+
+A new part is not added simply because someone wanted it. GOV.UK checks proposals against published contribution criteria (a proposal must be useful and unique), and in Carbon a new component has to go through a development lifecycle and a checklist (all categories of requirements must be completed before a part counts as done). A simple rule for a small project: **make something a component of the system the third time you need it.** Earlier is too early: you don’t yet know how the cases will differ.
+
+## Versions: an honest agreement
+
+If a system changes, the people who have built on it must understand what awaits them. For this, versions are numbered by the rule of **SemVer** (semantic versioning): three numbers with points, `major.minor.patch`.
+
+- **Patch** (1.4.2 to 1.4.3): a fix, the contract doesn’t change.
+- **Minor** (1.4.2 to 1.5.0): something new was added, and the old keeps working.
+- **Major** (1.4.2 to 2.0.0): a change after which something of the people’s breaks.
+
+The difficulty is that a break is not only a change of code. Renamed a token? Major. Removed a component? Major. Made the default button larger? Also major: layouts fitted to the old size will shift. Play with the diagram: apply the changes and watch how the number moves.
+
+<SemverLab />
+
+Every change is written in the **changelog**: the date, the version, what changed and what the user must fix. A good changelog is read before updating. GOV.UK’s button page has a “Recent changes” section and a link to the history of versions, and the GOV.UK Frontend project has a CHANGELOG file.
+
+## How a part is removed
+
+You can’t delete a part in one day: you would break other people’s pages. The right order is called **deprecation**:
+
+1. Mark the part deprecated in the documentation and in the code.
+2. Name what replaces it, and write how to move over.
+3. Record it in the changelog.
+4. Keep it for a few versions.
+5. Remove it in the next major version.
+
+<details>
+<summary>Check yourself: why can’t you just delete a component you no longer need?</summary>
+
+Those who built pages on it would be left with a break and no warning. So it is first marked deprecated and kept for a few versions.
+
+</details>
+
+## Who contributes, and how
+
+Many people use a system, and proposals come from everywhere. It must be decided in advance how they are accepted. GOV.UK describes how its community can take part: propose a component or a pattern, share research, give feedback through GitHub discussions; the system’s team checks everything against the contribution criteria. There is also a list of upcoming components, a roadmap, a Slack channel for people in government and monthly community calls. Carbon says “anyone can contribute” code, design or documentation; new components go through the lifecycle and the checklist, enhancements are taken from a backlog, and bugs are fixed by an issue and a pull request.
+
+For your project the simplest will do: one owner (you), a changelog and a deprecation rule, which you will write below.
+
+## Practice
+
+Write a reference page for your project’s main-action button: when to use it and when not to, variants, states, wording, accessibility, a code example, a status and version, a changelog and a deprecation rule. It is a page you can show to anyone who will work on your site, an AI builder from the part on AI included: the clearer your rules are described, the better it keeps them.
+
+## What was wrong with 2014
+
+In 2014 the documentation for styles was often kept in a separate wiki or a PDF, and it fell behind the code. A system had no versions at all: the site was updated “as a whole”, and nobody knew what exactly had changed. The habit of keeping a changelog and numbering versions by SemVer came to design from software development, and it is what tells a living system from a one-off piece of work.
