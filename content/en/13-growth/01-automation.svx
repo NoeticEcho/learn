@@ -1,0 +1,342 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/01-automation.svx. */
+	export const metadata = {
+		id: '13-growth/01-automation',
+		part: 13,
+		order: 1,
+		title: 'Automation: triggers, segments, cascades',
+		definition: 'Marketing automation is messages sent by themselves in response to what people do, by rules set in advance: a trigger, a condition, a pause and a message.',
+		summary:
+			'You’ll learn to describe a chain of messages that sends itself when a person acts, and to keep it from turning into spam. Afterwards you have a flow for the main action in your brief: a trigger, a segment, three messages in two channels, pauses, an exit condition and a check of consents.',
+		minutes: 25,
+		teaches: ['growth-automation-triggers'],
+		requires: ['copy-funnel', 'copy-lead-magnet-tripwire'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'trigger|if|wait|email', caption: 'Four building blocks', say: 'A request arrives and a message goes out by itself: trigger, condition, pause, action. Dull, but on time.' },
+				{ mood: 'hint', side: 'right', prop: 'envelope', label: 'exit condition', say: 'Decide in advance when the flow stops for a person. They booked, so we stop persuading.' },
+				{ mood: 'cheer', prop: 'envelope', label: 'email only', caption: 'Consent', say: 'Vera agreed to email only, so the flow must not text her. Write the channel and the consent into the flow.' },
+				{ mood: 'hmm', side: 'right', caption: 'Where automation stops', say: 'Automate the booking confirmation. But leave the answer to “what do I do about my boundary?” to a person.' }
+			]
+		},
+		practice: {
+			id: 'automation-cascade',
+			title: 'An automation flow for the main action',
+			task: 'Describe the flow in the note. 1) The trigger: the action that starts it; name the main action from the brief in the same words. 2) The segment: who the flow is for; paste the “for whom” wording from the brief and add how this segment differs from the others. 3) Three messages in the table: when (with a pause in days, hours or minutes), the channel, the goal (remind, prove or offer) and the gist. You need at least two channels, for example email and text message. 4) The exit condition: when the flow stops. 5) Consent: for which channel and how the person gave it. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="cascade">
+      <h2>Automation flow</h2>
+      <p>Trigger: <span id="trigger">…</span></p>
+      <p>Segment: <span id="segment">…</span></p>
+      <table id="steps">
+        <tr><th>When</th><th>Channel</th><th>Goal</th><th>Gist of the message</th></tr>
+        <tr class="msg"><td class="when">…</td><td class="channel">…</td><td class="goal">…</td><td class="say">…</td></tr>
+        <tr class="msg"><td class="when">…</td><td class="channel">…</td><td class="goal">…</td><td class="say">…</td></tr>
+        <tr class="msg"><td class="when">…</td><td class="channel">…</td><td class="goal">…</td><td class="say">…</td></tr>
+      </table>
+      <p>Exit from the flow: <span id="exit">…</span></p>
+      <p>Consent: <span id="consent">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="cascade">
+      <h2>Automation flow</h2>
+      <p>Trigger: <span id="trigger">a person took the main action: {{mainAction.label}}</span></p>
+      <p>Segment: <span id="segment">{{forWhom}}, narrowed to people we have not heard from before, who are leaving their address for the first time</span></p>
+      <table id="steps">
+        <tr><th>When</th><th>Channel</th><th>Goal</th><th>Gist of the message</th></tr>
+        <tr class="msg"><td class="when">at once, within 5 minutes</td><td class="channel">email</td><td class="goal">remind</td><td class="say">What you did, what happens next and when we’ll be in touch</td></tr>
+        <tr class="msg"><td class="when">after 2 days</td><td class="channel">text message</td><td class="goal">prove</td><td class="say">A short example of a similar job and how it ended</td></tr>
+        <tr class="msg"><td class="when">after 5 days</td><td class="channel">email</td><td class="goal">offer</td><td class="say">One button and one next step, no pressure</td></tr>
+      </table>
+      <p>Exit from the flow: <span id="exit">the person takes the action, replies to any message or presses unsubscribe</span></p>
+      <p>Consent: <span id="consent">for email the person ticked an empty box in the form, for text messages they opted in themselves by replying START</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#cascade', matches: '^[^…]*$' },
+				{ id: 'trigger', kind: 'field', selector: '#trigger', field: 'mainAction.label' },
+				{ id: 'segment', kind: 'field', selector: '#segment', field: 'forWhom' },
+				{ id: 'messages', kind: 'count', selector: '#steps tr.msg', min: 3 },
+				{ id: 'pause', kind: 'text', selector: '#steps .when', matches: '\\d+\\s*(?:day|hour|minute|min|week)' },
+				{
+					id: 'channels',
+					kind: 'text',
+					selector: '#steps',
+					matches: '^(?=[\\s\\S]*(?:[Ee]-?mail))(?=[\\s\\S]*(?:Telegram|WhatsApp|SMS|[Tt]ext|Messenger|LinkedIn|Instagram|[Pp]hone))[\\s\\S]*$'
+				},
+				{ id: 'goals', kind: 'text', selector: '#steps', matches: '^(?=[\\s\\S]*[Rr]emind)(?=[\\s\\S]*[Pp]rove)(?=[\\s\\S]*[Oo]ffer)[\\s\\S]*$' },
+				{ id: 'exit', kind: 'text', selector: '#exit', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' },
+				{ id: 'consent', kind: 'text', selector: '#consent', matches: '^(?=[\\s\\S]*(?:[Cc]onsent|agree|opt|tick|box|START|Start|subscri|sign))\\s*\\S+(?:\\s+\\S+){5,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each building block of a flow with what it does',
+				pairs: [
+					['Trigger', 'The event that starts the flow: a sign-up, a request, a booking'],
+					['Condition', 'An “if” check: did the person open the email, which segment are they in'],
+					['Pause', 'The wait between messages, so the person isn’t buried'],
+					['Exit condition', 'The rule by which the flow stops for this person']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How is an automated flow different from a newsletter to everyone at once?',
+				options: [
+					'It starts with the action of one particular person and runs for them at their own pace',
+					'It is cheaper than a newsletter',
+					'It doesn’t need consent to message people'
+				],
+				answer: 0,
+				why: [
+					'Yes. A flow answers what the person did, so the message arrives on time. A blast to everyone goes out at one moment for all, however their situations differ.',
+					'Not necessarily: the price depends on the service. The difference is what triggers the message.',
+					'No. Consent is needed for each channel. Automation doesn’t cancel the rules, it only raises the price of a mistake: a message without consent goes to a thousand people at once.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'In which cases does the flow have a mistake?',
+				options: [
+					'The person has already booked, and the third email asks them to book again',
+					'All three emails are sent on the same day',
+					'A text message went to a person who agreed to email only',
+					'Each message has one goal: remind, prove or offer'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the exit condition is missing. The person is asked to do what they’ve already done, and stops believing you.',
+					'Yes: without a pause the flow looks like spam. Choose the pause to match the rhythm of the person’s decision.',
+					'Yes: consent is given for a channel. Consent to email doesn’t allow you to text.',
+					'No, that is correct: each message should have one job.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is the open rate a poor main measure for a flow?',
+				options: [
+					'Mail apps, such as Apple Mail with its privacy protection, load images by themselves, so an “open” can happen without a person',
+					'Opened emails are never important',
+					'It can’t be counted'
+				],
+				answer: 0,
+				why: [
+					'Yes. An open is detected by a tiny image. If the mail app loads it in advance, there are more “opens” than readers. It is sounder to look at clicks and at the action itself.',
+					'No, an open can be a useful signal, but a weak one.',
+					'Every service counts it. The question is how far you can trust it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of designing a flow in order',
+				items: [
+					'Choose the main action and make it the trigger',
+					'Define the segment: who this flow is for',
+					'Write the messages and give each one goal',
+					'Set the pauses and the exit condition',
+					'Check consent for each channel',
+					'Launch, and watch clicks and the target action'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What shouldn’t be automated without a person?',
+				options: [
+					'The answer to a question that needs expert judgment and responsibility',
+					'The “request received” confirmation',
+					'A reminder the day before a consultation'
+				],
+				answer: 0,
+				why: [
+					'Yes. Automate what is the same for everyone: confirmations, reminders, preparation. An assessment of a particular situation should come from a person, above all an expert who answers for the words.',
+					'That is a typical example of good automation.',
+					'That is a typical example too: the rule is clear and the same for everyone.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-trigger',
+				front: 'What is a trigger in automation?',
+				back: 'The event that starts a flow for one person: a sign-up, a request, a booking, an abandoned form. The message comes in response to an action, not on a schedule for everyone.'
+			},
+			{
+				id: 'growth-cascade',
+				front: 'What is a cascade of messages?',
+				back: 'A chain of several messages with pauses between them (a drip campaign). Each message has its own goal (remind, prove, offer), and the whole chain has an exit condition.'
+			},
+			{
+				id: 'growth-exit-condition',
+				front: 'Why an exit condition?',
+				back: 'So the flow stops when the goal is reached: the person booked, replied or unsubscribed. Without it, people are asked to do what they’ve already done.'
+			},
+			{
+				id: 'growth-consent-per-channel',
+				front: 'Why is consent counted per channel?',
+				back: 'Consent to email doesn’t allow you to text or message a phone. Each channel needs its own consent, and in a dispute the sender has to be able to show it. A guideline, not legal advice.'
+			},
+			{
+				id: 'growth-open-rate-trap',
+				front: 'What is wrong with the open rate?',
+				back: 'Mail apps that load images in advance distort it. It is sounder to count clicks and the target action.'
+			}
+		],
+		sources: [
+			{ title: 'Marketing automation (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Marketing_automation', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Email tracking (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Email_tracking', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: '16 CFR Part 316: CAN-SPAM Rule (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-C/part-316', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: '47 CFR 64.1200: the Telephone Consumer Protection Act rules on calls and texts (Cornell LII)', url: 'https://www.law.cornell.edu/cfr/text/47/64.1200', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Electronic mail marketing (ICO guide to PECR)', url: 'https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/electronic-and-telephone-marketing/electronic-mail-marketing/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Directive 2002/58/EC, the ePrivacy Directive (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32002L0058', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A flow is a promise: “if a person does this, that will happen by itself”. A good promise describes not only what to send but when to stop.',
+			hints: [
+				'Start with the trigger: it is the main action from the brief. Write it in the same words.',
+				'In the segment, copy the “for whom” wording from the brief and add what sets these people apart, for example “leaving their address for the first time”.',
+				'Write a pause as a number: “after 2 days”, “after 5 days”. The goal of each message is one of three words: remind, prove, offer.',
+				'In the consent, say how the person allowed each channel: a ticked box in the form for email, replying START for text messages.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the trigger, the segment, the table, the exit and the consent.',
+				trigger: 'The trigger has to name the main action in the same words as the brief.',
+				segment: 'The segment needs the “for whom” wording from the brief, and after it how your segment is different.',
+				messages: 'The table needs at least three messages.',
+				pause: 'At least one “When” cell needs a pause as a number: “after 2 days”, “after 3 hours”.',
+				channels: 'You need at least two channels: for example email and text message.',
+				goals: 'All three goals have to appear among the messages: remind, prove, offer.',
+				exit: 'Describe the exit condition in at least five words: exactly when the flow stops.',
+				consent: 'Describe the consent: for which channel and how the person gave it, in at least six words.'
+			},
+			outro: 'Your main action now has a flow that works without you, but not without rules. In the next lesson we’ll make sure the emails arrive and stay within the law.'
+		},
+		say: { TOFU: 'tofu', Telegram: 'telegram', 'e-mail': 'email', SMS: 'S M S', CRM: 'C R M', Apple: 'apple', CAN: 'can', TCPA: 'T C P A', PECR: 'peck-er', START: 'start' }
+	};
+</script>
+
+<script>
+	import CascadeBuilder from '../../diagrams/CascadeBuilder.svelte';
+</script>
+
+## The message that arrived on time
+
+Remember the last time you got a message saying “Your booking is confirmed” or “See you tomorrow at 10:00”. No person wrote it: a service sent it by itself because you did something. That is **marketing automation**: messages go out by themselves, in response to what people do, by rules you described in advance.
+
+Why would a project without a marketing department want it? Three reasons:
+
+- **You can’t answer everyone on time**, and a person who sent a request expects an answer today, not on Friday.
+- **People decide slowly.** In the lessons on the funnel we said that days pass between “found out” and “decided”. An automatic chain accompanies the person through those days for you.
+- **A rule that is written down can be improved.** In the lessons on the value ladder you invented a lead magnet and a low-priced first offer. A flow is what delivers them to the person and leads to the next step.
+
+**Where it comes from.** The idea is old: direct marketing by post long had series of letters sent by rules. Software for it appeared in the 1990s alongside the first customer relationship systems, and broad platforms such as HubSpot and Marketo grew in the 2000s. Today the English-speaking web has dozens of email and automation services (Mailchimp, Klaviyo, ConvertKit and many others), and messengers have their own families of bot builders. Russia has its own services too, which we leave aside. We don’t recommend any of them: what matters is the logic, which is the same everywhere. Before choosing a service, check where it stores people’s data (we’ll say more in the lesson on email and in the part on law).
+
+## Four building blocks
+
+Any flow is put together from four parts.
+
+1. **The trigger.** The event that starts the flow: the person sent a form, subscribed to a channel, booked, downloaded a checklist, opened the pricing page and left. The best trigger is the **main action from the brief**, or a step toward it.
+2. **The condition** (“if”). A check on which what happens depends: did the person open the email, which segment are they in, have they already booked.
+3. **The pause.** The wait between steps: “after two days”. A pause respects the rhythm of the person’s decision. Its length depends on how urgent the decision is: a consultation about a boundary can wait a few days, but you can’t book tomorrow’s appointment after a week.
+4. **The message.** What goes to the person, in the right channel. A channel is an email, a text message, a message in a messenger or a direct message on a social network. Each message should have **one goal**.
+
+Three goals are enough for almost any small project:
+
+- **Remind**: “here is what you did and what happens next”;
+- **Prove**: “here is an example of how it goes”, that is, the material from the lessons on proof and case studies;
+- **Offer**: “here is the next step”, one action, without pressure.
+
+And two ideas without which any talk of flows is incomplete.
+
+A **segment** is a group of people with a shared feature, for whom the flow is the same. You met segmentation in the lesson on STP. Here a segment is built from what you know about the person: where they came from, what they downloaded, what they chose in the form. A flow “for everyone” usually speaks to no one, so a small site needs only two or three segments, and the first is the one written in the “for whom” field of your brief.
+
+A **cascade** (also called a drip campaign) is a chain of several messages, each sent after a pause and perhaps after a check of a condition. The diagram below shows a cascade of three messages.
+
+The **exit condition** is a separate and very important rule: when the flow stops for this person. Most often it is “took the action”, “replied” or “unsubscribed”.
+
+**An example with the default persona (the invented Kate Alder).** The trigger: a person sent a request for a consultation. The segment: private landowners getting in touch for the first time. Day 0, an email: “Request received, here is what to prepare and when I’ll call” (remind). Day 2, a text message, if the person agreed to texts: a short walk through a typical boundary situation (prove). Day 5, an email: “If your question is still open, here are times for a consultation” (offer). The exit: the person booked, replied or unsubscribed.
+
+## The cascade in action
+
+Open the diagram. Three invented people go through the same cascade of three messages. Three switches are three rules: a pause, an exit condition, and a second message by text for those who didn’t open the email. Switch the rules off one at a time and see which mistakes appear.
+
+<CascadeBuilder />
+
+The third switch is especially useful. Vera agreed to email only, so a text message to her must not be sent, even if the flow “wants” to. Automation does not know by itself what a person has allowed. You know it, and the rule has to be written into the flow.
+
+<details>
+<summary>Check yourself: which two parts of a flow protect a person from too many messages?</summary>
+
+The pause (so the messages don’t arrive in a heap) and the exit condition (so the flow stops when the goal is reached). A third safeguard is the check of consent for each channel.
+
+</details>
+
+## Consent: a guideline, not legal advice
+
+It is very easy to get this wrong, so briefly and carefully. What follows is how lawyers commonly read the rules, not advice on your own case, and it is worth checking with a lawyer.
+
+- **A message with an offer and a message “in reply to your request” are not the same.** A booking confirmation, a reminder of a consultation the person booked, and a message with a document they asked for are usually not marketing. Emails with new offers and invitations are.
+- **In the US,** the CAN-SPAM Act lets you send marketing email without prior consent, but each message must say who sends it and where they are (a real postal address), must not mislead in its header or subject, and must give a clear way to opt out, which you honor within ten business days. Transactional or relationship messages (a confirmation, a receipt) are mostly exempt from these rules. **Marketing texts are stricter:** under the Telephone Consumer Protection Act, automated marketing texts to a mobile number need the person’s prior express written consent, and a ticked box or a reply to a keyword can count when the wording is clear. State laws add their own rules.
+- **In the UK and the EU,** the rule is the reverse: marketing email to an individual needs prior consent (an opt-in), except for the “soft opt-in”, where you got the person’s address in the course of a sale, you market similar products, and you offered an opt-out when you collected it and in every message (PECR regulation 22 in the UK, Article 13 of the ePrivacy Directive in the EU). Consent as GDPR defines it has to be freely given, specific, informed and unambiguous, and a person can always object to direct marketing.
+- **In Canada,** the anti-spam law (CASL) asks for express or implied consent before a commercial electronic message. We mention it only so you know that the rules differ between countries: if your audience is there, read the regulator’s page.
+- **Consent is counted per channel.** Email and text message are two different consents.
+
+So for every flow you describe, write down: **for which channel, when and how the person consented**, and how they can withdraw. If you can’t answer, the message must not be sent. Which law applies depends on where your recipients are, not only on where you are. This is general information, not legal advice: for a real flow ask a lawyer, or the regulator (the FTC and the FCC in the US, the ICO in the UK, your national data protection authority in the EU).
+
+## What to measure in a flow
+
+It’s tempting to look at the “open rate”. But since 2021, mail apps with privacy protection (Apple Mail became the well-known example) load in advance the images by which an “open” is detected, so there are more opens than readers. Three numbers are more reliable:
+
+- **how many people reached each message** (didn’t leave earlier);
+- **how many pressed the button or link** in the message;
+- **how many took the target action** for which it was all started.
+
+How to tag links and count clicks you’ll learn in the lesson on social networks (UTM tags) and in the part on metrics. And in the lesson on the funnel you saw that every step of a funnel loses people: a cascade helps lose fewer.
+
+## Where automation stops
+
+- **Don’t automate judgment.** Automate the booking confirmation, but not the answer to “what do I do about my boundary?”, especially if you are an expert and answer for the words.
+- **Don’t pass a machine off as a person.** “Written just for you” from a robot is deceit. Honest is a signature such as “an automatic message, reply to it and a person will answer”.
+- **Keep the flow short.** Three to five messages are enough. Ten emails in a “series” is already pressure, not support.
+- **Review it once a month.** A flow that once sent a price list, when the prices have since changed, does harm.
+- **Follow the law.** The rules on mailings and personal data have changed more than once and will change again. What this lesson says is only a guideline.
+
+## Practice
+
+Describe a flow for your project’s main action.
+
+1. **The trigger**: what the person did for the flow to start. The main action from the brief, in the same words.
+2. **The segment**: who the flow is for. The “for whom” wording from the brief and a note on what makes the segment special.
+3. **Three messages**: when (with the pause in numbers), in which channel (at least two different ones), with what goal (remind, prove, offer) and about what.
+4. **The exit condition** and **the consent**: for which channel and how the person gave it.
+
+The check looks at form: the trigger and segment from the brief, three messages, pauses in numbers, two channels, three goals, an exit and a consent. Whether the flow is good is for you to decide. Picture a person from “for whom” who has no time: will each message reach them on time, and do they need it?

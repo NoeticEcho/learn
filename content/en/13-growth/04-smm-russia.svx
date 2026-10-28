@@ -1,0 +1,396 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/04-smm-russia.svx. */
+	export const metadata = {
+		id: '13-growth/04-smm-russia',
+		part: 13,
+		order: 4,
+		title: 'Social networks and messengers: channels, a content plan, UTM tags',
+		definition: 'Social media marketing is work with an audience on social networks and messengers that leads people to the site. UTM tags show where a visitor came from.',
+		summary:
+			'You’ll choose two channels where your people really are, and learn to run them so they lead to the site instead of replacing it. Afterwards you have a channel description, three posts of different forms, each linking to a section of the site with UTM tags, and a decision on whether you need a chatbot.',
+		minutes: 25,
+		teaches: ['growth-smm-russia', 'growth-content-plan', 'growth-utm'],
+		requires: ['story-abt', 'texts-tone-of-voice', 'growth-automation-triggers'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'phone', label: 'my channel', caption: 'Rented land', say: 'Rules and reach aren’t yours to decide. The site and the email list are yours, so every post leads to the site.' },
+				{ mood: 'explain', side: 'right', prop: 'browser', label: 'utm_source=linkedin', say: 'The tag in the link answers: where did the person come from. Lowercase, a table of values, and no names or emails.' },
+				{ mood: 'hint', prop: 'sheet', label: 'Ad', caption: 'Is it an ad?', say: 'A paid post by an influencer is an ad and needs a clear label. Where the line runs for your own channel, ask a lawyer.' }
+			]
+		},
+		practice: {
+			id: 'channels-posts-utm',
+			title: 'Two channels, three posts and UTM tags',
+			task: 'Fill in the note. 1) Choose two channels and write a reason for each (at least six words); the reasons must include the “for whom” wording from the brief. 2) A channel description of 12 to 120 characters and a link to the site with UTM tags (lowercase Latin letters, with utm_source). 3) Three posts: each has a form (a case study, an ABT or a useful tip; all three different), a short text, the section of the site from the brief that it leads to, and a link with the tags utm_source, utm_medium and utm_campaign. The links go to different sections. 4) A note on advertising: are the posts ads. 5) Whether you need a chatbot and how it would help the main action. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="smm">
+      <h2>Two channels</h2>
+      <ul id="channels">
+        <li class="channel"><b class="c-name">…</b>: <span class="c-why">…</span></li>
+        <li class="channel"><b class="c-name">…</b>: <span class="c-why">…</span></li>
+      </ul>
+      <p>Channel description: <span id="bio">…</span></p>
+      <p>Link in the description: <a id="bio-link" href="…">…</a></p>
+
+      <h2>Three posts</h2>
+      <div id="posts">
+        <article class="post">
+          <p>Form: <span class="kind">…</span></p>
+          <p>Text: <span class="text">…</span></p>
+          <p>Section of the site: <span class="section">…</span>, <a class="link" href="…">link</a></p>
+        </article>
+        <article class="post">
+          <p>Form: <span class="kind">…</span></p>
+          <p>Text: <span class="text">…</span></p>
+          <p>Section of the site: <span class="section">…</span>, <a class="link" href="…">link</a></p>
+        </article>
+        <article class="post">
+          <p>Form: <span class="kind">…</span></p>
+          <p>Text: <span class="text">…</span></p>
+          <p>Section of the site: <span class="section">…</span>, <a class="link" href="…">link</a></p>
+        </article>
+      </div>
+
+      <p>Advertising: <span id="ad-note">…</span></p>
+      <p>Chatbot: <span id="bot">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="smm">
+      <h2>Two channels</h2>
+      <ul id="channels">
+        <li class="channel"><b class="c-name">LinkedIn</b>: <span class="c-why">our audience is {{forWhom}}: they read short professional posts and message people directly</span></li>
+        <li class="channel"><b class="c-name">Facebook page</b>: <span class="c-why">local audiences are used to searching for and discussing a business in a community page</span></li>
+      </ul>
+      <p>Channel description: <span id="bio">{{who}}. Short, practical posts, with the website linked below</span></p>
+      <p>Link in the description: <a id="bio-link" href="https://riverbend.example/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=bio">Project website</a></p>
+
+      <h2>Three posts</h2>
+      <div id="posts">
+        <article class="post">
+          <p>Form: <span class="kind">Case study</span></p>
+          <p>Text: <span class="text">A person came with this problem, we did this, and here is how it turned out</span></p>
+          <p>Section of the site: <span class="section">{{sections.0}}</span>, <a class="link" href="https://riverbend.example/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=case_one">link</a></p>
+        </article>
+        <article class="post">
+          <p>Form: <span class="kind">ABT</span></p>
+          <p>Text: <span class="text">Many people think this is simple, but in fact there are three difficulties, so it is better to know them in advance</span></p>
+          <p>Section of the site: <span class="section">{{sections.1}}</span>, <a class="link" href="https://riverbend.example/?utm_source=linkedin&amp;utm_medium=social&amp;utm_campaign=abt_one">link</a></p>
+        </article>
+        <article class="post">
+          <p>Form: <span class="kind">Useful tip</span></p>
+          <p>Text: <span class="text">Three questions worth asking yourself before you get in touch</span></p>
+          <p>Section of the site: <span class="section">{{sections.2}}</span>, <a class="link" href="https://riverbend.example/?utm_source=facebook&amp;utm_medium=social&amp;utm_campaign=help_one">link</a></p>
+        </article>
+      </div>
+
+      <p>Advertising: <span id="ad-note">the posts tell people about the project; we show doubtful wording to a lawyer before it goes out, and label any paid placement by someone else clearly as an ad</span></p>
+      <p>Chatbot: <span id="bot">a simple booking chatbot is useful: it asks two questions and passes the request to a person, so the main action “{{mainAction.label}}” can be done from the messenger</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#smm', matches: '^[^…]*$' },
+				{ id: 'two-channels', kind: 'count', selector: '#channels .channel', min: 2, max: 2 },
+				{ id: 'why-long', kind: 'text', selector: '#channels .c-why', matches: '^\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'for-whom', kind: 'field', selector: '#channels', field: 'forWhom' },
+				{ id: 'bio-length', kind: 'text', selector: '#bio', matches: '^\\s*\\S[\\s\\S]{10,118}\\S\\s*$' },
+				{ id: 'bio-link', kind: 'attr', selector: '#bio-link', name: 'href', matches: '^https://\\S+utm_source=[a-z0-9_-]+' },
+				{ id: 'three-posts', kind: 'count', selector: '#posts .post', min: 3 },
+				{ id: 'kinds', kind: 'text', selector: '#posts', matches: '^(?=[\\s\\S]*[Cc]ase)(?=[\\s\\S]*ABT)(?=[\\s\\S]*(?:[Uu]seful|[Tt]ip|[Bb]enefit|[Hh]elpful))[\\s\\S]*$' },
+				{ id: 'sections', kind: 'field', selector: '#posts .section', field: 'sections', min: 2 },
+				{ id: 'utm', kind: 'attr', selector: '#posts a.link', name: 'href', matches: 'utm_source=[a-z0-9_-]+&utm_medium=[a-z0-9_-]+&utm_campaign=[a-z0-9_-]+$' },
+				{ id: 'utm-count', kind: 'count', selector: '#posts a.link[href*="utm_campaign="]', min: 3 },
+				{ id: 'ad-note', kind: 'text', selector: '#ad-note', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' },
+				{ id: 'bot', kind: 'text', selector: '#bot', matches: '^\\s*\\S+(?:\\s+\\S+){7,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why are the site and the email list called “owned land”, and a page on a social network “rented”?',
+				options: [
+					'A platform’s rules, reach and availability can change without you, while the site and the list stay yours',
+					'Social networks cost money and a website is free',
+					'Social networks are always banned'
+				],
+				answer: 0,
+				why: [
+					'Yes. Algorithms change what reaches your followers, accounts get suspended, and whole platforms have been restricted in a country (as several were in Russia after 2022). Someone whose audience is in one channel depends on decisions made by somebody else.',
+					'No, it isn’t about payment but about who controls the rules.',
+					'No. But no channel can be counted on forever.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which three tags are the main ones in links with UTM?',
+				options: [
+					'utm_source: where the person came from',
+					'utm_medium: the type of channel (social, email, cpc)',
+					'utm_campaign: the name of the campaign or post',
+					'utm_email: the person’s email address'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the source is always needed.',
+					'Yes: the type of channel lets you group the sources.',
+					'Yes: the campaign tells posts and emails apart. The other two tags (utm_term, utm_content) are optional.',
+					'No, and this matters most: no personal data may go into tags. They are visible in the address, in logs and in other people’s counters.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each form of post with its job',
+				pairs: [
+					['Case study', 'Show by example how a problem was solved and how it ended'],
+					['ABT (And, But, Therefore)', 'Tell an expectation, an obstacle and a conclusion in three moves'],
+					['Useful tip', 'Give the person something they can use on their own, without contacting you']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is wrong with the UTM tags “?utm_source=LinkedIn&utm_medium=Social Post”?',
+				options: [
+					'Tags with mixed case and spaces split into separate rows of a report: LinkedIn and linkedin count as different',
+					'Nothing: the counter merges everything itself',
+					'Tags can’t be written in Latin letters'
+				],
+				answer: 0,
+				why: [
+					'Yes. Agree on a rule: lowercase Latin letters, digits, underscores, no spaces. And write the tags in a table.',
+					'Sadly not: “LinkedIn” and “linkedin” will be different sources.',
+					'On the contrary: Latin letters without spaces are the safest.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A post leads “to the site”, to the home page. How can it be improved?',
+				options: [
+					'Lead to the specific section that continues the post’s thought',
+					'Lead to the home page so the person chooses for themselves',
+					'Put no link at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. The person came for the post’s topic and should find its continuation at once, not search. That also makes measuring simpler: you know which post brought people to which page.',
+					'Every step of searching loses people.',
+					'Then the social network stays the only place where you exist, and that is a risk.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How is a simple chatbot useful to a project with services?',
+				options: [
+					'It takes a request, asks two clarifying questions and passes it to a person, so the main action is done from the messenger',
+					'It replaces the specialist in assessing a situation',
+					'It sends advertising to every subscriber without consent'
+				],
+				answer: 0,
+				why: [
+					'Yes. A bot removes routine and speeds up the first answer. The data it collects (a name, an account, a phone number) is personal: you need consent and a policy.',
+					'No: a person makes the assessment, especially an expert.',
+					'No: sending marketing messages without consent breaks the law and the platforms’ own rules.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-own-land',
+				front: 'What are “owned land” and “rented land”?',
+				back: 'Owned: the site and the email list, which you control. Rented: a page on a social network, where the platform sets the rules, the reach and the availability. Build on the owned land and invite people from the rented.'
+			},
+			{
+				id: 'growth-content-pillars',
+				front: 'What does a simple content plan consist of?',
+				back: 'Three lines: something useful, proof (case studies) and something alive (the process, the people). Each post has one job and one link to a section of the site.'
+			},
+			{
+				id: 'growth-utm-three',
+				front: 'Which three UTM tags are always needed?',
+				back: 'utm_source (where from), utm_medium (the type of channel), utm_campaign (which campaign or post). Write them in lowercase Latin letters without spaces, and never put personal data in them.'
+			},
+			{
+				id: 'growth-utm-internal',
+				front: 'Can UTM tags go on a site’s internal links?',
+				back: 'No. A tag on an internal link starts a new visit and breaks the report: the real source is lost.'
+			},
+			{
+				id: 'growth-tg-bot',
+				front: 'What is a chatbot in a messenger, and why would a project want one?',
+				back: 'A program you talk to like a contact: it takes requests and answers frequent questions. The data it collects is personal, so you need consent and a policy.'
+			}
+		],
+		sources: [
+			{ title: 'UTM parameters (Wikipedia)', url: 'https://en.wikipedia.org/wiki/UTM_parameters', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Collect campaign data with custom URLs (Google Analytics Help)', url: 'https://support.google.com/analytics/answer/10917952?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Telegram: Bots, an introduction for developers', url: 'https://core.telegram.org/bots', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'WhatsApp Business Messaging Policy', url: 'https://business.whatsapp.com/policy', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: '16 CFR Part 255: Guides concerning the use of endorsements and testimonials in advertising (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-255', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'The CAP Code, section 2: Recognition of marketing communications (ASA)', url: 'https://www.asa.org.uk/type/non_broadcast/code_section/02.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'ВКонтакте (Wikipedia, in Russian, for the Russian market)', url: 'https://ru.wikipedia.org/wiki/ВКонтакте', licence: 'CC-BY-SA', kind: 'article', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Channels come and go, but the site stays. Let every post bring a person to a specific section of the site, in a way that lets you know afterwards where they came from.',
+			hints: [
+				'Write the reason for choosing a channel together with the “for whom” wording from the brief: “our audience is …, so …”.',
+				'Write tags in lowercase Latin letters without spaces: utm_source=linkedin&utm_medium=social&utm_campaign=case_one. All three tags in one link.',
+				'The three posts must be different: one case study, one ABT, one useful tip. Each has its own section of the site from the brief.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the channels, the description, the posts, the note and the chatbot.',
+				'two-channels': 'You need exactly two channels.',
+				'why-long': 'Write the reason for choosing a channel in at least six words.',
+				'for-whom': 'The reasons for choosing the channels must include the “for whom” wording from the brief.',
+				'bio-length': 'The channel description must be 12 to 120 characters long.',
+				'bio-link': 'The link in the description has to start with https:// and contain utm_source in lowercase Latin letters.',
+				'three-posts': 'You need three posts.',
+				kinds: 'Among the forms there must be a case study, an ABT and a useful tip.',
+				sections: 'The posts must lead to different sections of the site from the brief: write their names in the same words.',
+				utm: 'In the posts’ links the tags go in the order utm_source, utm_medium, utm_campaign, in lowercase Latin letters with no spaces.',
+				'utm-count': 'The link of each of the three posts needs a utm_campaign tag.',
+				'ad-note': 'In the note on advertising write at least five words: whether the posts are ads and how you label them.',
+				bot: 'Write about the chatbot in at least eight words: whether you need it and how it helps the main action.'
+			},
+			outro: 'Now you have two channels, posts with clear links and tags by which they can be counted. Next, search: how people find you when they don’t yet know you exist.'
+		},
+		say: { UTM: 'U T M', ABT: 'A B T', Telegram: 'telegram', VK: 'V K', LinkedIn: 'linked-in', YouTube: 'you-tube', 'e-mail': 'email', FTC: 'F T C', ASA: 'A S A', CAP: 'cap' }
+	};
+</script>
+
+<script>
+	import ChannelMap from '../../diagrams/ChannelMap.svelte';
+</script>
+
+## Where your people are and what you can do there
+
+In the earlier lessons you invented a flow and a value ladder. Now people have to come to them. One way is **social networks and messengers**: channels where you regularly talk to your audience and invite it to the site. The short name for this work is **social media marketing**.
+
+First, a word on what is not stable. Platforms rise and fall: Facebook was once the place to be, Twitter became X, TikTok and short video changed what people watch, and in each country the picture differs. The exact picture updates faster than textbooks, so we write this paragraph carefully: **check, on the day you launch, which networks your people actually use and what the current rules of each say**.
+
+From this follows the rule the lesson exists for: **a channel is rented land, while the site and the email list are yours**. A social network is good for attracting people and talking to them, but not as the only place you can be found. The rules, the reach and the availability there are not yours to decide. So every post leads to the site, and the site gathers those who want to stay (the subscription and the flows from the earlier lessons).
+
+## Choosing channels
+
+For a small project **two channels** are enough. Three or more you won’t keep up, and one is risky. Choose by three questions:
+
+1. **Where are the people from the “for whom” field today?** Not where it is convenient for you, but where they already read. Ask a few clients.
+2. **Which format can you keep up for a year?** Video takes a lot of time. Short posts are easier. Articles that rank in search work slowly but for a long time.
+3. **What does the channel give your main action?** For booking a consultation, the best is the chance of a quick conversation; for a shop, a shop window and photographs.
+
+Open the diagram and choose a type of project. The scores are for teaching and show the line of reasoning: what matters more for different projects and how much work a channel asks.
+
+<ChannelMap />
+
+Briefly about each.
+
+- **LinkedIn.** Short professional posts and direct messages. A good fit for an expert or a service for businesses. Slow, but the people are often decision-makers.
+- **Facebook and Instagram** (both run by Meta). A page with a shop window, events, groups and built-in advertising. Strong where the audience is local or broad (a shop, a café, a community, an event).
+- **X, Reddit and other communities.** Quick conversation and, on Reddit, communities by topic. Powerful but hard to control: use them to listen and help before you promote.
+- **Articles and search.** Long texts that search engines find. Good for an expert with something to explain, and they work for months (the next lessons are about this).
+- **Video** (YouTube, TikTok, Instagram Reels). Showing the process and the face is very strong, but expensive in time.
+- **Email.** Not a social network, but the most stable channel: the list is yours. You built it in the earlier lessons.
+- **Messengers** (WhatsApp, Messenger, Telegram). Good for quick conversation with people who already know you. A business must not message first without opt-in: WhatsApp, for example, requires it.
+
+**The Russian market.** In Russia the picture is different. VKontakte (launched in 2006) and Telegram (founded by the brothers Durov in 2013) became the main places where people read and talk, and since 2022 Instagram and Facebook have been blocked there, their owner Meta has been designated an extremist organization, and the law restricts advertising on such resources. Russian platforms (VK, Dzen, RuTube, the state messenger MAX) grew, while YouTube, WhatsApp and Telegram were at times slowed or restricted. Yandex has its own advertising and metrics tools beside Google’s. If your audience is in Russia, check on the day you launch what opens for your people. This is the clearest example of why a channel is rented land.
+
+**Where it comes from.** The phrase “social networks” became mass-market in the late 2000s, when Facebook (founded in 2004, open to everyone from 2006), YouTube (2005) and Twitter (2006) grew. For marketing this meant that instead of searching for sites, people began to find projects through a feed. And every platform named here has changed its rules more than once since.
+
+## A content plan: three lines and one link
+
+A content plan is not a schedule for a year but an agreement with yourself: **about what, how often and why**. For a small project three lines are enough:
+
+- **Useful.** What a person can apply on their own: a checklist, an answer to a frequent question, a walk through a mistake.
+- **Proof.** Case studies without bragging (the lesson on the case: what there was, what was done, what came of it; for regulated professions, remember the ethics).
+- **Alive.** People, the process, a look behind the scenes.
+
+For each line you already know the forms from the part on storytelling: a **case study** (STAR and “before and after”), an **ABT** (And, But, Therefore) and plain **usefulness**. Choose a rhythm you can keep: one or two posts a week are better than daily ones in the first month and silence afterwards.
+
+Every post has **one job and one link**: to a specific section of the site that continues the post’s thought. A post about a property boundary leads not to the home page but to the page about the service or to an article. How many posts to publish a month, decide by how many you can make well.
+
+Take the tone from the brief and from your style guide (the lesson on tone): a channel that speaks differently from the site breaks trust.
+
+## UTM tags: where a person came from
+
+When a person follows a link from a post, the counter on the site sees only “came from LinkedIn or somewhere else”. To know **which post exactly** brought them, you add **UTM tags** to the address (Urchin Tracking Module: the name stayed from the company Urchin, which Google bought in 2005 and whose software became Google Analytics).
+
+```text
+https://riverbend.example/services/?utm_source=linkedin&utm_medium=social&utm_campaign=case_boundary
+```
+
+Five tags, three of them main:
+
+- `utm_source`: where from (linkedin, facebook, newsletter);
+- `utm_medium`: the type of channel (social, email, cpc);
+- `utm_campaign`: the campaign or post (case_boundary);
+- `utm_content` and `utm_term`: tell ads and keywords apart, optional.
+
+Google Analytics 4 and Yandex Metrica read them without any setup. Rules, so you don’t suffer over the reports later:
+
+1. **Lowercase Latin letters, digits, underscores.** “LinkedIn” and “linkedin” count as different sources.
+2. **A table of tags** in one file: what each value means. In a month you won’t remember what “camp2” is.
+3. **Only on external links.** A tag on a site’s internal link starts a new visit and erases the real source.
+4. **No personal data.** Tags are visible in the address, in other people’s logs and in other people’s counters. No names and no emails.
+5. **Not on every link.** The link in the channel description and each post is enough.
+
+<details>
+<summary>Check yourself: why must UTM tags not go on links inside the site?</summary>
+
+A tag on an internal link gives a new source for the visit and erases the real one: the report will say “came from the services page”, and where they really came from will be unknown.
+
+</details>
+
+## A chatbot: do you need one
+
+A chatbot is useful where one and the same conversation repeats: “I’d like to book”, “how much is it”, “which documents are needed”. A simple bot takes a request, asks two questions and passes it to a person. It removes routine and speeds up the first answer. The details of how bots work are in the platforms’ documentation (see the sources), and you can build one without programming in a bot builder.
+
+But a bot has a price.
+
+- **It is personal data.** A name, an account, a phone number, the text of messages. You need consent and a policy, as for a form on the site.
+- **A bot is not a specialist.** It collects a request, and a person gives the assessment. Especially if you are an expert.
+- **It has to be kept up.** A bot that doesn’t answer is worse than none.
+
+If you aren’t sure, begin without a bot: a link to a form on the site gives the same with less upkeep.
+
+## Is it an ad?
+
+It is easy to go wrong here, so carefully. A **paid placement** by an influencer or in someone else’s channel is advertising, and the connection has to be disclosed clearly. In the US the FTC’s Endorsement Guides (16 CFR Part 255) require a clear and conspicuous disclosure of a “material connection”, such as payment or a free product, in the post itself; a vague tag or a link buried in a bio is not enough. In the UK the CAP Code says marketing communications must be obviously identifiable as such (rule 2.1), and the ASA applies the Code to brands’ own social media too. The EU’s rules on unfair practices ban hidden advertising, and the Digital Services Act (Article 26) requires online platforms to show clearly that something is an ad and who paid for it.
+
+As for **your own posts on your own channel**, the answer depends on the text and on the country, and it changes over time. A post that promotes a particular product or service is marketing, and the rules on truthful claims apply to it even if no label is needed. So remember two things: **a paid or gifted endorsement must be clearly disclosed**, and where the line runs between ordinary talk about yourself and advertising, **ask a lawyer or the regulator**. This is general information, not legal advice. Email is regulated separately: it needs the consent you met in the email lesson. Russia has its own labeling regime, with a mark and a token for every ad placement, which we leave to the Russian edition.
+
+## Practice
+
+Build a plan for two channels.
+
+1. **Channels and reasons.** Two channels and a reason for each: your audience from the brief, and why it is there.
+2. **A channel description** of 12 to 120 characters and a link to the site with tags.
+3. **Three posts**: a case study, an ABT and a useful tip, each leading to its own section of the site from the brief with the tags utm_source, utm_medium and utm_campaign.
+4. **A note on advertising** and a decision on the chatbot.
+
+The check looks at form: two channels, reasons with “for whom”, the length of the description, the form and the links of the posts, the tags. Whether the posts are good is for you to decide: read them aloud in the project’s name and ask yourself who will read this, and why.

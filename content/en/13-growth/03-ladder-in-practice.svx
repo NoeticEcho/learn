@@ -1,0 +1,394 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/03-ladder-in-practice.svx. */
+	export const metadata = {
+		id: '13-growth/03-ladder-in-practice',
+		part: 13,
+		order: 3,
+		title: 'The value ladder in practice: the page, the thank-you, the count',
+		definition: 'The value ladder in practice is a mechanism: a lead-magnet page, a form, confirmation, delivery, a page of thanks, follow-up emails and a count of events.',
+		summary:
+			'You’ll build the mechanism that delivers a lead magnet, honestly offers the next step and counts what happened. Afterwards you have a lead-magnet page with a one-field form, a thank-you page with delivery and a one-time offer that can be declined, and four events to count.',
+		minutes: 25,
+		teaches: ['growth-ladder-in-practice'],
+		requires: ['growth-email-law', 'copy-core-offer-oto', 'copy-dark-patterns'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'page|email|thanks|count', caption: 'Assembly', say: 'There’s no new trick, only assembly. The discipline is simple: complicate nothing, hide nothing, count everything.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', label: 'Checklist sent', caption: 'The thank-you page', say: 'First the confirmation and the benefit itself, then what happens next. And one next step, not five.' },
+				{ mood: 'hmm', prop: 'browser', label: 'No, I like paying more', caption: 'A dishonest decline', say: 'That decline button is manipulation. Declining must be as easy to see as accepting, and the price must not change.' },
+				{ mood: 'cheer', side: 'right', prop: 'sheet', label: '3 people', caption: 'Arithmetic', say: 'The lower rungs are small. A month with five people instead of three doesn’t prove the page got better.' }
+			]
+		},
+		practice: {
+			id: 'ladder-pages',
+			title: 'A lead-magnet page, a thank-you page and events',
+			task: 'Build two pages of the ladder in the note. 1) The lead-magnet page: the name of the material (at least three words), a form with one field (email), two unticked boxes (for processing the email address and for receiving news) and a button. 2) The thank-you page: a link to get the material, a link to the main action from the brief (in the same words) and a one-time offer with the price as a number, an accept button and a decline button “No, thanks”. The one-time offer must not contain “today only”, “left” or “last chance”. If the brief has services, the offer should relate to one of them. 3) List at least four events to count: names in lowercase Latin letters joined by underscores, for example lead_form_view. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="ladder">
+      <section id="landing">
+        <h2>The lead-magnet page</h2>
+        <p>Material: <span id="magnet">…</span></p>
+        <form action="/magnet" method="post">
+          <p>
+            <label for="m-email">Email address to send the material to</label><br>
+            <input id="m-email" name="email" type="email" required>
+          </p>
+          <p>
+            <label for="m-phone">Phone</label><br>
+            <input id="m-phone" name="phone" type="tel">
+          </p>
+          <p><label><input type="checkbox" name="all" checked> I agree to everything</label></p>
+          <p><button type="submit">Submit</button></p>
+        </form>
+      </section>
+
+      <section id="thanks">
+        <h2>The thank-you page</h2>
+        <p><a id="download" href="#">…</a></p>
+        <p><a id="core" href="#">…</a></p>
+        <div id="oto">
+          <h3>…</h3>
+          <p class="price">…</p>
+          <p>…</p>
+          <p><a class="accept" href="#">…</a> <a class="decline" href="#">…</a></p>
+        </div>
+      </section>
+
+      <section id="events">
+        <h2>Events to count</h2>
+        <ul>
+          <li class="ev">…</li>
+          <li class="ev">…</li>
+          <li class="ev">…</li>
+          <li class="ev">…</li>
+        </ul>
+      </section>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="ladder">
+      <section id="landing">
+        <h2>The lead-magnet page</h2>
+        <p>Material: <span id="magnet">A checklist of ten questions to ask before you get in touch</span></p>
+        <form action="/magnet" method="post">
+          <p>
+            <label for="m-email">Email address to send the material to</label><br>
+            <input id="m-email" name="email" type="email" required>
+          </p>
+          <p><label><input type="checkbox" name="consent-data" required> I agree to you using my email address to send me the material. <a href="privacy.html">Privacy policy</a></label></p>
+          <p><label><input type="checkbox" name="consent-mail"> I’d like to get news from the project by email.</label></p>
+          <p><button type="submit">Get the checklist</button></p>
+        </form>
+      </section>
+
+      <section id="thanks">
+        <h2>The thank-you page</h2>
+        <p><a id="download" href="https://riverbend.example/checklist.pdf">Download the checklist (PDF)</a>. The link has been sent to your email too.</p>
+        <p><a id="core" href="https://riverbend.example/#action">{{mainAction.label}}</a></p>
+        <div id="oto">
+          <h3>{{items.0.title}}: a short review of your situation</h3>
+          <p class="price">$30, and the price won’t change tomorrow</p>
+          <p>An hour of talk and a written summary. If you later order the main work, the cost of the review is deducted.</p>
+          <p><a class="accept" href="#">Order the review</a> <a class="decline" href="#">No, thanks</a></p>
+        </div>
+      </section>
+
+      <section id="events">
+        <h2>Events to count</h2>
+        <ul>
+          <li class="ev">lead_form_view</li>
+          <li class="ev">lead_form_submit</li>
+          <li class="ev">lead_confirmed</li>
+          <li class="ev">oto_accept</li>
+        </ul>
+      </section>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#ladder', matches: '^[^…]*$' },
+				{ id: 'magnet', kind: 'text', selector: '#magnet', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'email-only', kind: 'exists', selector: '#landing input[type="email"]' },
+				{ id: 'no-phone', kind: 'count', selector: '#landing input[type="tel"], #landing input[name*="phone"]', max: 0 },
+				{ id: 'two-consents', kind: 'count', selector: '#landing input[type="checkbox"]', min: 2 },
+				{ id: 'unchecked', kind: 'count', selector: '#landing input[type="checkbox"][checked]', max: 0 },
+				{ id: 'delivery', kind: 'text', selector: '#thanks a#download', matches: '[Dd]ownload|[Gg]et|[Oo]pen|[Rr]ead' },
+				{ id: 'core-link', kind: 'field', selector: '#thanks a', field: 'mainAction.label' },
+				{ id: 'price', kind: 'text', selector: '#oto .price', matches: '\\d' },
+				{ id: 'buttons', kind: 'exists', selector: '#oto a.accept' },
+				{ id: 'decline', kind: 'text', selector: '#oto a.decline', matches: '^\\s*(?:No|Not now|Not needed|Skip)' },
+				{ id: 'no-pressure', kind: 'text', selector: '#oto', matches: '^(?![\\s\\S]*(?:[Oo]nly today|[Tt]oday only|\\b[Ll]eft\\b|[Ll]ast chance|[Nn]ever again|[Hh]urry))[\\s\\S]*\\S' },
+				{ id: 'related', kind: 'field', selector: '#oto', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'events', kind: 'count', selector: '#events .ev', min: 4 },
+				{ id: 'event-names', kind: 'text', selector: '#events .ev', matches: '^\\s*[a-z][a-z0-9]*(?:_[a-z0-9]+)+\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put a person’s path up the ladder in the right order',
+				items: [
+					'The lead-magnet page with a one-field form',
+					'Confirming the address by a link in an email',
+					'Delivering the material on the thank-you page and by email',
+					'One honest offer of the next step, which can be declined',
+					'Follow-up emails by the flow, with an exit condition'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is best to put on the thank-you page?',
+				options: [
+					'The confirmation, the link to the material and one next step',
+					'Five offers to choose from and a countdown timer',
+					'An empty page that says “Done”'
+				],
+				answer: 0,
+				why: [
+					'Yes. At this moment the person is attentive: they’ve just got something of use and understand what comes next. One step is easier to choose than five.',
+					'No. Five offers scatter attention, and a timer is pressure (and if the deadline is invented, it is also a deceptive claim).',
+					'No. You lose the most attentive moment and don’t say what to do next.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a one-time offer (OTO) honest?',
+				options: [
+					'The price is visible at once and doesn’t change on the page',
+					'The decline button is as noticeable as the accept button',
+					'A 15-minute timer that starts again when the page is reloaded',
+					'The offer relates to what the person has just received'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: the person knows what they are agreeing to.',
+					'Yes: a decline without guilt removes the pressure and raises trust.',
+					'No: a timer that resets is false urgency, a dark pattern, and a deadline in advertising has to be real.',
+					'Yes: a fitting extra is useful, a random one is irritating.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A lead-magnet page gets 600 visitors a month, and 3 people ordered the core service, against 5 last month. What follows?',
+				options: [
+					'Nothing: with numbers like these a difference of two people is within chance',
+					'That the page got 40% worse',
+					'That everything must be redone at once'
+				],
+				answer: 0,
+				why: [
+					'Yes. With small numbers chance easily produces swings like this. You need more months of observation or more visitors.',
+					'Don’t trust a percentage calculated on three and five people: the 40% here is just two people.',
+					'Redoing things because of noise can break what worked.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the minimum to ask for in a lead-magnet form?',
+				options: [
+					'Only the email address, if the material is sent by email',
+					'Email, phone, address and date of birth, to know more',
+					'Only a phone number'
+				],
+				answer: 0,
+				why: [
+					'Yes. Ask for exactly as much data as the purpose needs: the more fields, the fewer people fill in the form, and privacy laws expect the data collected to fit the purpose (GDPR Article 5(1)(c); California’s law says the same of collection). A guideline, not legal advice.',
+					'Extra data lowers the share who complete the form and raises your responsibility for keeping it.',
+					'For an email with the material, a phone number isn’t needed.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each event with the moment it happens',
+				pairs: [
+					['lead_form_view', 'The person opened the lead-magnet page'],
+					['lead_form_submit', 'The person sent the form with an email address'],
+					['lead_confirmed', 'The person confirmed the address by the link in the email'],
+					['oto_accept', 'The person pressed “accept” in the one-time offer']
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-ladder-mechanism',
+				front: 'What parts does the ladder mechanism consist of?',
+				back: 'The lead-magnet page, a form with consents, address confirmation, delivery, a thank-you page with one next step, follow-up emails and a count of events.'
+			},
+			{
+				id: 'growth-thanks-page',
+				front: 'Why a thank-you page?',
+				back: 'The person has just got something of use and is attentive. Here you confirm what happened, deliver the material and offer one next step.'
+			},
+			{
+				id: 'growth-oto-honest',
+				front: 'When is a one-time offer honest?',
+				back: 'The price is visible and doesn’t change, declining is as easy to see as accepting, any deadline is real, and the offer relates to what was just received.'
+			},
+			{
+				id: 'growth-events-naming',
+				front: 'How are events to count named?',
+				back: 'In lowercase Latin letters joined by underscores, in the pattern “object_action”: lead_form_submit, oto_accept. One name means one action and doesn’t change.'
+			},
+			{
+				id: 'growth-small-numbers',
+				front: 'What do you do with small numbers?',
+				back: 'Draw no conclusions from a difference of one or two people. Gather observations for months, compare rates with an honest range and don’t change what works because of noise.'
+			}
+		],
+		sources: [
+			{ title: 'Lead generation (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Lead_generation', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Double opt-in (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Double_opt-in', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Dark pattern (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Dark_pattern', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: '16 CFR Part 233: Guides against deceptive pricing (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-233', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Directive 2005/29/EC on unfair commercial practices (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32005L0029', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Regulation (EU) 2016/679, the General Data Protection Regulation (EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'In the part on copywriting you invented the rungs. Now people must be able to climb them: the material must arrive, the offer must be honest and the result must be countable.',
+			hints: [
+				'In the lead-magnet form keep the email field and drop everything extra: a phone number isn’t needed to send a checklist. Instead of one “I agree to everything” box, put two empty ones.',
+				'On the thank-you page the decline button matters as much as the accept button: write “No, thanks”.',
+				'Write event names in Latin letters joined by underscores: lead_form_view. The object first, then the action.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the material, the links, the offer and the events.',
+				magnet: 'Name the material in at least three words: what the person will get.',
+				'email-only': 'The form needs a field for the email address.',
+				'no-phone': 'Remove the phone number from the form: sending the material by email doesn’t need it.',
+				'two-consents': 'You need two boxes: consent to processing the email address and to receiving news.',
+				unchecked: 'No box may be ticked in advance: remove checked.',
+				delivery: 'The link to the material has to be clear: “Download…”, “Get…” or “Open…”.',
+				'core-link': 'The thank-you page needs a link to the main action, worded as in the brief.',
+				price: 'Write the price of the one-time offer as a number.',
+				buttons: 'The offer needs an accept link with the class accept.',
+				decline: 'The decline button has to begin with “No”, “Not now” or “Not needed”.',
+				'no-pressure': 'The offer still has pressure words: “today only”, “left” or “last chance”. Remove them.',
+				related: 'The offer has to name one of your services from the brief.',
+				events: 'You need at least four events.',
+				'event-names': 'Event names have to be in lowercase Latin letters with underscores between words: lead_form_submit.'
+			},
+			outro: 'The ladder now exists in more than words: it has pages, an honest offer and events to count. Next we’ll look at where people come from to it: social networks.'
+		},
+		say: { OTO: 'O T O', PDF: 'P D F', tripwire: 'trip-wire', upsell: 'up-sell', GDPR: 'G D P R' }
+	};
+</script>
+
+<script>
+	import LadderMath from '../../diagrams/LadderMath.svelte';
+</script>
+
+## From a sketch to a mechanism
+
+In [the lesson on the value ladder](../../11-copywriting/10-ladder/) you built its rungs: a lead magnet, a low-priced first offer, a core offer, a one-time offer. That was a sketch on paper. To make it work you need a **mechanism**: pages people can come to, a form they can send, an email that arrives, and numbers that show what is going on. In this lesson we assemble it from what you can already do: the form and consents ([the lesson on email](../02-email/)), the flow ([the lesson on automation](../01-automation/)) and the honesty of the rungs (the lesson on the ladder).
+
+There is no new law and no new trick here, only **assembly**. So this lesson is about discipline: complicate nothing, hide nothing and count everything.
+
+## Seven parts of the mechanism
+
+1. **The lead-magnet page.** One goal: the person leaves an email address and gets the material. No menu, no five other calls to action, a headline that names the benefit (the four U’s from [the lesson on benefits and 4U](../../11-copywriting/03-benefit/)) and a short form.
+2. **The form.** One field: email. Two empty boxes: for processing the address and for receiving news (the email lesson). The button says what the person will get: “Get the checklist”, not “Submit”.
+3. **Confirmation.** The person gets an email with a “confirm your address” link. If there is no confirmation (it happens with very simple forms), decide that deliberately: without it, strangers’ addresses and typos get onto the list more easily.
+4. **Delivery.** Hand the material over **at once**: a link on the thank-you page and a duplicate email. If a person confirmed their address and no material came, you lose their trust for good.
+5. **The thank-you page.** The most underrated page on a site. Only people who have just done something open it, so they are attentive and well disposed.
+6. **Follow-up.** A short cascade from the first lesson’s flow: remind, prove, offer, with pauses and an exit condition.
+7. **Counting.** The events by which you’ll later count what happens at each rung.
+
+## The lead magnet: what to give and how
+
+We spoke about choosing the material in the part on copywriting: one narrow question of your audience. Now about the delivery.
+
+- **Format.** For a small project a one- or two-page PDF, a page on the site or a series of three emails is enough. The PDF must open on a phone and weigh no more than a few megabytes.
+- **Storage.** Best of all, put the material on your own site and give a link. A file attached to an email is often blocked by mail filters.
+- **No surprises.** What you promised on the page must be in the file. “A checklist of ten questions” is ten questions, not three and an advertisement.
+- **Value without a sequel.** A person who read the checklist and never came back still got what they came for. That is the main rule of an honest rung.
+
+## The thank-you page: what it needs
+
+This page needs four things, in this order:
+
+1. **Confirmation** of what happened: “The checklist has been sent to your email”.
+2. **The benefit itself**: a “Download” link (even if the email has already gone).
+3. **What happens next**: “Over the next week I’ll send two more emails, and you can unsubscribe in either”.
+4. **One next step**: either the main action from the brief (“Book a consultation”) or a one-time offer.
+
+A **one-time offer (OTO)** on this page is honest if it is:
+
+- **related to what was just received**: after a checklist, “a review of your situation”, not a random service;
+- **with a visible price**, which won’t change tomorrow if you promise so;
+- **with a decline button** that is neither hidden nor accusing (“No, I don’t want to save money” is manipulation, called confirmshaming);
+- **without invented deadlines.** If the deadline is real, give it as a date; if not, there is none. In the US the FTC treats false urgency as deceptive, and the EU’s list of banned practices names claiming an offer is available only for a very limited time when it is not (Directive 2005/29/EC, Annex I).
+
+On payment: if your first offer is paid, taking money is a question not for a marketer but for an accountant and a lawyer (terms of sale, receipts, sales tax, refunds, and in the EU and UK a right to withdraw from an online purchase within 14 days). Find out how this works for your form of business before launch, not after the first payment.
+
+## Events: what to count and what to call them
+
+To count later, every rung has to be marked with an **event**, that is, a record that “this happened”. The rules are simple:
+
+- **object_action**, in Latin letters, lowercase, joined by underscores: `lead_form_view`, `lead_form_submit`, `lead_confirmed`, `oto_accept`.
+- **One name, one action**, for good. If you rename it, the old and new statistics won’t join up.
+- **No personal data in the name.** An event must not contain a person’s email or name. In the part on metrics you’ll put these events into a counter, and we’ll talk about the ethics of measuring separately.
+
+## The arithmetic of the ladder
+
+Say fifteen hundred people a month come to the lead-magnet page. Some share leave an email, some confirm, then a few buy the low-priced offer and some of them order the core service. Open the diagram and move the rates. Beside each number the diagram shows a **plausible range**: the limits within which it swings by chance alone. With small numbers the range is huge.
+
+<LadderMath />
+
+What follows for practice:
+
+- **The lower rungs are always small.** If three people a month order the core service, a month with five doesn’t prove the page got better.
+- **Count rung by rung, not all together.** The share who left an email is of the page’s visitors, the share who bought is of those who confirmed. Mixing denominators gives pretty but meaningless numbers (more in the lesson on metrics that mislead).
+- **Quality beats quantity.** A lead magnet that collected a thousand addresses and not one client failed. Look not at “how many subscribed” but at “how many of the subscribers reached the main action”.
+
+<details>
+<summary>Check yourself: why does a lead-magnet form ask only for an email address?</summary>
+
+Sending the material by email needs nothing else. Every extra field lowers the share who complete the form, and data you didn’t collect doesn’t have to be stored, protected or deleted at a person’s request.
+
+</details>
+
+## What can go wrong
+
+- **The material is weaker than the promise.** People will unsubscribe and tell others.
+- **The email with the material went to spam.** Check the SPF and DKIM records (the email lesson) and open the email yourself from another address.
+- **The offer is irritating.** You put three buttons and a timer on the thank-you page. Leave one button and one step.
+- **The count doesn’t add up.** If more people “confirmed” than “left an email”, the event is in the wrong place. Check, in order, where it fires.
+
+This lesson is general information, not legal advice. Rules on consent, pricing and consumer withdrawal differ by country and state, so check the current texts and, for a real launch, ask a lawyer or your consumer authority (the FTC in the US, the CMA and Trading Standards in the UK, your national consumer authority in the EU).
+
+## Practice
+
+Build the ladder mechanism in the note.
+
+1. **The lead-magnet page.** The name of the material, a one-field form (email), two unticked boxes and a button.
+2. **The thank-you page.** A link to the material, a link to the main action from the brief and a one-time offer with the price as a number, an accept button and a “No, thanks” button. If the brief has services, relate the offer to one of them.
+3. **Events.** At least four names in Latin letters joined by underscores.
+
+The check looks at form: one email field, two unticked boxes, a price as a number, a decline, event names. Whether the ladder is honest is for you to decide: go through the six rules of an honest ladder from the previous part and make sure that at every rung the person gets something of use even if they go no further.

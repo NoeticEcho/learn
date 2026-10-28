@@ -1,0 +1,360 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/02-email.svx. */
+	export const metadata = {
+		id: '13-growth/02-email',
+		part: 13,
+		order: 2,
+		title: 'Email: deliverability, consent, unsubscribe',
+		definition: 'Deliverability is an email’s ability to reach the inbox, not spam. SPF, DKIM and DMARC records vouch for it. A mailing needs consent and an unsubscribe.',
+		summary:
+			'You’ll understand why some emails arrive and others don’t, what SPF, DKIM and DMARC are, and how to build a sign-up that stays within the rules. Afterwards you have a subscription form with two separate consents and a welcome email of 80 to 120 words.',
+		minutes: 25,
+		teaches: ['growth-email-basics', 'growth-email-law'],
+		requires: ['growth-automation-triggers', 'net-dns-records', 'html-forms', 'texts-microcopy'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'envelope', label: 'SPF DKIM DMARC', caption: 'An email as a parcel', say: 'SPF: who may send for the domain. DKIM: was it tampered with. DMARC: what to do if the check fails.' },
+				{ mood: 'hint', side: 'right', prop: 'envelope', label: 'double opt-in', say: 'Double opt-in: a link in an email confirms the address. No strangers’ addresses, no typos, no sign-ups “for a friend”.' },
+				{ mood: 'cheer', prop: 'envelope', label: 'not noreply', caption: 'The first email', say: 'A name they recognize, an honest subject, no pressure, 80 to 120 words. The first email is the one read best.' }
+			]
+		},
+		practice: {
+			id: 'subscribe-and-welcome',
+			title: 'A subscription form and a welcome email',
+			task: 'Fix the subscription form on the page: instead of one box saying “I agree to everything”, make two separate consents. The first is for processing the email address (required, with a link to the privacy policy), the second for receiving news (optional). Both are unticked, and the email field has a label. Then, in the note, write the welcome email: a subject of three words or more, with no exclamation marks and no “urgent” or “guarantee”; who it is from (the project’s name); and a text of 80 to 120 words with a link to the main action and an unsubscribe link. If the brief includes Russian, add a Russian version. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+
+      <section id="subscribe">
+        <h2>Emails from the project</h2>
+        <form action="/subscribe" method="post">
+          <p>
+            <label for="s-email">Your email</label><br>
+            <input id="s-email" name="email" type="email" autocomplete="email" required>
+          </p>
+          <p><label><input type="checkbox" name="all" checked> I agree to everything</label></p>
+          <p><button type="submit">Get the emails</button></p>
+        </form>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="letter">
+      <h2>Welcome email</h2>
+      <p>From: <span id="from">…</span></p>
+      <p>Subject: <span id="subject">…</span></p>
+      <div id="body">…</div>
+      <div id="body-ru">…</div>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+
+      <section id="subscribe">
+        <h2>Emails from the project</h2>
+        <form action="/subscribe" method="post">
+          <p>
+            <label for="s-email">Your email</label><br>
+            <input id="s-email" name="email" type="email" autocomplete="email" required>
+          </p>
+          <p><label><input type="checkbox" name="consent-data" required> I agree to you using my email address to send me this email. <a href="privacy.html">Privacy policy</a></label></p>
+          <p><label><input type="checkbox" name="consent-mail"> I’d like to get news from the project by email. I can unsubscribe in any email.</label></p>
+          <p><button type="submit">Get the emails</button></p>
+        </form>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="letter">
+      <h2>Welcome email</h2>
+      <p>From: <span id="from">{{name}}</span></p>
+      <p>Subject: <span id="subject">You’ve subscribed: what happens next and how to unsubscribe</span></p>
+      <div id="body">
+        <p>Hello, and thank you for subscribing to emails from {{name}}. Here is what to expect. Once a month we’ll send one short email: a walk through a typical situation, explained for someone with no special training, and an answer to the question we’re asked most often. No spam and no big promises. If you’d like to move from reading to doing, here is where to start: <a href="https://riverbend.example/#action">{{mainAction.label}}</a>. If you decide the emails aren’t for you, use the link below. It’s one click, and we won’t ask why. You can reply to this email too, because a real person reads it.</p>
+        <p><a href="https://riverbend.example/unsubscribe">Unsubscribe from these emails</a></p>
+      </div>
+      <div id="body-ru">
+        <p>Здравствуйте! Вы подписались на наши письма, спасибо. Раз в месяц мы будем присылать одно короткое письмо с понятным разбором и ответом на вопрос, который задают чаще всего. Отписаться можно в любой момент одним нажатием внизу письма.</p>
+      </div>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#letter', matches: '^[^…]*$' },
+				{ id: 'label', kind: 'label' },
+				{ id: 'email-field', kind: 'exists', selector: 'form input[type="email"]' },
+				{ id: 'two-boxes', kind: 'count', selector: 'form input[type="checkbox"]', min: 2 },
+				{ id: 'unchecked', kind: 'count', selector: 'form input[type="checkbox"][checked]', max: 0 },
+				{ id: 'optional-mailing', kind: 'count', selector: 'form input[type="checkbox"][required]', max: 1 },
+				{ id: 'policy', kind: 'text', selector: 'form a[href]', matches: '[Pp]rivacy|[Pp]olicy' },
+				{ id: 'separate', kind: 'text', selector: 'form', matches: '^(?=[\\s\\S]*(?:process|us(?:e|ing)|stor(?:e|ing)))(?=[\\s\\S]*(?:news|newsletter|emails|updates))[\\s\\S]*$' },
+				{ id: 'from', kind: 'field', selector: '#from', field: 'name' },
+				{ id: 'subject', kind: 'text', selector: '#subject', matches: '^(?![\\s\\S]*(?:!|[Uu]rgent|[Gg]uarantee|100\\s?%))\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'length', kind: 'text', selector: '#body', matches: '^\\s*(?:\\S+\\s+){79,119}\\S+\\s*$' },
+				{ id: 'unsubscribe', kind: 'text', selector: '#body a[href]', matches: '[Uu]nsubscribe|[Oo]pt out' },
+				{ id: 'action-link', kind: 'field', selector: '#body a', field: 'mainAction.label' },
+				{ id: 'russian', kind: 'text', selector: '#body', matches: '[A-Za-z]{4}' },
+				{ id: 'english', kind: 'text', selector: '#body-ru', matches: '^(?=[\\s\\S]*[А-Яа-яЁё]{3})\\s*\\S+(?:\\s+\\S+){9,}', when: { brief: 'languages', contains: 'ru' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each domain record with its job',
+				pairs: [
+					['SPF', 'A list of servers allowed to send email on behalf of the domain'],
+					['DKIM', 'A digital signature on the email that the recipient checks against a record in DNS'],
+					['DMARC', 'The domain’s rule: what to do with an email that fails the checks, and where to send reports'],
+					['One-click unsubscribe', 'A link or button by which a person opts out without signing in or answering questions']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A form has one box, ticked in advance: “I agree to data processing and to the newsletter”. What is wrong?',
+				options: [
+					'Two different consents are mixed into one, and it is ticked for the person',
+					'Nothing: it’s simpler for the person',
+					'Only the color of the box'
+				],
+				answer: 0,
+				why: [
+					'Yes. Consent has to be specific and a clear choice. A pre-ticked box and bundled purposes are generally treated as weak grounds (a guideline, not legal advice). Make two empty boxes with clear labels.',
+					'No. Convenience for you doesn’t replace the person’s free consent.',
+					'Color has nothing to do with it: what matters is what the consent covers.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why shouldn’t you buy a ready-made list of addresses?',
+				options: [
+					'The people never agreed to hear from you, the emails go to spam, and your domain’s reputation suffers',
+					'Such lists are always empty',
+					'It is forbidden in every country without exception, and your site would be closed the same day'
+				],
+				answer: 0,
+				why: [
+					'Yes. Without consent the recipients complain, mail services trust your domain less, and the emails people do need, such as booking confirmations, suffer along with the mailings.',
+					'They aren’t always empty, and that isn’t the problem.',
+					'That is too categorical: the rules differ, but the main consequence is practical, not instant.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes an email subject honest?',
+				options: [
+					'It describes what is inside',
+					'It doesn’t promise what the email doesn’t contain',
+					'It has the word “urgent” so the email is opened faster',
+					'It doesn’t pretend to be a reply to a message the person never wrote'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: the subject is a promise, the email is its fulfillment.',
+					'Yes: bait in the subject gets one open and then an unsubscribe.',
+					'No: invented urgency is pressure, not information.',
+					'Yes: “Re:” where there was no conversation is deceit, and in the US a deceptive subject line is what CAN-SPAM prohibits.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of double opt-in in order',
+				items: [
+					'The person enters an email address and ticks the boxes in the form',
+					'The service sends an email with a “confirm your address” link',
+					'The person clicks the link: the address is confirmed',
+					'The promised material or the welcome email arrives',
+					'Every following email has an “unsubscribe” link'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What should a welcome email contain?',
+				options: [
+					'Who it is from, why it arrived, what happens next and how to unsubscribe',
+					'Only a picture and a button',
+					'A long history of the project from its founding'
+				],
+				answer: 0,
+				why: [
+					'Yes. In a few seconds the person should understand who is writing, why they are getting it, what to expect and how to stop it.',
+					'Images are often blocked, and an email without words looks like spam.',
+					'It’s better to cut the story about yourself into parts and send them one at a time in later emails.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-spf-dkim-dmarc',
+				front: 'What are SPF, DKIM and DMARC?',
+				back: 'Three records in a domain’s DNS. SPF: who may send email on its behalf. DKIM: a signature on the email. DMARC: what to do if the check fails, and where to send reports. Together they show that the email really is yours.'
+			},
+			{
+				id: 'growth-double-opt-in',
+				front: 'What is double opt-in?',
+				back: 'The person enters an address, gets an email with a link and confirms that the address is theirs. That keeps strangers’ addresses and mistyped ones out of the list.'
+			},
+			{
+				id: 'growth-two-consents',
+				front: 'Why are there two consents?',
+				back: 'One is for processing the data (to send the email), the other for receiving news. Both are empty in advance and worded separately (a guideline, not legal advice).'
+			},
+			{
+				id: 'growth-unsubscribe',
+				front: 'What should an unsubscribe be like?',
+				back: 'In every email, one click, with no sign-in and no questions. Gmail and Yahoo have required this of bulk senders (over 5,000 messages a day) since February 2024 (RFC 8058).'
+			},
+			{
+				id: 'growth-honest-subject',
+				front: 'What should an email subject be like?',
+				back: 'It describes the content and doesn’t promise what the email lacks. No invented urgency, and no “Re:” when there was no conversation.'
+			}
+		],
+		sources: [
+			{ title: 'Sender Policy Framework (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Sender_Policy_Framework', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'DomainKeys Identified Mail (Wikipedia)', url: 'https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'DMARC (Wikipedia)', url: 'https://en.wikipedia.org/wiki/DMARC', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'RFC 8058: Signaling One-Click Functionality for List Email Headers', url: 'https://www.rfc-editor.org/rfc/rfc8058', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Email sender guidelines (Google Workspace Admin Help)', url: 'https://support.google.com/a/answer/81126?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: '16 CFR Part 316: CAN-SPAM Rule (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-C/part-316', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Electronic mail marketing (ICO guide to PECR)', url: 'https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/electronic-and-telephone-marketing/electronic-mail-marketing/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Regulation (EU) 2016/679, the General Data Protection Regulation (EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Федеральный закон «О рекламе» 38-ФЗ (for comparison, in Russian)', url: 'https://www.consultant.ru/document/cons_doc_LAW_58968/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'An email that didn’t arrive and an email that arrived without consent do equal harm. Fix the form first, then write an email you won’t be embarrassed to open.',
+			hints: [
+				'Delete the one “I agree to everything” box and make two: the first with the word “processing” (or “using”) and a link to the privacy policy, the second about receiving news. Neither has the checked attribute.',
+				'Only the first box is required. A person can subscribe to the news, or not.',
+				'Count the email’s words: you need 80 to 120. Say who it is from, why it arrived, what happens next, add a link to the main action and an “Unsubscribe” link.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” in the note about the email. Fill in “From”, the subject and the texts.',
+				label: 'Every form field needs a label, boxes included.',
+				'email-field': 'The form needs a field for the email address with the type email.',
+				'two-boxes': 'You need two boxes: one for processing the email address and one for receiving news.',
+				unchecked: 'No box may be ticked in advance: remove the checked attribute.',
+				'optional-mailing': 'Only one box may be required, and receiving news must be voluntary.',
+				policy: 'Beside the consent to processing there must be a link to the privacy policy, with the word “privacy” or “policy” in it.',
+				separate: 'The form needs separate words about processing or using the data and about receiving news or emails.',
+				from: 'In “From”, write the project’s name or your own name from the brief.',
+				subject: 'The subject must be three words or more, with no exclamation mark and no “urgent” or “guarantee”.',
+				length: 'The text of the email must be 80 to 120 words. Count the words of the links too.',
+				unsubscribe: 'The email needs a link with the word “unsubscribe”.',
+				'action-link': 'The email needs a link whose text is the same as the main action in the brief.',
+				russian: 'Write the email in English.',
+				english: 'The brief includes Russian: add a Russian version of the email of at least ten words.'
+			},
+			outro: 'Your subscription now has two honest consents, and the email has clear content. Next we’ll turn it into a value ladder that works.'
+		},
+		say: { SPF: 'S P F', DKIM: 'D K I M', DMARC: 'dee-mark', DNS: 'D N S', 'e-mail': 'email', 'opt-in': 'opt-in', RFC: 'R F C', CAN: 'can', PECR: 'peck-er', GDPR: 'G D P R', FTC: 'F T C' }
+	};
+</script>
+
+<script>
+	import EmailPath from '../../diagrams/EmailPath.svelte';
+</script>
+
+## The email nobody saw
+
+In the last lesson you described a flow of three messages. It works only if the emails **reach people** and **stay within the rules**. Deliverability first: an email travels from your service through the recipient’s server into the inbox, and at every step the mail system decides whether to trust it. There are a great many spammers, so the checks are strict. Emails that fail them land in spam, and if a domain misbehaves badly enough, its emails stop arriving at all.
+
+Email was invented before the web, and for a long time anyone could sign an email with someone else’s address. So the checks were added later, as records in **DNS** (you met them in the part on the internet: a TXT record holds free text about a domain). Three records for email became the standard.
+
+## Three signatures of a domain
+
+Picture an email as a parcel. The recipient wants to know three things: is it really from this sender, was it opened on the way, and what to do if something is wrong.
+
+- **SPF** (Sender Policy Framework) answers “**who** may send email on behalf of this domain”. The domain publishes a list of servers and mailing services. If an email comes from a server not on the list, it isn’t trusted.
+- **DKIM** (DomainKeys Identified Mail) answers “**was the email forged**”. The service signs the email with a secret key, and the public key sits in DNS. The recipient checks the signature: if it matches, the email wasn’t changed and was really sent from the domain.
+- **DMARC** (Domain-based Message Authentication, Reporting and Conformance) answers “**what to do** if the check fails”. The domain asks the recipient to do nothing (`none`, just send reports), to put the email in spam (`quarantine`) or to reject it (`reject`).
+
+This is how they look in a domain’s DNS (the addresses are invented):
+
+```text
+riverbend.example.                  TXT  "v=spf1 include:_spf.sender.example ~all"
+mail._domainkey.riverbend.example.  TXT  "v=DKIM1; k=rsa; p=MIGfMA0GCSq..."
+_dmarc.riverbend.example.           TXT  "v=DMARC1; p=none; rua=mailto:reports@riverbend.example"
+```
+
+You don’t need to write these lines by hand: the mailing service shows the values to add at your registrar or host (you made DNS records in the lesson on them). Start with `p=none`, read the reports, and tighten later.
+
+**Where it comes from.** SPF, DKIM and DMARC are described as internet standards (RFC 7208, RFC 6376 and RFC 7489). For a long time they were a recommendation. Since February 2024 Google requires all senders to Gmail to set up SPF or DKIM, and a sender of more than 5,000 messages a day to have SPF, DKIM and DMARC and to offer a one-click unsubscribe, which RFC 8058 describes. Yahoo announced similar rules for bulk senders. Google also asks senders to keep the share of messages reported as spam below 0.10% and never let it reach 0.30%.
+
+Open the diagram. It is a teaching model: it shows how each step adds to or takes away from the trust in an email. Switch everything on and see where the email lands, then spoil one item at a time on purpose.
+
+<EmailPath />
+
+<details>
+<summary>Check yourself: what do SPF and DKIM each vouch for, and how do they differ?</summary>
+
+SPF checks that the email came from an allowed server. DKIM checks that the email is signed and wasn’t changed. The first looks at the sender, the second at the email itself.
+
+</details>
+
+## The list of addresses: where it comes from
+
+Even with perfect records you can ruin your reputation with a list.
+
+- **Double opt-in.** The person enters an address in the form, gets an email with a “confirm” link, and joins the list only after clicking it. That keeps out strangers’ addresses, mistyped ones and sign-ups “for a friend”. Many services offer it as a setting, and in some countries, Germany among them, it has become the usual way to prove consent.
+- **No bought lists.** Those people don’t know you and never agreed. Spam complaints are inevitable.
+- **Cleaning.** If a person hasn’t opened or clicked anything for six months, ask them one last time (“do you still want these emails?”) and remove them if they don’t answer.
+- **Complaints.** If more than one person in a thousand complains, that is already a warning sign. Large mail services today give an acceptable complaint rate in tenths of a percent.
+
+## Consent and unsubscribe: a guideline, not legal advice
+
+What follows is how lawyers commonly read the rules. We don’t know the details of your project, so before launch show the form and the privacy policy to a lawyer.
+
+- **The US.** The CAN-SPAM Act doesn’t make you collect consent before marketing email, but it does ask for an accurate sender and subject line, a real postal address of the sender, and a clear way to opt out, honored within ten business days. Selling or transferring the addresses of people who opted out is not allowed. Some states add privacy-law duties: California’s law, for example, asks you to say at the point of collection what you collect and why, and to honor a person’s opt-out of the sale or sharing of their data.
+- **The UK and the EU.** Marketing email to individuals needs prior **consent**, apart from the narrow soft opt-in for existing customers (PECR regulation 22 in the UK, Article 13 of the ePrivacy Directive in the EU). Under the GDPR the consent must be freely given, specific, informed and unambiguous, shown by a clear affirmative act. A pre-ticked box doesn’t count (GDPR Article 4(11) and Recital 32), and a person may object to direct marketing at any time (Article 21).
+- **Two consents.** One: “process my email address so you can send me this email”. The other: “send me news”. Don’t glue them into one phrase and don’t tick boxes for the person: it is weak ground, and it is also a dark pattern (the lesson on the limits of persuasion).
+- **Service emails.** A booking confirmation or a reminder of a consultation to a person who booked is, as a general rule, not marketing. But adding “and also, a new service” to the same email turns it into marketing. Better to keep them apart.
+- **Other countries.** Canada’s anti-spam law (CASL) asks for express or implied consent and a working unsubscribe, and many other countries have their own rules. If your subscribers live somewhere, read that place’s rules.
+
+This is general information, not legal advice. For a real mailing ask a lawyer or the regulator: the FTC in the US, the ICO in the UK, your national data protection authority in the EU. For comparison, Russia’s advertising law (Article 18 of 38-FZ) also requires the recipient’s prior consent to advertising by email, and the sender has to be able to prove it.
+
+## What a good welcome email looks like
+
+The first email is read better than any later one, so give it time. It should have four things (you put them in the form “who, why, what next, how to unsubscribe”):
+
+1. **Who it is from.** A name of a person or project the subscriber will recognize. Not “noreply”.
+2. **Why it arrived.** One sentence: “You subscribed to emails from… on our site”.
+3. **What happens next.** How often you’ll write, and about what. That is a promise, and it has to be kept.
+4. **How to unsubscribe.** A visible link. An unsubscribe hidden in small print doesn’t add subscribers, only complaints.
+
+The **subject** is honest: it describes the email and uses no pressure techniques (in the lessons on influence you saw how they end). Good: “You’ve subscribed: what happens next and how to unsubscribe”. Bad: “URGENT!!! Today only”.
+
+Take the **tone** from the brief (the “tone” field) and the **language** from the “languages” field. A bilingual project writes the email in the subscriber’s language, and the form remembers which language the person chose. Don’t trust machine translation of legal texts (policies, consents) without a person checking it.
+
+**Length.** For a first email 80 to 120 words is enough. Longer ones are read less.
+
+## Practice
+
+You’re working on the page with the subscription.
+
+1. **Fix the form.** Replace the one box “I agree to everything” with two. The first: consent to processing the email address, with a link to the privacy policy, required. The second: consent to receiving news, optional. Neither is ticked in advance, and every field has a label.
+2. **Write the welcome email** in the note: who it is from, a subject, and a text of 80 to 120 words with a link to the main action and an “Unsubscribe” link. If the brief includes Russian, add a Russian version.
+
+The check looks at the form: two empty boxes, only one required, a link to the policy, labels; and at the email: subject, length, links. Whether your email is honest is for you to decide. Reread it through the eyes of a person from “for whom”: is it clear to them why the email arrived?
