@@ -1,0 +1,353 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/04-review-ai-output.svx. The legal remarks are general information, not legal advice. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const log = (v) => `<section data-scaffold id="review">
+      <h2>The review log</h2>
+      <ol id="review-log">
+        <li>${v.log[0]}</li>
+        <li>${v.log[1]}</li>
+        <li>${v.log[2]}</li>
+        <li>${v.log[3]}</li>
+        <li>${v.log[4]}</li>
+      </ol>
+      <p id="review-order">The order in which I check someone else’s output: ${v.order}</p>
+    </section>`;
+
+	const script = (key) => `      <script type="module" id="app-script">
+${key
+	? 'const API_KEY = "sk-live-9f2c7a41e5b84d3aa1c0";\nfunction send(data) { return fetch("https://api.example.com/leads?key=" + API_KEY, { method: "POST", body: data }); }'
+	: 'function send(data) { return fetch("/api/leads", { method: "POST", body: data }); }'}
+      <\/script>`;
+
+	const generated = `      <h1>{{name}}: innovative solutions for your business</h1>
+      <p>{{who}}</p>
+      <div class="btn" onclick="go()">Get Started</div>
+      <img src="https://images.example-stock.com/team.jpg" width="320" height="200">
+      <section id="proofs">
+        <h2>Proof</h2>
+        <p>More than 15 years of experience, 1,200+ satisfied clients, 99.9% of cases won</p>
+        <blockquote>“The best specialist I’ve ever met!” John, director</blockquote>
+      </section>
+      <section id="form">
+        <h2>{{mainAction.label}}</h2>
+        <form action="http://api.example.com/leads" method="get">
+          <input name="name" placeholder="Name">
+          <input name="phone" placeholder="Phone">
+          <button type="submit">Send</button>
+        </form>
+      </section>
+${script(true)}`;
+
+	const reviewed = `      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#form">{{mainAction.label}}</a></p>
+      <img src="/images/portrait.jpg" alt="Portrait: {{name}}" width="320" height="240">
+      <section id="proofs">
+        <h2>Proof</h2>
+        <ul>
+          {{#each proofs}}<li>{{title}}</li>
+          {{/each}}
+        </ul>
+      </section>
+      <section id="form">
+        <h2>{{mainAction.label}}</h2>
+        <form action="https://api.example.com/leads" method="post">
+          <p><label for="f-name">Name</label> <input id="f-name" name="name" autocomplete="name" required></p>
+          <p><label for="f-phone">Phone</label> <input id="f-phone" name="phone" type="tel" autocomplete="tel" required></p>
+          <p><label><input type="checkbox" name="consent" required> I agree to the processing of my personal data, <a href="/privacy/">privacy policy</a></label></p>
+          <button type="submit">{{mainAction.label}}</button>
+        </form>
+      </section>
+${script(false)}`;
+
+	const li = (id, n, re) => ({ id: `${id}-${n}`, kind: 'text', selector: `#review-log li:nth-child(${n})`, matches: re });
+
+	export const metadata = {
+		id: '16-ai/04-review-ai-output',
+		part: 16,
+		order: 4,
+		title: 'Checking what an AI made: mistakes that look plausible',
+		definition: 'Checking AI output is a review in order: facts, function, security, data and law, accessibility, tells of a template. Mistakes in the output look plausible.',
+		summary:
+			'An AI writes with confidence, and the mistakes in its output look like truth. Afterwards you’ll know what mistakes there are (invented facts, keys in the code, a form with no consent, other people’s pictures, inaccessible buttons), check output in the right order, and find and fix real mistakes on a page an “AI wrote”, with a log of what you found.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: '15 years of experience', caption: 'A confident tone', say: 'The page is handsome and sure of itself. Only you don’t have fifteen years of experience, or that many clients.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'facts|works|keys|law', say: 'Check in order: facts, does the action work, security, data and law, accessibility, tells of a template.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'log', caption: 'Found and fixed', say: 'Write down every mistake you find: what, where, how fixed. In a week you’ll find them faster.' }
+			]
+		},
+		minutes: 30,
+		teaches: ['future-review-ai-output', 'future-ai-failure-modes'],
+		requires: ['future-vibe-coding', 'future-prompt-as-brief', 'design-ai-tells', 'quality-prelaunch-checklist'],
+		practice: {
+			id: 'future-review-page',
+			title: 'Find and fix the mistakes on a page an “AI wrote”',
+			task: 'The page below was “written by an AI” and has real mistakes. Fix them right in the code. 1) Remove the slogan from the heading and the invented numbers and review; take the proof from the brief (as a list). 2) The image needs alt, and must not come from another server. 3) In place of the div “button”, make a link labeled with the main action from the brief. 4) Remove the key from the script. 5) The form: an https address, the post method, labels on the fields (label) and a required consent with a link to the policy. 6) In the log, write five mistakes you found (what, where, how you fixed it, at least four words each) and the order in which you check. Every “…” has to be replaced.',
+			era: 7,
+			files: files({ lang: 'en', main: generated, scaffold: log({ log: ['…', '…', '…', '…', '…'], order: '…' }) }),
+			solution: files({
+				lang: 'en',
+				main: reviewed,
+				scaffold: log({
+					log: [
+						'Replaced the invented numbers and review in the proof with real data from the brief',
+						'The image had no alt and came from a third-party server, so I put in my own file with a description',
+						'The div button with a stock label became a link named for the project’s action',
+						'A secret key sat right in the page’s code, so I deleted it and moved the requests to a server',
+						'The form sent over http by GET with no labels or consent, so I changed it to https and post with consent'
+					],
+					order: 'first the facts and proof, then whether the main action works, then security (keys, the form), data and law (consent, the policy), accessibility (labels, buttons) and last the tells of a template and the tone.'
+				})
+			}),
+			checks: [
+				{ id: 'review', kind: 'exists', selector: '#review' },
+				{ id: 'no-blanks', kind: 'text', selector: '#review', matches: '^[^…]*$' },
+				{ id: 'h1-no-slogan', kind: 'text', selector: 'h1', matches: '^(?![\\s\\S]*[Ii]nnovati)' },
+				{ id: 'h1-name', kind: 'field', selector: 'h1', field: 'name' },
+				{ id: 'no-fake-claims', kind: 'text', selector: '#proofs', matches: '^(?![\\s\\S]*(?:15 years|1,?200|99[,.]9|best specialist))' },
+				{ id: 'proofs-from-brief', kind: 'field', selector: '#proofs', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{ id: 'img-alt', kind: 'count', selector: 'img:not([alt])', max: 0 },
+				{ id: 'img-own', kind: 'count', selector: '[src*="example-stock"]', max: 0 },
+				{ id: 'no-div-button', kind: 'count', selector: 'div[onclick], span[onclick]', max: 0 },
+				{ id: 'cta', kind: 'field', selector: 'main a.button', field: 'mainAction.label' },
+				{ id: 'no-key', kind: 'text', selector: '#app-script', matches: '^(?![\\s\\S]*(?:sk-live|API_KEY\\s*=|key=))' },
+				{ id: 'form-https', kind: 'attr', selector: 'form', name: 'action', matches: '^https://' },
+				{ id: 'form-post', kind: 'attr', selector: 'form', name: 'method', matches: '^post$' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'consent', kind: 'count', selector: 'form input[type="checkbox"][required]', min: 1 },
+				{ id: 'policy-link', kind: 'count', selector: 'form a[href*="privacy"], form a[href*="policy"]', min: 1 },
+				li('log', 1, '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'),
+				li('log', 2, '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'),
+				li('log', 3, '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'),
+				li('log', 4, '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'),
+				li('log', 5, '\\S+\\s+\\S+\\s+\\S+\\s+\\S+'),
+				{ id: 'order-facts', kind: 'text', selector: '#review-order', matches: 'fact' },
+				{ id: 'order-security', kind: 'text', selector: '#review-order', matches: 'secur|key|form' },
+				{ id: 'order-law', kind: 'text', selector: '#review-order', matches: 'data|law|GDPR|consent|privacy' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each mistake on an AI page with why it is dangerous',
+				pairs: [
+					['invented numbers and reviews', 'false claims about you, lost trust, and a breach of the rules on advertising and reviews'],
+					['a secret key in the page’s code', 'anyone who opens the source sees the key: it counts as leaked'],
+					['a form with no privacy notice or consent', 'collecting personal data without telling people what is done with it, against privacy laws such as the GDPR'],
+					['a div button and a field with no label', 'not usable from the keyboard or with a screen reader']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the checks of AI output in a sensible order',
+				items: [
+					'Facts: compare every claim, number and name with the brief',
+					'Function: does the project’s main action work',
+					'Security: keys, the form’s address and method, checks of rights',
+					'Data and law: consent, the policy, other people’s scripts and images',
+					'Accessibility and speed: labels, Tab, contrast, the page’s weight',
+					'Tells of a template, and the tone'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A model suggested connecting a library with a fine-sounding name, and it isn’t in the package list. What is most likely?',
+				options: [
+					'The model invented the name: such a library may not exist, or someone may have registered the name with bad intent; check it on the package’s official page',
+					'The library exists, the package list is just incomplete',
+					'It is as it should be: models don’t make mistakes in names'
+				],
+				answer: 0,
+				why: [
+					'Yes. Invented names of packages, functions and properties are a known mistake of models. Worse, an attacker may register such a name and wait for someone to install it unchecked. Any dependency is checked at its official source.',
+					'No: check first, don’t assume.',
+					'No: it is exactly in names and links that models make confident mistakes.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these can be checked automatically, and which must a person decide?',
+				options: [
+					'Automatically: whether the code has a string that looks like a key, and whether every image has alt',
+					'Automatically: whether all the links open and whether any fields lack a label',
+					'A person: whether every claim on the page matches the truth about you',
+					'A person: whether the text of the policy is enough for your case (together with an attorney)'
+				],
+				answer: [0, 1, 2, 3],
+				why: [
+					'Yes: searching for keys and checking alt is a scanner’s job.',
+					'Yes: checking links and field labels can be automated.',
+					'Yes: only you know the truth about you.',
+					'Yes: whether a text is enough for the law is for a person to judge, best with an attorney.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A second model rechecked the first one’s output and wrote “no mistakes found”. Is that enough?',
+				options: [
+					'No: another model may repeat the same misconception, and it doesn’t know your facts; it is a helper in review, not a replacement for a person',
+					'Yes: two models don’t make the same mistake',
+					'Yes, if the second model costs more'
+				],
+				answer: 0,
+				why: [
+					'Yes. A reviewer model is useful: it finds what you would miss. But it doesn’t know what is true about you, and different models share weaknesses. So a person checks facts, data and money.',
+					'No: models share weak spots, and their mistakes often coincide.',
+					'No: price doesn’t guarantee accuracy.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-review-order',
+				front: 'In what order do you check AI output?',
+				back: 'Facts (compared with the brief), whether the main action works, security (keys, the form, rights), data and law (consent, the policy, other people’s resources), accessibility and speed, tells of a template and the tone. The costly and invisible mistakes come first.'
+			},
+			{
+				id: 'future-failure-modes',
+				front: 'Which mistakes are typical of AI pages and code?',
+				back: 'Invented facts, numbers and reviews; libraries and properties that don’t exist; keys in client code; a form over http and GET with no consent; outside scripts and images of unknown license; div buttons and fields with no label; the tells of a template.'
+			},
+			{
+				id: 'future-review-tools',
+				front: 'What do you check with yourself?',
+				back: 'The source code (a search for keys and the words password and key), the “Network” tab (outside servers), the Tab key, a check of links and labels, comparing every number and name with the brief, a reverse image search to check a license.'
+			},
+			{
+				id: 'future-ai-reviewer',
+				front: 'Can you hand the review to another model?',
+				back: 'As a helper yes, as a replacement no: models share weaknesses, and they don’t know the truth about you. A person checks facts, data and money.'
+			}
+		],
+		sources: [
+			{ title: 'OWASP: Top 10 for Large Language Model Applications', url: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OWASP Top 10', url: 'https://top10.owasp.org/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'W3C: Web Content Accessibility Guidelines (WCAG) 2.2', url: 'https://www.w3.org/TR/WCAG22/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'W3C WAI: Images tutorial', url: 'https://www.w3.org/WAI/tutorials/images/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'We Have a Package for You! A comprehensive analysis of package hallucinations by code generating LLMs', url: 'https://arxiv.org/abs/2406.10279', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: '16 CFR Part 465: Rule on the Use of Consumer Reviews and Testimonials (Cornell LII)', url: 'https://www.law.cornell.edu/cfr/text/16/part-465', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Simon Willison: Not all AI-assisted programming is vibe coding (but vibe coding rocks)', url: 'https://simonwillison.net/2025/Mar/19/vibe-coding/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The page in front of you looks decent, but it has real mistakes. Go in order: first the facts, then what the page does, then the keys and the form, then accessibility. Write every find in the log.',
+			hints: [
+				'A heading with no slogan: the project’s name. Proof: real, as a list from the brief. Delete the invented numbers and the review.',
+				'The image needs alt and a path of your own (for example /images/portrait.jpg), not another server. In place of a div with onclick you need a link labeled with the project’s action.',
+				'Delete the key from the script: keep the function but without the key, and the address of the request can be your own. In the form: https, post, a label on every field, a required consent checkbox and a link to the policy.',
+				'In the log, five finds, each at least four words: what you found, where, and how you fixed it. And the order of checking: facts, security, data and law.'
+			],
+			mistakes: {
+				review: 'The block “The review log” (the section whose id is review) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				'h1-no-slogan': 'The heading still has the slogan “innovative solutions”. Name the project.',
+				'h1-name': 'The heading should have the project’s name.',
+				'no-fake-claims': 'The proof still has invented numbers or a review (15 years, 1,200, 99.9, “best specialist”). Delete them.',
+				'proofs-from-brief': 'The proof should be the real proof from the brief: one per list item.',
+				'img-alt': 'The image has no alt attribute. Describe it, or give a decorative one an empty alt.',
+				'img-own': 'The image comes from a third-party server. Replace it with your own file.',
+				'no-div-button': 'A div “button” with onclick is left. Replace it with a real link or button.',
+				cta: 'The link-button should be named for the project’s main action in the words of the brief.',
+				'no-key': 'A key is left in the script. Delete it: secrets are kept on a server, not in the page’s code.',
+				'form-https': 'The form sends over http. Use https.',
+				'form-post': 'The form sends by the GET method. Use post.',
+				labels: 'Some form field has no label.',
+				consent: 'The form needs a required consent checkbox (input type=checkbox required).',
+				'policy-link': 'The form needs a link to the privacy policy (an address with the word privacy).',
+				'log-1': 'The first log entry: at least four words.',
+				'log-2': 'The second log entry: at least four words.',
+				'log-3': 'The third log entry: at least four words.',
+				'log-4': 'The fourth log entry: at least four words.',
+				'log-5': 'The fifth log entry: at least four words.',
+				'order-facts': 'In the order of checking, name the facts.',
+				'order-security': 'In the order of checking, name security (keys, the form).',
+				'order-law': 'In the order of checking, name data and law (consent, privacy).'
+			},
+			outro: 'You checked someone else’s output the way professionals do: in order, with a log. That is your role beside an AI.'
+		},
+		say: {
+			OWASP: 'oh wasp',
+			WCAG: 'wee cag',
+			alt: 'alt',
+			API: 'A P I',
+			onclick: 'on click',
+			GET: 'get',
+			POST: 'post',
+			GDPR: 'G D P R',
+			Tab: 'tab'
+		}
+	};
+</script>
+
+<script>
+	import ErrorHunt from '../../diagrams/ErrorHunt.svelte';
+</script>
+
+## Output that looks right
+
+An AI has an unpleasant trait: it makes mistakes **confidently and smoothly**. An invented number is written in the same tone as a real one. A function that doesn’t exist is named plausibly. A page with a key in its code looks exactly like a page without one. So “I looked, seems fine” is not a check of an AI’s output: eyes see only what is visible, and the most expensive mistakes are invisible.
+
+This part of the work answers the question “**what do you do when an AI has done it for you**”. You check. And for that you need two things: to know **which mistakes occur**, and to check them **in the right order**.
+
+## Which mistakes occur
+
+**Invented facts.** Numbers (“1,200 clients”), achievements (“specialist of the year”), reviews (“John, director”), the numbers of laws and standards, links to sources. A model completes what is missing with the most probable thing, and if the prompt doesn’t say “use only these facts”, it will add false ones.
+
+**The nonexistent and the outdated.** Libraries, functions, CSS properties and attributes that don’t exist. They are named plausibly, and it is easy to take them for real. Worst is when an attacker registers an invented package name and waits for someone to install it; researchers who tested code-writing models found that such made-up package names turn up in their output often enough to matter. Next to this stands the outdated: methods and versions from past years.
+
+**Security.** A secret key right in the page’s code. A form that sends over `http` or by `GET`, so that data lands in the address and the logs. No checking of input on the server and no access rights. Scripts from unknown outside servers. In Veracode’s 2025 study, models chose an insecure way in about 45% of the test tasks. This takes you back to the lesson on authentication and to the OWASP list.
+
+**Data and law.** The form collects a name and a phone number, but there is neither a notice on how the data is used nor a link to a privacy policy, which privacy laws such as the GDPR and California’s CCPA expect (and where consent is the legal basis, a consent checkbox as well). Counters, fonts and pictures load from other people’s servers, and the visitor sends a request to a third party, which has to be described in the policy. Stock pictures of unknown license. Generated images of people who resemble real ones. And invented reviews are a legal matter too: in the US, the FTC’s rule on consumer reviews and testimonials (16 CFR Part 465) bans fake or false reviews, and the FTC says that includes AI-generated ones. General information, not legal advice.
+
+**Accessibility.** “Buttons” made of `div`, images with no `alt`, fields with no labels, low contrast, a broken order of headings. You went through all this in the parts on HTML and design, and an AI reproduces these mistakes as readily as people do.
+
+**Tells of a template.** A slogan, three cards, invented numbers, stock labels: eight tells from the part on design.
+
+**Maintainability.** Duplicated code, unclear names, no documentation. It doesn’t break the page today, but it will make an edit next month painful.
+
+Try finding the mistakes on a page an “AI wrote”. Mark the lines you think are mistakes, then look at the results: found, missed, false alarms. Some lines are right, and marking one with no reason is a miss too.
+
+<ErrorHunt />
+
+<details>
+<summary>Check yourself: why is “I looked, seems fine” not a check of AI output?</summary>
+
+Eyes see only the visible, and the most expensive mistakes are invisible: a key in the source code, an invented number, a missing consent. They are found by a deliberate check, not by a glance.
+
+</details>
+
+## In what order to check
+
+The order is not random: **first what costs the most and is hardest to see**.
+
+1. **Facts.** Every claim, number, name and review: where does it come from? If the source isn’t the brief or a document you can show, it is invented. This is the simplest and the most important check: a list of everything the page asserts, and against each item the words “where is the proof”.
+2. **Function.** Does the page do what it was made for? Your project’s main action (a form, a booking) has to be walked through by hand at the real address.
+3. **Security.** A search in the source code for the words `key`, `token`, `password`, `sk-`. The form’s address and method. Which third-party servers show on the “Network” tab of the developer tools. What is checked on the server and what only in the browser.
+4. **Data and law.** The consent, the policy, where data goes, other people’s scripts and fonts, the licenses of images.
+5. **Accessibility and speed.** Go through the page with the Tab key, look at contrast, labels, headings, the page’s weight.
+6. **Tells of a template, and tone.** This is last, because it is about taste, not harm.
+
+Automatic tools help at steps two to five (an accessibility scanner, a link check, a search for strings that look like keys), but don’t replace the first: only you know the truth about you. And **a second model as a reviewer** is useful but no replacement: models share weak spots, and they don’t know your facts.
+
+<details>
+<summary>Check yourself: which check do you start with, and why?</summary>
+
+With the facts: an invented claim on the page is the most expensive and the simplest mistake, and only a person who knows the truth about the project can find it.
+
+</details>
+
+## The log
+
+A good habit is to write each find as “what, where, how I fixed it”. In a week the log shows what an AI catches you on most often (everyone has their own three or four kinds of mistake), and you learn to look for them first. And the log can be pasted into the next prompt as “what not to do”.
+
+## Practice
+
+In front of you is your project’s site, as if an AI had built it. It has real mistakes from the list above: a slogan, invented numbers and a review, an image with no `alt` from another server, a `div` “button” with a stock label, a key in the script, and a form with no labels, consent or protection. Fix them in the code itself and write five finds in the log: what, where, how you fixed it. Take the proof from your own brief.
+
+The check reads the page’s code: it will find whether the key is still there, whether there is `alt`, how many labels the fields have, and the consent. Whether a person would see it with their eyes it can’t say, so after it, go through the page with the Tab key.
+
+## What was wrong with 2025
+
+In 2025 AI output was checked selectively or not at all: it looked too good. Hence the invented achievements on specialists’ pages, the keys in public repositories and the open databases in services. The conclusion the professionals reached is simple: **trust in output should be proportional to the cost of a mistake**, and checking is not distrust of an AI but an editor’s ordinary work.

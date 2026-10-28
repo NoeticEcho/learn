@@ -1,0 +1,373 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/16-ai/05-capstone-builder.svx. */
+	import { files } from '../../diagrams/practice-kit.ts';
+
+	const plan = (v) => `<section data-scaffold id="pipeline-plan">
+      <h2>My pipeline</h2>
+      <table id="stages">
+        <thead><tr><th>Stage</th><th>Input</th><th>What the model does</th><th>Output and format</th><th>Check before the next stage</th></tr></thead>
+        <tbody>
+${['1. Brief', '2. Structure', '3. Copy', '4. Code']
+	.map((n, i) => `          <tr class="stage"><td>${n}</td><td class="in">${v.rows[i][0]}</td><td class="does">${v.rows[i][1]}</td><td class="out">${v.rows[i][2]}</td><td class="gate">${v.rows[i][3]}</td></tr>`)
+	.join('\n')}
+        </tbody>
+      </table>
+      <p>The structure the second stage must return:</p>
+      <pre id="pl-structure">${v.structure}<\/pre>
+      <p id="pl-facts">Which facts are allowed in the copy: ${v.facts}</p>
+      <p id="pl-sends">Which fields of the brief go to the model: ${v.sends}</p>
+      <p id="pl-notsend">Which don’t: ${v.notsend}</p>
+      <p id="pl-key">Where the key is kept: ${v.key}</p>
+      <p id="pl-ru">When I would choose a model in another region or run one myself: ${v.ru}</p>
+    </section>`;
+
+	const blankRows = [0, 1, 2, 3].map(() => ['…', '…', '…', '…']);
+	const solvedRows = [
+		['The project brief: fields from the settings', 'Nothing: only a choice of public fields', 'JSON of the chosen fields', 'The JSON has no phone number and no email'],
+		['The JSON from the first stage', 'Builds the structure of the page', 'JSON with a list of sections and the button’s label', 'Schema: the section names exactly as in the brief, and the button’s label matches'],
+		['The structure from the second stage and the brief’s facts', 'Writes the text of each section in the tone of the examples', 'Copy by section', 'Facts: every number and name is in the brief’s items and proofs, and there are no empty formulas'],
+		['The structure and copy from stages 2 and 3', 'Writes HTML and CSS', 'One HTML file and one CSS file', 'Code: one h1, alt on images, labels on fields, lang, no external scripts']
+	];
+
+	const row = (n, col, re) => ({ id: `s${n}-${col}`, kind: 'text', selector: `#stages tbody tr:nth-of-type(${n}) td.${col}`, matches: re });
+
+	export const metadata = {
+		id: '16-ai/05-capstone-builder',
+		part: 16,
+		order: 5,
+		title: 'Capstone: a mini-builder “brief, structure, copy, code”',
+		definition: 'A “brief, structure, copy, code” pipeline is a chain of model requests where ordinary code checks each stage’s output before the next stage uses it.',
+		summary:
+			'One big request breaks where you can’t see it. Afterwards you’ll assemble a pipeline of four stages with checks between them, understand how a call to a model through an API works (a request, a key, tokens, errors), decide which fields of the brief go to a model and when to pick a model in another region or one you run yourself, and write down the design of your own mini-builder.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'one request', caption: 'Do it all at once', say: 'One big request. Something in it went wrong, and what and where isn’t visible. Start over?' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'brief|structure|copy|code', say: 'Four stages and a check between them. A check fails: one stage breaks, not the whole site.' },
+				{ mood: 'cheer', prop: 'lock', label: 'the key is yours', caption: 'The key isn’t in the code', say: 'The key lies in your settings and goes only to the provider. It is nowhere in the page’s files.' }
+			]
+		},
+		minutes: 35,
+		teaches: ['future-llm-api-basics', 'future-builder-pipeline', 'future-russian-llm'],
+		requires: ['future-prompt-as-brief', 'future-review-ai-output', 'js-fetch', 'js-json', 'server-rest', 'server-authentication'],
+		practice: {
+			id: 'future-pipeline-plan',
+			title: 'The design of your mini-builder',
+			task: 'Describe the pipeline of your mini-builder. 1) In the table, for each of the four stages enter the input (the second stage takes the output of the first, the third that of the second, and so on), what the model does, the output with its format, and the check before the next stage. The second stage’s check compares the structure with the brief, the third checks facts, the fourth checks the code (h1, alt, labels, outside scripts). 2) In the structure block, enter JSON with every section of the brief and the label of the main button. 3) Say which facts are allowed in the copy, which fields of the brief go to the model and which don’t. 4) Say where the key is kept (not in the code and not in the site’s archive) and when you would choose a model in another region or run one yourself. Every “…” has to be replaced.',
+			era: 7,
+			files: files({
+				lang: 'en',
+				scaffold: plan({ rows: blankRows, structure: '{"sections": […], "cta": "…"}', facts: '…', sends: '…', notsend: '…', key: '…', ru: '…' })
+			}),
+			solution: files({
+				lang: 'en',
+				scaffold: plan({
+					rows: solvedRows,
+					structure: '{"sections": [{{#each sections}}"{{.}}", {{/each}}], "cta": "{{mainAction.label}}"}',
+					facts: 'only the names and descriptions from the items and the proof from the proofs of my brief; numbers, achievements and reviews that aren’t from the brief are forbidden.',
+					sends: 'who I am and what I do, for whom, the main action, the sections, what I offer, the proof and the tone: everything that will be on the public page anyway.',
+					notsend: 'phone number, email, address and any personal data of clients: I write them into the finished page myself.',
+					key: 'only in the textbook’s settings in my browser, and it goes to the model’s provider; the key is not in the page’s code or the site’s archive, and never gets into a repository.',
+					ru: 'when a request would hold personal data of people in the EU, I would pick a provider that states where it processes data and signs a processing agreement, or run an open model myself; I’d read the terms first.'
+				})
+			}),
+			checks: [
+				{ id: 'plan', kind: 'exists', selector: '#pipeline-plan' },
+				{ id: 'no-blanks', kind: 'text', selector: '#pipeline-plan', matches: '^[^…]*$' },
+				{ id: 'four', kind: 'count', selector: '#stages tbody tr.stage', min: 4 },
+				row(2, 'in', 'structur|JSON|stage\\s*1|brief|first'),
+				row(3, 'in', 'structur|stage\\s*2|JSON|second'),
+				row(4, 'in', 'copy|text|stage\\s*3|structur|third'),
+				row(2, 'out', 'JSON'),
+				row(2, 'gate', 'schema|sections|match|JSON|exact'),
+				row(3, 'gate', 'fact|number|brief|items|proofs'),
+				row(4, 'gate', 'h1|alt|label|script|lang|accessib'),
+				{ id: 'structure-sections', kind: 'field', selector: '#pl-structure', field: 'sections' },
+				{ id: 'structure-cta', kind: 'field', selector: '#pl-structure', field: 'mainAction.label' },
+				{ id: 'facts', kind: 'text', selector: '#pl-facts', matches: 'items|proofs|brief|proof|names|services|don’t invent|forbidden|only' },
+				{ id: 'sends', kind: 'text', selector: '#pl-sends', matches: 'who|for whom|sections|action|offer|public|tone' },
+				{ id: 'notsend', kind: 'text', selector: '#pl-notsend', matches: 'phone|email|address|personal|client|contact' },
+				{ id: 'key-local', kind: 'text', selector: '#pl-key', matches: 'settings|local|browser|variable|IndexedDB|not in the code|my computer|environment' },
+				{ id: 'key-not-in-code', kind: 'text', selector: '#pl-key', matches: 'not\\s+(?:in|put|kept|stored|saved)|no key|never|archive|repository|zip|isn’t|is not' },
+				{ id: 'key-no-secret', kind: 'text', selector: '#pl-key', matches: '^(?![\\s\\S]*sk-)' },
+				{ id: 'ru', kind: 'text', selector: '#pl-ru', matches: 'GDPR|personal|privacy|region|EU|myself|open|processing agreement|residency|Russia' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the stages of the pipeline in order',
+				items: [
+					'The brief: choose the public fields that will go to the model',
+					'The structure: the model returns JSON with a list of sections',
+					'A program checks the structure: the sections exactly as in the brief',
+					'The copy: the model writes each section from the brief’s facts only',
+					'The fact check: every number and name is in the brief',
+					'The code: the model writes HTML and CSS, and a program checks accessibility and scripts'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why put a check of ordinary code between the stages instead of asking the model to check itself?',
+				options: [
+					'Code checks by an exact rule and doesn’t make “confident” mistakes; a model may approve its own mistake',
+					'Because code is cheaper to write than a prompt',
+					'Because models can’t read JSON'
+				],
+				answer: 0,
+				why: [
+					'Yes. Checking a schema, finding numbers that aren’t in the brief, counting images with no alt: these are exact rules. Such a check is deterministic, fast and free. A reviewer model is fine as an addition, but not as the only gate.',
+					'No: it isn’t about cost but about reliability.',
+					'No: they can read it, but they can miss a mismatch.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is in a call to a model through an API?',
+				options: [
+					'The provider’s address and the model’s name',
+					'An access key in the request’s header',
+					'Messages: an instruction (system) and an assignment (user)',
+					'The password to your hosting'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the request goes over HTTPS to the provider’s address and names the model.',
+					'Yes: the key is your pass, and whoever it belongs to pays for it.',
+					'Yes: the instruction sets the behavior, and the assignment holds the data.',
+					'No: hosting has nothing to do with calling a model.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'An API key was put in a page’s code so that the request to the model goes straight from the visitor’s browser. What is wrong?',
+				options: [
+					'Every visitor can see the key, and your money can be spent with it; requests to a model are made from a server or a function where the key is in the settings',
+					'Nothing: it is faster',
+					'The key works for only one visitor'
+				],
+				answer: 0,
+				why: [
+					'Yes. Everything in a page’s code is public. The key counts as leaked and is revoked. On a published site the requests go through your server code, and in the textbook your key is kept only in your browser and goes to the provider you chose.',
+					'No: speed is no reason to show the key to everyone.',
+					'No: the key works for everyone who has it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'When would you choose a model in another region, or one you run yourself, for a project?',
+				options: [
+					'When requests would hold personal data of people covered by a law with rules on transfers, such as the GDPR; the provider’s terms still have to be read',
+					'Always: they are better than any other',
+					'Never: they can’t write well'
+				],
+				answer: 0,
+				why: [
+					'Yes. Legally it is simpler when personal data does not leave the region whose law applies, but that does not take away your duties as the one who decides what is done with the data. Check quality on your own tasks: it varies.',
+					'No: “better” depends on the task and has to be tested on your own texts.',
+					'No: many write well, and the question is quality and terms.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'future-pipeline-why',
+				front: 'Why a pipeline instead of one request?',
+				back: 'The stages are shorter and more exact, a program checks each output, a mistake shows where it arose, and a repeat costs less. It is the technique of prompt chaining, with checks between the steps.'
+			},
+			{
+				id: 'future-api-call',
+				front: 'What is a call to a model through an API made of?',
+				back: 'An HTTPS request with JSON to the provider’s address: the model’s name, the messages (an instruction and an assignment), a limit on the answer and a key in the header. The answer is JSON too, with text. You pay for tokens in and out, counted separately.'
+			},
+			{
+				id: 'future-key-rule',
+				front: 'Where may you keep an API key?',
+				back: 'In your own protected settings, and on a server in environment variables. Not in the page’s code, not in a repository, not in the site’s archive. If it got somewhere public: revoke it and issue a new one.'
+			},
+			{
+				id: 'future-send-what',
+				front: 'What do you send to a model?',
+				back: 'Only what will become public anyway: who you are, for whom, the sections, the offers, the proof, the tone. Contacts and other people’s personal data are not sent; for personal data covered by a transfer rule, weigh a provider in the right region or a model you run yourself.'
+			}
+		],
+		sources: [
+			{ title: 'Anthropic: Building effective agents', url: 'https://www.anthropic.com/engineering/building-effective-agents', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Claude docs: Prompt engineering overview', url: 'https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Claude docs: the Messages API', url: 'https://platform.claude.com/docs/en/api/messages', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'OpenAI: API reference', url: 'https://platform.openai.com/docs/api-reference', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'OpenRouter: documentation', url: 'https://openrouter.ai/docs', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'GDPR, Chapter V: transfers of personal data to third countries (gdpr-info.eu)', url: 'https://gdpr-info.eu/chapter-5/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'OWASP: Top 10 for Large Language Model Applications', url: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Build your mini-builder on paper, that is, in a table: four stages, each with an input, an output and a check. You don’t run a model yet: the design is what matters, and it is the same in any builder.',
+			hints: [
+				'The input of the next stage comes from the output of the one before: the structure from the first stage’s JSON, the copy from the structure, the code from the copy and the structure. Write it so: “the JSON from the first stage”.',
+				'The checks: of the structure (section names exactly as in the brief), of the facts (every number and name is in the items and proofs), of the code (one h1, alt, field labels, no outside scripts).',
+				'In the structure block, enter JSON with your sections and the label of the main button in the words of the brief.',
+				'About the key, say it is kept only in your settings and gets into neither the code nor the archive. You choose another region or a model of your own when a request holds personal data covered by a transfer rule.'
+			],
+			mistakes: {
+				plan: 'The block “My pipeline” (the section whose id is pipeline-plan) is gone. Put it back.',
+				'no-blanks': 'There are still “…” left. Replace every one.',
+				four: 'The table should still have four stages.',
+				's2-in': 'The second stage’s input is the first one’s output: name the JSON or the brief.',
+				's3-in': 'The third stage’s input is the structure from the second: name it.',
+				's4-in': 'The fourth stage’s input is the copy (and the structure): name them.',
+				's2-out': 'The second stage’s output: JSON.',
+				's2-gate': 'The second stage’s check compares the structure with the brief: the schema, the section names.',
+				's3-gate': 'The third stage’s check compares facts: the numbers and names are in the brief’s items and proofs.',
+				's4-gate': 'The fourth stage’s check looks at the code: h1, alt, field labels, outside scripts.',
+				'structure-sections': 'The structure’s JSON should have every section from the brief, each named in full.',
+				'structure-cta': 'The structure’s JSON needs the label of the main button in the words of the brief.',
+				facts: 'Say which facts are allowed: the brief’s items and proofs, and inventing is forbidden.',
+				sends: 'Name the fields of the brief that go to the model (the public ones).',
+				notsend: 'Name what doesn’t go: a phone number, an email, personal data.',
+				'key-local': 'Say where the key is kept: in the settings, in your browser or on a server.',
+				'key-not-in-code': 'Say that the key does not get into the page’s code, the archive or a repository.',
+				'key-no-secret': 'Don’t write the key itself here. Only where it is kept.',
+				ru: 'Say when you would choose another region or a model of your own: personal data covered by a transfer rule such as the GDPR.'
+			},
+			outro: 'Now you have the design of a mini-builder with four stages and gates between them. In the next lesson an AI stops being only a tool and becomes a visitor to the site.'
+		},
+		say: {
+			API: 'A P I',
+			JSON: 'jay son',
+			HTML: 'H T M L',
+			CSS: 'C S S',
+			token: 'token',
+			system: 'system',
+			user: 'user',
+			GDPR: 'G D P R',
+			h1: 'H one',
+			alt: 'alt',
+			lang: 'lang',
+			IndexedDB: 'indexed D B',
+			Anthropic: 'an throp ick',
+			OpenRouter: 'open router',
+			OWASP: 'oh wasp'
+		}
+	};
+</script>
+
+<script>
+	import PipelineBuilder from '../../diagrams/PipelineBuilder.svelte';
+</script>
+
+## One request or a pipeline
+
+In the earlier lessons you gave a model a task and checked the result. Now put it together into a **pipeline**: a chain of small requests in which the result of each is checked before it becomes the input of the next. That is a mini-builder, what is inside any AI builder from the first lesson, only now you see all the details.
+
+Why split it up. One big request “make a site” breaks where you can’t see it: it isn’t clear at which step an invented fact appeared and what exactly to redo. In a pipeline the stages are shorter and more exact, a program can check each output, a mistake is visible where it arose, and repeating one stage costs less than repeating everything. The authors of guides to building agents call this technique prompt chaining and advise putting programmatic checks between the steps.
+
+## Four stages
+
+1. **The brief.** You choose which fields go to the model. Only public ones: who you are, for whom, the main action, the sections, the offers, the proof, the tone. The phone number, the email and other people’s personal data stay with you. The output: JSON of the chosen fields. The check: that it has no contacts.
+2. **The structure.** The model receives the JSON and returns **JSON with the structure**: a list of sections and the label of the main button. The format is strict, because a program reads it. The check: the schema (does the JSON parse) and a comparison with the brief (the section names exactly the same, no extras, the button’s label matches).
+3. **The copy.** One section per request, only from the brief’s facts and in your tone (by examples). The fact check: every number and name in the text is found in the brief, and there are no empty formulas (“a personal approach”).
+4. **The code.** The model receives the structure and the copy and writes HTML and CSS. The code check: one `h1`, `lang`, `alt` on images, labels on fields, no outside scripts and no `div` “buttons”. These are the same checks you did by hand in the last lesson, now done by a program.
+
+The checks between the stages are **ordinary code**, not another model: it applies an exact rule, doesn’t tire and doesn’t confidently “approve” a mistake. A reviewer model is fine as an addition but not as the only gate.
+
+Play with the diagram. It is a **teaching mode**: no model runs, and each stage assembles its output by a rule from your brief, so the diagram works offline and for free. But the design is the same: what goes in, what comes out, and how a check refuses. Switch on a “model mistake” at each stage and see what the check says.
+
+<PipelineBuilder />
+
+<details>
+<summary>Check yourself: why check the structure at the second stage, and not only the finished code at the last?</summary>
+
+A mistake caught at the second stage (an extra section) is cheap: one small answer is redone. The same mistake in finished code means redoing the copy and the code.
+
+</details>
+
+## What a call to a model through an API is
+
+When you type in a builder’s window, an ordinary **HTTP request** happens behind the scenes, the kind you know from the part on servers (you had REST and fetch). Only it is a model that answers, not a page.
+
+- The request goes by the POST method to the provider’s address (Anthropic, OpenAI, OpenRouter and others each have their own addresses and formats).
+- The body of the request is JSON: the **model’s name**, the **messages** (an instruction, `system`, that sets the behavior, and an assignment, `user`, with the data) and a limit on the length of the answer.
+- In the header is the **key**: your pass. By it the provider knows whom to bill.
+- The answer is JSON too: inside is the text, and beside it the number of tokens used.
+
+**Tokens** are the pieces of text a model cuts words into; in English, about four characters, or three quarters of a word, to a token. You pay for tokens in and out separately, and the output ones usually cost more, so long answers and repeated “fix it” cost noticeable money. The textbook shows an estimate of cost before each question, and you should do the same in your own pipeline.
+
+There are three kinds of error: **401 or 403**: the key didn’t fit; **429**: too many requests, wait; **5xx**: a failure on the provider’s side, try again later. A pipeline should be able to wait and retry, not break silently.
+
+**A key is a secret.** It belongs in your settings or in environment variables on a server. Not in the page’s code, not in a repository, not in the site’s archive that you download and send out into the world. If a key ever gets somewhere public, it is revoked and a new one is issued. In the textbook your key is kept only in your browser and goes only to the provider you chose, and only when you ask a question. And on a published site, requests to a model go through your server code or a function where the key is in the settings.
+
+<details>
+<summary>Check yourself: why can’t you call a model straight from a site’s page with your key inside?</summary>
+
+All the page’s code is visible to visitors, so everyone will see the key and be able to spend your money. A request to a model is made from a server or a function, and the page asks that.
+
+</details>
+
+## Choosing a model, and where the data goes
+
+You have a choice of providers (Anthropic, OpenAI, Google, OpenRouter, which routes to many) and of models you can run yourself (open-weight models you host on your own machine or server). They differ in quality on your task, in price, and in where your data goes. Ask a provider where data is processed, whether it is used for training and how to delete it, and compare quality on your own texts: it differs between models and between tasks.
+
+The practical choice is this. If a request holds only public material (and in a good pipeline it should), any model will do. If personal data is unavoidable (answering clients’ letters, say), then the transfer rules from the last lesson of the part on infrastructure apply to the model’s provider like any other processor: for people in the EU you need a provider that states where it processes data and signs a data processing agreement and, where data leaves the EU, a transfer mechanism, or a model you run yourself. General information, not legal advice.
+
+A note on the Russian market, as one comparison: there the law asks for citizens’ personal data to be recorded first in Russia, so Russian projects look at Russian models such as GigaChat from Sber and YandexGPT in Yandex AI Studio, with their own APIs and documentation. The idea carries over anywhere: a provider in the right legal region makes a legal question simpler, and does not take away your duties or the need to read the contract.
+
+## For those who want to run it for real
+
+The textbook shows the pipeline’s design in a teaching mode. If you want to try it with a real model, here is a minimal script for Node.js with an Anthropic model. It is an example to run on your own machine (not in a browser and not on a site): the key and the model’s name come from environment variables, and a program checks the structure and the copy. The format of API answers may change, so check the provider’s documentation (links in the sources).
+
+```js
+import { readFile, writeFile } from 'node:fs/promises';
+
+const key = process.env.ANTHROPIC_API_KEY;
+const model = process.env.MODEL;
+if (!key || !model) throw new Error('Set the variables ANTHROPIC_API_KEY and MODEL');
+
+async function ask(system, user) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model, max_tokens: 4000, system, messages: [{ role: 'user', content: user }] })
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const data = await res.json();
+  return data.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+}
+
+const brief = JSON.parse(await readFile(process.argv[2], 'utf8'));
+
+// Stage 1. Only public fields go to the model: no phone, no email.
+const { who, forWhom, mainAction, sections, items, proofs, tone } = brief;
+const input = JSON.stringify({ who, forWhom, mainAction, sections, items, proofs, tone });
+
+// Stage 2. The structure: JSON that a program checks.
+const structure = JSON.parse(await ask('Answer with JSON only, of the form {"sections":[{"title":""}]}, no explanations.', `Brief: ${input}`));
+const titles = structure.sections.map((s) => s.title);
+if (JSON.stringify(titles) !== JSON.stringify(sections)) throw new Error('The structure does not match the brief');
+
+// Stage 3. Copy, one section at a time, from the brief's facts only.
+const copy = [];
+for (const title of titles) {
+  const text = await ask('Write in English, briefly, from the brief’s facts only. Do not invent numbers or achievements.', `Brief: ${input}\nWrite the text of the section “${title}”.`);
+  for (const n of text.match(/\d+/g) ?? []) if (!input.includes(n)) throw new Error(`The number ${n} in the section “${title}” is not from the brief`);
+  copy.push({ title, text });
+}
+
+// Stage 4. The code, and a program checks again.
+const html = await ask('Return one HTML file: semantic markup, one h1, lang="en", alt on images, no external scripts. Code only.', JSON.stringify({ copy, action: mainAction }));
+if (/<script[^>]+src=/i.test(html)) throw new Error('The code has an external script');
+if (/<img(?![^>]*\balt=)/i.test(html)) throw new Error('An image has no alt');
+await writeFile('index.html', html);
+console.log('Done: index.html. Check it by eye and against the list from the last lesson.');
+```
+
+To run it: `ANTHROPIC_API_KEY=… MODEL=… node pipeline.mjs brief.json`, where `brief.json` is your brief without contacts. It is an example, not a finished product: a real pipeline would need retries on 429 and 5xx errors, counting tokens and a more forgiving parse of the answer (a model may wrap the JSON in explanations). But the builders from the first lesson are built on this pattern.
+
+## Practice
+
+Build the design of your mini-builder: a table of four stages, a structure JSON for your sections and the decisions about data. For each stage, name the input (from the previous stage’s output), what the model does, the output with its format and the check. Then settle three questions: which facts are allowed in the copy, which fields of the brief you will send to a model and which you won’t, where the key is kept, and when you would choose another region or a model of your own.
+
+It is a design, not a run: the textbook doesn’t call a model from your practice, so as not to send your data without your decision. The check reads your table and makes sure the stages are linked, the checks are in place, and there is no key or contact in the plan. You can make a real run by the example above.
+
+## What was wrong with 2025
+
+In 2025 a builder was a black box: you wrote a request and got a site without seeing the steps between. Today the opposite is valued: visible stages, outputs you can check and data you yourself decided to send. Someone who understands the pipeline doesn’t depend on a particular product: they can build the same from any parts, and that is the real measure of understanding.
