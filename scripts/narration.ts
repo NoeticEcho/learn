@@ -80,8 +80,8 @@ const code = await withApp(async (load) => {
 				if (!h || h.hash !== s.hash) continue;
 				const ref = w.words(s.sentences.join(' '));
 				// Whisper spells an acronym it heard letter by letter as «H T T P S»: one word again
-				const heard = h.text.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m) => m.replace(/[ .]/g, ''));
-				const { errors, ops } = w.align(ref, w.words(n.spoken(heard, l, 'ru')));
+				const said = h.text.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''));
+				const { errors, ops } = w.align(ref, w.words(n.spoken(said, l, 'ru')));
 				refWords += ref.length;
 				errs += errors;
 				scored++;
