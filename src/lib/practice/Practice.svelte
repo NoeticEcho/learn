@@ -73,9 +73,13 @@
 	function render(now = false) {
 		clearTimeout(renderTimer);
 		const go = () => {
+			const next = buildSrcdoc($state.snapshot(files), step.checks, persona);
+			// The same page sets the same srcdoc, which does not reload the iframe, so no new
+			// learn:checks would come: clearing the results here left the checks «pending» forever.
+			if (next === srcdoc) return;
 			error = '';
 			results = null;
-			srcdoc = buildSrcdoc($state.snapshot(files), step.checks, persona);
+			srcdoc = next;
 		};
 		if (now) go();
 		else renderTimer = setTimeout(go, 400);

@@ -146,3 +146,23 @@ it('a brief edited on the same page reaches the checks without a reload', async 
 	await r.rerender({ step: named as never, store, persona: { name: 'Мария' } });
 	await vi.waitFor(() => expect(frame()).toContain('Мария'));
 });
+
+// 28.10, found in real Chromium on 08-cms/03, 07, 08: the learner's brief replaced the default a
+// moment after mount, render() cleared the results and set the same srcdoc again, the iframe was
+// not reloaded, no new learn:checks came, and the checks said «проверяется» until the next edit.
+it('a brief change that does not change the page keeps the check results', async () => {
+	const store = memoryStore();
+	const r = render(Practice, { step: step as never, store, persona: { name: 'Анна' } });
+	const iframe = () => r.container.querySelector('iframe')!;
+	await vi.waitFor(() => expect(iframe().getAttribute('srcdoc')).toBeTruthy());
+	const before = iframe().getAttribute('srcdoc');
+	window.dispatchEvent(
+		new MessageEvent('message', { data: { type: 'learn:checks', results: [{ id: 'h1', ok: false }] }, source: iframe().contentWindow })
+	);
+	const check = () => r.container.querySelector('[data-check="h1"]')!.getAttribute('data-ok');
+	await vi.waitFor(() => expect(check()).toBe('false'));
+	await r.rerender({ step: step as never, store, persona: { name: 'Мария' } });
+	await vi.runAllTimersAsync();
+	expect(iframe().getAttribute('srcdoc')).toBe(before);
+	expect(check()).toBe('false');
+});
