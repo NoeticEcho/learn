@@ -124,7 +124,12 @@ pre {
 }
 `;
 
+/** The English edition's stylesheet: the same rules, the comment in English. */
+export const baseCssEn = baseCss.replace('/* styles.css: страница после частей про HTML и CSS, в сокращённом виде */', '/* styles.css: the page after the parts on HTML and CSS, shortened */');
+
 export type PageOptions = {
+	/** The page's language: the Russian edition's (the default) or the English edition's. */
+	lang?: 'ru' | 'en';
 	/** Extra elements in `<head>`, after the stylesheet link. */
 	head?: string;
 	/** Markup between the page and the footer: the step's own part (mark it `data-scaffold`). */
@@ -135,8 +140,8 @@ export type PageOptions = {
 	main?: string;
 };
 
-const offerDefault = `      <section id="offer">
-        <h2>Что мы предлагаем</h2>
+const offerFor = (lang: 'ru' | 'en') => `      <section id="offer">
+        <h2>${lang === 'en' ? 'What we offer' : 'Что мы предлагаем'}</h2>
         <div class="cards">
           {{#each items}}<article class="card">
             <h3>{{title}}</h3>
@@ -147,30 +152,31 @@ const offerDefault = `      <section id="offer">
         </div>
       </section>`;
 
-const mainDefault = (offer: string) => `      <h1>{{name}}</h1>
+const mainDefault = (offer: string, lang: 'ru' | 'en') => `      <h1>{{name}}</h1>
       <p>{{who}}</p>
       <p><a class="button" href="#offer">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
-        <p>Пара предложений о разделе.</p>
+        <p>${lang === 'en' ? 'A couple of sentences about the section.' : 'Пара предложений о разделе.'}</p>
       </section>
 
       <section id="sec-2">
         <h2>{{sections.1}}</h2>
-        <p>Пара предложений о разделе.</p>
+        <p>${lang === 'en' ? 'A couple of sentences about the section.' : 'Пара предложений о разделе.'}</p>
       </section>
 
       <section id="sec-3">
         <h2>{{sections.2}}</h2>
-        <p>Пара предложений о разделе.</p>
+        <p>${lang === 'en' ? 'A couple of sentences about the section.' : 'Пара предложений о разделе.'}</p>
       </section>
 
 ${offer}`;
 
 export function page(o: PageOptions = {}): string {
+	const lang = o.lang ?? 'ru';
 	return `<!doctype html>
-<html lang="ru">
+<html lang="${lang}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -180,7 +186,7 @@ export function page(o: PageOptions = {}): string {
   <body>
     <header class="site-header" id="top">
       <p class="brand">{{name}}</p>
-      <nav aria-label="Разделы сайта">
+      <nav aria-label="${lang === 'en' ? 'Site sections' : 'Разделы сайта'}">
         <ul>
           <li><a href="#sec-1">{{sections.0}}</a></li>
           <li><a href="#sec-2">{{sections.1}}</a></li>
@@ -190,7 +196,7 @@ export function page(o: PageOptions = {}): string {
     </header>
 
     <main id="main">
-${o.main ?? mainDefault(o.offer ?? offerDefault)}
+${o.main ?? mainDefault(o.offer ?? offerFor(lang), lang)}
     </main>
 ${o.scaffold ? '\n' + o.scaffold + '\n' : ''}
     <footer class="site-footer">
@@ -202,4 +208,4 @@ ${o.scaffold ? '\n' + o.scaffold + '\n' : ''}
 }
 
 /** The two files of a step: the page and the shared stylesheet. */
-export const files = (o: PageOptions = {}) => ({ 'index.html': page(o), 'styles.css': baseCss });
+export const files = (o: PageOptions = {}) => ({ 'index.html': page(o), 'styles.css': o.lang === 'en' ? baseCssEn : baseCss });
