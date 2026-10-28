@@ -9,9 +9,19 @@
 
 	Файл написан на простом JavaScript без типов: практика уроков вставляет его текст в страницу
 	человека (блок data-scaffold), и там он должен работать как есть. Licence: Apache-2.0.
+	Сообщения двуязычны: T(ru, en) и setLang(); русский вывод не менялся.
 */
 
 export class SqlError extends Error {}
+
+// The words are Russian (the source edition) or English (docs/content-plan/README.md, «English edition»).
+// T(ru, en) picks one; SqlLab calls setLang(getLocale()). The in-page runner of a lesson's practice is
+// a separate copy and is localized with the same wording.
+let LANG = 'ru';
+export function setLang(l) {
+	LANG = l === 'en' ? 'en' : 'ru';
+}
+const T = (ru, en) => (LANG === 'en' ? en : ru);
 
 const KEYWORDS = new Set(
 	'select from where group by having order limit offset asc desc distinct as join inner left right outer on and or not null is in like between true false insert into values update set delete create table index unique primary key references default begin commit rollback explain integer int serial text varchar numeric boolean date timestamp real if exists'.split(
@@ -26,7 +36,7 @@ function tokenize(src) {
 	while (pos < src.length) {
 		re.lastIndex = pos;
 		const m = re.exec(src);
-		if (!m) throw new SqlError(`синтаксическая ошибка: не понимаю символ «${src[pos]}»`);
+		if (!m) throw new SqlError(T(`синтаксическая ошибка: не понимаю символ «${src[pos]}»`, `syntax error: unexpected character “${src[pos]}”`));
 		pos = re.lastIndex;
 		if (m[1] !== undefined) out.push({ t: 'str', v: m[1].slice(1, -1).replace(/''/g, "'") });
 		else if (m[2] !== undefined) out.push({ t: 'id', v: m[2].slice(1, -1).toLowerCase(), quoted: true });
@@ -81,20 +91,20 @@ class Parser {
 		return false;
 	}
 	expectKw(v) {
-		if (!this.eatKw(v)) this.fail(`ожидалось слово ${v.toUpperCase()}`);
+		if (!this.eatKw(v)) this.fail(T(`ожидалось слово ${v.toUpperCase()}`, `expected the word ${v.toUpperCase()}`));
 	}
 	expectOp(v) {
-		if (!this.eatOp(v)) this.fail(`ожидался символ «${v}»`);
+		if (!this.eatOp(v)) this.fail(T(`ожидался символ «${v}»`, `expected the symbol “${v}”`));
 	}
 	fail(msg) {
 		const t = this.peek();
-		const near = t ? ` около «${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}»` : ' в конце запроса';
-		throw new SqlError(`синтаксическая ошибка${near}: ${msg}`);
+		const near = t ? T(` около «${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}»`, ` near “${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}”`) : T(' в конце запроса', ' at the end of the query');
+		throw new SqlError(T(`синтаксическая ошибка${near}: ${msg}`, `syntax error${near}: ${msg}`));
 	}
 	name() {
 		const t = this.peek();
 		if (t && (t.t === 'id' || (t.t === 'kw' && ['key', 'text', 'date', 'index'].includes(t.v)))) return this.i++, t.v;
-		this.fail('ожидалось имя');
+		this.fail(T('ожидалось имя', 'expected a name'));
 	}
 	done() {
 		return this.i >= this.k.length;
@@ -175,7 +185,7 @@ class Parser {
 	}
 	primary() {
 		const t = this.peek();
-		if (!t) this.fail('ожидалось значение');
+		if (!t) this.fail(T('ожидалось значение', 'expected a value'));
 		if (t.t === 'num') return this.i++, { op: 'lit', v: t.v };
 		if (t.t === 'str') return this.i++, { op: 'lit', v: t.v };
 		if (t.t === 'kw' && t.v === 'null') return this.i++, { op: 'lit', v: null };
@@ -189,7 +199,7 @@ class Parser {
 		if (t.t === 'id' && this.isOp('(', 1)) {
 			this.i += 2;
 			const fn = t.v;
-			if (!['count', 'sum', 'avg', 'min', 'max', 'lower', 'upper', 'length', 'coalesce'].includes(fn)) throw new SqlError(`функция ${fn}() здесь не поддерживается`);
+			if (!['count', 'sum', 'avg', 'min', 'max', 'lower', 'upper', 'length', 'coalesce'].includes(fn)) throw new SqlError(T(`функция ${fn}() здесь не поддерживается`, `the function ${fn}() is not supported here`));
 			if (fn === 'count' && this.eatOp('*')) {
 				this.expectOp(')');
 				return { op: 'agg', fn, star: true };
@@ -209,7 +219,7 @@ class Parser {
 			}
 			return { op: 'col', name: t.v };
 		}
-		this.fail('ожидалось значение или имя столбца');
+		this.fail(T('ожидалось значение или имя столбца', 'expected a value or a column name'));
 	}
 }
 
@@ -239,7 +249,7 @@ const isNum = (v) => typeof v === 'number';
 
 function table(db, name) {
 	const t = db.tables[name];
-	if (!t) throw new SqlError(`таблицы «${name}» нет. Есть: ${Object.keys(db.tables).join(', ') || 'ни одной'}`);
+	if (!t) throw new SqlError(T(`таблицы «${name}» нет. Есть: ${Object.keys(db.tables).join(', ') || 'ни одной'}`, `table “${name}” does not exist. Tables: ${Object.keys(db.tables).join(', ') || 'none'}`));
 	return t;
 }
 
@@ -249,16 +259,16 @@ function coerce(col, v) {
 	if (['integer', 'int', 'serial'].includes(ty)) {
 		if (isNum(v) && Number.isInteger(v)) return v;
 		if (typeof v === 'string' && /^-?\d+$/.test(v.trim())) return Number(v);
-		throw new SqlError(`значение ${typeof v === 'string' ? `«${v}»` : v} не подходит к типу integer (столбец ${col.name})`);
+		throw new SqlError(T(`значение ${typeof v === 'string' ? `«${v}»` : v} не подходит к типу integer (столбец ${col.name})`, `the value ${typeof v === 'string' ? `“${v}”` : v} does not fit the type integer (column ${col.name})`));
 	}
 	if (['numeric', 'real'].includes(ty)) {
 		if (isNum(v)) return v;
 		if (typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v))) return Number(v);
-		throw new SqlError(`значение «${v}» не подходит к типу ${ty} (столбец ${col.name})`);
+		throw new SqlError(T(`значение «${v}» не подходит к типу ${ty} (столбец ${col.name})`, `the value “${v}” does not fit the type ${ty} (column ${col.name})`));
 	}
 	if (ty === 'boolean') {
 		if (typeof v === 'boolean') return v;
-		throw new SqlError(`значение «${v}» не подходит к типу boolean (столбец ${col.name})`);
+		throw new SqlError(T(`значение «${v}» не подходит к типу boolean (столбец ${col.name})`, `the value “${v}” does not fit the type boolean (column ${col.name})`));
 	}
 	return typeof v === 'string' ? v : String(v);
 }
@@ -273,16 +283,16 @@ function resolve(ctx, e) {
 	}
 	if (!found.length) {
 		const all = ctx.flatMap((c) => c.cols.map((n) => `${c.alias}.${n}`));
-		throw new SqlError(`столбца «${e.table ? e.table + '.' : ''}${e.name}» нет. Доступны: ${all.join(', ')}`);
+		throw new SqlError(T(`столбца «${e.table ? e.table + '.' : ''}${e.name}» нет. Доступны: ${all.join(', ')}`, `column “${e.table ? e.table + '.' : ''}${e.name}” does not exist. Available: ${all.join(', ')}`));
 	}
-	if (found.length > 1) throw new SqlError(`столбец «${e.name}» неоднозначен: он есть в таблицах ${found.map((f) => f.alias).join(' и ')}. Напишите ${found[0].alias}.${e.name}`);
+	if (found.length > 1) throw new SqlError(T(`столбец «${e.name}» неоднозначен: он есть в таблицах ${found.map((f) => f.alias).join(' и ')}. Напишите ${found[0].alias}.${e.name}`, `column “${e.name}” is ambiguous: it exists in tables ${found.map((f) => f.alias).join(' and ')}. Write ${found[0].alias}.${e.name}`));
 	return found[0].row ? found[0].row[e.name] : null;
 }
 
 function cmpVals(a, b) {
 	if (a === null || b === null) return null;
 	if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
-	if (typeof a !== typeof b) throw new SqlError(`нельзя сравнить ${typeof a === 'number' ? 'число' : 'текст'} и ${typeof b === 'number' ? 'число' : 'текст'}`);
+	if (typeof a !== typeof b) throw new SqlError(T(`нельзя сравнить ${typeof a === 'number' ? 'число' : 'текст'} и ${typeof b === 'number' ? 'число' : 'текст'}`, `cannot compare ${typeof a === 'number' ? 'a number' : 'text'} with ${typeof b === 'number' ? 'a number' : 'text'}`));
 	return a < b ? -1 : a > b ? 1 : 0;
 }
 
@@ -361,8 +371,8 @@ function ev(e, ctx, grp) {
 			const l = ev(e.l, ctx, grp),
 				r = ev(e.r, ctx, grp);
 			if (l === null || r === null) return null;
-			if (!isNum(l) || !isNum(r)) throw new SqlError(`арифметика (${e.op}) работает с числами, а здесь текст`);
-			if (e.op === '/' && r === 0) throw new SqlError('деление на ноль');
+			if (!isNum(l) || !isNum(r)) throw new SqlError(T(`арифметика (${e.op}) работает с числами, а здесь текст`, `arithmetic (${e.op}) works on numbers, and this is text`));
+			if (e.op === '/' && r === 0) throw new SqlError(T('деление на ноль', 'division by zero'));
 			return e.op === '+' ? l + r : e.op === '-' ? l - r : e.op === '*' ? l * r : l / r;
 		}
 		case '||': {
@@ -379,19 +389,19 @@ function ev(e, ctx, grp) {
 			return String(a[0]).length;
 		}
 		case 'agg': {
-			if (!grp) throw new SqlError(`${e.fn.toUpperCase()}() можно писать только в SELECT или HAVING, но не в WHERE`);
+			if (!grp) throw new SqlError(T(`${e.fn.toUpperCase()}() можно писать только в SELECT или HAVING, но не в WHERE`, `${e.fn.toUpperCase()}() can be used only in SELECT or HAVING, not in WHERE`));
 			if (e.star) return grp.length;
 			const vals = grp.map((g) => ev(e.e, g, null)).filter((v) => v !== null);
 			if (e.fn === 'count') return vals.length;
 			if (!vals.length) return null;
 			if (e.fn === 'min') return vals.reduce((a, b) => (cmpVals(a, b) <= 0 ? a : b));
 			if (e.fn === 'max') return vals.reduce((a, b) => (cmpVals(a, b) >= 0 ? a : b));
-			if (!vals.every(isNum)) throw new SqlError(`${e.fn.toUpperCase()}() считает только числа`);
+			if (!vals.every(isNum)) throw new SqlError(T(`${e.fn.toUpperCase()}() считает только числа`, `${e.fn.toUpperCase()}() works on numbers only`));
 			const s = vals.reduce((a, b) => a + b, 0);
 			return e.fn === 'sum' ? s : s / vals.length;
 		}
 	}
-	throw new SqlError('не понимаю выражение');
+	throw new SqlError(T('не понимаю выражение', 'cannot understand the expression'));
 }
 
 /* ---------- statements ---------- */
@@ -433,7 +443,7 @@ function parseSelect(p) {
 				p.expectKw('join');
 				kind = 'inner';
 			} else if (p.eatKw('join')) kind = 'inner';
-			else if (p.isKw('right')) throw new SqlError('RIGHT JOIN в учебной песочнице не поддерживается: поменяйте таблицы местами и напишите LEFT JOIN');
+			else if (p.isKw('right')) throw new SqlError(T('RIGHT JOIN в учебной песочнице не поддерживается: поменяйте таблицы местами и напишите LEFT JOIN', 'RIGHT JOIN is not supported in this practice sandbox: swap the tables and write LEFT JOIN'));
 			else break;
 			const ref = tableRef();
 			p.expectKw('on');
@@ -458,13 +468,13 @@ function parseSelect(p) {
 	}
 	if (p.eatKw('limit')) {
 		const t = p.peek();
-		if (!t || t.t !== 'num') p.fail('после LIMIT нужно число');
+		if (!t || t.t !== 'num') p.fail(T('после LIMIT нужно число', 'LIMIT needs a number after it'));
 		p.i++;
 		q.limit = t.v;
 	}
 	if (p.eatKw('offset')) {
 		const t = p.peek();
-		if (!t || t.t !== 'num') p.fail('после OFFSET нужно число');
+		if (!t || t.t !== 'num') p.fail(T('после OFFSET нужно число', 'OFFSET needs a number after it'));
 		p.i++;
 		q.offset = t.v;
 	}
@@ -505,10 +515,10 @@ function execSelect(db, q, explain) {
 		if (hit) {
 			base = t0.rows.filter((r) => r[hit.col] === hit.value);
 			scanned += base.length;
-			plan.push(`Index Scan по индексу ${hit.ix.name} на «${q.from.name}»: прочитано строк ${base.length}`);
+			plan.push(T(`Index Scan по индексу ${hit.ix.name} на «${q.from.name}»: прочитано строк ${base.length}`, `Index Scan using index ${hit.ix.name} on “${q.from.name}”: rows read ${base.length}`));
 		} else {
 			scanned += t0.rows.length;
-			plan.push(`Seq Scan на «${q.from.name}»: просмотрена вся таблица, строк ${t0.rows.length}`);
+			plan.push(T(`Seq Scan на «${q.from.name}»: просмотрена вся таблица, строк ${t0.rows.length}`, `Seq Scan on “${q.from.name}”: the whole table was read, rows ${t0.rows.length}`));
 		}
 		ctxRows = base.map((r) => [{ alias: q.from.alias, cols: t0.columns.map((c) => c.name), row: r }]);
 		for (const j of q.joins) {
@@ -516,7 +526,7 @@ function execSelect(db, q, explain) {
 			const cols = tj.columns.map((c) => c.name);
 			const next = [];
 			scanned += tj.rows.length;
-			plan.push(`${j.kind === 'left' ? 'Left ' : ''}Join с «${j.name}»: просмотрено строк ${tj.rows.length}`);
+			plan.push(T(`${j.kind === 'left' ? 'Left ' : ''}Join с «${j.name}»: просмотрено строк ${tj.rows.length}`, `${j.kind === 'left' ? 'Left ' : ''}Join with “${j.name}”: rows read ${tj.rows.length}`));
 			for (const left of ctxRows) {
 				let matched = false;
 				for (const r of tj.rows) {
@@ -533,7 +543,7 @@ function execSelect(db, q, explain) {
 	}
 	trace.from = ctxRows.length;
 	if (q.where) {
-		if (hasAgg(q.where)) throw new SqlError('в WHERE нельзя писать COUNT, SUM и подобные: они считаются после отбора. Для условий по ним есть HAVING');
+		if (hasAgg(q.where)) throw new SqlError(T('в WHERE нельзя писать COUNT, SUM и подобные: они считаются после отбора. Для условий по ним есть HAVING', 'COUNT, SUM and similar cannot be used in WHERE: they are computed after the rows are chosen. Use HAVING for conditions on them'));
 		ctxRows = ctxRows.filter((c) => ev(q.where, c, null) === true);
 	}
 	trace.where = ctxRows.length;
@@ -568,7 +578,7 @@ function execSelect(db, q, explain) {
 		const groupText = q.group.map((g) => (g.op === 'col' ? g.name : text(g)));
 		for (const [i, e] of exprs.entries()) {
 			const bare = (x) => !x || x.op === 'agg' || x.op === 'lit' || groupText.includes(x.op === 'col' ? x.name : text(x)) || ([x.l, x.r, x.e].some((s) => s) && [x.l, x.r, x.e].filter(Boolean).every(bare));
-			if (!bare(e)) throw new SqlError(`столбец «${columns[i]}» нужно либо добавить в GROUP BY, либо обернуть в COUNT, SUM, MIN, MAX или AVG: иначе непонятно, какую из строк группы показать`);
+			if (!bare(e)) throw new SqlError(T(`столбец «${columns[i]}» нужно либо добавить в GROUP BY, либо обернуть в COUNT, SUM, MIN, MAX или AVG: иначе непонятно, какую из строк группы показать`, `column “${columns[i]}” must either be added to GROUP BY or wrapped in COUNT, SUM, MIN, MAX or AVG, otherwise it is unclear which row of the group to show`));
 		}
 		rows = [...groups.values()].map((g) => ({ grp: g, ctx: g[0] || [] }));
 		trace.groups = rows.length;
@@ -615,17 +625,17 @@ function execSelect(db, q, explain) {
 
 function checkRow(db, t, row, skipPk) {
 	for (const c of t.columns) {
-		if (row[c.name] === null && (c.notNull || t.pk.includes(c.name))) throw new SqlError(`в столбец «${c.name}» таблицы «${t.name}» нельзя записать NULL (нарушено ограничение NOT NULL)`);
+		if (row[c.name] === null && (c.notNull || t.pk.includes(c.name))) throw new SqlError(T(`в столбец «${c.name}» таблицы «${t.name}» нельзя записать NULL (нарушено ограничение NOT NULL)`, `column “${c.name}” of table “${t.name}” cannot be NULL (NOT NULL constraint violated)`));
 		if (c.ref && row[c.name] !== null) {
 			const rt = db.tables[c.ref.table];
-			if (!rt) throw new SqlError(`таблицы «${c.ref.table}» нет`);
-			if (!rt.rows.some((r) => r[c.ref.col] === row[c.name])) throw new SqlError(`нарушен внешний ключ: в таблице «${c.ref.table}» нет строки, где ${c.ref.col} = ${row[c.name]}`);
+			if (!rt) throw new SqlError(T(`таблицы «${c.ref.table}» нет`, `table “${c.ref.table}” does not exist`));
+			if (!rt.rows.some((r) => r[c.ref.col] === row[c.name])) throw new SqlError(T(`нарушен внешний ключ: в таблице «${c.ref.table}» нет строки, где ${c.ref.col} = ${row[c.name]}`, `foreign key violated: table “${c.ref.table}” has no row where ${c.ref.col} = ${row[c.name]}`));
 		}
 	}
 	const uniq = [t.pk.length ? t.pk : null, ...t.columns.filter((c) => c.unique).map((c) => [c.name])].filter(Boolean);
 	for (const cols of uniq) {
 		const dup = t.rows.some((r) => r !== skipPk && cols.every((c) => r[c] === row[c]));
-		if (dup) throw new SqlError(`нарушено ограничение уникальности: строка с ${cols.map((c) => `${c} = ${row[c]}`).join(', ')} в таблице «${t.name}» уже есть`);
+		if (dup) throw new SqlError(T(`нарушено ограничение уникальности: строка с ${cols.map((c) => `${c} = ${row[c]}`).join(', ')} в таблице «${t.name}» уже есть`, `unique constraint violated: a row with ${cols.map((c) => `${c} = ${row[c]}`).join(', ')} already exists in table “${t.name}”`));
 	}
 }
 
@@ -637,29 +647,29 @@ function execOne(db, sql) {
 	if (p.eatKw('explain')) explain = true;
 	if (p.isKw('select')) {
 		const q = parseSelect(p);
-		if (!p.done()) p.fail('лишнее после конца запроса');
+		if (!p.done()) p.fail(T('лишнее после конца запроса', 'unexpected text after the end of the query'));
 		const r = execSelect(db, q, explain);
 		if (explain) return { kind: 'plan', lines: r.plan, scanned: r.scanned };
 		return r;
 	}
-	if (explain) throw new SqlError('EXPLAIN в песочнице работает только с SELECT');
+	if (explain) throw new SqlError(T('EXPLAIN в песочнице работает только с SELECT', 'EXPLAIN works only with SELECT in this sandbox'));
 	if (p.eatKw('begin')) {
-		if (db.txn) throw new SqlError('транзакция уже начата');
+		if (db.txn) throw new SqlError(T('транзакция уже начата', 'a transaction has already begun'));
 		db.txn = clone({ tables: db.tables, indexes: db.indexes });
-		return { kind: 'msg', message: 'BEGIN: транзакция началась. До COMMIT изменения можно отменить командой ROLLBACK' };
+		return { kind: 'msg', message: T('BEGIN: транзакция началась. До COMMIT изменения можно отменить командой ROLLBACK', 'BEGIN: the transaction has started. Until COMMIT, the changes can be undone with ROLLBACK') };
 	}
 	if (p.eatKw('commit')) {
-		if (!db.txn) return { kind: 'msg', message: 'COMMIT: транзакции не было, ничего не произошло' };
+		if (!db.txn) return { kind: 'msg', message: T('COMMIT: транзакции не было, ничего не произошло', 'COMMIT: there was no transaction, nothing happened') };
 		db.txn = null;
-		return { kind: 'msg', message: 'COMMIT: изменения записаны насовсем' };
+		return { kind: 'msg', message: T('COMMIT: изменения записаны насовсем', 'COMMIT: the changes are saved for good') };
 	}
 	if (p.eatKw('rollback')) {
-		if (!db.txn) return { kind: 'msg', message: 'ROLLBACK: транзакции не было, ничего не произошло' };
+		if (!db.txn) return { kind: 'msg', message: T('ROLLBACK: транзакции не было, ничего не произошло', 'ROLLBACK: there was no transaction, nothing happened') };
 		db.tables = db.txn.tables;
 		db.indexes = db.txn.indexes;
 		db.txn = null;
 		db.aborted = false;
-		return { kind: 'msg', message: 'ROLLBACK: все изменения с BEGIN отменены' };
+		return { kind: 'msg', message: T('ROLLBACK: все изменения с BEGIN отменены', 'ROLLBACK: every change since BEGIN is undone') };
 	}
 	if (p.eatKw('create')) {
 		if (p.eatKw('unique')) {
@@ -670,7 +680,7 @@ function execOne(db, sql) {
 		p.expectKw('table');
 		if (p.eatKw('if')) (p.expectKw('not'), p.expectKw('exists'));
 		const name = p.name();
-		if (db.tables[name]) throw new SqlError(`таблица «${name}» уже есть`);
+		if (db.tables[name]) throw new SqlError(T(`таблица «${name}» уже есть`, `table “${name}” already exists`));
 		p.expectOp('(');
 		const t = { name, columns: [], pk: [], rows: [], seq: 0 };
 		do {
@@ -684,7 +694,7 @@ function execOne(db, sql) {
 			}
 			const col = { name: p.name(), type: 'text', notNull: false, unique: false, def: undefined, ref: null };
 			const ty = p.peek();
-			if (!ty || ty.t !== 'kw' || !['integer', 'int', 'serial', 'text', 'varchar', 'numeric', 'boolean', 'date', 'timestamp', 'real'].includes(ty.v)) p.fail('ожидался тип столбца: integer, text, numeric, boolean, date или timestamp');
+			if (!ty || ty.t !== 'kw' || !['integer', 'int', 'serial', 'text', 'varchar', 'numeric', 'boolean', 'date', 'timestamp', 'real'].includes(ty.v)) p.fail(T('ожидался тип столбца: integer, text, numeric, boolean, date или timestamp', 'expected a column type: integer, text, numeric, boolean, date or timestamp'));
 			p.i++;
 			col.type = ty.v === 'varchar' ? 'text' : ty.v;
 			if (p.eatOp('(')) {
@@ -700,16 +710,16 @@ function execOne(db, sql) {
 					p.expectOp('(');
 					const rc = p.name();
 					p.expectOp(')');
-					if (!db.tables[rt]) throw new SqlError(`таблица «${rt}» ещё не создана: сначала создайте её, потом ссылайтесь`);
+					if (!db.tables[rt]) throw new SqlError(T(`таблица «${rt}» ещё не создана: сначала создайте её, потом ссылайтесь`, `table “${rt}” has not been created yet: create it first, then refer to it`));
 					col.ref = { table: rt, col: rc };
 				} else break;
 			}
 			t.columns.push(col);
 		} while (p.eatOp(','));
 		p.expectOp(')');
-		for (const k of t.pk) if (!t.columns.some((c) => c.name === k)) throw new SqlError(`в PRIMARY KEY указан столбец «${k}», которого нет`);
+		for (const k of t.pk) if (!t.columns.some((c) => c.name === k)) throw new SqlError(T(`в PRIMARY KEY указан столбец «${k}», которого нет`, `PRIMARY KEY names a column “${k}” that does not exist`));
 		db.tables[name] = t;
-		return { kind: 'msg', message: `CREATE TABLE: таблица «${name}» создана${t.pk.length ? `, ключ: ${t.pk.join(', ')}` : ', но первичного ключа нет'}` };
+		return { kind: 'msg', message: T(`CREATE TABLE: таблица «${name}» создана${t.pk.length ? `, ключ: ${t.pk.join(', ')}` : ', но первичного ключа нет'}`, `CREATE TABLE: table “${name}” created${t.pk.length ? `, key: ${t.pk.join(', ')}` : ', but it has no primary key'}`) };
 	}
 	if (p.eatKw('insert')) {
 		p.expectKw('into');
@@ -720,7 +730,7 @@ function execOne(db, sql) {
 			do cols.push(p.name());
 			while (p.eatOp(','));
 			p.expectOp(')');
-			for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(`в таблице «${t.name}» нет столбца «${c}». Есть: ${t.columns.map((x) => x.name).join(', ')}`);
+			for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(T(`в таблице «${t.name}» нет столбца «${c}». Есть: ${t.columns.map((x) => x.name).join(', ')}`, `table “${t.name}” has no column “${c}”. Columns: ${t.columns.map((x) => x.name).join(', ')}`));
 		}
 		p.expectKw('values');
 		const made = [];
@@ -730,7 +740,7 @@ function execOne(db, sql) {
 			do vals.push(ev(p.expr(), [], null));
 			while (p.eatOp(','));
 			p.expectOp(')');
-			if (vals.length !== cols.length) throw new SqlError(`столбцов ${cols.length}, а значений ${vals.length}: их должно быть поровну`);
+			if (vals.length !== cols.length) throw new SqlError(T(`столбцов ${cols.length}, а значений ${vals.length}: их должно быть поровну`, `${cols.length} columns but ${vals.length} values: the numbers must match`));
 			const row = {};
 			for (const c of t.columns) {
 				const at = cols.indexOf(c.name);
@@ -743,8 +753,8 @@ function execOne(db, sql) {
 			t.rows.push(row);
 			made.push(row);
 		} while (p.eatOp(','));
-		if (!p.done()) p.fail('лишнее после конца запроса');
-		return { kind: 'msg', message: `INSERT: добавлено строк ${made.length}`, changed: made.length };
+		if (!p.done()) p.fail(T('лишнее после конца запроса', 'unexpected text after the end of the query'));
+		return { kind: 'msg', message: T(`INSERT: добавлено строк ${made.length}`, `INSERT: rows added ${made.length}`), changed: made.length };
 	}
 	if (p.eatKw('update')) {
 		const t = table(db, p.name());
@@ -752,12 +762,12 @@ function execOne(db, sql) {
 		const sets = [];
 		do {
 			const c = p.name();
-			if (!t.columns.some((x) => x.name === c)) throw new SqlError(`в таблице «${t.name}» нет столбца «${c}»`);
+			if (!t.columns.some((x) => x.name === c)) throw new SqlError(T(`в таблице «${t.name}» нет столбца «${c}»`, `table “${t.name}” has no column “${c}”`));
 			p.expectOp('=');
 			sets.push([c, p.expr()]);
 		} while (p.eatOp(','));
 		const where = p.eatKw('where') ? p.expr() : null;
-		if (!p.done()) p.fail('лишнее после конца запроса');
+		if (!p.done()) p.fail(T('лишнее после конца запроса', 'unexpected text after the end of the query'));
 		const cols = t.columns.map((c) => c.name);
 		const hit = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
 		const next = hit.map((r) => {
@@ -769,23 +779,23 @@ function execOne(db, sql) {
 			checkRow(db, t, n, r);
 			Object.assign(r, n);
 		}
-		return { kind: 'msg', message: `UPDATE: изменено строк ${hit.length}${where ? '' : '. Условия WHERE не было, поэтому изменены ВСЕ строки таблицы'}`, changed: hit.length };
+		return { kind: 'msg', message: T(`UPDATE: изменено строк ${hit.length}${where ? '' : '. Условия WHERE не было, поэтому изменены ВСЕ строки таблицы'}`, `UPDATE: rows changed ${hit.length}${where ? '' : '. There was no WHERE condition, so ALL rows of the table were changed'}`), changed: hit.length };
 	}
 	if (p.eatKw('delete')) {
 		p.expectKw('from');
 		const t = table(db, p.name());
 		const where = p.eatKw('where') ? p.expr() : null;
-		if (!p.done()) p.fail('лишнее после конца запроса');
+		if (!p.done()) p.fail(T('лишнее после конца запроса', 'unexpected text after the end of the query'));
 		const cols = t.columns.map((c) => c.name);
 		const gone = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
 		for (const r of gone)
 			for (const o of Object.values(db.tables))
 				for (const c of o.columns)
-					if (c.ref && c.ref.table === t.name && o.rows.some((x) => x[c.name] !== null && x[c.name] === r[c.ref.col])) throw new SqlError(`нельзя удалить: на эту строку ссылается таблица «${o.name}» (столбец ${c.name}). Сначала уберите ссылки`);
+					if (c.ref && c.ref.table === t.name && o.rows.some((x) => x[c.name] !== null && x[c.name] === r[c.ref.col])) throw new SqlError(T(`нельзя удалить: на эту строку ссылается таблица «${o.name}» (столбец ${c.name}). Сначала уберите ссылки`, `cannot delete: table “${o.name}” refers to this row (column ${c.name}). Remove the references first`));
 		t.rows = t.rows.filter((r) => !gone.includes(r));
-		return { kind: 'msg', message: `DELETE: удалено строк ${gone.length}${where ? '' : '. Условия WHERE не было, поэтому удалены ВСЕ строки таблицы'}`, changed: gone.length };
+		return { kind: 'msg', message: T(`DELETE: удалено строк ${gone.length}${where ? '' : '. Условия WHERE не было, поэтому удалены ВСЕ строки таблицы'}`, `DELETE: rows deleted ${gone.length}${where ? '' : '. There was no WHERE condition, so ALL rows of the table were deleted'}`), changed: gone.length };
 	}
-	throw new SqlError('эта песочница знает команды SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK и EXPLAIN SELECT');
+	throw new SqlError(T('эта песочница знает команды SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK и EXPLAIN SELECT', 'this sandbox knows the commands SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK and EXPLAIN SELECT'));
 }
 
 function createIndex(db, p, unique) {
@@ -799,11 +809,11 @@ function createIndex(db, p, unique) {
 	do cols.push(p.name());
 	while (p.eatOp(','));
 	p.expectOp(')');
-	for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(`в таблице «${tn}» нет столбца «${c}»`);
+	for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(T(`в таблице «${tn}» нет столбца «${c}»`, `table “${tn}” has no column “${c}”`));
 	name = name || `${tn}_${cols.join('_')}_idx`;
-	if (db.indexes.some((i) => i.name === name)) throw new SqlError(`индекс «${name}» уже есть`);
+	if (db.indexes.some((i) => i.name === name)) throw new SqlError(T(`индекс «${name}» уже есть`, `index “${name}” already exists`));
 	db.indexes.push({ name, table: tn, cols, unique });
-	return { kind: 'msg', message: `CREATE INDEX: индекс «${name}» по ${tn}(${cols.join(', ')}) построен. Теперь каждая запись в «${tn}» обновляет и его` };
+	return { kind: 'msg', message: T(`CREATE INDEX: индекс «${name}» по ${tn}(${cols.join(', ')}) построен. Теперь каждая запись в «${tn}» обновляет и его`, `CREATE INDEX: index “${name}” on ${tn}(${cols.join(', ')}) is built. Now every write to “${tn}” updates it too`) };
 }
 
 /**
@@ -815,7 +825,7 @@ export function run(db, sql) {
 	const results = [];
 	for (const s of splitStatements(sql)) {
 		try {
-			if (db.aborted && !/^\s*rollback\b/i.test(s)) throw new SqlError('транзакция прервана после ошибки: все команды игнорируются, пока не будет ROLLBACK');
+			if (db.aborted && !/^\s*rollback\b/i.test(s)) throw new SqlError(T('транзакция прервана после ошибки: все команды игнорируются, пока не будет ROLLBACK', 'the transaction was aborted after an error: every command is ignored until ROLLBACK'));
 			const r = execOne(db, s);
 			if (r) results.push({ ...r, sql: s });
 		} catch (e) {

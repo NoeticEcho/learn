@@ -1,0 +1,807 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/07-data/01-what-is-a-database.svx. */
+	export const metadata = {
+		id: '07-data/01-what-is-a-database',
+		part: 7,
+		order: 1,
+		title: 'What a database is and why a site needs one',
+		definition: 'A database is an organized store watched over by a guard program, the DBMS. A relational database keeps its data in tables linked by keys.',
+		summary: 'You’ll see why a database beats a file or a spreadsheet, and break your project’s data into entities and links. Afterwards you have a data schema for your brief: what to store, under which key, and which fields count as personal data.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'sheet',
+					label: 'bookings.json',
+					caption: 'A file',
+					say: [
+						{ text: 'Two people opened the file. Both read: 10 seats.' },
+						{ who: 'File', text: 'I just sit here. Write whenever you like.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'seats: 9',
+					caption: 'Lost',
+					say: 'Both wrote 9. One booking vanished, and nobody got an error.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'server',
+					label: 'DBMS',
+					caption: 'A database',
+					say: [
+						{ who: 'DBMS', text: 'The second one waits until the first is done.' },
+						{ text: 'That is the whole difference: a database has a guard.' }
+					]
+				}
+			]
+		},
+		minutes: 20,
+		teaches: ['data-what-is-database', 'data-relational-model'],
+		requires: ['server-static-vs-dynamic', 'js-json'],
+		practice: {
+			id: 'data-schema-sketch',
+			title: 'The data schema of your project',
+			task: 'Fill in the data schema table. The first row (the services from items) is already done as a model. Add the other three: people, proofs and requests (what a visitor sends through the form). In each row give the entity’s name, its key (a unique field, usually id), its fields separated by commas, its link to another entity (for example “refers to a service”) and whether it holds personal data (“yes” or “no”, with a short reason). Make the request a separate entity, not a field of another one. If your project has no people or no proofs, write in the row that the entity isn’t needed and say why. Every “…” has to be replaced.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="schema">
+      <h2>The project’s data schema<\/h2>
+      <p>Each row is one entity: a kind of “thing” the site has to remember.<\/p>
+      <table>
+        <tr><th>Entity<\/th><th>Key<\/th><th>Fields<\/th><th>Links<\/th><th>Personal data?<\/th><\/tr>
+        <tr class="entity items"><td class="name">Service<\/td><td class="key">id<\/td><td class="fields">title, text, price<\/td><td class="rel">belongs to a category (category_id)<\/td><td class="pd">no<\/td><\/tr>
+        <tr class="entity people"><td class="name">…<\/td><td class="key">…<\/td><td class="fields">…<\/td><td class="rel">…<\/td><td class="pd">…<\/td><\/tr>
+        <tr class="entity proofs"><td class="name">…<\/td><td class="key">…<\/td><td class="fields">…<\/td><td class="rel">…<\/td><td class="pd">…<\/td><\/tr>
+        <tr class="entity request"><td class="name">…<\/td><td class="key">…<\/td><td class="fields">…<\/td><td class="rel">…<\/td><td class="pd">…<\/td><\/tr>
+      <\/table>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="schema">
+      <h2>The project’s data schema<\/h2>
+      <p>Each row is one entity: a kind of “thing” the site has to remember.<\/p>
+      <table>
+        <tr><th>Entity<\/th><th>Key<\/th><th>Fields<\/th><th>Links<\/th><th>Personal data?<\/th><\/tr>
+        <tr class="entity items"><td class="name">Service<\/td><td class="key">id<\/td><td class="fields">title, text, price<\/td><td class="rel">belongs to a category (category_id)<\/td><td class="pd">no<\/td><\/tr>
+        <tr class="entity people"><td class="name">Person<\/td><td class="key">id<\/td><td class="fields">name, role, bio<\/td><td class="rel">runs services (person_id on the service)<\/td><td class="pd">yes, if it is a real person: name and photo<\/td><\/tr>
+        <tr class="entity proofs"><td class="name">Proof<\/td><td class="key">id<\/td><td class="fields">title, text, image<\/td><td class="rel">belongs to a person (person_id)<\/td><td class="pd">no<\/td><\/tr>
+        <tr class="entity request"><td class="name">Request<\/td><td class="key">id<\/td><td class="fields">visitor_name, phone, created_at<\/td><td class="rel">refers to a service (item_id)<\/td><td class="pd">yes: the visitor’s name and phone<\/td><\/tr>
+      <\/table>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abridged */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (data-scaffold blocks). It does not go into the site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'schema-exists', kind: 'exists', selector: '#schema' },
+				{ id: 'no-blanks', kind: 'text', selector: '#schema', matches: '^[^…]*$' },
+				{ id: 'entities', kind: 'count', selector: '#schema tr.entity', min: 4 },
+				{ id: 'keys', kind: 'count', selector: '#schema td.key', min: 4 },
+				{ id: 'key-is-id', kind: 'text', selector: '#schema td.key', matches: '\\b(?:id|ID)\\b|identifier|number' },
+				{ id: 'request-separate', kind: 'text', selector: '#schema tr.entity.request td.fields', matches: 'phone|name|e-?mail|contact' },
+				{ id: 'relations', kind: 'text', selector: '#schema td.rel', matches: '_id|refer|belong|link|relat|→' },
+				{ id: 'pd-marked', kind: 'text', selector: '#schema tr.entity.request td.pd', matches: '^\\s*[Yy]es' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Two editors open the same JSON file with a booking counter at the same time. Both read 10 and both write 9. What happened?',
+				options: [
+					'The file knows nothing about two authors, so one edit was lost: it should have become 8',
+					'The file added both edits together and wrote 8',
+					'The file gave the second editor an error'
+				],
+				answer: 0,
+				why: [
+					'Yes. A file keeps only the last write, and doesn’t track who made it or from which value. This is a “lost update”.',
+					'No: a file can’t combine edits, it accepts whatever was written last.',
+					'No: a file doesn’t know anyone else has it open, so there is no error. There is no second edit either.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each term to what it means',
+				pairs: [
+					['Table', 'a set of records of one kind: for example, all services'],
+					['Row', 'one record: one service with all its values'],
+					['Column', 'one field of every record: for example, the price, with a set type'],
+					['Primary key', 'a field that names a row unambiguously and never repeats'],
+					['Foreign key', 'a field that points to a row of another table']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does a database do for you that a plain file doesn’t?',
+				options: [
+					'Makes sure two simultaneous edits can’t overwrite each other',
+					'Refuses a link to a row that doesn’t exist',
+					'Finds the records you need quickly, without reading everything',
+					'Works out for itself what data your site needs'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: locks and transactions do this.',
+					'Yes: a foreign key rejects the write if there is nothing to point to.',
+					'Yes: indexes do this, and lesson 4 of this part covers them.',
+					'No: what to store is your decision. That is why you need a data schema.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the best choice for the primary key of a table of services?',
+				options: ['An automatic number (id) that never changes', 'The name of the service', 'The price of the service'],
+				answer: 0,
+				why: [
+					'Yes. A number means nothing by itself, which is why it never changes: a name can be corrected while every link to the row stays intact.',
+					'No: a name can be changed, and two services can share one. A key must be unique and permanent.',
+					'No: prices repeat and change.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A visitor sent a request. Where should it be stored?',
+				options: [
+					'In a separate table of requests, with a link to the service',
+					'In a “requests” field inside the service’s row',
+					'In the service’s name, separated by commas'
+				],
+				answer: 0,
+				why: [
+					'Yes. One service has many requests, each with its own date and contact details, and they are also personal data, which is kept and deleted under its own rules.',
+					'No: one field can’t hold many requests with dates and contacts, and you couldn’t edit one of them on its own.',
+					'No: that mixes the data together, and you would have to search it by eye.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of designing a data schema in order',
+				items: [
+					'Pull the nouns out of the brief: services, people, proofs, requests',
+					'Decide which of them are entities of their own, with many instances',
+					'Give each one a key (id)',
+					'Describe the fields and their types',
+					'Draw the links between the entities',
+					'Mark the fields that hold personal data'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-db-what',
+				front: 'What is a database, and why is it better than a file?',
+				back: 'A store plus a guard program (the DBMS). It stops two edits from overwriting each other, keeps links consistent, searches quickly and hands out permissions.'
+			},
+			{
+				id: 'data-db-lost-update',
+				front: 'What is a “lost update”?',
+				back: 'Two people read the old value and each write their own: the last write overwrites the first, and nobody gets an error. A database doesn’t allow this.'
+			},
+			{
+				id: 'data-db-table-row-col',
+				front: 'Table, row and column: what are they?',
+				back: 'A table holds records of one kind. A row is one record. A column is one field of every record, with a set type.'
+			},
+			{
+				id: 'data-db-keys',
+				front: 'Primary key and foreign key',
+				back: 'A primary key (usually id) names a row unambiguously and never repeats. A foreign key is a field that points to the primary key of another table.'
+			},
+			{
+				id: 'data-db-entities',
+				front: 'How do you find a project’s entities?',
+				back: 'Pull the nouns out of the brief, keep those with many instances (service, person, request), and give each a key, fields and links. A request is a separate entity.'
+			}
+		],
+		sources: [
+			{
+				title: 'PostgreSQL documentation: Tutorial',
+				url: 'https://www.postgresql.org/docs/current/tutorial.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'SQLite: appropriate uses for SQLite', url: 'https://www.sqlite.org/whentouse.html', licence: 'PD', kind: 'docs', lang: 'en' },
+			{
+				title: 'Relational model (Wikipedia)',
+				url: 'https://en.wikipedia.org/wiki/Relational_model',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'PostgreSQL: Concurrency control, introduction',
+				url: 'https://www.postgresql.org/docs/current/mvcc-intro.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'We’re designing your site’s memory. You don’t have to build a database yet: first you need a schema, which is a list of the things the site has to remember and the links between them.',
+			hints: [
+				'The model is in the first row: an entity, a key, fields separated by commas, a link and a note on personal data. Repeat that order in the other rows.',
+				'A request is what a visitor sends through the form. Its fields are the visitor’s contact details and a date. Its link goes to the service it was sent about.',
+				'Personal data is anything that can identify a living person: a visitor’s name and phone number certainly do. Start the request row’s note with “yes”.'
+			],
+			mistakes: {
+				'schema-exists': 'The schema block is gone. It was in the page, so don’t delete it.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				entities: 'You need at least four rows with the class entity: services, people, proofs and requests.',
+				keys: 'Every entity needs a td.key cell with its key.',
+				'key-is-id': 'Write id in the key: that is the usual name for a row’s unique number.',
+				'request-separate': 'The request’s fields don’t show the visitor’s contact details. Write what exactly they leave: a name, a phone number, an email.',
+				relations: 'There are no links. Say what each entity is linked to: for example “refers to a service (item_id)”.',
+				'pd-marked': 'A visitor’s name and phone number are personal data. In the request row, start the cell with “yes”.'
+			},
+			outro: 'Now your project has a schema. In the next lesson we’ll turn it into tables and learn to ask them questions in SQL.'
+		},
+		say: {
+			SQL: 'S Q L',
+			JSON: 'jay son',
+			id: 'eye dee',
+			DBMS: 'D B M S',
+			SQLite: 'S Q L light',
+			PostgreSQL: 'post gress Q L',
+			Excel: 'excel',
+			CSV: 'C S V',
+			COMMIT: 'commit'
+		}
+	};
+</script>
+
+<script>
+	import FileVsDatabase from '../../diagrams/FileVsDatabase.svelte';
+</script>
+
+## Where a site’s data lives
+
+A site made of plain HTML files keeps everything in the markup itself: to change a price, you open the file and edit it. While edits are rare and one person makes them, that is a perfectly good life (static sites live like this, as part 8 shows). But as soon as data changes often or arrives from visitors, it has to be **written** somewhere and **read** from somewhere: requests from a form, orders, appointments, comments.
+
+The simplest place is a file: plain text, CSV or JSON (we covered JSON in part 5). Any program can open a file, read it, change it and write it back. On a small site with one editor that is enough. Let’s see where the trouble starts.
+
+## When a file is no longer enough
+
+Below, two editors change the same number. Look at the file first, then at the database, and compare the last step.
+
+<FileVsDatabase />
+
+In this example the file lost an edit and didn’t even notice. But that is only the first of its problems. Here are all five that push people from files to databases.
+
+1. **Simultaneous edits.** Shown above: the last write overwrites the one before.
+2. **Integrity.** In a file of services, each one has a “category” from another file. Someone deletes a category, and the services that pointed to it stay behind. The file won’t notice.
+3. **Search.** To find yesterday’s requests, a file has to be read from start to finish. With ten requests nobody notices, with a million it hurts.
+4. **Permissions.** Anyone with access to a file can read and change it. You want something else: an editor changes services, an accountant reads requests, a visitor sees nothing.
+5. **Failures.** If the server switches off in the middle of a write, the file is left half written.
+
+One tool solves all five.
+
+## What a database is
+
+A **database** is an organized store looked after by a special program. That program is called a **DBMS**, a database management system. People often say “database” for both at once: PostgreSQL, MySQL and SQLite are DBMSs, and what they hold are databases.
+
+What a DBMS does that a file doesn’t:
+
+- **Stops two edits from overwriting each other.** It has locks and transactions for this (lesson 4 covers them).
+- **Checks the rules.** “This field can’t be empty”, “this number is already taken”, “you can only point to a category that exists”.
+- **Searches quickly**, because it can build search aids called indexes (also lesson 4).
+- **Hands out permissions**: who may read and change what.
+- **Survives failures.** If the power goes out in the middle of a write, then after the restart the data is either entirely old or entirely new.
+
+Notice that **a DBMS doesn’t have to be big and far away**. SQLite is a database that lives in a single file and runs right inside your program, with no separate server. It sits in your phone and in your browser. SQLite’s own documentation says it suits sites with modest traffic, while for many simultaneous writes a server such as PostgreSQL is better. So “file versus database” isn’t a question of location. It is a question of **whether there is a guard**.
+
+<details>
+<summary>Check yourself: how is SQLite in one file different from a JSON file?</summary>
+
+Inside SQLite a guard program is at work: it checks the rules, locks simultaneous writes, searches by index and finishes a write even if the power goes out. A JSON file does none of this, it is just text.
+
+</details>
+
+## Tables, rows and columns
+
+The most common kind of database is called **relational** (from relation). All its data lives in **tables**. A table looks like a familiar spreadsheet, only stricter.
+
+| id | title | price | category_id |
+|---|---|---|---|
+| 1 | Portrait session | 150 | 1 |
+| 2 | Reportage | 900 | 1 |
+| 3 | Photos for your website | 400 | 2 |
+
+- A **table** holds records of one kind (all the services).
+- A **row** is one record: one service with all its values.
+- A **column** is one field of every record, and it has a **type**: a number, text, a date, yes/no. The database won’t let you write the word “negotiable” into a price. This is the main difference from a spreadsheet cell, which accepts anything.
+
+A **primary key** is a column whose value names a row unambiguously and never repeats. Usually it is a number, `id`, which the database hands out itself. Why not the name? Someone may correct it, and then every link to the row breaks; besides, two services can have the same name. A number means nothing, so it never changes.
+
+A **foreign key** is a column that holds the key of a row in another table. In the example `category_id` points to a row of the categories table. That is how tables get **related** (hence “relational”). And the database makes sure a link never leads nowhere.
+
+There are three kinds of relationship, and you’ll meet all three in your project:
+
+- **One to many**: one category has many services, and a service is in one category. The foreign key goes on the “many” side.
+- **Many to many**: a person runs many services, and a service can have several hosts. For this you add a third table of pairs, “person, service”.
+- **One to one**: rarer, for example a profile attached to an account.
+
+## How to find your project’s entities
+
+An **entity** is a kind of “thing” the site has to remember, with many instances. Each entity becomes a table. You can find them in the brief in four steps.
+
+1. List the nouns in your brief: services, people, proofs, requests, sections.
+2. Keep those that will have many instances and a life of their own. A “request” qualifies: there are many, each with its own date. The “tone of the site” doesn’t: there is only one.
+3. Give each entity a key and fields. Take the fields from the brief: for a service they are the name, the description and the price.
+4. Draw the links: “a request refers to a service”.
+
+**Requests** deserve a word of their own. A request from a form is almost always a separate entity, not a field of some other one. A service has many requests, each with its own date and contact details, and they are also a visitor’s **personal data**: a name and a phone number can identify a living person. The law sets requirements for such data (in Europe the GDPR, in the UK the UK GDPR, and in a growing number of US states their own privacy laws), so it is kept separately and under rules. Lesson 7 of this part covers that. For now it is enough to **mark** such fields on the schema.
+
+## When you don’t need a database
+
+An honest conclusion of this lesson: your project may **not need** a database. If the site has five services that change twice a year, and requests go to email through an intermediary service, you can keep the services right in a file (part 8 shows how, with Markdown), and nobody stores the requests on your side. The site you build in this course is made exactly like that: it has no database, and that is a deliberate decision.
+
+A database is worth adding when at least one of three things is true: visitors write data; several people work on the data at the same time; or there is so much data that you need to search and combine it (filters, sorting, reports).
+
+## Practice
+
+You’re in the era of 2010. Sites on a CMS can already keep articles and comments in a database, while small business owners still track requests in a spreadsheet and copy them to the site by hand. To avoid the double work, start with your project’s data schema.
+
+The page has a schema table. The first row (services) is filled in as a model. Complete the rest: people, proofs and requests. For each, give the key, the fields and the links, and mark whether the entity holds personal data.
+
+## What was wrong with a spreadsheet instead of a database
+
+In the 2000s the spreadsheet looked like a universal solution: understandable, at hand, everything visible. But it has the same five troubles as a file, and one more: no types and no links. That is how a “customer database” came to hold three records for one person with three spellings of the surname, and a “date” column held a date in one row and the word “yesterday” in the next. Relational databases introduce rules precisely so that this can’t happen. Spreadsheets remain an excellent tool for calculations and small lists. They just aren’t for data that a site reads and writes by itself.
