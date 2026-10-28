@@ -1,0 +1,328 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/10-writing/02-info-style.svx. */
+	export const metadata = {
+		id: '10-writing/02-info-style',
+		part: 10,
+		order: 2,
+		title: 'Plain, informative style: facts instead of judgments',
+		definition: 'Plain, informative style is writing without filler: facts instead of judgments, clichés and officialese, so that every word gives the reader something to check.',
+		summary:
+			'You’ll learn to clear empty judgments, filler words and officialese out of a text and replace them with facts: a number, a deadline, a document, an example. Afterwards the description of your project and of each service is short and concrete, and every word in it can be checked.',
+		minutes: 20,
+		teaches: ['texts-info-style', 'texts-stop-words'],
+		requires: ['texts-screen-reading'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'Before', caption: 'Echo reads a site', say: '“We provide a wide range of high-quality services.” How would I check that?' },
+				{ mood: 'hint', side: 'right', prop: 'sheet', label: 'how to check?', say: 'I ask each judgment what stands behind it. If there’s an answer, I write it instead of the word. If not, the word goes.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'After', say: '“Boundary survey: site visit, measurements, plan. I give you the price before work starts.” Facts, not compliments.' },
+				{ mood: 'hmm', caption: 'But don’t overdo it', say: '“Repairs. $12. Call.” is bad too: that’s not informative, that’s a telegram.' }
+			]
+		},
+		practice: {
+			id: 'info-style-rewrite',
+			title: 'Before and after: describing a project and its services',
+			task: 'At the bottom of the page, in the “Before” note, is the description of your project at its worst: full of judgments and officialese. Rewrite it right on the page. In the paragraph with the class lead, say in two or three short sentences what you do and for whom, with no judgments and no clichés. In each list item, replace the ellipsis in the paragraph with the class fact by a checkable fact: a number, a deadline, a document, a name or an example. Keep the “Before” note: the before-and-after pair is needed for the gallery. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <header>\n      <h1>{{title}}</h1>\n    </header>\n    <main>\n      <section id="about">\n        <h2>About the project</h2>\n        <p class="lead">…</p>\n      </section>\n      <section id="offer">\n        <h2>What you get</h2>\n        <ul>\n          {{#each items}}<li class="item"><h3>{{title}}</h3><p class="fact">…</p></li>\n          {{/each}}\n        </ul>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="before">\n      <h2>Before</h2>\n      <p>Welcome! We are a team of professionals with a wealth of experience. {{who}}. At this point in time we carry out the provision of quality services for clients such as {{forWhom}}, and we guarantee a personalized approach and high quality.</p>\n      <ul>\n        {{#each items}}<li>The performance of “{{title}}” is one of our best areas.</li>\n        {{/each}}\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <header>\n      <h1>{{title}}</h1>\n    </header>\n    <main>\n      <section id="about">\n        <h2>About the project</h2>\n        <p class="lead">{{who}}. We work with the people who need it: {{forWhom}}. We answer every request within one business day.</p>\n      </section>\n      <section id="offer">\n        <h2>What you get</h2>\n        <ul>\n          {{#each items}}<li class="item"><h3>{{title}}</h3><p class="fact">We name the price and the date before work starts, and we answer within 1 business day.</p></li>\n          {{/each}}\n        </ul>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="before">\n      <h2>Before</h2>\n      <p>Welcome! We are a team of professionals with a wealth of experience. {{who}}. At this point in time we carry out the provision of quality services for clients such as {{forWhom}}, and we guarantee a personalized approach and high quality.</p>\n      <ul>\n        {{#each items}}<li>The performance of “{{title}}” is one of our best areas.</li>\n        {{/each}}\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: 'main', matches: '^[^…]*$' },
+				{ id: 'lead-length', kind: 'text', selector: '#about .lead', matches: '^\\s*\\S[\\s\\S]{38,298}\\S\\s*$' },
+				{
+					id: 'no-stop-words',
+					kind: 'text',
+					selector: 'main',
+					matches:
+						'^(?![\\s\\S]*\\b(?:[Bb]est|[Hh]igh-quality|[Qq]uality|[Uu]nique|[Pp]ersonali[sz]ed|[Ii]ndividual approach|[Hh]ighly qualified|[Ww]ide range|[Ww]ealth of experience|[Tt]eam of professionals|[Rr]eliable|[Uu]tili[sz]e|[Ll]everage|[Ii]n order to|[Pp]ursuant to|[Ii]n accordance with|[Cc]arry out|[Cc]arries out|[Pp]rovision of|[Pp]erformance of)\\b)[\\s\\S]*\\S'
+				},
+				{ id: 'fact-per-item', kind: 'count', selector: 'main .item .fact', min: { brief: 'items' } },
+				{ id: 'fact-number', kind: 'text', selector: 'main .fact', matches: '\\d', when: { brief: 'items[].title' } },
+				{ id: 'before-kept', kind: 'exists', selector: '#before' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'In plain, informative style, what is a filler word?',
+				options: [
+					'A word that gives the reader no information, or gets in the way of it',
+					'A word that is banned by a censor',
+					'Any word longer than ten letters'
+				],
+				answer: 0,
+				why: [
+					'Yes. A judgment with no fact, an amplifier, officialese: all of them take up room and tell the reader nothing.',
+					'No: this isn’t about bans, it’s about whether the word is useful to the reader.',
+					'No: a long word can be exact, and a short one can be empty.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these phrases contain a judgment with no fact behind it?',
+				options: [
+					'We are the best workshop in town',
+					'The inspection is free, and you get an answer in 15 minutes',
+					'We take a personalized approach to our clients',
+					'A professional team with a wealth of experience',
+					'I’ve been working since 2011'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: “best” isn’t backed by anything, and nobody can check it.',
+					'No: this has two checkable facts, that it’s free and the time.',
+					'Yes: what exactly does a “personalized approach” mean? Nobody knows.',
+					'Yes: it isn’t clear how many years, what experience, or in what.',
+					'No: the year you started can be checked.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match the officialese with the plain version',
+				pairs: [
+					['we carry out repairs', 'we repair'],
+					['payment is to be made', 'you pay'],
+					['is free of charge', 'is free'],
+					['in order to improve', 'to improve']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You have no facts, but you want to write something convincing. What do you do?',
+				options: [
+					'Describe how you work, step by step, or honestly leave the judgment out; don’t invent numbers',
+					'Write the boldest number you can think of, since nobody will check',
+					'Use more adjectives'
+				],
+				answer: 0,
+				why: [
+					'Yes. A process and an order of work are facts too. An invented figure is a promise you’ll have to keep, and in advertising law an unsupported claim is a risk.',
+					'No: people check more often than you’d think, and the first check costs you trust.',
+					'No: adjectives are exactly the judgments with no facts that we’re getting rid of.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the danger of chasing the score of a text-checking tool?',
+				options: [
+					'The tool finds words, not meaning: a text can score high and still be empty',
+					'Such tools are against the law',
+					'The scores measure only reading speed'
+				],
+				answer: 0,
+				why: [
+					'Yes. A tool is good as a magnifying glass: it shows where to look. The decision about each word is yours.',
+					'No: there is no such ban.',
+					'No: the scores don’t measure reading speed.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the passes over a text in a sensible order',
+				items: [
+					'Find the filler words',
+					'Ask each judgment: what stands behind it?',
+					'Replace the judgment with a fact, or delete it',
+					'Bring back verbs instead of chains of nouns',
+					'Read it aloud and check that no information was lost'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In which text does plain, informative style fit worst?',
+				options: [
+					'In a story whose job is to stir a feeling',
+					'In the description of a service',
+					'In instructions for booking'
+				],
+				answer: 0,
+				why: [
+					'Yes. Where the reader expects an experience, not information, the method needs to be applied with care. A whole part of the course is given to stories.',
+					'No: the description of a service is the very place for facts.',
+					'No: instructions are the best territory for plain style.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'texts-info-style',
+				front: 'What is plain, informative style?',
+				back: 'A way of writing so that every word gives the reader something they can use and check. It has a long tradition in English (Strunk and White, Orwell, plain language) and a Russian school (Maxim Ilyakhov, “Pishi, sokrashchay”).'
+			},
+			{
+				id: 'texts-stop-kinds',
+				front: 'Name the kinds of “noise” in a text',
+				back: 'A judgment with no fact, an amplifier or filler, officialese, an empty phrase, a cliché, a chain of nouns.'
+			},
+			{
+				id: 'texts-fact-kinds',
+				front: 'What can replace a judgment?',
+				back: 'A number, a deadline, a document or source, an example or a case, a step of the process, a name. The test: “How would I check this?”'
+			},
+			{
+				id: 'texts-verb-not-noun',
+				front: 'What do you do about officialese?',
+				back: 'Bring the verb back: not “the performance of an inspection” but “we inspect”. Not “is free of charge” but “is free”.'
+			},
+			{
+				id: 'texts-info-limits',
+				front: 'Where does plain, informative style let you down?',
+				back: 'In stories and wherever feeling is needed; overdone, a text becomes a telegram; a tool’s score is not meaning; legal wording can’t be simplified at the price of accuracy.'
+			}
+		],
+		sources: [
+			{ title: 'Federal Plain Language Guidelines (plainlanguage.gov)', url: 'https://www.plainlanguage.gov/guidelines/', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Style guide (GOV.UK)', url: 'https://www.gov.uk/guidance/style-guide', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Politics and the English Language, George Orwell (1946, the Orwell Foundation)', url: 'https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'The Elements of Style (Wikipedia)', url: 'https://en.wikipedia.org/wiki/The_Elements_of_Style', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Concise, SCANNABLE, and Objective: How to Write for the Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/concise-scannable-and-objective-how-to-write-for-the-web/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Plain Writing Act of 2010 (U.S. Government Publishing Office)', url: 'https://www.govinfo.gov/content/pkg/PLAW-111publ274/html/PLAW-111publ274.htm', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Plain English Campaign (UK)', url: 'https://www.plainenglish.co.uk/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Максим Ильяхов: сайт автора («Пиши, сокращай», «Главред»)', url: 'https://maximilyahov.ru/', licence: 'proprietary-link', kind: 'book', lang: 'ru' },
+			{ title: 'Канцелярит (Википедия)', url: 'https://ru.wikipedia.org/wiki/Канцелярит', licence: 'CC-BY-SA', kind: 'article', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now your page has text that says a lot and tells nothing. Let’s turn it into text in which every word can be checked.',
+			hints: [
+				'Start with the lead paragraph. Answer two questions: what you do and for whom. No judgments needed.',
+				'Each fact needs something checkable: a number (“in 20 minutes”), a deadline, the name of a document, an example. If you can’t give a number, describe a step: what you do first.',
+				'Look at the “Before” note and at the highlighted words in the diagram above: that’s your list of what shouldn’t be left.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.',
+				'lead-length': 'The lead paragraph must be short but not empty: from 40 to 300 characters. Right now it falls outside that.',
+				'no-stop-words': 'The text still has judgments or officialese: “best”, “quality”, “unique”, “personalized approach”, “wide range”, “team of professionals”, “reliable”, “carry out”, “provision of”, “in order to”. Replace them with facts.',
+				'fact-per-item': 'Each service or product from the brief needs its own paragraph with the class fact inside the list item.',
+				'fact-number': 'None of the facts has a number. Give a deadline, a price, a quantity or a year in at least some of them.',
+				'before-kept': 'The “Before” note is gone. Put it back: it’s needed to see the difference.'
+			},
+			outro: 'Now every word in your text can be checked. Next we’ll learn to put the main thing at the top of the page and in the headline.'
+		},
+		say: { Ilyakhov: 'ill-YAH-khov', Orwell: 'OR-well', Strunk: 'strunk' }
+	};
+</script>
+
+<script>
+	import StopWordLens from '../../diagrams/StopWordLens.svelte';
+</script>
+
+## What plain, informative style is
+
+Open the website of almost any small business and you’ll probably read something like: “Our team of professionals carries out quality repairs at a high level.” Read it? Now say what exactly they do, how fast and for how much. You can’t. The sentence takes up a line and holds no information at all.
+
+This kind of writing is what **plain, informative style** is aimed against. In English it is an old tradition. William Strunk Jr.’s *The Elements of Style* (1918), later reworked by E. B. White, gave the famous rule “Omit needless words”. In 1946 George Orwell, in the essay “Politics and the English Language”, argued that vague, ready-made phrases let a writer stop thinking, and gave six rules, among them: cut a word if you can, prefer the short word to the long one, prefer the active voice to the passive. From the 1970s a plain-language movement took these ideas into law and government. In the UK the Plain English Campaign was founded in 1979. In the United States the Plain Writing Act of 2010 requires federal agencies to write documents the public can understand, and the Federal Plain Language Guidelines at plainlanguage.gov are the working manual. The GOV.UK style guide applies the same ideas to one of the biggest websites in the world.
+
+For the web there is hard evidence too. In 1997 Jakob Nielsen and John Morkes tested versions of the same website text. Promotional language (“the best”, “the greatest”) did worse than plain, objective language, and a version that was concise, scannable and objective together scored 124% better on a usability measure than the original. It is one of the oldest results in web writing, and it is the whole argument of this lesson.
+
+Russian has its own school of the same idea. The editor Maxim Ilyakhov, creator of the text-checking service Glavred, set it out in lectures and in the book “Pishi, sokrashchay” (“Write, Cut”), written with Lyudmila Sarycheva. He calls it *informatsionny stil*, informative style, and the classification of noise below is the textbook’s own, not his: his is longer and worth reading in the original. The idea is the same everywhere: **a text exists for the reader, and every word in it should give the reader something**. A fact they can use. Or check. Or both.
+
+For us the method matters because it turns editing from a matter of taste into a matter of checking. Instead of “I don’t like it” you ask: what does this word tell the reader? If nothing, it goes.
+
+<details>
+<summary>Check yourself: what question does plain, informative style rest on?</summary>
+
+What this word or sentence tells the reader, and whether that can be checked. If it tells nothing, you remove it or replace it with a fact.
+
+</details>
+
+## Six kinds of noise
+
+Let’s call noise the words that have taken the place of information. The classification below is our own, for teaching. Six groups cover almost everything.
+
+1. **A judgment with no fact.** “The best”, “quality”, “unique”, “professional”, “reliable”, “personalized approach”. The problem isn’t the word but that nothing stands behind it: the reader can’t check “the best” or “quality”. Trust in such a phrase drops with every use, because everybody writes this way.
+2. **An amplifier or filler.** “Very”, “really”, “absolutely”, “of course”, “as you know”, “actually”. They pretend to emphasize and in fact dilute: if you need the word “really” to be believed, then without it you weren’t.
+3. **Officialese.** “Utilize”, “in accordance with”, “pursuant to”, “prior to”, “in order to”, “provide services in the field of…”. Papers were once written like this in offices, and the habit moved into advertising. It lengthens the sentence and hides the verb. (Russian calls it *kantselyarit*, “office-ese”, and has the same disease.)
+4. **An empty phrase.** “At this point in time”, “currently”, “in the field of”, “so-called”, “due to the fact that”. Take it out and the meaning doesn’t change.
+5. **A cliché.** “Team of professionals”, “wealth of experience”, “wide range of services”, “your trusted partner”, “we are delighted to welcome you”. These are the same judgments, set into ready-made phrases. The reader skims past them without noticing.
+6. **A chain of nouns.** “The performance of an inspection of quality.” Nouns piled up and no verb. Bring it back: “we inspect”.
+
+Try it yourself. In the diagram below there is a “before” paragraph with every one of these kinds, and under it a list suggests what question to ask. Switch to “after” to see the same message written with facts, and paste your own text into the window: it stays in your browser and goes nowhere.
+
+<StopWordLens />
+
+<details>
+<summary>Check yourself: name three kinds of noise and give one example of each.</summary>
+
+For example: a judgment with no fact (“quality”), officialese (“utilize”), a cliché (“team of professionals”). There are also amplifiers (“very”), empty phrases (“at this point in time”) and chains of nouns (“the performance of an inspection”).
+
+</details>
+
+## A fact instead of a judgment
+
+The main move in editing is to find a judgment and ask **what stands behind it**. Usually it is one of six kinds of fact:
+
+- **a number**: “forty-two lots surveyed last year” instead of “great experience” (only if it’s true and you can prove it);
+- **a deadline**: “report within 14 days” instead of “fast”;
+- **a document or source**: “license no. 00-00-00, issued by the state board” instead of “licensed professional”;
+- **an example or a case**: “settled a dispute over a fence between two gardens” instead of “we solve difficult problems”;
+- **a step of the process**: “first we visit the site and measure, then we prepare the plan” instead of “a comprehensive approach”;
+- **a name**: who, where, what.
+
+A simple test: ask “how would I check this?” If there is no answer, delete the word. If there is an answer, write it in place of the word.
+
+An example with the default persona, the invented Kate Alder. Before: “I provide a wide range of high-quality services in the field of land surveying.” After: “I mark property lines by measurement and prepare a boundary plan you can file with the county recorder. I visit your property within three business days of your call.” The second version is a few words longer, but it holds three facts. Note that the numbers here are invented along with the persona. Yours will be real. If you don’t have them, don’t make them up. An invented figure is a promise, and promises have to be kept. Advertising law knows about them too: in the United States the FTC expects an advertiser to have proof for a claim before making it, and in the UK the ASA says the same. That comes back in the lesson on expert texts.
+
+And if there really are few facts? Then describe the process: what the person gets at each step. These are facts too, often the most useful, because it is frightening to buy what you don’t understand.
+
+<details>
+<summary>Check yourself: what do you replace the word “fast” with?</summary>
+
+A deadline: “in 20 minutes”, “within three business days”, “an answer the same day”. If you can’t give a deadline, describe the steps and say what it depends on.
+
+</details>
+
+## A verb instead of a noun
+
+Officialese usually hides the verb. You would never say aloud “a site visit by a specialist is performed for the purpose of taking measurements”, but you might write it without a second thought. Say it as a person: “We’ll come and measure everything.” The verb brought back the action and the person who does it.
+
+Practical rules that help when there’s no time to think:
+
+- **Look for words ending in “-tion” and “-ment”.** Beside them you’ll often find helper verbs like “perform”, “conduct”, “carry out”, “provide”. Cross out both and put in the one verb the noun grew from. “The making of a payment” becomes “pay”.
+- **Name who acts.** “Your request will be reviewed”: by whom? Say: “We’ll call you.”
+- **Watch the passive voice.** The passive hides the doer. Use it when the doer really doesn’t matter, and otherwise turn it round.
+- **Read it aloud.** What would you say to a person face to face? Write that, tidied up a little.
+
+<details>
+<summary>Check yourself: how would you rewrite “in order to improve quality, monitoring is carried out”?</summary>
+
+For example: “We check every job so that we find mistakes.” Now there is a person (“we”), a verb (“check”) and a reason (“so that we find mistakes”).
+
+</details>
+
+## Where the method lets you down
+
+Any good technique can be spoiled by zeal. Four cases to remember.
+
+**Not every text needs information.** Plain, informative style is for texts where the reader is looking for information. In a story about a person, in a greeting, in a letter that should touch someone, the main thing isn’t information but feeling. There the method is applied with care and selectively. A separate part of the course is about stories.
+
+**Overdoing it gives a telegram.** If you cut everything but facts, the text goes dry and even rude: “Repairs. $12. Call.” The reader will decide you don’t want to talk to them. Tone of voice is a job of its own, and we do it in the fifth lesson.
+
+**A tool’s score is not the goal.** Tools such as Hemingway Editor, Grammarly or the Russian Glavred work like a magnifying glass: they highlight words worth a look. They don’t understand meaning. A text that scores ten out of ten can be empty, and a text with an “ugly” word can be honest and exact. “Best” with a reference to this year’s award is no longer a judgment but a fact: “winner of the Riverbend Small Business Award, 2025”. Readability scores such as the Flesch reading ease measure sentence and word length, not truth.
+
+**Legal texts aren’t simplified at the cost of accuracy.** A privacy notice or a contract contains formulas with a precise legal meaning. You can explain them in human language, but you can’t replace the formula with a “simple word”. How to combine the two, we work out in the sixth lesson.
+
+<details>
+<summary>Check yourself: why doesn’t a high score from a tool guarantee a good text?</summary>
+
+A tool finds candidate words, not meaning. A text with no filler words can be empty, and a word from the list is sometimes right, if a fact stands behind it.
+
+</details>
+
+## Practice
+
+At the bottom of the page (in the “Before” note) is a description of your project as it is most often written: “team of professionals”, “the provision of quality services”, “personalized approach”. Rewrite it in plain, informative style right on the page.
+
+1. In the `lead` paragraph, say in two or three short sentences what you do and for whom. No judgments, no clichés.
+2. In each list item, replace the ellipsis in the `fact` paragraph with a checkable fact: a number, a deadline, a document, a name or an example. If you are only inventing a project, put in a believable fact for now and mark it in your head as “check this”.
+3. Don’t delete the “Before” note: the before-and-after pair will be useful at the end of the part, when you put all the techniques together.
+
+The check will find the most typical judgments and officialese in your text and tell you where ellipses are left. But the real check is yours: read the paragraph aloud and ask yourself of every word, “What does it tell the reader?”
+
+When the paragraphs are full of information, what is left is to put them in the right order: the main thing first, details after, and a headline that honestly says what’s inside. That’s the next lesson.

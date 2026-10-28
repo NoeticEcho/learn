@@ -1,0 +1,296 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/10-writing/03-pyramid.svx. */
+	export const metadata = {
+		id: '10-writing/03-pyramid',
+		part: 10,
+		order: 3,
+		title: 'The inverted pyramid and headlines',
+		definition: 'The inverted pyramid is a text shape with the main point in the first paragraph and details in order of importance. A headline says honestly what’s inside.',
+		summary:
+			'You’ll learn to put the main point at the start of a text and the details at the end, and to write headlines that say honestly what’s inside and read well in a browser tab, in search, on social media and in an email. Afterwards your project’s page has a headline, a description and a first paragraph with the answer.',
+		minutes: 20,
+		teaches: ['texts-inverted-pyramid', 'texts-headlines'],
+		requires: ['texts-info-style', 'html-open-graph'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'conclusion', caption: 'A story you can cut', say: 'A reader can leave at any paragraph. So the conclusion goes first, and the details follow in order of importance.' },
+				{ mood: 'hint', side: 'right', prop: 'sheet', label: 'covered', caption: 'The cut test', say: 'I cover the bottom half of the page. If everything important is clear anyway, the pyramid worked.' },
+				{ mood: 'hmm', caption: 'Not for stories', say: 'You don’t open a joke with the punchline. The pyramid is for people hunting for an answer, not for suspense.' }
+			]
+		},
+		practice: {
+			id: 'pyramid-headline',
+			title: 'A page built as a pyramid, with a headline and a description',
+			task: 'Build your project’s home page as a pyramid and label it for search and social media. In the head put a title (up to 60 characters), a description (50 to 160 characters), og:title and og:description. In an article with the id lead-page write an h1, a first paragraph with the class lead (the answer to the visitor’s question and the main action from the brief, in the same words), then a paragraph with the class detail for the details and a paragraph with the class background for the backstory. In the note, write three headlines in different ways (put the way in the class approach), pick one and explain your choice. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>…</title>\n    <meta name="description" content="…">\n    <meta property="og:title" content="…">\n    <meta property="og:description" content="…">\n  </head>\n  <body>\n    <article id="lead-page">\n      <h1>…</h1>\n      <p class="lead">…</p>\n      <p class="detail">…</p>\n      <p class="background">…</p>\n    </article>\n\n    <aside class="note" data-scaffold id="headline-variants">\n      <h2>Three headlines</h2>\n      <ol>\n        <li class="variant"><span class="approach">…</span>: <span class="text">…</span></li>\n        <li class="variant"><span class="approach">…</span>: <span class="text">…</span></li>\n        <li class="variant"><span class="approach">…</span>: <span class="text">…</span></li>\n      </ol>\n      <p>I chose version <span id="chosen">…</span> because <span id="reason">…</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n    <meta name="description" content="{{who}}. {{forWhom}}. {{mainAction.label}}.">\n    <meta property="og:title" content="{{title}}">\n    <meta property="og:description" content="{{who}}. {{forWhom}}. {{mainAction.label}}.">\n  </head>\n  <body>\n    <article id="lead-page">\n      <h1>{{title}}</h1>\n      <p class="lead">{{who}}. To begin, choose an action: {{mainAction.label}}.</p>\n      <p class="detail">Details, conditions and deadlines follow below, after the main point.</p>\n      <p class="background">The backstory and reference material come last: you can skip them.</p>\n    </article>\n\n    <aside class="note" data-scaffold id="headline-variants">\n      <h2>Three headlines</h2>\n      <ol>\n        <li class="variant"><span class="approach">direct</span>: <span class="text">{{who}}: {{mainAction.label}}</span></li>\n        <li class="variant"><span class="approach">benefit</span>: <span class="text">What you get after your first request</span></li>\n        <li class="variant"><span class="approach">question</span>: <span class="text">Where do you start if this is your first time?</span></li>\n      </ol>\n      <p>I chose version <span id="chosen">1</span> because <span id="reason">it names the subject directly and leads straight to the action</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'title-length', kind: 'text', selector: 'title', matches: '^\\s*(?![\\s\\S]*…)\\S[\\s\\S]{8,58}\\S\\s*$' },
+				{ id: 'description', kind: 'attr', selector: 'meta[name="description"]', name: 'content', matches: '^[^…]{50,160}$' },
+				{ id: 'og-title', kind: 'attr', selector: 'meta[property="og:title"]', name: 'content', matches: '^[^…]{10,90}$' },
+				{ id: 'og-description', kind: 'attr', selector: 'meta[property="og:description"]', name: 'content', matches: '^[^…]{40,200}$' },
+				{ id: 'lead-action', kind: 'field', selector: '#lead-page .lead', field: 'mainAction.label' },
+				{ id: 'three-parts', kind: 'count', selector: '#lead-page p.lead, #lead-page p.detail, #lead-page p.background', min: 3 },
+				{ id: 'no-blanks', kind: 'text', selector: '#lead-page', matches: '^[^…]*$' },
+				{ id: 'no-blanks-note', kind: 'text', selector: '#headline-variants', matches: '^[^…]*$' },
+				{ id: 'variants', kind: 'count', selector: '#headline-variants .variant .approach', min: 3 },
+				{ id: 'chosen', kind: 'text', selector: '#chosen', matches: '^\\s*[1-3]\\s*$' },
+				{ id: 'reason', kind: 'text', selector: '#reason', matches: '^\\s*\\S+(?:\\s+\\S+){3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does “inverted pyramid” mean for a text?',
+				options: [
+					'The most important thing comes first, the details next, and reference material and backstory last',
+					'The text starts with the backstory and gradually works up to the conclusion',
+					'The text is written backwards'
+				],
+				answer: 0,
+				why: [
+					'Yes. Then a reader who stops at any point has already got what matters most, and the tail can be cut without harm.',
+					'No: that’s an ordinary essay that builds up to its conclusion. The pyramid is built the other way round.',
+					'No, it’s about the order of importance, not the order of the words.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the parts of a page in pyramid order, from the first paragraph to the last',
+				items: [
+					'The conclusion: what this is and what to do',
+					'Key details: prices, deadlines, the order of work',
+					'Conditions and limits',
+					'Backstory and reference material'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'When is the pyramid not the best choice?',
+				options: [
+					'In a story where the ending should be a surprise',
+					'On a page with prices',
+					'When the conclusion makes no sense without preparation, such as bad news',
+					'In instructions for booking'
+				],
+				answer: [0, 2],
+				why: [
+					'Yes: a story rests on suspense, and a conclusion up front would destroy it. A separate part of the course is about stories.',
+					'No: prices are needed at once, so the conclusion goes first.',
+					'Yes: sometimes you need to lead the reader to the point first, or the conclusion hurts or isn’t understood. But the preparation is short.',
+					'No: in instructions the main thing goes first and the details after.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which headline is more honest for a page of prices?',
+				options: [
+					'Bike repair prices: new tube $12, full service $90',
+					'You won’t believe what a bike repair costs!',
+					'The best prices in town'
+				],
+				answer: 0,
+				why: [
+					'Yes: it names the subject and gives facts that really are on the page.',
+					'No: that’s bait. It promises a surprise and says nothing about the subject, and a reader who gets no surprise feels cheated.',
+					'No: “the best” is a judgment with no backing, and under advertising rules in the US and UK it’s you who must be able to prove it.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each element of a page with where it can be seen',
+				pairs: [
+					['title', 'The browser tab and the headline in search results'],
+					['h1', 'The main headline on the page itself'],
+					['og:title', 'The headline of the card when the page is shared on social media'],
+					['meta description', 'The description in search results']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is true of a page’s description for search?',
+				options: [
+					'A search engine may show different text, so the main point must also be on the page itself',
+					'A search engine always shows exactly what you wrote',
+					'A description isn’t needed, nobody reads it'
+				],
+				answer: 0,
+				why: [
+					'Yes. The description is a hint, not an order. A search engine builds its results from what it sees on the page and may replace your text.',
+					'No: Google says plainly that it takes the snippet from the page when that suits the query better.',
+					'No: it affects whether a person clicks the link in the results.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'texts-pyramid',
+				front: 'What is the inverted pyramid?',
+				back: 'An order for a text: the conclusion and the main point first, then key details, then conditions, and the backstory last. Cut the tail and the meaning isn’t lost.'
+			},
+			{
+				id: 'texts-pyramid-limits',
+				front: 'Where does the pyramid let you down?',
+				back: 'In stories where the ending should surprise, and where the conclusion makes no sense without brief preparation. Everywhere a person is hunting for an answer, the main thing goes first.'
+			},
+			{
+				id: 'texts-headline-honest',
+				front: 'What does an honest headline look like?',
+				back: 'It names the subject and the benefit and doesn’t promise what the page lacks. It has to work cut off from the page: in a tab, in search, on social media, in an email.'
+			},
+			{
+				id: 'texts-headline-places',
+				front: 'Where is a page’s headline seen?',
+				back: 'The tab and search results (title), the page itself (h1), the social card (og:title), the email subject. Each place has its own length limit.'
+			},
+			{
+				id: 'texts-three-variants',
+				front: 'Why write three versions of a headline?',
+				back: 'So that you choose, instead of taking the first that comes. The versions should differ in approach (direct, benefit, question, fact), not in one word.'
+			}
+		],
+		sources: [
+			{ title: 'Inverted Pyramid: Writing for Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/inverted-pyramid/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Microcontent: How to Write Headlines, Page Titles, and Subject Lines (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/microcontent-how-to-write-headlines-page-titles-and-subject-lines/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Inverted pyramid (journalism) (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Inverted_pyramid_(journalism)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Influencing your title links in search results (Google Search Central)', url: 'https://developers.google.com/search/docs/appearance/title-link', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Control your snippets in search results (Google Search Central)', url: 'https://developers.google.com/search/docs/appearance/snippet', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'The Open Graph protocol', url: 'https://ogp.me/', licence: 'proprietary-link', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The pyramid puts the main thing first, and the headline says what’s inside. Let’s build your first paragraph and label the page for search.',
+			hints: [
+				'Start with the p of the class lead: the answer and the action from the brief, in the same words, for example “Book a consultation”.',
+				'The three headlines must differ in approach: direct, benefit, question or fact. Write the approach in the class approach.',
+				'Keep the title short, up to 60 characters, with no ellipsis. The description is 50 to 160 characters: what this is and what you can do.'
+			],
+			mistakes: {
+				'title-length': 'The tab title (title) must be from 10 to 60 characters, with no ellipsis.',
+				description: 'The meta description needs text of 50 to 160 characters, with no “…”.',
+				'og-title': 'Put the headline for social media in og:title, up to 90 characters, with no “…”.',
+				'og-description': 'og:description needs text of 40 to 200 characters, with no “…”.',
+				'lead-action': 'The first paragraph (the class lead) doesn’t have the main action from the brief. Name it in the same words.',
+				'three-parts': 'The article needs three paragraphs: lead, detail and background, in that order.',
+				'no-blanks': 'An ellipsis “…” is left in the article. Replace it with your own words.',
+				'no-blanks-note': 'An ellipsis “…” is left in the note about three headlines. Replace it with your own words.',
+				variants: 'You need three headlines, each with its own approach in the class approach.',
+				chosen: 'In the “I chose version” field, write 1, 2 or 3.',
+				reason: 'Explain your choice in at least four words.'
+			},
+			outro: 'The page now has an order and an honest headline. Next come the smallest texts of all, which decide whether a form gets filled in: buttons and hints.'
+		},
+		say: { title: 'title', description: 'description', 'og:title': 'O G title', h1: 'H one', NN: 'N N', Ogilvy: 'OG-ilvee' }
+	};
+</script>
+
+<script>
+	import PyramidHeadlines from '../../diagrams/PyramidHeadlines.svelte';
+</script>
+
+## News you can cut
+
+Newspaper editors have long known that a reader can leave at any paragraph. So a news story is written with the first paragraph answering “who, what, when, where”, and the following ones adding details in order of falling importance. An editor who runs out of room cuts off the tail, and the story is still clear. This shape is called the **inverted pyramid**: the wide part, the most important, is at the top, and the point, the minor details and the backstory, is at the bottom.
+
+Where the form came from is disputed. It is usually tied to the telegraph and the newspapers of the second half of the nineteenth century, and often to the Associated Press, but historians aren’t sure how it really went; the Wikipedia article in the sources discusses the versions. What matters to us is something else: on the web the form turned out useful again, for the same reasons. A reader can be lost at any point, and a page is shown in pieces: in search, in a social card, in an email.
+
+What the pyramid looks like on a page:
+
+1. **The conclusion.** What this is, who it’s for and what to do. All in a sentence or two.
+2. **Key details.** Prices, deadlines, the order of work: whatever the decision can’t be made without.
+3. **Conditions and limits.** What’s included and what isn’t, what the deadline depends on.
+4. **Backstory and reference.** History, particulars, everything not everybody needs.
+
+The law is the same as in the last lesson: details aren’t thrown out, they’re put lower. The pyramid is applied twice: to the page as a whole and to each of its sections. In a section too, the first sentence carries the main point and the rest gives the reasons.
+
+You can check whether the pyramid worked with the **cut test**: cover the bottom half of the page with your hand. If the reader still understands what to do, there is a pyramid. If they’d understand the history of the workshop but never learn the prices, there isn’t.
+
+<details>
+<summary>Check yourself: what is the “cut test”?</summary>
+
+Cover the bottom part of a text and check whether the main point is still clear. If it is, the most important thing is at the start.
+
+</details>
+
+## Where the pyramid lets you down
+
+Every form has limits. The pyramid is good where a reader is looking for an answer. But it doesn’t suit a text whose point is the journey itself.
+
+- **Stories.** If you put the conclusion at the start, the suspense the story rests on disappears. You don’t begin a joke with the punchline. A separate part of the course is about stories.
+- **Hard news and delicate subjects.** When the reader must first be led to the point, or the conclusion will frighten them or be misunderstood. The preparation here is short, but it is there.
+- **Reasoning where the conclusion can’t be understood without the premises.** The answer “yes, you can” with no conditions is dangerous: for a lawyer or an expert almost any answer comes with a caveat. So the conclusion at the start of an expert text honestly names its own limits: “as a rule yes, if…”.
+
+An example with the default persona. The visitor’s question: “Can a boundary be settled without going to court?” A bad first paragraph: “Boundary disputes are among the hardest areas of property law, and every case is different.” A good one: “Often yes: if the neighbors agree, a boundary plan filed with the county recorder settles it without court. If they don’t agree, a court decides.” (An example of the shape, not legal advice.) The good paragraph has an answer, a caveat and a next step.
+
+<details>
+<summary>Check yourself: in which of two cases does the pyramid fit worse, a page of prices or the story of how the workshop began?</summary>
+
+The story fits worse. In it the conclusion comes at the end and holds the interest. Prices are needed at once, so the pyramid suits them.
+
+</details>
+
+## A headline stands alone
+
+A headline is read far more often than the text under it. The advertising classic David Ogilvy put the ratio at five to one in his book *Confessions of an Advertising Man*; the figure depends on the publications and nobody has measured it for the web, but the order of magnitude is clear: almost everybody reads the headline, and many don’t read the rest.
+
+The web has one more peculiarity: a headline is seen away from the page. Nielsen Norman Group calls such texts “microcontent”: the headline and description in search results, an email subject line, the caption of a link on social media, the name of a tab. The reader judges by them before opening the page, and there is no neighboring picture or paragraph to explain what it’s about. So a headline has to make sense **on its own**.
+
+Three rules follow:
+
+1. **Name the subject.** “Boundary survey consultation” is clearer than “We solve any problem”.
+2. **Say the benefit or the result**, if you can do it honestly: “Prices and timelines”, “What to bring to your first meeting”.
+3. **Don’t promise what isn’t there.** A bait headline (“You won’t believe…”, “Doctors hate him”) wins a click and loses trust: the person came for a surprise and didn’t find one. For a service with money and documents behind it, losing trust costs more than a click is worth. And if a headline makes a false claim about a product or service, it becomes a matter of advertising law: in the US the FTC treats a deceptive claim as deceptive wherever it appears, in a headline included.
+
+<details>
+<summary>Check yourself: why must a headline make sense without the page?</summary>
+
+Because it is seen on its own: in search results, on social media, in an email, in a tab. There is no page beside it to explain what it’s about.
+
+</details>
+
+## One meaning in four places
+
+For one page there are really several headlines. They can be close, but they mustn’t contradict one another:
+
+- **title**, the tag at the start of the file (in the `head`). It’s seen in the browser tab and as the page’s headline in search results. A length to aim for: up to 60 characters.
+- **h1**, the main headline on the page itself. It can be a little longer and softer than the title. A page has one `h1`.
+- **og:title** and **og:description** (“og” is for Open Graph): the tags from which a social network or messenger builds the card when you paste a link. The protocol was created at Facebook in 2010, it is described at ogp.me, and nearly the whole web uses it, including Slack, LinkedIn, iMessage and Telegram.
+- **description**, a `meta` tag with a description. A search engine may show it under the headline. A length to aim for: 120 to 160 characters.
+
+These are guidelines, not laws. Search engines cut text by width in pixels, not by the number of characters, and decide for themselves what to show: Google says that it may choose a different title and a different description if yours don’t fit the query. But to get a general idea, play with the “Headline” tab in the diagram.
+
+<PyramidHeadlines />
+
+Now, how to write. Three versions of a headline aren’t there for beauty, but so that you choose, instead of taking the first that comes. And the versions must differ in **approach**, not in a word. Here are five approaches worth having in reserve:
+
+- **Direct:** names the subject and who it’s for. “Boundary surveys in Riverbend”.
+- **Benefit:** names the result. “A boundary line the county will accept” (if you can promise that).
+- **A visitor’s question:** repeats what they’re thinking. “My neighbor moved the fence: what now?”
+- **A number or a fact:** “Three documents to bring to your first meeting”.
+- **Curiosity:** “The one mistake in a boundary survey that costs years in court”. It works well in a magazine, but it almost never suits a service that carries responsibility: curiosity promises more than the page delivers.
+
+For an expert page it’s better to begin with the direct and the benefit, and leave the question for articles. In the lesson on copywriting formulas you’ll learn to score headlines on four criteria; for now it’s enough to ask yourself: is it clear what the page is about, if nothing else can be seen?
+
+<details>
+<summary>Check yourself: how are “three different headlines” different from “one headline rewritten three times”?</summary>
+
+In approach: direct, benefit, question, fact. If one word differs, it is one headline.
+
+</details>
+
+## Practice
+
+Build your project’s home page as a pyramid and label it for search and social media.
+
+1. In the `head` put a `title` (up to 60 characters), a `description` (50 to 160 characters), `og:title` and `og:description`. These are the four lines of your business card in search results and on social media.
+2. In the `article` write an `h1`, then three paragraphs in pyramid order. The first paragraph, with the class `lead`, has the answer and the main action from the brief in the same words. The `detail` paragraph holds the details, and `background` the backstory.
+3. In the note “Three headlines” write one headline in each of three approaches, mark the approach in `approach`, choose the number of the best and explain your choice: does it honestly name the page?
+
+In the preview you won’t see search results or a social card, because those are pages on other people’s sites. Check the result with the diagram above: paste in your own `title` and description and see how they look cut off. To judge the headlines more strictly, in the part on copywriting you’ll come back to them with the “4 U’s” formula.

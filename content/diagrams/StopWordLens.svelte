@@ -8,14 +8,44 @@
 <script lang="ts">
 	import './shared.css';
 
-	import { dict, cats, mark, words, type Cat } from './stopwords.ts';
+	import { dictFor, cats, mark, words, type Cat } from './stopwords.ts';
+	import { pick } from '#lib/i18n/index.ts';
 
-	const before =
-		'Добро пожаловать в нашу мастерскую! Мы — команда профессионалов с богатым опытом. На сегодняшний день мы осуществляем качественный ремонт велосипедов и предоставляем широкий спектр услуг. Мы гарантируем индивидуальный подход к каждому клиенту и очень высокое качество. Осуществление проведения диагностики является бесплатным.';
-	const after =
-		'Чиним городские и дорожные велосипеды. Заменим камеру за 20 минут, 400 ₽. Отрегулируем тормоза и скорости за 600 ₽. Полное ТО делаем за день, 2 500 ₽. Диагностика бесплатна: скажем, что сломано и сколько это стоит, прежде чем начать.';
+	const W = pick({
+		ru: {
+			before:
+				'Добро пожаловать в нашу мастерскую! Мы — команда профессионалов с богатым опытом. На сегодняшний день мы осуществляем качественный ремонт велосипедов и предоставляем широкий спектр услуг. Мы гарантируем индивидуальный подход к каждому клиенту и очень высокое качество. Осуществление проведения диагностики является бесплатным.',
+			after:
+				'Чиним городские и дорожные велосипеды. Заменим камеру за 20 минут, 400 ₽. Отрегулируем тормоза и скорости за 600 ₽. Полное ТО делаем за день, 2 500 ₽. Диагностика бесплатна: скажем, что сломано и сколько это стоит, прежде чем начать.',
+			caption: 'Лупа для стоп-слов',
+			useBefore: 'Подставить «было»',
+			useAfter: 'Подставить «стало»',
+			area: 'Текст (можно вставить свой; он остаётся в этом браузере)',
+			words: 'Слов:',
+			flagged: 'Помечено:',
+			digits: 'Чисел в тексте:',
+			marked: 'Текст с пометками',
+			note: 'Лупа ищет кандидатов по короткому словарю. Решаете вы: «лучший» с ссылкой на премию года уже не оценка, а факт.'
+		},
+		en: {
+			before:
+				'Welcome to our workshop! We are a team of professionals with a wealth of experience. At this point in time we carry out high-quality bicycle repairs and provide a wide range of services. We guarantee a personalized approach to every customer and very high quality. The performance of an inspection is free of charge.',
+			after:
+				'We fix city and touring bikes. A new inner tube takes 20 minutes and costs $12. Brakes and gears adjusted: $25. A full service takes a day and costs $90. The inspection is free: we tell you what’s broken and what it costs before we start.',
+			caption: 'Stop-word lens',
+			useBefore: 'Use “before”',
+			useAfter: 'Use “after”',
+			area: 'Text (paste your own; it stays in this browser)',
+			words: 'Words:',
+			flagged: 'Marked:',
+			digits: 'Numbers in the text:',
+			marked: 'Text with marks',
+			note: 'The lens looks for candidates in a short dictionary. You decide: “best” with a reference to this year’s award is no longer an appraisal but a fact.'
+		}
+	});
+	const dict = dictFor();
 
-	let text = $state(before);
+	let text = $state(W.before);
 
 	const segs = $derived(mark(text));
 	const total = $derived(words(text));
@@ -26,20 +56,20 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Лупа для стоп-слов</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
-		<button type="button" onclick={() => (text = before)}>Подставить «было»</button>
-		<button type="button" onclick={() => (text = after)}>Подставить «стало»</button>
+		<button type="button" onclick={() => (text = W.before)}>{W.useBefore}</button>
+		<button type="button" onclick={() => (text = W.after)}>{W.useAfter}</button>
 	</div>
 	<label class="area">
-		Текст (можно вставить свой; он остаётся в этом браузере)
+		{W.area}
 		<textarea bind:value={text} rows="6"></textarea>
 	</label>
 
 	<p class="dg-out" aria-live="polite">
-		Слов: <strong>{total}</strong>. Помечено: <strong>{flagged}</strong> ({share}%). Чисел в тексте: <strong>{digits}</strong>.
+		{W.words} <strong>{total}</strong>. {W.flagged} <strong>{flagged}</strong> ({share}%). {W.digits} <strong>{digits}</strong>.
 	</p>
-	<div class="marked dg-box" aria-label="Текст с пометками">
+	<div class="marked dg-box" aria-label={W.marked}>
 		{#each segs as s, i (i)}{#if s.cat}<mark class="m-{s.cat}" title={dict[s.cat].label}>{s.text}</mark>{:else}{s.text}{/if}{/each}
 	</div>
 
@@ -50,7 +80,7 @@
 			</li>
 		{/each}
 	</ul>
-	<p class="dg-out">Лупа ищет кандидатов по короткому словарю. Решаете вы: «лучший» с ссылкой на премию года уже не оценка, а факт.</p>
+	<p class="dg-out">{W.note}</p>
 </figure>
 
 <style>

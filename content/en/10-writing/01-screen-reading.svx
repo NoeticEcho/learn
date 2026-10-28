@@ -1,0 +1,285 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/10-writing/01-screen-reading.svx. */
+	export const metadata = {
+		id: '10-writing/01-screen-reading',
+		part: 10,
+		order: 1,
+		title: 'How people read on a screen',
+		definition: 'Reading on a screen is scanning: a visitor hunts with their eyes for an answer instead of reading top to bottom. On a solid block of text the gaze draws an F.',
+		summary:
+			'You’ll see that a visitor doesn’t read a page but searches it for an answer, and you’ll learn to build a text so that the main thing is found in five seconds. Afterwards your project’s home page has a first screen, subheadings and short paragraphs, and you can test it with the five-second check.',
+		minutes: 15,
+		teaches: ['texts-screen-reading'],
+		requires: ['start-project-brief', 'html-semantic-elements', 'design-visual-hierarchy'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'coffee shop', caption: 'Echo wants one thing', say: 'Is the coffee shop open on Sunday? I don’t need its history from line one.' },
+				{ mood: 'explain', side: 'right', prop: 'browser', label: 'solid text', caption: 'The gaze draws an F', say: 'Nothing to catch on, so the eye slides down the left edge. The F is a symptom of a wall of text, not a layout.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'in 5 seconds', say: 'Subheadings, short paragraphs, the main thing first. Test it: look five seconds, close it, write down what you got.' }
+			]
+		},
+		practice: {
+			id: 'scan-home',
+			title: 'A home page you can scan',
+			task: 'Right now your project’s home page is one solid paragraph. Take it apart. Build the first screen in a header element with the id first-screen: an h1 heading, who you are, who the project is for, and an a link with the main action. Put the rest in main: for each section from your brief make an h2 heading and one or two short paragraphs (each p on its own line of the file). Write the services or products as a ul list. Then look at the page for exactly five seconds, close it, and write in the note what you understood and what you couldn’t find. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>Welcome!</h1>\n    <p>We are delighted to welcome you to our website. {{who}}. We work for those who need it: {{forWhom}}. {{#each sections}}The “{{.}}” section will tell you more about us. {{/each}}{{#each items}}We offer: {{title}}. {{/each}}Our professional team is looking forward to hearing from you, and to get in touch, click here: {{mainAction.label}}.</p>\n\n    <aside class="note" data-scaffold id="five-seconds">\n      <h2>The five-second check</h2>\n      <p>What I understood in five seconds: <span id="understood">…</span></p>\n      <p>What I couldn’t find: <span id="missed">…</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <header id="first-screen">\n      <h1>{{title}}</h1>\n      <p>{{who}}</p>\n      <p>Who it’s for: {{forWhom}}</p>\n      <p><a href="#contacts">{{mainAction.label}}</a></p>\n    </header>\n    <main>\n      {{#each sections}}<section>\n        <h2>{{.}}</h2>\n        <p>The most important thing about this section is said in the first sentence.</p>\n        <p>Details follow below, one idea to a paragraph.</p>\n      </section>\n      {{/each}}<section>\n        <h2>What you can get</h2>\n        <ul>\n          {{#each items}}<li><strong>{{title}}</strong>: {{text}}</li>\n          {{/each}}\n        </ul>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="five-seconds">\n      <h2>The five-second check</h2>\n      <p>What I understood in five seconds: <span id="understood">who this is, who it’s for and what to click</span></p>\n      <p>What I couldn’t find: <span id="missed">the price, which isn’t on the first screen yet</span></p>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'first-who', kind: 'field', selector: '#first-screen', field: 'who' },
+				{ id: 'first-for', kind: 'field', selector: '#first-screen', field: 'forWhom' },
+				{ id: 'first-action', kind: 'field', selector: '#first-screen a', field: 'mainAction.label' },
+				{ id: 'section-headings', kind: 'field', selector: 'main h2', field: 'sections' },
+				{ id: 'section-count', kind: 'count', selector: 'main h2', min: { brief: 'sections' } },
+				{ id: 'items-list', kind: 'field', selector: 'main li', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'no-wall', kind: 'text', selector: 'main', matches: '^(?![\\s\\S]*[^\\n]{450})[\\s\\S]*\\S' },
+				{ id: 'no-blanks', kind: 'text', selector: '#five-seconds', matches: '^[^…]*$' },
+				{ id: 'five-seconds', kind: 'text', selector: '#understood', matches: '\\S{3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What did Nielsen Norman Group’s research show about how visitors read a page?',
+				options: [
+					'Most visitors scan a page with their eyes, looking for what they need, rather than reading word by word',
+					'Visitors always read a page to the end if it’s interesting',
+					'Visitors read only the pictures'
+				],
+				answer: 0,
+				why: [
+					'Yes. A person arrives with a task and hunts for the answer: headings, numbers, the starts of lines. That’s why pages are written to be scanned.',
+					'No: even an interesting text is more often scanned than read straight through. People start reading it all once they’re sure they’ve found what they came for.',
+					'No: pictures get noticed, but the meaning of the page is still something a person looks for in the text.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How should you think about the F-shaped reading pattern?',
+				options: [
+					'As a sign that a text is poorly marked up, not as a layout to design for',
+					'As a rule: put everything important along the letter F',
+					'As a mistake, since it doesn’t really exist'
+				],
+				answer: 0,
+				why: [
+					'Yes. Nielsen Norman Group itself explained later that the F appears where text runs as a solid block. With subheadings and lists the gaze moves differently.',
+					'No: designing for the F means accepting a wall of text. It’s better to mark the text up so that no F is needed.',
+					'No: the observation is real. It’s just wrongly taken as a goal.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What helps a page that people scan with their eyes?',
+				options: [
+					'Subheadings that make clear what the section holds',
+					'One paragraph, one idea',
+					'A whole paragraph in bold, so it’s sure to be noticed',
+					'A list for items of equal weight, such as services',
+					'A link that says “click here”'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: from the subheadings a reader builds the sense of the page without reading the paragraphs.',
+					'Yes: it’s easier to find the idea you need and skip the ones you don’t.',
+					'No: when everything is highlighted, nothing is. Bold marks one or two key words.',
+					'Yes: a list is visible from afar, and the eye runs quickly down the starts of the lines.',
+					'No: that link says nothing. The name of the action (“Book a consultation”) speaks for itself.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each ailment of a page with its cure',
+				pairs: [
+					['A solid block of text several screens long', 'Subheadings and short paragraphs'],
+					['Services listed with commas in the middle of a paragraph', 'A list'],
+					['A section called “Our advantages”', 'A heading that names what’s inside'],
+					['A link that says “click here”', 'A link that names the action']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of the five-second check in order',
+				items: [
+					'Open the home page',
+					'Look at it for exactly five seconds',
+					'Close the page',
+					'Write down what you understood: who this is, who it’s for and what to do',
+					'Compare your note with the brief and fix the first screen'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Someone choosing an expert for a serious matter reads carefully. So why do they need a page that can be scanned?',
+				options: [
+					'To convince them within seconds that the page is about the right thing, and to give careful reading a place to start',
+					'They don’t: serious texts needn’t be marked up',
+					'So that they don’t read the details at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. Scanning is the doorway. Once the person has found what they need they read on, and the details should be waiting below or on pages of their own.',
+					'No: it’s in serious texts that it matters most to find what you need quickly.',
+					'No: the aim is that those who need the details are the ones who read them.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'texts-scan-not-read',
+				front: 'How do visitors read a page on the web?',
+				back: 'Mostly they scan: they look for headings, numbers and the starts of lines. They start reading straight through once they’ve found what they came for.'
+			},
+			{
+				id: 'texts-f-pattern',
+				front: 'What is the F-shaped pattern, and how should you treat it?',
+				back: 'It’s how the gaze moves over a solid text: two horizontal sweeps at the top and a vertical one down the left. It’s a symptom of poor markup, not a goal of the design.'
+			},
+			{
+				id: 'texts-first-screen',
+				front: 'Which four questions does the first screen answer?',
+				back: 'What is this, who is it for, how much or how, and what do I do? In the brief: who and what, for whom, the main action.'
+			},
+			{
+				id: 'texts-scan-techniques',
+				front: 'Name the techniques of a page that can be scanned',
+				back: 'A first screen with the main thing; informative subheadings; one paragraph, one idea; lists; the point at the start of the line; restrained emphasis.'
+			},
+			{
+				id: 'texts-five-seconds',
+				front: 'How do you test a first screen with the five-second check?',
+				back: 'Look at the page for five seconds, close it, and write down what you understood: who, for whom, what to do. What isn’t in the note isn’t on the first screen.'
+			}
+		],
+		sources: [
+			{ title: 'F-Shaped Pattern For Reading Web Content, the original study (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content-discovered/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'F-Shaped Pattern of Reading on the Web: Misunderstood, But Still Relevant (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'How Users Read on the Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/how-users-read-on-the-web/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'How Little Do Users Read? (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/how-little-do-users-read/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Eye tracking (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Eye_tracking', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A person arrives on a page with a question and hunts for the answer with their eyes. Let’s rebuild your home page so the answer is found at once.',
+			hints: [
+				'The first screen is a header element with the id first-screen. It needs an h1, a phrase about who you are, a phrase about who the project is for, and a link with the main action.',
+				'Every section from the brief needs its own h2 with the section’s name in it. You can add to the name: “Services and prices”.',
+				'If the check about solid text doesn’t pass, break the paragraph into several p elements and write each on its own line of the file.'
+			],
+			mistakes: {
+				'first-who': 'The element with the id first-screen doesn’t say who you are and what you do. Add the “who and what” field from the brief.',
+				'first-for': 'The first-screen doesn’t say who the project is for. Add that field from the brief.',
+				'first-action': 'The a link in first-screen has to name the main action in the same words as the brief.',
+				'section-headings': 'Not every section from the brief has its own h2 in main. The section’s name has to be in the heading’s text.',
+				'section-count': 'There are fewer h2 headings in main than sections in the brief.',
+				'items-list': 'Each service or product from the brief should stand in an li item of its own.',
+				'no-wall': 'Somewhere in main a paragraph is too long. Break it into several p elements, each on its own line of the file.',
+				'no-blanks': 'The five-second note still has the ellipsis “…” in it. Replace it with your own words.',
+				'five-seconds': 'Write what you understood in five seconds. One phrase at least.'
+			},
+			outro: 'Now your page can be skimmed, and what it’s about is clear at once. Next we’ll learn to choose words, so that these short paragraphs carry no filler.'
+		},
+		say: { 'F-shaped': 'eff-shaped', NN: 'N N', 'NN/g': 'N N G', h1: 'H one', h2: 'H two' }
+	};
+</script>
+
+<script>
+	import ScanSimulator from '../../diagrams/ScanSimulator.svelte';
+</script>
+
+## A person doesn’t read, they search
+
+Imagine you open a coffee shop’s website to find out whether it’s open on Sunday. You won’t read the shop’s history from the first line. Your eyes will race over the page looking for “hours” or “Sunday”. Found it, closed it. Almost every visitor to any site does this: they came with a task, not to read.
+
+Research backs this up. Nielsen Norman Group (NN/g), consultants on the usability of interfaces, watched people read pages on the web in 1997. Most scanned the page, and few read it word by word. In 2008 the same group estimated how much of a page a visitor reads in an average visit. It was a minority of the words: at most about 28% on an average page, and more likely about 20%, and the longer the page, the smaller the share. Numbers from studies like these depend on the sites and the tasks, so remember not the figure but the picture: **text on the web is scanned, not read**.
+
+From this follows the main rule of the lesson. A page is less like an essay and more like a shop sign with a directory beneath it. The sign shows what’s here and what it’s for. The directory lets you find what you need. Detailed text is necessary, but it stands behind the sign, not in its place.
+
+<details>
+<summary>Check yourself: why is a page written to be scanned rather than read from top to bottom?</summary>
+
+Because the visitor has come with a question and is hunting for the answer. If they don’t find it within a few seconds, they leave. They start reading straight through once they’re sure they’ve found what they came for.
+
+</details>
+
+## How the gaze moves: the F, the layer cake and the spots
+
+In 2006 NN/g recorded the eye movements of 232 people reading pages and folded the recordings into “heatmaps”: the longer the gaze lingered, the warmer the color. Most often the map looked like the letter F:
+
+1. the gaze runs along the top line from left to right;
+2. it drops a little and covers a second, shorter line;
+3. then it slides slowly down the left edge.
+
+The conclusions at the time were these. The first two paragraphs matter more than the rest. The starts of lines, headings and paragraphs get noticed more often than their ends. So the point belongs at the very start.
+
+Now for the place where this is easy to get wrong. The F is not a goal but a symptom. NN/g later explained that the pattern appears when text runs as one solid block with no markup: the eye has nothing to catch on and slides down the left edge. If the page has informative subheadings, the gaze jumps from one to the next, and another pattern appears, which NN/g called the “layer-cake pattern”: the person runs over the headings like layers and stops where they find what they need. There’s also the “spotted pattern”: when you’re looking for a particular word, number or link, the eye skips from one eye-catching spot to another. These are good pictures. Of them all, the F is the worst.
+
+One more honest caveat. NN/g’s studies were done mostly on English-language pages, read by eyes moving left to right. Languages written right to left, such as Arabic and Hebrew, mirror the layout, and scripts without spaces between words, such as Chinese or Thai, read differently again. The advice about headings and the starts of lines is usually carried over to other languages unchanged, but that’s an assumption, not a measurement.
+
+Experiment with the diagram. It doesn’t measure a real gaze: it’s a teaching model in which the order of “what is noticed first” comes from the research, and the seconds are approximate. But the difference between two versions of the same page is visible at once.
+
+<ScanSimulator />
+
+<details>
+<summary>Check yourself: what is the F-shaped pattern, and how should you treat it?</summary>
+
+It’s how the gaze moves over a solid text with no markup. It’s a sign that the text was badly prepared for scanning, not a layout to design for.
+
+</details>
+
+## Techniques for a page that can be scanned
+
+None of the techniques below is magic. Together they do what research calls “scannability”: the eye finds what it needs, and the brain doesn’t spend effort picking the page apart.
+
+**1. The first screen answers four questions.** The first screen is what you can see without scrolling. The visitor should understand what this is, who it’s for, how much or how, and what to do. In the brief these questions correspond to the fields “who and what”, “for whom” and “main action”. If the first screen holds only the words “Welcome!”, it has been wasted.
+
+**2. A subheading names what’s inside.** “Services and prices” beats “What we can offer you”. “How an appointment works” beats “Our approach”. The test is simple: read only the headings, one after another. If you can retell the page from them, they’re good. Witty headings are lovely in a magazine, but on a services page it’s better to be clear.
+
+**3. One paragraph, one idea.** A short paragraph, usually two to four lines, is easier to take in at a glance and easier to skip if you don’t need it. Put the main idea in the first sentence: someone who reads only that still gets it. And remember the phone: five lines on a computer take ten on a narrow screen.
+
+**4. A list where the items are equal.** Services, steps, documents, conditions: anything you can count goes in a list. If order matters (instructions), the list is numbered. If you’re telling a story you don’t need a list: it should flow.
+
+**5. The point at the start of the line.** The eye catches on the first words. “Price: from $40” works better than “If you’re interested in finding out how much it costs, then…”. This is called putting the main thing first. Numbers and the names of actions stand out most at the start.
+
+**6. Emphasize sparingly.** Bold one or two key words in a paragraph, never whole sentences. A link needs text that names the action or the place: “Book a consultation”, “Licenses and credentials”. A link that says “here” or “click” tells nothing to the eye or to the screen reader that blind people use.
+
+And one more point, about line length. Lines that are too long are hard to read: the eye loses track of which line to go to next. Typographers advise keeping to about 45 to 75 characters a line. You saw how to limit it on a page in the [lesson on typography](../../03-css/03-typography-colour/) (the `max-width` property in `ch` units). What matters here is something else: a narrow column reads better than a wide one.
+
+<details>
+<summary>Check yourself: which four questions should the first screen answer?</summary>
+
+What is this, who is it for, how much or how, and what do I do? In the brief the answers live in the fields “who and what”, “for whom” and “main action”.
+
+</details>
+
+## The five-second check
+
+How do you know whether the first screen worked? There’s a simple test, and anyone can do it. Open the page and look at it for exactly five seconds. Close it. On a sheet of paper write what you managed to understand: what it is, who it’s for, what to do. Then compare your note with the brief.
+
+It’s best if someone who knows nothing about your project looks at the page: a friend, a neighbor, a colleague. You already know what you meant to say, and your brain will fill in the meaning the page leaves out. A stranger’s eyes are more honest. If they didn’t find what you think is the main thing, it isn’t on the first screen, however much you wrote below. Usability people run a version of this under the name “five-second test”.
+
+Don’t think that scanning replaces reading. It only opens the door. Someone choosing an expert for a serious matter will read even a long text, but first they make sure within seconds that the page is about the right thing. That’s why the details aren’t thrown out. They go lower down or onto pages of their own, and the first screen keeps the sign.
+
+<details>
+<summary>Check yourself: what is the five-second check for?</summary>
+
+It shows what a visitor who knows nothing yet about the project really understands. What they didn’t write down isn’t on the first screen.
+
+</details>
+
+## Practice
+
+In the preview is your project’s page written the way pages were written in the worst years: one solid paragraph with “Welcome!” and the words “click here”. Take it apart.
+
+1. Build the first screen in a `header` element with the id `first-screen`: an `h1` heading, a phrase about who you are, a phrase about who the project is for, and a link with the main action.
+2. Put the rest in a `main` element. For each section from the brief make an `h2` heading and one or two short paragraphs, each `p` on its own line of the file.
+3. Write the services or products as a `ul` list.
+4. Look at the page for exactly five seconds, close it, and fill in the note at the bottom: what you understood and what you couldn’t find.
+
+The texts inside the paragraphs can be anything for now. What matters is that the shape is right. You’ve taken the page apart and you know what the eye looks for first. The next step is to fill the pieces with words that carry meaning. That’s the next lesson, on the plain, informative style.
