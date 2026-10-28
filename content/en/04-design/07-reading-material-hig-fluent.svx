@@ -1,0 +1,362 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/07-reading-material-hig-fluent.svx. */
+	export const metadata = {
+		id: '04-design/07-reading-material-hig-fluent',
+		part: 4,
+		order: 7,
+		title: 'How to read someone else’s design system: Material, Apple, Fluent',
+		definition: 'Material 3, Apple’s HIG and Fluent 2 are the design systems of Google, Apple and Microsoft. What is worth taking is their rules, not their look.',
+		summary:
+			'You’ll get a way to make sense of any design system in twenty minutes, and apply it to the systems of the biggest platforms: Google’s Material Design 3, Apple’s Human Interface Guidelines and Microsoft’s Fluent 2. Afterwards you borrow decisions from them, not styling.',
+		minutes: 30,
+		teaches: ['design-reading-a-design-system'],
+		requires: ['design-design-system', 'design-contrast'],
+		comic: {
+			panels: [
+				{ mood: 'hint', prop: 'sheet', label: 'documentation', say: 'Read someone else’s system with a question: what did they decide, why, and does it suit me? Beauty is not the question.' },
+				{ mood: 'explain', side: 'right', prop: 'cards', label: 'seven questions', caption: '20 minutes', say: 'Who is it for, how are tokens named, what is on a button page, how is accessibility handled, what license, is it alive?' },
+				{ mood: 'cheer', prop: 'phone', label: '44 or 48', say: 'Take the rules, not the look. Apple’s tap target is 44 points, Android’s is 48 dp. A finger is not a mouse.' }
+			]
+		},
+		practice: {
+			id: 'design-read-systems',
+			title: 'Read two systems and apply three decisions',
+			task: 'Choose two of the systems you looked at (Material, Apple HIG, Fluent or others) and fill in the note. 1) For each, write its name and three decisions: the corner radius, the spacing step and the focus state (with numbers or token names). 2) Explain how the choice relates to the tone and audience of your project, and whether the systems suit its language and audience. 3) Apply the decisions: in styles.css define the variables --radius and --space on :root and style the main-action button .cta as a block (inline-flex), with a height of at least 44 pixels (as Apple and Material ask in their rules). Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+
+      <aside class="note" data-scaffold id="reading">
+        <h2>What I learned from the systems</h2>
+        <p>Who the project is for: {{forWhom}}</p>
+        <ul>
+          <li class="sys"><strong class="sys-name">…</strong>
+            <ul>
+              <li class="decision">corner radius: …</li>
+              <li class="decision">spacing step: …</li>
+              <li class="decision">focus state: …</li>
+            </ul>
+          </li>
+          <li class="sys"><strong class="sys-name">…</strong>
+            <ul>
+              <li class="decision">corner radius: …</li>
+              <li class="decision">spacing step: …</li>
+              <li class="decision">focus state: …</li>
+            </ul>
+          </li>
+        </ul>
+        <p>How the choice relates to tone and audience: <span id="why">…</span></p>
+        <p>Whether these systems suit the project’s language and audience: <span id="fit">…</span></p>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+
+      <aside class="note" data-scaffold id="reading">
+        <h2>What I learned from the systems</h2>
+        <p>Who the project is for: {{forWhom}}</p>
+        <ul>
+          <li class="sys"><strong class="sys-name">Material Design 3</strong>
+            <ul>
+              <li class="decision">corner radius: fully rounded buttons</li>
+              <li class="decision">spacing step: an 8 dp grid, 4 for small things</li>
+              <li class="decision">focus state: a visible ring around the part</li>
+            </ul>
+          </li>
+          <li class="sys"><strong class="sys-name">Apple HIG</strong>
+            <ul>
+              <li class="decision">corner radius: set by the platform, not a fixed number</li>
+              <li class="decision">spacing step: about 12 points around elements with a border</li>
+              <li class="decision">focus state: the system focus ring, which is not removed</li>
+            </ul>
+          </li>
+        </ul>
+        <p>How the choice relates to tone and audience: <span id="why">a calm tone and visitors on phones: big tap targets are needed</span></p>
+        <p>Whether these systems suit the project’s language and audience: <span id="fit">yes for English, but their look is too recognizable, so we take the rules</span></p>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+:root {
+  --radius: 8px;
+  --space: 8px;
+}
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: calc(var(--space) * 3);
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 calc(var(--space) * 3);
+  border-radius: var(--radius);
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.cta:focus-visible {
+  outline: 3px solid #ffdd00;
+  outline-offset: 2px;
+}
+`
+			},
+			checks: [
+				{ id: 'two-systems', kind: 'count', selector: '#reading .sys-name', min: 2 },
+				{ id: 'system-names', kind: 'text', selector: '#reading .sys-name', matches: 'Material|Apple|HIG|Fluent|GOV|Carbon|Atlassian|Polaris|Primer|Radix|shadcn|Tailwind|Gravity|VKUI|Taiga|Plasma' },
+				{ id: 'decisions', kind: 'count', selector: '#reading li.decision', min: 6 },
+				{ id: 'no-blanks', kind: 'text', selector: '#reading', matches: '^[^…]*$' },
+				{ id: 'why', kind: 'text', selector: '#why', matches: '\\S{3,}' },
+				{ id: 'fit', kind: 'text', selector: '#fit', matches: '\\S{3,}' },
+				{ id: 'token-radius', kind: 'style', selector: ':root', prop: '--radius', matches: '^\\s*\\d+(\\.\\d+)?(px|rem)\\s*$' },
+				{ id: 'token-space', kind: 'style', selector: ':root', prop: '--space', matches: '^\\s*\\d+(\\.\\d+)?(px|rem)\\s*$' },
+				{ id: 'cta-display', kind: 'style', selector: 'a.cta', prop: 'display', matches: '^(inline-flex|inline-block|flex|block)$' },
+				{ id: 'cta-target', kind: 'style', selector: 'a.cta', prop: 'min-height', matches: '^(4[4-9]|[5-9]\\d)(\\.\\d+)?px$|^([3-9]|2\\.[7-9]\\d*)(\\.\\d+)?rem$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the steps of reading someone else’s system in order',
+				items: ['Understand who it was made for and what for', 'Look at the foundations and how the tokens are named', 'Open the page of one component: anatomy, states, when to use it', 'Check how open it is, its license and how fresh it is', 'Decide what to take for yourself and what not']
+			},
+			{
+				type: 'single',
+				prompt: 'What is worth borrowing from someone else’s system?',
+				options: [
+					'Decisions and rules: sizes of tap targets, the spacing step, the order of states',
+					'Its whole look, so that the site “looks professional”',
+					'The logo and the brand fonts'
+				],
+				answer: 0,
+				why: [
+					'Yes. A decision carries over to any project, while the look belongs to the product it was made for.',
+					'No: you get a recognizable site that belongs to someone else, and licenses and brand rules often forbid it.',
+					'No: the logo and brand fonts belong to their owner.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of Material Design 3?',
+				options: [
+					'Its color scheme is built from five key colors, which can be generated from one source color',
+					'Tokens are divided into three tiers: reference, system and component',
+					'It is only a set of icons',
+					'Dynamic color on Android 12 and newer takes the source color from the wallpaper'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: from those colors the system gets its palettes and roles.',
+					'Yes: the raw palette, the roles and the values of components sit in different layers.',
+					'No: it is a full system with foundations, components and documentation.',
+					'Yes: this is “dynamic color”, which arrived with Material You.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do Apple’s Human Interface Guidelines differ from most of the systems in this lesson?',
+				options: [
+					'They are mainly a guide for apps on Apple’s own platforms, not a ready code library for the web',
+					'They are an open library of React components',
+					'They are a system for government sites'
+				],
+				answer: 0,
+				why: [
+					'Yes. It is useful to read them for rules (for example, a hit region of 44 points), but there is no ready web code there.',
+					'No: the HIG is documentation.',
+					'No: it is Apple’s system for its own devices.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What are “aliases” in the tokens of Fluent 2?',
+				options: [
+					'Semantic names on top of the global values: a component refers to a role, not to “blue”',
+					'Short file names',
+					'Old, obsolete tokens'
+				],
+				answer: 0,
+				why: [
+					'Yes. The layer of aliases lets you change the theme without touching components: more in the lesson on tokens.',
+					'No: an alias is a name for a value.',
+					'No: it is an ordinary working layer of tokens.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each system with its characteristic feature',
+				pairs: [
+					['Material Design 3', 'color roles from key colors, and three tiers of tokens'],
+					['Apple HIG', 'rules for the platform: a tap target of 44 points, the person’s settings respected'],
+					['Fluent 2', 'one language across Microsoft’s products and the web, with global and alias tokens']
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-read-method', front: 'How do you make sense of someone else’s system in twenty minutes?', back: 'Who and what for; the foundations and how tokens are named; the page of one component (anatomy, states, when to use it, accessibility); how open and fresh it is; what to take for yourself.' },
+			{ id: 'design-read-borrow', front: 'What do you take from someone else’s system?', back: 'Decisions and rules, not the look: the size of a tap target, the spacing step, the order of states, the names of tokens.' },
+			{ id: 'design-read-m3', front: 'What is Material Design 3 known for?', back: 'Color roles from five key colors (which can be generated from one), three tiers of tokens (reference, system, component), and dynamic color on Android.' },
+			{ id: 'design-read-hig', front: 'What is useful in Apple’s HIG for a website?', back: 'A tap target of at least 44 points, respect for the person’s settings (text size, theme, motion), roles instead of fixed colors. There is no ready web code.' },
+			{ id: 'design-read-fluent', front: 'What is useful in Fluent 2?', back: 'The idea of a shared language across platforms, and a layer of aliases (semantic names) on top of global tokens.' }
+		],
+		sources: [
+			{ title: 'Material Design 3', url: 'https://m3.material.io/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Material Design 3 in Compose (Android Developers)', url: 'https://developer.android.com/develop/ui/compose/designsystems/material3', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Human Interface Guidelines (Apple)', url: 'https://developer.apple.com/design/human-interface-guidelines/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Fluent 2 Design System (Microsoft)', url: 'https://fluent2.microsoft.design/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Material Design (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Material_Design', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Design Systems 101 (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/design-systems-101/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Understanding: Target Size (Minimum), WCAG 2.2 (W3C)', url: 'https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Open two systems in neighboring tabs. In half an hour you will find three decisions in each, and then you will try them on your project’s button.',
+			hints: [
+				'In the note write the names of the systems and three decisions from each: the corner radius, the spacing step, what focus looks like. If you can’t find a number, describe in words how it works.',
+				'How the choice relates to tone: for example, “the tone is calm, visitors come from phones, so big tap targets”. Fill in the last line about language too.',
+				'In styles.css define --radius and --space on :root, and give the .cta button display: inline-flex and min-height: 44px.'
+			],
+			mistakes: {
+				'two-systems': 'You need two systems: their names in strong elements with the class sys-name.',
+				'system-names': 'The name must be a real system from the list in the lesson: Material, Apple HIG, Fluent, GOV.UK, Carbon and others.',
+				decisions: 'Each system needs three decisions, six lines in all.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.',
+				why: 'Explain how the choice relates to the tone and audience of the project.',
+				fit: 'Write whether the systems suit the language and audience of the project.',
+				'token-radius': ':root needs a variable --radius, for example 8px.',
+				'token-space': ':root needs a variable --space, for example 8px.',
+				'cta-display': 'The .cta button needs display: inline-flex, or its height won’t obey.',
+				'cta-target': '.cta needs a height of at least 44 pixels: min-height: 44px (or 2.75rem).'
+			},
+			outro: 'You’ve read two systems and carried their decisions over to your page. In the next lessons we’ll read the rest the same way.'
+		},
+		say: { Material: 'material', Apple: 'apple', HIG: 'H I G', Fluent: 'floo-ent', Microsoft: 'microsoft', Android: 'android', dp: 'D P', iOS: 'i O S', Windows: 'windows', Outlook: 'outlook', Teams: 'teams', React: 'react', Figma: 'fig-ma', GOV: 'gov', UK: 'U K', CSS: 'C S S', WCAG: 'wuh-cag', Dynamic: 'dynamic', Type: 'type', Liquid: 'liquid', Glass: 'glass' }
+	};
+</script>
+
+<script>
+	import SystemExplorer from '../../diagrams/SystemExplorer.svelte';
+</script>
+
+## Why read other people’s systems
+
+Some of the best lessons in design are free to read: the documentation of the big design systems. Behind them are years of research, thousands of tested decisions and teams who maintain them every day. But you have to read them with the right question. Not “how do I make it just as beautiful” but **“what did they decide and why, and does it suit me”**.
+
+The dangerous mistake is to take a system’s look. It belongs to the product it was made for, and is often protected by brand rules. Take the rules: the size of a tap target, the spacing step, the order of states, the names of tokens.
+
+<details>
+<summary>Check yourself: what do you borrow from someone else’s system?</summary>
+
+Decisions and rules, not the look: they carry over to any project.
+
+</details>
+
+## Reading in twenty minutes: seven questions
+
+Any system is read the same way. Ask it seven questions, and in twenty minutes you will understand the main thing.
+
+1. **Who is it for, and what for?** For Android apps, for government services, for working dashboards? Everything else depends on this.
+2. **Foundations.** What colors, fonts, spacing and grid does it have? Is there a spacing step and a type scale, like yours?
+3. **Tokens.** How are values named: by look (`blue-500`) or by role (`color.text.primary`)? How many tiers?
+4. **The page of one component.** Open the button: is there an anatomy, variants, states, rules for “when to use and when not”, notes on accessibility, a code example?
+5. **Accessibility.** Is it claimed, how was it tested, are there minimum sizes for tap targets?
+6. **Openness.** Can you take the code? What is the license? What are you allowed to do with the styling?
+7. **Health.** When was it last updated? Are there versions and a list of changes? Is the community alive?
+
+One caveat: systems change. Everything below describes the situation at the end of October 2026, and the only reliable source is the documentation itself, which you will find linked on every card.
+
+## Three systems of the biggest platforms
+
+Open the cards: they are arranged the same way, which makes the systems easy to compare.
+
+<SystemExplorer ids={['material3', 'hig', 'fluent2']} />
+
+**Material Design 3 (Google).** Material was born in 2014 as a language of “sheets of paper”. Its third version (2021, “Material You”) made color expressive: a color scheme is built from five key colors, each giving a tonal palette of 13 tones; all five can be generated from one source color, and on Android 12 and newer that color can be taken from the wallpaper. The roles are named like “primary”, “on primary” and “container”. Tokens are split into three layers: *reference* (the raw palette), *system* (the roles) and *component* (the values of one part). A button’s states are made as a “state layer”: a semi-transparent layer over the part. In 2025 Google announced Material 3 Expressive, a more expressive wing of the system. What is most valuable for us: the color roles and the order in which a component is documented.
+
+**Human Interface Guidelines (Apple).** These are rules for apps on Apple’s devices, not a library. They teach respect for the platform and the person: a button needs a hit region of at least 44 by 44 points (60 by 60 in visionOS), text size follows the person’s setting (Dynamic Type), and colors are named by purpose (“background”, “label”) and adapt by themselves to Dark Mode. In 2025 Apple updated its platforms with a glass manner called Liquid Glass. What to take for a website is the respect for the person’s settings, not the look.
+
+**Fluent 2 (Microsoft).** One language for Microsoft’s products (Windows, Teams, Outlook) and the web. Fluent’s tokens divide into global tokens, which store raw values, and “aliases”: semantic names that refer to the global ones. The layer of aliases lets you change the theme without touching components. There are components for Web (an open React library), iOS, Android and Windows. It is useful to take the idea of the alias layer: we’ll return to it in the lesson on tokens.
+
+<details>
+<summary>Check yourself: what are the three tiers of tokens in Material 3?</summary>
+
+Reference (raw palette values), system (roles such as primary and surface) and component (the values of one part).
+
+</details>
+
+## What the big systems have in common
+
+Put the three together, and you can see that they **argue about taste but agree on the main things**:
+- each has a step (4 or 8) and a scale of sizes;
+- color is defined by role, not by name;
+- a tap target has a minimum size: 44 points at Apple, and 48 dp in the Android guidance that Material follows (and in WCAG 2.2 the minimum for criterion 2.5.8 is 24 by 24 pixels);
+- every component has an explicit list of states;
+- the person’s settings (text size, theme, reduced motion) are respected.
+
+These five things you can take into your project right now, without borrowing anyone’s look.
+
+## Practice
+
+Open two of the systems we went through (or any others from the list in the lesson) and write out three decisions from each: the corner radius, the spacing step, what focus looks like. Don’t copy the number: understand why it is what it is. Then explain how the choice relates to the tone and audience of your project (you remember “warm” or “businesslike” from the brief), and apply the decisions to the main-action button.
+
+A button that is easy to press is not a small thing: on a phone a finger is not a mouse, and a target smaller than 44 pixels leads to misses. If your audience is older, do make it bigger.
+
+## What was wrong with 2014
+
+Material Design appeared in 2014, and within a year web libraries grew up around it, such as Material Design Lite and Angular Material. But hardly anyone then had tokens as a separate layer, and accessibility more often stayed on the developer’s conscience. Systems with tokens, detailed documentation and accessibility checks became the standard later.
