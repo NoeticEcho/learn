@@ -1,0 +1,289 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/01-internet/04-urls-domains.svx. */
+	export const metadata = {
+		id: '01-internet/04-urls-domains',
+		part: 1,
+		order: 4,
+		title: 'URLs, domain names and registrars',
+		definition: 'A URL is a page’s address in parts: scheme, host, port, path, query and fragment. The host is a domain name, read right to left and rented from a registrar.',
+		summary:
+			'You’ll read any address part by part and choose a name for your project. Afterwards you’ll know how a scheme differs from a host and a path, what a top-level domain such as .com is, and what a registrar does.',
+		minutes: 20,
+		teaches: ['net-url-anatomy', 'net-domain-names'],
+		requires: ['net-ip-tcp'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'envelope', label: 'UK, Riverbend, Mill Lane, 7', say: 'An address on an envelope is read in parts: country, town, street, house.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', label: 'https://example.com/services', say: 'A URL is the same: the scheme https, the server example.com and the path /services to the right page.' },
+				{ mood: 'hmm', prop: 'flowchart', label: 'com|example|www', caption: 'www.example.com', say: 'And the name itself is read right to left: first the zone com, then example, then www.' }
+			]
+		},
+		practice: {
+			id: 'address-note',
+			title: 'Your site’s name and addresses',
+			task: 'Choose a name for the site and addresses for its sections. Enter in the note: the domain you chose (in Latin letters, with no spaces, with a zone, for example .com), two spare options in alt elements, one sentence on why you chose this one, and a path for each section: it starts with a slash and is written in Latin letters, for example /services. Every “…” has to be replaced.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="address">\n      <h2>The site’s address</h2>\n      <p>Chosen: <code id="domain">…</code></p>\n      <p>Spares: <code class="alt">…</code>, <code class="alt">…</code></p>\n      <p>Why this one: <span id="why">…</span></p>\n      <h3>Addresses of the sections</h3>\n      <ul id="paths">\n        {{#each sections}}<li><code class="path">…</code> for {{.}}</li>\n        {{/each}}\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="address">\n      <h2>The site’s address</h2>\n      <p>Chosen: <code id="domain">my-project.com</code></p>\n      <p>Spares: <code class="alt">myproject.org</code>, <code class="alt">my-project.online</code></p>\n      <p>Why this one: <span id="why">short, easy to say aloud, and the .com zone is familiar to a worldwide audience</span></p>\n      <h3>Addresses of the sections</h3>\n      <ul id="paths">\n        {{#each sections}}<li><code class="path">/section</code> for {{.}}</li>\n        {{/each}}\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#address', matches: '^[^…]*$' },
+				{
+					id: 'domain',
+					kind: 'text',
+					selector: '#domain',
+					matches: '^\\s*(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}\\s*$'
+				},
+				{ id: 'spares', kind: 'count', selector: '#address .alt', min: 2 },
+				{ id: 'why', kind: 'text', selector: '#why', matches: '\\S{3,}' },
+				{ id: 'paths', kind: 'count', selector: '#paths .path', min: 3 },
+				{ id: 'path-slash', kind: 'text', selector: '#paths .path', matches: '^\\s*/[a-z0-9/_-]*\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the parts of the address in the order they come in it: https://www.example.com:443/services?city=a#price',
+				items: ['Scheme (https)', 'Host (www.example.com)', 'Port (443)', 'Path (/services)', 'Query (?city=a)', 'Fragment (#price)']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each part of an address to what it means',
+				pairs: [
+					['Scheme', 'how to talk to the server'],
+					['Host', 'whose server it is, and what is looked up in DNS'],
+					['Path', 'what exactly is requested'],
+					['Fragment', 'a place inside the page, never sent to the server']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In the address blog.example.com, what is example?',
+				options: [
+					'The domain name: it is registered with a registrar',
+					'The top-level domain',
+					'A subdomain that the owner creates themselves'
+				],
+				answer: 0,
+				why: [
+					'Yes. Reading from the right: com is the zone, example is the domain name, blog is the subdomain.',
+					'No: the top-level domain is the last part, com.',
+					'No: a subdomain is the leftmost part, blog. The owner of the domain creates it and pays nobody for it.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true about registering a domain?',
+				options: [
+					'A domain is rented for a term, usually a year, and renewed',
+					'If you don’t renew in time, the name can go to someone else',
+					'A registrar and a hosting provider are necessarily the same company',
+					'A domain and hosting are different things: the name is one, the place for the site’s files another'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a domain isn’t bought for good.',
+					'Yes: so turn on auto-renewal and watch the registrar’s email.',
+					'No: a domain and hosting can be kept with different companies.',
+					'Yes: a domain is the name, and hosting is the place where the files live.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which page path is best for a site that will also be opened from links in messengers?',
+				options: ['/services/surveying', '/Services & prices (new)', '/page?id=7384&x=1'],
+				answer: 0,
+				why: [
+					'Yes: short, readable, in Latin letters, with no spaces. When copied, the link stays clean.',
+					'No: spaces, brackets and ampersands turn into a long run of %-codes when copied.',
+					'No: this address tells a person nothing, and it isn’t memorable.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is a domain registrar?',
+				options: [
+					'An organization that, on your behalf, enters the name in the zone’s registry and renews it',
+					'The company where the site’s files are kept',
+					'A government body that approves sites'
+				],
+				answer: 0,
+				why: [
+					'Yes. A zone (such as .com) is run by a registry, and registrars sell names in it and work with the registry.',
+					'No: that is hosting.',
+					'No: nobody approves sites before a domain is registered.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'net-url-parts',
+				front: 'What is a URL made of?',
+				back: 'Scheme, host, port, path, query and fragment: https://host:port/path?query#fragment.'
+			},
+			{
+				id: 'net-fragment',
+				front: 'Where does the fragment (#…) of an address go?',
+				back: 'Nowhere: it isn’t sent to the server. The browser uses it to scroll the page to the right place.'
+			},
+			{
+				id: 'net-domain-order',
+				front: 'In what order is a domain name read?',
+				back: 'Right to left: the zone (.com), the domain name (example), the subdomain (blog).'
+			},
+			{
+				id: 'net-registrar',
+				front: 'What does a domain registrar do?',
+				back: 'It enters your name in the zone’s registry and renews it. A domain is rented, usually for a year, so it must be renewed.'
+			},
+			{
+				id: 'net-domain-vs-hosting',
+				front: 'How does a domain differ from hosting?',
+				back: 'A domain is the name, and hosting is the place where the site’s files live. They can be kept with different companies.'
+			}
+		],
+		sources: [
+			{
+				title: 'What is a URL? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_URL',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'What is a domain name? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_domain_name',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'Cool URIs don’t change (Tim Berners-Lee)', url: 'https://www.w3.org/Provider/Style/URI', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Domain name (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Domain_name', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Registrars (ICANN)', url: 'https://www.icann.org/resources/pages/registrars-0d-2012-02-25-en', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Root zone database: every top-level domain (IANA)', url: 'https://www.iana.org/domains/root/db', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you’ll choose a name for your project and decide how the addresses of its sections will look.',
+			hints: [
+				'A domain is written in Latin letters, lower case, with no spaces, and ends in a zone: for example my-project.com.',
+				'A section’s path starts with a slash and is made of Latin words joined by hyphens: /about, /services, /contact.',
+				'You need two spares: two more names in code elements with the class alt.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				domain: 'The domain is written wrongly. You need Latin letters and digits, with no spaces or underscores, and a zone at the end: for example my-project.com.',
+				spares: 'You need two spare options in code elements with the class alt.',
+				why: 'Write in one sentence why you chose this name.',
+				paths: 'You need a path for each section: at least three, in code elements with the class path.',
+				'path-slash': 'A path must start with a slash and be made of Latin letters, digits and hyphens: for example /about.'
+			},
+			outro: 'Now your project has a name and tidy addresses. The next question is how to find a server from that name. That is DNS.'
+		},
+		say: { URL: 'U R L', DNS: 'D N S', HTTPS: 'H T T P S', TLD: 'T L D', punycode: 'pyoony code', example: 'example' }
+	};
+</script>
+
+<script>
+	import UrlParser from '../../diagrams/UrlParser.svelte';
+</script>
+
+## An address like one on an envelope
+
+For a letter to arrive, you write the country, the town, the street and the house on the envelope. For a page to be found, it has an address, a **URL** (Uniform Resource Locator). It is also read in parts, from the general to the particular. Take this address:
+
+```
+https://www.example.com:443/services/surveying?city=riverbend#price
+```
+
+- **Scheme** (`https`): how to talk to the server. `http` is the plain protocol, and `https` is the secure one.
+- **Host** (`www.example.com`): whose server it is. The computer uses the host to find where to go (in the next lesson we’ll see how).
+- **Port** (`443`): which program on the server gets the request. It is usually not written: `https` implies 443, and `http` implies 80.
+- **Path** (`/services/surveying`): what exactly you are requesting on this server. It looks like a path to a file in folders.
+- **Query** (`?city=riverbend`): a refinement in the form of “name=value” pairs. This is how search and filters work.
+- **Fragment** (`#price`): a place inside the page. It is **not sent** to the server: the browser handles it and scrolls the page to the right place.
+
+Type any address into the diagram below, and it will split it into parts. Nothing is sent: the parsing happens in your browser.
+
+<UrlParser />
+
+<details>
+<summary>Check yourself: which part of an address is not sent to the server?</summary>
+
+The fragment (what comes after the hash sign). Only the browser uses it.
+
+</details>
+
+## A domain name is read right to left
+
+The host `www.example.com` is a **domain name**. It is built like a tree, and you read it from the end:
+
+1. `com`: the **top-level domain** (TLD). This is what the rightmost part of a name is called.
+2. `example`: the **domain name**. This is what you register.
+3. `www`: a **subdomain**. The owner creates it, free of charge, as many as they like: `blog.example.com`, `shop.example.com`. Even “www” is just a subdomain, left over by habit from the days of the first sites.
+
+Zones come in two kinds. **Country-code** zones: `.uk`, `.de`, `.ca`, `.ru`, which are the zones of countries. And **generic** ones: `.com`, `.org`, `.net`, and a great many newer ones such as `.online` and `.shop`. The whole system is coordinated by ICANN, which accredits the registrars for the generic zones, and the list of every zone is kept by IANA. Both have links in the sources. Each country-code zone is run by a registry of its own, with rules of its own.
+
+Some zones take names in other alphabets. Russia’s `.рф` zone, for example, accepts Cyrillic names such as `пример.рф`. For the network such a name is written in Latin letters by a special scheme called punycode: `xn--e1afmkfd.xn--p1ai`. The browser does this itself, and you only see it when you copy the address.
+
+<details>
+<summary>Check yourself: how is blog.example.com read, and what is what in it?</summary>
+
+From the right: com is the zone, example is the domain name, blog is the subdomain.
+
+</details>
+
+## Who manages the names
+
+This system has three players:
+
+- The **registry** runs a whole zone: it remembers which names in it are taken and by whom. For `.com` it is Verisign, for `.uk` it is Nominet.
+- The **registrar** is the company you order a name from. It deals with the registry on your behalf. There are many registrars, and they compete on price and service.
+- The **registrant** is you: the one who rents the name.
+
+The word “rents” matters here. A domain isn’t bought for good. It is registered usually for a year and renewed. If you don’t renew in time, the name becomes free, and someone else can take it, along with your address and every link to it. So turn on auto-renewal, keep access to the registrar’s account and watch for its emails: reminders will arrive in your inbox.
+
+Don’t confuse a domain with **hosting**. A domain is the name on the envelope. Hosting is the place where the site’s files live. They can be kept with different companies, and that is normal. We’ll cover hosting in the part on infrastructure.
+
+<details>
+<summary>Check yourself: what happens if you don’t renew a domain in time?</summary>
+
+The name becomes free, and someone else can take it, along with your address.
+
+</details>
+
+## How to choose a name
+
+A good name for a site is:
+
+- **short and easy to say aloud**, so it can be dictated over the phone;
+- **free of hyphens and digits** if possible: they have to be explained (“hyphen”, “seven” or “7”?);
+- **in a zone familiar to the audience**: `.com` for an international project, or the country zone for a project that people look for in one country;
+- **not a copy of someone else’s brand**: otherwise you may get a letter from the brand’s owner;
+- **permanent**: an address is remembered and placed in links, and changing it later hurts.
+
+Spelling is a problem too: one name can be written in several ways, and people will get it wrong. So a spare name with another spelling is useful.
+
+## Page paths
+
+A path is also part of your interface. A good path is:
+
+- **short and readable**: `/services/surveying`, not `/page?id=7384&x=1`;
+- **in plain Latin letters**, because spaces and symbols in an address turn into a long run of codes like `%20` when copied;
+- **without spaces or capitals**, with words joined by hyphens;
+- **stable**: Tim Berners-Lee wrote an article, “Cool URIs don’t change”: a good address shouldn’t change. If a page is moved anyway, the old address should be redirected to the new one (we’ll do that in the lesson on HTTP).
+
+If a site has several languages, tell them apart in the address: by a subfolder (`/en/`, `/fr/`) or a subdomain (`fr.example.com`). Choose one way and stick to it. There is more about multilingual sites in the part on search and in the part on HTML.
+
+## Practice
+
+Choose a name and the addresses of the sections for your project and write them in the note. The names of the sections are already on the page: you need to invent a Latin path for each. If the site is in two languages, add the language to the paths: `/en/services` and `/fr/services`.
+
+## What was wrong with the addresses of the 1990s
+
+The first addresses were long and arbitrary: `~username/pages/index.html`, through home directories on university servers. Later came dynamic addresses of the form `index.php?id=4`, which no one can remember. The readable addresses we are used to today are thanks to people beginning to think of an address as part of the interface.

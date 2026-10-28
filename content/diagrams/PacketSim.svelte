@@ -7,8 +7,72 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick as byLocale } from '#lib/i18n/index.ts';
 
-	let text = $state('Кадастровый инженер и судебный эксперт: помогаю владельцам участков отстоять границы.');
+	const W = byLocale({
+		ru: {
+			sample: 'Кадастровый инженер и судебный эксперт: помогаю владельцам участков отстоять границы.',
+			caption: 'Ваш текст путешествует кусками',
+			loss: 'Потери в сети:',
+			again: 'Отправить снова',
+			none: 'Без потерь',
+			cut: '{W.cut}',
+			no: '№',
+			q: ['«', '»'],
+			from: 'откуда',
+			to: 'куда',
+			packet: 'пакет',
+			of: 'из',
+			data: 'данные:',
+			legend: '203.0.113.7 и 198.51.100.20 это адреса узлов (так принято писать примеры). Число после двоеточия это порт: порт 443 принимает защищённый веб-трафик (HTTPS), а порт отправителя выбирает ваш компьютер.',
+			round: 'Круг',
+			prev: 'Предыдущий круг',
+			next: 'Следующий круг',
+			sent: 'Отправлено в этом круге: пакеты',
+			arrived: 'Дошли, в порядке прибытия:',
+			nothing: 'ни одного',
+			lost: 'Потеряны:',
+			askAgain: 'Получатель сообщает, каких номеров нет, и отправитель шлёт их снова.',
+			allArrived: 'Все недостающие дошли.',
+			assembled: 'Что собрал получатель: ',
+			notYet: (n: number) => `пакет №${n} ещё не дошёл`,
+			total: 'Всего отправлено пакетов:',
+			inText: 'при',
+			inTextEnd: 'в тексте. Лишняя работа из-за потерь:'
+		},
+		en: {
+			sample: 'Land surveyor and expert witness: I help landowners settle their boundaries.',
+			caption: 'Your text travels in pieces',
+			loss: 'Network loss:',
+			again: 'Send again',
+			none: 'No loss',
+			cut: 'The sender cuts the text into numbered packets (press a packet)',
+			no: '#',
+			q: ['“', '”'],
+			from: 'from',
+			to: 'to',
+			packet: 'packet',
+			of: 'of',
+			data: 'data:',
+			legend: '203.0.113.7 and 198.51.100.20 are the addresses of the nodes (the usual way to write examples). The number after the colon is the port: port 443 takes secure web traffic (HTTPS), and your computer chooses the sender’s port.',
+			round: 'Round',
+			prev: 'Previous round',
+			next: 'Next round',
+			sent: 'Sent in this round: packets',
+			arrived: 'Arrived, in order of arrival:',
+			nothing: 'none',
+			lost: 'Lost:',
+			askAgain: 'The receiver reports which numbers are missing, and the sender sends them again.',
+			allArrived: 'All the missing ones arrived.',
+			assembled: 'What the receiver has put together: ',
+			notYet: (n: number) => `packet #${n} hasn’t arrived yet`,
+			total: 'Packets sent in all:',
+			inText: 'for',
+			inTextEnd: 'in the text. Extra work caused by loss:'
+		}
+	});
+
+	let text = $state(W.sample);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -62,42 +126,42 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Ваш текст путешествует кусками</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
 		<label>
-			Потери в сети: {loss}%
+			{W.loss} {loss}%
 			<input type="range" min="0" max="60" step="5" bind:value={loss} oninput={() => (view = 0)} />
 		</label>
-		<button type="button" onclick={() => ((seed = seed + 1), (view = 0))}>Отправить снова</button>
-		<button type="button" onclick={resend(0)}>Без потерь</button>
+		<button type="button" onclick={() => ((seed = seed + 1), (view = 0))}>{W.again}</button>
+		<button type="button" onclick={resend(0)}>{W.none}</button>
 	</div>
 
-	<div class="dh">Отправитель режет текст на пронумерованные пакеты (нажмите на пакет)</div>
+	<div class="dh">{W.cut}</div>
 	<ol class="pk">
 		{#each chunks as c, i (i)}
-			<li><button type="button" class:on={pick === i} aria-pressed={pick === i} onclick={() => (pick = i)}><b>№{i + 1}</b> {c}</button></li>
+			<li><button type="button" class:on={pick === i} aria-pressed={pick === i} onclick={() => (pick = i)}><b>{W.no}{i + 1}</b> {c}</button></li>
 		{/each}
 	</ol>
 	<p class="dg-box dg-mono hdr" aria-live="polite">
-		откуда 203.0.113.7:51514 → куда 198.51.100.20:443 | пакет №{pick + 1} из {chunks.length} | данные: «{chunks[pick]}»
+		{W.from} 203.0.113.7:51514 → {W.to} 198.51.100.20:443 | {W.packet} {W.no}{pick + 1} {W.of} {chunks.length} | {W.data} {W.q[0]}{chunks[pick]}{W.q[1]}
 	</p>
-	<p class="legend">203.0.113.7 и 198.51.100.20 это адреса узлов (так принято писать примеры). Число после двоеточия это порт: порт 443 принимает защищённый веб-трафик (HTTPS), а порт отправителя выбирает ваш компьютер.</p>
+	<p class="legend">{W.legend}</p>
 
-	<div class="dh">Круг {k + 1} из {rounds.length}</div>
+	<div class="dh">{W.round} {k + 1} {W.of} {rounds.length}</div>
 	<div class="dg-ctl">
-		<button type="button" disabled={k === 0} onclick={() => (view = k - 1)}>Предыдущий круг</button>
-		<button type="button" disabled={k >= rounds.length - 1} onclick={() => (view = k + 1)}>Следующий круг</button>
+		<button type="button" disabled={k === 0} onclick={() => (view = k - 1)}>{W.prev}</button>
+		<button type="button" disabled={k >= rounds.length - 1} onclick={() => (view = k + 1)}>{W.next}</button>
 	</div>
 	<p class="dg-out" aria-live="polite">
-		Отправлено в этом круге: пакеты {rounds[k].sent.map((i) => i + 1).join(', ')}.
-		Дошли, в порядке прибытия: {rounds[k].arrived.length ? rounds[k].arrived.map((i) => i + 1).join(', ') : 'ни одного'}.
-		{#if rounds[k].lost.length}Потеряны: {rounds[k].lost.map((i) => i + 1).join(', ')}. Получатель сообщает, каких номеров нет, и отправитель шлёт их снова.{:else}Все недостающие дошли.{/if}
+		{W.sent} {rounds[k].sent.map((i) => i + 1).join(', ')}.
+		{W.arrived} {rounds[k].arrived.length ? rounds[k].arrived.map((i) => i + 1).join(', ') : W.nothing}.
+		{#if rounds[k].lost.length}{W.lost} {rounds[k].lost.map((i) => i + 1).join(', ')}. {W.askAgain}{:else}{W.allArrived}{/if}
 	</p>
 	<p class="asm">
-		<span class="visually-hidden">Что собрал получатель: </span>{#each chunks as c, i (i)}{#if have.has(i)}<span>{c}</span>{:else}<span class="gap" title="пакет №{i + 1} ещё не дошёл">▒▒</span>{/if}{/each}
+		<span class="visually-hidden">{W.assembled}</span>{#each chunks as c, i (i)}{#if have.has(i)}<span>{c}</span>{:else}<span class="gap" title={W.notYet(i + 1)}>▒▒</span>{/if}{/each}
 	</p>
 	<p class="dg-out">
-		Всего отправлено пакетов: <strong>{sentTotal}</strong> при {chunks.length} в тексте. Лишняя работа из-за потерь: <strong>{sentTotal - chunks.length}</strong>.
+		{W.total} <strong>{sentTotal}</strong> {W.inText} {chunks.length} {W.inTextEnd} <strong>{sentTotal - chunks.length}</strong>.
 	</p>
 </figure>
 

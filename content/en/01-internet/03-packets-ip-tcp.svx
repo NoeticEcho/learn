@@ -1,0 +1,273 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/01-internet/03-packets-ip-tcp.svx. */
+	export const metadata = {
+		id: '01-internet/03-packets-ip-tcp',
+		part: 1,
+		order: 3,
+		title: 'Packets, IP and TCP: how data gets there',
+		definition: 'A packet is a piece of data with a header: where from, where to, which number. IP delivers packets by address with no guarantees; TCP numbers and resends.',
+		summary:
+			'You’ll see that a page doesn’t travel whole but in pieces, and why it still arrives correctly. Afterwards you can explain an IP address, a port, a lost packet and the TCP handshake in plain words.',
+		minutes: 20,
+		teaches: ['net-packets', 'net-ip-tcp'],
+		requires: ['net-web-vs-internet'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'packets', label: '1 2 3', say: 'A page doesn’t travel whole: it is cut into packets, each with an address and a number.' },
+				{ mood: 'hmm', side: 'right', prop: 'packets', label: '3 1', caption: 'On the way', say: 'Packets take different roads and arrive out of order. And the second one got lost.' },
+				{ mood: 'cheer', prop: 'packets', label: '1 2 3', caption: 'TCP', say: 'TCP puts them in order by number and asks for the missing one again. The network is unreliable, delivery is reliable.' }
+			]
+		},
+		practice: {
+			id: 'page-budget',
+			title: 'A page budget for a modem',
+			task: 'In 1996 a page was opened over a modem, at about 3.6 kilobytes a second (a 28.8k modem). A 50 kilobyte page took almost fourteen seconds to load, so it had a budget. Fill in the table under the heading: write each row’s weight in kilobytes (a number in the cell with the class kb), answer “yes” or “no” in the img cell for each row with images, and enter the total, no more than 50. Every “…” has to be replaced.',
+			era: 1,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="budget">\n      <h2>Page weight, KB</h2>\n      <table>\n        <tr><th>What</th><th>Image?</th><th>KB</th></tr>\n        <tr class="row"><td>The text of all the sections</td><td class="img">no</td><td class="kb">…</td></tr>\n        <tr class="row"><td>Logo</td><td class="img">…</td><td class="kb">…</td></tr>\n        <tr class="row"><td>Main picture</td><td class="img">…</td><td class="kb">…</td></tr>\n        <tr class="row"><td>Pictures for your services, products or people</td><td class="img">…</td><td class="kb">…</td></tr>\n        <tr><th>Total</th><td></td><td id="total">…</td></tr>\n      </table>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <aside class="note" data-scaffold id="budget">\n      <h2>Page weight, KB</h2>\n      <table>\n        <tr><th>What</th><th>Image?</th><th>KB</th></tr>\n        <tr class="row"><td>The text of all the sections</td><td class="img">no</td><td class="kb">6</td></tr>\n        <tr class="row"><td>Logo</td><td class="img">yes</td><td class="kb">4</td></tr>\n        <tr class="row"><td>Main picture</td><td class="img">yes</td><td class="kb">20</td></tr>\n        <tr class="row"><td>Pictures for your services, products or people</td><td class="img">yes</td><td class="kb">10</td></tr>\n        <tr><th>Total</th><td></td><td id="total">40</td></tr>\n      </table>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'rows', kind: 'count', selector: '#budget tr.row', min: 3 },
+				{ id: 'no-blanks', kind: 'text', selector: '#budget', matches: '^[^…]*$' },
+				{ id: 'weights', kind: 'text', selector: '#budget td.kb', matches: '^\\s*\\d+([.,]\\d+)?\\s*$' },
+				{ id: 'images-answered', kind: 'text', selector: '#budget td.img', matches: '^\\s*(yes|no)\\s*$' },
+				{ id: 'within-budget', kind: 'text', selector: '#budget #total', matches: '^\\s*([1-9]|[1-4][0-9]|50)([.,]\\d+)?\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each part of a packet’s header to what it tells you',
+				pairs: [
+					['The receiver’s IP address', 'which computer to deliver to'],
+					['The port', 'which program on that computer gets the data'],
+					['The packet number', 'in what order to put the whole together'],
+					['The data', 'the piece of the page the packet carries']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Some packets were lost on the way. Why does the page still open whole?',
+				options: [
+					'The receiver notices the missing numbers and asks for them again (that is how TCP works)',
+					'Lost packets aren’t needed',
+					'Routers keep a copy of every packet'
+				],
+				answer: 0,
+				why: [
+					'Yes. TCP numbers the packets, the receiver confirms what it got, and the sender repeats what is missing.',
+					'No: without any piece the page would be incomplete or broken.',
+					'No: routers only pass packets along, and keep no copies.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of setting up a TCP connection (the “handshake”) in order',
+				items: [
+					'The client sends the server a SYN signal: “let’s talk”',
+					'The server replies SYN-ACK: “agreed, I’m ready”',
+					'The client replies ACK: “received”',
+					'The data starts to flow'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does TCP do?',
+				options: [
+					'Numbers the packets so they can be put in the right order',
+					'Confirms the packets that arrived',
+					'Resends the lost packets',
+					'Chooses each packet’s route across the network'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: by the numbers the receiver puts the data in order.',
+					'Yes: the sender knows what got through.',
+					'Yes: that is exactly what TCP is valued for.',
+					'No: the route is chosen by routers from the receiver’s address, and different packets can take different paths.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does port 443 mean?',
+				options: [
+					'The number of the program on a server that accepts secure web traffic (HTTPS)',
+					'A computer’s number on the network',
+					'A packet’s number'
+				],
+				answer: 0,
+				why: [
+					'Yes. Plain HTTP traditionally uses port 80, and HTTPS uses port 443. The browser fills them in itself, and you don’t see them.',
+					'No: a computer is found by its IP address. The port picks the program on it.',
+					'No: a packet’s number is something else, and it changes with every packet.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why were IPv6 addresses introduced when IPv4 exists?',
+				options: [
+					'IPv4 has about 4.3 billion addresses, which isn’t enough for every device, and an IPv6 address is far longer',
+					'IPv6 is faster',
+					'IPv4 was banned'
+				],
+				answer: 0,
+				why: [
+					'Yes. An IPv4 address is 32 bits and an IPv6 address is 128, so there are practically unlimited addresses.',
+					'No: speed depends on other things. The protocol is new for the sake of the number of addresses.',
+					'No: IPv4 still works alongside IPv6.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'net-packet',
+				front: 'What is a packet?',
+				back: 'A small piece of data (usually up to 1,500 bytes) with a header: from, to, number. Every page travels the network in packets.'
+			},
+			{
+				id: 'net-ip-address',
+				front: 'What is an IP address?',
+				back: 'The address of a node on the network. In IPv4 it is four numbers from 0 to 255 separated by dots, and in IPv6 it is longer: there are enough addresses for everyone.'
+			},
+			{
+				id: 'net-port',
+				front: 'What is a port for?',
+				back: 'An IP address finds the computer, and a port finds the program on it: 80 for HTTP, 443 for HTTPS, 25 for mail.'
+			},
+			{
+				id: 'net-tcp',
+				front: 'What does TCP do?',
+				back: 'It makes an unreliable network reliable: it numbers packets, confirms what arrived and resends what was lost.'
+			},
+			{
+				id: 'net-handshake',
+				front: 'How does the TCP handshake work?',
+				back: 'Three steps: the client sends SYN, the server replies SYN-ACK, the client replies ACK. Then the data flows.'
+			}
+		],
+		sources: [
+			{
+				title: 'How does the Internet work? (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/How_does_the_Internet_work',
+				licence: 'CC-BY-SA',
+				kind: 'article',
+				lang: 'en'
+			},
+			{ title: 'Internet protocol suite (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Internet_protocol_suite', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Packet switching (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Packet_switching', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'RFC 9293: Transmission Control Protocol (TCP)', url: 'https://www.rfc-editor.org/rfc/rfc9293', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Computer Networks: A Systems Approach', url: 'https://book.systemsapproach.org/', licence: 'link-only', kind: 'book', lang: 'en' }
+		],
+		videos: [
+			{ title: 'The Internet: Packets, Routing & Reliability (Code.org, “How the internet works”, 2 of 5)', url: 'https://www.youtube.com/watch?v=AYdF7b3nMto', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now you’ll do what real webmasters did in 1996: count a page’s weight down to the last kilobyte.',
+			hints: [
+				'Write the weight in the kb cell as a number, without “KB”: for example 6 or 20.',
+				'In the img cells write “yes” for the rows with pictures, and “no” where there is no picture.',
+				'The total is the sum of all the rows. If you get more than 50, think about which picture you could drop.'
+			],
+			mistakes: {
+				rows: 'The table should have at least three rows with the class row.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with a number or a word.',
+				weights: 'The weight must be a number: for example 6 or 12.5. There is no need to write “KB”.',
+				'images-answered': 'The img cells should hold the word “yes” or “no”, with no other words.',
+				'within-budget': 'The total must be a number from 1 to 50. If yours is higher, remove or shrink some pictures.'
+			},
+			outro: 'That is how every kilobyte was counted while the internet ran over a telephone wire. Today the budget is bigger, but the habit of counting weight is still useful.'
+		},
+		say: { IP: 'I P', TCP: 'T C P', UDP: 'U D P', HTTP: 'H T T P', HTTPS: 'H T T P S', SYN: 'sin', ACK: 'ack', IPv4: 'I P v four', IPv6: 'I P v six', RFC: 'R F C', MTU: 'M T U', KB: 'kilobytes' }
+	};
+</script>
+
+<script>
+	import PacketSim from '../../diagrams/PacketSim.svelte';
+</script>
+
+## A page travels in pieces
+
+When you open a page, it doesn’t arrive in one parcel. The data is cut into small pieces, **packets**, and each one travels on its own. Compare it with moving house: you don’t load everything into one enormous freight car, you pack it in boxes, number them and send them in different trucks. At the other end the boxes are opened in numeric order.
+
+A packet has a **header**, like a parcel’s label: where from, where to and which number it is. And it has its **contents**: the piece of data itself. The size is limited: a packet usually carries fifteen hundred bytes, which is about one and a half kilobytes. A hundred kilobyte page is about seventy packets, and a megabyte picture is about seven hundred.
+
+Move the loss slider on the diagram. The network isn’t perfect: packets are sometimes lost or arrive in the wrong order, and the receiver still puts the whole together.
+
+<PacketSim />
+
+<details>
+<summary>Check yourself: what is a packet made of?</summary>
+
+A header (where from, where to, which number) and contents (a piece of data).
+
+</details>
+
+## Why cut it into packets
+
+Telephone service used to work differently: for the length of a call you were given a whole line, and nobody else used it. That line sat idle while you were silent, and dropped if even one section broke.
+
+A packet network is more economical. Packets from different people go along the same lines, mixed together. If some node breaks, packets go around it by another road. This idea was invented in the early 1960s by Paul Baran in the United States and Donald Davies in Britain, and the internet grew on it.
+
+Packets are passed along by **routers**: nodes that look at the receiver’s address in the header and decide whom to hand the packet to next. No router knows the whole route, each knows only where to hand it on. That is why the packets of one message can take different paths and arrive out of order.
+
+## IP: the address of a node
+
+Every device on the network needs an address, or there is no telling where to take a packet. That address is called an **IP address**. In the IPv4 protocol it is four numbers from 0 to 255 separated by dots, for example `198.51.100.20`. There are about 4.3 billion such addresses in all, and they ran short of the planet’s devices long ago.
+
+That is why there is IPv6, where an address is much longer and is written in hexadecimal, for example `2001:db8::1`. There are practically endless addresses in it, and today both protocols work side by side.
+
+At home you usually have one “outside” address given by your provider, and a router that hands the devices inside the house addresses of their own, of the form `192.168.…`. The inside addresses can’t be seen from outside.
+
+An important property of IP: it delivers on a best-effort basis. A packet can be lost, arrive twice or arrive out of order. There are no guarantees, and that is a deliberate decision: it keeps the network simple and fast.
+
+<details>
+<summary>Check yourself: why was IPv6 needed when there is IPv4?</summary>
+
+IPv4 has about 4.3 billion addresses, and they aren’t enough for every device. An IPv6 address is longer, and the number of addresses is practically unlimited.
+
+</details>
+
+## Ports: which program
+
+An IP address brings a packet to the right computer. But many programs run on a computer, and the packet has to go to the right one: the browser, the mail program, a game. For that there is a **port**: a number from 0 to 65535. The address is the building, and the port is the apartment.
+
+Some ports are standard: 80 for the plain web (HTTP), 443 for the secure web (HTTPS), 25 for sending mail, 53 for DNS. The browser fills them in itself, which is why you don’t see a port in a site’s address. In the address `https://example.com:8443/` the port is shown explicitly, because it is not the standard one.
+
+## TCP: reliability on top of unreliability
+
+IP doesn’t guarantee delivery, and we need the page to arrive whole and in order. That is the job of **TCP**, the reliable transport protocol that works on top of IP. It does four things:
+
+1. **Sets up a connection.** The client and the server first agree, in a three-step “handshake”: the client says SYN (“let’s talk”), the server replies SYN-ACK (“agreed”), the client replies ACK (“received”). Only then does data flow.
+2. **Numbers** the packets.
+3. **Confirms** what arrived: the receiver reports exactly what got through.
+4. **Resends** what was lost: if there is no confirmation, the sender sends the packet again. You saw this on the diagram.
+
+TCP also takes care not to flood the receiver or overload the network: it starts carefully and speeds up as long as everything goes smoothly.
+
+There is another approach, **UDP**: it simply sends packets with no guarantees and no confirmations. It is faster and fits where a late packet is no longer needed: in a video call, in DNS queries, in games.
+
+An important consequence of the handshake: before the first byte of the page moved, at least one round trip had passed. The speed of light in optical fiber is finite, so a site on the other side of the planet opens with a delay that no price plan can beat. That is one of the reasons sites are placed closer to their visitors.
+
+<details>
+<summary>Check yourself: how do IP and TCP differ?</summary>
+
+IP delivers packets by address on a best-effort basis, with no guarantees. TCP on top of it numbers the packets, confirms what arrived and resends what was lost, so the data arrives whole and in order.
+
+</details>
+
+## Practice
+
+You are in the era of 1996. Your site will be opened over a modem, at about 3.6 kilobytes a second. Fifty kilobytes take almost fourteen seconds to load, and that is already long. That is why every page had a **budget**: how much it could weigh.
+
+A page weight table has been added under the heading. Work out how much the text, the logo, the main picture and the pictures for your services, products or people weigh (you described them in the brief). Write the numbers in kilobytes. If you have no picture, say so. The last row is the total, and it must fit in 50 kilobytes.
+
+How many packets is that? Divide the weight by one and a half kilobytes: 40 kilobytes is about 27 packets.
+
+## What was wrong with 1996
+
+A budget of 50 kilobytes forced you to economize: compress pictures, give up what you didn’t need. It was a discipline imposed by necessity, and it hasn’t gone out of date: today slow mobile networks and expensive data make the same economy important for millions of people. What has gone out of date is counting by eye, because today the browser has tools for it: we’ll open them in the last lesson of the part.
