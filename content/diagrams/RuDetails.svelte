@@ -6,6 +6,7 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { getLocale } from '#lib/i18n/index.ts';
 
 	let n = $state(5);
 	const rules = new Intl.PluralRules('ru');
@@ -21,8 +22,83 @@
 	const dateShort = new Intl.DateTimeFormat('ru-RU').format(date);
 
 	let fixed = $state(true);
+
+	// The English edition (docs/content-plan/README.md, «English edition») shows the same three things
+	// from an English speaker's side: Russian is the worked example of what other languages do.
+	// Everything is again computed by the browser's own Intl.
+	const en = getLocale() === 'en';
+	const langs = [
+		{ tag: 'en-GB', name: 'English' },
+		{ tag: 'ru-RU', name: 'Russian' },
+		{ tag: 'ar', name: 'Arabic' }
+	];
+	const pluralWord: Record<string, Record<string, string>> = {
+		'en-GB': { one: 'service', other: 'services' },
+		'ru-RU': { one: 'услуга', few: 'услуги', many: 'услуг', other: 'услуги' },
+		ar: {}
+	};
+	const catEn: Record<string, string> = { zero: 'zero', one: 'one', two: 'two', few: 'few', many: 'many', other: 'other' };
+	const forLang = (tag: string) => {
+		const r = new Intl.PluralRules(tag);
+		return { cats: r.resolvedOptions().pluralCategories.map((c) => catEn[c]).join(', '), cat: catEn[r.select(n)], word: pluralWord[tag][r.select(n)] };
+	};
+	const places = ['en-GB', 'ru-RU', 'de-DE'] as const;
+	const moneyFor = (tag: string) => {
+		const cur = tag === 'ru-RU' ? 'RUB' : tag === 'de-DE' ? 'EUR' : 'GBP';
+		return new Intl.NumberFormat(tag, { style: 'currency', currency: cur, maximumFractionDigits: 0 }).format(price);
+	};
+	const dateFor = (tag: string) => ({ long: new Intl.DateTimeFormat(tag, { dateStyle: 'long' }).format(date), short: new Intl.DateTimeFormat(tag).format(date) });
+	const labels = ['Book a call', 'Beratungstermin vereinbaren', 'Записаться на консультацию'];
 </script>
 
+{#if en}
+<figure class="dg">
+	<figcaption>Three things that break when an interface meets another language</figcaption>
+
+	<div class="dh">1. The word after a number: English has two forms, other languages more</div>
+	<label class="dg-ctl">
+		Number: {n}
+		<input type="range" min="0" max="30" step="1" bind:value={n} />
+	</label>
+	<ul class="langs">
+		{#each langs as l (l.tag)}
+			{@const f = forLang(l.tag)}
+			<li>
+				<strong>{l.name}:</strong>
+				{#if f.word}<span class="out"><strong>{n} {f.word}</strong></span>{/if}
+				<span class="small">(category “{f.cat}”; all the forms this language has: {f.cats})</span>
+			</li>
+		{/each}
+	</ul>
+
+	<div class="dh">2. A price and a date</div>
+	<label class="dg-ctl">
+		Price: {price}
+		<input type="range" min="0" max="250000" step="500" bind:value={price} />
+	</label>
+	<ul class="langs">
+		{#each places as tag (tag)}
+			<li><strong>{tag}:</strong> <span class="out"><strong>{moneyFor(tag)}</strong></span> <span class="small">· spaces inside a number are non-breaking, shown here as “␣”: {showNbsp(moneyFor(tag))}</span></li>
+		{/each}
+	</ul>
+	<ul class="langs">
+		{#each places as tag (tag)}
+			<li><strong>{tag}:</strong> <span class="out"><strong>{dateFor(tag).long}</strong></span> <span class="small">· short: {dateFor(tag).short}</span></li>
+		{/each}
+	</ul>
+
+	<div class="dh">3. A label longer than the English one</div>
+	<div class="dg-ctl">
+		<label><input type="checkbox" bind:checked={fixed} /> The button is rigidly 9rem wide</label>
+	</div>
+	<div class="btns">
+		{#each labels as t (t)}<span class="btn" class:fixed>{t}</span>{/each}
+	</div>
+	<p class="dg-out">
+		English labels are often the shortest. A button whose width is set by a number breaks in German or Russian: the text sticks out or wraps onto three lines. Set a minimum width and padding instead, and let the button grow with its label.
+	</p>
+</figure>
+{:else}
 <figure class="dg">
 	<figcaption>Три мелочи, на которых ломаются «английские» компоненты</figcaption>
 
@@ -54,6 +130,7 @@
 		строки. Задавайте не ширину, а минимальную ширину и внутренние отступы, и пусть кнопка растёт по подписи.
 	</p>
 </figure>
+{/if}
 
 <style>
 	.dh {
@@ -71,6 +148,13 @@
 		font-size: var(--text-body-sm);
 		color: var(--text-secondary);
 		font-weight: normal;
+	}
+	.langs {
+		list-style: none;
+		margin: var(--space-2) 0 !important;
+		padding: 0 !important;
+		display: grid;
+		gap: var(--space-1);
 	}
 	.btns {
 		display: flex;

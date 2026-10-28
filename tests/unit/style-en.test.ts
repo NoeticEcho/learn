@@ -84,6 +84,9 @@ export function britishSpellings(text: string): string[] {
 	return [...text.replace(BRITISH_NAMES, ' ').matchAll(BRITISH)].map((m) => m[0]);
 }
 
+/** Lessons that quote Russian words as examples of what another language does. */
+const CYRILLIC_EXAMPLES = new Set(['04-design/10-russian-systems']);
+
 const en = loadEdition('en');
 
 describe('English house style', () => {
@@ -108,7 +111,8 @@ describe('English house style', () => {
 			expect(bad).toEqual([]);
 			expect(headings.filter((h) => /:\s+[A-Z][a-z]/.test(h) && !NAMES.has(h.split(/:\s+/)[1].split(/\W/)[0]))).toEqual([]);
 		});
-		test(`${lesson.id}: no Cyrillic`, () => expect(prose.match(/[А-Яа-яЁё]+/g) ?? []).toEqual([]));
+		// A lesson whose subject is another language shows that language's words (the Russian plural forms).
+		test(`${lesson.id}: no Cyrillic`, () => expect(CYRILLIC_EXAMPLES.has(lesson.id) ? [] : (prose.match(/[А-Яа-яЁё]+/g) ?? [])).toEqual([]));
 		test(`${lesson.id}: typographic quotes and apostrophes`, () => {
 			expect(prose.split('\n').filter((l) => /["']/.test(l))).toEqual([]);
 		});

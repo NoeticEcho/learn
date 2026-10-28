@@ -1,0 +1,339 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/10-russian-systems.svx. */
+	export const metadata = {
+		id: '04-design/10-russian-systems',
+		part: 4,
+		order: 10,
+		title: 'Open systems from Russia, and what a language does to an interface',
+		definition: 'Gravity UI, VKUI, Taiga UI and Plasma are open design systems from Russia. A second language tests an interface: plurals, number formats and label length.',
+		summary:
+			'You’ll meet four open design systems from Russian companies: Gravity UI, VKUI, Taiga UI and Plasma, and learn what any system must handle to work in more than one language: plural forms, prices, dates, quotation marks and long labels. Afterwards you fix those details on your own page.',
+		minutes: 30,
+		teaches: ['design-ds-russian'],
+		requires: ['design-ds-product-and-headless', 'html-lang-i18n'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', caption: '1, 2, 5', say: 'After a number English has two forms: 1 service, 2 services. Russian has three, Arabic has six.' },
+				{ mood: 'explain', side: 'right', prop: 'browser', label: '£12,500', say: 'A price is written differently in each place: £12,500 in the UK, 12 500 ₽ in Russia. The browser’s Intl knows how.' },
+				{ mood: 'hint', prop: 'browser', label: 'Book a call', caption: 'Not 9rem', say: 'Labels in other languages run longer. Give a button min-width and padding, not a width in numbers.' },
+				{ mood: 'cheer', side: 'right', caption: 'Quotes', say: 'English uses curly quotes, Russian uses «guillemets». A good system keeps such details in one place.' }
+			]
+		},
+		practice: {
+			id: 'design-russian-details',
+			title: 'The small details of a language in the interface',
+			task: 'Fix what makes a page look careless to a reader in the UK, and what breaks when a system moves between languages. 1) Counters: “1 service”, “2 services”, “5 services” (now every line says “services”). 2) The price: “£12,500”, with a comma between the thousands and the pound sign before the number (now it says “12500 gbp”). 3) The date: wrap it in a time element with a datetime attribute in the form 2026-10-27, and write it in words: “27 October 2026”. 4) The quotation in curly quotation marks. 5) In styles.css the .cta button must grow with its label: instead of a fixed width set min-width (for example 9rem) and remove white-space: nowrap. 6) In the note choose one of the Russian systems (Gravity UI, VKUI, Taiga UI or Plasma), write one idea you would take and one reason not to take it whole. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <ul class="counts">
+        <li class="plural">1 services</li>
+        <li class="plural">2 services</li>
+        <li class="plural">5 services</li>
+      </ul>
+      <p class="price">Cost: 12500 gbp</p>
+      <p>Date: <span class="when">27.10.2026</span></p>
+      <blockquote class="quote">"Work done on time"</blockquote>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+
+      <aside class="note" data-scaffold id="borrow">
+        <h2>What I will take from the Russian systems</h2>
+        <p>System: <strong class="sys-name">…</strong></p>
+        <p>The idea I take: <span id="idea">…</span></p>
+        <p>Why I don’t take it whole: <span id="not">…</span></p>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  display: inline-block;
+  width: 9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0.6rem 1rem;
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 6px;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="page">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <ul class="counts">
+        <li class="plural">1 service</li>
+        <li class="plural">2 services</li>
+        <li class="plural">5 services</li>
+      </ul>
+      <p class="price">Cost: £12,500</p>
+      <p>Date: <time class="when" datetime="2026-10-27">27 October 2026</time></p>
+      <blockquote class="quote">“Work done on time”</blockquote>
+      <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>
+
+      <aside class="note" data-scaffold id="borrow">
+        <h2>What I will take from the Russian systems</h2>
+        <p>System: <strong class="sys-name">Gravity UI</strong></p>
+        <p>The idea I take: <span id="idea">three themes out of the box, a high-contrast one among them</span></p>
+        <p>Why I don’t take it whole: <span id="not">the library is written for React, and mine is a simple site</span></p>
+      </aside>
+    </main>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site */
+body {
+  font-family: system-ui, sans-serif;
+  color: #1c1b19;
+  background: #faf9f7;
+  margin: 0;
+}
+#page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+.cta {
+  display: inline-block;
+  min-width: 9rem;
+  padding: 0.6rem 1rem;
+  background-color: #0b5cad;
+  color: #ffffff;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 6px;
+}
+`
+			},
+			checks: [
+				{ id: 'plural-1', kind: 'text', selector: 'li.plural', matches: '^\\s*1\\s+service\\s*$' },
+				{ id: 'plural-2', kind: 'text', selector: 'li.plural', matches: '^\\s*2\\s+services\\s*$' },
+				{ id: 'plural-5', kind: 'text', selector: 'li.plural', matches: '^\\s*5\\s+services\\s*$' },
+				{ id: 'price', kind: 'text', selector: '.price', matches: '£\\s?\\d{1,3},\\d{3}' },
+				{ id: 'time', kind: 'attr', selector: 'time', name: 'datetime', matches: '^\\d{4}-\\d{2}-\\d{2}$' },
+				{ id: 'date-words', kind: 'text', selector: 'time', matches: '\\d{1,2}\\s+[A-Za-z]+\\s+\\d{4}' },
+				{ id: 'quotes', kind: 'text', selector: '.quote', matches: '^\\s*“[^“”"]+”\\s*$' },
+				{ id: 'cta-min', kind: 'style', selector: 'a.cta', prop: 'min-width', matches: '^[1-9]\\d*(\\.\\d+)?(px|rem)$' },
+				{ id: 'cta-wrap', kind: 'style', selector: 'a.cta', prop: 'white-space', matches: '^(normal)?$' },
+				{ id: 'sys-name', kind: 'text', selector: '#borrow .sys-name', matches: 'Gravity|VKUI|Taiga|Plasma' },
+				{ id: 'idea', kind: 'text', selector: '#idea', matches: '\\S{3,}' },
+				{ id: 'not', kind: 'text', selector: '#not', matches: '\\S{3,}' },
+				{ id: 'no-blanks', kind: 'text', selector: '#borrow', matches: '^[^…]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How many forms of a noun does English need after a number, and how many does Russian?',
+				options: ['Two in English (1 service, 2 services) and three in Russian', 'Two in both', 'Three in both'],
+				answer: 0,
+				why: [
+					'Yes. The form depends on the number, and in Russian on its last digit and on the exceptions for 11 to 14. The browser picks it with Intl.PluralRules and a language tag.',
+					'No: Russian has three forms, “1 услуга, 2 услуги, 5 услуг”.',
+					'No: English has just two, “1 item, 2 items”.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of the Russian systems in this lesson?',
+				options: [
+					'Gravity UI, VKUI, Taiga UI and Plasma are written for React or Angular, not for plain HTML',
+					'All four have open code on GitHub',
+					'Taiga UI is made for Angular, and the other three for React',
+					'All four suit only the internal services of one company'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: all four are libraries for frameworks.',
+					'Yes: the code of each is on GitHub under an open license (MIT or Apache-2.0).',
+					'Yes: Taiga UI is for Angular, and Gravity UI, VKUI and Plasma are for React.',
+					'No: anyone can use them, but their look and stack are set by the tasks of their own products.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each system with its characteristic feature',
+				pairs: [
+					['Gravity UI', 'three themes (light, dark, high contrast) and built-in internationalization'],
+					['VKUI', 'adaptive components that follow the platform'],
+					['Taiga UI', 'Angular, styling through CSS variables, a dark theme out of the box'],
+					['Plasma', 'a core plus “verticals”: sets of themes and components for products']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How is a price of twelve and a half thousand pounds written for readers in the UK?',
+				options: [
+					'£12,500: the sign before the number and a comma between the thousands (Intl.NumberFormat with en-GB does this itself)',
+					'12 500 £ with ordinary spaces',
+					'12500gbp'
+				],
+				answer: 0,
+				why: [
+					'Yes. Each place has its own convention, and the browser knows them: in Russian the same sum is “12 500 ₽”, with non-breaking spaces so that the number never splits across lines.',
+					'No: that is neither the British nor the Russian way.',
+					'No: a run-together form is hard to read.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why is it better to give a button min-width than width?',
+				options: [
+					'Labels in other languages are longer: a button with a rigid width cuts the text off or breaks the line',
+					'min-width works faster',
+					'The browser doesn’t understand width for buttons'
+				],
+				answer: 0,
+				why: [
+					'Yes. Let the button grow with its label, and let min-width hold a minimum.',
+					'No: speed has nothing to do with it.',
+					'No: width is understood, but it doesn’t suit texts of different lengths.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is worth borrowing from a Russian system for a site that isn’t written in React or Angular?',
+				options: [
+					'Ideas and decisions: themes, documentation, token names, the approach to localization',
+					'The source code of the components',
+					'Nothing: they are useless outside their stack'
+				],
+				answer: 0,
+				why: [
+					'Yes. Decisions carry over to any stack, while the code is tied to a framework.',
+					'No: the components’ code won’t work without the right framework.',
+					'No: decisions and documentation are useful to everyone.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-ru-plural', front: 'How many forms does a noun need after a number?', back: 'It depends on the language: two in English (1 service, 2 services), three in Russian (1 услуга, 2 услуги, 5 услуг), six in Arabic. Intl.PluralRules picks the category.' },
+			{ id: 'design-ru-price', front: 'How is a price written in different places?', back: '£12,500 in the UK, 12 500 ₽ in Russia (with non-breaking spaces, &nbsp;). Intl.NumberFormat with the right locale does it itself.' },
+			{ id: 'design-ru-button', front: 'How do you build buttons for labels in other languages?', back: 'Not a rigid width, but min-width and padding: the button grows with its label and doesn’t cut it off.' },
+			{ id: 'design-ru-systems', front: 'Which open Russian systems do you know?', back: 'Gravity UI (React, from Yandex), VKUI (React, VK), Taiga UI (Angular, begun at Tinkoff, now T-Bank), Plasma (React, Sber’s ecosystem). All on GitHub, under MIT or Apache-2.0.' },
+			{ id: 'design-ru-quotes', front: 'Which quotation marks are used in English, and in Russian?', back: 'English uses curly quotes “…”, and ‘…’ inside them. Russian uses «guillemets», with „…“ inside them. Straight typewriter quotes are not used in either.' }
+		],
+		sources: [
+			{ title: 'Gravity UI: UIKit (GitHub)', url: 'https://github.com/gravity-ui/uikit', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Taiga UI (GitHub)', url: 'https://github.com/taiga-family/taiga-ui', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'VKUI (documentation, in Russian)', url: 'https://vkcom.github.io/VKUI/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' },
+			{ title: 'Plasma (salute-developers, GitHub, in Russian)', url: 'https://github.com/salute-developers/plasma', licence: 'proprietary-link', kind: 'docs', lang: 'ru' },
+			{ title: 'Intl.PluralRules (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Intl.NumberFormat (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Straight and curly quotes (Practical Typography, Matthew Butterick)', url: 'https://practicaltypography.com/straight-and-curly-quotes.html', licence: 'link-only', kind: 'book', lang: 'en' },
+			{ title: 'Kovodstvo (Art. Lebedev Studio): the rules of Russian typography, in Russian', url: 'https://www.artlebedev.ru/kovodstvo/sections/', licence: 'link-only', kind: 'book', lang: 'ru' },
+			{ title: 'hyphens (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/CSS/hyphens', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Right now the page has five habits that look careless to a UK reader and that break when a system moves between languages. Let’s fix each.',
+			hints: [
+				'The form depends on the number: 1 service, 2 services, 5 services. Write the price as £12,500, the pound sign first and a comma between the thousands.',
+				'Wrap the date in a time element with datetime set to 2026-10-27, and write 27 October 2026 inside it. Put the quotation in curly quotation marks, not straight ones.',
+				'In styles.css replace width on the .cta button with min-width: 9rem and remove white-space: nowrap. In the note choose a system and write an idea and a reason.'
+			],
+			mistakes: {
+				'plural-1': 'For one you need the form “1 service”.',
+				'plural-2': 'For two you need the form “2 services”.',
+				'plural-5': 'For five you need the form “5 services”.',
+				price: 'The price must be written as £12,500: the pound sign first and a comma between the thousands.',
+				time: 'The date must be in a time element with a datetime attribute in the form 2026-10-27.',
+				'date-words': 'Inside time write the date in words: “27 October 2026”.',
+				quotes: 'The quotation must be in curly quotation marks: “Work done on time”.',
+				'cta-min': '.cta must have a min-width, for example 9rem, in place of a fixed width.',
+				'cta-wrap': '.cta must not have white-space: nowrap: let the label wrap.',
+				'sys-name': 'In the note name one of the systems: Gravity UI, VKUI, Taiga UI or Plasma.',
+				idea: 'Write the idea you take from that system.',
+				not: 'Write why you don’t take the system whole.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.'
+			},
+			outro: 'It is small details like these that tell a site made for its readers from a site that has only been translated. Systems that take localization seriously do this out of the box.'
+		},
+		say: { Gravity: 'gravity', UI: 'U I', VKUI: 'V K U I', Taiga: 'tai-ga', Plasma: 'plasma', GitHub: 'git hub', React: 'react', Angular: 'angular', MIT: 'M I T', Intl: 'I N T L', ru: 'R U', RU: 'R U', nbsp: 'N B S P', CSS: 'C S S', min: 'min', width: 'width', Yandex: 'yan-dex', Sber: 'sber', Tinkoff: 'tin-koff' }
+	};
+</script>
+
+<script>
+	import SystemExplorer from '../../diagrams/SystemExplorer.svelte';
+	import RuDetails from '../../diagrams/RuDetails.svelte';
+</script>
+
+## Why Russian systems get a lesson of their own
+
+Most of the systems you have met were written in English, for English. That hides a difficulty: much of what they do “by default” works only for English. The design systems of Russian companies are worth a look for two reasons. They are open, large and in daily use, built by teams at big companies such as Yandex, VK, Tinkoff (now T-Bank) and Sber. And they had to deal with a language that is not English from their very first day.
+
+We take four open systems from Russian companies. Each has public documentation and open code.
+
+<SystemExplorer ids={['gravity', 'vkui', 'taiga', 'plasma']} />
+
+- **Gravity UI.** A set of libraries and a design system for complex web services, from Yandex. UIKit holds the base components and tokens; it has three themes (light, dark, high contrast), support for right-to-left writing and built-in localization. Separate packages solve separate tasks: charts, a Markdown editor, navigation, a landing-page builder, calendar components. The code is under the MIT license.
+- **VKUI.** A library of React components from VK, based on VK’s design system. The components are made to follow the platform they run on, so the look adapts. The license is MIT.
+- **Taiga UI.** A library for Angular. It began as an internal product at Tinkoff (the bank is now called T-Bank), and is now an open project with dozens of tokens on CSS variables, a dark theme out of the box and more than a hundred components. The license is Apache-2.0.
+- **Plasma.** A system from Sber’s ecosystem (the organization salute-developers): a common core and “verticals”, that is, sets of components and themes for particular products. Themes and tokens live in separate packages. The license is MIT.
+
+All four are made for a framework (React or Angular). So for a simple site you won’t install them, but they are worth reading: take ideas, not code. For example, three themes out of the box at Gravity UI, the “core plus verticals” approach at Plasma, separate packages at Taiga UI.
+
+<details>
+<summary>Check yourself: what framework is Taiga UI written for?</summary>
+
+Angular. Gravity UI, VKUI and Plasma are written for React.
+
+</details>
+
+## What a language does to an interface: four pitfalls
+
+Whatever system you choose, an interface breaks in four places when it meets another language. Russian is a good worked example, because it differs from English in all four. Move the diagram: the numbers, prices and dates are all worked out by the browser’s built-in `Intl`.
+
+<RuDetails />
+
+**1. The form of the word after a number.** English has two forms (“1 service”, “2 services”); Russian has three: “1 услуга”, “2 услуги”, “5 услуг”, and Arabic has six. The choice depends on the number, and in Russian on its last digit, with numbers from 11 to 14 always “many”. It is easy to get wrong by hand, so the browser does it for you: `Intl.PluralRules('ru')` answers with a category (`one`, `few`, `many`) by which you pick the word. A good design system stores words in all the forms a language needs and puts in the right one.
+
+**2. A price and a date.** Each place has its own habits. In the UK it is “£12,500”, with a comma between the thousands, a point for decimals and the sign before the number. In Russia it is “12 500 ₽”: a space between the thousands, a comma for decimals, the sign after the number. That space must be non-breaking (`&nbsp;`), or the line will break in the middle of the number. A date is “27 October 2026” in the UK, “27 октября 2026” in Russia, and in markup, for machines, it is wrapped in `<time datetime="2026-10-27">` everywhere. Beware of numbers-only dates: 03/04/2026 is the third of April in the UK and the fourth of March in the US.
+
+**3. The length of words.** Labels in other languages are often noticeably longer than the English ones. A button 9rem wide looks fine with the English “Book a call” and cuts off the Russian “Записаться на консультацию”. Don’t set a width as a number: use `min-width` and padding. For long words in narrow columns turn on hyphenation: `hyphens: auto` works when the page states its language with `lang`.
+
+**4. Typography.** English uses curly quotation marks, “like this”, with ‘single’ ones inside, and never the straight marks of a typewriter. Russian uses «guillemets» with „low-high“ marks inside them. A dash and a hyphen are different characters in both. The details of Russian typography are collected in the “Kovodstvo” by Art. Lebedev Studio (in the sources), and for English in Matthew Butterick’s *Practical Typography*, but it is enough to remember these three.
+
+Systems that care about localization (Gravity UI, for one, includes internationalization) do such details for you. For the others you do them by hand, as in the practice.
+
+## Practice
+
+Your page has the usual signs of a text that nobody has looked after: a plural form that is wrong for one, a price without a thousands separator, a date in digits, straight quotation marks and a button with a rigid width. Fix them. It is the same set of fixes that a Russian reader needs on a Russian page, only with English forms. Then choose one of the four Russian systems and write down what you would take from it and why you would not take it whole.
+
+## What was wrong with 2014
+
+In 2014 most design systems were written in English only, and localization was “translate the strings”. Plural forms were glued together by hand (“1 item(s)”), prices were joined to currency signs in ad hoc ways, and a design with a button of a fixed width was handed to a translator. Today the browser has `Intl` for all of this, and the best systems take it into account from the start.
