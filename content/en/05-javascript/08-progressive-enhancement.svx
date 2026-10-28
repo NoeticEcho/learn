@@ -1,0 +1,1280 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/08-progressive-enhancement.svx. */
+	export const metadata = {
+		id: '05-javascript/08-progressive-enhancement',
+		part: 5,
+		order: 8,
+		title: 'Progressive enhancement',
+		definition: 'Progressive enhancement is a way to build a page in layers: the essentials work in HTML without JavaScript, and a script adds conveniences on top.',
+		summary:
+			'A script doesn’t always reach the visitor: a weak network, a crash, a blocker, an old browser. Afterwards you’ll build a page whose essentials work without JavaScript while a script makes it better, and you’ll test that with the script switched off.',
+		minutes: 20,
+		teaches: ['js-progressive-enhancement'],
+		requires: ['js-fetch', 'js-events', 'html-forms'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'phone', label: 'loading...', caption: 'On the train', say: 'The page is visible, but the script is still on its way. The menu button is there and does nothing: a dud.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'HTML|CSS|JavaScript', caption: 'Layers', say: 'HTML works everywhere. CSS decorates, JavaScript adds conveniences. Each layer only improves the one before.' },
+				{ mood: 'cheer', prop: 'browser', label: 'JavaScript is off', say: 'The markup hides the menu button and the script shows it, so there are no duds. The form submits without a script too.' },
+				{ mood: 'hint', side: 'right', caption: 'How to test', say: 'Switch JavaScript off in the developer tools, reload the page and see what is left.' }
+			]
+		},
+		practice: {
+			id: 'js-progressive-page',
+			title: 'A page that works without the script too',
+			task: 'Make the page resilient. 1) Fill in the table “What is essential and what is an enhancement”: at least five features, each marked with the word “essential” or “enhancement” and with what the visitor sees without JavaScript. 2) Make the essentials independent of the script: add an aside block with the id contacts, holding the address from the brief and tel: and mailto: links (the phone and email from the brief), and after the header put a <noscript> with a paragraph saying the page works without JavaScript too. The enquiry form keeps its action and method, and the main action is labeled with the words from the brief. 3) Search is useless without a script, so hide it in the markup (the hidden attribute on the form with the id search), and let the script show it. 4) Add a fifth script, a module script with the id enhance-code: it shows the search form (search.hidden = false) and checks the phone live: an input listener on the #f-phone field, aria-invalid and a message in a span with the id phone-hint and role status after the field. Both actions are wrapped in an “is the element there” check (if). Test without the script: on your own machine switch JavaScript off in the developer tools and reload the page. The automatic check sees the page after the scripts have run, when hidden is already removed, so that search is hidden without JavaScript can only be seen that way.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="enhancement-plan">
+      <h2>What is essential and what is an enhancement</h2>
+      <table>
+        <tr><th>Feature</th><th>Essential or enhancement</th><th>What the visitor sees without JavaScript</th></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="feature"><td>…</td><td>…</td><td>…</td></tr>
+      </table>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+    <noscript>
+      <p>JavaScript is switched off in your browser. The page works anyway: the list, the sections, the contacts and the enquiry form are all available, and only search and the menu do not work.</p>
+    </noscript>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers" hidden>
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint">
+            <span id="phone-hint" role="status"></span>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </main>
+
+
+    <section data-scaffold id="enhancement-plan">
+      <h2>What is essential and what is an enhancement</h2>
+      <table>
+        <tr><th>Feature</th><th>Essential or enhancement</th><th>What the visitor sees without JavaScript</th></tr>
+        <tr class="feature"><td>The list of offers</td><td>essential</td><td>All the cards are in the markup and visible at once.</td></tr>
+        <tr class="feature"><td>The main action: the enquiry form</td><td>essential</td><td>The form submits the ordinary way: the page reloads and the enquiry goes to the server.</td></tr>
+        <tr class="feature"><td>Contacts</td><td>essential</td><td>The phone and email work as tel: and mailto: links.</td></tr>
+        <tr class="feature"><td>The menu button</td><td>enhancement</td><td>The list of sections is always visible. There is no button: it appears only together with the script.</td></tr>
+        <tr class="feature"><td>Search in the list</td><td>enhancement</td><td>There is no search field: it is useless without a script, so the script shows it.</td></tr>
+        <tr class="feature"><td>Live phone check</td><td>enhancement</td><td>The browser checks the field itself on submit (required and type="tel").</td></tr>
+      </table>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+    <script type="module" id="enhance-code">
+      const search = document.querySelector('#search');
+      const phone = document.querySelector('#f-phone');
+      const hint = document.querySelector('#phone-hint');
+
+      // Search is useless without a script, so the markup hides it and the script shows it.
+      if (search) {
+        search.hidden = false;
+      }
+
+      // Live phone check: an enhancement on top of the browser’s own check.
+      if (phone && hint) {
+        phone.addEventListener('input', () => {
+          const digits = phone.value.replace(/\\D/g, '');
+          const ok = phone.value === '' || digits.length >= 10;
+          phone.setAttribute('aria-invalid', String(!ok));
+          hint.textContent = ok ? '' : ' Phone: at least ten digits, for example +44 0000 000000.';
+        });
+      }
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			checks: [
+				{
+					id: 'plan-section',
+					kind: 'exists',
+					selector: '#enhancement-plan'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#enhancement-plan',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'five-features',
+					kind: 'count',
+					selector: '#enhancement-plan tr.feature',
+					min: 5
+				},
+				{
+					id: 'must-and-enhance',
+					kind: 'text',
+					selector: '#enhancement-plan',
+					matches: '^(?=[\\s\\S]*essential)(?=[\\s\\S]*enhancement)'
+				},
+				{
+					id: 'contacts-block',
+					kind: 'exists',
+					selector: 'main #contacts'
+				},
+				{
+					id: 'tel-link',
+					kind: 'attr',
+					selector: '#contacts a[href^="tel:"]',
+					name: 'href',
+					matches: '^tel:',
+					when: {
+						brief: 'contacts.phone'
+					}
+				},
+				{
+					id: 'mail-link',
+					kind: 'attr',
+					selector: '#contacts a[href^="mailto:"]',
+					name: 'href',
+					matches: '^mailto:',
+					when: {
+						brief: 'contacts.email'
+					}
+				},
+				{
+					id: 'address-shown',
+					kind: 'field',
+					selector: '#contacts',
+					field: 'contacts.address',
+					when: {
+						brief: 'contacts.address'
+					}
+				},
+				{
+					id: 'noscript-note',
+					kind: 'text',
+					selector: 'noscript',
+					matches: '\\S'
+				},
+				{
+					id: 'main-action-label',
+					kind: 'field',
+					selector: 'a.button, #request-form button[type="submit"]',
+					field: 'mainAction.label'
+				},
+				{
+					id: 'form-native',
+					kind: 'attr',
+					selector: '#request-form',
+					name: 'method',
+					matches: '^(?:post|POST)$'
+				},
+				{
+					id: 'form-action',
+					kind: 'attr',
+					selector: '#request-form',
+					name: 'action',
+					matches: '^/'
+				},
+				{
+					// The preview runs the scripts, so by the time checks run #enhance-code has removed
+					// hidden; a check cannot see the markup's attribute (content-plan README). It sees the
+					// form, and the learner checks the no-script state by hand, as the task says.
+					id: 'search-form',
+					kind: 'exists',
+					selector: 'form#search[role="search"]'
+				},
+				{
+					id: 'phone-status',
+					kind: 'exists',
+					selector: '#phone-hint[role="status"], #phone-hint[aria-live]'
+				},
+				{
+					id: 'enhance-code-exists',
+					kind: 'exists',
+					selector: 'script#enhance-code'
+				},
+				{
+					id: 'is-module',
+					kind: 'attr',
+					selector: '#enhance-code',
+					name: 'type',
+					matches: '^module$'
+				},
+				{
+					id: 'reveals-search',
+					kind: 'text',
+					selector: '#enhance-code',
+					matches: '#search[\\s\\S]*\\.hidden\\s*=\\s*false'
+				},
+				{
+					id: 'live-validation',
+					kind: 'text',
+					selector: '#enhance-code',
+					matches: '^(?=[\\s\\S]*addEventListener\\(\\s*[\'"]input[\'"])(?=[\\s\\S]*aria-invalid)'
+				},
+				{
+					id: 'guarded',
+					kind: 'text',
+					selector: '#enhance-code',
+					matches: 'if\\s*\\(\\s*\\w+\\s*&&\\s*\\w+|if\\s*\\(\\s*\\w+\\s*\\)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is progressive enhancement?',
+				options: [
+					'A page is built first so that the essentials work in plain HTML, and JavaScript adds conveniences on top',
+					'Gradually updating a site once a year',
+					'Loading a page in parts until the script is ready'
+				],
+				answer: 0,
+				why: [
+					'Yes. The base layer of HTML works for everyone: on a weak phone, and when the script didn’t load. Each next layer (CSS, then JavaScript) only improves what already works.',
+					'No: this isn’t about releases but about the order of layers when a page is built.',
+					'No: that is lazy loading, which is something else.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Why might JavaScript not work for a visitor?',
+				options: [
+					'The network is slow and the script hasn’t loaded yet',
+					'There is an error in the script and it stopped',
+					'A blocker or a company filter removed the script',
+					'The visitor has no money'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: on a weak connection the page is visible long before the script arrives and runs.',
+					'Yes: one error early on, and nothing after it runs.',
+					'Yes: this happens often too.',
+					'No, and you can’t build a page on that logic anyway: scripts cost the visitor nothing. The trouble is in delivery and running.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these should be essential on a site, that is, work without JavaScript?',
+				options: [
+					'The list of offers in the markup',
+					'Sending the enquiry form the ordinary way',
+					'The tel: and mailto: links in the contacts',
+					'Highlighting a field while typing'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: this is the content people came for.',
+					'Yes: the main action must not depend on a script.',
+					'Yes: contacts are links, and links don’t need a script.',
+					'No: that is a convenience, not a necessity, and an ordinary browser checks the field on its own.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The menu button has the hidden attribute in the markup, and the script shows it. Why?',
+				options: [
+					'Without the script the button would do nothing, so it shouldn’t be there, and the list of sections stays visible',
+					'So that search engines don’t find the button',
+					'So that the page loads faster'
+				],
+				answer: 0,
+				why: [
+					'Yes. A dud button is worse than no button. A script that can run the menu creates the conditions for the button itself: it shows the button and hides the list.',
+					'No: it has nothing to do with search engines.',
+					'No: it doesn’t affect speed.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the layers of a page in order, from the base to the enhancement',
+				items: [
+					'HTML: content, links and forms',
+					'CSS: styling and layout',
+					'JavaScript: conveniences and interactivity'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the noscript tag for?',
+				options: [
+					'To show a message or a fallback to those who have scripts switched off',
+					'To forbid scripts from running',
+					'To make a script run faster'
+				],
+				answer: 0,
+				why: [
+					'Yes. The content of noscript is shown only when JavaScript is off. Use it for calm messages, not for demands like “turn it on or you’ll see nothing”.',
+					'No: it forbids nothing.',
+					'No: it has nothing to do with speed.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-pe-what',
+				front: 'What is progressive enhancement?',
+				back: 'An approach: first the page works in plain HTML (content, links, forms), then CSS makes it look good, then JavaScript adds conveniences. The essentials reach everyone.'
+			},
+			{
+				id: 'js-pe-why',
+				front: 'Why can’t you count on the script always being there?',
+				back: 'It may not finish loading (a weak network), crash with an error, be blocked or be unsupported in an old browser. A page built on it is empty in those cases.'
+			},
+			{
+				id: 'js-pe-pattern',
+				front: 'How do you handle an element that is needed only with a script?',
+				back: 'The markup hides it (hidden) or doesn’t include it at all, and the script shows or creates it. That way there are no dud buttons without a script.'
+			},
+			{
+				id: 'js-pe-test',
+				front: 'How do you test a page without JavaScript?',
+				back: 'Switch JavaScript off in the developer tools (in Chrome: Ctrl+Shift+P, “Disable JavaScript”), slow the network down in the Network tab and look at the source HTML. The essentials should work.'
+			},
+			{
+				id: 'js-pe-ssr',
+				front: 'How is progressive enhancement related to server rendering?',
+				back: 'Meta-frameworks (SvelteKit, Next.js, Astro) send ready HTML and bring it to life with a script later: the same principle, automated.'
+			}
+		],
+		sources: [
+			{
+				title: 'GOV.UK Service Manual: Building a resilient frontend using progressive enhancement',
+				url: 'https://www.gov.uk/service-manual/technology/using-progressive-enhancement',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: Progressive enhancement',
+				url: 'https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'web.dev Learn HTML: Forms',
+				url: 'https://web.dev/learn/forms',
+				licence: 'CC-BY',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'Inclusive Components (Heydon Pickering)',
+				url: 'https://inclusive-components.design/',
+				licence: 'link-only',
+				kind: 'book',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Here you’ll check that the page doesn’t fall apart without the script, and fix what does. First make an honest list of “essential and enhancement”, then adjust the markup and the script to match it.',
+			hints: [
+				'Fill in the table: five or six features of your page (the list, the enquiry form, the contacts, the menu, search, the phone check). In the second column the word “essential” or “enhancement”, in the third what is visible without JavaScript.',
+				'The contacts block: an aside with the id contacts, holding the address and two links, one with a tel: address and one with a mailto: address. And a noscript element with a paragraph in it, right after the header.',
+				'Search: in the markup the form with the id search gets the hidden attribute. And in the enhance-code script: find the form with querySelector, then if (search) { search.hidden = false; }.',
+				'The phone check: the field with the id f-phone, and after it a span with the id phone-hint and role status. In the script, if (phone && hint) { phone.addEventListener with the input event } and inside the handler set aria-invalid and the text of the hint.'
+			],
+			mistakes: {
+				'plan-section': 'The block “What is essential and what is an enhancement” (the section with the id enhancement-plan) has gone. Bring it back.',
+				'no-blanks': 'The table still has ellipses “…”. Fill in every cell.',
+				'five-features': 'The table needs at least five rows with the class feature.',
+				'must-and-enhance': 'Both words must appear in the second column: “essential” and “enhancement”. You are dividing the features into two classes.',
+				'contacts-block': 'main needs an aside block with the id contacts, holding the contacts.',
+				'tel-link': 'The phone must be a link whose address starts with tel:, followed by the number.',
+				'mail-link': 'The email must be a link whose address starts with mailto:.',
+				'address-shown': 'The address from the brief must be shown in the contacts block.',
+				'noscript-note': 'Add a <noscript> with a paragraph saying the page works without JavaScript too.',
+				'main-action-label': 'The main action must be labeled with the words from the brief: on the button link or on the form’s button.',
+				'form-native': 'The form must keep method post: without the script it submits the ordinary way.',
+				'form-action': 'The form must keep an action with an address that starts with “/”.',
+				'search-form': 'The search form must stay, with the hidden attribute. The hidden attribute hides it without a script, and the script shows it.',
+				'phone-status': 'After the phone field there must be a span with the id phone-hint and role status: the script writes the hint there.',
+				'enhance-code-exists': 'The fifth script is missing: a module script with the id enhance-code.',
+				'is-module': 'The script needs the attribute type set to module.',
+				'reveals-search': 'The script must show the search form: search.hidden = false, where search is the form found with querySelector.',
+				'live-validation': 'The live check needs an input listener on the phone field and the aria-invalid attribute.',
+				guarded: 'Wrap the actions in an “is the element there” check: if (search) { … } and if (phone && hint) { … }. If the element is missing, the script quietly skips the enhancement.'
+			},
+			outro: 'Your page now has two modes: the basic one, where everything necessary works, and the enhanced one. Try switching JavaScript off in the developer tools: the page gets plainer, but it doesn’t break.'
+		},
+		say: {
+			noscript: 'no script',
+			hidden: 'hidden',
+			aria: 'ah-ree-ah',
+			'aria-invalid': 'ah-ree-ah invalid',
+			GOV: 'gov',
+			tel: 'tel',
+			mailto: 'mail to',
+			JavaScript: 'JavaScript',
+			SvelteKit: 'svelt kit',
+			'Next.js': 'next J S',
+			Astro: 'astro'
+		}
+	};
+</script>
+
+<script>
+	import EnhanceMatrix from '../../diagrams/EnhanceMatrix.svelte';
+</script>
+
+## The script may not arrive
+
+Through this whole part we learned to write scripts, and it is time for an uncomfortable question: what if the script doesn’t run? Not for you: for the visitor. There are more reasons than you might think:
+
+- **the network is weak**, and the page is already visible while the script is still downloading (on a train or in the countryside this is ordinary);
+- **there is an error in the script**, for example a visitor with an old browser that lacks a feature it needs, and everything below the error never runs;
+- **a blocker** or a company filter removed the script altogether;
+- **a search robot or a screen reader** doesn’t run scripts at all, or doesn’t run them right away;
+- the script was switched off on purpose.
+
+If a page is built so that it is empty without the script, then in any of these cases the visitor sees nothing. If it is built so that without the script it is plainer but useful, they see the essentials. This idea is called **progressive enhancement**, and the UK government’s digital services (GOV.UK) made it a rule.
+
+## Layers
+
+A page is built in layers, and each next layer only improves the previous one:
+
+1. **HTML**: content, links and forms. This layer works everywhere. The list of offers sits in the markup, the enquiry form submits the ordinary way, the phone is a `tel:` link.
+2. **CSS**: styling and layout. If the styles didn’t load, the page is ugly but readable.
+3. **JavaScript**: conveniences. The menu folds, search filters, the phone is checked as you type, the form submits without a reload.
+
+Everything you did in the earlier lessons can be divided into “essential” and “enhancement”, and the division is very practical. The link to the enquiry form and the form itself: essential. Checking the phone while typing: an enhancement (without it the browser checks the field itself on submit, because the markup has `required` and `type="tel"`).
+
+Here are the techniques that follow from this.
+
+- **A form with `action` and `method`.** Without a script the browser submits it by itself. A script that intercepts the submit (`preventDefault`, as in the fetch lesson) does the same thing better: without a reload and with a clear message. But it must not be able to break anything: if it didn’t load, the form stays working.
+- **Elements needed only by the script are hidden by the markup and shown by the script.** A menu button does nothing without a script, so the markup hides it (`hidden`), and the script shows it and hides the list at the same time. A search field is useless without a script, so it is hidden in the markup too and appears with the script. That way there are no dud buttons.
+- **The script checks that the elements it needs are there**: `if (search) { ... }`. If the markup changed, it quietly skips the enhancement instead of crashing and dragging the rest down with it.
+- **The `<noscript>` tag** shows fallback content when scripts are off. Write calm text in it (“The page works without JavaScript, only search doesn’t”), not a demand like “turn it on or you’ll see nothing”.
+
+Look at two similar visitors. In one version the page is built as an enhancement, in the other on the script alone: choose the conditions and see what is left for the visitor.
+
+<EnhanceMatrix />
+
+<details>
+<summary>Check yourself: why is the menu button hidden in the markup rather than always visible?</summary>
+
+Without the script it would do nothing. A dud button is worse than no button, so the script shows it itself once it is ready to run it.
+
+</details>
+
+## How to test
+
+Three ways, all on your own computer, with no special tool.
+
+1. **Switch JavaScript off.** In Chrome open the developer tools (F12), press Ctrl+Shift+P (Cmd+Shift+P on a Mac), start typing “Disable JavaScript” and choose the command. Reload the page. In Firefox the same is done with the `javascript.enabled` setting on the `about:config` page.
+2. **Slow the network down.** In the Network tab, open the “No throttling” list, choose “Slow 3G” (or similar) and reload the page. You’ll see what the visitor sees in the first seconds.
+3. **Look at the source HTML** (Ctrl+U): what is in it is seen by robots and by visitors without the script. If the list of offers isn’t in it, a search engine doesn’t have it either.
+
+## Frameworks and progressive enhancement
+
+We have already seen that a simple project in Svelte or React, without extra measures, sends an empty page until the script loads. Meta-frameworks (SvelteKit, Next.js, Astro) solve this: on the server they prepare ready HTML, so the browser gets the page at once and the script then “brings it to life”. It is the same principle you applied by hand, automated. The talk continues in the parts on site generators and Jamstack.
+
+## Practice
+
+You’re on a 2019 site. The page you’ve been building does a lot with scripts. Walk through it with the eyes of a distrustful visitor: what happens if the scripts don’t run?
+
+Make a table of “essential and enhancement”: five or six features of your page, and for each, what is visible without the script. Then adjust the page to fit it: add a contacts block with `tel:` and `mailto:` links, a `<noscript>`, hide search in the markup and show it with the script, and add the live phone check. Wrap all the enhancements in an “is the element there” check.
+
+At the end, test for real: switch JavaScript off in the developer tools on a site you’ve downloaded, or on any page of your own, and see what is left. Our preview always runs scripts, so you have to do this check on your own machine.
+
+## What was wrong before
+
+In the 2010s a fashion arrived for “single-page applications” that are assembled entirely by a script: the HTML came empty, and JavaScript drew everything else. Business card sites took ten seconds to open on weak phones, and for a time search engines saw a blank screen. Before that, in the era of “graceful degradation”, a page was built for the newest browsers and fallbacks were added for old ones, and almost always they were forgotten. Links with the address `javascript:void(0)` and a sign saying “please enable JavaScript” on an empty page were the norm.
+
+One thing stays true: start with what must reach everyone, and add the rest on top. That is accessible, faster and more dependable all at once.

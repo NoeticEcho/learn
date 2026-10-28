@@ -1,0 +1,1157 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/06-why-frameworks.svx. */
+	export const metadata = {
+		id: '05-javascript/06-why-frameworks',
+		part: 5,
+		order: 6,
+		title: 'Why frameworks exist',
+		definition: 'A framework such as React, Vue, Svelte or Angular builds an interface from components and derives the view from state. This is called reactivity.',
+		summary:
+			'Hand-written DOM code works while the page has only a few places to keep in step. Afterwards you’ll see where it starts to crack, understand what React, Vue, Svelte and Angular solve and what that costs a visitor, and be able to answer calmly “do I need a framework at all?”',
+		minutes: 25,
+		teaches: ['js-why-frameworks', 'js-reactivity'],
+		requires: ['js-dom', 'js-events', 'js-modules'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: '3 items', caption: 'One place forgotten', say: 'The list updated, the counter was forgotten. The page says “3 items” and shows five cards.' },
+				{ mood: 'explain', side: 'right', prop: 'editor', label: 'addItem(item)', say: 'By hand you must remember every place: list, counter, badge, links. Forget one and nothing warns you.' },
+				{ mood: 'cheer', prop: 'flowchart', label: 'state|view', caption: 'Reactivity', say: 'One state, and the view is derived from it. The counter simply equals the list’s length.' },
+				{ mood: 'hint', caption: 'When it is needed', say: 'Three or four places to keep in step? Plain JavaScript is enough. The tenth place? Then a framework pays off.' }
+			]
+		},
+		practice: {
+			id: 'js-framework-notes',
+			title: 'Does your project need a framework? Review your own page',
+			task: 'Find three places on the page where the view and the state have to be kept in step by hand (the scripts above have them: the counter, the quick links, the menu, the search), and fill in the table “Where the page is kept in step by hand”: what is kept in step with what, how it is done now, and how it would work in a reactive way. Each cell is a real sentence, not “…”. Then write a verdict for your project (the “Verdict” paragraph): whether it needs a framework or not, in view of the number of sections and items in your brief (write those numbers down). And in the last paragraph give the weight of your scripts in kilobytes (roughly, from the Network tab or the file size) and say how it affects the first load.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="framework-notes">
+      <h2>Where the page is kept in step by hand</h2>
+      <table>
+        <tr><th>What must be kept in step with what</th><th>How it is done now</th><th>How it is simpler when reactive</th></tr>
+        <tr class="sync"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="sync"><td>…</td><td>…</td><td>…</td></tr>
+        <tr class="sync"><td>…</td><td>…</td><td>…</td></tr>
+      </table>
+      <h3>Verdict for my project</h3>
+      <p id="verdict">…</p>
+      <p id="js-weight">…</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="framework-notes">
+      <h2>Where the page is kept in step by hand</h2>
+      <table>
+        <tr><th>What must be kept in step with what</th><th>How it is done now</th><th>How it is simpler when reactive</th></tr>
+        <tr class="sync"><td>The list of cards and the counter “Shown: N of M”</td><td>In the search handler I recalculate shown myself and write the counter’s text, and I write it again after loading from the server: two places that are easy to get out of step.</td><td>The counter is declared as a value computed from the list and the query, so it updates itself wherever the list changes.</td></tr>
+        <tr class="sync"><td>The list of cards and the quick links</td><td>The quick links are built once when the page opens, so after the list loads from the server the new item is missing from them.</td><td>The cards and the links are drawn from one array, so they cannot drift apart.</td></tr>
+        <tr class="sync"><td>The menu button and the list of sections</td><td>The aria-expanded attribute and the hidden property are changed by two commands in setMenu. If I forget one, the screen reader tells the visitor something untrue.</td><td>There is one state, open, and aria-expanded and hidden are derived from it and change together.</td></tr>
+      </table>
+      <h3>Verdict for my project</h3>
+      <p id="verdict">For my project (5 sections and 4 items) a framework is not needed yet: only 3 places have to be kept in step by hand, and they fit in a hundred lines. I’ll think again if the items grow in number or an account area with shared state appears.</p>
+      <p id="js-weight">My scripts weigh about 6 KB, so the first load is hardly slowed. A framework would add tens of kilobytes more, which a phone would have to download and parse before the first paint.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'notes-section',
+					kind: 'exists',
+					selector: '#framework-notes'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#framework-notes',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'three-places',
+					kind: 'count',
+					selector: '#framework-notes tr.sync',
+					min: 3
+				},
+				{
+					id: 'verdict-decides',
+					kind: 'text',
+					selector: '#verdict',
+					matches: '[Nn]eed'
+				},
+				{
+					id: 'verdict-numbers',
+					kind: 'text',
+					selector: '#verdict',
+					matches: '\\d'
+				},
+				{
+					id: 'weight-number',
+					kind: 'text',
+					selector: '#js-weight',
+					matches: '\\d+\\s*(?:kB|KB|kb|Kb|kilobytes?)'
+				},
+				{
+					id: 'weight-first-load',
+					kind: 'text',
+					selector: '#js-weight',
+					matches: 'load|speed|phone|mobile'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is reactivity in an interface?',
+				options: [
+					'What you see is derived from state: you change the data, and the right parts of the screen update themselves',
+					'The page reacts to clicks faster than usual',
+					'The script runs on a separate thread'
+				],
+				answer: 0,
+				why: [
+					'Yes. Instead of “find this element and rewrite its text” you write “this text equals that value”. The framework does the rest, and forgetting to update one of the places is no longer possible.',
+					'No: speed has nothing to do with it. Reactivity is about how data is tied to the screen.',
+					'No: JavaScript in the browser stays single-threaded, and reactivity doesn’t change that.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each framework with its trait',
+				pairs: [
+					['React', 'components and JSX, released by Facebook in 2013'],
+					['Vue', 'templates and reactive data, created by Evan You in 2014'],
+					['Svelte', 'a compiler: turns components into small, precise plain JavaScript'],
+					['Angular', 'a full framework from Google, in TypeScript, with its own project structure']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'For which sites is a framework most likely too much?',
+				options: [
+					'A business card site with a form and a couple of interactive blocks',
+					'A landing page with a menu, search and an enquiry form',
+					'An account area with dozens of screens and shared state',
+					'An editor where several people edit a document at once'
+				],
+				answer: [0, 1],
+				why: [
+					'Yes: there is little interactivity, and the hand-written code is shorter than a framework and a build put together.',
+					'Yes: a few places to keep in step are easy to hold in your head, and the page stays light.',
+					'No: dozens of screens with shared state are what frameworks were invented for.',
+					'No: keeping many parts of a screen in step with changing data is exactly where hand-written code drowns.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does a visitor “pay” for a framework first of all?',
+				options: [
+					'The weight of JavaScript that has to be downloaded, parsed and run, especially on a weak phone',
+					'Nothing: the server runs the code',
+					'Only the money for a license'
+				],
+				answer: 0,
+				why: [
+					'Yes. A kilobyte of script costs more than a kilobyte of image, because it still has to be parsed and run, and until it has, the page may be “dead”. That is why you take a framework when it saves more than it costs.',
+					'No: the page’s code runs in the browser, and the framework arrives with it. (Server rendering exists, but the script still reaches the browser.)',
+					'No: the main frameworks are free. The price is in weight and in the project’s complexity.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the first thing to “break” hand-written DOM work?',
+				options: [
+					'One value shown in several places, each of which must be updated on every change',
+					'The page grew longer than three screens',
+					'A second paragraph appeared on the page'
+				],
+				answer: 0,
+				why: [
+					'Yes. While there is one place, updating it is easy. When there are five, and three rules that change the value, the number of combinations grows, and somewhere something is sure to be forgotten. That is a synchronization bug.',
+					'No: the length of a page breaks nothing by itself.',
+					'No: static text doesn’t touch hand-written code.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-why-fw',
+				front: 'What problem do frameworks solve?',
+				back: 'Keeping data and screen in step: you describe what the interface looks like for a given state, and the framework updates the right parts itself. Components, routing and a build come in the box.'
+			},
+			{
+				id: 'js-reactivity',
+				front: 'What is reactivity?',
+				back: 'The view is derived from state: change a value and everything that depends on it updates itself. You don’t have to remember each place where the value is shown.'
+			},
+			{
+				id: 'js-fw-cost',
+				front: 'What does a visitor pay for a framework?',
+				back: 'The weight of JavaScript: it has to be downloaded, parsed and run, and until it has, the page may not respond. On a weak phone that is noticeable.'
+			},
+			{
+				id: 'js-fw-landscape',
+				front: 'Name the main frameworks and their idea',
+				back: 'React: components and JSX (2013). Vue: templates and reactivity (2014). Svelte: a compiler instead of a heavy library. Angular: a full TypeScript framework from Google. Next.js, Nuxt, SvelteKit and Astro: layers on top with routing and server rendering.'
+			},
+			{
+				id: 'js-fw-need',
+				front: 'How do you decide whether you need a framework?',
+				back: 'Count how many places on the page must be kept in step, and how often. Few places and little interactivity: plain JavaScript is enough. Many screens, shared state, long lists: a framework.'
+			}
+		],
+		sources: [
+			{
+				title: 'React: Thinking in React',
+				url: 'https://react.dev/learn/thinking-in-react',
+				licence: 'CC-BY',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Vue.js: Introduction',
+				url: 'https://vuejs.org/guide/introduction.html',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Svelte: Overview',
+				url: 'https://svelte.dev/docs/svelte/overview',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'MDN: Introduction to client-side frameworks',
+				url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Frameworks_libraries/Introduction',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'HTTP Archive Web Almanac: JavaScript',
+				url: 'https://almanac.httparchive.org/en/2024/javascript',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'In this lesson you write no code. You look at your own page through the eyes of the person who has to maintain it. Find three places where the page has to be “stitched” by hand, and decide honestly whether it needs a framework.',
+			hints: [
+				'Your own code will show you the three places. The counter “Shown: N of M” is written both in the search handler and after loading. The quick links are built once. The menu button changes both hidden and aria-expanded.',
+				'For each row write what is kept in step with what (two things on the page), how it is done now (one or two sentences, from your script) and how it would be simpler in a reactive way.',
+				'Start the verdict with “Needed” or “Not needed”, and give the numbers from your brief at once: how many sections and items you have and how many places to keep in step.',
+				'Estimate the weight of your scripts from the Network tab (the size column) or from the file sizes. Write the number in KB and a sentence about the first load on a slow phone.'
+			],
+			mistakes: {
+				'notes-section': 'The block “Where the page is kept in step by hand” (the section with the id framework-notes) has gone. Bring it back.',
+				'no-blanks': 'The table or a paragraph still has an ellipsis “…”. Replace each with a real sentence.',
+				'three-places': 'The table needs at least three rows with the class sync: three places that are kept in step by hand.',
+				'verdict-decides': 'The verdict must say plainly whether your project needs a framework: use the word “need” or “needed”.',
+				'verdict-numbers': 'The verdict must rest on numbers from your brief: how many sections, how many items, how many places to keep in step.',
+				'weight-number': 'Give the weight of your scripts as a number with a unit, for example “about 6 KB”.',
+				'weight-first-load': 'Write how the weight of the scripts affects the first load of the page, especially on a phone.'
+			},
+			outro: 'You now have what a good developer can produce: not “we take a framework because everyone does”, but “here are three places, here is the cost, here is the decision”. You can return to this answer when the site grows.'
+		},
+		say: {
+			React: 'react',
+			Vue: 'view',
+			Svelte: 'svelt',
+			Angular: 'angular',
+			JSX: 'J S X',
+			TypeScript: 'type script',
+			'Next.js': 'next J S',
+			Nuxt: 'nukst',
+			SvelteKit: 'svelt kit',
+			Astro: 'astro',
+			jQuery: 'J query',
+			Facebook: 'facebook'
+		}
+	};
+</script>
+
+<script>
+	import SyncDemo from '../../diagrams/SyncDemo.svelte';
+</script>
+
+## When hand-written code starts to crumble
+
+Over four lessons you wrote quite a lot for your page: a summary, quick links, a menu, search, loading the list. Every piece worked. But did you notice that in the fetch lesson the quick links had no place for the new item? The script built them when the page opened, then the list changed, and nobody told them.
+
+This is the main difficulty of interfaces. State (which items exist, what is typed in the search, whether the menu is open) lives in one place, but it is shown in several: in the list, in the counter, in the links, in the `aria-expanded` attribute. Every time the state changes, you must update every place that shows it. While there are two, that is easy. When there are five, and three ways to change the state, the number of combinations grows, and somewhere something is sure to be forgotten. You get a page that says “3 items” in the counter and shows five cards in the list.
+
+In hand-written code it looks like this:
+
+```js
+function addItem(item) {
+  items.push(item);
+  list.append(makeCard(item));            // 1: the list
+  counter.textContent = items.length;     // 2: the counter
+  badge.textContent = items.length;       // 3: the menu badge
+  quickNav.append(makeLink(item));        // 4: the quick links
+  // …and nothing reminds you if you forget the fifth
+}
+```
+
+## What was invented instead
+
+Different teams arrived at one idea: **the view is derived from state**. You don’t write “find the counter and rewrite it”. You declare: “the counter equals the length of the list”. The library takes care of the rest: when the list changes, it finds what needs updating. This approach is called **reactivity**.
+
+A second idea almost always comes with it: the **component**. A piece of interface (a card, a menu, a form) is made a unit of its own, with its own data, markup and styling, and the page is assembled from such pieces. You met this in the design systems lessons, and here it becomes code.
+
+With these two, frameworks usually bring routing (which page at which address), management of shared state, a build and a ready-made ecosystem of plugins and components.
+
+## Who is who
+
+There are many frameworks, and they differ in how they carry out the same idea.
+
+- **React** (Facebook, 2013) describes an interface with function components and JSX, a notation that looks like HTML inside JavaScript. The idea: you “draw” the interface again each time, and the library compares it with the previous one (the so-called virtual DOM) and changes only the differences. Today it is the most widespread.
+- **Vue** (Evan You, 2014) likes templates close to HTML, and reactive data. It is considered the gentlest to start with.
+- **Angular** (Google; the first one, AngularJS, in 2010, rewritten completely in 2016) is a full framework in TypeScript with its own project structure. It is common in large corporate systems.
+- **Svelte** (Rich Harris, 2016) solves the same task differently: it is a compiler. It analyzes your component at build time and produces minimal plain JavaScript that updates the right nodes directly, so there is almost no heavy library in the browser. This textbook itself is written in Svelte 5.
+- Above them stand the **meta-frameworks**: Next.js (over React), Nuxt (over Vue), SvelteKit (over Svelte) and Astro. They add routes, rendering on the server and delivering ready HTML, which we discuss in the part on site generators and Jamstack.
+
+Around 2016 the phrase “JavaScript fatigue” appeared: new tools came out faster than people could learn them. It helps to remember that they all share one root: the view is derived from state.
+
+## See where the complexity grows
+
+One counter of items is shown in several places on the page. Choose how many places depend on it, and add items. Compare the manual version, where the programmer must remember every place, with the reactive one, where the number is derived from state:
+
+<SyncDemo />
+
+<details>
+<summary>Check yourself: what is a synchronization bug?</summary>
+
+A situation where the state changed but one of the places that show it never found out: for example, the counter says “3” while five cards are on the screen.
+
+</details>
+
+## The price
+
+A framework is not free, and it isn’t only the developer who pays.
+
+- **Weight.** The library and your code arrive in the browser as JavaScript. A kilobyte of script costs more than a kilobyte of image: an image only has to be shown, while a script must first be downloaded, then parsed, then run. Until it has run, the page may look fine but be dead: the buttons don’t respond.
+- **Weak devices.** A budget phone parses the same script many times slower than your laptop. The Web Almanac report in the sources shows how much JavaScript pages usually weigh.
+- **Complexity.** A build, dependencies, version updates, ways to store state: that is separate work, and it has to pay for itself.
+- **Search engines and the first paint.** A page drawn entirely by a script is empty until the script has run. Modern search engines can cope with that, but at a higher cost and less well. That is why meta-frameworks send ready HTML at once and “bring it to life” with a script later.
+
+## When you need a framework and when you don’t
+
+Honest criteria you can apply to any project.
+
+**Probably not needed:** a business card site, a landing page, a blog, a services page. There is little interactivity (a menu, a form, search), three or four places to keep in step, and it all fits in your head. Plain JavaScript and a few modules keep the page light.
+
+**Probably needed:** an account area, a shop with a basket, an editor, a dashboard with charts, anything with many screens, shared state and data that changes by itself. Hand-written code drowns in synchronization here, and a framework pays off.
+
+And a third point, the most important: the decision can be revisited. Starting with plain JavaScript and moving to a framework when you reach the tenth place to keep in step is a normal path.
+
+## Practice
+
+You’re on a 2019 site, where frameworks have long been the norm. But let’s look not at frameworks in general but at your own page: how many places on it are kept in step by hand, and does it need a framework?
+
+The table has three columns: **what is kept in step with what**, **how it is done now** and **how it would work in a reactive way**. At least three rows: anything you wrote in the earlier lessons will do. Then the verdict, “needed” or “not needed”, with numbers from your brief (how many sections, how many items). And the weight of your scripts: estimate it roughly from the Network tab or from the size of the code.
+
+“Not needed” is a correct answer too, and often the right one. What matters more is that your page supports it.
+
+## What was wrong before
+
+When there were no frameworks, everything was written by hand, and later with jQuery, and big pages turned into spaghetti: dozens of handlers that change each other’s elements, and nobody remembers what depends on what. In 2010 the first frameworks appeared (Backbone, AngularJS), then React with the idea “an interface is a function of state”. But the new era had its excess too: a five-page business card site was built as a heavy single-page application that took tens of seconds to open on a weak phone, while search engines saw an empty page.
+
+What remains true is the essential: the view is derived from state, and an interface is assembled from components. And what is superfluous is a heavy tool where a light one would do.

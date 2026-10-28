@@ -1,0 +1,1321 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/07-svelte-component.svx. */
+	export const metadata = {
+		id: '05-javascript/07-svelte-component',
+		part: 5,
+		order: 7,
+		title: 'A Svelte component',
+		definition: 'A Svelte component is a .svelte file with the code, markup and styles of one piece of interface. The runes $state, $derived and $props set its state and inputs.',
+		summary:
+			'A component is a piece of interface with its own data, markup and styling. Afterwards you’ll read a .svelte file, understand the runes $state, $derived and $props, and move a block of your page into components: a card and a list with search.',
+		minutes: 30,
+		teaches: ['js-svelte-component'],
+		requires: ['js-reactivity', 'js-modules'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'editor', label: 'let open = $state(false)', say: 'A plain open = !open, and the screen changes. No “find the element”, no setOpen: the $state rune makes a value live.' },
+				{ mood: 'hint', side: 'right', prop: 'flowchart', label: 'items|query|shown', caption: '$derived', say: 'shown is derived from items and query and recalculates itself. You can’t forget to update the list or the counter.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'plain JavaScript', caption: 'The build', say: 'The browser doesn’t know Svelte. The compiler writes plain JavaScript ahead: value changed, update that node.' }
+			]
+		},
+		practice: {
+			id: 'js-svelte-components',
+			title: 'Your project’s card and list as components',
+			task: 'The sandbox doesn’t build Svelte, so you write the components as text, in the fields of the block “The page’s components”, as if they lay in files. Fill in every “…”. 1) ItemCard.svelte: takes item with let { item } = $props(), keeps in $state whether the “More” block is open, shows {item.title} and {item.price}, and on a button with aria-expanded shows {item.text}. 2) ItemList.svelte: imports ItemCard, takes items through $props, keeps the query in $state and works out the shown list with $derived; the search field is tied with bind:value; the cards are shown with {#each … as item (item.title)}, and an empty list shows a message through {:else}. 3) App.svelte: an items array with your items from the brief, and the line <ItemList {items} />. 4) Count the lines of code: by hand (your scripts on the page) and in the components. 5) In the paragraph about JavaScript write what a visitor sees without the script. You can test the components in the Svelte playground at svelte.dev/playground.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="components">
+      <h2>The page’s components</h2>
+      <p>The <code>ItemCard.svelte</code> file: one card.</p>
+      <textarea data-file="ItemCard.svelte" rows="14" cols="70" spellcheck="false">…<\/textarea>
+      <p>The <code>ItemList.svelte</code> file: the list with search.</p>
+      <textarea data-file="ItemList.svelte" rows="16" cols="70" spellcheck="false">…<\/textarea>
+      <p>The <code>App.svelte</code> file: the data and the assembly of the page.</p>
+      <textarea data-file="App.svelte" rows="10" cols="70" spellcheck="false">…<\/textarea>
+      <p id="lines">Lines of code: by hand …, in components ….</p>
+      <p id="nojs">Without JavaScript: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="components">
+      <h2>The page’s components</h2>
+      <p>The <code>ItemCard.svelte</code> file: one card.</p>
+      <textarea data-file="ItemCard.svelte" rows="14" cols="70" spellcheck="false"><script>
+  let { item } = $props();
+  let open = $state(false);
+<\/script>
+
+<article class="card">
+  <h3>{item.title}</h3>
+  <p class="price">{item.price}</p>
+  <button type="button" aria-expanded={open} onclick={() => (open = !open)}>More</button>
+  {#if open}
+    <p>{item.text}</p>
+  {/if}
+</article><\/textarea>
+      <p>The <code>ItemList.svelte</code> file: the list with search.</p>
+      <textarea data-file="ItemList.svelte" rows="16" cols="70" spellcheck="false"><script>
+  import ItemCard from './ItemCard.svelte';
+
+  let { items } = $props();
+  let query = $state('');
+  let shown = $derived(
+    items.filter((item) => item.title.toLowerCase().includes(query.trim().toLowerCase()))
+  );
+<\/script>
+
+<label>Search the list <input type="search" bind:value={query}></label>
+<p role="status">Shown: {shown.length} of {items.length}</p>
+
+<div class="cards">
+  {#each shown as item (item.title)}
+    <ItemCard {item} />
+  {:else}
+    <p>Nothing found.</p>
+  {/each}
+</div><\/textarea>
+      <p>The <code>App.svelte</code> file: the data and the assembly of the page.</p>
+      <textarea data-file="App.svelte" rows="10" cols="70" spellcheck="false"><script>
+  import ItemList from './ItemList.svelte';
+
+  const items = [
+    {{#each items}}{ title: '{{title}}', text: '{{text}}', price: '{{price}}' },
+    {{/each}}
+  ];
+<\/script>
+
+<ItemList {items} /><\/textarea>
+      <p id="lines">Lines of code: by hand 140, in components 45.</p>
+      <p id="nojs">Without JavaScript: in a SvelteKit project the list is rendered on the server and is visible, minus the search; in a plain Vite project the page stays empty until the script loads.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'components-section',
+					kind: 'exists',
+					selector: '#components'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#components',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'card-props',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: 'let\\s*\\{\\s*item\\s*\\}\\s*=\\s*\\$props\\(\\)'
+				},
+				{
+					id: 'card-state',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: '\\$state\\('
+				},
+				{
+					id: 'card-shows-data',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: '\\{item\\.title\\}[\\s\\S]*\\{item\\.text\\}|\\{item\\.text\\}[\\s\\S]*\\{item\\.title\\}'
+				},
+				{
+					id: 'card-button',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemCard.svelte"]',
+					matches: '<button[^>]*aria-expanded[^>]*onclick|<button[^>]*onclick[^>]*aria-expanded'
+				},
+				{
+					id: 'no-raw-html',
+					kind: 'text',
+					selector: '#components',
+					matches: '^(?![\\s\\S]*\\{@html)'
+				},
+				{
+					id: 'list-imports-card',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: 'import\\s+ItemCard\\s+from\\s*[\'"]\\./ItemCard\\.svelte[\'"]'
+				},
+				{
+					id: 'list-state-derived',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '^(?=[\\s\\S]*\\$state\\()(?=[\\s\\S]*\\$derived)'
+				},
+				{
+					id: 'list-props',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '\\$props\\(\\)'
+				},
+				{
+					id: 'list-each',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '\\{#each\\s+\\w+\\s+as\\s+\\w+\\s*\\([^)]+\\)\\s*\\}'
+				},
+				{
+					id: 'list-empty',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '\\{:else\\}'
+				},
+				{
+					id: 'list-bind',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: 'bind:value'
+				},
+				{
+					id: 'list-uses-card',
+					kind: 'text',
+					selector: '#components textarea[data-file="ItemList.svelte"]',
+					matches: '<ItemCard\\b'
+				},
+				{
+					id: 'app-imports-list',
+					kind: 'text',
+					selector: '#components textarea[data-file="App.svelte"]',
+					matches: 'import\\s+ItemList\\s+from\\s*[\'"]\\./ItemList\\.svelte[\'"]'
+				},
+				{
+					id: 'app-passes-items',
+					kind: 'text',
+					selector: '#components textarea[data-file="App.svelte"]',
+					matches: '<ItemList\\s+(?:\\{items\\}|items=\\{items\\})'
+				},
+				{
+					id: 'app-own-items',
+					kind: 'field',
+					selector: '#components textarea[data-file="App.svelte"]',
+					field: 'items[].title',
+					min: 2,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'lines-counted',
+					kind: 'text',
+					selector: '#lines',
+					matches: '\\d+\\D+\\d+'
+				},
+				{
+					id: 'nojs-answer',
+					kind: 'text',
+					selector: '#nojs',
+					matches: '[Ww]ithout\\s+(?:JavaScript|a\\s+script|the\\s+script)|no\\s+JavaScript|JavaScript\\s+(?:is\\s+)?(?:off|disabled|fails)'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does the line let count = $state(0) do in a Svelte 5 component?',
+				options: [
+					'Declares reactive state: when count changes, everything that shows it updates itself',
+					'Creates a constant that can’t be changed',
+					'Requests data from a server'
+				],
+				answer: 0,
+				why: [
+					'Yes. $state is a rune: a word the Svelte compiler understands in a special way. You wrote count = count + 1, and in the DOM only the nodes that depend on count changed.',
+					'No: for a value that doesn’t change there is const. The whole point of $state is that the value changes.',
+					'No: data is requested by fetch. $state only keeps a value and watches it for changes.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each rune with its meaning',
+				pairs: [
+					['$state', 'a value whose change updates the screen'],
+					['$derived', 'a value that recalculates itself from others'],
+					['$props', 'data the component receives from its parent'],
+					['$effect', 'a side effect after a change, such as writing to localStorage']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you pass an item from ItemList to its child component ItemCard?',
+				options: [
+					'Through props: <ItemCard {item} /> in the parent, let { item } = $props() in the child',
+					'Through a global variable, window.item',
+					'Through innerHTML: the parent inserts the child’s markup as a string'
+				],
+				answer: 0,
+				why: [
+					'Yes. A component’s properties are called props. Data flows from parent to child in one direction, so it’s clear where everything comes from.',
+					'No: global variables break the independence of components, and Svelte has props for this.',
+					'No: you would lose reactivity and open the door to XSS.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does Svelte do at build time?',
+				options: [
+					'Turns a component into plain JavaScript that changes the right nodes directly',
+					'Limits a component’s styles to its own markup',
+					'Sends the visitor a compiler that assembles the page on the fly',
+					'Removes unused CSS rules'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: this is the main difference of Svelte. The build does the work that other frameworks do in the browser.',
+					'Yes: by default the styles in a component’s <style> apply only to that component.',
+					'No: the opposite. The compiler runs on the developer’s machine, and ready code travels to the browser.',
+					'Yes: rules that match nothing in the component’s markup are removed from the result.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why does {#each shown as item (item.title)} have a key in brackets?',
+				options: [
+					'So Svelte knows which element belongs to which item when the list is filtered or reordered',
+					'So the items can’t be deleted',
+					'It is required syntax with no meaning'
+				],
+				answer: 0,
+				why: [
+					'Yes. By the key Svelte matches old elements with new items: those that remain are not recreated and keep their state, for example whether “More” is open.',
+					'No: the key protects nothing.',
+					'No: without a key the list works, but on reordering the state can “move” to the wrong cards.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does {@html text} differ from the ordinary insertion {text}?',
+				options: [
+					'{@html} parses the string as markup, like innerHTML, so it is dangerous for other people’s text; {text} inserts safe text',
+					'{@html} is faster and always better',
+					'They are the same'
+				],
+				answer: 0,
+				why: [
+					'Yes. The ordinary insertion {text} becomes textContent, and tags in the string stay letters. {@html} inserts the string as markup: use it only for code you wrote entirely yourself.',
+					'No: it is not better, it is more dangerous.',
+					'No: the difference is fundamental, the same as between textContent and innerHTML.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-svelte-runes',
+				front: 'Which runes does Svelte 5 have, and what do they do?',
+				back: '$state: a reactive value. $derived: a value computed from others. $props: data from the parent. $effect: a side effect after a change. They are words the compiler understands.'
+			},
+			{
+				id: 'js-svelte-props',
+				front: 'How do components exchange data?',
+				back: 'A parent passes data to its child through props (<Card {item} />), and the child takes it with $props(). Data flows down, and events flow up through handlers.'
+			},
+			{
+				id: 'js-svelte-each',
+				front: 'How do you show a list in Svelte, and why a key?',
+				back: '{#each items as item (item.id)} … {:else} empty {/each}. The key in brackets helps Svelte match elements with items when the list is filtered or reordered.'
+			},
+			{
+				id: 'js-svelte-compile',
+				front: 'How does Svelte differ from React and Vue?',
+				back: 'It is a compiler: at build time it turns a component into plain JavaScript that changes the right nodes directly. No heavy library travels to the browser, and there is no virtual DOM.'
+			},
+			{
+				id: 'js-svelte-kit',
+				front: 'What is SvelteKit?',
+				back: 'A meta-framework over Svelte: routes by folders, server rendering and pages prepared in advance, and a build on Vite. This textbook is built on it.'
+			}
+		],
+		sources: [
+			{
+				title: 'Svelte: What are runes?',
+				url: 'https://svelte.dev/docs/svelte/what-are-runes',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Svelte Tutorial',
+				url: 'https://svelte.dev/tutorial/svelte/welcome-to-svelte',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'SvelteKit: Introduction',
+				url: 'https://svelte.dev/docs/kit/introduction',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Svelte: Overview',
+				url: 'https://svelte.dev/docs/svelte/overview',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: 'Runes in Svelte 5: reactivity with $state, $effect and $derived (Code Hub)',
+				url: 'https://www.youtube.com/watch?v=3AIPUA1vPfM',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'Now your list becomes a component. Three files: a card, a list with search, and the assembly. The code in the blocks is text, so check it in the Svelte playground if you want to see it live.',
+			hints: [
+				'Start ItemCard.svelte with a <script>: let { item } = $props(); let open = $state(false);. Below it goes the markup: an article with {item.title}, {item.price} and a button with aria-expanded={open} and onclick={() => (open = !open)}.',
+				'ItemList.svelte: import ItemCard from ./ItemCard.svelte; let { items } = $props(); let query = $state with an empty string; let shown = $derived(items.filter(…)). In the markup, <input bind:value={query}>, and the list through {#each shown as item (item.title)} … {:else} … {/each}.',
+				'App.svelte: import ItemList from ./ItemList.svelte; const items = [ ... ] with an object for each item, giving its title, text and price; and at the bottom <ItemList {items} />.',
+				'Count lines honestly: how many are in your scripts on the page and how many in the three components. And for the switched-off JavaScript, write what a plain Vite project shows a visitor, and what SvelteKit with server rendering shows.'
+			],
+			mistakes: {
+				'components-section': 'The block “The page’s components” (the section with the id components) has gone. Bring it back.',
+				'no-blanks': 'Ellipses “…” are left. Fill in every field with code or text.',
+				'card-props': 'ItemCard takes its data like this: let { item } = $props();.',
+				'card-state': 'ItemCard needs the state for open and closed: let open = $state(false);.',
+				'card-shows-data': 'The card must show {item.title} and, on the button, {item.text}.',
+				'card-button': 'The button that opens the card needs aria-expanded and onclick, like this: a button element with aria-expanded={open} and onclick={…}.',
+				'no-raw-html': 'Remove {@html …}: show data with the ordinary insertion {…}, which is safe.',
+				'list-imports-card': 'ItemList must import the card: import ItemCard from ./ItemCard.svelte.',
+				'list-state-derived': 'In ItemList the query is kept in $state, and the shown list is worked out with $derived.',
+				'list-props': 'ItemList receives the list from its parent: let { items } = $props();.',
+				'list-each': 'The list is shown like this: {#each shown as item (item.title)} … {/each}, with the key in brackets.',
+				'list-empty': 'An empty list needs an {:else} branch with a message for the visitor.',
+				'list-bind': 'The search field is tied to the state with bind:value={query}.',
+				'list-uses-card': 'The list has to use the card: <ItemCard {item} />.',
+				'app-imports-list': 'App must import the list: import ItemList from ./ItemList.svelte.',
+				'app-passes-items': 'App passes the data to the list: <ItemList {items} />.',
+				'app-own-items': 'App.svelte must hold your items from the brief: at least two titles written as they are in the brief.',
+				'lines-counted': 'The paragraph “Lines of code” needs two numbers: how many by hand and how many in the components.',
+				'nojs-answer': 'In the last paragraph write what a visitor sees without JavaScript.'
+			},
+			outro: 'You built an interface from three small pieces, and each makes sense on its own. Change an item in App.svelte, and everything that depends on it updates, without a single “find and rewrite” line.'
+		},
+		say: {
+			Svelte: 'svelt',
+			SvelteKit: 'svelt kit',
+			Vite: 'veet',
+			props: 'props',
+			Props: 'props',
+			rune: 'roon',
+			runes: 'roons',
+			state: 'state',
+			derived: 'derived',
+			effect: 'effect',
+			each: 'each',
+			playground: 'playground',
+			localStorage: 'local storage'
+		}
+	};
+</script>
+
+<script>
+	import RunesDemo from '../../diagrams/RunesDemo.svelte';
+</script>
+
+## A file where a piece of interface lives
+
+In the last lesson you saw that frameworks offer two ideas: the view is derived from state, and an interface is assembled from components. Now let’s look at how that looks in **Svelte**. The choice isn’t random: this textbook is itself written in Svelte 5, and every diagram on its pages is a component like the ones below.
+
+A Svelte component lives in a file with the extension `.svelte` and has three parts you already know: code (`<script>`), markup (ordinary HTML with a few additions) and styling (`<style>`, optional). Here is an offer card in full:
+
+```html
+<script>
+  let { item } = $props();
+  let open = $state(false);
+</script>
+
+<article class="card">
+  <h3>{item.title}</h3>
+  <p class="price">{item.price}</p>
+  <button type="button" aria-expanded={open} onclick={() => (open = !open)}>More</button>
+  {#if open}
+    <p>{item.text}</p>
+  {/if}
+</article>
+```
+
+Nothing unusual for a person who has written HTML. Three things are unusual: words with a dollar sign, curly braces in the markup, and the fact that the page changes after the button is pressed, although we never wrote “find the element and toggle it”. Let’s take them in order.
+
+## Runes: words the compiler understands
+
+The words with a dollar sign are called **runes**. They are special words of Svelte 5: the compiler sees them and turns ordinary code into reactive code.
+
+- **`$props()`** receives data from the parent. The line `let { item } = $props()` reads: “I’ll be given a property called `item`”. The parent writes `<ItemCard {item} />`. Data flows down, from parent to child.
+- **`$state(value)`** declares **state**: a value whose change updates the screen. In `let open = $state(false)`, while `open` is false the block with the description is hidden. Press the button, `open = !open` runs, and Svelte shows the block by itself. Notice that this is an ordinary assignment, with no `setOpen`.
+- **`$derived(expression)`** declares a value that is **computed** from others and recalculates itself. If you have `query` (what is typed in the search) and the list `items`, then `let shown = $derived(items.filter(...))` always answers the current query.
+- **`$effect(() => ...)`** runs a side effect after the state has changed, such as writing a value to `localStorage`. Reach for it last: most tasks are solved by the first three runes.
+
+Here is a list with search: it receives all the items, keeps the query and shows the filtered result.
+
+```html
+<script>
+  import ItemCard from './ItemCard.svelte';
+
+  let { items } = $props();
+  let query = $state('');
+  let shown = $derived(
+    items.filter((item) => item.title.toLowerCase().includes(query.trim().toLowerCase()))
+  );
+</script>
+
+<label>Search the list <input type="search" bind:value={query}></label>
+<p role="status">Shown: {shown.length} of {items.length}</p>
+
+<div class="cards">
+  {#each shown as item (item.title)}
+    <ItemCard {item} />
+  {:else}
+    <p>Nothing found.</p>
+  {/each}
+</div>
+```
+
+Compare it with the events lesson: there you caught `input` by hand, looped over the cards, wrote `card.hidden` and updated the counter separately. Here the counter, the list and the empty screen are derived from two values: `items` and `query`. You can’t forget to update something.
+
+## Curly braces and blocks
+
+In the markup, curly braces mean “JavaScript here”:
+
+- **`{expression}`** inserts a value. It is **text**, not markup: tags in the string stay letters, as with `textContent`. That is why `{item.title}` is safe for other people’s data. Only `{@html string}` is dangerous, because it inserts markup, like `innerHTML`: use it only for code you wrote entirely yourself;
+- **`{#if condition} ... {:else} ... {/if}`** shows a block on a condition;
+- **`{#each list as element (key)} ... {:else} ... {/each}`** repeats a block for every element of a list. The **key** in brackets helps Svelte understand which card belongs to which item when the list is filtered or reordered, so that state (such as whether “More” is open) isn’t lost. The `{:else}` branch is shown for an empty list: a ready-made “nothing found”;
+- **`onclick={function}`** attaches a handler, and **`bind:value={query}`** ties a field to state in both directions: type in the field and `query` changes; change `query` and the field shows the new value.
+
+One more thing that is easy to miss: the styles in a component’s `<style>` apply by default **only to that component**. A card won’t spoil the styling of the rest of the page, and a rule that matches nothing is thrown out of the result.
+
+## What really happens
+
+The browser doesn’t know what Svelte is. At build time the **compiler** turns every `.svelte` file into plain JavaScript: for each place where `{item.title}` depends on state, it writes a short command, “if this value changed, update this text node”. So almost no middleman library travels to the browser, and there is no comparing of the “old and new” tree as in React: exactly what depends on the changed value is updated.
+
+Check it yourself. On the right is a live component on the same runes, and under it a log of what exactly changed in the page tree after each of your actions.
+
+<RunesDemo />
+
+<details>
+<summary>Check yourself: how does $derived differ from $state?</summary>
+
+`$state` holds a value that you change yourself. `$derived` is computed from other values and recalculates automatically, so you never assign to it by hand.
+
+</details>
+
+## How to run it yourself
+
+In our sandbox components aren’t built, because that needs a compiler. There are two simple ways to try them.
+
+- Open **svelte.dev/playground**, paste in the files `App.svelte`, `ItemList.svelte` and `ItemCard.svelte` from the practice, and you’ll see the page at once.
+- Create a project with the command `npx sv create my-app` (you’ll need Node.js). It sets up **SvelteKit**, which is Svelte together with routes by folders, preparing pages on the server and the Vite bundler. Then `npm install` and `npm run dev`.
+
+One difference worth knowing in advance: in a plain project of Svelte and Vite alone, the page is empty until the script loads. In SvelteKit the page is rendered on the server and arrives in the browser as ready HTML, and the script then “brings it to life”. For a visitor without the script the difference is huge, and the next lesson is about it.
+
+## Practice
+
+You’re on a 2019 site. Move the block of offers into components: the card `ItemCard`, the list with search `ItemList` and the assembly point `App`. The code is written as text in the fields of the block “The page’s components”: inside them you can use the `<` sign as it is.
+
+The checks read the text of your components: whether there are `$props`, `$state`, `$derived`, a key in `{#each}` and an `{:else}` branch. Whether they work is best checked in the Svelte playground. While you’re at it, count honestly how many lines of code it took by hand (your four scripts on the page) and in components, and write what a visitor sees whose JavaScript didn’t load. It’s a very useful thought for the next lesson.
+
+## What was wrong before
+
+Before version 5, Svelte was written differently: state was declared with an ordinary `let`, and reactivity was implied (a special `$:` label for computed values and special rules for assignment). It was short, but the magic sometimes failed: it worked only inside a component and didn’t carry over into ordinary files, and a newcomer found it hard to see why an assignment in one place is reactive and in another is not. In 2024 Svelte 5 arrived with runes: the same abilities, but written explicitly.
+
+The idea that the view is derived from state and that changes travel along a chain of dependencies (it is called **signals**) came to almost every framework in the 2020s: Solid, Preact, Angular and Vue (where it is `ref`). Learn it in Svelte and you’ll read the others easily.

@@ -7,6 +7,43 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			names: ['список', 'счётчик', 'значок в меню', 'быстрый переход', 'заголовок', 'подвал', 'вкладка', 'подсказка'],
+			caption: 'Одно число, много мест',
+			places: 'Сколько мест показывают число пунктов:',
+			forget: 'программист забыл обновить последнее место',
+			add: 'Добавить пункт',
+			reset: 'Сначала',
+			manualLabel: 'Ручной код',
+			manual: (n: number) => `Вручную: строк обновления ${n}`,
+			forgot: '   // забыли',
+			reactiveLabel: 'Реактивный код',
+			reactive: 'Реактивно: объявлено одно значение',
+			stale: (n: number) => `Устарело мест: ${n}. Страница противоречит сама себе.`,
+			fine: 'Все места совпадают, пока ничего не забыто.',
+			nothing: 'Забыть нечего: каждое место выведено из одного значения и обновляется вместе с ним.'
+		},
+		en: {
+			names: ['list', 'counter', 'menuBadge', 'quickNav', 'heading', 'footer', 'tab', 'tooltip'],
+			caption: 'One number, many places',
+			places: 'How many places show the number of items:',
+			forget: 'the programmer forgot to update the last place',
+			add: 'Add an item',
+			reset: 'Start over',
+			manualLabel: 'Manual code',
+			manual: (n: number) => `By hand: ${n} update ${n === 1 ? 'line' : 'lines'}`,
+			forgot: '   // forgot this one',
+			reactiveLabel: 'Reactive code',
+			reactive: 'Reactive: one value declared',
+			stale: (n: number) => `Stale places: ${n}. The page contradicts itself.`,
+			fine: 'Every place agrees, as long as nothing is forgotten.',
+			nothing: 'Nothing to forget: every place is derived from one value and updates with it.'
+		}
+	});
 
 	let places = $state(4);
 	let forget = $state(false);
@@ -23,35 +60,35 @@
 		items = 3;
 		copies = Array.from({ length: 8 }, () => 3);
 	};
-	const names = ['список', 'счётчик', 'значок в меню', 'быстрый переход', 'заголовок', 'подвал', 'вкладка', 'подсказка'];
+	const names = W.names;
 	const stale = $derived(copies.slice(0, places).filter((c) => c !== items).length);
 </script>
 
 <figure class="dg">
-	<figcaption>Одно число, много мест</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="dg-ctl">
-		<label>Сколько мест показывают число пунктов: {places}
+		<label>{W.places} {places}
 			<input type="range" min="1" max="8" bind:value={places} />
 		</label>
-		<label><input type="checkbox" bind:checked={forget} /> программист забыл обновить последнее место</label>
-		<button type="button" onclick={addManual}>Добавить пункт</button>
-		<button type="button" onclick={reset}>Сначала</button>
+		<label><input type="checkbox" bind:checked={forget} /> {W.forget}</label>
+		<button type="button" onclick={addManual}>{W.add}</button>
+		<button type="button" onclick={reset}>{W.reset}</button>
 	</div>
 
 	<div class="two">
-		<section aria-label="Ручной код">
-			<div class="dh">Вручную: строк обновления {places}</div>
-			<pre class="dg-box dg-mono">{#each Array.from({ length: places }, (_, i) => i) as i (i)}{names[i]}.textContent = items.length;{forget && i === places - 1 ? '   // забыли' : ''}
+		<section aria-label={W.manualLabel}>
+			<div class="dh">{W.manual(places)}</div>
+			<pre class="dg-box dg-mono">{#each Array.from({ length: places }, (_, i) => i) as i (i)}{names[i]}.textContent = items.length;{forget && i === places - 1 ? W.forgot : ''}
 {/each}</pre>
 			<div class="chips" aria-live="polite">
 				{#each copies.slice(0, places) as c, i (i)}
 					<span class="chip" class:stale={c !== items}>{names[i]}: {c}</span>
 				{/each}
 			</div>
-			<p class="verdict" class:bad={stale > 0}>{stale > 0 ? `Устарело мест: ${stale}. Страница противоречит сама себе.` : 'Все места совпадают, пока ничего не забыто.'}</p>
+			<p class="verdict" class:bad={stale > 0}>{stale > 0 ? W.stale(stale) : W.fine}</p>
 		</section>
-		<section aria-label="Реактивный код">
-			<div class="dh">Реактивно: объявлено одно значение</div>
+		<section aria-label={W.reactiveLabel}>
+			<div class="dh">{W.reactive}</div>
 			<pre class="dg-box dg-mono">let items = $state(3);
 {#each Array.from({ length: places }, (_, i) => i) as i (i)}{names[i]}: {'{items}'}
 {/each}</pre>
@@ -60,7 +97,7 @@
 					<span class="chip">{names[i]}: {items}</span>
 				{/each}
 			</div>
-			<p class="verdict">Забыть нечего: каждое место выведено из одного значения и обновляется вместе с ним.</p>
+			<p class="verdict">{W.nothing}</p>
 		</section>
 	</div>
 </figure>

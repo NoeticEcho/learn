@@ -1,0 +1,1265 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/05-modules-tooling.svx. */
+	export const metadata = {
+		id: '05-javascript/05-modules-tooling',
+		part: 5,
+		order: 5,
+		title: 'Modules, npm and bundling',
+		definition: 'An ES module is a JavaScript file that shares names with export and takes names with import. npm installs packages, and a bundler assembles modules.',
+		summary:
+			'One long script soon turns into a mess. Afterwards you’ll split code into files with ES modules, read a package.json, understand what a bundler does and see why dependencies are worth guarding.',
+		minutes: 25,
+		teaches: ['js-modules', 'js-tooling'],
+		requires: ['js-fetch', 'net-url-anatomy'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'items', caption: 'Shared names', say: 'Two files called a variable items. One quietly overwrote the other, and nobody knew why.' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'data.js|render.js|main.js', caption: 'Modules', say: 'A module says what it hands out (export) and what it takes from others (import). The rest is its own business.' },
+				{ mood: 'hint', prop: 'editor', label: 'from ./data.js', say: 'The .js in the path is required. And open the page through a local server: over file:// modules won’t load.' }
+			]
+		},
+		practice: {
+			id: 'js-modules-plan',
+			title: 'Split your site’s code into modules',
+			task: 'The sandbox can’t load several files, so you’ll write the modules as text, in pre blocks, as if they lay in files. Fill in every “…” in the block “The page’s modules”. 1) data.js: export const items = […], with your items from the brief (title, text, price). 2) render.js: import items from ./data.js (the .js extension is required) and export a function renderCards(container) that builds the cards with createElement and textContent. 3) main.js: import items and renderCards and call them. 4) package.json: a name and the type set to module. 5) In the paragraph “External packages” write which outside packages you need and how much they weigh, or that you need none. Inside pre, the < sign is written as &lt;. You’ll have to test the modules on your own machine: save the files and start a local server (the lesson says how).',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="modules">
+      <h2>The page’s modules</h2>
+      <p>The <code>data.js</code> file: the data from the brief.</p>
+      <pre data-file="data.js">…<\/pre>
+      <p>The <code>render.js</code> file: draws the cards.</p>
+      <pre data-file="render.js">…<\/pre>
+      <p>The <code>main.js</code> file: puts it all together.</p>
+      <pre data-file="main.js">…<\/pre>
+      <p>The <code>package.json</code> file.</p>
+      <pre data-file="package.json">…<\/pre>
+      <p id="deps">External packages: …</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}</h2>
+        <p>A couple of sentences about this section.</p>
+      </section>
+
+      <section id="offer">
+        <h2>What we offer</h2>
+        <nav id="quick" aria-label="Quick links to the offers"></nav>
+        <p id="offer-count"></p>
+        <form id="search" role="search" aria-label="Search the offers">
+          <label for="q">Search the list</label>
+          <input id="q" type="search" autocomplete="off">
+        </form>
+        <p id="nothing" hidden>Nothing found. Try another word.</p>
+        <p id="status" role="status"></p>
+        <button type="button" id="retry" hidden>Try again</button>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+            <p class="price">{{price}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}</h2>
+        <form id="request-form" action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+          <p id="form-status" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+
+    <section data-scaffold id="modules">
+      <h2>The page’s modules</h2>
+      <p>The <code>data.js</code> file: the data from the brief.</p>
+      <pre data-file="data.js">// data.js: the page’s data lives apart from the code that draws it.
+export const items = [
+        {{#each items}}{ title: '{{title}}', text: '{{text}}', price: '{{price}}' },
+        {{/each}}
+];<\/pre>
+      <p>The <code>render.js</code> file: draws the cards.</p>
+      <pre data-file="render.js">// render.js: takes the data and builds the cards. It knows nothing about where the page is run from.
+import { items } from './data.js';
+
+export function renderCards(container) {
+  const cards = items.map((item) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    const title = document.createElement('h3');
+    title.textContent = item.title;
+    const text = document.createElement('p');
+    text.textContent = item.text;
+    card.append(title, text);
+    return card;
+  });
+  container.replaceChildren(...cards);
+}<\/pre>
+      <p>The <code>main.js</code> file: puts it all together.</p>
+      <pre data-file="main.js">// main.js: the entry point. The page loads it with one line: a script tag with type="module" and src="main.js".
+import { items } from './data.js';
+import { renderCards } from './render.js';
+
+const container = document.querySelector('#offer .cards');
+renderCards(container);
+document.querySelector('#offer-count').textContent = 'Offers: ' + items.length;<\/pre>
+      <p>The <code>package.json</code> file.</p>
+      <pre data-file="package.json">{
+  "name": "my-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}<\/pre>
+      <p id="deps">External packages: none needed, everything is plain JavaScript.</p>
+    </section>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The brief’s data: the list items. For now they live here;
+      // in the fetch lesson we moved them to a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Titles only. map makes a new array, and items stays as it was.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items are in the list.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in all: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // The menu: without the script the list is always visible, with the script it hides behind a button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches input in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // Find the cards at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Shown: ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+    <fieldset data-scaffold id="net-sim">
+      <legend>Server mock: the state of the connection</legend>
+      <label><input type="radio" name="net" value="ok" checked> all is well</label>
+      <label><input type="radio" name="net" value="slow"> slow, three seconds</label>
+      <label><input type="radio" name="net" value="offline"> connection lost</label>
+      <label><input type="radio" name="net" value="error500"> the server broke (500)</label>
+      <label><input type="radio" name="net" value="missing404"> no such file (404)</label>
+    </fieldset>
+    <script type="module" data-scaffold>
+      // A MOCK SERVER. The sandbox lets no real requests through, so fetch
+      // on this page is replaced: it answers as chosen above.
+      // A real site has no such block, and the addresses lead to your server.
+      const snapshot = [...document.querySelectorAll('#offer .card')].map((card) => ({
+        title: card.querySelector('h3').textContent,
+        text: card.querySelector('p').textContent,
+        price: card.querySelector('.price')?.textContent ?? ''
+      }));
+      const reply = (data, status = 200) =>
+        new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+      const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      window.fetch = async (url, options = {}) => {
+        const mode = document.querySelector('input[name="net"]:checked').value;
+        await pause(mode === 'slow' ? 3000 : 600);
+        if (mode === 'offline') throw new TypeError('Failed to fetch');
+        if (mode === 'error500') return reply({ error: 'The server broke' }, 500);
+        if (mode === 'missing404') return reply({ error: 'Not found' }, 404);
+        const path = new URL(url, 'https://site.example/').pathname;
+        if (path === '/items.json') {
+          return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
+        }
+        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        return reply({ error: 'Not found' }, 404);
+      };
+    <\/script>
+
+    <script type="module" id="fetch-code">
+      const cardsBox = document.querySelector('#offer .cards');
+      const status = document.querySelector('#status');
+      const retry = document.querySelector('#retry');
+      const count = document.querySelector('#offer-count');
+      const form = document.querySelector('#request-form');
+      const formStatus = document.querySelector('#form-status');
+      const submit = form.querySelector('button[type="submit"]');
+
+      // Build cards from the server’s data: text only through textContent.
+      function showCards(items) {
+        const cards = items.map((item, index) => {
+          const card = document.createElement('article');
+          card.className = 'card';
+          card.id = 'item-' + (index + 1);
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+          const text = document.createElement('p');
+          text.textContent = item.text;
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = item.price;
+          card.append(title, text, price);
+          return card;
+        });
+        cardsBox.replaceChildren(...cards);
+        count.textContent = 'Offers: ' + cards.length;
+      }
+
+      async function loadItems() {
+        status.textContent = 'Loading the latest list…';
+        retry.hidden = true;
+        cardsBox.setAttribute('aria-busy', 'true');
+        try {
+          const response = await fetch('/items.json');
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const items = await response.json();
+          showCards(items);
+          status.textContent = '';
+        } catch (error) {
+          console.error(error);
+          status.textContent = 'Could not refresh the list, so the saved one is shown. Check your connection and try again.';
+          retry.hidden = false;
+        } finally {
+          cardsBox.removeAttribute('aria-busy');
+        }
+      }
+
+      retry.addEventListener('click', loadItems);
+      loadItems();
+
+      // The form: without the script it submits the ordinary way, with the script without a reload.
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit.disabled) return;
+        submit.disabled = true;
+        formStatus.textContent = 'Sending…';
+        try {
+          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          if (!response.ok) {
+            throw new Error('The server replied with code ' + response.status);
+          }
+          const result = await response.json();
+          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          form.reset();
+        } catch (error) {
+          console.error(error);
+          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, in short */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+`
+			},
+			checks: [
+				{
+					id: 'modules-section',
+					kind: 'exists',
+					selector: '#modules'
+				},
+				{
+					id: 'no-blanks',
+					kind: 'text',
+					selector: '#modules',
+					matches: '^[^…]*$'
+				},
+				{
+					id: 'data-exports',
+					kind: 'text',
+					selector: '#modules pre[data-file="data.js"]',
+					matches: 'export\\s+(?:const|let|default)\\s'
+				},
+				{
+					id: 'data-own-items',
+					kind: 'field',
+					selector: '#modules pre[data-file="data.js"]',
+					field: 'items[].title',
+					min: 2,
+					when: {
+						brief: 'items[].title'
+					}
+				},
+				{
+					id: 'render-imports-data',
+					kind: 'text',
+					selector: '#modules pre[data-file="render.js"]',
+					matches: 'import\\s*\\{[^}]+\\}\\s*from\\s*[\'"]\\./data\\.js[\'"]'
+				},
+				{
+					id: 'render-exports',
+					kind: 'text',
+					selector: '#modules pre[data-file="render.js"]',
+					matches: 'export\\s+(?:function|const|default)\\s'
+				},
+				{
+					id: 'render-safe',
+					kind: 'text',
+					selector: '#modules pre[data-file="render.js"]',
+					matches: '^(?=[\\s\\S]*createElement\\()(?=[\\s\\S]*textContent)(?![\\s\\S]*\\.innerHTML\\s*\\+?=)'
+				},
+				{
+					id: 'main-imports',
+					kind: 'text',
+					selector: '#modules pre[data-file="main.js"]',
+					matches: '^(?=[\\s\\S]*import[^;]*from\\s*[\'"]\\./render\\.js[\'"])(?=[\\s\\S]*import[^;]*from\\s*[\'"]\\./data\\.js[\'"])'
+				},
+				{
+					id: 'main-calls',
+					kind: 'text',
+					selector: '#modules pre[data-file="main.js"]',
+					matches: 'renderCards\\('
+				},
+				{
+					id: 'package-name',
+					kind: 'text',
+					selector: '#modules pre[data-file="package.json"]',
+					matches: '"name"\\s*:\\s*"[^"]+"'
+				},
+				{
+					id: 'package-module',
+					kind: 'text',
+					selector: '#modules pre[data-file="package.json"]',
+					matches: '"type"\\s*:\\s*"module"'
+				},
+				{
+					id: 'deps-note',
+					kind: 'text',
+					selector: '#deps',
+					matches: '(?:[Nn]one|[Nn]o |not needed|[Kk][Bb])'
+				}
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'You saved index.html with a module on your computer and opened it with a double click (an address starting file://). The script doesn’t run. Why?',
+				options: [
+					'The browser won’t load modules over file://: open a page with modules through a local server',
+					'Modules work only in Chrome',
+					'The file is missing var'
+				],
+				answer: 0,
+				why: [
+					'Yes. For security, browsers don’t let module scripts read files over file://. Any local server will do: npx serve . or python3 -m http.server.',
+					'No: modules work in every modern browser.',
+					'No: modern code doesn’t need var at all, and it has nothing to do with modules.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each term with what it is',
+				pairs: [
+					['export', 'makes a value of a module available to other files'],
+					['import', 'takes a value from another file'],
+					['package.json', 'the project’s passport: name, scripts, dependencies'],
+					['node_modules', 'the folder where npm puts downloaded packages'],
+					['bundler', 'assembles modules into files for the browser and makes them smaller']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the version ^1.4.2 mean in dependencies?',
+				options: [
+					'Any 1.x.y from 1.4.2 up is fine, but not version 2',
+					'Exactly 1.4.2 and nothing else',
+					'Any version above 1.4.2, 2.0 included'
+				],
+				answer: 0,
+				why: [
+					'Yes. The ^ sign allows updates that, by the semver convention, don’t break compatibility: fixes and new features. A new major version (2.0.0) may break things, and ^ doesn’t take it.',
+					'No: for an exact version you write 1.4.2 with no sign.',
+					'No: version 2.0 may already have broken compatibility, so ^ leaves it out.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does a bundler usually do?',
+				options: [
+					'Follows the graph of import statements and assembles one or more files',
+					'Minifies the code: removes spaces and shortens names',
+					'Throws out what is never used (tree shaking)',
+					'Writes the application code for you'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: it walks the imports and gathers everything the page needs.',
+					'Yes: minification makes a file several times smaller.',
+					'Yes: if you import one function from a big library, only that function lands in the file.',
+					'No: you write the application code.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the journey of your code from your folder to a visitor’s browser in order',
+				items: [
+					'Source modules with import and export',
+					'The bundler builds the dependency graph',
+					'The code is minified and the unused parts are dropped',
+					'The finished files go to the host',
+					'The visitor’s browser downloads and runs them'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why guard your dependencies, when a package takes one line to add?',
+				options: [
+					'Every package is someone else’s code: it adds weight, needs updating and can turn out vulnerable or vanish',
+					'Packages are banned in commercial projects',
+					'The more packages, the faster the site'
+				],
+				answer: 0,
+				why: [
+					'Yes. In 2016 a developer unpublished a tiny package called left-pad from npm, and thousands of builds around the world broke. And the weight of packages adds up in the page your visitor downloads. A package is worth it when it saves more than it costs.',
+					'No: most packages are open and free to use. The question is the cost of owning one, not a ban.',
+					'No: the opposite. Downloading and parsing other people’s code slows loading down.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-module-syntax',
+				front: 'How do ES modules work?',
+				back: 'One file exports values (export), another takes them with import { a } from a path. A module has a scope of its own, runs once, and runs after the page is parsed. You load it with a script tag whose type is module.'
+			},
+			{
+				id: 'js-npm',
+				front: 'What are npm and package.json?',
+				back: 'npm is a package manager and a registry of other people’s code. package.json is the project’s passport with its name, scripts and list of dependencies. The packages themselves are downloaded into node_modules.'
+			},
+			{
+				id: 'js-semver',
+				front: 'What do the numbers of version 2.5.1 and the ^ sign mean?',
+				back: 'Major.minor.patch. A major version changes when compatibility breaks, a minor one when features are added, a patch when something is fixed. ^2.5.1 allows updates up to, but not including, 3.0.0.'
+			},
+			{
+				id: 'js-bundler',
+				front: 'What does a bundler do, and is it always needed?',
+				back: 'It assembles the graph of imports into files, minifies them, drops what is unused and turns TypeScript and JSX into plain JavaScript. A small site of plain modules doesn’t need one. You need it once packages, TypeScript or a framework arrive.'
+			},
+			{
+				id: 'js-dependency-cost',
+				front: 'What does each dependency cost?',
+				back: 'Weight for the visitor, updates and vulnerabilities, and reliance on someone else’s decisions (a stray package can vanish or change). Add one if it saves more than it costs.'
+			}
+		],
+		sources: [
+			{
+				title: 'JavaScript modules (MDN)',
+				url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules',
+				licence: 'CC-BY-SA',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Modules, introduction (javascript.info)',
+				url: 'https://javascript.info/modules-intro',
+				licence: 'link-only',
+				kind: 'course',
+				lang: 'en'
+			},
+			{
+				title: 'npm Docs: About packages and modules',
+				url: 'https://docs.npmjs.com/about-packages-and-modules',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Semantic Versioning 2.0.0',
+				url: 'https://semver.org/',
+				licence: 'CC-BY',
+				kind: 'spec',
+				lang: 'en'
+			},
+			{
+				title: 'Vite: Getting Started',
+				url: 'https://vite.dev/guide/',
+				licence: 'link-only',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'web.dev: Reduce JavaScript payloads with tree shaking',
+				url: 'https://web.dev/articles/reduce-javascript-payloads-with-tree-shaking',
+				licence: 'CC-BY',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [],
+		guide: {
+			intro: 'Here you’ll split your site’s code into files. The sandbox has no files, so each “file” is a pre block of code. Write it as if it lay on disk, then test it on your own machine.',
+			hints: [
+				'In the data.js block: export const items = [ ... ] with an object for each item, giving its title, text and price. Put in your own items from the brief.',
+				'The first line of render.js imports items from the path ./data.js, written as a string (with the .js extension: the browser doesn’t guess it). Then export function renderCards(container) { … } and inside it createElement, textContent and container.replaceChildren(...cards).',
+				'main.js has two imports, items from ./data.js and renderCards from ./render.js, and then a call: renderCards with the .cards element of the offer section as its argument.',
+				'package.json needs a name field and a type field set to module. In the packages paragraph, write “none needed” or list them with their weight in kilobytes.'
+			],
+			mistakes: {
+				'modules-section': 'The block “The page’s modules” (the section with the id modules) has gone. Bring it back: it’s where you write the modules.',
+				'no-blanks': 'The modules block still has ellipses “…”. Replace each with code or text.',
+				'data-exports': 'data.js has to hand its data to other files: export const items = […].',
+				'data-own-items': 'data.js must hold your items from the brief: at least two titles written as they are in the brief.',
+				'render-imports-data': 'render.js needs an import on its first line: items from ./data.js. The .js extension is required.',
+				'render-exports': 'render.js has to export a function: export function renderCards(container) { … }.',
+				'render-safe': 'renderCards builds the cards with createElement and textContent. You don’t need innerHTML for data.',
+				'main-imports': 'main.js needs two imports: one from ./render.js and one from ./data.js.',
+				'main-calls': 'main.js has to call the function: renderCards(…).',
+				'package-name': 'package.json needs a name field, for example my-site.',
+				'package-module': 'package.json needs the type field set to module: that is how Node and bundlers know the files are modules.',
+				'deps-note': 'In the paragraph “External packages” write that none are needed, or name them and give their weight in kilobytes.'
+			},
+			outro: 'Now the code has a structure: data apart, drawing apart, starting apart. Save these files on your machine, start a local server and open the page: it should work just the same.'
+		},
+		say: {
+			npm: 'N P M',
+			package: 'package',
+			json: 'jason',
+			export: 'export',
+			import: 'import',
+			Vite: 'veet',
+			bundler: 'bundler',
+			semver: 'sem ver',
+			node_modules: 'node modules',
+			webpack: 'web pack',
+			Rollup: 'roll up',
+			esbuild: 'E S build',
+			TypeScript: 'type script',
+			'left-pad': 'left pad'
+		}
+	};
+</script>
+
+<script>
+	import ModuleGraph from '../../diagrams/ModuleGraph.svelte';
+</script>
+
+## When a script no longer fits in your head
+
+Your page already has four scripts: a summary, quick links, a menu with search, and loading data. They sit one after another in a single HTML file, and that is still bearable. Now imagine a site with twenty pages and forty scripts. Which one declared the variable `items`? Which depends on which? What breaks if you reorder the `<script>` tags? In the early 2000s sites lived exactly like that: one enormous file, or a dozen files loaded in a strict order, with every script sharing one namespace. It was enough for two files to give a variable the same name, and one quietly overwrote the other.
+
+You need a way to say of each file: this is what it **offers** to the others, this is what it **takes** from them, and everything else is its own business. Files like that are called **modules**.
+
+## How we got here
+
+There were several answers. First, people wrapped code in a function that called itself at once, which gave it a private scope (the trick was called an IIFE). In 2009 the server-side JavaScript runtime Node.js got a module system, CommonJS, with a `require` command, and others (AMD among them) were invented for browsers. To make all of that work in a browser, **bundlers** appeared: Browserify and webpack (2011 and 2012), Rollup, Parcel, and later esbuild and Vite. In 2015 the language itself gained modules, the **ES modules**, and by 2018 every major browser understood them. Since then a small site doesn’t always need a bundler.
+
+## ES modules
+
+A module file exposes what is marked with the word `export`, and the rest stays inside:
+
+```js
+// data.js
+export const items = [ /* … */ ];
+```
+
+Another file takes what it needs with `import`:
+
+```js
+// render.js
+import { items } from './data.js';
+
+export function renderCards(container) { /* … */ }
+```
+
+You load the main file with one line, and the browser follows the chain of imports by itself:
+
+```html
+<script type="module" src="main.js"></script>
+```
+
+The rules that trip people up the first time:
+
+- the path starts with `./` or `../`, and **the `.js` extension is required**: the browser doesn’t guess what you meant;
+- each module runs **once**, however many files import it, and it has a scope of its own, so `items` in one module doesn’t clash with `items` in another;
+- a module runs after the page is parsed, like the `type="module"` scripts in our lessons;
+- you need a server: if you open the page with a double click (an address starting `file://`), the browser won’t let modules load each other. Any local server will do, for example `npx serve .` or `python3 -m http.server`.
+
+There is also a **dynamic import**, `import('./big.js')`, which returns a promise: it loads a module only when it’s needed, such as the code of an editor that opens on a button press.
+
+Something else looks odd: a line such as `import x from 'lodash'`, with no `./`, doesn’t work in a browser on its own. The browser doesn’t know where to look for a package by name. You need either a bundler, which finds the package in `node_modules` and puts it in the bundle, or an import map (`importmap`), where you write the address yourself.
+
+<details>
+<summary>Check yourself: why does a page with modules fail when you open it with a double click?</summary>
+
+The browser doesn’t let modules read files from a `file://` address. The page has to be opened through a local server.
+
+</details>
+
+## npm: other people’s code in one command
+
+So that nobody writes everything alone, developers share code as **packages**. The main warehouse of packages is called npm (and so is the program you install them with). Every project starts with a file called `package.json`, the project’s passport:
+
+```json
+{
+  "name": "my-site",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "npx serve ." },
+  "dependencies": { "dates-lib": "^1.4.2" }
+}
+```
+
+It holds the project’s name, the mark `"type": "module"` (the files count as modules), the commands in `scripts` (you run one as `npm run start`) and the list of **dependencies**. The command `npm install` downloads them into a folder called `node_modules`, and a file called `package-lock.json` records the exact versions, so that you and a colleague get the same thing.
+
+Versions follow the **semver** convention: three numbers, `major.minor.patch`. A patch fixes bugs, a minor version adds features without breaking anything, and a major version breaks compatibility. The `^` in `^1.4.2` lets you update inside the major version: `1.5.0` is fine, `2.0.0` is not.
+
+## The bundler
+
+A **bundler** follows the chain of `import` statements, gathers everything the page needs into one or more files, and does useful things to them. It makes them smaller (**minification** removes spaces and shortens names). It throws out what nobody used (**tree shaking**, as if you shook the tree and the dead leaves fell off). It turns TypeScript, JSX and other formats into ordinary JavaScript, and it runs a local server that refreshes the page on every edit. Today the most popular in new projects is Vite, and under the hood of many bundlers lies esbuild. Try it on the diagram: add a big package and see what each of the two operations does to it:
+
+<ModuleGraph />
+
+Does your site need a bundler? A small site of plain modules with no outside packages doesn’t: the browser copes on its own, and HTTP/2 long ago removed the old problem of “many small files”. A bundler becomes necessary when you add packages from npm, write TypeScript or take a framework (more on that in the next lessons).
+
+## Every dependency has a price
+
+A package goes in with one line, and that is why people add so many. But every package is:
+
+- **weight** on the page, which the visitor downloads, on a weak phone too;
+- **someone else’s code**, which you must update and in which vulnerabilities are found (the command `npm audit` reports the known ones);
+- **reliance on other people’s decisions**. In March 2016 the author of a tiny package called left-pad (eleven lines that pad a string with spaces) removed it from the registry, and thousands of builds around the world broke, because other packages leaned on it. And in 2018 malicious code got into the popular package event-stream through a new dependency. That’s no reason to fear npm. It is a reason to ask yourself before every install: how much does this package save, and what does it cost?
+
+A good rule: a package is justified if it replaces a lot of work and there is no sense in writing it yourself (parsing dates with time zones, for example). Three lines that are easy to write yourself don’t deserve a package.
+
+## Practice
+
+You’re on a 2019 site. The scripts have grown, and it’s time to split them into files. The sandbox can’t load several files, so you’ll write the modules **as text**, as if they lay in files: in `pre` blocks named `data.js`, `render.js`, `main.js` and `package.json`. Inside `pre`, the `<` sign is written as `&lt;`, and the rest of the code stays as it is.
+
+Then do what the sandbox can’t, and test on your own machine. Create a folder, put in it an `index.html` with the tag `<script type="module" src="main.js"></script>` and the three files from the blocks. Run `npx serve .` in that folder (you’ll need Node.js) or `python3 -m http.server`, and open the address it shows. If the console shows a red error, read it: most often it’s a forgotten `.js` in a path or `file://` instead of a server address.
+
+At the end, write which outside packages the project needs and how much they weigh. For your site, probably none: everything is done in plain JavaScript. That is an answer too, and a good one.
+
+## What was wrong before
+
+Scripts were glued together by hand or by build commands (Grunt, Gulp), shared names lived in one global object (`window.MyApp = {}`), the order of `<script>` tags was part of the program, and nobody knew exactly which file depended on which. For every jQuery plugin you had to remember that it needed jQuery before it. Today those dependencies are written in the code itself, in the `import` lines, and people, bundlers and editors all see them.
+
+What remains true: divide code by responsibility, and keep data apart from what draws it. And a package from the registry is still added with care: what is handy today can be a problem tomorrow.

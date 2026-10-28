@@ -9,13 +9,62 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// Bilingual (docs/content-plan/README.md, «English edition»): the words are in `W`, one entry per edition.
+	const W = pick({
+		ru: {
+			items: [
+				{ title: 'Первое предложение', text: 'Описание первого.' },
+				{ title: 'Второе предложение', text: 'Описание второго.' },
+				{ title: 'Третье предложение', text: 'Описание третьего.' }
+			],
+			added: (tag: string, n: number) => `в <${tag}> добавлено элементов: ${n}`,
+			removed: (tag: string, n: number) => `из <${tag}> убрано элементов: ${n}`,
+			text: (s: string) => `обновлён текстовый узел: «${s}»`,
+			attr: (tag: string, name: string | null) => `у <${tag}> изменился атрибут ${name}`,
+			caption: 'Компонент и то, что в нём обновилось',
+			codeLabel: 'Код компонента',
+			code: 'Код',
+			shownCode: 'Показано:',
+			liveLabel: 'Работающий компонент',
+			live: 'Живой результат',
+			find: 'Найти',
+			shown: (a: number, b: number) => `Показано: ${a} из ${b}`,
+			more: 'Подробнее',
+			none: 'Ничего не нашлось.',
+			changed: (n: number) => `Что изменилось в дереве страницы: всего ${n}`,
+			empty: 'пока ничего: введите слово или нажмите «Подробнее»',
+			clear: 'Очистить журнал'
+		},
+		en: {
+			items: [
+				{ title: 'First offer', text: 'A description of the first.' },
+				{ title: 'Second offer', text: 'A description of the second.' },
+				{ title: 'Third offer', text: 'A description of the third.' }
+			],
+			added: (tag: string, n: number) => `${n} ${n === 1 ? 'element' : 'elements'} added to <${tag}>`,
+			removed: (tag: string, n: number) => `${n} ${n === 1 ? 'element' : 'elements'} removed from <${tag}>`,
+			text: (s: string) => `a text node was updated: “${s}”`,
+			attr: (tag: string, name: string | null) => `<${tag}> changed its ${name} attribute`,
+			caption: 'A component and what it updated',
+			codeLabel: 'The component’s code',
+			code: 'Code',
+			shownCode: 'Shown:',
+			liveLabel: 'The running component',
+			live: 'Live result',
+			find: 'Find',
+			shown: (a: number, b: number) => `Shown: ${a} of ${b}`,
+			more: 'More',
+			none: 'Nothing found.',
+			changed: (n: number) => `What changed in the page tree: ${n} in all`,
+			empty: 'nothing yet: type a word or press “More”',
+			clear: 'Clear the log'
+		}
+	});
 
 	type Item = { title: string; text: string };
-	let items = $state<Item[]>([
-		{ title: 'Первое предложение', text: 'Описание первого.' },
-		{ title: 'Второе предложение', text: 'Описание второго.' },
-		{ title: 'Третье предложение', text: 'Описание третьего.' }
-	]);
+	let items = $state<Item[]>(W.items);
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -45,10 +94,10 @@
 				if (r.type === 'childList') {
 					const add = Array.from(r.addedNodes).filter((n) => n.nodeType === 1).length;
 					const del = Array.from(r.removedNodes).filter((n) => n.nodeType === 1).length;
-					if (add) lines.push(`в <${(r.target as Element).localName}> добавлено элементов: ${add}`);
-					if (del) lines.push(`из <${(r.target as Element).localName}> убрано элементов: ${del}`);
-				} else if (r.type === 'characterData') lines.push(`обновлён текстовый узел: «${(r.target.textContent ?? '').slice(0, 30)}»`);
-				else if (r.type === 'attributes') lines.push(`у <${(r.target as Element).localName}> изменился атрибут ${r.attributeName}`);
+					if (add) lines.push(W.added((r.target as Element).localName, add));
+					if (del) lines.push(W.removed((r.target as Element).localName, del));
+				} else if (r.type === 'characterData') lines.push(W.text((r.target.textContent ?? '').slice(0, 30)));
+				else if (r.type === 'attributes') lines.push(W.attr((r.target as Element).localName, r.attributeName));
 			}
 			if (lines.length) {
 				total += lines.length;
@@ -68,46 +117,46 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Компонент и то, что в нём обновилось</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="two">
-		<section aria-label="Код компонента">
-			<div class="dh">Код</div>
+		<section aria-label={W.codeLabel}>
+			<div class="dh">{W.code}</div>
 			<pre class="dg-box dg-mono">let query = $state('');
 let shown = $derived(
   items.filter((i) =&gt; i.title.includes(query))
 );
 
 &lt;input bind:value=&#123;query&#125;&gt;
-&lt;p&gt;Показано: &#123;shown.length&#125;&lt;/p&gt;
+&lt;p&gt;{W.shownCode} &#123;shown.length&#125;&lt;/p&gt;
 &#123;#each shown as item (item.title)&#125;
   &lt;article&gt;…&lt;/article&gt;
 &#123;/each&#125;</pre>
 		</section>
-		<section aria-label="Работающий компонент">
-			<div class="dh">Живой результат</div>
+		<section aria-label={W.liveLabel}>
+			<div class="dh">{W.live}</div>
 			<div class="demo dg-box" bind:this={area}>
-				<label>Найти <input type="search" bind:value={query} /></label>
-				<p>Показано: {shown.length} из {items.length}</p>
+				<label>{W.find} <input type="search" bind:value={query} /></label>
+				<p>{W.shown(shown.length, items.length)}</p>
 				<div class="cards">
 					{#each shown as item, i (i)}
 						<article>
 							<strong>{item.title}</strong>
-							<button type="button" aria-expanded={open.includes(item.title)} onclick={() => toggle(item.title)}>Подробнее</button>
+							<button type="button" aria-expanded={open.includes(item.title)} onclick={() => toggle(item.title)}>{W.more}</button>
 							{#if open.includes(item.title)}<p>{item.text}</p>{/if}
 						</article>
 					{:else}
-						<p>Ничего не нашлось.</p>
+						<p>{W.none}</p>
 					{/each}
 				</div>
 			</div>
 		</section>
 	</div>
 	<div class="logbox">
-		<div class="dh">Что изменилось в дереве страницы: всего {total}</div>
+		<div class="dh">{W.changed(total)}</div>
 		<ol class="dg-box log" aria-live="polite">
-			{#each log as line, i (i + line)}<li>{line}</li>{:else}<li class="muted">пока ничего: введите слово или нажмите «Подробнее»</li>{/each}
+			{#each log as line, i (i + line)}<li>{line}</li>{:else}<li class="muted">{W.empty}</li>{/each}
 		</ol>
-		<button type="button" onclick={clear}>Очистить журнал</button>
+		<button type="button" onclick={clear}>{W.clear}</button>
 	</div>
 </figure>
 

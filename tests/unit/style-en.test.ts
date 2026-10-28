@@ -20,7 +20,7 @@ const NAMES = new Set([
 	'Material', 'Apple', 'Fluent', 'Carbon', 'Atlassian', 'Polaris', 'Primer', 'Radix', 'Tailwind', 'Telegram', 'Netscape',
 	'Mosaic', 'Figma', 'Drupal', 'Joomla', 'Jekyll', 'Hugo', 'Eleventy', 'Astro', 'Strapi', 'Directus', 'Sanity',
 	'Contentful', 'Decap', 'Vercel', 'Netlify', 'Pages', 'GitHub', 'Lovable', 'Metrica', 'Europe', 'European', 'UK',
-	'Web', 'World', 'Wide', 'I', 'Story', 'Brand', 'Canvas', 'Value', 'Proposition', 'Metric', 'Star', 'North'
+	'Web', 'World', 'Wide', 'I', 'Story', 'Brand', 'Canvas', 'Value', 'Proposition', 'Metric', 'Star', 'North', 'Svelte'
 ]);
 
 function body(file: string): string {
