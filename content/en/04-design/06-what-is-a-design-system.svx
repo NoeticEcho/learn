@@ -1,0 +1,286 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/06-what-is-a-design-system.svx. */
+	export const metadata = {
+		id: '04-design/06-what-is-a-design-system',
+		part: 4,
+		order: 6,
+		title: 'What a design system is, and what it is made of',
+		definition: 'A design system is a project’s shared language: principles, tokens, components, rules for using them, code, documentation and a process for changes.',
+		summary:
+			'You’ll see how a design system differs from a set of pictures and from a style guide, what nine layers it is built from, and which of them your project needs. Afterwards you have a passport for a system of your own.',
+		minutes: 25,
+		teaches: ['design-design-system'],
+		requires: ['design-visual-hierarchy', 'design-colour-system', 'design-type-scale'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'three blues', say: 'Page two has a slightly different blue, page five a new card. Each choice is sensible, but together they drift.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'style guide', say: [{ text: 'A style guide describes, a library reproduces. A system also has principles, documentation and a way to change.' }] },
+				{ mood: 'cheer', prop: 'flowchart', label: 'tokens|parts|code|owner', say: 'A system lives while it has code and an owner. An album with no code stops being opened within half a year.' }
+			]
+		},
+		practice: {
+			id: 'design-ds-passport',
+			title: 'The design system passport for your project',
+			task: 'Fill in the passport: what your project has at each layer of a system. 1) Three principles: short rules by which you will settle disputed questions (each of three words or more). 2) For six layers (foundations, tokens, components, words, documentation, governance) write what you have or will have at that layer. 3) Who decides about changes. 4) What the system does not have yet and will not have: knowing how to refuse the extra is part of design. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="passport">
+      <h2>The system passport</h2>
+      <p>Who we design for: {{forWhom}}</p>
+      <h3>Principles</h3>
+      <ol>
+        <li class="principle">…</li>
+        <li class="principle">…</li>
+        <li class="principle">…</li>
+      </ol>
+      <h3>Layers</h3>
+      <table>
+        <tr><th>Layer</th><th>What we have</th></tr>
+        <tr class="layer"><td>Foundations</td><td class="decision">…</td></tr>
+        <tr class="layer"><td>Tokens</td><td class="decision">…</td></tr>
+        <tr class="layer"><td>Components</td><td class="decision">…</td></tr>
+        <tr class="layer"><td>Words</td><td class="decision">…</td></tr>
+        <tr class="layer"><td>Documentation</td><td class="decision">…</td></tr>
+        <tr class="layer"><td>Governance</td><td class="decision">…</td></tr>
+      </table>
+      <p>Who decides about changes: <span id="owner">…</span></p>
+      <p>What the system does not have yet and will not have: <span id="out-of-scope">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="passport">
+      <h2>The system passport</h2>
+      <p>Who we design for: {{forWhom}}</p>
+      <h3>Principles</h3>
+      <ol>
+        <li class="principle">Clarity first, beauty second</li>
+        <li class="principle">One main action per screen</li>
+        <li class="principle">Text must be readable outdoors</li>
+      </ol>
+      <h3>Layers</h3>
+      <table>
+        <tr><th>Layer</th><th>What we have</th></tr>
+        <tr class="layer"><td>Foundations</td><td class="decision">the palette, type scale and spacing step from the earlier lessons</td></tr>
+        <tr class="layer"><td>Tokens</td><td class="decision">a tokens file and CSS variables in three layers</td></tr>
+        <tr class="layer"><td>Components</td><td class="decision">button, link, field, card, header</td></tr>
+        <tr class="layer"><td>Words</td><td class="decision">a few rules for buttons and error messages</td></tr>
+        <tr class="layer"><td>Documentation</td><td class="decision">a reference page on the site itself</td></tr>
+        <tr class="layer"><td>Governance</td><td class="decision">one owner and a change log in a file</td></tr>
+      </table>
+      <p>Who decides about changes: <span id="owner">the project owner</span></p>
+      <p>What the system does not have yet and will not have: <span id="out-of-scope">animations, a dark theme and an icon library</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'principles', kind: 'count', selector: '#passport li.principle', min: 3 },
+				{ id: 'principle-words', kind: 'text', selector: '#passport li.principle', matches: '^\\s*(\\S+\\s+){2}\\S+' },
+				{ id: 'layers', kind: 'count', selector: '#passport tr.layer', min: 6 },
+				{ id: 'decisions', kind: 'text', selector: '#passport td.decision', matches: '\\S{3,}' },
+				{ id: 'no-blanks', kind: 'text', selector: '#passport', matches: '^[^…]*$' },
+				{ id: 'owner', kind: 'text', selector: '#owner', matches: '\\S{3,}' },
+				{ id: 'out-of-scope', kind: 'text', selector: '#out-of-scope', matches: '\\S{3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does a design system differ from an ordinary style guide?',
+				options: [
+					'It holds not only rules but shared names for values (tokens), ready components in code, documentation and a process for changes',
+					'It is simply better looking',
+					'It exists only at big companies'
+				],
+				answer: 0,
+				why: [
+					'Yes. A style guide is text or pictures; a system is also code that people use, and people who maintain it.',
+					'No: the look has nothing to do with it.',
+					'No: a small system is needed by one person too, if they want not to repeat decisions.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What belongs among the layers of a design system?',
+				options: ['Principles', 'Tokens', 'Components and patterns', 'Only the company logo'],
+				answer: [0, 1, 2],
+				why: ['Yes: what we believe in.', 'Yes: named values of color, spacing, type.', 'Yes: the parts, and the common solutions built from the parts.', 'No: a logo is part of a brand, and a system is larger.']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each layer with the question it answers',
+				pairs: [
+					['Principles', 'what we believe in when we settle a disputed question'],
+					['Tokens', 'how to name values so that design and code speak the same way'],
+					['Components', 'which ready-made parts we build pages from'],
+					['Patterns', 'how to solve a common task that takes several components'],
+					['Governance', 'who decides how the system changes']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Does a one-page site made by one person need a design system?',
+				options: [
+					'A light one: principles, tokens, five or six components and a short reference',
+					'No, it is a waste of time',
+					'One just like a big company’s'
+				],
+				answer: 0,
+				why: [
+					'Yes. The size of a system is fitted to the project: the layers “patterns” and “governance” can be skipped.',
+					'No: even a light system saves time and keeps the look cohesive.',
+					'No: a big system for one person becomes work at the expense of the site.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is called the “source of truth” when design lives in Figma and the product lives in code?',
+				options: [
+					'One place the rest is taken from: usually the tokens file and the code of the components, with the mockup and the documentation following it',
+					'The mockup in Figma, with the code copying it',
+					'Each side has its own truth, and that is fine'
+				],
+				answer: 0,
+				why: [
+					'Yes. Two diverging sources sooner or later argue. So shared values are stored once and sent out in both directions.',
+					'No: a mockup often lags behind the code, and copying goes the other way.',
+					'No: a double truth is exactly what a system is there to protect against.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of creating a light system in order',
+				items: ['Write down a few principles', 'Bring colors, type and spacing together into foundations and tokens', 'Build five or six components with states', 'Describe them on one reference page', 'Name an owner and a process for changes']
+			}
+		],
+		cards: [
+			{ id: 'design-ds-what', front: 'What is a design system?', back: 'A shared language: principles, tokens, components, patterns, words, code, documentation and a process for changes. Everything a product is built from, and the rules for how.' },
+			{ id: 'design-ds-vs-guide', front: 'How does a system differ from a style guide?', back: 'A style guide describes. A system also contains code that people use, shared names for values (tokens) and the people who maintain it.' },
+			{ id: 'design-ds-layers', front: 'What layers does a system have?', back: 'Principles, foundations, tokens, components, patterns, words, code, documentation, governance. A light system needs half of them.' },
+			{ id: 'design-ds-small', front: 'Does a small site need a system?', back: 'A light one: principles, tokens, five or six components and a reference. The layers “patterns” and “governance” can be skipped.' },
+			{ id: 'design-ds-truth', front: 'What is a system’s source of truth?', back: 'One place (usually tokens and code) the rest is taken from. The mockup and the documentation follow it, so that two versions don’t argue.' }
+		],
+		sources: [
+			{ title: 'Design Systems 101 (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/design-systems-101/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Design system (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Design_system', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'GOV.UK Design System: styles, components and patterns', url: 'https://design-system.service.gov.uk/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Carbon Design System (IBM)', url: 'https://carbondesignsystem.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Atlassian Design System', url: 'https://atlassian.design/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Primer (GitHub’s design system)', url: 'https://primer.style/', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [{ title: 'What is a design system? Six different types of design systems (Dan Mall)', url: 'https://www.youtube.com/watch?v=hMSSg-pA9lk', licence: 'proprietary-link', kind: 'video', lang: 'en' }],
+		guide: {
+			intro: 'Now we’ll write the passport of your light design system: what you have at each layer. It is a short document, but it shows at once what is missing.',
+			hints: [
+				'Principles are short rules for decisions, for example “one main action per screen”. Write each in at least three words.',
+				'In the table of layers write a phrase each: what you already have from earlier lessons (the palette, the type scale) and what will appear (components, a reference).',
+				'In the last two lines write who decides about changes (it can be “me”) and what you deliberately do without.'
+			],
+			mistakes: {
+				principles: 'You need three principles, each in its own list item with the class principle.',
+				'principle-words': 'A principle is too short. Write it in at least three words.',
+				layers: 'The table should keep six layers.',
+				decisions: 'In the column “What we have” write words, don’t leave it empty.',
+				'no-blanks': 'An ellipsis “…” is still left somewhere. Replace it with your own words.',
+				owner: 'Write who decides about changes to the system.',
+				'out-of-scope': 'Write what the system will not have: knowing how to refuse is a decision too.'
+			},
+			outro: 'Your system now has a passport. Next we’ll see how the big systems of the world answered the same questions: Material, Apple, Microsoft, government and Russian ones.'
+		},
+		say: { Figma: 'fig-ma', GOV: 'gov', UK: 'U K', Carbon: 'carbon', Atlassian: 'at-lass-ee-an', IBM: 'I B M', NN: 'N N', CSS: 'C S S', Storybook: 'story book', GitHub: 'git hub' }
+	};
+</script>
+
+<script>
+	import DsAnatomy from '../../diagrams/DsAnatomy.svelte';
+</script>
+
+## From a set of rules to a system
+
+Every project sooner or later meets the same thing: on the second page the button came out a slightly different blue, on the third the spacing is a little smaller, and on the fifth someone invented a new card. Each decision on its own is sensible, but together they drift apart. The visitor doesn’t put it into words, but feels it: the site is “put together from different places”.
+
+The cure is called a **design system**. It is the shared language of a project: principles, values (colors, sizes), ready-made parts (buttons, fields), rules for using them, code that reproduces them, and an agreement on how all of it changes. Nielsen Norman Group describe it as a set of standards for managing design at scale, with a shared language at its center (their article is linked in the sources).
+
+Three terms get mixed up, so let’s separate them.
+
+- **A style guide.** A document: “our blue is this one, the font is that one”. It describes, but reproduces nothing.
+- **A component library.** Ready-made parts as code or as a Figma file. They reproduce, but don’t explain when to take which.
+- **A design system.** All of it together: the principles, the values, the parts, the documentation, the process for changes, and the people responsible.
+
+<details>
+<summary>Check yourself: how does a system differ from a style guide?</summary>
+
+A style guide only describes. A system also contains code that people use, shared names for values, and the people who maintain it.
+
+</details>
+
+## Nine layers
+
+A system has no single mandatory “shape”, but the big public systems have the same layers. On the diagram, choose the size of the project and see how many layers you need. Open any layer: it says what question it answers and how it is arranged in real systems.
+
+<DsAnatomy />
+
+Here are the same layers in words.
+
+1. **Principles.** Three to five short rules for disputed cases: “clarity first, beauty second”. GOV.UK’s system stands on the open Government Design Principles.
+2. **Foundations.** Color, typography, spacing, grid, icons, motion. You have already made three of them in the earlier lessons.
+3. **Tokens.** Named values everything is built from: `color.text.primary`, `space.200`. Two lessons below are given to them.
+4. **Components.** A button, a field, a card, a menu: each has variants and states (default, hover, focus, disabled, error).
+5. **Patterns.** Solutions to common tasks made of several components: a sign-in form, search, a confirmation. GOV.UK keeps them strictly apart: “components” in one place, “patterns” in another.
+6. **Words.** Tone of voice, rules for buttons, error messages, names. Words are part of the interface, and Carbon gives them a section of their own among the foundations.
+7. **Code.** A library you can install and use: a package, examples, tests.
+8. **Documentation.** When and how to take each part, when not to, “do” and “don’t” examples, notes on accessibility.
+9. **Governance.** Who is responsible, how to propose a change, how versions change, how the outdated is retired. This is the most underrated layer: a system with no owner turns into a dump within a year.
+
+## Why bother, and what it costs
+
+A system pays off like this:
+- **One look and one behavior.** The visitor gets used to it once.
+- **Speed.** A new page is assembled from ready parts, not drawn anew.
+- **Quality and accessibility “out of the box”.** Contrast, focus and sizes are fixed in one place, and so they are fixed everywhere.
+- **Scale.** Dozens of people work on a product, and the system holds them together.
+
+It has a cost too: time to build it, time to maintain it, and the risk of “locking” the design into old decisions. So the size of a system is fitted to the project. A one-page site needs a light one: principles, tokens, five or six components and a reference. To ignore a system entirely is expensive too: you will create one anyway, only by accident and sloppily.
+
+## One source of truth
+
+A designer draws in Figma and a developer writes code, and two versions of the “truth” easily appear: a mockup with some values, a product with others. So mature systems choose **one source** from which the rest is taken. Most often it is a tokens file and the code of the components: from them the Figma variables, the CSS and the documentation are all built. You’ll see how this is done in the lessons on tokens and on handing a design over to code.
+
+<details>
+<summary>Check yourself: does a one-page site need a system?</summary>
+
+A light one: principles, tokens, five or six components and a short reference. Patterns and governance can be skipped.
+
+</details>
+
+## Practice
+
+Write the passport of your project’s design system. It is one small table, but filling it in honestly is not as easy as it seems: you will have to answer what your principles are, and what you will do and what you won’t. The passport will be useful in the last lesson of the part, when you put your own small system together.
+
+## What was wrong with 2014
+
+In 2014 a “design system” was often an album in a PDF: beautiful, but not connected to code. Within half a year the code drifted from the album, and nobody opened the album any more. The lesson of that era: a system is alive if it has code and an owner, and dead if it is only a document.
