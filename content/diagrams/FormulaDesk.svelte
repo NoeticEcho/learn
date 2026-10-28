@@ -8,10 +8,12 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
-	import { formulas, guesses, type Formula, type Src } from './formulas.ts';
+	import { formulasFor, guessesFor, type Formula, type Src } from './formulas.ts';
+	import { pick as pickW } from '#lib/i18n/index.ts';
 
 	let { sets, guess }: { sets: string; guess?: string } = $props();
 
+	const formulas = formulasFor();
 	const chosen = $derived(sets.split(/\s+/).map((id) => formulas.find((f) => f.id === id)).filter((f): f is Formula => !!f));
 	let tab = $state<string>('');
 	$effect(() => {
@@ -20,19 +22,70 @@
 	const current = $derived(chosen.find((f) => f.id === tab));
 
 	type Facts = Record<Src, string>;
-	const missing = '(в брифе пока пусто: заполните это поле в настройках)';
-	let facts = $state<Facts>({
-		forWhom: 'Для кого проект: поле «для кого» в брифе',
-		who: 'Кто вы: поле «кто и что» в брифе',
-		action: 'Главное действие из брифа',
-		item: 'Первая услуга или товар из брифа',
-		itemText: 'Описание первой услуги или товара',
-		price: 'Цена или условия первой услуги',
-		proof: 'Первое доказательство из брифа',
-		sections: 'Разделы из брифа',
-		contacts: 'Контакты из брифа',
-		none: 'Тут нет поля брифа: ответ знаете вы'
+	const W = pickW({
+		ru: {
+			missing: '(в брифе пока пусто: заполните это поле в настройках)',
+			noPrice: 'цену или условия пока нигде не записано',
+			facts: {
+				forWhom: 'Для кого проект: поле «для кого» в брифе',
+				who: 'Кто вы: поле «кто и что» в брифе',
+				action: 'Главное действие из брифа',
+				item: 'Первая услуга или товар из брифа',
+				itemText: 'Описание первой услуги или товара',
+				price: 'Цена или условия первой услуги',
+				proof: 'Первое доказательство из брифа',
+				sections: 'Разделы из брифа',
+				contacts: 'Контакты из брифа',
+				none: 'Тут нет поля брифа: ответ знаете вы'
+			} as Facts,
+			capDesk: 'Формула, разложенная на ваш бриф',
+			capGuess: 'Какая это формула?',
+			mode: 'Режим',
+			desk: 'Разложить на бриф',
+			guessTab: 'Угадать формулу',
+			formula: 'Формула',
+			ask: 'Вопрос себе:',
+			from: 'Из вашего брифа:',
+			note: 'Строки «Из вашего брифа» взяты из ваших данных. Остальное придумываете вы: блок за блоком, в порядке формулы.',
+			textOf: (n: number) => `Формула текста ${n}`,
+			right: 'Верно.',
+			no: (f: string) => `Нет, это ${f}.`,
+			hits: 'Верно:',
+			of: 'из'
+		},
+		en: {
+			missing: '(empty in the brief so far: fill in this field in settings)',
+			noPrice: 'no price or terms are written anywhere yet',
+			facts: {
+				forWhom: 'Who the project is for: the “for whom” field of the brief',
+				who: 'Who you are: the “who and what” field of the brief',
+				action: 'The main action from the brief',
+				item: 'The first service or product from the brief',
+				itemText: 'The description of the first service or product',
+				price: 'The price or terms of the first service',
+				proof: 'The first proof from the brief',
+				sections: 'The sections from the brief',
+				contacts: 'The contacts from the brief',
+				none: 'There is no brief field here: you know the answer'
+			} as Facts,
+			capDesk: 'A formula laid out on your brief',
+			capGuess: 'Which formula is it?',
+			mode: 'Mode',
+			desk: 'Lay it out on the brief',
+			guessTab: 'Guess the formula',
+			formula: 'Formula',
+			ask: 'Ask yourself:',
+			from: 'From your brief:',
+			note: 'The lines “From your brief” come from your data. You make up the rest, block by block, in the formula’s order.',
+			textOf: (n: number) => `Formula of text ${n}`,
+			right: 'Right.',
+			no: (f: string) => `No, this is ${f}.`,
+			hits: 'Right:',
+			of: 'of'
+		}
 	});
+	const missing = W.missing;
+	let facts = $state<Facts>({ ...W.facts });
 	onMount(async () => {
 		try {
 			const p = await (await import('#lib/learner.ts')).persona();
@@ -42,11 +95,11 @@
 				action: p.mainAction.label || missing,
 				item: p.items[0]?.title || missing,
 				itemText: p.items[0]?.text || p.items[0]?.title || missing,
-				price: p.items[0]?.price || 'цену или условия пока нигде не записано',
+				price: p.items[0]?.price || W.noPrice,
 				proof: p.proofs[0]?.title || missing,
 				sections: p.sections.length ? p.sections.join(' → ') : missing,
 				contacts: [p.phone, p.email].filter(Boolean).join(', ') || missing,
-				none: 'Тут нет поля брифа: ответ знаете вы'
+				none: W.facts.none
 			};
 		} catch {
 			/* the generic labels stay */
@@ -54,7 +107,7 @@
 	});
 
 	// the guessing game
-	const game = $derived(guess ? guesses[guess] : undefined);
+	const game = $derived(guess ? guessesFor()[guess] : undefined);
 	let mode = $state<'desk' | 'guess'>('desk');
 	let pick = $state<(string | null)[]>([]);
 	$effect(() => {
@@ -65,17 +118,17 @@
 </script>
 
 <figure class="dg">
-	<figcaption>{mode === 'desk' ? 'Формула, разложенная на ваш бриф' : 'Какая это формула?'}</figcaption>
+	<figcaption>{mode === 'desk' ? W.capDesk : W.capGuess}</figcaption>
 	{#if game}
-		<div class="dg-ctl" role="tablist" aria-label="Режим">
-			<button type="button" role="tab" aria-selected={mode === 'desk'} onclick={() => (mode = 'desk')}>Разложить на бриф</button>
-			<button type="button" role="tab" aria-selected={mode === 'guess'} onclick={() => (mode = 'guess')}>Угадать формулу</button>
+		<div class="dg-ctl" role="tablist" aria-label={W.mode}>
+			<button type="button" role="tab" aria-selected={mode === 'desk'} onclick={() => (mode = 'desk')}>{W.desk}</button>
+			<button type="button" role="tab" aria-selected={mode === 'guess'} onclick={() => (mode = 'guess')}>{W.guessTab}</button>
 		</div>
 	{/if}
 
 	{#if mode === 'desk'}
 		{#if chosen.length > 1}
-			<div class="dg-ctl" role="group" aria-label="Формула">
+			<div class="dg-ctl" role="group" aria-label={W.formula}>
 				{#each chosen as f (f.id)}
 					<button type="button" aria-pressed={tab === f.id} onclick={() => (tab = f.id)}>{f.name}</button>
 				{/each}
@@ -87,30 +140,30 @@
 					<li>
 						<p class="head"><span class="code">{b.code}</span> <strong>{b.name}</strong></p>
 						<p class="does">{b.does}</p>
-						<p class="ask">Вопрос себе: {b.ask}</p>
-						<p class="fact" class:none={b.src === 'none'}>{#if b.src !== 'none'}<span class="from">Из вашего брифа:</span> {/if}{facts[b.src]}</p>
+						<p class="ask">{W.ask} {b.ask}</p>
+						<p class="fact" class:none={b.src === 'none'}>{#if b.src !== 'none'}<span class="from">{W.from}</span> {/if}{facts[b.src]}</p>
 					</li>
 				{/each}
 			</ol>
-			<p class="dg-out">Строки «Из вашего брифа» взяты из ваших данных. Остальное придумываете вы: блок за блоком, в порядке формулы.</p>
+			<p class="dg-out">{W.note}</p>
 		{/if}
 	{:else if game}
 		<ol class="guess">
 			{#each game.items as g, i (i)}
 				<li>
 					<p class="txt dg-box">{g.text}</p>
-					<div class="dg-ctl" role="group" aria-label="Формула текста {i + 1}">
+					<div class="dg-ctl" role="group" aria-label={W.textOf(i + 1)}>
 						{#each game.options as o (o)}
 							<button type="button" aria-pressed={pick[i] === o} onclick={() => (pick[i] = o)}>{nameOf(o)}</button>
 						{/each}
 					</div>
 					{#if pick[i]}
-						<p class="fb" class:ok={pick[i] === g.right} role="status">{pick[i] === g.right ? 'Верно.' : `Нет, это ${nameOf(g.right)}.`} {g.why}</p>
+						<p class="fb" class:ok={pick[i] === g.right} role="status">{pick[i] === g.right ? W.right : W.no(nameOf(g.right))} {g.why}</p>
 					{/if}
 				</li>
 			{/each}
 		</ol>
-		<p class="dg-out" aria-live="polite">Верно: <strong>{hits}</strong> из {game.items.length}.</p>
+		<p class="dg-out" aria-live="polite">{W.hits} <strong>{hits}</strong> {W.of} {game.items.length}.</p>
 	{/if}
 </figure>
 

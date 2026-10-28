@@ -1,0 +1,286 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/11-copywriting/01-awareness.svx. */
+	export const metadata = {
+		id: '11-copywriting/01-awareness',
+		part: 11,
+		order: 1,
+		title: 'Levels of awareness and the Ogilvy principles',
+		definition: 'The levels of awareness are Eugene Schwartz’s five steps, from “doesn’t know about the problem” to “ready to act”. They decide where a text begins.',
+		summary:
+			'Before choosing a formula, you’ll work out how much your visitor knows about the problem and the solutions, and from that where your text should begin. Afterwards your project’s home page has a headline and a first paragraph for your reader, and you can test them against six principles of Ogilvy.',
+		minutes: 20,
+		teaches: ['copy-awareness-levels', 'copy-ogilvy-principles'],
+		requires: ['texts-headlines', 'start-project-brief'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', caption: 'The reader first', say: 'Before I write, I ask: what does the reader already know? That decides where the text begins.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: '5 steps', caption: 'Schwartz, 1966', say: 'From “doesn’t know about the problem” to “ready to act”. One reader ignores a crooked fence, another asks the price.' },
+				{ mood: 'cheer', prop: 'browser', label: 'one level', say: 'On the first screen I choose one main level. Readers at the other levels get theirs further down the page.' }
+			]
+		},
+		practice: {
+			id: 'awareness-first-screen',
+			title: 'A first screen for your reader',
+			task: 'Choose your visitor’s main level of awareness (a number from 1 to 5, where 1 is doesn’t know about the problem and 5 is ready to act) and explain the choice through who the project is for and where people come from. Then write the first screen for that level: a headline (an h1 with the class headline, not “Welcome”), a first paragraph with the class first-para that includes a fact from the proofs in the brief, and a link a with the class cta. For a reader at level 4 or 5 it leads to the main action; at 1 to 3, to some material. Check the text against three of Ogilvy’s principles in the note. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <main>\n      <section id="first">\n        <h1 class="headline">…</h1>\n        <p class="first-para">…</p>\n        <p><a class="cta" href="#contacts">…</a></p>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="awareness">\n      <h2>Level of awareness</h2>\n      <p>The visitor’s main level: <span id="level">…</span> (from 1 to 5)</p>\n      <p>Why: <span id="why-level">…</span></p>\n      <h2>Checked against Ogilvy</h2>\n      <ul>\n        <li class="ogilvy">Specifics: <span class="o-specific">…</span></li>\n        <li class="ogilvy">A fact from the proofs: <span class="o-fact">…</span></li>\n        <li class="ogilvy">One reader: <span class="o-reader">…</span></li>\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			solution: {
+				'index.html':
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <main>\n      <section id="first">\n        <h1 class="headline">{{profession}}: {{mainAction.label}}</h1>\n        <p class="first-para">{{who}}. We work for the people who need it: {{forWhom}}. {{#each proofs}}{{title}}. {{/each}}To begin, choose: {{mainAction.label}}.</p>\n        <p><a class="cta" href="#contacts">{{mainAction.label}}</a></p>\n      </section>\n    </main>\n\n    <aside class="note" data-scaffold id="awareness">\n      <h2>Level of awareness</h2>\n      <p>The visitor’s main level: <span id="level">4</span> (from 1 to 5)</p>\n      <p>Why: <span id="why-level">people arrive from a search for the service by name, so they know they need it and are choosing who does it</span></p>\n      <h2>Checked against Ogilvy</h2>\n      <ul>\n        <li class="ogilvy">Specifics: <span class="o-specific">the headline names the service and the action, with no general words</span></li>\n        <li class="ogilvy">A fact from the proofs: <span class="o-fact">a document with a number stands in the first paragraph</span></li>\n        <li class="ogilvy">One reader: <span class="o-reader">the text speaks to one person: someone looking for who will do the job</span></li>\n      </ul>\n    </aside>\n  </body>\n</html>\n'
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#first', matches: '^[^…]*$' },
+				{ id: 'no-blanks-note', kind: 'text', selector: '#awareness', matches: '^[^…]*$' },
+				{ id: 'level', kind: 'text', selector: '#level', matches: '^\\s*[1-5]\\s*$' },
+				{ id: 'why-level', kind: 'text', selector: '#why-level', matches: '^\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'headline', kind: 'text', selector: '#first .headline', matches: '^\\s*(?!(?:Welcome|Greetings|We(?:’|\')re (?:glad|happy|pleased|delighted)))\\S[\\s\\S]{13,108}\\S\\s*$' },
+				{ id: 'first-para', kind: 'text', selector: '#first .first-para', matches: '^\\s*\\S+(?:\\s+\\S+){14,}' },
+				{ id: 'first-fact', kind: 'field', selector: '#first .first-para', field: 'proofs[].title', min: 1, when: { brief: 'proofs[].title' } },
+				{ id: 'cta', kind: 'text', selector: '#first .cta', matches: '^\\s*\\S+(?:\\s+\\S+){1,}' },
+				{ id: 'ogilvy', kind: 'count', selector: '#awareness .ogilvy', min: 3 },
+				{ id: 'reader', kind: 'text', selector: '#awareness .o-reader', matches: '^\\s*\\S+(?:\\s+\\S+){3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put Schwartz’s levels of awareness in order, from the least informed reader to the most ready',
+				items: [
+					'Doesn’t know they have a problem',
+					'Knows about the problem, but not that it can be solved',
+					'Knows a solution exists, but not your product',
+					'Knows your product, but isn’t sure it’s right for them',
+					'Ready to act and needs the terms and a button'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each reader level with where the text should begin',
+				pairs: [
+					['Doesn’t know about the problem', 'With a story or an observation that makes them notice the problem'],
+					['Knows about the problem', 'With the problem itself, in their words'],
+					['Knows about solutions', 'With the result and what is different about your way'],
+					['Knows about the product', 'With your offer and the reasons for it'],
+					['Ready to act', 'With the terms and the button']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A visitor arrived from a search for “boundary survey cost near me”. Roughly what level is that?',
+				options: [
+					'Fourth or fifth: they know what is needed and are comparing who will do it',
+					'First: they don’t know about the problem',
+					'It can’t be told'
+				],
+				answer: 0,
+				why: [
+					'Yes. A query with the name of the service and the word “cost” says the person has understood the problem and is choosing. They need prices, timing, proof.',
+					'No: someone searching for a service has known about the problem for a while.',
+					'No: from the source and the wording of the query you can estimate the level, at least roughly.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What is true of the ladder of awareness?',
+				options: [
+					'It describes the reader, not the product',
+					'A page has one main level, and the others are served further down',
+					'The levels are sharply divided, and a reader clearly belongs to just one of them',
+					'For a first-level reader, the first button should say “Buy”'
+				],
+				answer: [0, 1],
+				why: [
+					'Yes: the same product needs different text for different readers.',
+					'Yes: the first screen is written for the main level, and lower down the page there is room for those who know less or more.',
+					'No: the boundaries are blurred, and one person on different pages may be at different levels.',
+					'No: someone who doesn’t know about the problem is offered something to read, not a purchase.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How should you treat Ogilvy’s figure that five times as many people read the headline as the text?',
+				options: [
+					'As a well-known claim: the order of magnitude is right, but the exact figure was never measured for the web',
+					'As an exact law for any site',
+					'As an invention'
+				],
+				answer: 0,
+				why: [
+					'Yes. Ogilvy wrote about print advertisements of the 1950s to 1980s. The conclusion “the headline matters more than the rest” is supported by data on screen reading, but the number will differ.',
+					'No: different pages have different numbers, and it’s worth testing your own.',
+					'No: the idea that nearly everybody reads the headline is supported by reading research.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these rules are Ogilvy’s (as retold here)?',
+				options: [
+					'First study the product and the reader',
+					'Put your main force into the headline',
+					'Specific facts persuade better than general words',
+					'Respect the reader: they are not stupid',
+					'The longer the headline, the better'
+				],
+				answer: [0, 1, 2, 3],
+				why: [
+					'Yes: research is the first of his commandments.',
+					'Yes.',
+					'Yes: he insisted on facts.',
+					'Yes: his line that the reader is nobody’s fool became famous.',
+					'No: the length of a headline is set by what it says, not by wanting to stretch it.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'copy-schwartz-levels',
+				front: 'Which five levels of awareness did Eugene Schwartz name?',
+				back: 'Doesn’t know about the problem; knows about the problem; knows about solutions; knows about the product; ready to act. The book is “Breakthrough Advertising”, 1966.'
+			},
+			{
+				id: 'copy-level-start',
+				front: 'Where do you begin a text at each level?',
+				back: '1: with a story or an observation; 2: with the problem; 3: with the result; 4: with the offer and the reasons; 5: with the terms and the button.'
+			},
+			{
+				id: 'copy-level-detect',
+				front: 'How do you tell a reader’s level?',
+				back: 'From the source of traffic, the search query, and the questions customers ask. Choose one main level and serve the others lower on the page.'
+			},
+			{
+				id: 'copy-ogilvy-rules',
+				front: 'Which of David Ogilvy’s rules do we take?',
+				back: 'Research; invest in the headline; facts, not general words; respect the reader; don’t write what you wouldn’t show your family; test the result.'
+			},
+			{
+				id: 'copy-level-cta',
+				front: 'What action do you ask of readers at different levels?',
+				back: 'Levels 4 and 5: the main action (a booking, a purchase). Levels 1 to 3: material, such as an article, a comparison or an example. They aren’t ready to buy.'
+			}
+		],
+		sources: [
+			{ title: 'Levels of Awareness (Personal MBA, on Eugene Schwartz’s “Breakthrough Advertising”)', url: 'https://book.personalmba.com/levels-of-awareness/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Eugene Schwartz (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Eugene_Schwartz', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'David Ogilvy (Wikipedia)', url: 'https://en.wikipedia.org/wiki/David_Ogilvy', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Confessions of an Advertising Man (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Confessions_of_an_Advertising_Man', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'How Users Read on the Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/how-users-read-on-the-web/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The same project has to be told one way to people who have never heard of it and another way to people who are already choosing. Let’s work out who your reader is.',
+			hints: [
+				'Choose the level by where the visitor will come from. From a search for the service by name it is usually 4 or 5. From a story on social media it is 1 or 2.',
+				'The headline names what the reader already knows: the problem, the result or the service. Starting with the company’s name is almost never needed.',
+				'In the first paragraph put in one proof from the brief in full, for example the name of a document with its number.'
+			],
+			mistakes: {
+				'no-blanks': 'An ellipsis “…” is left in the first screen. Replace it with text.',
+				'no-blanks-note': 'An ellipsis “…” is left in the note on the level and Ogilvy’s principles.',
+				level: 'The “level” field must hold a number from 1 to 5, nothing else.',
+				'why-level': 'Explain the choice of level in at least six words: where people come from and what they already know.',
+				headline: 'The headline must be from 15 to 110 characters and not begin with “Welcome” or “Greetings”.',
+				'first-para': 'The first paragraph is too short: it needs at least fifteen words.',
+				'first-fact': 'The first paragraph has none of the proofs from the brief. Put one in in full, as it is written in the brief.',
+				cta: 'The link text must be at least two words and name an action.',
+				ogilvy: 'The note needs three items of the check against Ogilvy.',
+				reader: 'Describe the one person the text speaks to, in at least four words.'
+			},
+			outro: 'Now your first screen has an addressee. In the next lesson we’ll take formulas that build a text beyond this screen.'
+		},
+		say: { Schwartz: 'shvarts', Ogilvy: 'OG-ilvee', 'Breakthrough Advertising': 'Breakthrough Advertising' }
+	};
+</script>
+
+<script>
+	import AwarenessLadder from '../../diagrams/AwarenessLadder.svelte';
+</script>
+
+## The reader first, then the formula
+
+In this part you will meet a dozen copywriting formulas: AIDA, PAS, BAB, the 4 U’s and others. The most common mistake with them is to grab the first one that comes along and pour your text into it. A formula is only an order of thoughts, and an order is good only when it suits the reader. If a person doesn’t know they have a problem, the text “your problem is solved in one day” sails past them. If they are already choosing among three providers, a story of how you came to your trade will only hold them up.
+
+So the first question is always the same: **what does the reader already know?** The answer comes from one of the most useful schemes in advertising.
+
+## Five levels of awareness
+
+The American copywriter Eugene Schwartz described it in his book *Breakthrough Advertising* (1966). Schwartz wrote mail-order advertising, and noticed that texts work least well not because of bad words but because they begin in the wrong place: they talk about the product to people who have never heard of it, or about the problem to people who have long been looking for a price. He named five levels a reader can be at. Here they run from the unaware to the ready:
+
+1. **Doesn’t know about the problem.** The discomfort is there, but the person doesn’t link it to anything solvable, or doesn’t notice it at all.
+2. **Knows about the problem.** Feels that something is wrong, but doesn’t know what can be done about it.
+3. **Knows about solutions.** Understands the result is within reach, but doesn’t know your product.
+4. **Knows about the product.** Has heard of you, but isn’t sure you are right for them in particular.
+5. **Ready to act.** Wants you, and needs only the terms and a button.
+
+From this follows directly where to begin a text. For a reader at the first level you must first let them see the problem: a story, an observation, a surprising fact. At the second, begin with the problem itself, in their words. At the third, with the result and with how your way differs from the others. At the fourth, with your offer and the reasons for it. At the fifth, with the terms and the button. The more aware the reader, the shorter the text and the nearer to the action.
+
+An example with the default persona, the invented Kate Alder. One service, five readers:
+
+- **1.** “The fence stands on the old posts, but on the map the boundary runs somewhere else.” The person never thought this could be a problem.
+- **2.** “My neighbor moved the fence: what now?”
+- **3.** “A boundary can be settled with a boundary plan, without going to court, if the neighbors agree.”
+- **4.** “A boundary survey by a licensed surveyor: how it works and what it costs.”
+- **5.** “Boundary survey. Book a consultation.”
+
+See how it looks in the diagram: drag the slider and watch the first screen of an invented workshop rebuild itself. For readers at the fourth and fifth levels the button is your main action from the brief, and for the others it leads to some material.
+
+<AwarenessLadder />
+
+<details>
+<summary>Check yourself: where do you begin a text for a reader who doesn’t know about the problem?</summary>
+
+With a story, an observation or a fact that helps them notice the problem. The product and the price are not needed yet at this level.
+
+</details>
+
+## How to tell the level
+
+There is no need to guess. There are three sources.
+
+- **Where the person came from.** A search for the name of the service and the word “price” means level four or five. A social media post about something they didn’t know, level one or two. A link from an acquaintance, three or four.
+- **What questions customers ask.** Write down the first ten questions you have been asked. “How much does it cost?” says one level, and “do I even need this?” another.
+- **What a person finds before they reach you.** Your main competitor is not necessarily another provider: it is often “wait and see” or “do it myself”.
+
+The practical conclusion: **choose one main level for the first screen**, and serve the others lower down the page. For those who know less there is a section further down, “How it works”; for those who are ready there is a button at the top.
+
+## Where the ladder lets you down
+
+Schwartz’s scheme was made for the mail-order advertising of the 1960s, and it has three weak spots.
+
+- **The boundaries are blurred.** The same person may be at the fifth level on one question and the second on another. Don’t treat the levels as a questionnaire.
+- **Level is not intent.** An aware reader isn’t necessarily ready to buy today. “Awareness” speaks of knowledge, not of a decision.
+- **This is about the reader, not the market.** Schwartz has a second idea too, the “stages of market sophistication”, about how used to advertising a market has become. We don’t cover it here.
+
+## Ogilvy: six rules
+
+David Ogilvy (1911 to 1999) founded the advertising agency that is today called Ogilvy, and wrote *Confessions of an Advertising Man* (1963) and *Ogilvy on Advertising* (1983). His rules became classics. Retold in our own words, they are:
+
+1. **Research first.** Before writing, learn everything about what you sell and about those you sell to. That is what we did above.
+2. **The headline matters more than everything else.** Ogilvy claimed that several times as many people read the headline as read the body. The exact number hasn’t been measured for the web, but reading research supports the conclusion: nearly everyone sees the headline and the first lines. Put your main force into it.
+3. **Facts, not general words.** Specific information persuades better than adjectives. Ogilvy defended long copy, but only when it is full of facts. This matches the plain style of the last part.
+4. **Respect the reader.** The reader is not stupid. Don’t deceive, don’t shout, talk to them as an intelligent person who needs help.
+5. **Don’t write what you wouldn’t show your family.** Honesty is not politeness but practice: dishonest advertising, once it has worked, breaks trust.
+6. **Test.** Ogilvy was a supporter of testing: try versions and see what worked, rather than rely on the author’s taste. In the part on metrics we’ll learn to do that on your own site.
+
+Two caveats. Ogilvy wrote about print advertising of the 1950s to 1980s, and not all of it carries over to the web literally. “Long copy sells” is not a law: long text works when it holds facts and hurts when it holds filler. And “respect the reader” is no excuse for any technique: his own rule about the family forbids the manipulation we’ll discuss later.
+
+<details>
+<summary>Check yourself: name three of Ogilvy’s six rules.</summary>
+
+For example: research the reader and the product; invest in the headline; facts instead of general words; respect the reader; don’t write what you wouldn’t show your family; test the result.
+
+</details>
+
+## Practice
+
+Write your project’s first screen for one reader.
+
+1. In the note “Level of awareness” write a number from 1 to 5 and explain the choice: where the visitor will come from and what they already know. This is the main level, not all of them at once.
+2. Write the **headline** (an `h1` with the class `headline`): it names what the reader already knows: the problem, the result or the service. Not “Welcome” and not the company’s name.
+3. Write the **first paragraph** (`first-para`) and put in it, in full, one proof from the brief.
+4. Label the **link** `cta`. For a reader at level 4 or 5 it is the main action from the brief; for 1 to 3 it is some material (for example, “Read how to check a boundary yourself”).
+5. Check the text **against Ogilvy** in the note: specifics, a fact, one reader.
+
+The check looks at form: the level number, the explanation, the headline, a fact from the proofs, the link. Whether the headline is good in substance is for you to decide. Read it aloud and picture a person at the level you chose: would they stop?
