@@ -1,0 +1,1107 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/03-events.svx. */
+	export const metadata = {
+		id: '05-javascript/03-events',
+		part: 5,
+		order: 3,
+		title: 'Events: reacting to clicks, typing and keys',
+		definition: 'An event is a message from the browser about something a visitor did: a click, typing, a key press. A script subscribes to it with addEventListener and reacts.',
+		summary:
+			'A page comes alive when it reacts to the visitor. Afterwards you’ll attach handlers to clicks, typing and keys, understand how an event bubbles up the tree and why delegation helps, and not break control from the keyboard.',
+		minutes: 25,
+		teaches: ['js-events'],
+		requires: ['js-dom', 'html-forms'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'link|card|list|body', caption: 'The event bubbles up', say: 'A link inside a card was clicked. The event starts on it and climbs the ancestors: card, list, body.' },
+				{ mood: 'hmm', side: 'right', prop: 'cards', label: '100 cards', say: 'A hundred cards, a hundred handlers? And if the script adds card 101 later, it won’t have one.' },
+				{ mood: 'cheer', prop: 'editor', label: 'cards.addEventListener', say: 'One handler on the list. event.target names the place that was clicked, closest finds the card. New cards work too.' }
+			]
+		},
+		practice: {
+			id: 'js-events-menu-search',
+			title: 'A menu button and a search through the offers, from the keyboard',
+			task: 'Bring the page to life with two things. 1) A menu. In the nav with the site sections, add before its list a button with type set to button, the id menu-button, aria-expanded set to false, aria-controls set to menu-list, the hidden attribute, and the label Sections; give the ul the id menu-list. Without a script the list is always visible, and the script removes hidden from the button, hides the list, and opens and closes it on a click while updating aria-expanded. The Escape key closes the menu and returns the focus to the button. In styles.css add a rule [hidden] with display none and important, because the display flex of the list would otherwise override the attribute. 2) A search. In the #offer section after the counter, add a form with the id search, role search and an aria-label, containing a field of type search with a label, and a paragraph with the id nothing and the hidden attribute, with the text Nothing found. 3) A third script, a script tag with type module and id events-code: a click listener on the button, a keydown listener for Escape, on the form a submit listener with preventDefault (otherwise Enter reloads the page) and an input listener. By the word typed, hide the cards (card.hidden) that don’t contain it, ignoring case; show an empty result with the paragraph #nothing, and write Showing N of M in #offer-count. Do not write onclick handlers in the markup.',
+			era: 4,
+			continues: 'js-dom-quick-nav',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <nav id="quick" aria-label="Jump to an offer"></nav>
+          <p id="offer-count"></p>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The data of the brief: the items of the list. For now they sit here;
+      // in the lesson on fetch we’ll move them into a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Only the titles. map makes a new array; items does not change.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items there are.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in total: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <button type="button" id="menu-button" aria-expanded="false" aria-controls="menu-list" hidden>Sections</button>
+        <ul id="menu-list">
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <nav id="quick" aria-label="Jump to an offer"></nav>
+          <p id="offer-count"></p>
+          <form id="search" role="search" aria-label="Search the offers">
+            <label for="q">Find in the list</label>
+            <input id="q" type="search" autocomplete="off">
+          </form>
+          <p id="nothing" hidden>Nothing found. Try another word.</p>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The data of the brief: the items of the list. For now they sit here;
+      // in the lesson on fetch we’ll move them into a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Only the titles. map makes a new array; items does not change.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items there are.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in total: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+
+    <script type="module" id="events-code">
+      const button = document.querySelector('#menu-button');
+      const menu = document.querySelector('#menu-list');
+      const search = document.querySelector('#search');
+      const nothing = document.querySelector('#nothing');
+      const count = document.querySelector('#offer-count');
+
+      // Menu: without a script the list is always visible; with one it hides behind the button.
+      button.hidden = false;
+      menu.hidden = true;
+
+      function setMenu(open) {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+
+      button.addEventListener('click', () => {
+        setMenu(menu.hidden);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !menu.hidden) {
+          setMenu(false);
+          button.focus();
+        }
+      });
+
+      // Search: one handler on the form catches typing in its fields (bubbling).
+      search.addEventListener('submit', (event) => {
+        event.preventDefault();
+      });
+
+      search.addEventListener('input', (event) => {
+        const query = event.target.value.trim().toLowerCase();
+        // The cards are found at the moment of the event: the list may have changed.
+        const cards = document.querySelectorAll('#offer .card');
+        let shown = 0;
+        cards.forEach((card) => {
+          const match = card.textContent.toLowerCase().includes(query);
+          card.hidden = !match;
+          if (match) shown += 1;
+        });
+        nothing.hidden = shown > 0;
+        count.textContent = 'Showing ' + shown + ' of ' + cards.length;
+      });
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+`
+			},
+			checks: [
+				{ id: 'menu-button', kind: 'exists', selector: 'nav button#menu-button' },
+				{ id: 'button-type', kind: 'attr', selector: '#menu-button', name: 'type', matches: '^button$' },
+				{ id: 'button-expanded', kind: 'attr', selector: '#menu-button', name: 'aria-expanded', matches: '^(?:true|false)$' },
+				{ id: 'button-controls', kind: 'attr', selector: '#menu-button', name: 'aria-controls', matches: '\\S' },
+				{ id: 'menu-list', kind: 'exists', selector: 'ul#menu-list' },
+				{ id: 'search-form', kind: 'exists', selector: 'form#search input[type="search"]' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'nothing-message', kind: 'text', selector: '#nothing', matches: '\\S' },
+				{ id: 'no-inline-handlers', kind: 'count', selector: '[onclick],[oninput],[onchange],[onkeydown],[onsubmit]', max: 0 },
+				{ id: 'events-code-exists', kind: 'exists', selector: 'script#events-code' },
+				{ id: 'is-module', kind: 'attr', selector: '#events-code', name: 'type', matches: '^module$' },
+				{ id: 'click-listener', kind: 'text', selector: '#events-code', matches: 'addEventListener\\(\\s*[\'"]click[\'"]' },
+				{ id: 'escape-key', kind: 'text', selector: '#events-code', matches: '^(?=[\\s\\S]*addEventListener\\(\\s*[\'"]key(?:down|up)[\'"])(?=[\\s\\S]*[\'"]Escape[\'"])' },
+				{ id: 'aria-expanded-updated', kind: 'text', selector: '#events-code', matches: 'setAttribute\\(\\s*[\'"]aria-expanded[\'"]|\\.ariaExpanded\\s*=' },
+				{ id: 'toggles-hidden', kind: 'text', selector: '#events-code', matches: '\\.hidden\\s*=|toggleAttribute\\(\\s*[\'"]hidden[\'"]|classList\\.(?:toggle|add|remove)\\(' },
+				{ id: 'focus-returns', kind: 'text', selector: '#events-code', matches: '\\.focus\\(\\)' },
+				{ id: 'input-listener', kind: 'text', selector: '#events-code', matches: 'addEventListener\\(\\s*[\'"]input[\'"]' },
+				{ id: 'submit-prevented', kind: 'text', selector: '#events-code', matches: '^(?=[\\s\\S]*addEventListener\\(\\s*[\'"]submit[\'"])(?=[\\s\\S]*preventDefault\\()' },
+				{ id: 'uses-target', kind: 'text', selector: '#events-code', matches: '\\.target\\b|\\.closest\\(' },
+				{ id: 'case-insensitive', kind: 'text', selector: '#events-code', matches: 'toLowerCase\\(\\)|toLocaleLowerCase\\(' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does event.preventDefault() do in a form’s submit handler?',
+				options: [
+					'It cancels sending the form and reloading the page, and your code decides what happens next',
+					'It stops the visitor from pressing the button',
+					'It removes the form from the page'
+				],
+				answer: 0,
+				why: [
+					'Yes. Many events have a default action: a link follows its address, a form is sent. preventDefault cancels it, so the page stays where it is, and you can send the form’s data yourself with fetch.',
+					'No: the button still works. Only what the browser would have done by itself is canceled.',
+					'No: the element stays on the page. Only the event’s behavior changes.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each event with when it happens',
+				pairs: [
+					['click', 'pressed with a mouse button or a finger, or with Enter or Space on a button'],
+					['input', 'the value of a field changes while the person types'],
+					['submit', 'a form is sent'],
+					['keydown', 'a key on the keyboard is pressed'],
+					['DOMContentLoaded', 'the page is parsed and the tree is ready']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'A visitor clicks a link inside a card. Put the nodes in the order the event bubbles up the tree',
+				items: [
+					'a: the link that was clicked',
+					'article.card: the card',
+					'div.cards: the container of the list',
+					'body',
+					'document'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A script adds cards to the list after the page has loaded. Why is delegation (one handler on the container) handier than a handler on every card?',
+				options: [
+					'The container’s handler already exists and also fires for future cards, while separate ones would have to be attached again',
+					'The page loads faster in every case',
+					'The browser doesn’t let you attach a handler to a card'
+				],
+				answer: 0,
+				why: [
+					'Yes. The event bubbles up to the container, and the handler looks at event.target to see what was actually clicked. New cards are picked up by themselves. There are fewer listeners as well.',
+					'Not necessarily: with three cards there is no difference. The gain is that the code doesn’t depend on how many cards there are or when they appear.',
+					'It does let you, but you would have to remember to attach one to every new card.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What does a menu button need to be usable without a mouse?',
+				options: [
+					'A real button instead of a div with a handler',
+					'An aria-expanded attribute that changes along with the menu',
+					'Closing on Escape and returning the focus to the button',
+					'A handler on mousedown only'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: a button gets focus from the Tab key and is pressed with Enter and Space on its own, without any code from you.',
+					'Yes: a screen reader announces “expanded” or “collapsed” from exactly this attribute.',
+					'Yes: this is the expected behavior of disclosure widgets, and the focus must not be lost after closing.',
+					'No: mousedown belongs to the mouse alone. Pressing with the keyboard doesn’t trigger it, and a person without a mouse could never open the menu.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the difference between event.target and event.currentTarget?',
+				options: [
+					'target is the element where the event happened; currentTarget is the element the running handler is attached to',
+					'They are the same thing under two names',
+					'target is the page, currentTarget is the window'
+				],
+				answer: 0,
+				why: [
+					'Yes. With delegation the handler is attached to the container (that is currentTarget), while the card or button inside was clicked (that is target).',
+					'No: while the event bubbles, they differ, and delegation is built on exactly that.',
+					'No: both refer to elements of the tree.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Attach a click handler to the button with the id go: use addEventListener',
+				starter: `<button type=button id=go>Click me</button>
+<script type=module id=q>
+const go = document.body.firstElementChild;
+
+<\/script>`,
+				checks: [
+					{
+						id: 'listens-click',
+						kind: 'text',
+						selector: '#q',
+						matches: 'go\\.addEventListener\\(\\s*[\\x22\\x27]click[\\x22\\x27]'
+					}
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-events-listen',
+				front: 'How do you attach an event handler?',
+				back: 'element.addEventListener(type, function). The function gets an event object with type, target, key and other fields. Attributes like onclick in the markup are not used.'
+			},
+			{
+				id: 'js-bubbling',
+				front: 'What is event bubbling?',
+				back: 'After it fires on an element, the event climbs the ancestors: card, container, body, document. Every ancestor with a handler receives it. event.target stays the element where it all began.'
+			},
+			{
+				id: 'js-delegation',
+				front: 'What is delegation, and when is it needed?',
+				back: 'One handler on a shared parent instead of many on the children; inside, it looks at event.target or closest. It is needed when there are many children or a script adds them later.'
+			},
+			{
+				id: 'js-prevent-default',
+				front: 'What is preventDefault for?',
+				back: 'It cancels the browser’s default action: following a link, sending a form. Without it Enter in a form reloads the page, and your code never gets its turn.'
+			},
+			{
+				id: 'js-keyboard-a11y',
+				front: 'How do you make interaction work from the keyboard?',
+				back: 'Use real button and a elements, show the focus, change aria-expanded along with the state, close on Escape and return the focus. A click on a div alone can’t do any of this.'
+			}
+		],
+		sources: [
+			{ title: 'Introduction to events (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'EventTarget.addEventListener (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Introduction to browser events (The Modern JavaScript Tutorial)', url: 'https://javascript.info/introduction-browser-events', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'ARIA Authoring Practices Guide: Disclosure (W3C)', url: 'https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/', licence: 'link-only', kind: 'docs', lang: 'en' }
+		],
+		videos: [
+			{ title: 'Learn JavaScript EventListeners in 4 minutes (Coding2GO)', url: 'https://www.youtube.com/watch?v=i_8NQuEAOmg', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'We’ll make two things: a menu that opens with a button, and a search that hides the cards that don’t fit. Both must work from the keyboard. Start with the markup, then the script.',
+			hints: [
+				'The menu markup: before the list in the nav, put a button with type button, the id menu-button, aria-expanded set to false, aria-controls set to menu-list and the hidden attribute, labeled Sections; give the ul the id menu-list. In styles.css add a rule for [hidden] with display none and important.',
+				'The search markup in the #offer section: a form with the id search, role search and an aria-label, holding a label for the id q and an input of type search with the id q; and a paragraph with the id nothing and the hidden attribute, with a message such as Nothing found.',
+				'The script is a script tag with type module and the id events-code. Start by finding the elements (querySelector) and setting button.hidden to false and menu.hidden to true. Then add a click listener to the button: toggle menu.hidden and update aria-expanded with button.setAttribute.',
+				'For the search: a listener for input on the form, and a listener for submit that calls event.preventDefault(). Inside the input handler take event.target.value in lower case, and for each card set card.hidden to the opposite of card.textContent.toLowerCase().includes(query).'
+			],
+			mistakes: {
+				'menu-button': 'The nav with the site sections needs a button with the id menu-button.',
+				'button-type': 'The button needs type set to button: without it, inside a form it would send the form.',
+				'button-expanded': 'The button needs an aria-expanded attribute whose value is false or true.',
+				'button-controls': 'Give the button an aria-controls attribute holding the id of the list it controls: menu-list.',
+				'menu-list': 'The list of sections must be a ul with the id menu-list.',
+				'search-form': 'You need a form with the id search containing an input of type search.',
+				labels: 'Every field needs a label. Check the new search field: a label whose for matches the id q of the input.',
+				'nothing-message': 'The paragraph with the id nothing and the hidden attribute must hold the text of the message, for example Nothing found.',
+				'no-inline-handlers': 'Remove attributes such as onclick and oninput from the markup: the script attaches handlers with addEventListener.',
+				'events-code-exists': 'I can’t find the third script: a script tag with type module and the id events-code.',
+				'is-module': 'The script needs the attribute type set to module.',
+				'click-listener': 'I don’t see addEventListener with the click event for the menu button.',
+				'escape-key': 'Escape needs a keyboard listener: document.addEventListener with keydown, and inside it a test for event.key being Escape.',
+				'aria-expanded-updated': 'Change aria-expanded along with the menu: button.setAttribute with aria-expanded and String(open).',
+				'toggles-hidden': 'Hide and show through the hidden property: menu.hidden = true.',
+				'focus-returns': 'After closing with Escape, return the focus to the button: button.focus().',
+				'input-listener': 'You need a listener for the input event on the search: search.addEventListener with input.',
+				'submit-prevented': 'The search form needs a submit handler with event.preventDefault(), or Enter will reload the page.',
+				'uses-target': 'Take the field’s value from the event: event.target.value. That way a handler on the form works for any of its fields.',
+				'case-insensitive': 'The search must ignore case: bring both the query and the card’s text to lower case with toLowerCase().'
+			},
+			outro: 'Now the page reacts to the visitor, without a mouse too. Check it: press Tab until you reach the menu button, open it with Enter and close it with Escape. If it all worked, you’ve done what half of the “interactivity” on the web does.'
+		},
+		say: {
+			addEventListener: 'add event listener',
+			preventDefault: 'prevent default',
+			stopPropagation: 'stop propagation',
+			click: 'click',
+			input: 'input',
+			submit: 'submit',
+			keydown: 'key down',
+			Escape: 'escape',
+			DOMContentLoaded: 'DOM content loaded',
+			aria: 'AH-ree-uh',
+			ARIA: 'AH-ree-uh',
+			target: 'target',
+			hidden: 'hidden'
+		}
+	};
+</script>
+
+<script>
+	import EventFlight from '../../diagrams/EventFlight.svelte';
+</script>
+
+## A page that listens
+
+A browser constantly notices what a visitor does: pressed, swiped, typed a letter, switched tabs, turned the phone. The browser wraps each observation in an **event** and tells the page. The page does nothing until it is “subscribed” to an event, and a script has to do the subscribing.
+
+```js
+const button = document.querySelector('#menu-button');
+
+button.addEventListener('click', (event) => {
+  console.log('Clicked, the type of event:', event.type);
+});
+```
+
+The `addEventListener` method takes two arguments: the **type of event** and a **handler**, the function the browser calls when the event happens. It passes the function an event object. The object has `type` (which event), `target` (where it happened), `key` for the keyboard (which key), and much else. A subscription can be removed with `removeEventListener`.
+
+There are two older ways, and both are worse. An attribute in the markup (`<button onclick="...">`) mixes markup with code and allows only one handler. A property (`button.onclick = ...`) also gives one handler per event: the next one overwrites the last. `addEventListener` lets you subscribe as many functions to one event as you like.
+
+## The events a site needs
+
+There are dozens of events, but almost everything on a site is built on five:
+
+- `click`: a press with a mouse or a finger, and on a button also the Enter and Space keys;
+- `input`: the value of a field changes while the person types (while `change` fires when they have finished, for example left the field or switched a checkbox);
+- `submit`: a form is sent, by the button or by Enter;
+- `keydown`: a key is pressed, and `event.key` names it (`'Escape'`, `'Enter'`, `'a'`);
+- `DOMContentLoaded`: the page is parsed. In our editor module scripts run after that moment anyway, so you don’t need to listen for it.
+
+## Canceling the browser’s action
+
+Many events have a **default** action: a link follows its address, a form is sent and the page reloads, Tab moves the focus. When you need to do it your own way, you cancel the action by calling `event.preventDefault()`.
+
+```js
+form.addEventListener('submit', (event) => {
+  event.preventDefault();   // the page won't reload
+  // then we send the data ourselves: that is the lesson on fetch
+});
+```
+
+Without that line, Enter in the search field sends the form and the page reloads with an empty result: the most common beginner mistake.
+
+<details>
+<summary>Check yourself: what happens if you forget preventDefault in a submit handler?</summary>
+
+The browser does the default action: it sends the form and reloads the page, and everything the script managed to do is gone.
+
+</details>
+
+## Bubbling and delegation
+
+An event doesn’t stay in one place. When you click a link inside a card, the browser first gives the event to the link itself, and then it **bubbles** up the ancestors: the card, the container of the list, `body`, `document`. Each of them may have its own handler and receive the same event. That is why the event object has two addresses:
+
+- `event.target`: where the event **happened** (the deepest element that was clicked);
+- `event.currentTarget`: the element the **running** handler is attached to.
+
+This gives a trick that everyone uses: **delegation**. Instead of a handler on each of a hundred cards, you attach one to the container and look at `event.target` to see what was actually clicked:
+
+```js
+cards.addEventListener('click', (event) => {
+  const card = event.target.closest('.card');   // the nearest card, going up from the click
+  if (!card) return;                            // the click missed every card
+  card.classList.toggle('selected');
+});
+```
+
+The `closest` method looks for a matching element from the place of the click upward through the tree. There are two gains. There are fewer listeners, and above all the handler also works for cards that a script adds later: their events bubble up to the container too. So if you have a list that changes, attach the handler to the parent.
+
+Bubbling can be stopped with `event.stopPropagation()`, but it is rarely worth doing: it breaks other people’s handlers that you may not have thought of.
+
+See how an event travels the tree. Choose where to click, which nodes have handlers, and try to stop the bubbling:
+
+<EventFlight />
+
+And the second question of the diagram: how many handlers you need when the cards multiply and when a script has added one:
+
+<EventFlight mode="delegate" />
+
+<details>
+<summary>Check yourself: how does event.target differ from event.currentTarget?</summary>
+
+`target` is where the event happened. `currentTarget` is the element the running handler is attached to. With delegation the handler is on the container (`currentTarget`), and an element inside it was clicked (`target`).
+
+</details>
+
+## Usable from the keyboard
+
+The sneakiest mistake with events is to make something that works only with a mouse. Many people use the keyboard: people with motor impairments, people who listen to a page with a screen reader, and plain people who are faster without a mouse. The rules are short.
+
+1. **Use a real `button`.** It gets focus from the Tab key, it is pressed with Enter and Space, a screen reader announces it as “button”, and all of that is free. A `div` with a `click` handler can do none of it, and a link `<a href="#">` that works as a button confuses both groups.
+2. **Report the state.** A button that expands a block has an `aria-expanded` attribute (`false` or `true`), and the script changes it together with the block. The `aria-controls` attribute names the id of the controlled block. A screen reader will read “Sections, button, collapsed”.
+3. **Close on Escape and return the focus.** If the menu was opened with a key, the focus stayed on the button. When you close the menu, don’t lose it: `button.focus()`.
+4. **Don’t remove the visible focus.** The frame around the element that Tab has reached is the only way to know where you are.
+
+The first rule has a second half: if the menu has to work without a script (and we’ll see why at the end of the part), then the list of sections is always visible in the markup, and the script hides it behind the button. Not the other way round.
+
+## Practice
+
+We continue with the 2014 page. We’ll add two typical elements: a menu that folds behind a button, and a search through the offers that hides the cards that don’t fit as you type.
+
+Notice three details in the task. The `hidden` attribute loses to any CSS rule that sets `display`, so you need the rule `[hidden] { display: none !important }`. The search form gets a `submit` handler with `preventDefault`, or Enter will reload the page. And the cards are searched for at the moment of typing, not once at start: the list may change, and you’ll see that in the lesson on fetch.
+
+As in the earlier lessons, the checks read the markup and the text of the script. Whether it works you check yourself: press Tab until you reach the menu button, open and close it with the keys, and type a word in the search.
+
+## What was wrong with the old events
+
+Before `addEventListener`, handlers were attached in different ways: Internet Explorer up to version 9 used `attachEvent`, the other browsers used `addEventListener`, and every developer wrote a wrapper of their own (jQuery, with its `.click()` and `.on()`, was among other things such a wrapper). Menus were made of links `<a href="#">` with “nothing” where the address should be: they could be clicked with a mouse, were not announced as buttons, and added a stray hash sign to the address bar. Bubbling was often stopped out of habit, and so other people’s scripts (analytics, for one) stopped seeing the clicks.
+
+What stayed right: listen for events on a shared parent instead of attaching a hundred handlers, and treat the keyboard as equal to the mouse.

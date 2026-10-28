@@ -1,0 +1,981 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/01-values-functions.svx. */
+	export const metadata = {
+		id: '05-javascript/01-values-functions',
+		part: 5,
+		order: 1,
+		title: 'Values, functions, arrays and objects',
+		definition: 'JavaScript is the browser’s programming language. It works with typed values, keeps data in arrays and objects and processes it with functions.',
+		summary:
+			'HTML and CSS decide nothing: JavaScript does. Afterwards you’ll read and write short programs: keep the items of your list in an array of objects, turn them into other data with functions, and know how a type, a variable and a scope differ.',
+		minutes: 25,
+		teaches: ['js-values-and-types', 'js-functions', 'js-arrays-and-objects'],
+		requires: ['html-document-structure', 'net-rendering-pipeline'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'editor', label: 'items.sort()', caption: 'Sorted for display', say: 'I only sorted the list for display. Why did it change somewhere else too?' },
+				{ mood: 'explain', side: 'right', prop: 'flowchart', label: 'filter|map|join', caption: 'The pipeline', say: 'map and filter hand back a new array and leave the original alone. join glues the result into a string.' },
+				{ mood: 'hint', prop: 'editor', label: 'push sort splice', say: 'push, sort and splice change an array in place. Build what you show with filter and map, and the list stays whole.' }
+			]
+		},
+		practice: {
+			id: 'js-first-code',
+			title: 'The first program on your site: a summary of the list',
+			task: 'Add the first script to the page. 1) In the footer, add an empty paragraph with the id summary. 2) At the end of the body, just before its closing tag, add a script tag with type set to module and id set to my-code. Inside it, write your list as an array of objects, const items = [{ title: …, price: … }, …], using the items from your brief (do not write var). 3) Write three functions: titlesOf(list) returns an array of titles using map, withPrice(list) keeps the items that have a price using filter, and countOf(list) returns how many there are. The original array must not change: no push, sort or splice. 4) Build a summary string and show it in two places: console.log(summary), and by setting the textContent of the element with the id summary. The checks read the text of your script; what it does you can see yourself, because the summary will appear in the footer of the preview.',
+			era: 4,
+			continues: 'responsive-page',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+    </footer>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The data of the brief: the items of the list. For now they sit here;
+      // in the lesson on fetch we’ll move them into a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Only the titles. map makes a new array; items does not change.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items there are.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in total: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			checks: [
+				{ id: 'summary-element', kind: 'exists', selector: 'footer #summary' },
+				{ id: 'my-code-exists', kind: 'exists', selector: 'script#my-code' },
+				{ id: 'is-module', kind: 'attr', selector: '#my-code', name: 'type', matches: '^module$' },
+				{ id: 'items-array', kind: 'text', selector: '#my-code', matches: '(?:const|let)\\s+items\\s*=\\s*\\[\\s*\\{', when: { brief: 'items[].title' } },
+				{ id: 'items-own-titles', kind: 'field', selector: '#my-code', field: 'items[].title', min: 2, when: { brief: 'items[].title' } },
+				{ id: 'no-var', kind: 'text', selector: '#my-code', matches: '^(?![\\s\\S]*\\bvar\\s+[\\w$])[\\s\\S]*\\S' },
+				{ id: 'uses-map', kind: 'text', selector: '#my-code', matches: '\\.map\\(' },
+				{ id: 'uses-filter', kind: 'text', selector: '#my-code', matches: '\\.filter\\(' },
+				{ id: 'uses-length', kind: 'text', selector: '#my-code', matches: '\\.length\\b' },
+				{ id: 'no-mutation', kind: 'text', selector: '#my-code', matches: '^(?![\\s\\S]*\\.(?:push|pop|shift|unshift|splice|sort|reverse)\\s*\\()[\\s\\S]*\\S' },
+				{ id: 'three-functions', kind: 'text', selector: '#my-code', matches: '^(?=[\\s\\S]*titlesOf)(?=[\\s\\S]*withPrice)(?=[\\s\\S]*countOf)' },
+				{ id: 'console-log', kind: 'text', selector: '#my-code', matches: 'console\\.log\\(' },
+				{ id: 'writes-summary', kind: 'text', selector: '#my-code', matches: '^(?=[\\s\\S]*[\'"]#?summary[\'"])(?=[\\s\\S]*textContent)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each value with its type',
+				pairs: [
+					['42', 'number'],
+					['“Tablecloth”', 'string'],
+					['true', 'boolean: yes or no'],
+					['undefined', 'there is no value: the variable was never filled'],
+					['[1, 2, 3]', 'array: a numbered list']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the expression “5” + 3 give, where “5” is a string?',
+				options: ['The string 53: plus glued the text together', 'The number 8', 'An error'],
+				answer: 0,
+				why: [
+					'Yes. If one of the operands is a string, plus glues. But a string 5 minus 3 gives the number 2: minus has no gluing meaning. Data from form fields always arrives as strings, so surprises like this happen on real sites.',
+					'No: JavaScript will not turn a string into a number when one operand is already a string.',
+					'No: there is no error, the language silently glues the values. That silence is exactly what makes it dangerous.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What happens with const price = 100; price = 200;?',
+				options: [
+					'An error: a const cannot be assigned again',
+					'The price becomes 200',
+					'The price stays 100 and there is no error'
+				],
+				answer: 0,
+				why: [
+					'Yes. const ties the name to the value for good. If a value has to change, use let; the default is const, so you don’t overwrite something by accident.',
+					'No: that is what let is for. With const the script stops with a TypeError.',
+					'No: JavaScript will not quietly ignore the assignment. It reports an error.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which array methods return a new array and leave the original unchanged?',
+				options: ['map', 'filter', 'push', 'sort'],
+				answer: [0, 1],
+				why: [
+					'Yes: map creates a new array of the same length.',
+					'Yes: filter creates a new array of the items that fit.',
+					'No: push adds an item straight into the original array.',
+					'No: sort rearranges the items of the original array itself. If you need a sorted copy, make the copy first or use toSorted.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of the “show the titles of items with a price” pipeline in the order they run',
+				items: [
+					'The original items array',
+					'filter: keep the items with a price',
+					'map: take the title of each',
+					'join: glue the titles into one string',
+					'textContent: show the string on the page'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What will the console print? function f() { const secret = 1; } f(); console.log(secret);',
+				options: ['ReferenceError: secret is not defined', '1', 'undefined'],
+				answer: 0,
+				why: [
+					'Yes. A variable declared inside a function lives only there. Outside, it does not exist, and the language says there is no such name.',
+					'No: the value stayed inside the function, and you cannot reach it from outside.',
+					'No: undefined belongs to a variable that exists but has no value, and here the name does not exist at all.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Inside the script, write an arrow function double that returns a number multiplied by 2',
+				starter: '<script id=q>\n\n<\\/script>',
+				checks: [
+					{
+						id: 'double-arrow',
+						kind: 'text',
+						selector: '#q',
+						matches: '(?:const|let)\\s+double\\s*=\\s*\\(?\\s*\\w+\\s*\\)?\\s*=>[\\s\\S]*\\*\\s*2|(?:const|let)\\s+double\\s*=\\s*\\(?\\s*\\w+\\s*\\)?\\s*=>[\\s\\S]*2\\s*\\*'
+					}
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-types',
+				front: 'What types of value does JavaScript have?',
+				back: 'Number, string, boolean (true and false), undefined (no value), null (deliberately empty), and objects, which include arrays and functions. The typeof operator shows the type.'
+			},
+			{
+				id: 'js-const-let',
+				front: 'How does const differ from let, and why not var?',
+				back: 'const: the name is tied to the value for good. let: the value can change. var is outdated: its scope is odd, and new code doesn’t use it. The default is const.'
+			},
+			{
+				id: 'js-strict-equal',
+				front: 'How does === differ from ==?',
+				back: '=== compares the value and the type. == converts the types first and gives surprises (0 == empty string is true). Always write ===.'
+			},
+			{
+				id: 'js-map-filter',
+				front: 'What do map, filter and reduce do?',
+				back: 'map: a new array where a function was applied to each item. filter: a new array of the items that fit. reduce: fold an array into one value. None of them changes the original array.'
+			},
+			{
+				id: 'js-scope',
+				front: 'What is scope?',
+				back: 'The place where a variable’s name exists. A variable from a function or block can’t be seen outside it, while an outer one can be seen from inside.'
+			}
+		],
+		sources: [
+			{ title: 'JavaScript Guide (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'JavaScript basics (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'The Modern JavaScript Tutorial (javascript.info)', url: 'https://javascript.info/', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'JavaScript (Wikipedia)', url: 'https://en.wikipedia.org/wiki/JavaScript', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Eloquent JavaScript (Marijn Haverbeke)', url: 'https://eloquentjavascript.net/', licence: 'link-only', kind: 'book', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is your first script. It takes the list of items, works out a summary and shows it in the footer. Write it in parts, and look at the preview after each: the summary should appear.',
+			hints: [
+				'Start with two frames: an empty paragraph with the id summary in the footer, and a script tag with type module and the id my-code before the closing body tag. While the script is empty, the checks about its contents stay red.',
+				'An array of objects is written like this: const items = [{ title: …, price: … }, { title: …, price: … }]; where each title and price is text in quotes. Put your own items from the brief, each one in curly braces and separated by commas.',
+				'An arrow function: const titlesOf = (list) => list.map((item) => item.title); The other two work the same way, except that one uses filter and the other uses length.',
+				'The summary is shown with two commands: console.log(summary), and setting the textContent of the element found by the selector #summary. Both must be in the script.'
+			],
+			mistakes: {
+				'summary-element': 'The footer needs a paragraph with the id summary. The script will write the summary into it.',
+				'my-code-exists': 'I can’t find the script tag with type module and the id my-code. It must be on the page, near the end of the body.',
+				'is-module': 'The script tag needs the attribute type set to module. Then it runs after the page is parsed and has a scope of its own.',
+				'items-array': 'The data must be an array of objects: const items = [{ title: …, price: … }, …]. Check that it starts with const or let, and that a curly brace comes right after the opening square bracket.',
+				'items-own-titles': 'The array must hold your items from the brief: at least two titles written in the script just as they are in the brief.',
+				'no-var': 'The script must not contain var. Replace it with const (if the value doesn’t change) or let.',
+				'uses-map': 'The titles need the map method: list.map((item) => item.title).',
+				'uses-filter': 'The selection needs the filter method: list.filter((item) => …), where the function says true for an item that has a price.',
+				'uses-length': 'Counting needs the length property: list.length.',
+				'no-mutation': 'The original array must not change. Remove push, pop, shift, unshift, splice, sort and reverse: map and filter already create new arrays.',
+				'three-functions': 'You need three functions with these names: titlesOf, withPrice and countOf.',
+				'console-log': 'I can’t find console.log(…). Print the summary to the console: console.log(summary).',
+				'writes-summary': 'The summary must also be shown on the page: set the textContent of the element found by #summary.'
+			},
+			outro: 'Your site has counted something by itself for the first time. Data in an array, functions around it, a result on the page: all the rest of JavaScript is built on this pattern.'
+		},
+		say: {
+			JavaScript: 'Java Script',
+			ECMAScript: 'eck-ma-script',
+			const: 'const',
+			let: 'let',
+			var: 'var',
+			map: 'map',
+			filter: 'filter',
+			reduce: 'reduce',
+			JSON: 'jay-son',
+			typeof: 'type of',
+			Netscape: 'Net-scape',
+			V8: 'V eight',
+			SpiderMonkey: 'Spider Monkey',
+			JavaScriptCore: 'Java Script Core',
+			console: 'console',
+			log: 'log'
+		}
+	};
+</script>
+
+<script>
+	import ValueLab from '../../diagrams/ValueLab.svelte';
+</script>
+
+## A language that can decide
+
+HTML says what is on the page. CSS says how it looks. But neither can **decide** anything: open a menu when it is pressed, check that a phone number was entered in full, show only the items of a list that a visitor searched for. That takes a programming language, and the browser has exactly one: **JavaScript** (often shortened to JS).
+
+A short history. In 1995 a company called Netscape (we met it in the story of the browser wars) had Brendan Eich write a language for its browser, and by his own account the first version took ten days. It got the name JavaScript because Java was fashionable, and the two share nothing but the start of the word. Then Microsoft made its own copy for Internet Explorer, and web developers lived through years of writing the same script twice. To end that, the language was handed to an organization called Ecma International. Its standard is called **ECMAScript**, and a new edition comes out every year. In the browser the code is run by an “engine”: V8 in Chrome and the browsers built on it, SpiderMonkey in Firefox, JavaScriptCore in Safari.
+
+## Where to write it
+
+There are two places.
+
+- The **console** in the developer tools (F12, the Console tab; you opened it on the workbench). Type a line, press Enter, see the result. It is the best way to try something for five seconds.
+- The **`<script>` tag** on a page. The browser runs its code when parsing reaches it. Remember the pipeline from the lesson on rendering: until an ordinary script has run, HTML parsing waits, and a script at the top of the page can’t see elements that haven’t been parsed yet. The simplest way to avoid this today is `<script type="module">`. Such a script runs only after the page is parsed, and everything it declares stays inside it and doesn’t disturb other scripts. (The old ways were to put the script at the very end of `<body>`, or to add the `defer` attribute.)
+
+In a real project the code lives in a separate file (`<script type="module" src="script.js"></script>`). In our editor the script is written straight into the page, inside the tag, so that the checks can read your code. That is fine, it is the same JavaScript. We’ll say what a module is later, in the lesson on modules. For now it is enough that “such a script can trust that the page is ready”.
+
+## Values and types
+
+A program works with **values**, and every value has a **type**:
+
+- a **number** (`number`): `42`, `3.14`. Whole numbers and fractions share one type in JavaScript;
+- a **string** (`string`): text in quotes, `'Tablecloth'` or `"Tablecloth"`;
+- a **boolean** (`boolean`): `true` or `false`, “yes” and “no”;
+- `undefined`: “there is no value”, for example when a variable was declared and nothing was put into it;
+- `null`: “it is empty on purpose”;
+- **objects**, which include arrays and functions (more on them below).
+
+The `typeof` operator shows the type of any value: `typeof 42` gives `'number'`.
+
+A value is put into a **variable**: a name you use to get it back later.
+
+```js
+const price = 4500;   // const: the name is tied to the value for good
+let count = 0;        // let: the value can be replaced later
+count = count + 1;
+```
+
+The rule is this: write `const` by default, and take `let` when the value really has to change. There is a third word, `var`. Until 2015 it was the only way to declare a variable, and its rules are odd: the variable “jumps” to the top of the function and is visible where you don’t expect it. New code doesn’t use `var`. If you meet it in old code, it is a sign of that code’s age.
+
+Compare values with the triple equals sign, `===`. It compares both the value and the type. The double `==` first tries to convert the types to match, and the results are surprising: `0 == ''` is true. Get used to `===` and forget `==`.
+
+Types sometimes set traps. Plus can both add and glue strings, so `'5' + 3` gives the string `'53'`, while `'5' - 3` gives the number `2`. Values from form fields always arrive as strings, and `Number('42')` turns a string into a number. Try some examples:
+
+<ValueLab />
+
+<details>
+<summary>Check yourself: what does the text 5 plus the number 3 give, and why?</summary>
+
+The string `'53'`. If at least one operand is a string, plus glues text instead of adding numbers.
+
+</details>
+
+## Objects and arrays
+
+An **object** is a card: a set of “key: value” pairs. One item of your list (a service, a product, a dish) is naturally written as an object:
+
+```js
+const item = { title: 'Portrait session', price: 'from £000' };
+item.title;        // 'Portrait session'
+item.price;        // 'from £000'
+```
+
+An **array** is a numbered list. The numbers start at zero, and the length is in the `length` property:
+
+```js
+const names = ['Portrait session', 'Reportage', 'Prints'];
+names[0];          // 'Portrait session'
+names.length;      // 3
+```
+
+Together they give the main way to store data: an **array of objects**. The `items` list from your brief looks exactly like this, and the whole part rests on it: it is drawn, filtered and fetched from a server. A notation very close to it is called JSON, and we’ll take it apart in the lesson on fetch.
+
+```js
+const items = [
+  { title: 'Portrait session', price: 'from £000' },
+  { title: 'Reportage', price: '' }
+];
+```
+
+## Functions
+
+A **function** is a named sequence of actions. You pass it data (**parameters**), and it returns a result (`return`).
+
+```js
+function priceOf(item) {
+  return item.price;
+}
+const titleOf = (item) => item.title;   // arrow notation, since 2015
+```
+
+The two forms do almost the same thing. The arrow form is used when the function is short and needed on the spot. A function is called by its name with parentheses: `priceOf(items[0])`. A function without `return` returns `undefined`.
+
+The best habit is to make functions **pure**. A pure function takes data from its parameters, returns a result and touches nothing else. It is easy to check (“I gave it this, I got that”), easy to reuse, and there is nowhere in it for the error “someone changed my array” to hide.
+
+**Scope** says where a name exists. A variable declared inside a function or a block `{ ... }` is visible only there. You can look outward from inside, but not inward from outside. That is why two functions can each have a variable `total` without mixing them up. (There is a subtlety too: a function remembers the variables of the place where it was created. This is called a closure, and it is what will let you keep a menu’s state in one place in the lesson on events.)
+
+<details>
+<summary>Check yourself: why does console.log(secret) outside a function give an error if secret was declared inside it?</summary>
+
+A variable lives only in its own scope. Outside the function, there is no such name.
+
+</details>
+
+## map, filter, reduce: a pipeline instead of a loop
+
+Work on a list is often described with a loop and a counter. It is more natural and more reliable to describe it with **array methods** that take a function:
+
+- `map(f)` returns a **new** array of the same length: `f` was applied to each item;
+- `filter(f)` returns a **new** array of the items for which `f` returned `true`;
+- `reduce(f, start)` folds an array into one value: a sum, the largest, the cheapest;
+- `join(', ')` glues an array of strings into one string.
+
+The main property: they **do not change** the original array. But `push`, `sort` and `splice` change it in place, and programs break because of them more than anything else (“I only sorted it for display, and the list vanished somewhere else”). The methods can be joined in a chain, and it reads like a sentence:
+
+```js
+items
+  .filter((item) => item.price !== '')   // keep those with a price
+  .map((item) => item.title)              // take the titles
+  .join(', ');                            // glue into a string
+```
+
+Build a pipeline on the items of your own list. They are the same items as in the brief:
+
+<ValueLab mode="pipeline" />
+
+## Reading errors
+
+Red lines in the console are not a verdict but a hint: they name the error, say what is wrong, and give the file and line. The three most common:
+
+- `ReferenceError: x is not defined`: a typo in a name, or a variable used outside its scope;
+- `TypeError: Cannot read properties of undefined (reading 'title')`: you took a field from something that isn’t there, for example `items[10].title` when the list has three items;
+- `SyntaxError`: a lost bracket, quote or comma. The script does not start at all.
+
+And `console.log(value)` remains the main way to look inside a program: what is in the variable at this point. Read the error whole and from the top before you change anything at random.
+
+## Practice
+
+You are on a 2014 site whose page is already responsive but has no script yet. Add the first one. It will take the list of your items, work out a summary and show it in the footer.
+
+For now the data sits right in the script, copied from the markup. That is temporary: a little later (the lessons on the DOM and on fetch) we’ll teach the script to read it from the page and from a server. The code you write here will still be useful: the same functions work on any data.
+
+Notice how the checks work. They **read the text of your script**: is there an array of objects with your titles, is there no `var`, is there no `push`. They don’t run the script to see what it *does*: you see that yourself, in the footer of the preview a line like “Items in total: 3, with a price: 3. Portrait session, Reportage…” should appear. If it doesn’t, open the console of the preview window (F12; in the console’s list of contexts choose the preview frame) and read the red line.
+
+## What was wrong with 2005
+
+In the 2000s JavaScript was written differently. Handlers were hung straight in the markup (`onclick="..."`), links were given the address `javascript:void(0)`, values were kept in global variables, and messages were shown with an `alert()` window. The result: logic smeared across the HTML, any name could be overwritten by another script by accident, and without scripts the links didn’t work. The browser was detected by its name (`navigator.userAgent`), because Internet Explorer and Netscape differed.
+
+Something right survived: small functions with clear names, and one source of data instead of copies. And the fact that `const`, `let` and arrow functions arrived in 2015, and then the language began to get an update every year, means that code from 2025 is noticeably shorter and more reliable than code from 2005.

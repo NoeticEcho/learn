@@ -8,6 +8,69 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+	// The words, one table per edition (docs/content-plan/README.md, «English edition»).
+	const W = pick({
+		ru: {
+			stopped: 'событие досюда не дошло: всплытие остановлено ниже',
+			ran: (target: string, who: string) => `обработчик сработал: target = ${target}, currentTarget = ${who}`,
+			passes: 'событие проходит сквозь, обработчика нет',
+			stopNote: '. Здесь вызван stopPropagation, дальше событие не идёт.',
+			cancelled: 'Переход по ссылке отменён: сработал preventDefault.',
+			followed: 'Браузер перейдёт по ссылке: действие по умолчанию никто не отменил.',
+			noDefault: 'У этого элемента действия по умолчанию нет.',
+			flight: 'Куда летит нажатие',
+			where: 'Куда нажали',
+			clickedOn: 'Нажали на:',
+			handlerLegend: 'Где стоит обработчик click',
+			stopOn: 'Остановить всплытие на',
+			nowhere: 'нигде',
+			prevent: 'в обработчике вызван preventDefault',
+			alsoHappens: 'Что ещё случится.',
+			howMany: 'Сколько обработчиков нужно',
+			added: 'Скрипт добавил карточку',
+			again: 'Сначала',
+			perCardLabel: 'Обработчик на каждой карточке',
+			perCardTitle: (n: number) => `Обработчик на каждой карточке: ${n}`,
+			containerLabel: 'Один обработчик на контейнере',
+			containerTitle: 'Один обработчик на контейнере: 1',
+			card: (id: number, late: boolean) => `Карточка ${id}${late ? ', добавлена скриптом, обработчика нет' : ''}`,
+			hintLate: 'Новая карточка (пунктир) не реагирует: на ней нет обработчика, его надо было навесить при создании.',
+			hintPer: 'Нажмите на карточки: каждая отвечает своим обработчиком.',
+			hintWorks: 'Новая карточка работает сама: её нажатие всплыло до контейнера, а там closest нашёл карточку.',
+			hintAdd: 'Добавьте карточку: она тоже заработает без нового кода.'
+		},
+		en: {
+			stopped: 'the event never got this far: bubbling was stopped lower down',
+			ran: (target: string, who: string) => `the handler ran: target = ${target}, currentTarget = ${who}`,
+			passes: 'the event passes through, there is no handler',
+			stopNote: '. stopPropagation is called here, so the event goes no further.',
+			cancelled: 'Following the link is canceled: preventDefault ran.',
+			followed: 'The browser will follow the link: nobody canceled the default action.',
+			noDefault: 'This element has no default action.',
+			flight: 'Where the click flies',
+			where: 'Where the click landed',
+			clickedOn: 'Clicked on:',
+			handlerLegend: 'Where the click handler stands',
+			stopOn: 'Stop bubbling at',
+			nowhere: 'nowhere',
+			prevent: 'the handler calls preventDefault',
+			alsoHappens: 'What else happens.',
+			howMany: 'How many handlers are needed',
+			added: 'The script added a card',
+			again: 'Start over',
+			perCardLabel: 'A handler on every card',
+			perCardTitle: (n: number) => `A handler on every card: ${n}`,
+			containerLabel: 'One handler on the container',
+			containerTitle: 'One handler on the container: 1',
+			card: (id: number, late: boolean) => `Card ${id}${late ? ', added by the script, no handler' : ''}`,
+			hintLate: 'The new card (dashed) doesn’t react: it has no handler, which should have been attached when it was created.',
+			hintPer: 'Click the cards: each answers with its own handler.',
+			hintWorks: 'The new card works by itself: its click bubbled up to the container, where closest found the card.',
+			hintAdd: 'Add a card: it will work too, with no new code.'
+		}
+	});
 
 	let { mode = 'flight' }: { mode?: 'flight' | 'delegate' } = $props();
 
@@ -25,18 +88,18 @@
 		for (let i = from; i < path.length; i++) {
 			const who = path[i];
 			if (stopped) {
-				out.push({ who, text: 'событие досюда не дошло: всплытие остановлено ниже', ran: false });
+				out.push({ who, text: W.stopped, ran: false });
 				continue;
 			}
 			if (handlers[who]) {
-				out.push({ who, text: `обработчик сработал: target = ${target}, currentTarget = ${who}`, ran: true, stop: stopAt === who });
+				out.push({ who, text: W.ran(target, who), ran: true, stop: stopAt === who });
 				if (stopAt === who) stopped = true;
-			} else out.push({ who, text: 'событие проходит сквозь, обработчика нет', ran: false });
+			} else out.push({ who, text: W.passes, ran: false });
 		}
 		return out;
 	});
 	const defaultAction = $derived(
-		target === 'a' ? (prevent && log.some((l) => l.ran) ? 'Переход по ссылке отменён: сработал preventDefault.' : 'Браузер перейдёт по ссылке: действие по умолчанию никто не отменил.') : 'У этого элемента действия по умолчанию нет.'
+		target === 'a' ? (prevent && log.some((l) => l.ran) ? W.cancelled : W.followed) : W.noDefault
 	);
 
 	// ----- delegation
@@ -65,60 +128,60 @@
 
 {#if mode === 'flight'}
 	<figure class="dg">
-		<figcaption>Куда летит нажатие</figcaption>
-		<div class="dg-ctl" role="group" aria-label="Куда нажали">
-			<span>Нажали на:</span>
+		<figcaption>{W.flight}</figcaption>
+		<div class="dg-ctl" role="group" aria-label={W.where}>
+			<span>{W.clickedOn}</span>
 			{#each path.slice(0, 3) as n (n)}
 				<button type="button" class="dg-mono" aria-pressed={target === n} onclick={() => (target = n)}>{n}</button>
 			{/each}
 		</div>
 		<fieldset class="hand">
-			<legend>Где стоит обработчик click</legend>
+			<legend>{W.handlerLegend}</legend>
 			{#each path as n (n)}
 				<label class="dg-mono"><input type="checkbox" bind:checked={handlers[n]} /> {n}</label>
 			{/each}
 		</fieldset>
 		<div class="dg-ctl">
-			<label>Остановить всплытие на
+			<label>{W.stopOn}
 				<select bind:value={stopAt}>
-					<option value="none">нигде</option>
+					<option value="none">{W.nowhere}</option>
 					{#each path as n (n)}<option value={n}>{n}</option>{/each}
 				</select>
 			</label>
-			<label><input type="checkbox" bind:checked={prevent} /> в обработчике вызван preventDefault</label>
+			<label><input type="checkbox" bind:checked={prevent} /> {W.prevent}</label>
 		</div>
 		<ol class="log dg-box" aria-live="polite">
 			{#each log as l (l.who)}
-				<li class:ran={l.ran}><code>{l.who}</code>: {l.text}{l.stop ? '. Здесь вызван stopPropagation, дальше событие не идёт.' : ''}</li>
+				<li class:ran={l.ran}><code>{l.who}</code>: {l.text}{l.stop ? W.stopNote : ''}</li>
 			{/each}
 		</ol>
-		<p class="dg-out"><strong>Что ещё случится.</strong> {defaultAction}</p>
+		<p class="dg-out"><strong>{W.alsoHappens}</strong> {defaultAction}</p>
 	</figure>
 {:else}
 	<figure class="dg">
-		<figcaption>Сколько обработчиков нужно</figcaption>
+		<figcaption>{W.howMany}</figcaption>
 		<div class="dg-ctl">
-			<button type="button" onclick={addCard}>Скрипт добавил карточку</button>
-			<button type="button" onclick={reset}>Сначала</button>
+			<button type="button" onclick={addCard}>{W.added}</button>
+			<button type="button" onclick={reset}>{W.again}</button>
 		</div>
 		<div class="two">
-			<section aria-label="Обработчик на каждой карточке">
-				<div class="dh">Обработчик на каждой карточке: {perCard.filter((c) => c.own).length}</div>
+			<section aria-label={W.perCardLabel}>
+				<div class="dh">{W.perCardTitle(perCard.filter((c) => c.own).length)}</div>
 				<div class="row">
 					{#each perCard as c (c.id)}
-						<button type="button" class="sq" class:on={c.picked} class:late={!c.own} onclick={() => clickPer(c)} aria-pressed={c.picked} aria-label="Карточка {c.id}{c.own ? '' : ', добавлена скриптом, обработчика нет'}">{c.id}</button>
+						<button type="button" class="sq" class:on={c.picked} class:late={!c.own} onclick={() => clickPer(c)} aria-pressed={c.picked} aria-label={W.card(c.id, !c.own)}>{c.id}</button>
 					{/each}
 				</div>
-				<p class="hint">{perCard.some((c) => !c.own) ? 'Новая карточка (пунктир) не реагирует: на ней нет обработчика, его надо было навесить при создании.' : 'Нажмите на карточки: каждая отвечает своим обработчиком.'}</p>
+				<p class="hint">{perCard.some((c) => !c.own) ? W.hintLate : W.hintPer}</p>
 			</section>
-			<section aria-label="Один обработчик на контейнере">
-				<div class="dh">Один обработчик на контейнере: 1</div>
+			<section aria-label={W.containerLabel}>
+				<div class="dh">{W.containerTitle}</div>
 				<div class="row">
 					{#each delegated as c (c.id)}
-						<button type="button" class="sq" class:on={c.picked} onclick={() => clickDelegated(c)} aria-pressed={c.picked} aria-label="Карточка {c.id}">{c.id}</button>
+						<button type="button" class="sq" class:on={c.picked} onclick={() => clickDelegated(c)} aria-pressed={c.picked} aria-label={W.card(c.id, false)}>{c.id}</button>
 					{/each}
 				</div>
-				<p class="hint">{delegated.some((c) => c.added) ? 'Новая карточка работает сама: её нажатие всплыло до контейнера, а там closest нашёл карточку.' : 'Добавьте карточку: она тоже заработает без нового кода.'}</p>
+				<p class="hint">{delegated.some((c) => c.added) ? W.hintWorks : W.hintAdd}</p>
 			</section>
 		</div>
 	</figure>

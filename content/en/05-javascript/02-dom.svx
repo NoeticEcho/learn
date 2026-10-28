@@ -1,0 +1,975 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/05-javascript/02-dom.svx. */
+	export const metadata = {
+		id: '05-javascript/02-dom',
+		part: 5,
+		order: 2,
+		title: 'The DOM: a page that can be changed',
+		definition: 'The DOM is the document object model: the tree of nodes a browser builds from HTML. JavaScript finds elements in it, changes them and creates new ones.',
+		summary:
+			'A browser keeps the page as a tree, and JavaScript can search it, read it and change it. Afterwards you’ll find elements with selectors, create new ones from data, and understand why other people’s text must never go in through innerHTML.',
+		minutes: 25,
+		teaches: ['js-dom'],
+		requires: ['js-arrays-and-objects', 'html-semantic-elements'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'document', caption: 'Find, change, insert', say: 'The page is handed to the script as a tree called document. Whatever the script changes, the browser redraws at once.' },
+				{ mood: 'hmm', side: 'right', prop: 'editor', label: 'box.innerHTML = name', caption: 'The name came from a visitor', say: 'What if the name is really markup with a handler? The browser can’t tell it from yours, and runs the stranger’s code.' },
+				{ mood: 'cheer', prop: 'lock', label: 'textContent', say: 'textContent writes a string as text: angle brackets stay ordinary letters. Insert other people’s text only this way.' }
+			]
+		},
+		practice: {
+			id: 'js-dom-quick-nav',
+			title: 'Quick links to your offers: a list built from the cards',
+			task: 'Let the script build the navigation to the cards itself. 1) In the #offer section, after the heading, add an empty nav with the id quick and an aria-label (for example Jump to an offer), and an empty paragraph with the id offer-count. 2) Add a second script, a script tag with type set to module and id set to dom-code. In it, find all the cards (#offer .card) with querySelectorAll. 3) If there are no cards, show a clear message in #quick (with textContent). If there are, create a ul list: give every card an id such as item-1, item-2, and make an li for it with a link a whose href leads to that id and whose text is taken from the card’s heading. Do all of this with createElement, textContent and append. 4) In #offer-count write Offers: N. Using innerHTML to insert text is not allowed. The checks read the text of your script and the markup; you’ll see the list of links in the preview.',
+			era: 4,
+			continues: 'js-first-code',
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The data of the brief: the items of the list. For now they sit here;
+      // in the lesson on fetch we’ll move them into a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Only the titles. map makes a new array; items does not change.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items there are.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in total: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="{{who}}. {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a4d8f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%23fff'%3E{{name.0}}%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{who}}">
+    <meta property="og:image" content="https://riverbend.example/og.png">
+    <meta property="og:locale" content="en_GB">
+    {{#each languages}}<link rel="alternate" hreflang="{{.}}" href="https://riverbend.example/{{.}}/">
+    {{/each}}<link rel="alternate" hreflang="x-default" href="https://riverbend.example/">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}</p>
+      <nav aria-label="Site language">
+        <ul>
+          {{#each languages}}<li><a href="/{{.}}/" hreflang="{{.}}" lang="{{.}}">{{.}}</a></li>
+          {{/each}}
+        </ul>
+      </nav>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}</a></li>
+          <li><a href="#sec-2">{{sections.1}}</a></li>
+          <li><a href="#sec-3">{{sections.2}}</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <main id="main">
+        <h1>{{name}}</h1>
+        <p>{{who}}</p>
+        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+
+        <section id="sec-1">
+          <h2>{{sections.0}}</h2>
+          <p>A couple of sentences about this section.</p>
+          <img src="photo.jpg" width="160" height="160" alt="Photo of {{name}}">
+        </section>
+
+        <section id="sec-2">
+          <h2>{{sections.1}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="sec-3">
+          <h2>{{sections.2}}</h2>
+          <p>A couple of sentences about this section.</p>
+        </section>
+
+        <section id="offer">
+          <h2>What we offer</h2>
+          <nav id="quick" aria-label="Jump to an offer"></nav>
+          <p id="offer-count"></p>
+          <div class="cards">
+            {{#each items}}<article class="card">
+              <h3>{{title}}</h3>
+              <p>{{text}}</p>
+              <p class="price">{{price}}</p>
+            </article>
+            {{/each}}
+          </div>
+        </section>
+
+        <section id="prices">
+          <h2>Terms and prices</h2>
+          <table>
+            <caption>What is included and what it costs</caption>
+            <thead>
+              <tr>
+                <th scope="col">Item</th>
+                <th scope="col">What is included</th>
+                <th scope="col">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each items}}<tr>
+                <th scope="row">{{title}}</th>
+                <td>{{text}}</td>
+                <td>{{price}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </section>
+
+        <section id="enquiry">
+          <h2>{{mainAction.label}}</h2>
+          <form action="/enquiry" method="post">
+            <p>
+              <label for="f-name">What should we call you?</label><br>
+              <input id="f-name" name="name" type="text" autocomplete="name" required>
+            </p>
+            <p>
+              <label for="f-phone">Phone</label><br>
+              <input id="f-phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phone-hint"><br>
+              <small id="phone-hint">For example, +44 0000 000000. We call during working hours.</small>
+            </p>
+            <fieldset>
+              <legend>When is it best to call?</legend>
+              <label><input type="radio" name="when" value="morning" checked> Morning</label>
+              <label><input type="radio" name="when" value="day"> Afternoon</label>
+              <label><input type="radio" name="when" value="evening"> Evening</label>
+            </fieldset>
+            <p>
+              <label for="f-comment">What do you need, briefly?</label><br>
+              <textarea id="f-comment" name="comment" rows="4"></textarea>
+            </p>
+            <p>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+            </p>
+            <p><button type="submit">{{mainAction.label}}</button></p>
+          </form>
+        </section>
+
+        <section id="proofs">
+          <h2>Credentials</h2>
+          {{#each proofs}}<figure>
+            <img src="scan.jpg" width="120" height="160" alt="Scan of the document">
+            <figcaption>{{title}}</figcaption>
+          </figure>
+          {{/each}}
+        </section>
+      </main>
+
+      <aside id="contacts">
+        <h2>Get in touch</h2>
+        <p>{{contacts.address}}</p>
+        <p><a href="tel:{{phone}}">{{phone}}</a><br><a href="mailto:{{email}}">{{email}}</a></p>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}</p>
+      <p><a href="privacy.html">Privacy notice</a> · <a href="#top">Back to top</a></p>
+      <p id="summary"></p>
+    </footer>
+
+    <script type="module" id="my-code">
+      // The data of the brief: the items of the list. For now they sit here;
+      // in the lesson on fetch we’ll move them into a file of their own.
+      const items = [
+        {{#each items}}{ title: '{{title}}', price: '{{price}}' },
+        {{/each}}
+      ];
+
+      // Only the titles. map makes a new array; items does not change.
+      const titlesOf = (list) => list.map((item) => item.title);
+
+      // Only the items that have a price.
+      const withPrice = (list) => list.filter((item) => item.price !== '');
+
+      // How many items there are.
+      const countOf = (list) => list.length;
+
+      const summary =
+        'Items in total: ' + countOf(items) +
+        ', with a price: ' + countOf(withPrice(items)) +
+        '. ' + titlesOf(items).join(', ') + '.';
+
+      console.log(summary);
+      document.querySelector('#summary').textContent = summary;
+    <\/script>
+
+    <script type="module" id="dom-code">
+      // The page is already parsed: a module runs after it.
+      const cards = document.querySelectorAll('#offer .card');
+      const quick = document.querySelector('#quick');
+      const count = document.querySelector('#offer-count');
+
+      if (cards.length === 0) {
+        quick.textContent = 'There are no offers in the list yet.';
+      } else {
+        const list = document.createElement('ul');
+        cards.forEach((card, index) => {
+          card.id = 'item-' + (index + 1);
+          const link = document.createElement('a');
+          link.href = '#' + card.id;
+          link.textContent = card.querySelector('h3').textContent;
+          const row = document.createElement('li');
+          row.append(link);
+          list.append(row);
+        });
+        quick.append(list);
+      }
+
+      count.textContent = 'Offers: ' + cards.length;
+    <\/script>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the base of the 2014 site (reset and typography). You write the layout yourself. */
+
+html {
+  box-sizing: border-box;
+  font-size: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  color: #1d2430;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* ===== Layout: your work starts here ===== */
+
+header nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "aside";
+  gap: 2rem;
+  max-width: 62.5rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.layout main {
+  grid-area: main;
+}
+
+.layout aside {
+  grid-area: aside;
+}
+
+.cards {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+
+/* Wide screens: we add rules, we do not take them away (mobile first). */
+@media (min-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 2fr) minmax(14rem, 1fr);
+    grid-template-areas: "main aside";
+  }
+}
+
+/* The card looks at the width of its own place, not the window. */
+@container (min-width: 40rem) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    column-gap: 1rem;
+  }
+}
+`
+			},
+			checks: [
+				{ id: 'quick-nav', kind: 'exists', selector: '#offer nav#quick' },
+				{ id: 'quick-label', kind: 'attr', selector: 'nav#quick', name: 'aria-label', matches: '\\S' },
+				{ id: 'count-element', kind: 'exists', selector: '#offer-count' },
+				{ id: 'dom-code-exists', kind: 'exists', selector: 'script#dom-code' },
+				{ id: 'is-module', kind: 'attr', selector: '#dom-code', name: 'type', matches: '^module$' },
+				{ id: 'cards-kept', kind: 'count', selector: '#offer article.card', min: { brief: 'items' } },
+				{ id: 'finds-cards', kind: 'text', selector: '#dom-code', matches: 'querySelectorAll\\(' },
+				{ id: 'creates', kind: 'text', selector: '#dom-code', matches: 'createElement\\(' },
+				{ id: 'inserts', kind: 'text', selector: '#dom-code', matches: '\\.(?:append|appendChild|prepend|replaceChildren)\\(' },
+				{ id: 'text-content', kind: 'text', selector: '#dom-code', matches: 'textContent' },
+				{ id: 'no-inner-html', kind: 'text', selector: '#dom-code', matches: '^(?![\\s\\S]*(?:\\.(?:innerHTML|outerHTML)\\s*\\+?=|insertAdjacentHTML|document\\.write))[\\s\\S]*\\S' },
+				{ id: 'empty-state', kind: 'text', selector: '#dom-code', matches: '\\.length\\s*(?:===?|<=?)\\s*[01]\\b|!\\s*[\\w.]+\\.length' },
+				{ id: 'semantic-list', kind: 'text', selector: '#dom-code', matches: '^(?=[\\s\\S]*createElement\\(\\s*[\'"](?:ul|ol)[\'"]\\s*\\))(?=[\\s\\S]*createElement\\(\\s*[\'"]li[\'"]\\s*\\))' },
+				{ id: 'anchors', kind: 'text', selector: '#dom-code', matches: '^(?=[\\s\\S]*(?:\\.id\\s*=|setAttribute\\(\\s*[\'"]id[\'"]))(?=[\\s\\S]*(?:\\.href\\s*=|setAttribute\\(\\s*[\'"]href[\'"]))' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does document.querySelector return when you give it a selector that no element on the page matches?',
+				options: ['null: the empty value', 'An empty array', 'An error, and the script stops at once'],
+				answer: 0,
+				why: [
+					'Yes. querySelector returns the first matching element or null. So if an element may be missing, check the result, or the next line (null.textContent) will fail with a TypeError.',
+					'No: an empty list is what querySelectorAll returns, while querySelector returns one element or null.',
+					'No: the search itself throws nothing. The error comes later, when you try to do something with null.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each command with what it does',
+				pairs: [
+					['document.querySelector(sel)', 'finds the first matching element'],
+					['document.querySelectorAll(sel)', 'finds all matching elements and returns a list'],
+					['document.createElement for an li', 'creates an element in memory; it isn’t on the page yet'],
+					['parent.append(child)', 'inserts the element into the page tree'],
+					['el.textContent = text', 'writes the text as text, without parsing tags']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A visitor types <img src=x onerror=alert(1)> into the Name field, and you show it on the page. How do you do that safely?',
+				options: [
+					'Write it with textContent: the string stays text',
+					'Write it with innerHTML',
+					'Do nothing: the browser filters everything itself'
+				],
+				answer: 0,
+				why: [
+					'Yes. textContent never parses tags: the string appears on the page as letters, and the script inside it doesn’t run.',
+					'No. innerHTML parses the string as markup, creates the image, and its onerror handler runs someone else’s code. This is called XSS, cross-site scripting.',
+					'No: the browser doesn’t know the string holds hostile code. The page’s author has to filter it, and the easiest way is never to parse other people’s text as markup at all.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of adding a new card to a list in order',
+				items: [
+					'Find the container with querySelector for the .cards class',
+					'Create an article element with createElement',
+					'Set its text: element.textContent = title',
+					'Put it on the page: container.append(element)'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which ways of inserting do not parse the text as markup?',
+				options: ['textContent', 'document.createTextNode', 'innerHTML', 'insertAdjacentHTML'],
+				answer: [0, 1],
+				why: [
+					'Yes: textContent inserts plain text.',
+					'Yes: createTextNode creates a text node, which has no tags in it.',
+					'No: innerHTML turns the string into elements.',
+					'No: insertAdjacentHTML also parses the string as markup, so it must not be used for other people’s text.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A script with no type module and no defer sits in the head and looks for the h1 heading. Why does it get null?',
+				options: [
+					'The browser hasn’t reached the h1 yet: the script ran while the page was still being parsed',
+					'JavaScript can’t search for an h1',
+					'Scripts in the head don’t work at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. An ordinary script stops parsing and runs at once, and elements further down the document aren’t there yet. That is why scripts go at the end of the page, get defer, or become modules.',
+					'No: any element can be searched for, but only once it is in the tree.',
+					'No: they work, they just run before the part of the page you need has been built.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'In the script, find the first h1 heading on the page and put it in a variable called title',
+				starter: '<h1>Hello</h1>\n<script type=module id=q>\n\n<\\/script>',
+				checks: [
+					{
+						id: 'finds-h1',
+						kind: 'text',
+						selector: '#q',
+						matches: '(?:const|let)\\s+title\\s*=\\s*document\\.querySelector\\(\\s*[\\x22\\x27]h1[\\x22\\x27]\\s*\\)'
+					}
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'js-dom-what',
+				front: 'What is the DOM?',
+				back: 'The tree of objects a browser builds from HTML. JavaScript gets it as document and can search, read and change the nodes. The page on screen is redrawn to follow.'
+			},
+			{
+				id: 'js-query',
+				front: 'How does querySelector differ from querySelectorAll?',
+				back: 'querySelector finds the first matching element, or null. querySelectorAll returns a list of all the matches (possibly empty). The selectors are the same as in CSS.'
+			},
+			{
+				id: 'js-create-append',
+				front: 'How do you add a new element to a page?',
+				back: 'Create it with createElement, set it up (textContent, attributes, classList) and put it in the tree with append. Until it is inserted, it isn’t on the page.'
+			},
+			{
+				id: 'js-innerhtml-xss',
+				front: 'Why must other people’s text not go in through innerHTML?',
+				back: 'innerHTML parses a string as markup. If it holds a tag with a handler, a stranger’s code runs on your page (XSS). textContent shows text as text.'
+			},
+			{
+				id: 'js-nodelist',
+				front: 'What does querySelectorAll return, and what do you do with it?',
+				back: 'A NodeList: a list you can walk with forEach or for...of. To use map and filter, turn it into an array first: Array.from(list).'
+			}
+		],
+		sources: [
+			{ title: 'Document Object Model (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Document.querySelector (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'DOM Standard (WHATWG)', url: 'https://dom.spec.whatwg.org/', licence: 'CC-BY', kind: 'spec', lang: 'en' },
+			{ title: 'Document (The Modern JavaScript Tutorial)', url: 'https://javascript.info/document', licence: 'link-only', kind: 'course', lang: 'en' },
+			{ title: 'OWASP: DOM based XSS Prevention Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' }
+		],
+		videos: [
+			{ title: 'JavaScript DOM Manipulation: full course for beginners (freeCodeCamp.org)', url: 'https://www.youtube.com/watch?v=5fb2aPlgoys', licence: 'proprietary-link', kind: 'video', lang: 'en' }
+		],
+		guide: {
+			intro: 'Now the script will not count, it will change the page. It will find your cards, build a list of links from them and count them. Go step by step: the markup first, then the script.',
+			hints: [
+				'In the markup, after the heading What we offer, you need two empty elements: a nav with the id quick and an aria-label, and a paragraph with the id offer-count. The script will fill them.',
+				'The script is a script tag with type module and the id dom-code, the second one after your first. Start with a line that sets const cards to document.querySelectorAll with the selector #offer .card.',
+				'For each card use cards.forEach((card, index) => { … }). Inside, set card.id to item- plus (index + 1); create an a element with createElement, set link.href to # plus card.id and link.textContent to the text of the card’s h3; wrap it in an li and add that to a ul.',
+				'If there are no cards: if (cards.length === 0) { … } with a message set through textContent. The counter: count.textContent = Offers: followed by cards.length, joined with plus.'
+			],
+			mistakes: {
+				'quick-nav': 'The #offer section needs a nav element with the id quick and an aria-label. The script will build a list inside it.',
+				'quick-label': 'The nav needs a label for screen readers: an aria-label such as Jump to an offer.',
+				'count-element': 'You need a paragraph for the counter, with the id offer-count.',
+				'dom-code-exists': 'I can’t find the second script: a script tag with type module and the id dom-code.',
+				'is-module': 'The script needs the attribute type set to module.',
+				'cards-kept': 'The cards in the markup (article elements with the class card) must stay where they are: the script builds the navigation, it doesn’t replace them.',
+				'finds-cards': 'Cards are found with querySelectorAll: document.querySelectorAll with the selector #offer .card.',
+				creates: 'I don’t see createElement. List elements are created with document.createElement, giving it the tag name li.',
+				inserts: 'The elements you create must be inserted into the page: list.append(row), quick.append(list).',
+				'text-content': 'Write the text of the links with textContent.',
+				'no-inner-html': 'Remove innerHTML, outerHTML, insertAdjacentHTML and document.write: text has to go in through textContent.',
+				'empty-state': 'You need a check for an empty list: if (cards.length === 0) { … }. Write the message for the visitor into #quick through textContent.',
+				'semantic-list': 'The navigation must be a real list: create a ul (or an ol) and li elements with createElement.',
+				anchors: 'Give every card an id (card.id = item- plus the number), and give the link an href that points at that id: link.href = # plus card.id.'
+			},
+			outro: 'The page now builds its own navigation from whatever is on it. Add a fifth card to the markup and a fifth link will appear in the list: the script doesn’t need to know about it in advance.'
+		},
+		say: {
+			DOM: 'dom',
+			querySelector: 'query selector',
+			querySelectorAll: 'query selector all',
+			createElement: 'create element',
+			textContent: 'text content',
+			innerHTML: 'inner H T M L',
+			XSS: 'X S S',
+			append: 'append',
+			NodeList: 'node list',
+			jQuery: 'j query',
+			WHATWG: 'what W G',
+			null: 'null'
+		}
+	};
+</script>
+
+<script>
+	import DomTree from '../../diagrams/DomTree.svelte';
+</script>
+
+## A page you can touch
+
+In the lesson on rendering you saw that the browser reads HTML and builds a **DOM** (Document Object Model) from it: a tree in which every tag, every piece of text and every attribute becomes a node. The page on screen is drawn from this tree. What matters for us: the browser hands the tree to JavaScript. In a script it is available under the name `document`, and whatever the script changes in it, the browser redraws at once.
+
+Every kind of interactivity works this way: a menu opens because a script removed the `hidden` attribute from an element; a counter grows because a script wrote a new number into an element; a list appears because a script created an element for each item and put it on the page. Three actions: **find**, **read or change**, **create and insert**.
+
+## Finding an element
+
+The language has two commands for searching, and they take the same **selectors** you wrote in CSS: `h3`, `.card`, `#offer`, `nav a`.
+
+```js
+const first = document.querySelector('.card');          // the first match, or null
+const all = document.querySelectorAll('#offer .card');  // every match
+```
+
+`querySelector` returns one element, or `null` if nothing was found. `querySelectorAll` returns a **list** of nodes (a `NodeList`), possibly empty. You can walk it with `forEach` or `for...of`, and to use `map` and `filter` you turn it into an array: `Array.from(all)`.
+
+From a found element you can search further: `card.querySelector('h3')` looks only inside that card. That lets you write shorter selectors, and the script comes out tidier.
+
+Try selectors on a small page, and what you find is highlighted in both the markup and the tree:
+
+<DomTree />
+
+<details>
+<summary>Check yourself: what does querySelector return if there is no such element?</summary>
+
+`null`. So when an element may be missing, check the result, or the next line, such as `el.textContent = ...`, will fail with an error.
+
+</details>
+
+## Reading and changing
+
+Once an element is found, it has properties and methods:
+
+- `textContent` reads and writes the element’s **text**: `title.textContent = 'New title'`;
+- `getAttribute('href')` and `setAttribute('href', '#top')` work with attributes. Many attributes also have short properties: `link.href`, `input.value`, `el.id`, `el.hidden`;
+- `classList.add('selected')`, `classList.remove('selected')` and `classList.toggle('selected')` manage classes. This is the best way to change how something looks: the script attaches a class, and CSS knows what to do with it. The styling stays in CSS and the logic in JS;
+- `dataset` gives access to attributes like `data-price="1200"`: `card.dataset.price`. That is how markup passes its own data to a script.
+
+## Creating and inserting
+
+To add something new, you first create an element in memory, set it up, and only then put it in the tree:
+
+```js
+const row = document.createElement('li');   // not on the page yet
+row.textContent = 'A new item';
+list.append(row);                           // now it is
+```
+
+Other commands you will need: `prepend` (to the start), `remove()` (take an element away) and `replaceChildren(...)` (replace all the contents). If you insert many elements in a row, build them in memory and insert them with a single `append` with several arguments: the browser then doesn’t have to redraw the page after each one.
+
+## Why other people’s text must not go in through innerHTML
+
+There is a shorter way too: the `innerHTML` property. You write a string of markup into it, and the browser parses it:
+
+```js
+box.innerHTML = '<p>Hello, ' + name + '</p>';
+```
+
+It looks convenient, but if `name` came from a visitor (from a form field, a comment, a server’s answer, the page’s address), it may not be a name at all, but markup with an event handler. The browser sees no difference between “your” markup and “someone else’s”: it parses everything and runs the stranger’s code in the name of your site. This vulnerability is called **XSS** (cross-site scripting). It is how sessions are stolen and pages are replaced.
+
+The rule is simple: **other people’s text goes in through `textContent`**. It writes the string as text, the characters `<` and `>` stay ordinary letters, and nothing runs. Keep `innerHTML` for markup that you wrote in full yourself.
+
+Try the same string both ways:
+
+<DomTree mode="inject" />
+
+## When a script runs
+
+A mistake everyone trips over: a script looks for an element, and it isn’t there yet. An ordinary `<script>` stops the parsing of the page and runs at once, so everything lower in the document is still invisible to it. There are three ways out: put the script at the very end of the page, give it the `defer` attribute, or make it a module, as in our editor (`type="module"`). A module runs after the page is parsed, and you can search for anything in it.
+
+## Practice
+
+A 2014 site. You already have a list of cards, but on a long page they can’t all be seen on the first screen. Let a script build a **quick jump** from the cards: a link to every offer at the top of the section, plus a counter.
+
+The script invents nothing, it reads what is in the markup: it finds the cards, takes the heading of each and makes a link to it. Add one more card to the markup, and a link appears by itself. And if there are no cards, the visitor sees a clear message rather than an empty space.
+
+Notice what is missing from the task: the word `innerHTML`. A card’s heading can contain anything, so everything goes through `textContent`.
+
+## What was wrong with the old DOM
+
+There was a time when the DOM differed from browser to browser: Internet Explorer had some methods, Netscape had others, and `document.all` and `document.layers` had to be guessed at. A standard appeared in the late 1990s, and the browsers were slow to follow it. That confusion is why the **jQuery** library was born in 2006: one function, `$('.card')`, that worked the same in every browser. Millions of sites were built on it, and many still run on it, so if you read someone else’s code and see a dollar sign, you are looking at jQuery.
+
+Today browsers behave alike, the standard is called the DOM Standard (WHATWG), and `querySelector`, `classList` and `append` do the jobs for which a library used to be added. New sites don’t need jQuery: it weighs tens of kilobytes and solves problems that no longer exist. What stayed right is something else: find elements with selectors, change classes rather than styles, and never trust other people’s text.
