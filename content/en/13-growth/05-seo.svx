@@ -1,0 +1,357 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/05-seo.svx. */
+	export const metadata = {
+		id: '13-growth/05-seo',
+		part: 13,
+		order: 5,
+		title: 'SEO: crawling, indexing, ranking',
+		definition: 'SEO is work so that a search engine finds, understands and shows pages to those they help. It works in three steps: crawling, indexing, ranking.',
+		summary:
+			'You’ll understand how a search engine finds a page, remembers it and decides whom to show it to, and do what depends on the site: a unique title and description for each section, one top-level heading, a canonical address. Afterwards you have a passport for every page of the project and a plan for connecting Google Search Console and Bing Webmaster Tools.',
+		minutes: 30,
+		teaches: ['growth-seo-crawl-index-rank', 'growth-yandex-vs-google', 'growth-seo-content-links'],
+		requires: ['net-http-status-headers', 'html-head-meta', 'html-semantic-elements', 'texts-headlines'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'robot|index|results', caption: 'The search engine’s three steps', say: 'A robot finds and downloads the page, the engine understands and stores it, then it decides whom to show it to.' },
+				{ mood: 'hint', side: 'right', prop: 'browser', label: 'one intent', say: 'What does the person really want? One page is written for one intent, instead of answering everything at once.' },
+				{ mood: 'hmm', prop: 'sheet', label: 'guaranteed #1', caption: 'False promises', say: 'Only the search engines know how much each factor weighs. Don’t believe anyone who guarantees first place.' }
+			]
+		},
+		practice: {
+			id: 'seo-passports',
+			title: 'Page passports and the head of the home page',
+			task: 'Prepare the page for search. 1) In the head of the home page: a title of up to 60 characters with the project’s name, a description of 50 to 160 characters, a canonical address (full, with https://) and, if the brief includes Russian, a pair of hreflang links for en and ru. The page has one top-level heading. 2) In the “Page passports” table, for each section from the brief: an address (starting with /, in Latin letters), a title (10 to 60 characters, with the section’s name in it) and a description (50 to 160 characters). 3) Write how you’ll connect the site to Google Search Console and Bing Webmaster Tools (the way you verify ownership), and which query the home page is written for. Every “…” has to be replaced.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>{{name}}</h1>
+    <h1>{{profession}}</h1>
+    <p>{{who}}</p>
+    <p><a href="#action">{{mainAction.label}}</a></p>
+
+    <aside class="note" data-scaffold id="seo">
+      <h2>Page passports</h2>
+      <table id="pages">
+        <tr><th>Section</th><th>Address</th><th>Title</th><th>Description</th></tr>
+        {{#each sections}}<tr class="page">
+          <td class="p-section">{{.}}</td>
+          <td class="p-path">…</td>
+          <td class="p-title">…</td>
+          <td class="p-desc">…</td>
+        </tr>
+        {{/each}}
+      </table>
+      <p>Connecting to Search Console and Bing Webmaster Tools: <span id="verify">…</span></p>
+      <p>The query the home page is written for: <span id="query">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: project website</title>
+    <meta name="description" content="{{who}}. Who it is for: {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <link rel="alternate" hreflang="en" href="https://riverbend.example/">
+    <link rel="alternate" hreflang="ru" href="https://riverbend.example/ru/">
+  </head>
+  <body>
+    <h1>{{name}}</h1>
+    <p>{{profession}}</p>
+    <p>{{who}}</p>
+    <p><a href="#action">{{mainAction.label}}</a></p>
+
+    <aside class="note" data-scaffold id="seo">
+      <h2>Page passports</h2>
+      <table id="pages">
+        <tr><th>Section</th><th>Address</th><th>Title</th><th>Description</th></tr>
+        {{#each sections}}<tr class="page">
+          <td class="p-section">{{.}}</td>
+          <td class="p-path">/section/</td>
+          <td class="p-title">{{.}}: {{name}}</td>
+          <td class="p-desc">The “{{.}}” section of the project’s website: what you can learn here and how to take the next step.</td>
+        </tr>
+        {{/each}}
+      </table>
+      <p>Connecting to Search Console and Bing Webmaster Tools: <span id="verify">I’ll add the site to Google Search Console and Bing Webmaster Tools and verify ownership with a meta tag in the head of the home page, then submit the sitemap</span></p>
+      <p>The query the home page is written for: <span id="query">how to find a specialist near me</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#seo', matches: '^[^…]*$' },
+				{ id: 'title', kind: 'text', selector: 'title', matches: '^\\s*\\S[\\s\\S]{8,58}\\S\\s*$' },
+				{ id: 'title-name', kind: 'field', selector: 'title', field: 'name' },
+				{ id: 'description', kind: 'attr', selector: 'meta[name="description"]', name: 'content', matches: '^\\s*\\S[\\s\\S]{48,158}\\S\\s*$' },
+				{ id: 'canonical', kind: 'attr', selector: 'link[rel="canonical"]', name: 'href', matches: '^https://\\S+' },
+				{ id: 'hreflang', kind: 'count', selector: 'link[rel="alternate"][hreflang]', min: 2, when: { brief: 'languages', contains: 'ru' } },
+				{ id: 'one-h1', kind: 'count', selector: 'h1', min: 1, max: 1 },
+				{ id: 'pages', kind: 'count', selector: '#pages tr.page', min: { brief: 'sections' } },
+				{ id: 'path', kind: 'text', selector: '#pages .p-path', matches: '^\\s*/[a-z0-9/_-]*\\s*$' },
+				{ id: 'page-title', kind: 'text', selector: '#pages .p-title', matches: '^\\s*\\S[\\s\\S]{8,58}\\S\\s*$' },
+				{ id: 'page-topics', kind: 'field', selector: '#pages .p-title', field: 'sections' },
+				{ id: 'page-desc', kind: 'text', selector: '#pages .p-desc', matches: '^\\s*\\S[\\s\\S]{48,158}\\S\\s*$' },
+				{ id: 'verify', kind: 'text', selector: '#verify', matches: '^(?=[\\s\\S]*Search Console)(?=[\\s\\S]*Bing)[\\s\\S]*\\S' },
+				{ id: 'query', kind: 'text', selector: '#query', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the search engine’s steps in order',
+				items: [
+					'A robot finds an address by a link or in the sitemap',
+					'The robot downloads the page (crawling)',
+					'The engine analyzes the page and records it in the index',
+					'For a person’s query the engine picks pages from the index',
+					'The engine puts them in order: ranking'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each stage with what can go wrong at it',
+				pairs: [
+					['Crawling', 'The robot was kept out (robots.txt, a server error), or no link leads to the page'],
+					['Indexing', 'The page was crawled, but the engine decided not to keep it: a duplicate, empty, noindex'],
+					['Ranking', 'The page is in the index, but for the query it is placed lower than others'],
+					['Display', 'The title and description in the results don’t tempt anyone to click']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the “search intent” of a query mean?',
+				options: [
+					'What the person really wants: to find out, to choose, to do or to find a place',
+					'How many times a month the query is typed',
+					'How many words the query has'
+				],
+				answer: 0,
+				why: [
+					'Yes. The same words can mean different things: “boundary survey cost” is an intent to act, “what is a boundary survey” an intent to learn. The page has to match the intent.',
+					'That is the query’s volume, a different measure.',
+					'The length of a query is not its intent.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these mostly depend on you, not on the search engine?',
+				options: [
+					'That the robot isn’t shut out of a section you need',
+					'That a page has a clear title and its own description',
+					'That the content answers the person’s question',
+					'That you are put in first place'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: if the robot is kept out, the rest is in vain.',
+					'Yes: the title and description are yours, and they decide whether the person clicks.',
+					'Yes: usefulness of content is the main thing you control.',
+					'No: the engine decides the place. Any “guarantee of first place” is deceit.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You are offered a “guaranteed top 1 in a month”. What does it mean?',
+				options: [
+					'A promise nobody may give: the engine decides the places, not the contractor',
+					'A good sign of professionalism',
+					'All honest agencies do it'
+				],
+				answer: 0,
+				why: [
+					'Yes. Google says plainly that no one can guarantee a number-one ranking. Honest specialists promise work, not a result.',
+					'On the contrary: it is one of the signs that you should look for another contractor.',
+					'Honest agencies promise work done and measurable steps, never a position.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which statement about Google, Bing and Yandex is right?',
+				options: [
+					'All three crawl, index and rank on the same basics, but each has its own index, tools and details, so you verify the site in each one that matters to your audience',
+					'They are one and the same search',
+					'Yandex searches only Russian sites and Google only English ones'
+				],
+				answer: 0,
+				why: [
+					'Yes. The common part: robots, an index, ranking. The differences are in details, tools and regional strength (Yandex is strong in Russia, Bing’s index also feeds other products). Verify the site where your people search.',
+					'No: separate indexes, separate rules and separate consoles (Search Console, Bing Webmaster Tools, Yandex Webmaster).',
+					'No: all of them search any sites in any languages.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-crawl-index-rank',
+				front: 'The search engine’s three steps?',
+				back: 'Crawling (a robot finds and downloads the page), indexing (the engine analyzes it and records it in a database), ranking (for a query it picks and orders pages from the database).'
+			},
+			{
+				id: 'growth-search-intent',
+				front: 'What is search intent?',
+				back: 'What the person really wants: to find out, to choose, to do or to find a place. A page should answer that, not just the words of the query.'
+			},
+			{
+				id: 'growth-title-description',
+				front: 'What are the title and description for?',
+				back: 'The title is the page’s headline in the results (about 60 characters show), the description is the text under it (about 155 to 160). Each should be unique to the page and describe it honestly.'
+			},
+			{
+				id: 'growth-yandex-google',
+				front: 'Google, Bing and Yandex: what do they share and how do they differ?',
+				back: 'Shared: crawling, an index, ranking, the same basics. Different: each has its own index, rules and console (Search Console, Bing Webmaster Tools, Yandex Webmaster), and Yandex is strongly regional in Russia. Verify the site in each one your audience uses.'
+			},
+			{
+				id: 'growth-eeat',
+				front: 'What is E-E-A-T and why does it matter to an expert?',
+				back: 'Experience, expertise, authoritativeness, trust: the criteria by which Google asks its raters to judge quality. For topics of law, health and money (YMYL) the bar is higher: you need an author, qualifications and verifiable facts.'
+			}
+		],
+		sources: [
+			{ title: 'Google Search Central: SEO Starter Guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: In-depth guide to how Google Search works', url: 'https://developers.google.com/search/docs/fundamentals/how-search-works', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Creating helpful, reliable, people-first content', url: 'https://developers.google.com/search/docs/fundamentals/creating-helpful-content', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Do you need an SEO?', url: 'https://developers.google.com/search/docs/fundamentals/do-i-need-seo', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Spam policies for Google web search', url: 'https://developers.google.com/search/docs/essentials/spam-policies', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Bing Webmaster Guidelines', url: 'https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'MDN Glossary: SEO', url: 'https://developer.mozilla.org/en-US/docs/Glossary/SEO', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Search engine optimization (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Search_engine_optimization', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Yandex Webmaster: site indexing (English, for the Russian market)', url: 'https://yandex.ru/support/webmaster/en/recommendations/indexing', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A search engine doesn’t know you until you explain. The title and description are the first explanation it (and the person in the results) will read.',
+			hints: [
+				'The home page must have one h1. The starter has two: remove the extra one or change it to another tag.',
+				'Make the title: the project’s name, a colon, what you do. No longer than 60 characters. Write the description in 50 to 160 characters so that it’s clear why to click.',
+				'In the passport table each section has its own address (in Latin letters, starting with /), its own title with the section’s name and its own description.',
+				'For the connection, write that you’ll add the site to Google Search Console and Bing Webmaster Tools and how you’ll verify ownership (a meta tag, a file or a DNS record).'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the addresses, titles, descriptions and the two texts below.',
+				title: 'The title of the home page must be 10 to 60 characters long.',
+				'title-name': 'The title of the home page must contain the project’s name (the “name” field of the brief).',
+				description: 'The head needs a description meta tag of 50 to 160 characters.',
+				canonical: 'You need a canonical link with a full address beginning with https://.',
+				hreflang: 'The brief includes Russian: add two alternate links with hreflang, for en and ru.',
+				'one-h1': 'The page must have exactly one h1.',
+				pages: 'The table needs a row for every section from the brief.',
+				path: 'An address is written in Latin letters, begins with / and has no spaces: for example /services/.',
+				'page-title': 'A page’s title must be 10 to 60 characters long.',
+				'page-topics': 'Each page’s title must contain the name of its section from the brief.',
+				'page-desc': 'A page’s description must be 50 to 160 characters long.',
+				verify: 'In the description of the connection name both Google Search Console and Bing Webmaster Tools.',
+				query: 'Write the query in at least three words: as a person would type it.'
+			},
+			outro: 'Now every page of yours has a passport for search. Next we’ll make it easy for the robot to move around the site: robots.txt, the sitemap and markup.'
+		},
+		say: { SEO: 'S E O', title: 'title', description: 'description', Google: 'google', Bing: 'bing', Yandex: 'yan-dex', 'Search Console': 'search console', 'E-E-A-T': 'E E A T', YMYL: 'Y M Y L', hreflang: 'H ref lang', PageRank: 'page rank' }
+	};
+</script>
+
+<script>
+	import IntentSorter from '../../diagrams/IntentSorter.svelte';
+</script>
+
+## How people find you when they don’t know you yet
+
+In the earlier lessons you drew people in yourself, with emails and posts. But a huge number of those who need you don’t know you and expect nothing. They type a question into a search box. **SEO** (search engine optimization) is work so that a search engine **finds, understands and shows** your pages to those they help. It isn’t magic or hacking: it is a careful explanation to the engine of what your page is about, and honest work to make the page truly useful.
+
+**Where it comes from.** The first search engines (Archie, AltaVista) appeared in the 1990s. In 1998 the Stanford students Sergey Brin and Larry Page described the **PageRank** algorithm in a paper and founded Google: their idea was that a page is important if important pages link to it. SEO as a profession grew from site owners quickly realizing that the flow of visitors depends on the place in the results. That gave rise both to honest work and to the deceit discussed below. Bing, the second large engine in English-speaking countries, also supplies results to other search products, DuckDuckGo and Yahoo among them. In Russia the search engine Yandex has been the main alternative since 1997.
+
+## The search engine’s three steps
+
+A search engine works in three stages. It is very useful to keep them apart, because each has its own causes of failure.
+
+1. **Crawling.** A program called a **robot** travels the web following links and downloads pages. It can find a page by a link from another page, or by a list of addresses you give it yourself (a sitemap). Google’s robot is called Googlebot, Bing’s is Bingbot. If the robot is kept out or the server answers with an error (you studied HTTP status codes in the part on the internet), the page goes no further.
+2. **Indexing.** The engine analyzes the downloaded page: the text, headings, images, links, language, what is for what. Then it decides whether to record it in the **index**, the huge database from which it answers queries. It may decline: the page is empty, duplicates another, is closed by a noindex directive, or is judged low in quality.
+3. **Ranking.** When a person types a query, the engine picks suitable pages from the index and **orders** them. How exactly, nobody outside knows: there are hundreds of factors, their weights are secret and change. The direction is known: how well the page answers the query, how useful and reliable it is, how fast and easy it is to open, and whether others link to it.
+
+And a fourth, often forgotten: **display**. In the results the person sees a headline and a short description. They decide whether the person clicks. Here you have direct influence through the title and description (you met them in the lesson on the head and meta tags).
+
+<details>
+<summary>Check yourself: the page is on your site, but the search engine doesn’t show it. At which three stages could this have happened?</summary>
+
+At crawling (the robot didn’t find it or couldn’t download it), at indexing (it downloaded but didn’t record it in the index) and at ranking (it is in the index but stands too low for the queries). The first two can be checked in Search Console or Bing Webmaster Tools.
+
+</details>
+
+## What the person really wants
+
+A search engine tries to give the person what they need. So the main thing to understand about a query is its **intent**: what the person really wants. Four typical intents: **to find out** (how to find the boundary of my lot), **to choose** (how a boundary survey differs from a topographic survey), **to do** (order a boundary survey, learn the price) and **to find a specific place** (a land surveyor, a phone number, an address). You have met them in another form: they are the See, Think and Do stages from the lesson on the funnel, and the pages for them differ: an article, a comparison, a service page, contacts.
+
+Label a few queries in the diagram. Notice that one of them is honestly ambiguous: a query doesn’t always have a single intent.
+
+<IntentSorter />
+
+The practical conclusion: **one page is written for one intent**. Don’t try to answer both “what is a boundary survey” and “boundary survey cost” on one page: the person with the first query needs an article, the one with the second needs a price and a form. For each page write down the query it is written for, and write for the person who typed it.
+
+## What depends on you at each step
+
+- **Crawling.** You don’t shut out of the robot what is needed, you link pages to each other, you provide a sitemap, you make sure the server answers without errors.
+- **Indexing.** Each page answers its own question and doesn’t duplicate another, service pages are kept out of the index, and the text makes sense.
+- **Ranking.** You answer the question better than others, you show the author and the evidence, you make the site fast and comfortable on a phone.
+- **Display.** You write a title and description that honestly describe the page and that people want to click.
+
+The first two steps you’ll set up in the next lesson (robots.txt, the sitemap, canonical addresses, noindex). For now let’s deal with what the person and the search engine see on the page itself.
+
+## Title, description, headings
+
+- **Title** (in the head). The page’s headline in the results; about 60 characters show. It holds **the page’s topic and the project’s name**, not “Home”: the word “home” tells neither a person nor a robot anything. Each page has its own.
+- **Description** (a meta tag in the head). The text under the headline; about 155 to 160 characters show. It isn’t a “magic” factor: the engine may show its own text instead of yours. But a good description raises the share of clicks. Write so that it’s clear what is on the page and why to click.
+- **The top-level heading (h1).** One per page, matching the title in meaning. Second and third level headings divide the text into parts (you studied the structure in the lesson on document headings).
+- **The address (URL).** Short, in Latin letters, clear: `/services/boundary-survey/`, not `/p?id=482`.
+
+## Google, Bing and Yandex: what they share and how they differ
+
+They share more than divides them: all of them crawl, index and rank, and the basics are the same. Differences that matter to a site:
+
+- **Tools.** Google Search Console, Bing Webmaster Tools and, for Russia, Yandex Webmaster. In each you verify ownership of the site, submit a sitemap, see which pages are indexed and receive messages about errors. Connect the ones your audience uses, because you need to see each side. Bing Webmaster Tools can import a site from Search Console, so the second connection is quick.
+- **Region.** Yandex ties the results more strongly to the region of the person and of the site, which matters for a local business in Russia. Google and Bing also have local search, built differently (more in the lesson on local SEO).
+- **Directives.** In robots.txt Yandex has directives Google doesn’t, for example `Clean-param` (for addresses with parameters). Most of the main directives are common, and a common standard describes them (RFC 9309).
+- **Mobile and speed.** Google has long indexed the mobile version of a page first. Bing and Yandex also take into account how a page looks and works on a phone.
+- **Answers from AI.** All of them show generated answers above the ordinary results. That has a lesson of its own.
+
+What **no one knows except the search engines themselves**: how much each factor weighs. Anyone who claims to know the exact formula is deceiving or mistaken. So a reliable strategy isn’t guessing the factors but working on what the engines themselves publicly advise: useful content, a clear site, honest methods.
+
+## Content and links
+
+**Content.** In its guidance Google describes “helpful, reliable, people-first content”, written for people, not for search engines. In practice that means:
+
+- It answers the question and does so first (the inverted pyramid from the lesson on text structure).
+- It is written by someone who knows the subject, and it shows: **the author is named**, with qualifications and evidence. Google calls this E-E-A-T (experience, expertise, authoritativeness, trust), and topics on which a person’s health, money and rights depend “YMYL” (Your Money or Your Life): the bar for them is higher. Property law is exactly such a topic.
+- It doesn’t repeat what has been said a hundred times but gives something of its own: your experience, examples, your own numbers.
+- It isn’t stuffed with keywords. A text written “for the robot” (“cheap boundary survey boundary survey cost boundary survey Riverbend”) a person won’t read, and search engines have long recognized it.
+
+**Links.** The idea of PageRank is that a link to your page from another site is a kind of recommendation. Good links (people link to you because you are useful) still help. But:
+
+- **Bought links** break the rules of Google and Bing and can lead to demotion. Don’t buy them.
+- **Internal links** (between your own pages) are entirely in your power: they help the robot find pages and the person go on. In a link write words that say where it leads, not “click here”.
+- **An honest link** is one placed because someone found something useful at your site: a mention in a professional community, in an article, in a directory.
+
+**False promises.** You’ll be offered “guaranteed first place”, “promotion in a week”, “thousands of links”. Remember that the search engine determines the result, not the contractor. Google itself says no one can guarantee a number-one ranking, and advises you to look for someone else if an SEO guarantees first place. An honest contractor promises work (a technical audit, fixes, texts) and measurable steps, never a position.
+
+## Practice
+
+Prepare the page and the passports.
+
+1. **The head of the home page.** A title of up to 60 characters with the project’s name, a description of 50 to 160 characters, a canonical address and (if the brief includes Russian) hreflang. One h1.
+2. **Page passports.** For each section from the brief: an address, a title and a description. The title has the section’s name.
+3. **The connection.** How you’ll verify ownership in Google Search Console and Bing Webmaster Tools, and which query the home page is written for.
+
+The check looks at lengths, the project’s name, addresses and that all sections are present. Whether the descriptions are good in meaning is for you to decide: read each title and description as if you had seen it in the results. Would you click?

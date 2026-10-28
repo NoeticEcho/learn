@@ -1,0 +1,426 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/06-technical-seo.svx. */
+	export const metadata = {
+		id: '13-growth/06-technical-seo',
+		part: 13,
+		order: 6,
+		title: 'Technical SEO and JSON-LD markup',
+		definition: 'Technical SEO is setting up a site for the search robot: robots.txt, sitemap.xml, canonical addresses, noindex. JSON-LD markup says what a page is about.',
+		summary:
+			'You’ll make the site easy for a robot: robots.txt, a sitemap, canonical addresses, noindex for service pages, and tell the search engine what a page is about with schema.org markup in JSON-LD. Afterwards you have robots.txt and sitemap.xml files ready, a list of pages kept out of the index, and a JSON-LD block with your project’s data.',
+		minutes: 30,
+		teaches: ['growth-technical-seo', 'growth-structured-data'],
+		requires: ['growth-seo-crawl-index-rank', 'html-lang-i18n'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'Disallow: /', caption: 'One line', say: 'This line in robots.txt shuts the whole site off from robots. After every edit, check the file again.' },
+				{ mood: 'explain', side: 'right', prop: 'lock', label: 'not a lock', say: 'robots.txt is a request, not a lock. It is public, so list no secrets in it. Secrets are closed with a password.' },
+				{ mood: 'hint', prop: 'browser', label: 'noindex', caption: 'A trap', say: 'To read noindex, the robot must open the page. Block it in robots.txt as well and it will never see the tag.' },
+				{ mood: 'cheer', side: 'right', prop: 'sheet', label: 'JSON-LD', caption: 'Markup', say: 'Mark up what is visible on the page. Opening hours that aren’t there don’t go into the markup.' }
+			]
+		},
+		practice: {
+			id: 'robots-sitemap-jsonld',
+			title: 'robots.txt, sitemap.xml, noindex and JSON-LD',
+			task: 'Prepare the technical parts of the site. 1) robots.txt in the “Files for the robot” block: a User-agent line, only service sections blocked (not the whole site: Disallow: / is forbidden) and a Sitemap line with a full https:// address. 2) The addresses for sitemap.xml: one full address for each section from the brief, and the sitemap.xml file itself with urlset and loc tags. 3) What to keep out of the index: at least two service pages (for example “Thank you” and the customer account) with the address and the method; at least one closed through noindex. 4) In the page’s head, a JSON-LD block with the schema.org @context, a @type, the project’s name and address, and a contact (a phone or email from the brief). Every “…” has to be replaced.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: project website</title>
+    <meta name="description" content="{{who}}. Who it is for: {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <script type="application/ld+json">…<\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <ul>
+        {{#each sections}}<li>{{.}}</li>
+        {{/each}}
+      </ul>
+    </main>
+
+    <aside class="note" data-scaffold id="tech">
+      <h2>Files for the robot</h2>
+      <pre id="robots">…</pre>
+
+      <h3>Addresses for sitemap.xml</h3>
+      <ol id="urls">
+        {{#each sections}}<li class="loc">…</li>
+        {{/each}}
+      </ol>
+      <pre id="sitemap">…</pre>
+
+      <h3>What to keep out of the index</h3>
+      <ul id="closed">
+        <li class="closed"><span class="c-path">…</span>: <span class="c-how">…</span></li>
+        <li class="closed"><span class="c-path">…</span>: <span class="c-how">…</span></li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: project website</title>
+    <meta name="description" content="{{who}}. Who it is for: {{forWhom}}.">
+    <link rel="canonical" href="https://riverbend.example/">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "{{name}}",
+      "url": "https://riverbend.example/",
+      "description": "{{who}}",
+      "email": "{{email}}",
+      "telephone": "{{phone}}"
+    }
+    <\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <ul>
+        {{#each sections}}<li>{{.}}</li>
+        {{/each}}
+      </ul>
+    </main>
+
+    <aside class="note" data-scaffold id="tech">
+      <h2>Files for the robot</h2>
+      <pre id="robots">User-agent: *
+Disallow: /account/
+Sitemap: https://riverbend.example/sitemap.xml</pre>
+
+      <h3>Addresses for sitemap.xml</h3>
+      <ol id="urls">
+        {{#each sections}}<li class="loc">https://riverbend.example/section/</li>
+        {{/each}}
+      </ol>
+      <pre id="sitemap">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;&lt;loc&gt;https://riverbend.example/&lt;/loc&gt;&lt;lastmod&gt;2026-10-27&lt;/lastmod&gt;&lt;/url&gt;
+  &lt;url&gt;&lt;loc&gt;https://riverbend.example/section/&lt;/loc&gt;&lt;lastmod&gt;2026-10-27&lt;/lastmod&gt;&lt;/url&gt;
+&lt;/urlset&gt;</pre>
+
+      <h3>What to keep out of the index</h3>
+      <ul id="closed">
+        <li class="closed"><span class="c-path">/thank-you/</span>: <span class="c-how">noindex in a meta tag, the page stays open to the robot</span></li>
+        <li class="closed"><span class="c-path">/account/</span>: <span class="c-how">sign-in with a password and Disallow in robots.txt</span></li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#tech', matches: '^[^…]*$' },
+				{ id: 'ld-context', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"@context"\\s*:\\s*"https?://schema\\.org/?"' },
+				{ id: 'ld-type', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"@type"\\s*:\\s*"[A-Z][A-Za-z]+"' },
+				{ id: 'ld-name', kind: 'field', selector: 'script[type="application/ld+json"]', field: 'name' },
+				{ id: 'ld-url', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"url"\\s*:\\s*"https://\\S+"' },
+				{ id: 'ld-contact', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"(?:telephone|email)"\\s*:\\s*"\\S[^"]+"' },
+				{ id: 'robots-agent', kind: 'text', selector: '#robots', matches: 'User-agent:\\s*\\S+' },
+				{ id: 'robots-open', kind: 'text', selector: '#robots', matches: '^(?![\\s\\S]*Disallow:\\s*/\\s*(?:\\n|$))[\\s\\S]*\\S' },
+				{ id: 'robots-sitemap', kind: 'text', selector: '#robots', matches: 'Sitemap:\\s*https://\\S+' },
+				{ id: 'urls', kind: 'count', selector: '#urls li.loc', min: { brief: 'sections' } },
+				{ id: 'url-form', kind: 'text', selector: '#urls li.loc', matches: '^\\s*https://\\S+\\s*$' },
+				{ id: 'sitemap-xml', kind: 'text', selector: '#sitemap', matches: '<urlset[\\s\\S]*<loc>https://\\S+</loc>[\\s\\S]*</urlset>' },
+				{ id: 'closed', kind: 'count', selector: '#closed li.closed', min: 2 },
+				{ id: 'closed-path', kind: 'text', selector: '#closed .c-path', matches: '^\\s*/[a-z0-9/_-]*\\s*$' },
+				{ id: 'noindex', kind: 'text', selector: '#closed .c-how', matches: 'noindex' },
+				{ id: 'canonical', kind: 'attr', selector: 'link[rel="canonical"]', name: 'href', matches: '^https://\\S+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each tool with its job',
+				pairs: [
+					['robots.txt', 'Tell the robot where it may go and where it need not'],
+					['sitemap.xml', 'Give the robot a list of the addresses you want shown'],
+					['A canonical link', 'Say which of several similar addresses counts as the main one'],
+					['noindex', 'Ask that the page not be recorded in the index']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You blocked the “Thank you” page both in robots.txt (Disallow) and with a noindex tag. What will happen?',
+				options: [
+					'The robot won’t open the page and won’t see noindex; the address may still appear in results if others link to it',
+					'The page will reliably vanish from search',
+					'Nothing changes: both rules are ignored'
+				],
+				answer: 0,
+				why: [
+					'Yes. To see noindex the robot has to open the page. So for pages that must stay out of search, leave access open in robots.txt and set noindex. robots.txt controls access, not display.',
+					'That is exactly what will not happen: robots.txt and noindex get in each other’s way.',
+					'The rules are taken into account, but differently, and together they don’t reinforce but hinder each other.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can be said about robots.txt?',
+				options: [
+					'Honest search robots read it, but an attacker can ignore it',
+					'It lives at /robots.txt at the root of the site',
+					'The file is public: anyone can read it, so secret addresses can’t be hidden there',
+					'It reliably protects closed information from everyone'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: it is a request, not protection (RFC 9309 says so itself).',
+					'Yes: the file’s address is one and always the same.',
+					'Yes: by listing secret sections in it you tell everyone about them. Close them with a password.',
+					'No: protection takes a password and access rights on the server.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The same page is available at http://, https://, with www and without. What do you do?',
+				options: [
+					'Choose one main version, redirect the others with a 301 and point canonical to the main one',
+					'Keep all four: the more addresses, the better',
+					'Block three of the versions in robots.txt'
+				],
+				answer: 0,
+				why: [
+					'Yes. One address for one page. A redirect moves people and the robot, canonical tells the engine the main version.',
+					'Those are duplicates: strength is split among them, and the engine picks which to show.',
+					'The robot won’t see that they are the same pages and won’t merge them; a redirect is more reliable.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What can be marked up with JSON-LD and schema.org?',
+				options: [
+					'What is really on the page and visible to a person: an organization, an address, opening hours, an event, a product',
+					'Any claim, even if the page says nothing about it',
+					'Only images'
+				],
+				answer: 0,
+				why: [
+					'Yes. Markup restates the visible content in a language a machine understands. Google requires outright that it match the page.',
+					'No: markup of what isn’t on the page breaks the rules and can lead to penalties.',
+					'No: people, organizations, events, products, articles and much else can be marked up.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the checks of a new site in order',
+				items: [
+					'Open /robots.txt and make sure nothing needed is blocked',
+					'Open /sitemap.xml and make sure all the needed addresses are there',
+					'Check that service pages have noindex and the main ones do not',
+					'Check the JSON-LD markup in a rich results test',
+					'Submit the sitemap to Google Search Console and Bing Webmaster Tools'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-robots-txt',
+				front: 'What does robots.txt do, and what doesn’t it do?',
+				back: 'It lives at the root of the site and asks robots not to go to the listed sections. It doesn’t protect information (honest robots read it) and doesn’t guarantee that the address won’t be shown.'
+			},
+			{
+				id: 'growth-sitemap',
+				front: 'What is sitemap.xml?',
+				back: 'A list of the site’s addresses in XML (the tags urlset, url, loc). It is a hint to the robot, not a command; one file holds up to 50,000 addresses.'
+			},
+			{
+				id: 'growth-canonical',
+				front: 'Why a canonical link?',
+				back: 'So that of several addresses of one page (http or https, with or without www, with parameters) the engine knows the main one. It is complemented by a 301 redirect.'
+			},
+			{
+				id: 'growth-noindex',
+				front: 'How do you keep a page out of search?',
+				back: 'Leave it open to the robot and set the robots meta tag to noindex. Don’t also block it in robots.txt, or the robot won’t see the tag.'
+			},
+			{
+				id: 'growth-jsonld',
+				front: 'What are JSON-LD and schema.org?',
+				back: 'schema.org is a vocabulary of types (Organization, Event, Product), JSON-LD a way to write the data as JSON inside a script in the head. The markup must restate what is visible on the page.'
+			}
+		],
+		sources: [
+			{ title: 'Google Search Central: Introduction to robots.txt', url: 'https://developers.google.com/search/docs/crawling-indexing/robots/intro', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Block Search indexing with noindex', url: 'https://developers.google.com/search/docs/crawling-indexing/block-indexing', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: What is a sitemap', url: 'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Consolidate duplicate URLs', url: 'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Intro to structured data markup', url: 'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Bing Webmaster Tools: Submit your sitemap', url: 'https://www.bing.com/webmasters/help/sitemaps-3b5cf6ed', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'RFC 9309: Robots Exclusion Protocol', url: 'https://www.rfc-editor.org/rfc/rfc9309', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'JSON-LD 1.1 (W3C Recommendation)', url: 'https://www.w3.org/TR/json-ld11/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Getting Started with schema.org using Microdata (schema.org)', url: 'https://schema.org/docs/gs.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Yandex Webmaster: using robots.txt (English, for the Russian market)', url: 'https://yandex.ru/support/webmaster/en/controlling-robot/robots-txt', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A robot doesn’t read minds: you need to tell it where to go, where not to go, and what is on the page. That is three small files and one block of markup.',
+			hints: [
+				'robots.txt begins with the line “User-agent: *”, then “Disallow:” only for service sections, then “Sitemap:” with a full address. A bare “Disallow: /” line must not be there: it closes the whole site.',
+				'In sitemap.xml each address goes in the url and loc tags, inside urlset. In the pre element write &lt; and &gt; in place of the angle brackets.',
+				'For the “Thank you” page write “noindex”. For the account you can write about a password and robots.txt.',
+				'JSON-LD is written as an object in curly braces: @context, @type, name, url, telephone or email, each value in double quotes.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in robots.txt, the addresses, the sitemap and the list of closed pages.',
+				'ld-context': 'The JSON-LD needs an @context of https://schema.org.',
+				'ld-type': 'The JSON-LD needs an @type with a type name starting with a capital letter: for example Organization.',
+				'ld-name': 'In the JSON-LD the name must match the project’s name from the brief.',
+				'ld-url': 'The JSON-LD needs a url with the full address of the site, starting with https://.',
+				'ld-contact': 'The JSON-LD needs a telephone or an email with a value in quotes.',
+				'robots-agent': 'robots.txt needs a User-agent line: for example “User-agent: *”.',
+				'robots-open': 'robots.txt contains “Disallow: /”, which closes the whole site. Close only the service sections.',
+				'robots-sitemap': 'robots.txt needs a “Sitemap:” line with a full address starting with https://.',
+				urls: 'There must be at least as many addresses as sections in the brief.',
+				'url-form': 'An address must be full: begin with https:// and contain no spaces.',
+				'sitemap-xml': 'sitemap.xml needs the urlset and loc tags with a full address. In the pre element write &lt; and &gt; for the angle brackets.',
+				closed: 'The list of closed pages needs at least two.',
+				'closed-path': 'The address of a closed page is written in Latin letters and begins with /.',
+				noindex: 'At least one service page must be closed through noindex.',
+				canonical: 'The head needs a canonical link with a full address on https://.'
+			},
+			outro: 'The site now has files for the robot and markup that says whose it is. Next we’ll look at how your site gets into the answers of AI.'
+		},
+		say: { robots: 'robots', sitemap: 'site map', noindex: 'no-index', canonical: 'canonical', 'JSON-LD': 'jay-son L D', 'schema.org': 'schema dot org', XML: 'X M L', URL: 'U R L', RFC: 'R F C' }
+	};
+</script>
+
+<script>
+	import SpiderGame from '../../diagrams/SpiderGame.svelte';
+</script>
+
+## First, get into the house
+
+In the last lesson you saw that a search engine goes through three steps: crawling, indexing and ranking. This lesson is about the first two. It is technical but not difficult: it comes down to three small files, one meta tag and one block of markup. If you get these wrong, nobody will see the best texts in the world. A common “surprise” of a new site is that during development the robots were shut out so as not to show a raw version, and after launch nobody remembered to open the door.
+
+## robots.txt: what the robot may do and need not do
+
+**What it is.** A text file that lives strictly at `/robots.txt` in the root of the site (`https://riverbend.example/robots.txt`). Honest search robots read it first and only then go around the site. The rules are written in groups: for which robot (`User-agent`), what is forbidden (`Disallow`) or allowed (`Allow`).
+
+```text
+User-agent: *
+Disallow: /account/
+Sitemap: https://riverbend.example/sitemap.xml
+```
+
+This says: all robots must keep out of the customer account section, and the sitemap is at such-and-such an address. The asterisk means “all”. For particular robots you can write separate groups (`User-agent: Googlebot`, `User-agent: Bingbot`).
+
+**Where it comes from.** The file was devised in 1994 by Martijn Koster for the early search engines, so that site owners could tell robots where not to go. For almost thirty years it was an informal agreement. Only in 2022 was it made a standard: RFC 9309, which is among the sources. Google and Bing support it, and each has its own additions (Yandex, for example, has `Clean-param` for addresses with parameters).
+
+**What robots.txt does not do.** This matters, because it is where people go wrong most often:
+
+- **It doesn’t protect.** It is a request, not a lock. Honest robots will obey, an attacker won’t. Close what is secret with a password and access rights on the server.
+- **It is public.** Anyone can open `/robots.txt`. If you list secret sections in it, you tell everyone about them.
+- **It controls access, not display.** If a page is blocked in robots.txt but other sites link to it, the engine may show a **bare address with no description**. To keep a page from being shown you need another tool: noindex.
+- **One mistake closes everything.** The line `Disallow: /` forbids the entire site. Check the file after every edit.
+
+## sitemap.xml: a list for the robot
+
+**What it is.** A file (most often `/sitemap.xml`) with a list of the addresses you want to show the search engine. The XML format is simple:
+
+```text
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://riverbend.example/</loc><lastmod>2026-10-27</lastmod></url>
+  <url><loc>https://riverbend.example/services/</loc><lastmod>2026-10-20</lastmod></url>
+</urlset>
+```
+
+Only `loc` is required. `lastmod` (the date of the last change) is useful if you give it honestly. The other tags (`priority`, `changefreq`) Google ignores. One file holds up to 50,000 addresses and 50 megabytes.
+
+**What to understand.** A sitemap is a **hint, not a command**: it helps the robot find pages (especially ones nothing links to) but doesn’t force indexing. Name it in robots.txt with a `Sitemap:` line and submit it in Search Console and Bing Webmaster Tools. Include only the pages you want: take out those closed by noindex or redirected.
+
+## The canonical page and duplicates
+
+One page is often available at several addresses: `http://` and `https://`, with `www` and without, with a slash at the end and without, with parameters (`?utm_source=...`, you know the tags from the lesson on social networks). For a search engine these are different pages with the same content: **duplicates**. They split the strength of links between them and confuse the engine.
+
+What to do:
+
+1. **One main version.** Choose: https, with www or without. Send the other versions to the main one with a **301 redirect** (you studied status codes in the part on HTTP: 301 means “moved permanently”).
+2. **`rel="canonical"`.** In the head of each page write `<link rel="canonical" href="https://riverbend.example/services/">`, and make the address full. It is a hint: “the main version of this page is this one”. A page may point to itself.
+3. **A uniform look of addresses.** Decide on the slash at the end and on lowercase letters, and stick to it.
+
+## noindex: how to keep a page out of search
+
+Not every page of a site is needed in search: the “Thank you” after a request, the customer account, internal search results, the cart. To keep the engine from storing them, put a meta tag in the head:
+
+```text
+<meta name="robots" content="noindex">
+```
+
+Or the same in the server’s response header (`X-Robots-Tag: noindex`) if the file isn’t HTML, a PDF for example.
+
+The main trap, which the diagram below shows: **for noindex the robot has to open the page**. If you blocked it in robots.txt, the robot won’t open it and won’t see the tag. So the rule is: pages that must not be in search should **stay open to the robot and carry noindex**. Keep robots.txt for sections the robot just has no need to visit (huge service directories), and don’t count on it for protection.
+
+And for a customer account you need a password sign-in: that is protection, while noindex is only a request not to show.
+
+## The spider game
+
+Open the diagram. It is an invented site of seven pages and the links between them. The robot begins at the home page and follows links. Block pages in robots.txt, set noindex, switch on a sitemap, and see what the robot finds, reads and remembers. The goal: the pages you need are reachable and in the index, the service ones stay out of the index, and no rule gets in another’s way.
+
+<SpiderGame />
+
+<details>
+<summary>Check yourself: what is the right way to keep the “Thank you” page out of search?</summary>
+
+Leave it open to the robot and put a noindex meta tag in the head. If you also block it in robots.txt, the robot won’t see the tag, and the address may still appear in results.
+
+</details>
+
+## Languages: hreflang
+
+For a site in several languages (the “languages” field of the brief), the head of each version names its “relatives” with `<link rel="alternate" hreflang="ru" href="...">` tags (you studied this in the part on HTML and page languages). There are three rules: each version links to **all** versions, itself included; addresses are **full**; and pages link to each other **both ways**. Then Google, Bing and Yandex show a person the page in their language instead of at random.
+
+## Markup: telling the search engine what a page is
+
+A search engine reads the text of a page and guesses what is what. The guesses are not always right: is “2026” a year or a price? Markup removes the question.
+
+**schema.org** is a shared vocabulary of types and properties: `Organization`, `Person`, `Event`, `Product`, `Article` and hundreds of others. It was created in 2011 by the biggest search engines (Google, Microsoft, Yahoo, joined by Yandex). **JSON-LD** is a way to write that data: as ordinary JSON inside a `script` tag of type `application/ld+json`. The JSON-LD standard was adopted by the W3C. Google recommends exactly this format, and Bing and Yandex also understand schema.org.
+
+```text
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Project name",
+  "url": "https://riverbend.example/",
+  "email": "hello@riverbend.example",
+  "telephone": "+1 555 000 0000"
+}
+</script>
+```
+
+What it gives: the engine is clearer about what the page is and who stands behind it; and for some types your page may get **rich** display in the results (a rating, a price, an event date). What it doesn’t give: guarantees. Google decides itself whether to show a rich result and changes over time which kinds it supports: see the current list in its documentation.
+
+**Rules of honest markup.**
+
+1. **Mark up what is visible on the page.** Opening hours that aren’t on the page can’t be given. False markup breaks Google’s rules and can lead to penalties.
+2. **Choose the type by what it is.** An expert is `Person` or `ProfessionalService`, a company `Organization`, a place `LocalBusiness` (the next lessons), a shop `Store` with `Product` items, a festival `Event`, a service `SoftwareApplication`.
+3. **Check it.** Google’s Rich Results Test and the Schema Markup Validator can be found by those names; they show syntax errors.
+4. **Don’t multiply.** One main entity per page, with the rest linked to it.
+
+## Practice
+
+Prepare the technical parts of the site.
+
+1. **robots.txt**: a User-agent line, only service sections blocked, a Sitemap line with a full address.
+2. **Addresses and sitemap.xml**: a full address for each section from the brief, and the file itself.
+3. **Pages kept out of the index**: at least two, at least one through noindex.
+4. **JSON-LD** in the head: `@context`, `@type`, the project’s name, address and a contact from the brief.
+
+The check looks at the form of the files and the markup block. Whether the type suits your project is for you to decide: open schema.org and find a type that describes you more precisely than Organization.
