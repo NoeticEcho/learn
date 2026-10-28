@@ -1,0 +1,347 @@
+<script module>
+	/** Licence of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/04-design/01-history.svx. */
+	export const metadata = {
+		id: '04-design/01-history',
+		part: 4,
+		order: 1,
+		title: 'Thirty years of web design: from gray backgrounds to glass',
+		definition: 'Web design history is a change of manners, from gray pages and Flash to flat design, Material and glass, each driven by technology, screens or fashion.',
+		summary:
+			'You’ll learn to recognize the era of a web design from the look of a page, and to see what produced it: a technology, a screen or a fashion. Afterwards, given a screenshot, you can name the time, explain what in it has aged and what is still right.',
+		minutes: 25,
+		teaches: ['design-history-of-web-design'],
+		requires: ['net-internet-history', 'net-dotcom-web2', 'css-separate-stylesheets', 'css-floats-legacy'],
+		comic: {
+			panels: [
+				{ era: 1, mood: 'explain', prop: 'browser-1996', caption: '1996', say: 'The reason: CSS had no columns yet, so pages were laid out in a table and the gaps were held open by one-pixel images.' },
+				{ era: 1, mood: 'hmm', side: 'right', prop: 'browser', label: 'skip intro', caption: '2000', say: 'The reason: technology. Splash pages ran on the Flash plugin, and Flash support ended in late 2020.' },
+				{ era: 4, mood: 'hint', prop: 'phone', caption: 'Flat design', say: 'The reason: screens of different densities, and weariness with textures. Fashion turned to simple shapes.' },
+				{ era: 7, mood: 'cheer', side: 'right', caption: '2025', say: 'Every trick has a reason: technology, a screen or fashion. Know it, and you decide whether to keep the trick.' }
+			]
+		},
+		practice: {
+			id: 'design-two-layouts',
+			title: 'The first screen, two ways',
+			task: 'Build your project’s first screen in the manner of two eras. In the “1996” block the layout is a table: the name, the items from your content and the main action all sit inside a table, and the action is a link. In the “2005” block there are no tables: a header with a colored background, a left column of items (class side, floated left) and a main column with the same main-action link. Write the rules for the columns and the header in styles.css. At the end, fill in the note: what was lost and what got better.',
+			era: 2,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+
+    <section id="v1996">
+      <h2>The 1996 version</h2>
+      <p>{{mainAction.label}}</p>
+      <ul>{{#each items}}<li>{{title}}</li>{{/each}}</ul>
+    </section>
+
+    <section id="v2005">
+      <h2>The 2005 version</h2>
+      <p>{{mainAction.label}}</p>
+      <ul>{{#each items}}<li>{{title}}</li>{{/each}}</ul>
+    </section>
+
+    <aside class="note" data-scaffold id="era-note">
+      <h2>What changed</h2>
+      <dl>
+        <dt>What was lost</dt>
+        <dd id="lost">…</dd>
+        <dt>What got better</dt>
+        <dd id="better">…</dd>
+      </dl>
+    </aside>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site. Write the rules for the 2005 version here. */
+body {
+  font-family: Georgia, serif;
+  margin: 1rem;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+
+    <section id="v1996">
+      <h2>The 1996 version</h2>
+      <table border="1" cellpadding="6">
+        <tr><td colspan="2"><b>{{title}}</b></td></tr>
+        <tr><td>
+          <ul>{{#each items}}<li>{{title}}</li>{{/each}}</ul>
+        </td><td>
+          <a href="#contacts">{{mainAction.label}}</a>
+        </td></tr>
+      </table>
+    </section>
+
+    <section id="v2005">
+      <h2>The 2005 version</h2>
+      <header><h3>{{title}}</h3></header>
+      <div class="side">
+        <ul>{{#each items}}<li>{{title}}</li>{{/each}}</ul>
+      </div>
+      <div class="main">
+        <p><a href="#contacts">{{mainAction.label}}</a></p>
+      </div>
+    </section>
+
+    <aside class="note" data-scaffold id="era-note">
+      <h2>What changed</h2>
+      <dl>
+        <dt>What was lost</dt>
+        <dd id="lost">simplicity: two files instead of one, and the styles have to be maintained separately</dd>
+        <dt>What got better</dt>
+        <dd id="better">the look changes in one place, and the markup keeps only the meaning</dd>
+      </dl>
+    </aside>
+  </body>
+</html>
+`,
+				'styles.css': `/* styles.css: the look of the site. Write the rules for the 2005 version here. */
+body {
+  font-family: Georgia, serif;
+  margin: 1rem;
+}
+#v2005 header {
+  background-color: #cfe0f3;
+  padding: 0.5rem 1rem;
+}
+#v2005 .side {
+  float: left;
+  width: 30%;
+}
+#v2005 .main {
+  overflow: hidden;
+}
+`
+			},
+			checks: [
+				{ id: 'css-linked', kind: 'exists', selector: 'link[rel="stylesheet"][href="styles.css"]' },
+				{ id: 'table-1996', kind: 'field', selector: '#v1996 table', field: 'title' },
+				{ id: 'items-1996', kind: 'field', selector: '#v1996 table', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'action-1996', kind: 'field', selector: '#v1996 a', field: 'mainAction.label' },
+				{ id: 'no-table-2005', kind: 'count', selector: '#v2005 table', max: 0 },
+				{ id: 'items-2005', kind: 'field', selector: '#v2005 .side', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'action-2005', kind: 'field', selector: '#v2005 .main a', field: 'mainAction.label' },
+				{ id: 'header-2005', kind: 'style', selector: '#v2005 header', prop: 'background-color', matches: '^(#[0-9a-fA-F]{3,8}|rgb|hsl)' },
+				{ id: 'float-2005', kind: 'style', selector: '#v2005 .side', prop: 'float', equals: 'left' },
+				{ id: 'no-blanks', kind: 'text', selector: '#era-note', matches: '^[^…]*$' },
+				{ id: 'lost', kind: 'text', selector: '#lost', matches: '\\S{3,}' },
+				{ id: 'better', kind: 'text', selector: '#better', matches: '\\S{3,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the manners of web design in the order they arrived',
+				items: ['Tables, a gray background and a tiled backdrop', 'A Flash splash page with a “skip intro” button', 'The gloss, rounded corners and “glass” buttons of Web 2.0', 'Flat design with no shadows', 'Material cards with shadows by the rules', 'Frosted glass and background blur']
+			},
+			{
+				type: 'match',
+				prompt: 'Match each trick with what produced it',
+				pairs: [
+					['Tables and transparent spacer images for layout', 'CSS could not yet lay out a page reliably, and tables worked everywhere'],
+					['A Flash splash page', 'a plugin that could do animation and sound but was not part of the browser'],
+					['Flat design', 'phones and screens of different densities, where gloss and shadows get in the way'],
+					['Gloss and “glass” buttons', 'a fashion for imitating objects, and shadows and gradients that had just become cheap in CSS']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why did people once place a transparent image one pixel across (a “spacer”)?',
+				options: [
+					'To hold a gap open in a table, where there was no other way to set spacing',
+					'To make the page load faster',
+					'So that search engines would find the site'
+				],
+				answer: 0,
+				why: [
+					'Yes. The spacer was stretched to the width or height needed. Today CSS has margins and padding for this.',
+					'No: extra images slowed a page down, they didn’t speed it up.',
+					'No: it had nothing to do with search.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What led to flat design in 2012 and 2013?',
+				options: ['Phones and screens with different pixel densities', 'Weariness with textures, gloss and shadows', 'A ban on colors in browsers', 'Responsive layout: simple shapes are easier to resize'],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: an interface had to look the same on very different screens.',
+					'Yes: “leather” and “wooden” elements had become tiresome and were heavy to load.',
+					'No: there was no such thing, and flat design is in fact colorful.',
+					'Yes: simple shapes are easier to scale and rearrange.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which trick aged because a technology went away, not because of fashion?',
+				options: ['A Flash splash page at the entrance', 'Rounded corners', 'Dark mode'],
+				answer: 0,
+				why: [
+					'Yes. The Flash plugin reached the end of its life in late 2020, and the splash pages went with it: they didn’t work on phones and search engines couldn’t read them.',
+					'No: rounded corners are alive today.',
+					'No: dark mode became the norm, not a dying trick.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is risky about neumorphism and “glass” when they are applied carelessly?',
+				options: [
+					'Edges and text blend into the background: contrast drops, and people with low vision can hardly read the page',
+					'The standard forbids them',
+					'They don’t work in modern browsers'
+				],
+				answer: 0,
+				why: [
+					'Yes. Beauty must not cost legibility. We’ll check contrast with numbers in the fifth lesson of this part.',
+					'No: the standard bans nothing, but it does set requirements for contrast (WCAG).',
+					'No: background blur has worked in browsers for a long time.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'design-hist-tables', front: 'Why were pages laid out with tables in the nineties?', back: 'There was no reliable way yet to lay out a page in CSS, and tables worked in every browser. Gaps were held open with transparent spacer images.' },
+			{ id: 'design-hist-flat', front: 'Where did flat design come from?', back: 'From phones and screens of different densities, weariness with textures and gloss, and ease of scaling. But a button you can’t tell from a label became a new problem.' },
+			{ id: 'design-hist-cause', front: 'What three causes change how sites look?', back: 'Technology (what the browser can do), the screen (what is shown on it) and fashion (what people like). What depended on a technology that has gone ages first.' },
+			{ id: 'design-hist-glass', front: 'What do “glass” and neumorphism risk?', back: 'Low contrast: borders and text blend into the background. A beautiful screenshot is not a legible page.' },
+			{ id: 'design-hist-kept', front: 'What from the old eras is still right?', back: 'The simplicity and speed of the nineties, the clear button states of skeuomorphism, the grid step and shadow as a language of depth from Material. Take the principle, not the styling.' }
+		],
+		sources: [
+			{ title: 'Web Design Museum: the history of web design, year by year', url: 'https://www.webdesignmuseum.org/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Web design (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Web_design', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Skeuomorph (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Skeuomorph', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Flat Design: Its Origins, Its Problems, and Why Flat 2.0 Is Better for Users (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/flat-design/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Neumorphism (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Neumorphism', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Brutalist Websites: a gallery', url: 'https://brutalistwebsites.com/', licence: 'link-only', kind: 'article', lang: 'en' }
+		],
+		videos: [{ title: 'How did we get here? Web design history from dial-up to the weird future (Flux Academy)', url: 'https://www.youtube.com/watch?v=wlYjSThvtew', licence: 'proprietary-link', kind: 'video', lang: 'en' }],
+		guide: {
+			intro: 'You’re about to build your project’s first screen twice: once as in 1996 and once as in 2005. You’ll see at once what a separate stylesheet gave us.',
+			hints: [
+				'The “1996” block needs a table: the table tag, with rows (tr) and cells (td) inside it. Put the project name, the items and the link with the main action in the cells.',
+				'The “2005” block must have no tables. Make a header, a block with the class side for the items and a block with the class main for the action, then give .side the rule float: left in styles.css.',
+				'Fill in the note in two phrases: what you lost by moving to a separate stylesheet (simplicity, for instance) and what you gained (for instance, the look changes in one place).'
+			],
+			mistakes: {
+				'css-linked': 'There is no stylesheet link in the head. Add a link tag whose rel is stylesheet and whose href is styles.css.',
+				'table-1996': 'In the 1996 block the project name has to be inside the table.',
+				'items-1996': 'The items from your content have to be inside the table in the 1996 block.',
+				'action-1996': 'The main action in the 1996 block has to be a link (the a tag) with your action text.',
+				'no-table-2005': 'The 2005 block must have no tables: CSS does the layout.',
+				'items-2005': 'In the 2005 block, put the content items in the element with the class side.',
+				'action-2005': 'The main action in the 2005 block has to be a link inside the element with the class main.',
+				'header-2005': 'The header of the 2005 block (the header element) needs a background color in styles.css, for example background-color: #cfe0f3.',
+				'float-2005': 'The .side column needs the rule float: left in styles.css. The stylesheet is on the neighboring tab.',
+				'no-blanks': 'The note still has the ellipsis “…” in it. Replace it with your own words.',
+				lost: 'Write what was lost by moving to a separate stylesheet.',
+				better: 'Write what got better.'
+			},
+			outro: 'You’ve walked from 1996 to 2005 yourself: the meaning stayed in the HTML and the look moved to the CSS. Next we’ll look at what exactly makes a page look dated.'
+		},
+		say: { CSS: 'C S S', HTML: 'H T M L', Flash: 'flash', GIF: 'jif', NN: 'N N', 'NN/g': 'N N slash g', Material: 'material', styles: 'styles', float: 'float', WCAG: 'wuh-cag' }
+	};
+</script>
+
+<script>
+	import DesignEras from '../../diagrams/DesignEras.svelte';
+</script>
+
+## Why know the history of styling
+
+A page looks “like the two-thousands” not because it was made long ago. It looks that way because it kept something that a technology or a fashion once dictated. If you understand the reason for a trick, you can decide: keep it, replace it or work around it. If you don’t, you copy what others did, as people copied Flash intros and gloss on buttons.
+
+The story is shorter than it seems: a little over thirty years. And almost every new manner arrived for one of three reasons:
+
+- **technology**: the browser learned to do something it couldn’t before (or stopped needing a plugin);
+- **screen**: devices appeared with a different width and density, and the old styling didn’t work on them;
+- **fashion**: people got tired of the previous look and wanted the opposite.
+
+<details>
+<summary>Check yourself: what three causes change how sites look?</summary>
+
+Technology, the screen and fashion. What ages first is whatever depended on a technology that no longer exists.
+
+</details>
+
+## The eras, in order
+
+Move the slider. Your project’s card, in your own words, is drawn in the manner of each period. These aren’t copies of real sites but simplified “portraits” of the eras, each in plain CSS.
+
+<DesignEras />
+
+Now in order, with the reasons.
+
+**The early nineties: text on gray.** The first pages had no styling at all. A gray background, black text, blue underlined links: this is how a browser shows any page without styles. There was structure, not design. In 1993 the Mosaic browser popularized pictures inside text, and pages became “covers”.
+
+**The late nineties: tables and spacers.** Designers wanted columns and margins, and CSS had no means for them. A page was laid out in a table, and the gaps were held open by transparent one-pixel images, “spacers”. Tiled backgrounds appeared, blinking “under construction” signs, visitor counters and badges saying “best viewed in this browser”. Each browser showed a page a little differently, and the badges were an honest admission of it. You already built a page in this manner in the second part of the course.
+
+**Around 2000: splash pages and Flash.** The Flash plugin gave animation, sound and interactivity that HTML couldn’t. Many sites opened with a “cinematic” splash page and a “skip intro” button. The styling was striking, but the page could be neither read by a screen reader, nor found by search, nor opened on a phone. Adobe ended support for Flash on 31 December 2020, and a whole manner went with it.
+
+**The mid-two-thousands: CSS and “Web 2.0”.** The [CSS Zen Garden](https://csszengarden.com/) site (2003) showed that the same markup could be dressed in hundreds of different looks, and styles moved into separate files. Gradients, rounded corners, reflections and bright icons followed: this is what “Web 2.0”, which you read about in the first part, looked like.
+
+**The late two-thousands: skeuomorphism.** A skeuomorph is a thing that keeps the form of an earlier object although it no longer needs it. In interfaces the word means styling that imitates real things: the leather of a calendar, the wood of a bookshelf, the metal of a switch. On the first smartphones it helped people understand what to press. But textures are heavy, gloss is noisy, and imitating things limits what an interface can be.
+
+**2012 to 2014: flat design.** Phones with screens of different densities, weariness with textures, and the interfaces of Windows 8 and iOS 7 together turned fashion toward simple shapes and solid colors. But extremes have a price: when a button looks like a label, a person doesn’t know it can be pressed. Researchers at Nielsen Norman Group tested this and described it in an article that is linked in the sources.
+
+**From 2014: Material.** In 2014 Google described in Material Design a world of “sheets of paper” with height and shadow. It was no longer a style but a set of rules: a grid, a spacing step, states, motion. This is where the era of design systems began, and the whole second half of this part is about them.
+
+**Brutalism.** In parallel, from the mid-2010s, the opposite fashion appeared: a system font, hard borders, a raw grid. It is a protest against smooth, identical templates. The gallery linked below collects such sites by the dozen. The manner doesn’t suit most projects, but it is a useful reminder: a page that pretends to be nothing reads better.
+
+**Around 2020 to 2022: neumorphism and glass.** Neumorphism “presses” elements out of the background; glass blurs everything behind a translucent panel. Both need care: borders become barely visible, and the contrast of text drops. In 2025 Apple updated its systems with a glass manner called Liquid Glass, and Google released Material 3 Expressive: fashion goes on without us.
+
+**Today: restraint.** Large readable text, one strong action per screen, plenty of air, tokens, a light and a dark theme. This isn’t “the end of history”. In ten years something from today will date a page too.
+
+<details>
+<summary>Check yourself: why did Flash splash pages disappear?</summary>
+
+The technology they stood on stopped being supported, and the splash pages themselves couldn’t be read by search engines or screen readers and didn’t work on phones.
+
+</details>
+
+## What to take from the past
+
+From each era it is useful to take not the look but the principle:
+
+- from the nineties, simplicity and speed;
+- from skeuomorphism, clarity that a button can be pressed;
+- from flat design, discipline: fewer decorations;
+- from Material, shadow as a language of depth, a spacing step and states;
+- from brutalism, the honesty of text;
+- from glass, layers, if they explain what is above what.
+
+You’ll come back to this in the next lesson, when we look for the signs of a dated page.
+
+## Practice
+
+Build your project’s first screen twice, as if in different eras. It is also a review: you already used tables for the 1996 page, and a separate stylesheet is exactly what marks the next era.
+
+In the “1996” block put the name, the items from your content and the main action inside a `table`. In the “2005” block there are no tables: a `header` with a colored background, a column of items `.side` floated left, and a column `.main` with the same action. Write the rules for the columns in the `styles.css` tab. Here are the lines that are enough.
+
+```css
+#v2005 .side {
+  float: left;
+  width: 30%;
+}
+```
+
+The rule `float: left` makes a block press to the left while the rest of the content flows around it on the right. This is how pages were laid out from the mid-two-thousands until flexbox and grid arrived. You’ll learn those two in the CSS part.
+
+## What was wrong with 2005
+
+Every site in this manner opened on a desktop screen, and for a narrow phone there was nothing: the columns didn’t rearrange. Designers fitted pages to a width of 960 pixels and thought that was enough. We’ll see how that broke when we reach responsive layout.

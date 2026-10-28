@@ -7,10 +7,11 @@
 <script lang="ts">
 	import './shared.css';
 	import { onMount } from 'svelte';
+	import { pick } from '#lib/i18n/index.ts';
 
 	type Look = { id: string; year: string; name: string; cause: string; kept: string; gone: string; stage: string; card: string; h: string; p: string; li: string; btn: string; note?: string };
 
-	const looks: Look[] = [
+	const base: Look[] = [
 		{
 			id: '1996', year: '1996', name: 'Таблицы и серый фон',
 			cause: 'Технология: CSS ещё нет или он не работает одинаково, и раскладку делают таблицами, а промежутки прозрачными картинками-распорками.',
@@ -110,8 +111,85 @@
 		}
 	];
 
+	// The English edition's words for each look (docs/content-plan/README.md, «English edition»):
+	// the drawn CSS is shared, only the words change. The Russian rendering is `base` as it is.
+	const EN: Record<string, Partial<Look>> = {
+		'1996': {
+			name: 'Tables and a gray background',
+			cause: 'Technology: CSS barely exists or behaves differently in each browser, so layout is done with tables and the gaps are held open by transparent one-pixel images.',
+			kept: 'Simplicity and speed: the page is light and opens anywhere.',
+			gone: 'The layout is baked into the markup, there are no mobile screens, and the table that frames the page means nothing.'
+		},
+		'2000': {
+			name: 'The splash page and Flash',
+			cause: 'Technology: the Flash plugin brings animation and sound, so the first page becomes a “cinematic” intro with a “skip intro” button.',
+			kept: 'The wish to set the mood at once.',
+			gone: 'The visitor waits instead of reading, search engines and screen readers see nothing, and phones have no plugin.',
+			note: 'Enter • Skip intro'
+		},
+		'2008': {
+			name: 'Web 2.0 and skeuomorphism',
+			cause: 'Technology and fashion: CSS learns rounded corners and shadows, and graphics imitate objects such as leather, glass and the gloss on a button.',
+			kept: 'A button should look like something you can press.',
+			gone: 'Gloss and textures are noisy, slow to load and quickly out of fashion.'
+		},
+		'2013': {
+			name: 'Flat design',
+			cause: 'Screen: phones with different pixel densities, where gloss and shadows get in the way. Color, type and empty space do all the work.',
+			kept: 'Fewer decorations, so attention goes to the content. Responsiveness.',
+			gone: 'The excesses: a button you can’t tell from a label, and links with no sign that they can be pressed. Nielsen Norman Group wrote about this at once.'
+		},
+		'2018': {
+			name: 'Material: paper and shadow',
+			cause: 'System: in 2014 Google described a world of “sheets of paper” with height and shadow. All apps got a common grammar.',
+			kept: 'Shadow as a language: the higher, the more important. A grid, a spacing step, states.',
+			gone: 'Identical cards and all-caps buttons on thousands of sites.'
+		},
+		'2021': {
+			name: 'Glass and neumorphism',
+			cause: 'Fashion and hardware: blurring the background became cheap, so interfaces turned into “frosted glass” or “pressed out of plastic”.',
+			kept: 'Layers and depth, when they explain what is above what.',
+			gone: 'Low contrast: edges and text blend together. For people with low vision such pages are unreadable.'
+		},
+		brutal: {
+			year: 'from 2014',
+			name: 'Brutalism',
+			cause: 'Protest: an answer to identical smooth templates. A system font, hard borders, a raw grid and a deliberate lack of polish.',
+			kept: 'Honesty: the page pretends to be nothing, so it reads well.',
+			gone: 'As a style it doesn’t suit most projects: it looks like a position, not like care for the visitor.'
+		},
+		'2025': {
+			name: 'Today’s restraint',
+			cause: 'Accumulated experience: variable fonts, tokens, light and dark themes, large text, one strong action and plenty of air.',
+			kept: 'Everything useful from before: the grid, the states, layers only when they are needed.',
+			gone: 'Nothing yet. But in ten years something here will date the page too.'
+		}
+	};
+	const over = pick({ ru: {} as Record<string, Partial<Look>>, en: EN });
+	const looks: Look[] = base.map((l) => ({ ...l, ...over[l.id] }));
+	const W = pick({
+		ru: {
+			title: 'Один проект, восемь визуальных эпох',
+			era: 'Эпоха:',
+			stage: 'Страница вашего проекта в манере',
+			forWhom: 'Для кого:',
+			kept: 'Что осталось верным.',
+			gone: 'Что устарело.',
+			fallback: { title: 'Ваш проект', forWhom: 'Для кого он', action: 'Что делает посетитель', items: ['Первый пункт', 'Второй пункт', 'Третий пункт'] }
+		},
+		en: {
+			title: 'One project, eight visual eras',
+			era: 'Era:',
+			stage: 'Your project’s page in the manner of',
+			forWhom: 'For:',
+			kept: 'What is still right.',
+			gone: 'What has aged.',
+			fallback: { title: 'Your project', forWhom: 'Who it is for', action: 'What the visitor does', items: ['First item', 'Second item', 'Third item'] }
+		}
+	});
+
 	let i = $state(0);
-	let brief = $state({ title: 'Ваш проект', forWhom: 'Для кого он', action: 'Что делает посетитель', items: ['Первый пункт', 'Второй пункт', 'Третий пункт'] });
+	let brief = $state({ ...W.fallback });
 
 	onMount(async () => {
 		try {
@@ -128,21 +206,21 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Один проект, восемь визуальных эпох</figcaption>
+	<figcaption>{W.title}</figcaption>
 	<div class="dg-ctl">
 		<label>
-			Эпоха:
+			{W.era}
 			<input type="range" min="0" max={looks.length - 1} step="1" bind:value={i} aria-valuetext="{look.year}: {look.name}" />
 		</label>
 		<span class="years">
 			{#each looks as l, k (l.id)}<button type="button" class:on={k === i} onclick={() => (i = k)} tabindex="-1">{l.year}</button>{/each}
 		</span>
 	</div>
-	<div class="stage" style={look.stage} role="group" aria-label="Страница вашего проекта в манере: {look.name}">
+	<div class="stage" style={look.stage} role="group" aria-label="{W.stage}: {look.name}">
 		<div style={look.card}>
 			{#if look.note}<p style="{look.p};font-size:11px;text-align:right">{look.note}</p>{/if}
 			<h3 style={look.h}>{brief.title}</h3>
-			<p style={look.p}>Для кого: {brief.forWhom}</p>
+			<p style={look.p}>{W.forWhom} {brief.forWhom}</p>
 			<ul class="items">
 				{#each brief.items as it, k (k)}<li style={look.li}>{it}</li>{/each}
 			</ul>
@@ -151,8 +229,8 @@
 	</div>
 	<div class="dg-out" aria-live="polite">
 		<p><strong>{look.year}: {look.name}.</strong> {look.cause}</p>
-		<p><strong>Что осталось верным.</strong> {look.kept}</p>
-		<p><strong>Что устарело.</strong> {look.gone}</p>
+		<p><strong>{W.kept}</strong> {look.kept}</p>
+		<p><strong>{W.gone}</strong> {look.gone}</p>
 	</div>
 </figure>
 
