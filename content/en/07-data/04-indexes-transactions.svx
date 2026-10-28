@@ -1,0 +1,2613 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/07-data/04-indexes-transactions.svx. */
+	export const metadata = {
+		id: '07-data/04-indexes-transactions',
+		part: 7,
+		order: 4,
+		title: 'Indexes and transactions',
+		definition: 'An index is an ordered structure of column values and row pointers that speeds up search. A transaction is a group of commands that run in full or not at all.',
+		summary: 'You’ll see why a query can be slow and how an index speeds it up, and what a transaction does when a crash strikes between two writes. Afterwards you can read a query plan, create an index where one is needed, and say what ACID means.',
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: '2,000,000 rows', caption: 'No index', say: 'I want one enquiry, and I read all two million rows in a row.' },
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'flowchart',
+					label: 'root|branch|leaf',
+					caption: 'The index',
+					say: 'Three steps down a tree instead of two million. But the index takes space and slows down writing.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'server',
+					label: 'COMMIT',
+					caption: 'Transaction',
+					say: [
+						{ text: 'The server crashed between two writes.' },
+						{ who: 'Database', text: 'I rolled both back. The ticket is still there.' }
+					]
+				}
+			]
+		},
+		minutes: 30,
+		teaches: ['data-index', 'data-transaction'],
+		requires: ['data-sql-join', 'data-sql-write'],
+		practice: {
+			id: 'data-index-tx',
+			title: 'An index for a query and a transaction for an enquiry',
+			task: 'The page already has the tables items (2,000 rows), requests and notifications. 1) In the first box, ask for the query plan with EXPLAIN SELECT: the items of category 7, newest first, the first ten (WHERE category_id = 7, ORDER BY day DESC, LIMIT 10). 2) In the second box, create an index on the column from the WHERE and ask for the plan again. Write how many rows were read before and after on the line under the box (the number from the result). 3) In the third box, write a transaction of two inserts (an enquiry and a notification) with BEGIN and COMMIT. 4) In the fourth box, do the same, but make the second insert fail (for example, NULL in text) and don’t write COMMIT. 5) In the fifth box, roll the transaction back and check that no enquiries were added. 6) Answer what price a write pays for every extra index. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="sql-work">
+      <h2>An index and a transaction on your table<\/h2>
+      <p>Three tables are already created. Write the queries right in the boxes; the result appears under each one (this is a practice sandbox, not real PostgreSQL). The boxes run in order, top to bottom.<\/p>
+      <pre>items(id, title, category_id, day)  -- 2000 rows, category_id from 1 to 20, day from 1 to 365
+requests(id, name, phone, item_id)  -- enquiries: item_id points to the service
+notifications(id, request_id, text) -- notifications: request_id points to the enquiry<\/pre>
+
+      <h3>1. Ask for the query plan before the index<\/h3>
+      <textarea aria-label="1. Ask for the query plan before the index" class="sql" id="q-before" rows="3">-- EXPLAIN SELECT: the items of category 7, newest first, the first ten
+EXPLAIN …<\/textarea>
+      <div class="out" id="q-before-out"><\/div>
+
+      <h3>2. Create an index and ask for the plan again<\/h3>
+      <textarea aria-label="2. Create an index and ask for the plan again" class="sql" id="q-index" rows="4">-- CREATE INDEX name ON items (the column from the WHERE);
+-- then the same EXPLAIN again
+…<\/textarea>
+      <div class="out" id="q-index-out"><\/div>
+      <p>Rows read before the index: <span id="rows-before">…<\/span>, after: <span id="rows-after">…<\/span><\/p>
+
+      <h3>3. An enquiry and a notification in one transaction<\/h3>
+      <textarea aria-label="3. An enquiry and a notification in one transaction" class="sql" id="q-tx-ok" rows="7">BEGIN;
+INSERT INTO requests …
+INSERT INTO notifications …
+…<\/textarea>
+      <div class="out" id="q-tx-ok-out"><\/div>
+
+      <h3>4. A crash in the middle of a transaction: the second step fails, and we don’t write COMMIT<\/h3>
+      <textarea aria-label="4. A crash in the middle of a transaction: the second step fails, and we don’t write COMMIT" class="sql" id="q-tx-fail" rows="6">BEGIN;
+…<\/textarea>
+      <div class="out" id="q-tx-fail-out"><\/div>
+
+      <h3>5. Roll back and check that nothing is left of the failed enquiry<\/h3>
+      <textarea aria-label="5. Roll back and check that nothing is left of the failed enquiry" class="sql" id="q-tx-after" rows="3">…<\/textarea>
+      <div class="out" id="q-tx-after-out"><\/div>
+
+      <p>The price a write pays for every extra index: <span id="index-cost">…<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="sql-runner">
+      // Teaching SQL (not real PostgreSQL): the queries in the boxes above run here, in the page’s memory.
+      // You don’t need to read this block. It is not part of your site.
+      class SqlError extends Error {}
+      const KEYWORDS = new Set(
+      'select from where group by having order limit offset asc desc distinct as join inner left right outer on and or not null is in like between true false insert into values update set delete create table index unique primary key references default begin commit rollback explain integer int serial text varchar numeric boolean date timestamp real if exists'.split(
+      ' '
+      )
+      );
+      function tokenize(src) {
+      const out = [];
+      const re = /\\s+|--[^\\n]*|('(?:[^']|'')*')|("(?:[^"]*)")|(\\d+(?:\\.\\d+)?)|([A-Za-z_\\u0400-\\u04FF][A-Za-z0-9_\\u0400-\\u04FF]*)|(<=|>=|<>|!=|\\|\\||[(),.*+\\-\\/=<>;])/gy;
+      let pos = 0;
+      while (pos < src.length) {
+      re.lastIndex = pos;
+      const m = re.exec(src);
+      if (!m) throw new SqlError(\`syntax error: unexpected character “\${src[pos]}”\`);
+      pos = re.lastIndex;
+      if (m[1] !== undefined) out.push({ t: 'str', v: m[1].slice(1, -1).replace(/''/g, "'") });
+      else if (m[2] !== undefined) out.push({ t: 'id', v: m[2].slice(1, -1).toLowerCase(), quoted: true });
+      else if (m[3] !== undefined) out.push({ t: 'num', v: Number(m[3]) });
+      else if (m[4] !== undefined) {
+      const low = m[4].toLowerCase();
+      out.push(KEYWORDS.has(low) ? { t: 'kw', v: low, raw: m[4] } : { t: 'id', v: low });
+      } else if (m[5] !== undefined) out.push({ t: 'op', v: m[5] });
+      }
+      return out;
+      }
+      /** The text of a script, split into statements by “;” outside quotes. */
+      function splitStatements(sql) {
+      const parts = [];
+      let cur = '';
+      let q = false;
+      for (let i = 0; i < sql.length; i++) {
+      const c = sql[i];
+      if (c === "'") q = !q;
+      if (c === ';' && !q) {
+      parts.push(cur);
+      cur = '';
+      } else cur += c;
+      }
+      parts.push(cur);
+      return parts.map((s) => s.replace(/--[^\\n]*/g, '').trim()).filter(Boolean);
+      }
+      class Parser {
+      constructor(tokens) {
+      this.k = tokens;
+      this.i = 0;
+      }
+      peek(o = 0) {
+      return this.k[this.i + o];
+      }
+      isKw(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'kw' && t.v === v;
+      }
+      isOp(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'op' && t.v === v;
+      }
+      eatKw(v) {
+      if (this.isKw(v)) return this.i++, true;
+      return false;
+      }
+      eatOp(v) {
+      if (this.isOp(v)) return this.i++, true;
+      return false;
+      }
+      expectKw(v) {
+      if (!this.eatKw(v)) this.fail(\`expected the word \${v.toUpperCase()}\`);
+      }
+      expectOp(v) {
+      if (!this.eatOp(v)) this.fail(\`expected the symbol “\${v}”\`);
+      }
+      fail(msg) {
+      const t = this.peek();
+      const near = t ? \` near “\${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}”\` : ' at the end of the query';
+      throw new SqlError(\`syntax error\${near}: \${msg}\`);
+      }
+      name() {
+      const t = this.peek();
+      if (t && (t.t === 'id' || (t.t === 'kw' && ['key', 'text', 'date', 'index'].includes(t.v)))) return this.i++, t.v;
+      this.fail('expected a name');
+      }
+      done() {
+      return this.i >= this.k.length;
+      }
+      /* expressions */
+      expr() {
+      return this.or();
+      }
+      or() {
+      let l = this.and();
+      while (this.eatKw('or')) l = { op: 'or', l, r: this.and() };
+      return l;
+      }
+      and() {
+      let l = this.not();
+      while (this.eatKw('and')) l = { op: 'and', l, r: this.not() };
+      return l;
+      }
+      not() {
+      if (this.eatKw('not')) return { op: 'not', e: this.not() };
+      return this.cmp();
+      }
+      cmp() {
+      const l = this.add();
+      const t = this.peek();
+      if (t && t.t === 'op' && ['=', '<>', '!=', '<', '>', '<=', '>='].includes(t.v)) {
+      this.i++;
+      return { op: t.v === '!=' ? '<>' : t.v, l, r: this.add() };
+      }
+      if (this.isKw('is')) {
+      this.i++;
+      const neg = this.eatKw('not');
+      this.expectKw('null');
+      return { op: 'isnull', e: l, neg };
+      }
+      const neg = this.isKw('not') && (this.isKw('like', 1) || this.isKw('in', 1) || this.isKw('between', 1));
+      if (neg) this.i++;
+      if (this.eatKw('like')) return { op: 'like', l, r: this.add(), neg };
+      if (this.eatKw('in')) {
+      this.expectOp('(');
+      const list = [this.expr()];
+      while (this.eatOp(',')) list.push(this.expr());
+      this.expectOp(')');
+      return { op: 'in', l, list, neg };
+      }
+      if (this.eatKw('between')) {
+      const lo = this.add();
+      this.expectKw('and');
+      const hi = this.add();
+      return { op: 'between', e: l, lo, hi, neg };
+      }
+      return l;
+      }
+      add() {
+      let l = this.mul();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['+', '-', '||'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.mul() };
+      } else return l;
+      }
+      }
+      mul() {
+      let l = this.unary();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['*', '/'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.unary() };
+      } else return l;
+      }
+      }
+      unary() {
+      if (this.eatOp('-')) return { op: 'neg', e: this.unary() };
+      return this.primary();
+      }
+      primary() {
+      const t = this.peek();
+      if (!t) this.fail('expected a value');
+      if (t.t === 'num') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'str') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'kw' && t.v === 'null') return this.i++, { op: 'lit', v: null };
+      if (t.t === 'kw' && t.v === 'true') return this.i++, { op: 'lit', v: true };
+      if (t.t === 'kw' && t.v === 'false') return this.i++, { op: 'lit', v: false };
+      if (this.eatOp('(')) {
+      const e = this.expr();
+      this.expectOp(')');
+      return e;
+      }
+      if (t.t === 'id' && this.isOp('(', 1)) {
+      this.i += 2;
+      const fn = t.v;
+      if (!['count', 'sum', 'avg', 'min', 'max', 'lower', 'upper', 'length', 'coalesce'].includes(fn)) throw new SqlError(\`the function \${fn}() is not supported here\`);
+      if (fn === 'count' && this.eatOp('*')) {
+      this.expectOp(')');
+      return { op: 'agg', fn, star: true };
+      }
+      const args = [this.expr()];
+      while (this.eatOp(',')) args.push(this.expr());
+      this.expectOp(')');
+      return ['count', 'sum', 'avg', 'min', 'max'].includes(fn) ? { op: 'agg', fn, e: args[0] } : { op: 'fn', fn, args };
+      }
+      if (t.t === 'id' || (t.t === 'kw' && ['text', 'date', 'key', 'index'].includes(t.v))) {
+      this.i++;
+      if (this.isOp('.') && this.peek(1) && (this.peek(1).t === 'id' || this.peek(1).t === 'kw')) {
+      this.i++;
+      const c = this.peek();
+      this.i++;
+      return { op: 'col', table: t.v, name: c.v };
+      }
+      return { op: 'col', name: t.v };
+      }
+      this.fail('expected a value or a column name');
+      }
+      }
+      const text = (e) => {
+      switch (e.op) {
+      case 'col':
+      return e.table ? \`\${e.table}.\${e.name}\` : e.name;
+      case 'lit':
+      return e.v === null ? 'NULL' : typeof e.v === 'string' ? \`'\${e.v}'\` : String(e.v);
+      case 'agg':
+      return \`\${e.fn}(\${e.star ? '*' : text(e.e)})\`;
+      case 'fn':
+      return \`\${e.fn}(\${e.args.map(text).join(', ')})\`;
+      default:
+      return e.op;
+      }
+      };
+      const hasAgg = (e) => !!e && (e.op === 'agg' || [e.l, e.r, e.e, e.lo, e.hi].some(hasAgg) || (e.args || e.list || []).some(hasAgg));
+      function createDb() {
+      return { tables: {}, indexes: [], txn: null, aborted: false };
+      }
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      const isNum = (v) => typeof v === 'number';
+      function table(db, name) {
+      const t = db.tables[name];
+      if (!t) throw new SqlError(\`table “\${name}” does not exist. Tables: \${Object.keys(db.tables).join(', ') || 'none'}\`);
+      return t;
+      }
+      function coerce(col, v) {
+      if (v === null || v === undefined) return null;
+      const ty = col.type;
+      if (['integer', 'int', 'serial'].includes(ty)) {
+      if (isNum(v) && Number.isInteger(v)) return v;
+      if (typeof v === 'string' && /^-?\\d+$/.test(v.trim())) return Number(v);
+      throw new SqlError(\`the value \${typeof v === 'string' ? \`“\${v}”\` : v} does not fit the type integer (column \${col.name})\`);
+      }
+      if (['numeric', 'real'].includes(ty)) {
+      if (isNum(v)) return v;
+      if (typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v))) return Number(v);
+      throw new SqlError(\`the value “\${v}” does not fit the type \${ty} (column \${col.name})\`);
+      }
+      if (ty === 'boolean') {
+      if (typeof v === 'boolean') return v;
+      throw new SqlError(\`the value “\${v}” does not fit the type boolean (column \${col.name})\`);
+      }
+      return typeof v === 'string' ? v : String(v);
+      }
+      /* ---------- evaluation ---------- */
+      function resolve(ctx, e) {
+      const found = [];
+      for (const c of ctx) {
+      if (e.table && c.alias !== e.table) continue;
+      if (c.cols.includes(e.name)) found.push(c);
+      }
+      if (!found.length) {
+      const all = ctx.flatMap((c) => c.cols.map((n) => \`\${c.alias}.\${n}\`));
+      throw new SqlError(\`column “\${e.table ? e.table + '.' : ''}\${e.name}” does not exist. Available: \${all.join(', ')}\`);
+      }
+      if (found.length > 1) throw new SqlError(\`column “\${e.name}” is ambiguous: it exists in tables \${found.map((f) => f.alias).join(' and ')}. Write \${found[0].alias}.\${e.name}\`);
+      return found[0].row ? found[0].row[e.name] : null;
+      }
+      function cmpVals(a, b) {
+      if (a === null || b === null) return null;
+      if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
+      if (typeof a !== typeof b) throw new SqlError(\`cannot compare \${typeof a === 'number' ? 'a number' : 'text'} with \${typeof b === 'number' ? 'a number' : 'text'}\`);
+      return a < b ? -1 : a > b ? 1 : 0;
+      }
+      function like(s, p) {
+      const re = new RegExp('^' + p.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', 'is');
+      return re.test(s);
+      }
+      function ev(e, ctx, grp) {
+      switch (e.op) {
+      case 'lit':
+      return e.v;
+      case 'col':
+      return resolve(ctx, e);
+      case 'neg': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : -v;
+      }
+      case 'not': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : !v;
+      }
+      case 'and': {
+      const l = ev(e.l, ctx, grp);
+      if (l === false) return false;
+      const r = ev(e.r, ctx, grp);
+      if (r === false) return false;
+      return l === null || r === null ? null : true;
+      }
+      case 'or': {
+      const l = ev(e.l, ctx, grp);
+      if (l === true) return true;
+      const r = ev(e.r, ctx, grp);
+      if (r === true) return true;
+      return l === null || r === null ? null : false;
+      }
+      case '=':
+      case '<>':
+      case '<':
+      case '>':
+      case '<=':
+      case '>=': {
+      const c = cmpVals(ev(e.l, ctx, grp), ev(e.r, ctx, grp));
+      if (c === null) return null;
+      return { '=': c === 0, '<>': c !== 0, '<': c < 0, '>': c > 0, '<=': c <= 0, '>=': c >= 0 }[e.op];
+      }
+      case 'isnull': {
+      const v = ev(e.e, ctx, grp);
+      return e.neg ? v !== null : v === null;
+      }
+      case 'like': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      const m = like(String(l), String(r));
+      return e.neg ? !m : m;
+      }
+      case 'in': {
+      const l = ev(e.l, ctx, grp);
+      if (l === null) return null;
+      const m = e.list.some((x) => cmpVals(l, ev(x, ctx, grp)) === 0);
+      return e.neg ? !m : m;
+      }
+      case 'between': {
+      const v = ev(e.e, ctx, grp);
+      const lo = cmpVals(v, ev(e.lo, ctx, grp)),
+      hi = cmpVals(v, ev(e.hi, ctx, grp));
+      if (lo === null || hi === null) return null;
+      const m = lo >= 0 && hi <= 0;
+      return e.neg ? !m : m;
+      }
+      case '+':
+      case '-':
+      case '*':
+      case '/': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      if (!isNum(l) || !isNum(r)) throw new SqlError(\`arithmetic (\${e.op}) works on numbers, and this is text\`);
+      if (e.op === '/' && r === 0) throw new SqlError('division by zero');
+      return e.op === '+' ? l + r : e.op === '-' ? l - r : e.op === '*' ? l * r : l / r;
+      }
+      case '||': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      return l === null || r === null ? null : String(l) + String(r);
+      }
+      case 'fn': {
+      const a = e.args.map((x) => ev(x, ctx, grp));
+      if (e.fn === 'coalesce') return a.find((x) => x !== null) ?? null;
+      if (a[0] === null) return null;
+      if (e.fn === 'lower') return String(a[0]).toLowerCase();
+      if (e.fn === 'upper') return String(a[0]).toUpperCase();
+      return String(a[0]).length;
+      }
+      case 'agg': {
+      if (!grp) throw new SqlError(\`\${e.fn.toUpperCase()}() can be used only in SELECT or HAVING, not in WHERE\`);
+      if (e.star) return grp.length;
+      const vals = grp.map((g) => ev(e.e, g, null)).filter((v) => v !== null);
+      if (e.fn === 'count') return vals.length;
+      if (!vals.length) return null;
+      if (e.fn === 'min') return vals.reduce((a, b) => (cmpVals(a, b) <= 0 ? a : b));
+      if (e.fn === 'max') return vals.reduce((a, b) => (cmpVals(a, b) >= 0 ? a : b));
+      if (!vals.every(isNum)) throw new SqlError(\`\${e.fn.toUpperCase()}() works on numbers only\`);
+      const s = vals.reduce((a, b) => a + b, 0);
+      return e.fn === 'sum' ? s : s / vals.length;
+      }
+      }
+      throw new SqlError('cannot understand the expression');
+      }
+      /* ---------- statements ---------- */
+      function parseSelect(p) {
+      const q = { distinct: false, items: [], from: null, joins: [], where: null, group: [], having: null, order: [], limit: null, offset: 0 };
+      p.expectKw('select');
+      q.distinct = p.eatKw('distinct');
+      do {
+      if (p.eatOp('*')) q.items.push({ star: true });
+      else if (p.peek() && p.peek().t === 'id' && p.isOp('.', 1) && p.isOp('*', 2)) {
+      const tb = p.peek().v;
+      p.i += 3;
+      q.items.push({ star: true, table: tb });
+      } else {
+      const e = p.expr();
+      let alias = null;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      q.items.push({ e, alias });
+      }
+      } while (p.eatOp(','));
+      if (p.eatKw('from')) {
+      const tableRef = () => {
+      const name = p.name();
+      let alias = name;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      return { name, alias };
+      };
+      q.from = tableRef();
+      for (;;) {
+      let kind = null;
+      if (p.eatKw('left')) {
+      p.eatKw('outer');
+      p.expectKw('join');
+      kind = 'left';
+      } else if (p.eatKw('inner')) {
+      p.expectKw('join');
+      kind = 'inner';
+      } else if (p.eatKw('join')) kind = 'inner';
+      else if (p.isKw('right')) throw new SqlError('RIGHT JOIN is not supported in this practice sandbox: swap the tables and write LEFT JOIN');
+      else break;
+      const ref = tableRef();
+      p.expectKw('on');
+      q.joins.push({ kind, ...ref, on: p.expr() });
+      }
+      }
+      if (p.eatKw('where')) q.where = p.expr();
+      if (p.eatKw('group')) {
+      p.expectKw('by');
+      do q.group.push(p.expr());
+      while (p.eatOp(','));
+      }
+      if (p.eatKw('having')) q.having = p.expr();
+      if (p.eatKw('order')) {
+      p.expectKw('by');
+      do {
+      const e = p.expr();
+      const desc = p.eatKw('desc');
+      if (!desc) p.eatKw('asc');
+      q.order.push({ e, desc });
+      } while (p.eatOp(','));
+      }
+      if (p.eatKw('limit')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('LIMIT needs a number after it');
+      p.i++;
+      q.limit = t.v;
+      }
+      if (p.eatKw('offset')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('OFFSET needs a number after it');
+      p.i++;
+      q.offset = t.v;
+      }
+      return q;
+      }
+      /** An index can serve \`col = literal\` among the AND-ed conditions of WHERE. */
+      function indexFor(db, q, tname, alias) {
+      if (!q.where) return null;
+      const conj = [];
+      (function walk(e) {
+      if (e.op === 'and') (walk(e.l), walk(e.r));
+      else conj.push(e);
+      })(q.where);
+      for (const c of conj) {
+      if (c.op !== '=') continue;
+      const [a, b] = c.l.op === 'col' ? [c.l, c.r] : [c.r, c.l];
+      if (a.op !== 'col' || b.op !== 'lit' || (a.table && a.table !== alias)) continue;
+      const ix = db.indexes.find((i) => i.table === tname && i.cols[0] === a.name);
+      if (ix) return { ix, col: a.name, value: b.v };
+      const t = db.tables[tname];
+      if (t.pk.length === 1 && t.pk[0] === a.name) return { ix: { name: \`\${tname}_pkey\`, table: tname, cols: [a.name] }, col: a.name, value: b.v };
+      }
+      return null;
+      }
+      function execSelect(db, q, explain) {
+      let scanned = 0;
+      const plan = [];
+      const trace = { from: 0, where: 0, groups: null, result: 0, limit: 0 };
+      let ctxRows = [];
+      if (!q.from) {
+      ctxRows = [[]];
+      } else {
+      const t0 = table(db, q.from.name);
+      const hit = indexFor(db, q, q.from.name, q.from.alias);
+      let base = t0.rows;
+      if (hit) {
+      base = t0.rows.filter((r) => r[hit.col] === hit.value);
+      scanned += base.length;
+      plan.push(\`Index Scan using index \${hit.ix.name} on “\${q.from.name}”: rows read \${base.length}\`);
+      } else {
+      scanned += t0.rows.length;
+      plan.push(\`Seq Scan on “\${q.from.name}”: the whole table was read, rows \${t0.rows.length}\`);
+      }
+      ctxRows = base.map((r) => [{ alias: q.from.alias, cols: t0.columns.map((c) => c.name), row: r }]);
+      for (const j of q.joins) {
+      const tj = table(db, j.name);
+      const cols = tj.columns.map((c) => c.name);
+      const next = [];
+      scanned += tj.rows.length;
+      plan.push(\`\${j.kind === 'left' ? 'Left ' : ''}Join with “\${j.name}”: rows read \${tj.rows.length}\`);
+      for (const left of ctxRows) {
+      let matched = false;
+      for (const r of tj.rows) {
+      const ctx = [...left, { alias: j.alias, cols, row: r }];
+      if (ev(j.on, ctx, null) === true) {
+      next.push(ctx);
+      matched = true;
+      }
+      }
+      if (!matched && j.kind === 'left') next.push([...left, { alias: j.alias, cols, row: null }]);
+      }
+      ctxRows = next;
+      }
+      }
+      trace.from = ctxRows.length;
+      if (q.where) {
+      if (hasAgg(q.where)) throw new SqlError('COUNT, SUM and similar cannot be used in WHERE: they are computed after the rows are chosen. Use HAVING for conditions on them');
+      ctxRows = ctxRows.filter((c) => ev(q.where, c, null) === true);
+      }
+      trace.where = ctxRows.length;
+      const aggregated = q.group.length > 0 || q.items.some((i) => i.e && hasAgg(i.e)) || (q.having && hasAgg(q.having));
+      const columns = [];
+      const exprs = [];
+      for (const it of q.items) {
+      if (it.star) {
+      const sample = q.from ? [{ alias: q.from.alias, cols: table(db, q.from.name).columns.map((c) => c.name) }, ...q.joins.map((j) => ({ alias: j.alias, cols: table(db, j.name).columns.map((c) => c.name) }))] : [];
+      for (const s of sample) {
+      if (it.table && s.alias !== it.table) continue;
+      for (const n of s.cols) {
+      columns.push(n);
+      exprs.push({ op: 'col', table: s.alias, name: n });
+      }
+      }
+      } else {
+      columns.push(it.alias || (it.e.op === 'col' ? it.e.name : it.e.op === 'agg' || it.e.op === 'fn' ? it.e.fn : text(it.e)));
+      exprs.push(it.e);
+      }
+      }
+      let rows; // each: { out: [...], ctx, grp }
+      if (aggregated) {
+      const groups = new Map();
+      for (const c of ctxRows) {
+      const key = JSON.stringify(q.group.map((g) => ev(g, c, null)));
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(c);
+      }
+      if (!q.group.length && !groups.size) groups.set('', []);
+      const groupText = q.group.map((g) => (g.op === 'col' ? g.name : text(g)));
+      for (const [i, e] of exprs.entries()) {
+      const bare = (x) => !x || x.op === 'agg' || x.op === 'lit' || groupText.includes(x.op === 'col' ? x.name : text(x)) || ([x.l, x.r, x.e].some((s) => s) && [x.l, x.r, x.e].filter(Boolean).every(bare));
+      if (!bare(e)) throw new SqlError(\`column “\${columns[i]}” must either be added to GROUP BY or wrapped in COUNT, SUM, MIN, MAX or AVG, otherwise it is unclear which row of the group to show\`);
+      }
+      rows = [...groups.values()].map((g) => ({ grp: g, ctx: g[0] || [] }));
+      trace.groups = rows.length;
+      if (q.having) rows = rows.filter((r) => ev(q.having, r.ctx, r.grp) === true);
+      rows.forEach((r) => (r.out = exprs.map((e) => ev(e, r.ctx, r.grp))));
+      } else {
+      rows = ctxRows.map((c) => ({ ctx: c, grp: null, out: exprs.map((e) => ev(e, c, null)) }));
+      }
+      if (q.distinct) {
+      const seen = new Set();
+      rows = rows.filter((r) => {
+      const k = JSON.stringify(r.out);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+      });
+      }
+      if (q.order.length) {
+      const keyOf = (r, o) => {
+      if (o.e.op === 'lit' && isNum(o.e.v)) return r.out[o.e.v - 1];
+      if (o.e.op === 'col' && !o.e.table && columns.includes(o.e.name)) return r.out[columns.indexOf(o.e.name)];
+      return ev(o.e, r.ctx, r.grp);
+      };
+      rows.sort((a, b) => {
+      for (const o of q.order) {
+      const x = keyOf(a, o),
+      y = keyOf(b, o);
+      if (x === y) continue;
+      if (x === null) return o.desc ? -1 : 1;
+      if (y === null) return o.desc ? 1 : -1;
+      const c = cmpVals(x, y);
+      if (c !== 0) return o.desc ? -c : c;
+      }
+      return 0;
+      });
+      }
+      trace.result = rows.length;
+      const total = rows.length;
+      if (q.offset) rows = rows.slice(q.offset);
+      if (q.limit !== null) rows = rows.slice(0, q.limit);
+      trace.limit = rows.length;
+      return { kind: 'select', columns, rows: rows.map((r) => r.out), scanned, plan, total, trace };
+      }
+      function checkRow(db, t, row, skipPk) {
+      for (const c of t.columns) {
+      if (row[c.name] === null && (c.notNull || t.pk.includes(c.name))) throw new SqlError(\`column “\${c.name}” of table “\${t.name}” cannot be NULL (NOT NULL constraint violated)\`);
+      if (c.ref && row[c.name] !== null) {
+      const rt = db.tables[c.ref.table];
+      if (!rt) throw new SqlError(\`table “\${c.ref.table}” does not exist\`);
+      if (!rt.rows.some((r) => r[c.ref.col] === row[c.name])) throw new SqlError(\`foreign key violated: table “\${c.ref.table}” has no row where \${c.ref.col} = \${row[c.name]}\`);
+      }
+      }
+      const uniq = [t.pk.length ? t.pk : null, ...t.columns.filter((c) => c.unique).map((c) => [c.name])].filter(Boolean);
+      for (const cols of uniq) {
+      const dup = t.rows.some((r) => r !== skipPk && cols.every((c) => r[c] === row[c]));
+      if (dup) throw new SqlError(\`unique constraint violated: a row with \${cols.map((c) => \`\${c} = \${row[c]}\`).join(', ')} already exists in table “\${t.name}”\`);
+      }
+      }
+      function execOne(db, sql) {
+      const p = new Parser(tokenize(sql));
+      const first = p.peek();
+      if (!first) return null;
+      let explain = false;
+      if (p.eatKw('explain')) explain = true;
+      if (p.isKw('select')) {
+      const q = parseSelect(p);
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      const r = execSelect(db, q, explain);
+      if (explain) return { kind: 'plan', lines: r.plan, scanned: r.scanned };
+      return r;
+      }
+      if (explain) throw new SqlError('EXPLAIN works only with SELECT in this sandbox');
+      if (p.eatKw('begin')) {
+      if (db.txn) throw new SqlError('a transaction has already begun');
+      db.txn = clone({ tables: db.tables, indexes: db.indexes });
+      return { kind: 'msg', message: 'BEGIN: the transaction has started. Until COMMIT, the changes can be undone with ROLLBACK' };
+      }
+      if (p.eatKw('commit')) {
+      if (!db.txn) return { kind: 'msg', message: 'COMMIT: there was no transaction, nothing happened' };
+      db.txn = null;
+      return { kind: 'msg', message: 'COMMIT: the changes are saved for good' };
+      }
+      if (p.eatKw('rollback')) {
+      if (!db.txn) return { kind: 'msg', message: 'ROLLBACK: there was no transaction, nothing happened' };
+      db.tables = db.txn.tables;
+      db.indexes = db.txn.indexes;
+      db.txn = null;
+      db.aborted = false;
+      return { kind: 'msg', message: 'ROLLBACK: every change since BEGIN is undone' };
+      }
+      if (p.eatKw('create')) {
+      if (p.eatKw('unique')) {
+      p.expectKw('index');
+      return createIndex(db, p, true);
+      }
+      if (p.eatKw('index')) return createIndex(db, p, false);
+      p.expectKw('table');
+      if (p.eatKw('if')) (p.expectKw('not'), p.expectKw('exists'));
+      const name = p.name();
+      if (db.tables[name]) throw new SqlError(\`table “\${name}” already exists\`);
+      p.expectOp('(');
+      const t = { name, columns: [], pk: [], rows: [], seq: 0 };
+      do {
+      if (p.eatKw('primary')) {
+      p.expectKw('key');
+      p.expectOp('(');
+      do t.pk.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      continue;
+      }
+      const col = { name: p.name(), type: 'text', notNull: false, unique: false, def: undefined, ref: null };
+      const ty = p.peek();
+      if (!ty || ty.t !== 'kw' || !['integer', 'int', 'serial', 'text', 'varchar', 'numeric', 'boolean', 'date', 'timestamp', 'real'].includes(ty.v)) p.fail('expected a column type: integer, text, numeric, boolean, date or timestamp');
+      p.i++;
+      col.type = ty.v === 'varchar' ? 'text' : ty.v;
+      if (p.eatOp('(')) {
+      while (!p.eatOp(')')) p.i++;
+      }
+      for (;;) {
+      if (p.eatKw('primary')) (p.expectKw('key'), t.pk.push(col.name));
+      else if (p.eatKw('not')) (p.expectKw('null'), (col.notNull = true));
+      else if (p.eatKw('unique')) col.unique = true;
+      else if (p.eatKw('default')) col.def = p.primary().v;
+      else if (p.eatKw('references')) {
+      const rt = p.name();
+      p.expectOp('(');
+      const rc = p.name();
+      p.expectOp(')');
+      if (!db.tables[rt]) throw new SqlError(\`table “\${rt}” has not been created yet: create it first, then refer to it\`);
+      col.ref = { table: rt, col: rc };
+      } else break;
+      }
+      t.columns.push(col);
+      } while (p.eatOp(','));
+      p.expectOp(')');
+      for (const k of t.pk) if (!t.columns.some((c) => c.name === k)) throw new SqlError(\`PRIMARY KEY names a column “\${k}” that does not exist\`);
+      db.tables[name] = t;
+      return { kind: 'msg', message: \`CREATE TABLE: table “\${name}” created\${t.pk.length ? \`, key: \${t.pk.join(', ')}\` : ', but there is no primary key'}\` };
+      }
+      if (p.eatKw('insert')) {
+      p.expectKw('into');
+      const t = table(db, p.name());
+      let cols = t.columns.map((c) => c.name);
+      if (p.eatOp('(')) {
+      cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`table “\${t.name}” has no column “\${c}”. Columns: \${t.columns.map((x) => x.name).join(', ')}\`);
+      }
+      p.expectKw('values');
+      const made = [];
+      do {
+      p.expectOp('(');
+      const vals = [];
+      do vals.push(ev(p.expr(), [], null));
+      while (p.eatOp(','));
+      p.expectOp(')');
+      if (vals.length !== cols.length) throw new SqlError(\`\${cols.length} columns but \${vals.length} values: the numbers must match\`);
+      const row = {};
+      for (const c of t.columns) {
+      const at = cols.indexOf(c.name);
+      let v = at >= 0 ? vals[at] : c.def !== undefined ? c.def : null;
+      if (v === null && c.type === 'serial') v = ++t.seq;
+      row[c.name] = coerce(c, v);
+      if (c.type === 'serial' && row[c.name] > t.seq) t.seq = row[c.name];
+      }
+      checkRow(db, t, row);
+      t.rows.push(row);
+      made.push(row);
+      } while (p.eatOp(','));
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      return { kind: 'msg', message: \`INSERT: rows added \${made.length}\`, changed: made.length };
+      }
+      if (p.eatKw('update')) {
+      const t = table(db, p.name());
+      p.expectKw('set');
+      const sets = [];
+      do {
+      const c = p.name();
+      if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`table “\${t.name}” has no column “\${c}”\`);
+      p.expectOp('=');
+      sets.push([c, p.expr()]);
+      } while (p.eatOp(','));
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      const cols = t.columns.map((c) => c.name);
+      const hit = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      const next = hit.map((r) => {
+      const n = { ...r };
+      for (const [c, e] of sets) n[c] = coerce(t.columns.find((x) => x.name === c), ev(e, [{ alias: t.name, cols, row: r }], null));
+      return [r, n];
+      });
+      for (const [r, n] of next) {
+      checkRow(db, t, n, r);
+      Object.assign(r, n);
+      }
+      return { kind: 'msg', message: \`UPDATE: rows changed \${hit.length}\${where ? '' : '. There was no WHERE condition, so ALL rows of the table were changed'}\`, changed: hit.length };
+      }
+      if (p.eatKw('delete')) {
+      p.expectKw('from');
+      const t = table(db, p.name());
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      const cols = t.columns.map((c) => c.name);
+      const gone = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      for (const r of gone)
+      for (const o of Object.values(db.tables))
+      for (const c of o.columns)
+      if (c.ref && c.ref.table === t.name && o.rows.some((x) => x[c.name] !== null && x[c.name] === r[c.ref.col])) throw new SqlError(\`cannot delete: table “\${o.name}” refers to this row (column \${c.name}). Remove the references first\`);
+      t.rows = t.rows.filter((r) => !gone.includes(r));
+      return { kind: 'msg', message: \`DELETE: rows deleted \${gone.length}\${where ? '' : '. There was no WHERE condition, so ALL rows of the table were deleted'}\`, changed: gone.length };
+      }
+      throw new SqlError('this sandbox knows the commands SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK and EXPLAIN SELECT');
+      }
+      function createIndex(db, p, unique) {
+      let name = null;
+      if (!p.isKw('on')) name = p.name();
+      p.expectKw('on');
+      const tn = p.name();
+      const t = table(db, tn);
+      p.expectOp('(');
+      const cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`table “\${tn}” has no column “\${c}”\`);
+      name = name || \`\${tn}_\${cols.join('_')}_idx\`;
+      if (db.indexes.some((i) => i.name === name)) throw new SqlError(\`index “\${name}” already exists\`);
+      db.indexes.push({ name, table: tn, cols, unique });
+      return { kind: 'msg', message: \`CREATE INDEX: index “\${name}” on \${tn}(\${cols.join(', ')}) is built. Now every write to “\${tn}” updates it too\` };
+      }
+      /**
+      * Runs a script: statements split by “;”, executed in order, stopping at the first error.
+      * Returns { results, error }. After an error inside BEGIN the transaction is “aborted”
+      * and every command is refused until ROLLBACK, as in PostgreSQL.
+      */
+      function run(db, sql) {
+      const results = [];
+      for (const s of splitStatements(sql)) {
+      try {
+      if (db.aborted && !/^\\s*rollback\\b/i.test(s)) throw new SqlError('the transaction was aborted after an error: every command is ignored until ROLLBACK');
+      const r = execOne(db, s);
+      if (r) results.push({ ...r, sql: s });
+      } catch (e) {
+      if (!(e instanceof SqlError)) throw e;
+      if (db.txn) db.aborted = true;
+      return { results, error: { message: e.message, sql: s } };
+      }
+      }
+      return { results, error: null };
+      }
+      /** Puts ready rows into an existing table (for seeding a page from the person's brief). */
+      function load(db, name, rows) {
+      const t = table(db, name);
+      for (const r of rows) {
+      const row = {};
+      for (const c of t.columns) {
+      row[c.name] = r[c.name] === undefined ? null : r[c.name];
+      if (c.type === 'serial') (row[c.name] === null && (row[c.name] = ++t.seq), (t.seq = Math.max(t.seq, row[c.name])));
+      }
+      t.rows.push(row);
+      }
+      }
+      /** A value as the person reads it in a result table. */
+      function show(v) {
+      return v === null ? 'NULL' : v === true ? 'true' : v === false ? 'false' : String(v);
+      }
+
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      // A practice table of 2000 rows. The names come from your brief, the rest is made up.
+      const names = [{{#each items}}'{{title}}', {{/each}}].map(unesc);
+      function afterSetup(db) {
+        const rows = [];
+        for (let i = 1; i <= 2000; i++) rows.push({ title: (names.length ? names[i % names.length] : 'Item') + ' #' + i, category_id: ((i * 7) % 20) + 1, day: ((i * 13) % 365) + 1 });
+        load(db, 'items', rows);
+      }
+
+      function draw(box, r) {
+        box.replaceChildren();
+        for (const res of r.results) {
+          const p = document.createElement('p');
+          if (res.kind === 'select') {
+            const t = document.createElement('table');
+            const head = t.insertRow();
+            for (const c of res.columns) head.appendChild(Object.assign(document.createElement('th'), { textContent: c }));
+            for (const row of res.rows) {
+              const tr = t.insertRow();
+              for (const v of row) tr.insertCell().textContent = show(v);
+            }
+            box.appendChild(t);
+            p.textContent = 'Rows: ' + res.rows.length + '. Read from tables: ' + res.scanned + '.';
+          } else if (res.kind === 'plan') {
+            p.textContent = 'Plan (a simplified model): ' + res.lines.join('; ');
+          } else p.textContent = res.message;
+          box.appendChild(p);
+        }
+        if (r.error) {
+          const e = document.createElement('p');
+          e.className = 'err';
+          e.textContent = 'Error: ' + r.error.message;
+          box.appendChild(e);
+        }
+      }
+
+      function runAll() {
+        const db = createDb();
+        const base = run(db, "CREATE TABLE items (id serial PRIMARY KEY, title text NOT NULL, category_id integer, day integer);\\nCREATE TABLE requests (id serial PRIMARY KEY, name text NOT NULL, phone text NOT NULL, item_id integer REFERENCES items(id));\\nCREATE TABLE notifications (id serial PRIMARY KEY, request_id integer REFERENCES requests(id), text text NOT NULL);");
+        if (base.error) console.error(base.error.message);
+        afterSetup(db);
+        for (const area of document.querySelectorAll('#sql-work textarea.sql')) {
+          const box = document.getElementById(area.id + '-out');
+          const r = run(db, area.value);
+          if (box) draw(box, r);
+        }
+      }
+      for (const area of document.querySelectorAll('#sql-work textarea.sql')) area.addEventListener('input', runAll);
+      runAll();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It is not part of your site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="sql-work">
+      <h2>An index and a transaction on your table<\/h2>
+      <p>Three tables are already created. Write the queries right in the boxes; the result appears under each one (this is a practice sandbox, not real PostgreSQL). The boxes run in order, top to bottom.<\/p>
+      <pre>items(id, title, category_id, day)  -- 2000 rows, category_id from 1 to 20, day from 1 to 365
+requests(id, name, phone, item_id)  -- enquiries: item_id points to the service
+notifications(id, request_id, text) -- notifications: request_id points to the enquiry<\/pre>
+
+      <h3>1. Ask for the query plan before the index<\/h3>
+      <textarea aria-label="1. Ask for the query plan before the index" class="sql" id="q-before" rows="3">EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/textarea>
+      <div class="out" id="q-before-out"><\/div>
+
+      <h3>2. Create an index and ask for the plan again<\/h3>
+      <textarea aria-label="2. Create an index and ask for the plan again" class="sql" id="q-index" rows="4">CREATE INDEX items_category_idx ON items (category_id);
+EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/textarea>
+      <div class="out" id="q-index-out"><\/div>
+      <p>Rows read before the index: <span id="rows-before">2000<\/span>, after: <span id="rows-after">100<\/span><\/p>
+
+      <h3>3. An enquiry and a notification in one transaction<\/h3>
+      <textarea aria-label="3. An enquiry and a notification in one transaction" class="sql" id="q-tx-ok" rows="7">BEGIN;
+INSERT INTO requests (name, phone, item_id) VALUES ('Test visitor', '+1 000 000 0000', 1);
+INSERT INTO notifications (request_id, text) VALUES (1, 'New enquiry');
+COMMIT;
+SELECT COUNT(*) FROM requests;<\/textarea>
+      <div class="out" id="q-tx-ok-out"><\/div>
+
+      <h3>4. A crash in the middle of a transaction: the second step fails, and we don’t write COMMIT<\/h3>
+      <textarea aria-label="4. A crash in the middle of a transaction: the second step fails, and we don’t write COMMIT" class="sql" id="q-tx-fail" rows="6">BEGIN;
+INSERT INTO requests (name, phone, item_id) VALUES ('Second visitor', '+1 000 000 0001', 1);
+INSERT INTO notifications (request_id, text) VALUES (2, NULL);<\/textarea>
+      <div class="out" id="q-tx-fail-out"><\/div>
+
+      <h3>5. Roll back and check that nothing is left of the failed enquiry<\/h3>
+      <textarea aria-label="5. Roll back and check that nothing is left of the failed enquiry" class="sql" id="q-tx-after" rows="3">ROLLBACK;
+SELECT COUNT(*) FROM requests;<\/textarea>
+      <div class="out" id="q-tx-after-out"><\/div>
+
+      <p>The price a write pays for every extra index: <span id="index-cost">every index has to be updated on every write, so inserts and updates get slower, and the index takes up space on disk<\/span><\/p>
+    <\/section>
+
+    <script type="module" data-scaffold id="sql-runner">
+      // Teaching SQL (not real PostgreSQL): the queries in the boxes above run here, in the page’s memory.
+      // You don’t need to read this block. It is not part of your site.
+      class SqlError extends Error {}
+      const KEYWORDS = new Set(
+      'select from where group by having order limit offset asc desc distinct as join inner left right outer on and or not null is in like between true false insert into values update set delete create table index unique primary key references default begin commit rollback explain integer int serial text varchar numeric boolean date timestamp real if exists'.split(
+      ' '
+      )
+      );
+      function tokenize(src) {
+      const out = [];
+      const re = /\\s+|--[^\\n]*|('(?:[^']|'')*')|("(?:[^"]*)")|(\\d+(?:\\.\\d+)?)|([A-Za-z_\\u0400-\\u04FF][A-Za-z0-9_\\u0400-\\u04FF]*)|(<=|>=|<>|!=|\\|\\||[(),.*+\\-\\/=<>;])/gy;
+      let pos = 0;
+      while (pos < src.length) {
+      re.lastIndex = pos;
+      const m = re.exec(src);
+      if (!m) throw new SqlError(\`syntax error: unexpected character “\${src[pos]}”\`);
+      pos = re.lastIndex;
+      if (m[1] !== undefined) out.push({ t: 'str', v: m[1].slice(1, -1).replace(/''/g, "'") });
+      else if (m[2] !== undefined) out.push({ t: 'id', v: m[2].slice(1, -1).toLowerCase(), quoted: true });
+      else if (m[3] !== undefined) out.push({ t: 'num', v: Number(m[3]) });
+      else if (m[4] !== undefined) {
+      const low = m[4].toLowerCase();
+      out.push(KEYWORDS.has(low) ? { t: 'kw', v: low, raw: m[4] } : { t: 'id', v: low });
+      } else if (m[5] !== undefined) out.push({ t: 'op', v: m[5] });
+      }
+      return out;
+      }
+      /** The text of a script, split into statements by “;” outside quotes. */
+      function splitStatements(sql) {
+      const parts = [];
+      let cur = '';
+      let q = false;
+      for (let i = 0; i < sql.length; i++) {
+      const c = sql[i];
+      if (c === "'") q = !q;
+      if (c === ';' && !q) {
+      parts.push(cur);
+      cur = '';
+      } else cur += c;
+      }
+      parts.push(cur);
+      return parts.map((s) => s.replace(/--[^\\n]*/g, '').trim()).filter(Boolean);
+      }
+      class Parser {
+      constructor(tokens) {
+      this.k = tokens;
+      this.i = 0;
+      }
+      peek(o = 0) {
+      return this.k[this.i + o];
+      }
+      isKw(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'kw' && t.v === v;
+      }
+      isOp(v, o = 0) {
+      const t = this.peek(o);
+      return !!t && t.t === 'op' && t.v === v;
+      }
+      eatKw(v) {
+      if (this.isKw(v)) return this.i++, true;
+      return false;
+      }
+      eatOp(v) {
+      if (this.isOp(v)) return this.i++, true;
+      return false;
+      }
+      expectKw(v) {
+      if (!this.eatKw(v)) this.fail(\`expected the word \${v.toUpperCase()}\`);
+      }
+      expectOp(v) {
+      if (!this.eatOp(v)) this.fail(\`expected the symbol “\${v}”\`);
+      }
+      fail(msg) {
+      const t = this.peek();
+      const near = t ? \` near “\${t.t === 'str' ? "'" + t.v + "'" : (t.raw ?? t.v)}”\` : ' at the end of the query';
+      throw new SqlError(\`syntax error\${near}: \${msg}\`);
+      }
+      name() {
+      const t = this.peek();
+      if (t && (t.t === 'id' || (t.t === 'kw' && ['key', 'text', 'date', 'index'].includes(t.v)))) return this.i++, t.v;
+      this.fail('expected a name');
+      }
+      done() {
+      return this.i >= this.k.length;
+      }
+      /* expressions */
+      expr() {
+      return this.or();
+      }
+      or() {
+      let l = this.and();
+      while (this.eatKw('or')) l = { op: 'or', l, r: this.and() };
+      return l;
+      }
+      and() {
+      let l = this.not();
+      while (this.eatKw('and')) l = { op: 'and', l, r: this.not() };
+      return l;
+      }
+      not() {
+      if (this.eatKw('not')) return { op: 'not', e: this.not() };
+      return this.cmp();
+      }
+      cmp() {
+      const l = this.add();
+      const t = this.peek();
+      if (t && t.t === 'op' && ['=', '<>', '!=', '<', '>', '<=', '>='].includes(t.v)) {
+      this.i++;
+      return { op: t.v === '!=' ? '<>' : t.v, l, r: this.add() };
+      }
+      if (this.isKw('is')) {
+      this.i++;
+      const neg = this.eatKw('not');
+      this.expectKw('null');
+      return { op: 'isnull', e: l, neg };
+      }
+      const neg = this.isKw('not') && (this.isKw('like', 1) || this.isKw('in', 1) || this.isKw('between', 1));
+      if (neg) this.i++;
+      if (this.eatKw('like')) return { op: 'like', l, r: this.add(), neg };
+      if (this.eatKw('in')) {
+      this.expectOp('(');
+      const list = [this.expr()];
+      while (this.eatOp(',')) list.push(this.expr());
+      this.expectOp(')');
+      return { op: 'in', l, list, neg };
+      }
+      if (this.eatKw('between')) {
+      const lo = this.add();
+      this.expectKw('and');
+      const hi = this.add();
+      return { op: 'between', e: l, lo, hi, neg };
+      }
+      return l;
+      }
+      add() {
+      let l = this.mul();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['+', '-', '||'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.mul() };
+      } else return l;
+      }
+      }
+      mul() {
+      let l = this.unary();
+      for (;;) {
+      const t = this.peek();
+      if (t && t.t === 'op' && ['*', '/'].includes(t.v)) {
+      this.i++;
+      l = { op: t.v, l, r: this.unary() };
+      } else return l;
+      }
+      }
+      unary() {
+      if (this.eatOp('-')) return { op: 'neg', e: this.unary() };
+      return this.primary();
+      }
+      primary() {
+      const t = this.peek();
+      if (!t) this.fail('expected a value');
+      if (t.t === 'num') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'str') return this.i++, { op: 'lit', v: t.v };
+      if (t.t === 'kw' && t.v === 'null') return this.i++, { op: 'lit', v: null };
+      if (t.t === 'kw' && t.v === 'true') return this.i++, { op: 'lit', v: true };
+      if (t.t === 'kw' && t.v === 'false') return this.i++, { op: 'lit', v: false };
+      if (this.eatOp('(')) {
+      const e = this.expr();
+      this.expectOp(')');
+      return e;
+      }
+      if (t.t === 'id' && this.isOp('(', 1)) {
+      this.i += 2;
+      const fn = t.v;
+      if (!['count', 'sum', 'avg', 'min', 'max', 'lower', 'upper', 'length', 'coalesce'].includes(fn)) throw new SqlError(\`the function \${fn}() is not supported here\`);
+      if (fn === 'count' && this.eatOp('*')) {
+      this.expectOp(')');
+      return { op: 'agg', fn, star: true };
+      }
+      const args = [this.expr()];
+      while (this.eatOp(',')) args.push(this.expr());
+      this.expectOp(')');
+      return ['count', 'sum', 'avg', 'min', 'max'].includes(fn) ? { op: 'agg', fn, e: args[0] } : { op: 'fn', fn, args };
+      }
+      if (t.t === 'id' || (t.t === 'kw' && ['text', 'date', 'key', 'index'].includes(t.v))) {
+      this.i++;
+      if (this.isOp('.') && this.peek(1) && (this.peek(1).t === 'id' || this.peek(1).t === 'kw')) {
+      this.i++;
+      const c = this.peek();
+      this.i++;
+      return { op: 'col', table: t.v, name: c.v };
+      }
+      return { op: 'col', name: t.v };
+      }
+      this.fail('expected a value or a column name');
+      }
+      }
+      const text = (e) => {
+      switch (e.op) {
+      case 'col':
+      return e.table ? \`\${e.table}.\${e.name}\` : e.name;
+      case 'lit':
+      return e.v === null ? 'NULL' : typeof e.v === 'string' ? \`'\${e.v}'\` : String(e.v);
+      case 'agg':
+      return \`\${e.fn}(\${e.star ? '*' : text(e.e)})\`;
+      case 'fn':
+      return \`\${e.fn}(\${e.args.map(text).join(', ')})\`;
+      default:
+      return e.op;
+      }
+      };
+      const hasAgg = (e) => !!e && (e.op === 'agg' || [e.l, e.r, e.e, e.lo, e.hi].some(hasAgg) || (e.args || e.list || []).some(hasAgg));
+      function createDb() {
+      return { tables: {}, indexes: [], txn: null, aborted: false };
+      }
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      const isNum = (v) => typeof v === 'number';
+      function table(db, name) {
+      const t = db.tables[name];
+      if (!t) throw new SqlError(\`table “\${name}” does not exist. Tables: \${Object.keys(db.tables).join(', ') || 'none'}\`);
+      return t;
+      }
+      function coerce(col, v) {
+      if (v === null || v === undefined) return null;
+      const ty = col.type;
+      if (['integer', 'int', 'serial'].includes(ty)) {
+      if (isNum(v) && Number.isInteger(v)) return v;
+      if (typeof v === 'string' && /^-?\\d+$/.test(v.trim())) return Number(v);
+      throw new SqlError(\`the value \${typeof v === 'string' ? \`“\${v}”\` : v} does not fit the type integer (column \${col.name})\`);
+      }
+      if (['numeric', 'real'].includes(ty)) {
+      if (isNum(v)) return v;
+      if (typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v))) return Number(v);
+      throw new SqlError(\`the value “\${v}” does not fit the type \${ty} (column \${col.name})\`);
+      }
+      if (ty === 'boolean') {
+      if (typeof v === 'boolean') return v;
+      throw new SqlError(\`the value “\${v}” does not fit the type boolean (column \${col.name})\`);
+      }
+      return typeof v === 'string' ? v : String(v);
+      }
+      /* ---------- evaluation ---------- */
+      function resolve(ctx, e) {
+      const found = [];
+      for (const c of ctx) {
+      if (e.table && c.alias !== e.table) continue;
+      if (c.cols.includes(e.name)) found.push(c);
+      }
+      if (!found.length) {
+      const all = ctx.flatMap((c) => c.cols.map((n) => \`\${c.alias}.\${n}\`));
+      throw new SqlError(\`column “\${e.table ? e.table + '.' : ''}\${e.name}” does not exist. Available: \${all.join(', ')}\`);
+      }
+      if (found.length > 1) throw new SqlError(\`column “\${e.name}” is ambiguous: it exists in tables \${found.map((f) => f.alias).join(' and ')}. Write \${found[0].alias}.\${e.name}\`);
+      return found[0].row ? found[0].row[e.name] : null;
+      }
+      function cmpVals(a, b) {
+      if (a === null || b === null) return null;
+      if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
+      if (typeof a !== typeof b) throw new SqlError(\`cannot compare \${typeof a === 'number' ? 'a number' : 'text'} with \${typeof b === 'number' ? 'a number' : 'text'}\`);
+      return a < b ? -1 : a > b ? 1 : 0;
+      }
+      function like(s, p) {
+      const re = new RegExp('^' + p.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', 'is');
+      return re.test(s);
+      }
+      function ev(e, ctx, grp) {
+      switch (e.op) {
+      case 'lit':
+      return e.v;
+      case 'col':
+      return resolve(ctx, e);
+      case 'neg': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : -v;
+      }
+      case 'not': {
+      const v = ev(e.e, ctx, grp);
+      return v === null ? null : !v;
+      }
+      case 'and': {
+      const l = ev(e.l, ctx, grp);
+      if (l === false) return false;
+      const r = ev(e.r, ctx, grp);
+      if (r === false) return false;
+      return l === null || r === null ? null : true;
+      }
+      case 'or': {
+      const l = ev(e.l, ctx, grp);
+      if (l === true) return true;
+      const r = ev(e.r, ctx, grp);
+      if (r === true) return true;
+      return l === null || r === null ? null : false;
+      }
+      case '=':
+      case '<>':
+      case '<':
+      case '>':
+      case '<=':
+      case '>=': {
+      const c = cmpVals(ev(e.l, ctx, grp), ev(e.r, ctx, grp));
+      if (c === null) return null;
+      return { '=': c === 0, '<>': c !== 0, '<': c < 0, '>': c > 0, '<=': c <= 0, '>=': c >= 0 }[e.op];
+      }
+      case 'isnull': {
+      const v = ev(e.e, ctx, grp);
+      return e.neg ? v !== null : v === null;
+      }
+      case 'like': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      const m = like(String(l), String(r));
+      return e.neg ? !m : m;
+      }
+      case 'in': {
+      const l = ev(e.l, ctx, grp);
+      if (l === null) return null;
+      const m = e.list.some((x) => cmpVals(l, ev(x, ctx, grp)) === 0);
+      return e.neg ? !m : m;
+      }
+      case 'between': {
+      const v = ev(e.e, ctx, grp);
+      const lo = cmpVals(v, ev(e.lo, ctx, grp)),
+      hi = cmpVals(v, ev(e.hi, ctx, grp));
+      if (lo === null || hi === null) return null;
+      const m = lo >= 0 && hi <= 0;
+      return e.neg ? !m : m;
+      }
+      case '+':
+      case '-':
+      case '*':
+      case '/': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      if (l === null || r === null) return null;
+      if (!isNum(l) || !isNum(r)) throw new SqlError(\`arithmetic (\${e.op}) works on numbers, and this is text\`);
+      if (e.op === '/' && r === 0) throw new SqlError('division by zero');
+      return e.op === '+' ? l + r : e.op === '-' ? l - r : e.op === '*' ? l * r : l / r;
+      }
+      case '||': {
+      const l = ev(e.l, ctx, grp),
+      r = ev(e.r, ctx, grp);
+      return l === null || r === null ? null : String(l) + String(r);
+      }
+      case 'fn': {
+      const a = e.args.map((x) => ev(x, ctx, grp));
+      if (e.fn === 'coalesce') return a.find((x) => x !== null) ?? null;
+      if (a[0] === null) return null;
+      if (e.fn === 'lower') return String(a[0]).toLowerCase();
+      if (e.fn === 'upper') return String(a[0]).toUpperCase();
+      return String(a[0]).length;
+      }
+      case 'agg': {
+      if (!grp) throw new SqlError(\`\${e.fn.toUpperCase()}() can be used only in SELECT or HAVING, not in WHERE\`);
+      if (e.star) return grp.length;
+      const vals = grp.map((g) => ev(e.e, g, null)).filter((v) => v !== null);
+      if (e.fn === 'count') return vals.length;
+      if (!vals.length) return null;
+      if (e.fn === 'min') return vals.reduce((a, b) => (cmpVals(a, b) <= 0 ? a : b));
+      if (e.fn === 'max') return vals.reduce((a, b) => (cmpVals(a, b) >= 0 ? a : b));
+      if (!vals.every(isNum)) throw new SqlError(\`\${e.fn.toUpperCase()}() works on numbers only\`);
+      const s = vals.reduce((a, b) => a + b, 0);
+      return e.fn === 'sum' ? s : s / vals.length;
+      }
+      }
+      throw new SqlError('cannot understand the expression');
+      }
+      /* ---------- statements ---------- */
+      function parseSelect(p) {
+      const q = { distinct: false, items: [], from: null, joins: [], where: null, group: [], having: null, order: [], limit: null, offset: 0 };
+      p.expectKw('select');
+      q.distinct = p.eatKw('distinct');
+      do {
+      if (p.eatOp('*')) q.items.push({ star: true });
+      else if (p.peek() && p.peek().t === 'id' && p.isOp('.', 1) && p.isOp('*', 2)) {
+      const tb = p.peek().v;
+      p.i += 3;
+      q.items.push({ star: true, table: tb });
+      } else {
+      const e = p.expr();
+      let alias = null;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      q.items.push({ e, alias });
+      }
+      } while (p.eatOp(','));
+      if (p.eatKw('from')) {
+      const tableRef = () => {
+      const name = p.name();
+      let alias = name;
+      if (p.eatKw('as')) alias = p.name();
+      else if (p.peek() && p.peek().t === 'id') alias = p.name();
+      return { name, alias };
+      };
+      q.from = tableRef();
+      for (;;) {
+      let kind = null;
+      if (p.eatKw('left')) {
+      p.eatKw('outer');
+      p.expectKw('join');
+      kind = 'left';
+      } else if (p.eatKw('inner')) {
+      p.expectKw('join');
+      kind = 'inner';
+      } else if (p.eatKw('join')) kind = 'inner';
+      else if (p.isKw('right')) throw new SqlError('RIGHT JOIN is not supported in this practice sandbox: swap the tables and write LEFT JOIN');
+      else break;
+      const ref = tableRef();
+      p.expectKw('on');
+      q.joins.push({ kind, ...ref, on: p.expr() });
+      }
+      }
+      if (p.eatKw('where')) q.where = p.expr();
+      if (p.eatKw('group')) {
+      p.expectKw('by');
+      do q.group.push(p.expr());
+      while (p.eatOp(','));
+      }
+      if (p.eatKw('having')) q.having = p.expr();
+      if (p.eatKw('order')) {
+      p.expectKw('by');
+      do {
+      const e = p.expr();
+      const desc = p.eatKw('desc');
+      if (!desc) p.eatKw('asc');
+      q.order.push({ e, desc });
+      } while (p.eatOp(','));
+      }
+      if (p.eatKw('limit')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('LIMIT needs a number after it');
+      p.i++;
+      q.limit = t.v;
+      }
+      if (p.eatKw('offset')) {
+      const t = p.peek();
+      if (!t || t.t !== 'num') p.fail('OFFSET needs a number after it');
+      p.i++;
+      q.offset = t.v;
+      }
+      return q;
+      }
+      /** An index can serve \`col = literal\` among the AND-ed conditions of WHERE. */
+      function indexFor(db, q, tname, alias) {
+      if (!q.where) return null;
+      const conj = [];
+      (function walk(e) {
+      if (e.op === 'and') (walk(e.l), walk(e.r));
+      else conj.push(e);
+      })(q.where);
+      for (const c of conj) {
+      if (c.op !== '=') continue;
+      const [a, b] = c.l.op === 'col' ? [c.l, c.r] : [c.r, c.l];
+      if (a.op !== 'col' || b.op !== 'lit' || (a.table && a.table !== alias)) continue;
+      const ix = db.indexes.find((i) => i.table === tname && i.cols[0] === a.name);
+      if (ix) return { ix, col: a.name, value: b.v };
+      const t = db.tables[tname];
+      if (t.pk.length === 1 && t.pk[0] === a.name) return { ix: { name: \`\${tname}_pkey\`, table: tname, cols: [a.name] }, col: a.name, value: b.v };
+      }
+      return null;
+      }
+      function execSelect(db, q, explain) {
+      let scanned = 0;
+      const plan = [];
+      const trace = { from: 0, where: 0, groups: null, result: 0, limit: 0 };
+      let ctxRows = [];
+      if (!q.from) {
+      ctxRows = [[]];
+      } else {
+      const t0 = table(db, q.from.name);
+      const hit = indexFor(db, q, q.from.name, q.from.alias);
+      let base = t0.rows;
+      if (hit) {
+      base = t0.rows.filter((r) => r[hit.col] === hit.value);
+      scanned += base.length;
+      plan.push(\`Index Scan using index \${hit.ix.name} on “\${q.from.name}”: rows read \${base.length}\`);
+      } else {
+      scanned += t0.rows.length;
+      plan.push(\`Seq Scan on “\${q.from.name}”: the whole table was read, rows \${t0.rows.length}\`);
+      }
+      ctxRows = base.map((r) => [{ alias: q.from.alias, cols: t0.columns.map((c) => c.name), row: r }]);
+      for (const j of q.joins) {
+      const tj = table(db, j.name);
+      const cols = tj.columns.map((c) => c.name);
+      const next = [];
+      scanned += tj.rows.length;
+      plan.push(\`\${j.kind === 'left' ? 'Left ' : ''}Join with “\${j.name}”: rows read \${tj.rows.length}\`);
+      for (const left of ctxRows) {
+      let matched = false;
+      for (const r of tj.rows) {
+      const ctx = [...left, { alias: j.alias, cols, row: r }];
+      if (ev(j.on, ctx, null) === true) {
+      next.push(ctx);
+      matched = true;
+      }
+      }
+      if (!matched && j.kind === 'left') next.push([...left, { alias: j.alias, cols, row: null }]);
+      }
+      ctxRows = next;
+      }
+      }
+      trace.from = ctxRows.length;
+      if (q.where) {
+      if (hasAgg(q.where)) throw new SqlError('COUNT, SUM and similar cannot be used in WHERE: they are computed after the rows are chosen. Use HAVING for conditions on them');
+      ctxRows = ctxRows.filter((c) => ev(q.where, c, null) === true);
+      }
+      trace.where = ctxRows.length;
+      const aggregated = q.group.length > 0 || q.items.some((i) => i.e && hasAgg(i.e)) || (q.having && hasAgg(q.having));
+      const columns = [];
+      const exprs = [];
+      for (const it of q.items) {
+      if (it.star) {
+      const sample = q.from ? [{ alias: q.from.alias, cols: table(db, q.from.name).columns.map((c) => c.name) }, ...q.joins.map((j) => ({ alias: j.alias, cols: table(db, j.name).columns.map((c) => c.name) }))] : [];
+      for (const s of sample) {
+      if (it.table && s.alias !== it.table) continue;
+      for (const n of s.cols) {
+      columns.push(n);
+      exprs.push({ op: 'col', table: s.alias, name: n });
+      }
+      }
+      } else {
+      columns.push(it.alias || (it.e.op === 'col' ? it.e.name : it.e.op === 'agg' || it.e.op === 'fn' ? it.e.fn : text(it.e)));
+      exprs.push(it.e);
+      }
+      }
+      let rows; // each: { out: [...], ctx, grp }
+      if (aggregated) {
+      const groups = new Map();
+      for (const c of ctxRows) {
+      const key = JSON.stringify(q.group.map((g) => ev(g, c, null)));
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(c);
+      }
+      if (!q.group.length && !groups.size) groups.set('', []);
+      const groupText = q.group.map((g) => (g.op === 'col' ? g.name : text(g)));
+      for (const [i, e] of exprs.entries()) {
+      const bare = (x) => !x || x.op === 'agg' || x.op === 'lit' || groupText.includes(x.op === 'col' ? x.name : text(x)) || ([x.l, x.r, x.e].some((s) => s) && [x.l, x.r, x.e].filter(Boolean).every(bare));
+      if (!bare(e)) throw new SqlError(\`column “\${columns[i]}” must either be added to GROUP BY or wrapped in COUNT, SUM, MIN, MAX or AVG, otherwise it is unclear which row of the group to show\`);
+      }
+      rows = [...groups.values()].map((g) => ({ grp: g, ctx: g[0] || [] }));
+      trace.groups = rows.length;
+      if (q.having) rows = rows.filter((r) => ev(q.having, r.ctx, r.grp) === true);
+      rows.forEach((r) => (r.out = exprs.map((e) => ev(e, r.ctx, r.grp))));
+      } else {
+      rows = ctxRows.map((c) => ({ ctx: c, grp: null, out: exprs.map((e) => ev(e, c, null)) }));
+      }
+      if (q.distinct) {
+      const seen = new Set();
+      rows = rows.filter((r) => {
+      const k = JSON.stringify(r.out);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+      });
+      }
+      if (q.order.length) {
+      const keyOf = (r, o) => {
+      if (o.e.op === 'lit' && isNum(o.e.v)) return r.out[o.e.v - 1];
+      if (o.e.op === 'col' && !o.e.table && columns.includes(o.e.name)) return r.out[columns.indexOf(o.e.name)];
+      return ev(o.e, r.ctx, r.grp);
+      };
+      rows.sort((a, b) => {
+      for (const o of q.order) {
+      const x = keyOf(a, o),
+      y = keyOf(b, o);
+      if (x === y) continue;
+      if (x === null) return o.desc ? -1 : 1;
+      if (y === null) return o.desc ? 1 : -1;
+      const c = cmpVals(x, y);
+      if (c !== 0) return o.desc ? -c : c;
+      }
+      return 0;
+      });
+      }
+      trace.result = rows.length;
+      const total = rows.length;
+      if (q.offset) rows = rows.slice(q.offset);
+      if (q.limit !== null) rows = rows.slice(0, q.limit);
+      trace.limit = rows.length;
+      return { kind: 'select', columns, rows: rows.map((r) => r.out), scanned, plan, total, trace };
+      }
+      function checkRow(db, t, row, skipPk) {
+      for (const c of t.columns) {
+      if (row[c.name] === null && (c.notNull || t.pk.includes(c.name))) throw new SqlError(\`column “\${c.name}” of table “\${t.name}” cannot be NULL (NOT NULL constraint violated)\`);
+      if (c.ref && row[c.name] !== null) {
+      const rt = db.tables[c.ref.table];
+      if (!rt) throw new SqlError(\`table “\${c.ref.table}” does not exist\`);
+      if (!rt.rows.some((r) => r[c.ref.col] === row[c.name])) throw new SqlError(\`foreign key violated: table “\${c.ref.table}” has no row where \${c.ref.col} = \${row[c.name]}\`);
+      }
+      }
+      const uniq = [t.pk.length ? t.pk : null, ...t.columns.filter((c) => c.unique).map((c) => [c.name])].filter(Boolean);
+      for (const cols of uniq) {
+      const dup = t.rows.some((r) => r !== skipPk && cols.every((c) => r[c] === row[c]));
+      if (dup) throw new SqlError(\`unique constraint violated: a row with \${cols.map((c) => \`\${c} = \${row[c]}\`).join(', ')} already exists in table “\${t.name}”\`);
+      }
+      }
+      function execOne(db, sql) {
+      const p = new Parser(tokenize(sql));
+      const first = p.peek();
+      if (!first) return null;
+      let explain = false;
+      if (p.eatKw('explain')) explain = true;
+      if (p.isKw('select')) {
+      const q = parseSelect(p);
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      const r = execSelect(db, q, explain);
+      if (explain) return { kind: 'plan', lines: r.plan, scanned: r.scanned };
+      return r;
+      }
+      if (explain) throw new SqlError('EXPLAIN works only with SELECT in this sandbox');
+      if (p.eatKw('begin')) {
+      if (db.txn) throw new SqlError('a transaction has already begun');
+      db.txn = clone({ tables: db.tables, indexes: db.indexes });
+      return { kind: 'msg', message: 'BEGIN: the transaction has started. Until COMMIT, the changes can be undone with ROLLBACK' };
+      }
+      if (p.eatKw('commit')) {
+      if (!db.txn) return { kind: 'msg', message: 'COMMIT: there was no transaction, nothing happened' };
+      db.txn = null;
+      return { kind: 'msg', message: 'COMMIT: the changes are saved for good' };
+      }
+      if (p.eatKw('rollback')) {
+      if (!db.txn) return { kind: 'msg', message: 'ROLLBACK: there was no transaction, nothing happened' };
+      db.tables = db.txn.tables;
+      db.indexes = db.txn.indexes;
+      db.txn = null;
+      db.aborted = false;
+      return { kind: 'msg', message: 'ROLLBACK: every change since BEGIN is undone' };
+      }
+      if (p.eatKw('create')) {
+      if (p.eatKw('unique')) {
+      p.expectKw('index');
+      return createIndex(db, p, true);
+      }
+      if (p.eatKw('index')) return createIndex(db, p, false);
+      p.expectKw('table');
+      if (p.eatKw('if')) (p.expectKw('not'), p.expectKw('exists'));
+      const name = p.name();
+      if (db.tables[name]) throw new SqlError(\`table “\${name}” already exists\`);
+      p.expectOp('(');
+      const t = { name, columns: [], pk: [], rows: [], seq: 0 };
+      do {
+      if (p.eatKw('primary')) {
+      p.expectKw('key');
+      p.expectOp('(');
+      do t.pk.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      continue;
+      }
+      const col = { name: p.name(), type: 'text', notNull: false, unique: false, def: undefined, ref: null };
+      const ty = p.peek();
+      if (!ty || ty.t !== 'kw' || !['integer', 'int', 'serial', 'text', 'varchar', 'numeric', 'boolean', 'date', 'timestamp', 'real'].includes(ty.v)) p.fail('expected a column type: integer, text, numeric, boolean, date or timestamp');
+      p.i++;
+      col.type = ty.v === 'varchar' ? 'text' : ty.v;
+      if (p.eatOp('(')) {
+      while (!p.eatOp(')')) p.i++;
+      }
+      for (;;) {
+      if (p.eatKw('primary')) (p.expectKw('key'), t.pk.push(col.name));
+      else if (p.eatKw('not')) (p.expectKw('null'), (col.notNull = true));
+      else if (p.eatKw('unique')) col.unique = true;
+      else if (p.eatKw('default')) col.def = p.primary().v;
+      else if (p.eatKw('references')) {
+      const rt = p.name();
+      p.expectOp('(');
+      const rc = p.name();
+      p.expectOp(')');
+      if (!db.tables[rt]) throw new SqlError(\`table “\${rt}” has not been created yet: create it first, then refer to it\`);
+      col.ref = { table: rt, col: rc };
+      } else break;
+      }
+      t.columns.push(col);
+      } while (p.eatOp(','));
+      p.expectOp(')');
+      for (const k of t.pk) if (!t.columns.some((c) => c.name === k)) throw new SqlError(\`PRIMARY KEY names a column “\${k}” that does not exist\`);
+      db.tables[name] = t;
+      return { kind: 'msg', message: \`CREATE TABLE: table “\${name}” created\${t.pk.length ? \`, key: \${t.pk.join(', ')}\` : ', but there is no primary key'}\` };
+      }
+      if (p.eatKw('insert')) {
+      p.expectKw('into');
+      const t = table(db, p.name());
+      let cols = t.columns.map((c) => c.name);
+      if (p.eatOp('(')) {
+      cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`table “\${t.name}” has no column “\${c}”. Columns: \${t.columns.map((x) => x.name).join(', ')}\`);
+      }
+      p.expectKw('values');
+      const made = [];
+      do {
+      p.expectOp('(');
+      const vals = [];
+      do vals.push(ev(p.expr(), [], null));
+      while (p.eatOp(','));
+      p.expectOp(')');
+      if (vals.length !== cols.length) throw new SqlError(\`\${cols.length} columns but \${vals.length} values: the numbers must match\`);
+      const row = {};
+      for (const c of t.columns) {
+      const at = cols.indexOf(c.name);
+      let v = at >= 0 ? vals[at] : c.def !== undefined ? c.def : null;
+      if (v === null && c.type === 'serial') v = ++t.seq;
+      row[c.name] = coerce(c, v);
+      if (c.type === 'serial' && row[c.name] > t.seq) t.seq = row[c.name];
+      }
+      checkRow(db, t, row);
+      t.rows.push(row);
+      made.push(row);
+      } while (p.eatOp(','));
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      return { kind: 'msg', message: \`INSERT: rows added \${made.length}\`, changed: made.length };
+      }
+      if (p.eatKw('update')) {
+      const t = table(db, p.name());
+      p.expectKw('set');
+      const sets = [];
+      do {
+      const c = p.name();
+      if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`table “\${t.name}” has no column “\${c}”\`);
+      p.expectOp('=');
+      sets.push([c, p.expr()]);
+      } while (p.eatOp(','));
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      const cols = t.columns.map((c) => c.name);
+      const hit = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      const next = hit.map((r) => {
+      const n = { ...r };
+      for (const [c, e] of sets) n[c] = coerce(t.columns.find((x) => x.name === c), ev(e, [{ alias: t.name, cols, row: r }], null));
+      return [r, n];
+      });
+      for (const [r, n] of next) {
+      checkRow(db, t, n, r);
+      Object.assign(r, n);
+      }
+      return { kind: 'msg', message: \`UPDATE: rows changed \${hit.length}\${where ? '' : '. There was no WHERE condition, so ALL rows of the table were changed'}\`, changed: hit.length };
+      }
+      if (p.eatKw('delete')) {
+      p.expectKw('from');
+      const t = table(db, p.name());
+      const where = p.eatKw('where') ? p.expr() : null;
+      if (!p.done()) p.fail('unexpected text after the end of the query');
+      const cols = t.columns.map((c) => c.name);
+      const gone = t.rows.filter((r) => !where || ev(where, [{ alias: t.name, cols, row: r }], null) === true);
+      for (const r of gone)
+      for (const o of Object.values(db.tables))
+      for (const c of o.columns)
+      if (c.ref && c.ref.table === t.name && o.rows.some((x) => x[c.name] !== null && x[c.name] === r[c.ref.col])) throw new SqlError(\`cannot delete: table “\${o.name}” refers to this row (column \${c.name}). Remove the references first\`);
+      t.rows = t.rows.filter((r) => !gone.includes(r));
+      return { kind: 'msg', message: \`DELETE: rows deleted \${gone.length}\${where ? '' : '. There was no WHERE condition, so ALL rows of the table were deleted'}\`, changed: gone.length };
+      }
+      throw new SqlError('this sandbox knows the commands SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, CREATE INDEX, BEGIN, COMMIT, ROLLBACK and EXPLAIN SELECT');
+      }
+      function createIndex(db, p, unique) {
+      let name = null;
+      if (!p.isKw('on')) name = p.name();
+      p.expectKw('on');
+      const tn = p.name();
+      const t = table(db, tn);
+      p.expectOp('(');
+      const cols = [];
+      do cols.push(p.name());
+      while (p.eatOp(','));
+      p.expectOp(')');
+      for (const c of cols) if (!t.columns.some((x) => x.name === c)) throw new SqlError(\`table “\${tn}” has no column “\${c}”\`);
+      name = name || \`\${tn}_\${cols.join('_')}_idx\`;
+      if (db.indexes.some((i) => i.name === name)) throw new SqlError(\`index “\${name}” already exists\`);
+      db.indexes.push({ name, table: tn, cols, unique });
+      return { kind: 'msg', message: \`CREATE INDEX: index “\${name}” on \${tn}(\${cols.join(', ')}) is built. Now every write to “\${tn}” updates it too\` };
+      }
+      /**
+      * Runs a script: statements split by “;”, executed in order, stopping at the first error.
+      * Returns { results, error }. After an error inside BEGIN the transaction is “aborted”
+      * and every command is refused until ROLLBACK, as in PostgreSQL.
+      */
+      function run(db, sql) {
+      const results = [];
+      for (const s of splitStatements(sql)) {
+      try {
+      if (db.aborted && !/^\\s*rollback\\b/i.test(s)) throw new SqlError('the transaction was aborted after an error: every command is ignored until ROLLBACK');
+      const r = execOne(db, s);
+      if (r) results.push({ ...r, sql: s });
+      } catch (e) {
+      if (!(e instanceof SqlError)) throw e;
+      if (db.txn) db.aborted = true;
+      return { results, error: { message: e.message, sql: s } };
+      }
+      }
+      return { results, error: null };
+      }
+      /** Puts ready rows into an existing table (for seeding a page from the person's brief). */
+      function load(db, name, rows) {
+      const t = table(db, name);
+      for (const r of rows) {
+      const row = {};
+      for (const c of t.columns) {
+      row[c.name] = r[c.name] === undefined ? null : r[c.name];
+      if (c.type === 'serial') (row[c.name] === null && (row[c.name] = ++t.seq), (t.seq = Math.max(t.seq, row[c.name])));
+      }
+      t.rows.push(row);
+      }
+      }
+      /** A value as the person reads it in a result table. */
+      function show(v) {
+      return v === null ? 'NULL' : v === true ? 'true' : v === false ? 'false' : String(v);
+      }
+
+      const unesc = (s) => String(s).replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      // A practice table of 2000 rows. The names come from your brief, the rest is made up.
+      const names = [{{#each items}}'{{title}}', {{/each}}].map(unesc);
+      function afterSetup(db) {
+        const rows = [];
+        for (let i = 1; i <= 2000; i++) rows.push({ title: (names.length ? names[i % names.length] : 'Item') + ' #' + i, category_id: ((i * 7) % 20) + 1, day: ((i * 13) % 365) + 1 });
+        load(db, 'items', rows);
+      }
+
+      function draw(box, r) {
+        box.replaceChildren();
+        for (const res of r.results) {
+          const p = document.createElement('p');
+          if (res.kind === 'select') {
+            const t = document.createElement('table');
+            const head = t.insertRow();
+            for (const c of res.columns) head.appendChild(Object.assign(document.createElement('th'), { textContent: c }));
+            for (const row of res.rows) {
+              const tr = t.insertRow();
+              for (const v of row) tr.insertCell().textContent = show(v);
+            }
+            box.appendChild(t);
+            p.textContent = 'Rows: ' + res.rows.length + '. Read from tables: ' + res.scanned + '.';
+          } else if (res.kind === 'plan') {
+            p.textContent = 'Plan (a simplified model): ' + res.lines.join('; ');
+          } else p.textContent = res.message;
+          box.appendChild(p);
+        }
+        if (r.error) {
+          const e = document.createElement('p');
+          e.className = 'err';
+          e.textContent = 'Error: ' + r.error.message;
+          box.appendChild(e);
+        }
+      }
+
+      function runAll() {
+        const db = createDb();
+        const base = run(db, "CREATE TABLE items (id serial PRIMARY KEY, title text NOT NULL, category_id integer, day integer);\\nCREATE TABLE requests (id serial PRIMARY KEY, name text NOT NULL, phone text NOT NULL, item_id integer REFERENCES items(id));\\nCREATE TABLE notifications (id serial PRIMARY KEY, request_id integer REFERENCES requests(id), text text NOT NULL);");
+        if (base.error) console.error(base.error.message);
+        afterSetup(db);
+        for (const area of document.querySelectorAll('#sql-work textarea.sql')) {
+          const box = document.getElementById(area.id + '-out');
+          const r = run(db, area.value);
+          if (box) draw(box, r);
+        }
+      }
+      for (const area of document.querySelectorAll('#sql-work textarea.sql')) area.addEventListener('input', runAll);
+      runAll();
+    <\/script>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It is not part of your site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'work-exists', kind: 'exists', selector: '#sql-work' },
+				{ id: 'no-blanks', kind: 'text', selector: '#sql-work', matches: '^[^…]*$' },
+				{
+					id: 'explain-before',
+					kind: 'text',
+					selector: '#q-before',
+					matches: '[Ee][Xx][Pp][Ll][Aa][Ii][Nn]\\s+[Ss][Ee][Ll][Ee][Cc][Tt][\\s\\S]*[Ww][Hh][Ee][Rr][Ee][\\s\\S]*category_id'
+				},
+				{
+					id: 'create-index',
+					kind: 'text',
+					selector: '#q-index',
+					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Ii][Nn][Dd][Ee][Xx][\\s\\S]*[Oo][Nn]\\s+items\\s*\\(\\s*category_id'
+				},
+				{
+					id: 'explain-after',
+					kind: 'text',
+					selector: '#q-index',
+					matches: '[Cc][Rr][Ee][Aa][Tt][Ee]\\s+[Ii][Nn][Dd][Ee][Xx][\\s\\S]*[Ee][Xx][Pp][Ll][Aa][Ii][Nn]\\s+[Ss][Ee][Ll][Ee][Cc][Tt]'
+				},
+				{ id: 'rows-before', kind: 'text', selector: '#rows-before', matches: '^\\s*\\d+\\s*$' },
+				{ id: 'rows-after', kind: 'text', selector: '#rows-after', matches: '^\\s*\\d+\\s*$' },
+				{
+					id: 'tx-ok',
+					kind: 'text',
+					selector: '#q-tx-ok',
+					matches: '[Bb][Ee][Gg][Ii][Nn][\\s\\S]*[Ii][Nn][Ss][Ee][Rr][Tt]\\s+[Ii][Nn][Tt][Oo]\\s+[Rr][Ee][Qq][Uu][Ee][Ss][Tt][Ss][\\s\\S]*[Ii][Nn][Ss][Ee][Rr][Tt]\\s+[Ii][Nn][Tt][Oo]\\s+[Nn][Oo][Tt][Ii][Ff][Ii][Cc][Aa][Tt][Ii][Oo][Nn][Ss][\\s\\S]*[Cc][Oo][Mm][Mm][Ii][Tt]'
+				},
+				{
+					id: 'tx-fail-open',
+					kind: 'text',
+					selector: '#q-tx-fail',
+					matches: '^(?![\\s\\S]*[Cc][Oo][Mm][Mm][Ii][Tt])[\\s\\S]*[Bb][Ee][Gg][Ii][Nn][\\s\\S]*[Ii][Nn][Ss][Ee][Rr][Tt]\\s+[Ii][Nn][Tt][Oo]\\s+[Rr][Ee][Qq][Uu][Ee][Ss][Tt][Ss][\\s\\S]*[Ii][Nn][Ss][Ee][Rr][Tt]\\s+[Ii][Nn][Tt][Oo]\\s+[Nn][Oo][Tt][Ii][Ff][Ii][Cc][Aa][Tt][Ii][Oo][Nn][Ss]'
+				},
+				{
+					id: 'tx-rollback',
+					kind: 'text',
+					selector: '#q-tx-after',
+					matches: '[Rr][Oo][Ll][Ll][Bb][Aa][Cc][Kk][\\s\\S]*[Ss][Ee][Ll][Ee][Cc][Tt]\\s+[Cc][Oo][Uu][Nn][Tt]\\('
+				},
+				{ id: 'index-cost', kind: 'text', selector: '#index-cost', matches: '[Ww]rit|[Ii]nsert|[Ss]low|[Ss]pace|[Uu]pdat|[Dd]isk' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Why is a search through an index faster than reading the whole table?',
+				options: [
+					'An index is an ordered structure: every step through it discards almost the whole table, like looking a word up in the index at the back of a book',
+					'An index keeps a copy of the whole table in memory',
+					'An index makes the database read the rows in reverse order'
+				],
+				answer: 0,
+				why: [
+					'Yes. An index tree has a few levels, and millions of rows are found in three or four steps instead of reading every page.',
+					'No: an index is not a copy of the whole table but a compact structure of keys and pointers to rows.',
+					'No: the order of reading has nothing to do with it. The point is that hundreds of times less has to be read.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What price is paid for every extra index?',
+				options: [
+					'Every insert and update has to update the index too, so writing is slower',
+					'The index takes space on disk',
+					'Read queries become slower',
+					'The index has to be kept consistent with the table, and the database does that itself'
+				],
+				answer: [0, 1],
+				why: [
+					'Yes: five indexes mean five extra writes with every insert.',
+					'Yes: big indexes can be comparable to the table in size.',
+					'No: an index usually speeds reading up. Sometimes an index is simply not needed, but it won’t slow reading down.',
+					'True, but that is not a price, it is a chore the database takes on. Its cost shows up as slower writing.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A table of customers has a million rows, and you built an index on the column “active” (two values, roughly half and half). Will it help the query WHERE active = true?',
+				options: [
+					'Hardly: half the table matches, and it is simpler to read it all than to make a trip through the index for every row',
+					'Yes, twice as fast: an index always speeds up any query with WHERE',
+					'No, because an index can’t be built on a yes/no column'
+				],
+				answer: 0,
+				why: [
+					'Yes. An index wins when few rows match. When half of them do, the planner will choose an ordinary scan of the table.',
+					'No: “always” doesn’t exist here, and an index on a column with two values is almost useless.',
+					'No: indexes can be built on text, numbers, dates and yes/no values alike.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each letter of ACID to its meaning',
+				pairs: [
+					['Atomicity', 'a transaction goes through completely or not at all'],
+					['Consistency', 'after a transaction the rules of the data hold: keys, constraints'],
+					['Isolation', 'simultaneous transactions don’t see each other’s unfinished changes'],
+					['Durability', 'what has been confirmed (COMMIT) won’t vanish even in a power failure']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A transaction has two inserts: an enquiry and a notification. The second ended with an error, and then a ROLLBACK was run. What is left in the database?',
+				options: ['Nothing: both inserts are undone', 'The enquiry: the first insert had already gone through', 'A notification without an enquiry'],
+				answer: 0,
+				why: [
+					'Yes. Until COMMIT, everything done inside a transaction is temporary. ROLLBACK returns the tables to the state they had at BEGIN.',
+					'No: that is exactly what a transaction is for. Without one, the enquiry would be left alone, with no notification.',
+					'No: the insert of the notification is the one that failed.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You created an index, but EXPLAIN on a table of 50 rows still shows a scan of the whole table. Is something broken?',
+				options: [
+					'No: on a small table reading everything is simpler, and the planner picks the cheapest path',
+					'Yes, the index has to be re-created',
+					'Yes, EXPLAIN can’t show indexes'
+				],
+				answer: 0,
+				why: [
+					'Yes. The planner compares the costs of the paths itself. The index will be used once the gain becomes noticeable.',
+					'No, there is nothing to re-create.',
+					'No, EXPLAIN is exactly what shows which path was chosen.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'One seat is left, and two purchases arrive at the same moment. What is the most reliable way not to sell it twice?',
+				options: [
+					'One statement: UPDATE seats SET free = free - 1 WHERE free > 0, then check whether a row was changed',
+					'First read the number of seats, then write “that number minus one” in a separate statement',
+					'Ask the buyers not to click at the same time'
+				],
+				answer: 0,
+				why: [
+					'Yes. The condition and the change run as one action under a row lock: the second buyer will see free = 0 and be refused.',
+					'No: between the read and the write the second buyer can read the same number. This is the very lost update from the first lesson.',
+					'No: you can’t rely on people, the rule must be held by the database itself.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-index-what',
+				front: 'What is an index, and how does it speed up a query?',
+				back: 'An ordered structure (usually a tree) of column values and pointers to rows. Instead of reading the whole table, the database walks to the right rows in a few steps.'
+			},
+			{
+				id: 'data-index-cost',
+				front: 'What does an index cost, and when is it useless?',
+				back: 'It slows writing down (the index is updated along with the table) and takes space. It is useless on a small table and on a column where many rows match, such as a yes/no flag.'
+			},
+			{
+				id: 'data-index-explain',
+				front: 'How can you tell whether a query uses an index?',
+				back: 'EXPLAIN before the query shows the plan: Seq Scan means reading the whole table, Index Scan means going through the index. EXPLAIN ANALYZE also runs the query and measures the time.'
+			},
+			{
+				id: 'data-tx-what',
+				front: 'What does a transaction do?',
+				back: 'It bundles several writes into one: BEGIN, the steps, then COMMIT (everything becomes final) or ROLLBACK (everything is undone). If a crash strikes in the middle, the data stays consistent.'
+			},
+			{
+				id: 'data-tx-acid',
+				front: 'What does ACID mean?',
+				back: 'Atomicity: all or nothing. Consistency: the rules of the data hold. Isolation: simultaneous transactions don’t get in each other’s way. Durability: what is confirmed won’t vanish.'
+			}
+		],
+		sources: [
+			{ title: 'PostgreSQL: Indexes', url: 'https://www.postgresql.org/docs/current/indexes.html', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'PostgreSQL: Using EXPLAIN',
+				url: 'https://www.postgresql.org/docs/current/using-explain.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'PostgreSQL: Transactions (tutorial)',
+				url: 'https://www.postgresql.org/docs/current/tutorial-transactions.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Use The Index, Luke!', url: 'https://use-the-index-luke.com/', licence: 'link-only', kind: 'book', lang: 'en' }
+		],
+		videos: [
+			{
+				title: 'Database Indexing Explained (with PostgreSQL) (Hussein Nasser)',
+				url: 'https://www.youtube.com/watch?v=-qNSXK7s7_w',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'The table has two thousand rows. First we’ll ask the database how it searches it without an index, then build an index and compare. After that we’ll record an enquiry so that a crash can’t spoil it.',
+			hints: [
+				'You ask for a plan by putting the word EXPLAIN before an ordinary SELECT. Our condition in WHERE is on the column category_id.',
+				'An index is built on the column that appears in WHERE: CREATE INDEX items_category_idx ON items (category_id). Read the numbers “before” and “after” in the sandbox’s answer, where it says “rows read”.',
+				'A transaction starts with the word BEGIN and ends with COMMIT. If a step failed, COMMIT is not written, and in the fifth box you put ROLLBACK.'
+			],
+			mistakes: {
+				'work-exists': 'The block with the queries has disappeared. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				'explain-before': 'The first box needs a query like EXPLAIN SELECT * FROM items WHERE category_id = 7 …',
+				'create-index': 'An index is created with CREATE INDEX name ON items (category_id). The column in the parentheses must be the one in the WHERE.',
+				'explain-after': 'In the second box, after CREATE INDEX write EXPLAIN SELECT … again, to see the difference.',
+				'rows-before': 'The “before the index” line needs a number: how many rows were read, as the sandbox’s answer says.',
+				'rows-after': 'The “after the index” line needs the number from the second plan.',
+				'tx-ok': 'The third box needs the chain: BEGIN, INSERT INTO requests …, INSERT INTO notifications …, COMMIT.',
+				'tx-fail-open': 'The fourth box needs BEGIN and two inserts, but no COMMIT: the transaction must stay open after the error.',
+				'tx-rollback': 'In the fifth box write ROLLBACK, then SELECT COUNT(*) FROM requests, to check that nothing is left of the failed enquiry.',
+				'index-cost': 'Say what is bad about an extra index: writing slows down because the index is updated along with the table, and it takes up space.'
+			},
+			outro: 'Now you know how to speed up a query and how to protect a pair of writes. Next we’ll look at databases that are built differently from tables.'
+		},
+		say: {
+			EXPLAIN: 'explain',
+			ACID: 'acid',
+			BEGIN: 'begin',
+			COMMIT: 'commit',
+			ROLLBACK: 'roll back',
+			SELECT: 'select',
+			INDEX: 'index',
+			Seq: 'seek',
+			Scan: 'scan'
+		}
+	};
+</script>
+
+<script>
+	import IndexAndTransaction from '../../diagrams/IndexAndTransaction.svelte';
+</script>
+
+## Why a query can be slow
+
+When you ask the database for all the services of category 7, by default it does the simplest thing: it **reads the table row by row** and checks each one. This is called a **full scan** (in a query plan it is called `Seq Scan`, short for sequential scan). On a hundred rows you won’t notice it. On a million rows you will: the database reads a million rows to find ten.
+
+## The index: the pointer at the back of a book
+
+A good book has an alphabetical index at the back: “contract: 14, 87, 203”. You don’t leaf through the whole book for the word “contract”, you look it up in the index and go to the right pages. A database **index** works the same way: it is a separate ordered structure of column values and pointers to rows.
+
+Most often it is a **tree**: on each level the values are laid out in order, and one step discards almost everything. A tree that branches hundreds of ways finds one row among millions in three or four steps. That is why a search through an index barely slows down when the table grows a thousand times.
+
+Play with the diagram. The table-size slider and the “how many rows match” choice show how many pages the database reads with an index and without one. Try the smallest tables and the most common values.
+
+<IndexAndTransaction />
+
+What you should have noticed.
+
+- **The gain grows with the table.** On a table of a hundred rows there is no difference. On a million rows with a rare value, the index reads hundreds of times less.
+- **An index isn’t always needed.** If half the table matches (gender, yes/no, “active”), it is simpler to read it all: a trip through the index for every row costs more. The planner (the part of the database that chooses how to run a query) decides this itself.
+- **Every index costs something.** An insert or an update has to change the table and every index. Five indexes mean five extra writes with every enquiry. They also take up space.
+
+The rules that follow:
+
+1. Build an index for a **specific, frequent query** that is slow, not “just in case” on every column.
+2. A primary key and columns marked `UNIQUE` get an index automatically. But on **foreign keys** (`category_id`) PostgreSQL does not create an index by itself, and joins on them often get faster after you add one by hand.
+3. An index can be **composite**: `ON items (category_id, day)` helps queries that filter by category (and by date as well). The order of the columns matters: such an index serves queries on `category_id` and on the pair, but not queries on `day` alone.
+
+<details>
+<summary>Check yourself: is an index on a yes/no column worth building?</summary>
+
+Almost never. The condition “active = true” matches about half the table, and it is simpler to read the table straight through than to make a trip through the index for every row.
+
+</details>
+
+## How to see what the database does: EXPLAIN
+
+You don’t have to guess: before any query you can write the word `EXPLAIN`, and the database shows the **plan**, how it intends to run it.
+
+```sql
+EXPLAIN SELECT * FROM items WHERE category_id = 7;
+```
+
+In the plan of real PostgreSQL you will see `Seq Scan on items` (reads everything) or `Index Scan using … on items` (goes through the index), and also an estimate of the cost in arbitrary units. The `EXPLAIN ANALYZE` version also runs the query and measures the real time. In the practice below the sandbox prints a simplified model of a plan: how many rows it read. It is a teaching interpreter, not real PostgreSQL, and the numbers in its plan are different, but you can see the same difference between scanning the whole table and using an index.
+
+## A transaction: all or nothing
+
+Now the second topic, about crashes. Buying a ticket is **two writes**: take the seat off and record the order. If the server falls over between them, we get a seat taken with no order. The ticket is lost, and nobody will know. The two writes need to go through **together or not at all**.
+
+That is what a **transaction** does: a group of commands that the database treats as one indivisible action.
+
+```sql
+BEGIN;
+UPDATE seats SET free = free - 1;
+INSERT INTO orders (name, phone) VALUES ('…', '…');
+COMMIT;   -- everything is final now
+```
+
+`BEGIN` opens the transaction, `COMMIT` confirms all the changes at once, and `ROLLBACK` cancels them all. If the server falls over in the middle, everything before `COMMIT` is rolled back on its own. Look at the “Transaction” tab of the diagram: the mode without a transaction leaves the data in a broken state, and the mode with a transaction doesn’t.
+
+The properties of transactions are gathered into the word **ACID**:
+
+- **Atomicity**: all or nothing.
+- **Consistency**: after a transaction the rules of the data hold, foreign keys lead where they should, and no constraint is broken.
+- **Isolation**: two simultaneous transactions don’t see each other’s **unfinished** changes. This is what kept two editors from overwriting each other in the first lesson.
+- **Durability**: what was confirmed with `COMMIT` won’t vanish, even if the power goes off right afterwards.
+
+Isolation has **levels**: the stricter it is, the safer, and the more often transactions have to wait for each other. By default PostgreSQL chooses a moderate one (`READ COMMITTED`), and the strictest is called `SERIALIZABLE`. On your site the moderate one is almost always enough.
+
+One last detail, but it saves you in shops and in booking appointments. Two buyers press “buy” for the last seat at the same moment. You can’t first **read** the number of seats and then **write** “that number minus one”: between those steps the second buyer reads the same number. It is safer in one statement: `UPDATE seats SET free = free - 1 WHERE free > 0`, and then check whether a row was changed. The condition and the change run indivisibly, and the second buyer is refused.
+
+## Practice
+
+You are in the era of 2022: sites now live on cloud databases, and designers think about load in advance. Take a table of two thousand services and speed up the query by category, then record an enquiry so that a crash can’t spoil it.
+
+The page has three ready tables and five boxes. In the first, ask for the plan before the index; in the second, create an index and ask again (how many rows were read, write the numbers on the line under the box). Then in the third write a transaction of two inserts, in the fourth imitate a crash (no COMMIT), and in the fifth roll back and make sure there are no new enquiries.
+
+## What was wrong with MySQL: no transactions
+
+For many years the most popular table engine in MySQL was MyISAM: fast, simple, and **with no transactions and no foreign keys**. Thousands of PHP sites ran on it, and a crash between two writes left half-assembled orders in the database. The InnoDB engine, which has all of this, became the default only in MySQL 5.5, at the end of 2010. Today a database that can do transactions is taken for granted, and nobody wants to explain to a customer where their ticket went.

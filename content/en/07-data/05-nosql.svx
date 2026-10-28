@@ -1,0 +1,827 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/07-data/05-nosql.svx. */
+	export const metadata = {
+		id: '07-data/05-nosql',
+		part: 7,
+		order: 5,
+		title: 'Document, key-value and graph databases: when, and when not',
+		definition: 'NoSQL means databases not built on tables: document (MongoDB), key-value (Redis) and graph (Neo4j). Each has its own job, and a relational one is the default.',
+		summary: 'You’ll see what job each “non-relational” database does (MongoDB, Redis, Neo4j) and when a relational one is enough. Afterwards you can pick a store for each feature of your project, without chasing fashion.',
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'network',
+					label: 'MongoDB|Redis|Neo4j|Postgres',
+					caption: 'Choosing a database',
+					say: 'A different database for every feature? Four servers, four backups, four passwords.'
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'server',
+					label: 'PostgreSQL',
+					caption: 'The default',
+					say: 'Start with one relational database. It does tables, documents (JSON) and transactions.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'lock',
+					label: 'password',
+					caption: 'Who can read it?',
+					say: [
+						{ text: 'I added Redis for sessions.' },
+						{ who: 'Admin', text: 'Close its port to the internet. Thousands of databases sit open with no password.' }
+					]
+				}
+			]
+		},
+		minutes: 25,
+		teaches: ['data-document-db', 'data-key-value', 'data-graph-db', 'data-choose-database'],
+		requires: ['data-relational-model', 'data-index'],
+		practice: {
+			id: 'data-choose-store',
+			title: 'A store for each feature of the project',
+			task: 'The table lists five features of your project. For each one, fill three cells: the kind of store (relational database, document, key-value, graph or file), why, and what you pay for it (for example: no links, no transactions, one more server, data in memory). If one relational database is enough for a feature, say so, and don’t look for another. Below, answer where the data lives and who can read it, and where you chose a relational database although you were tempted by another. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="choose">
+      <h2>Which store for which feature<\/h2>
+      <p>Kinds of store: relational database, document, key-value, graph or a plain file. If one relational database is enough, say so.<\/p>
+      <table>
+        <tr><th>Project feature<\/th><th>Kind of store<\/th><th>Why<\/th><th>What we pay<\/th><\/tr>
+        <tr class="fn catalog"><td>Catalog of services or products (items)<\/td><td class="store">…<\/td><td class="why">…<\/td><td class="cost">…<\/td><\/tr>
+        <tr class="fn requests"><td>Visitors’ enquiries: {{mainAction.label}}<\/td><td class="store">…<\/td><td class="why">…<\/td><td class="cost">…<\/td><\/tr>
+        <tr class="fn sessions"><td>Sessions of signed-in visitors<\/td><td class="store">…<\/td><td class="why">…<\/td><td class="cost">…<\/td><\/tr>
+        <tr class="fn links"><td>Links between the project’s people (people)<\/td><td class="store">…<\/td><td class="why">…<\/td><td class="cost">…<\/td><\/tr>
+        <tr class="fn counter"><td>A fast visitor counter for today<\/td><td class="store">…<\/td><td class="why">…<\/td><td class="cost">…<\/td><\/tr>
+      <\/table>
+      <p>Where the data lives and who can read it: <span id="where">…<\/span><\/p>
+      <p>Where I chose a relational database although I was tempted by another, and why: <span id="boring">…<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It is not part of your site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}<\/title>
+    <link rel="stylesheet" href="styles.css">
+  <\/head>
+  <body>
+    <header class="site-header" id="top">
+      <p class="brand">{{name}}<\/p>
+      <nav aria-label="Site sections">
+        <ul>
+          <li><a href="#sec-1">{{sections.0}}<\/a><\/li>
+          <li><a href="#sec-2">{{sections.1}}<\/a><\/li>
+          <li><a href="#sec-3">{{sections.2}}<\/a><\/li>
+        <\/ul>
+      <\/nav>
+    <\/header>
+
+    <main id="main">
+      <h1>{{name}}<\/h1>
+      <p>{{who}}<\/p>
+      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+
+      <section id="sec-1">
+        <h2>{{sections.0}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-2">
+        <h2>{{sections.1}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="sec-3">
+        <h2>{{sections.2}}<\/h2>
+        <p>A couple of sentences about this section.<\/p>
+      <\/section>
+
+      <section id="offer">
+        <h2>What we offer<\/h2>
+        <div class="cards">
+          {{#each items}}<article class="card">
+            <h3>{{title}}<\/h3>
+            <p>{{text}}<\/p>
+            <p class="price">{{price}}<\/p>
+          <\/article>
+          {{/each}}
+        <\/div>
+      <\/section>
+
+      <section id="enquiry">
+        <h2>{{mainAction.label}}<\/h2>
+        <form action="/enquiry" method="post">
+          <p>
+            <label for="f-name">What should we call you?<\/label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          <\/p>
+          <p>
+            <label for="f-phone">Phone<\/label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required>
+          <\/p>
+          <p><button type="submit">{{mainAction.label}}<\/button><\/p>
+        <\/form>
+      <\/section>
+    <\/main>
+
+    <section data-scaffold id="choose">
+      <h2>Which store for which feature<\/h2>
+      <p>Kinds of store: relational database, document, key-value, graph or a plain file. If one relational database is enough, say so.<\/p>
+      <table>
+        <tr><th>Project feature<\/th><th>Kind of store<\/th><th>Why<\/th><th>What we pay<\/th><\/tr>
+        <tr class="fn catalog"><td>Catalog of services or products (items)<\/td><td class="store">relational database (PostgreSQL)<\/td><td class="why">there are few services, they share the same fields, and selecting and sorting are needed<\/td><td class="cost">nothing: this is the most ordinary case for tables<\/td><\/tr>
+        <tr class="fn requests"><td>Visitors’ enquiries: {{mainAction.label}}<\/td><td class="store">relational database (PostgreSQL)<\/td><td class="why">an enquiry refers to a service, reports and transactions are needed, and this is personal data too<\/td><td class="cost">nothing: links and transactions are exactly what is needed here<\/td><\/tr>
+        <tr class="fn sessions"><td>Sessions of signed-in visitors<\/td><td class="store">key-value (Redis)<\/td><td class="why">a session has to be found instantly by the token from a cookie, and it has a lifetime<\/td><td class="cost">one more server to maintain; after a crash the sessions are lost and the person has to sign in again<\/td><\/tr>
+        <tr class="fn links"><td>Links between the project’s people (people)<\/td><td class="store">relational database (PostgreSQL)<\/td><td class="why">there are few people and few links, so a link table and a JOIN are enough<\/td><td class="cost">if the chains of links become many, queries get complex; then a graph is worth a look<\/td><\/tr>
+        <tr class="fn counter"><td>A fast visitor counter for today<\/td><td class="store">key-value (Redis)<\/td><td class="why">the counter grows with every visit, and an atomic increment in memory is very fast<\/td><td class="cost">the data is in memory: after a crash the counter may reset, so it is not for money<\/td><\/tr>
+      <\/table>
+      <p>Where the data lives and who can read it: <span id="where">everything sits on one server in an EU data center: PostgreSQL and Redis behind a closed port; the owner can read it through the admin panel, and so can the site’s server, and the database ports are not open to the outside<\/span><\/p>
+      <p>Where I chose a relational database although I was tempted by another, and why: <span id="boring">for the catalog and the enquiries: I was tempted by a document database, but enquiries are tied to services, and reports and transactions are needed, which a relational database does<\/span><\/p>
+    <\/section>
+
+
+    <footer class="site-footer">
+      <p>{{name}}, {{city}}<\/p>
+    <\/footer>
+  <\/body>
+<\/html>
+`,
+				'styles.css': `/* styles.css: the page after the CSS part, abbreviated */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1d2430;
+  background-color: #ffffff;
+}
+
+main {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+a {
+  color: #1a4d8f;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+}
+
+.site-header a {
+  color: #ffffff;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  background-color: #1a4d8f;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background-color: #f3f5f8;
+  border-radius: 0.5rem;
+}
+
+.price {
+  font-weight: 600;
+}
+
+input,
+button {
+  font: inherit;
+}
+
+input {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.site-footer {
+  padding: 1rem;
+  background-color: #f3f5f8;
+}
+
+/* Styling for the exercise (blocks with data-scaffold). It is not part of your site. */
+[data-scaffold] {
+  margin: 1.5rem auto;
+  max-width: 50rem;
+  padding: 1rem;
+  border: 2px dashed #7a8aa0;
+  border-radius: 0.5rem;
+  background-color: #fbfcfd;
+}
+
+[data-scaffold] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+[data-scaffold] th,
+[data-scaffold] td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #c4ccd8;
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-scaffold] textarea {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] pre {
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background-color: #eef1f5;
+  font: 0.9rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+}
+
+[data-scaffold] .out {
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+[data-scaffold] .err {
+  color: #8f1d1d;
+}
+`
+			},
+			checks: [
+				{ id: 'choose-exists', kind: 'exists', selector: '#choose' },
+				{ id: 'no-blanks', kind: 'text', selector: '#choose', matches: '^[^…]*$' },
+				{ id: 'functions', kind: 'count', selector: '#choose tr.fn', min: 5 },
+				{
+					id: 'store-named',
+					kind: 'text',
+					selector: '#choose td.store',
+					matches: '[Rr]elational|SQL|Postgres|SQLite|MySQL|[Dd]ocument|Mongo|[Kk]ey|Redis|[Gg]raph|Neo4j|[Ff]ile'
+				},
+				{ id: 'relational-used', kind: 'text', selector: '#choose td.store', matches: '[Rr]elational|SQL|Postgres|SQLite|MySQL' },
+				{ id: 'reasons', kind: 'text', selector: '#choose td.why', matches: '\\S+\\s+\\S+\\s+\\S+\\s+\\S+' },
+				{
+					id: 'cost-named',
+					kind: 'text',
+					selector: '#choose td.cost',
+					matches: '[Ll]ink|[Rr]elation|[Tt]ransaction|JOIN|[Ss]erver|[Mm]emory|[Nn]othing|[Ll]imit|[Tt]ool|[Rr]eport|[Mm]aintain|[Mm]aintenance|[Cc]omplex|[Qq]uer|[Cc]rash|[Ll]ost|[Dd]uplicat'
+				},
+				{ id: 'where-readers', kind: 'text', selector: '#where', matches: '[Ss]erver|[Cc]loud|[Hh]ost|[Cc]ountry|[Rr]ead|[Aa]ccess|[Aa]dmin|[Pp]assword|EU|[Rr]egion' },
+				{ id: 'boring-choice', kind: 'text', selector: '#boring', matches: '(?=[\\s\\S]*(?:[Rr]elational|PostgreSQL|SQL))(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each kind of database to the job it suits best',
+				pairs: [
+					['Relational (PostgreSQL)', 'catalogs, enquiries, orders: linked data with reports and transactions'],
+					['Document (MongoDB)', 'records with different fields, read whole in one piece'],
+					['Key-value (Redis)', 'sessions, caches and counters: fast by key, often with a lifetime'],
+					['Graph (Neo4j)', 'links several steps deep: friends of friends, recommendations, fraud detection']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Where is it best to keep the sessions of signed-in visitors: a token from a cookie, and a lifetime of half an hour?',
+				options: [
+					'In a key-value store: a record is found instantly by its token, and the lifetime can be set',
+					'In a graph database: a session is a link between a person and the site',
+					'In a separate document inside the enquiries table'
+				],
+				answer: 0,
+				why: [
+					'Yes. The key is the token, the value is the session. Redis does it in a fraction of a millisecond and deletes the expired ones itself. But a small site can perfectly well keep sessions in an ordinary table too.',
+					'No: graphs are about links several steps deep, and a session has no links.',
+					'No: sessions shouldn’t be mixed with enquiries, because they have different lifetimes and different secrecy.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A small site: a catalog of thirty services, enquiries with contact details, a monthly report. What is the default choice?',
+				options: [
+					'One relational database, for example PostgreSQL or SQLite',
+					'MongoDB for the catalog and Redis for the enquiries',
+					'A graph database, because services are linked to people'
+				],
+				answer: 0,
+				why: [
+					'Yes. Linked data, reports and transactions are what relational databases were invented for. And JSON columns cover the rare “pieces with any fields”.',
+					'No: you get two databases instead of one and lose the links between enquiries and services.',
+					'No: there are few people and few services, and links one step deep are handled perfectly well by a JOIN.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What do you pay for choosing a document database for data that is linked together?',
+				options: [
+					'You have to check links and integrity yourself: there is no JOIN or foreign key of the familiar kind',
+					'Data is often duplicated across several documents, and has to be fixed everywhere',
+					'Reports and complex selections have to be assembled by hand',
+					'The database stops storing JSON'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the main price of flexibility is that nobody tidies up for you.',
+					'Yes: by nesting a service in every enquiry you get the very update anomalies from lesson 3.',
+					'Yes: reports are a strong side of SQL, and a weaker one in document databases.',
+					'No: on the contrary, JSON is the native format of a document database.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You need “friends of friends of friends” for recommendations, and there are millions of such links. Which store fits?',
+				options: [
+					'A graph database: walking edges several steps deep is its native job',
+					'Key-value: under a person’s key sits the list of their friends',
+					'A JSON file'
+				],
+				answer: 0,
+				why: [
+					'Yes. When links are the main thing and the steps are many, a graph is faster and simpler: the query reads like a path along edges. But most sites have no such case.',
+					'No: getting one person’s friends is easy, but a walk three steps down the chain has to be done by hand, calling the store many times.',
+					'No: the file would have to be read whole for every question.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why not give every feature of the site its own “best-suited” database?',
+				options: [
+					'Every new database is one more server to run, update, secure and back up, and one more point of failure',
+					'Databases of different kinds can’t be installed on the same server',
+					'The law forbids using more than one database'
+				],
+				answer: 0,
+				why: [
+					'Yes. All that work falls on you, and on a small site the “best-suited” database most often brings no gain. The rule: take another database once you have measured that you can’t manage without it.',
+					'No: they can, and it is often done.',
+					'No: there is no such law.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'data-nosql-meaning',
+				front: 'What does NoSQL mean, and when are such databases appropriate?',
+				back: '“Not only SQL”: databases that store data other than in tables, such as documents, key-value pairs and graphs. They fit when a task has a special shape: pieces with different fields, fast counters and sessions, links several steps deep.'
+			},
+			{
+				id: 'data-nosql-document',
+				front: 'A document database: what does it store, and what does it lose?',
+				back: 'It stores JSON documents with arbitrary fields (MongoDB). It is handy when a document is read whole. It loses the familiar links, JOINs and integrity checks: you tidy up yourself, and nested copies get duplicated.'
+			},
+			{
+				id: 'data-nosql-kv',
+				front: 'Key-value: what is it for, and what is the risk?',
+				back: 'A dictionary of “key → value” (Redis), usually in memory: sessions, caches, counters, limits, queues. It is fast and supports a lifetime. You can’t search by content, and after a crash the data in memory may be lost.'
+			},
+			{
+				id: 'data-nosql-graph',
+				front: 'When do you need a graph database?',
+				back: 'When the main thing is links several steps deep: “friends of friends”, recommendations, anti-fraud, routes. For an ordinary site, where a link is one step, a JOIN is enough.'
+			},
+			{
+				id: 'data-choose-default',
+				front: 'Which database is the default, and why?',
+				back: 'One relational database (PostgreSQL or SQLite): it does links, transactions, reports and JSON fields. Every extra database is another server, more backups and a point of failure, so add one once you have measured that you can’t do without it.'
+			}
+		],
+		sources: [
+			{
+				title: 'MongoDB Docs: Data Modeling',
+				url: 'https://www.mongodb.com/docs/manual/data-modeling/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{ title: 'Redis Docs: Data types', url: 'https://redis.io/docs/latest/develop/data-types/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{
+				title: 'Neo4j: Graph database concepts',
+				url: 'https://neo4j.com/docs/getting-started/appendix/graphdb-concepts/',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'PostgreSQL: JSON Types',
+				url: 'https://www.postgresql.org/docs/current/datatype-json.html',
+				licence: 'proprietary-link',
+				kind: 'docs',
+				lang: 'en'
+			},
+			{
+				title: 'Dan McKinley: Choose Boring Technology',
+				url: 'https://mcfunley.com/choose-boring-technology',
+				licence: 'link-only',
+				kind: 'article',
+				lang: 'en'
+			}
+		],
+		videos: [
+			{
+				title: '4 Types of NoSQL Databases Explained (MongoDB, Redis, Cassandra, Neo4j)',
+				url: 'https://www.youtube.com/watch?v=TkGmX3ExVQg',
+				licence: 'proprietary-link',
+				kind: 'video',
+				lang: 'en'
+			}
+		],
+		guide: {
+			intro: 'You’re about to decide where your project keeps each of its features. The honest answer is often boring: “in one ordinary database”. That’s fine.',
+			hints: [
+				'For each feature, think about the questions it will be asked: find by key, walk the links, assemble a report, show it whole. The kind of store follows from the questions.',
+				'In “what we pay” write what the chosen store lacks compared with tables: links, transactions, familiar queries, or that it needs a server of its own.',
+				'On the last line, name a feature for which a relational database was enough although another could have been chosen, and explain why.'
+			],
+			mistakes: {
+				'choose-exists': 'The block with the decision table has disappeared. It was in the page, so put it back.',
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Replace it with your own text.',
+				functions: 'You need five rows of features. Don’t delete rows of the table.',
+				'store-named': 'The “Kind of store” column must name a kind: relational database, document, key-value, graph or file.',
+				'relational-used': 'A relational database is never chosen. For the linked data of a project it almost always fits.',
+				reasons: 'Explain the choice properly: at least a few words in every row of the “Why” column.',
+				'cost-named': 'The “What we pay” column says nothing about a price. Write what the store lacks or what it demands.',
+				'where-readers': 'Say where the data lives (on which server, in which country) and who can read it.',
+				'boring-choice': 'Name a case where you chose a relational database, and explain why that choice beats the tempting one.'
+			},
+			outro: 'The choice is made and justified, and there is nothing exotic in it: that is a good sign. The next lesson is about searching the data, by words and by meaning.'
+		},
+		say: {
+			NoSQL: 'no S Q L',
+			MongoDB: 'mongo D B',
+			Redis: 'redis',
+			Neo4j: 'neo four J',
+			PostgreSQL: 'postgres Q L',
+			SQLite: 'S Q L lite',
+			JSON: 'jason',
+			JSONB: 'jason B',
+			TTL: 'T T L',
+			INCR: 'incr'
+		}
+	};
+</script>
+
+<script>
+	import DataShapes from '../../diagrams/DataShapes.svelte';
+</script>
+
+## Tables aren’t the only way
+
+So far we have stored data in tables. That is the most common way, but not the only one. Around 2009 the word **NoSQL** came into use. It is usually read as “not only SQL”: databases where data is arranged differently from tables. They did not appear out of fashion but out of specific problems. Big sites ran into the fact that one relational database could not keep up with the writes, and that the data of different pages had different shapes. So people began trying other shapes.
+
+A craze followed: “tables are obsolete, put everything in MongoDB”. A few years later the wave ebbed. Relational databases learned to store JSON and to scale, and many of the new databases, on the contrary, added SQL and transactions. The sensible conclusion is that **every shape of data has a job where it is best**, and almost always there are fewer such jobs than it seems.
+
+Look at the same data from your brief in four shapes and ask it different questions. For each question the diagram rates how comfortably the chosen shape handles it.
+
+<DataShapes />
+
+## Document databases
+
+A **document database** (MongoDB, CouchDB, Firestore) stores **documents**: usually JSON objects with nesting, each with its own set of fields. A service can be one document with its credentials and its leaders nested right inside.
+
+This is good when:
+
+- a document is read **whole, in one piece** (a service page takes everything at once);
+- records have **different fields** (one service has a schedule, another doesn’t);
+- the schema changes often on the go.
+
+The price. A document has no familiar links: by nesting a service in every enquiry you duplicate it and return to the very “update anomalies” of lesson 3. The “schema” now lives not in the database but in the head of the code: the database won’t stop you writing a price as a string in one document and as a number in another. Reports and joins are harder.
+
+An important caveat: **PostgreSQL can do documents**. The `jsonb` type stores JSON in a column, which you can search and index. So a table with one JSON column is often enough for “pieces with any fields”, and a separate database is not needed.
+
+## Key-value
+
+The simplest shape: a **dictionary**. A key unambiguously names a value, and that is all. The best-known store of this kind is **Redis**, which keeps data right in memory and so answers in a fraction of a millisecond.
+
+What it is taken for:
+
+- **sessions**: the key is the token from a cookie, the value is what is known about the person, and the entry disappears by itself after half an hour;
+- **caches**: a ready-made page or the result of a heavy query;
+- **counters and limits**: “no more than five sign-in attempts a minute from this address”;
+- **queues** of short tasks.
+
+The price: you can’t search by value (only by key), there are no links, and data in memory may be lost in a crash (this can be configured, but then the speed goes). So Redis is most often a **helper** to the main database, not a replacement.
+
+## Graph databases
+
+When the **links** are the main thing in the data, a graph fits: **nodes** (people, services) and **edges** between them (leads, knows, bought). The best-known graph database is **Neo4j**. A query reads like a path: “find the people who lead the services that my acquaintances lead”.
+
+It is a strength for tasks like “friends of friends of friends”, recommendations (“people who bought this also bought…”), finding fraudulent chains, routes. But an ordinary site has links one step deep: a service belongs to a category, an enquiry to a service. An ordinary JOIN handles those, and a graph database isn’t needed here. It is worth knowing about so that you recognize “your” problem if it ever turns up.
+
+There are other shapes too: **column** stores for huge analytics (ClickHouse), **time series** stores for metrics, **search engines** and **vector databases** (more on those in the next lesson).
+
+## How to choose
+
+Questions worth asking before choosing.
+
+1. **What questions will the data be asked?** Find by key, walk the links, assemble a report, show whole? The shape of storage should follow from the questions, not from the name of a fashionable database.
+2. **Do you need transactions and integrity?** For enquiries, orders and money, yes. For a visitor counter, no.
+3. **How much data and load?** On a brochure site with a hundred enquiries a year, these questions don’t even arise.
+4. **Who will look after all this?** Every new database is one more server: to start, update, secure, back up and watch. That is the real price.
+
+This gives a working rule: **by default take one relational database** (PostgreSQL, or SQLite for the smallest project) and add another when you have measured that you can’t do without it. The engineer Dan McKinley called this “choosing boring technology”: every team has only a few “innovation tokens”, and spending one on an exotic store is sensible only if that is where you differ from everyone else. For a website that is almost never the case.
+
+<details>
+<summary>Check yourself: for enquiries with contact details and a monthly report, would you choose a document database?</summary>
+
+No. An enquiry refers to a service, a report is a grouping by dates and services, and transactions are needed too. All of that is a strong side of a relational database. A document database would make you duplicate the service in every enquiry.
+
+</details>
+
+## Where the data lives and who can read it
+
+Every non-relational database has its own access settings, and this is where mistakes are made most often. For years, thousands of MongoDB and Redis instances were found open to the internet **with no password**, because during installation, for the convenience of development, access had not been closed. Data was copied out of them, and sometimes wiped, with a ransom demanded. The rule is simple: a database must not be visible from the internet (the port is closed by a firewall, and only its own server can reach it), it has a password, and the brief records for each feature **who** reads the data and **where** it lives. The latter (in which country) comes back in lesson 7: for personal data it is not a whim but a legal matter.
+
+## Practice
+
+You are in the era of 2022. Sites no longer live on one database: a cache, search and sessions get attached to it. Let’s decide what your project really needs.
+
+The page has a table of five features: a catalog, enquiries, sessions, links between people and a fast counter. For each, choose a store, explain the choice and name the price. Then say where the data lives and who can read it, and show one place where you chose an ordinary relational database despite the temptation.
+
+## What was wrong with 2010
+
+In the early 2010s “NoSQL” became a banner: many startups took MongoDB for everything, because it needed no schema and promised endless growth. The growth did not come to everyone, but the price (a “schema” in the head of the code, duplicated data, reports by hand) came to all. By the middle of the decade many had gone back to relational databases and brought with them a lesson: **choose by the job, not by fashion**.
