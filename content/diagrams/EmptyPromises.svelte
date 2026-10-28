@@ -7,12 +7,37 @@
 <script lang="ts">
 	import './shared.css';
 
-	let text = $state(
-		'Мы команда профессионалов с богатым опытом. Мы предлагаем индивидуальный подход к каждому клиенту и гарантируем качественный результат. С 2012 года мы помогли владельцам 140 участков в Заречье уточнить границы. Мы заботимся о вас.'
-	);
+	import { pick } from '#lib/i18n/index.ts';
 
-	const stock = ['команда профессионалов', 'профессионал', 'богатый опыт', 'индивидуальный подход', 'качественн', 'заботимся', 'лучш', 'уникальн', 'широкий спектр', 'клиентоориентирован', 'гарантируем'];
-	const re = new RegExp(`(${stock.join('|')})[а-яё]*`, 'giu');
+	const W = pick({
+		ru: {
+			text: 'Мы команда профессионалов с богатым опытом. Мы предлагаем индивидуальный подход к каждому клиенту и гарантируем качественный результат. С 2012 года мы помогли владельцам 140 участков в Заречье уточнить границы. Мы заботимся о вас.',
+			stock: ['команда профессионалов', 'профессионал', 'богатый опыт', 'индивидуальный подход', 'качественн', 'заботимся', 'лучш', 'уникальн', 'широкий спектр', 'клиентоориентирован', 'гарантируем'],
+			pre: '',
+			tail: '[а-яё]',
+			caption: 'Найдите фразы, которые подойдут любому конкуренту',
+			label: 'Текст («О нас» или «Обо мне»; свой можно вставить)',
+			sentences: 'Предложений: ',
+			withFact: ', с числом или датой: ',
+			stockCount: '. Стандартных оборотов: ',
+			note: 'Отмеченное это кандидаты на «проверку заменой»: можно ли поставить это же предложение на сайт конкурента, и ничего не изменится? Тогда оно пустое. Программа ничего не доказывает: она лишь подсказывает, куда смотреть.'
+		},
+		en: {
+			text: 'We are a team of dedicated professionals with a wealth of experience. We offer a personalized approach to every client and guarantee a high-quality result. Since 2012 we have helped the owners of 140 lots in Riverbend confirm their boundaries. We care about you.',
+			stock: ['team of (?:dedicated |passionate |experienced )?professional', 'professional', 'wealth of experience', 'years of experience', '(?:personali[sz]ed|individual|tailored|bespoke) (?:approach|service|solution)', 'high[- ]quality', 'quality', 'we care', 'best', 'unique', 'wide range', 'customer[- ](?:focused|centric)', 'client[- ]focused', 'we guarantee', 'guarantee', 'dedicated', 'passionate', 'cutting[- ]edge', 'world[- ]class', 'innovative', 'state[- ]of[- ]the[- ]art'],
+			pre: '\\b',
+			tail: '[a-z’]',
+			caption: 'Find the phrases that would fit any competitor',
+			label: 'Text (an “About us” or “About me”; you can paste your own)',
+			sentences: 'Sentences: ',
+			withFact: ', with a number or a date: ',
+			stockCount: '. Stock phrases: ',
+			note: 'What is marked is a candidate for the swap test: could the same sentence go on a competitor’s site with nothing changed? Then it is empty. The program proves nothing: it only suggests where to look.'
+		}
+	});
+	let text = $state(W.text);
+
+	const re = new RegExp(`${W.pre}(${W.stock.join('|')})${W.tail}*`, 'giu');
 
 	const parts = $derived.by(() => {
 		const out: { t: string; hit: boolean }[] = [];
@@ -32,17 +57,17 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Найдите фразы, которые подойдут любому конкуренту</figcaption>
-	<label class="area">Текст («О нас» или «Обо мне»; свой можно вставить)
+	<figcaption>{W.caption}</figcaption>
+	<label class="area">{W.label}
 		<textarea rows="5" bind:value={text}></textarea>
 	</label>
 	<p class="dg-out" aria-live="polite">
-		Предложений: <strong>{sentences.length}</strong>, с числом или датой: <strong>{withFact}</strong>. Стандартных оборотов: <strong>{hits}</strong>.
+		{W.sentences}<strong>{sentences.length}</strong>{W.withFact}<strong>{withFact}</strong>{W.stockCount}<strong>{hits}</strong>.
 	</p>
 	<p class="marked">
 		{#each parts as p, i (i)}{#if p.hit}<mark>{p.t}</mark>{:else}{p.t}{/if}{/each}
 	</p>
-	<p class="dg-out">Отмеченное это кандидаты на «проверку заменой»: можно ли поставить это же предложение на сайт конкурента, и ничего не изменится? Тогда оно пустое. Программа ничего не доказывает: она лишь подсказывает, куда смотреть.</p>
+	<p class="dg-out">{W.note}</p>
 </figure>
 
 <style>

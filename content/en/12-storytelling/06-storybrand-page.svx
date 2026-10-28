@@ -1,0 +1,320 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/06-storybrand-page.svx. */
+	export const metadata = {
+		id: '12-storytelling/06-storybrand-page',
+		part: 12,
+		order: 6,
+		title: 'StoryBrand as the skeleton of a page',
+		definition: 'StoryBrand is Donald Miller’s seven-part framework: a hero with a want, a problem, a guide, a plan, a call to action, stakes, success. It orders a home page.',
+		summary:
+			'You’ll take the seven parts of Donald Miller’s StoryBrand and lay a home page out along them: a hero with a want, a problem, a guide, a plan, a call to action, stakes and success. Afterwards you have a working draft of a home page in which the visitor is the hero and you are the guide.',
+		minutes: 30,
+		teaches: ['story-storybrand-page'],
+		requires: ['story-heros-journey', 'copy-storybrand'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: '3 layers of a problem', caption: 'StoryBrand', say: 'Outer layer: the job is stuck. Inner: worry. Philosophical: it shouldn’t be this way. Sites usually name only the first.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'why now?', caption: 'Stakes', say: 'One honest line on what the person stands to lose. Scare tactics count as unfair: stay calm and exact.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'a 3-step plan', say: 'A three-step plan removes the fear of the unknown. Success is a picture of “after”, not a slogan.' }
+			]
+		},
+		practice: {
+			id: 'story-storybrand',
+			title: 'A home page in seven blocks',
+			task: 'Build a home page of six sections. In the first, in the paragraph want, write what the visitor gets. In the problem section write three layers: outer, inner and “unfairness”. In the guide section write empathy and competence (back the competence with a proof from the brief). Give the plan three steps. Add a second button with the label of your main action in the plan. Give the stakes and success sections one honest paragraph each. The words “best” and “unique” must not appear. Replace every “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <section class="sb" id="sb-hero">
+        <h1>{{title}}</h1>
+        <p class="want">…</p>
+        <a class="cta" href="#sb-plan">{{mainAction.label}}</a>
+      </section>
+
+      <section class="sb" id="sb-problem">
+        <h2>…</h2>
+        <ul>
+          <li class="external">…</li>
+          <li class="internal">…</li>
+          <li class="philosophical">…</li>
+        </ul>
+      </section>
+
+      <section class="sb" id="sb-guide">
+        <h2>…</h2>
+        <p class="empathy">…</p>
+        <p class="authority">…</p>
+      </section>
+
+      <section class="sb" id="sb-plan">
+        <h2>…</h2>
+        <ol>
+          <li>…</li>
+          <li>…</li>
+          <li>…</li>
+        </ol>
+      </section>
+
+      <section class="sb" id="sb-stakes">
+        <h2>…</h2>
+        <p>…</p>
+      </section>
+
+      <section class="sb" id="sb-success">
+        <h2>…</h2>
+        <p>…</p>
+      </section>
+    </main>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <section class="sb" id="sb-hero">
+        <h1>{{title}}</h1>
+        <p class="want">You get a clear answer and a plan of action without wasted trips.</p>
+        <a class="cta" href="#sb-plan">{{mainAction.label}}</a>
+      </section>
+
+      <section class="sb" id="sb-problem">
+        <h2>A question that hangs around</h2>
+        <ul>
+          <li class="external">The matter stands still while the deadlines go by.</li>
+          <li class="internal">It’s worrying and awkward: it isn’t clear whom to ask.</li>
+          <li class="philosophical">Sorting out your own affairs shouldn’t be this hard.</li>
+        </ul>
+      </section>
+
+      <section class="sb" id="sb-guide">
+        <h2>We know this</h2>
+        <p class="empathy">We understand how unpleasant it is to put a question off, and we explain everything in plain words.</p>
+        <p class="authority">We work from documents: {{proofs.0.title}}.</p>
+      </section>
+
+      <section class="sb" id="sb-plan">
+        <h2>How it will go</h2>
+        <ol>
+          <li>You tell us about your situation.</li>
+          <li>We name the time, the price and the order of work.</li>
+          <li>You get the result and a clear next step.</li>
+        </ol>
+        <a class="cta" href="#sb-hero">{{mainAction.label}}</a>
+      </section>
+
+      <section class="sb" id="sb-stakes">
+        <h2>If nothing is done</h2>
+        <p>The question won’t go away by itself, and the time left to settle it will get shorter.</p>
+      </section>
+
+      <section class="sb" id="sb-success">
+        <h2>How it will be afterwards</h2>
+        <p>You know what to do next, and you stop thinking about it at night.</p>
+      </section>
+    </main>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'six-sections', kind: 'count', selector: 'main > section.sb', min: 6 },
+				{ id: 'no-blanks', kind: 'text', selector: 'main', matches: '^[^…]*$' },
+				{ id: 'want', kind: 'text', selector: '#sb-hero p.want', matches: '^\\s*(\\S+\\s+){4}\\S+' },
+				{ id: 'cta-guard', kind: 'field', selector: '#sb-hero a.cta', field: 'mainAction.label' },
+				{ id: 'cta-twice', kind: 'count', selector: 'a.cta', min: 2 },
+				{ id: 'problem-three', kind: 'count', selector: '#sb-problem li.external, #sb-problem li.internal, #sb-problem li.philosophical', min: 3 },
+				{ id: 'empathy', kind: 'text', selector: '#sb-guide p.empathy', matches: '^\\s*(\\S+\\s+){5}\\S+' },
+				{ id: 'authority-proof', kind: 'field', selector: '#sb-guide p.authority', field: 'proofs[].title', min: 1, when: { brief: 'proofs[].title' } },
+				{ id: 'plan-steps', kind: 'count', selector: '#sb-plan li', min: 3, max: 4 },
+				{ id: 'stakes', kind: 'text', selector: '#sb-stakes p', matches: '^\\s*(\\S+\\s+){5}\\S+' },
+				{ id: 'success', kind: 'text', selector: '#sb-success p', matches: '^\\s*(\\S+\\s+){5}\\S+' },
+				{ id: 'plain', kind: 'text', selector: 'main', matches: '^(?![\\s\\S]*(?:\\b[Bb]est\\b|[Uu]nique|#\\s?1|[Ww]orld-class|[Ll]eading provider))[\\s\\S]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the blocks of a page in StoryBrand order',
+				items: ['The hero wants something', 'The problem', 'The guide', 'The plan', 'The call to action', 'What happens if they don’t act', 'Success']
+			},
+			{
+				type: 'multiple',
+				prompt: 'What are the three layers of the hero’s problem in this framework?',
+				options: ['Outer: what stands in the way externally', 'Inner: what the person feels', 'Philosophical: why this is unfair', 'Financial: how much it costs'],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the outer problem is clear to everyone, and measurable.',
+					'Yes: people decide because of feelings, so the inner layer matters most.',
+					'Yes: a short line about how things “should be” gives the problem meaning.',
+					'No: price isn’t a layer of the problem, it belongs to your offer.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What two traits make up the image of the guide?',
+				options: ['Empathy and competence', 'Modesty and mystery', 'Speed and price'],
+				answer: 0,
+				why: [
+					'Yes: “we understand you” and “we know how to do this”. One without the other doesn’t work.',
+					'No: mystery tends to get in the way of trust.',
+					'No: speed and price belong to the offer, not to the guide’s image.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does competence differ from boasting?',
+				options: [
+					'Competence is a checkable fact: a document, a length of time, a number; boasting is a judgment',
+					'Competence is the words “best” and “leader”',
+					'It doesn’t'
+				],
+				answer: 0,
+				why: [
+					'Yes: a reader can check “license number…” or “since 2008”, but not “the best”.',
+					'No: those are empty judgments, and they prove nothing.',
+					'No: the difference is basic, especially for experts.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How many steps does a plan usually have?',
+				options: ['Three simple steps', 'Twelve, so that everything is detailed', 'One'],
+				answer: 0,
+				why: [
+					'Yes: three steps read as a simple path, and they’re easy to remember.',
+					'No: twelve steps are frightening, and the details can go lower down.',
+					'No: one step doesn’t make a plan.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you describe the “stakes” honestly?',
+				options: [
+					'Name the real consequences of inaction calmly, without scare tactics',
+					'Scare people: “you’ll miss the chance forever”',
+					'Don’t write them at all'
+				],
+				answer: 0,
+				why: [
+					'Yes: one calm line about what the person stands to lose is enough.',
+					'No: scare tactics are considered an unfair practice, and the marketing and ethics lessons come back to them.',
+					'No: without stakes there is no reason to act now.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-sb7', front: 'How does StoryBrand lay out a home page?', back: 'A first screen with the hero’s want and a button, then the problem, the guide, a three-step plan with the button again, the stakes and success.' },
+			{ id: 'story-guide-traits', front: 'How does a page prove the guide’s competence?', back: 'With a fact from the brief: a document, a length of time, a number of jobs done. Judgments such as “best” prove nothing.' },
+			{ id: 'story-three-problems', front: 'What are the three layers of the hero’s problem?', back: 'Outer (what is in the way), inner (what they feel), philosophical (why it is unfair).' },
+			{ id: 'story-plan-three', front: 'Why does a plan have three steps?', back: 'Three steps read as a simple path and are easy to remember. The details can go lower down.' }
+		],
+		sources: [
+			{ title: 'StoryBrand: Donald Miller’s site', url: 'https://storybrand.com/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Donald Miller (author), on the author and his book (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Donald_Miller_(author)', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'How Users Read on the Web (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/how-users-read-on-the-web/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Landing page (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Landing_page', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Creating helpful, reliable, people-first content (Google Search Central)', url: 'https://developers.google.com/search/docs/fundamentals/creating-helpful-content', licence: 'CC-BY', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you’ll build a home page from seven parts: from the visitor’s want to their success. On it you are the guide, not the hero.',
+			hints: [
+				'Start with the paragraph want: what the person gets. Not “we offer”, but “you get”.',
+				'The problem section has three lines: outside (what gets in the way), inside (what they feel), and why it shouldn’t be this way.',
+				'Competence needs a fact from the brief: the name of a document, a length of time, a number. And put the button with your main action in the plan once more.'
+			],
+			mistakes: {
+				'six-sections': 'The page needs six sections with the class sb.',
+				'no-blanks': 'There’s an ellipsis “…” left somewhere. Replace it with text.',
+				want: 'Write at least five words on what the visitor gets.',
+				'cta-guard': 'The button in the first section has to stay, with the label of your main action.',
+				'cta-twice': 'Add a second button with the class cta, for example in the plan.',
+				'problem-three': 'The problem needs three lines: external, internal, philosophical.',
+				empathy: 'Express empathy in a sentence of at least six words.',
+				'authority-proof': 'In the competence paragraph, name a document or proof from your brief.',
+				'plan-steps': 'The plan needs three or four steps.',
+				stakes: 'In the stakes section, say calmly and honestly what happens without action (at least six words).',
+				success: 'Describe success: what the hero’s life looks like afterwards (at least six words).',
+				plain: 'The words “best”, “unique” or “#1” are still in the text. Replace them with a fact.'
+			},
+			outro: 'You have a page skeleton in seven blocks. The next lesson shows how to turn it into a real plot: the order of sections, scenes, testimonials.'
+		},
+		say: { StoryBrand: 'STORY-brand', SB7: 'S B seven', Miller: 'MILL-er' }
+	};
+</script>
+
+<script>
+	import PageSkeleton from '../../diagrams/PageSkeleton.svelte';
+</script>
+
+## A framework thousands of pages stand on
+
+You already met the seven parts of Donald Miller’s StoryBrand in the [StoryBrand lesson](../../11-copywriting/05-storybrand/), as a technique for persuasive copy: a hero with a want, a problem in three layers, a guide with empathy and competence, a plan, a call to action, stakes and success. Here the framework has a different job: it suggests the **order of the sections on a home page**. These are the same acts and the same hero’s journey, packed for a page.
+
+Press the blocks on the diagram: each comes with a weak and a stronger example for an invented shoe repair workshop.
+
+<PageSkeleton />
+
+<details>
+<summary>Check yourself: who is the hero in this framework, and who is the guide?</summary>
+
+The hero is the visitor, who has a want and a problem. The guide is you: you know the path and help them along it.
+
+</details>
+
+## Seven parts on a page
+
+What each part means on a page, rather than in a standalone text.
+
+1. **The hero wants something.** The first screen: a headline about the visitor’s want, and the main button. Not “About us”, but what the person came for.
+2. **The problem.** The section right after the first screen. Most sites describe only the outer layer (“we repair”, “we build”). When you name the inner layer too, a person feels “this is about me”. The philosophical layer isn’t required, but it shows your values without pomp: “understanding your rights shouldn’t be this hard”.
+3. **The guide.** A short line of empathy, not about yourself, and competence as a fact. For an expert that means the documents and proofs in the brief: a license, a membership, years in practice. For a project without “titles” it is a number of jobs done, a length of time, or an honest “we’re small, but you deal with us personally”. Some professions (attorneys, expert witnesses, doctors) have rules about what they may say about themselves; the [lesson on experts without boasting](../12-expert-ethics/) is about that.
+4. **The plan.** Three simple steps remove the fear of the unknown: a person sees what happens after the button. “Tell us your situation, get a time and a price, collect the result” reads as a short staircase.
+5. **The call to action.** The direct button repeats: on the first screen and after the plan. Beside it goes a soft call (“See how it works”): without one, people who aren’t ready to decide have nothing to do but leave.
+6. **The stakes.** One honest line about what the person loses if they don’t act. Scare tactics (“while you’re thinking, your fence is already being moved”) are considered an unfair practice, and you looked at them in the [lesson on the limits of persuasion](../../11-copywriting/06-persuasion/). Write as you would say it to an acquaintance.
+7. **Success.** A picture of “after”, not a slogan: “you walk into the hall in your own shoes and forget you’re wearing them”. It works best when it shows a change in the person, not in your revenue.
+
+<details>
+<summary>Check yourself: which layer of the problem do sites skip most often?</summary>
+
+The inner one: what the person feels. Sites talk about what they do, not about how their client lives.
+
+</details>
+
+<details>
+<summary>Check yourself: how does an honest “stakes” line differ from scare tactics?</summary>
+
+It names the real consequences of inaction calmly, without exaggeration or pressure.
+
+</details>
+
+## Practice
+
+Build your project’s home page from six sections.
+
+1. **The first screen.** The headline is already there. Finish the paragraph `want`: what the visitor gets (start with “you get”). The button is already there.
+2. **The problem.** A heading and three lines: outside, inside, unfairness.
+3. **The guide.** A heading, a line of empathy, a line of competence. Put a proof from your brief in it.
+4. **The plan.** A heading, three steps and a second button with the label of your main action.
+5. **The stakes.** A heading and one calm line about what happens without action.
+6. **Success.** A heading and a picture of life afterwards.
+
+The words “best” and “unique” must not appear on the page: the check will see them. If your trade needs care in advertising, come back to the text in the ethics lesson, where we check it once more.
+
+## What next
+
+The skeleton is there, but a page of seven blocks can be as dull as a form. In the next lesson we turn it into a plot: put the sections in order by acts, bring the proof and testimonials to life, and decide what not to tell at all.

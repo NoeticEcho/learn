@@ -1,0 +1,332 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/08-brand-and-founder.svx. */
+	export const metadata = {
+		id: '12-storytelling/08-brand-and-founder',
+		part: 12,
+		order: 8,
+		title: 'The brand story and the founder’s story',
+		definition: 'A brand story explains why a project exists and for whom; a founder’s story explains why this person can be trusted. Both rest on a reason and on facts.',
+		summary:
+			'You’ll learn to write an “About” page that people believe: with a reason, facts that can be checked, and no empty promises. Afterwards you have the founder’s story in three lengths, a line, a paragraph and a page, with the same reason in all three.',
+		minutes: 30,
+		teaches: ['story-brand-story', 'story-founder-story'],
+		requires: ['story-landing-narrative'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'a personal approach', caption: 'The swap test', say: 'Put the sentence on a competitor’s site. If nothing changes, it’s empty. So what? Prove it.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'the turn', caption: 'The founder’s story', say: 'One event, one scene. You’re no savior: leave the victories to case studies. Truth matters more than polish.' },
+				{ mood: 'cheer', prop: 'flowchart', label: 'line|paragraph|page', caption: 'Three lengths', say: 'One story, told at three sizes, with one reason. Otherwise the reader hears three different people.' }
+			]
+		},
+		practice: {
+			id: 'story-founder',
+			title: 'The founder’s story in three lengths',
+			task: 'Write an “About” page in three lengths: a line under the name (one for each language of your site), a paragraph announcement, and a page of three paragraphs: the turning event (with a date or a place), what it taught you, and what you do now for the people the site is for. In all three lengths, mark the same reason in words with a span element of the class reason. Empty words such as “professional” and “personalized approach” must not appear. Replace every “…”.',
+			era: 3,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <div id="story-all">
+      <header>
+        <h1>{{title}}</h1>
+        {{#each languages}}<p class="line" lang="{{.}}">…</p>
+        {{/each}}
+      </header>
+
+      <main id="about">
+        <h2>Why I do this</h2>
+        <p class="turn">…</p>
+        <p class="lesson">…</p>
+        <p class="now">…</p>
+        <ul class="facts">
+          {{#each proofs}}<li>{{title}}</li>
+          {{/each}}
+        </ul>
+      </main>
+
+      <aside class="note" data-scaffold id="announce">
+        <h2>Announcement for the feed</h2>
+        <p class="para">…</p>
+      </aside>
+    </div>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <div id="story-all">
+      <header>
+        <h1>{{title}}</h1>
+        {{#each languages}}<p class="line" lang="{{.}}">I explain complicated things in plain words because <span class="reason">I once couldn’t make sense of it myself</span>.</p>
+        {{/each}}
+      </header>
+
+      <main id="about">
+        <h2>Why I do this</h2>
+        <p class="turn">In autumn 2012, in Riverbend, I spent half a year unable to get a clear answer to a question of my own, and nobody explained what was going on.</p>
+        <p class="lesson">That’s when I understood that people don’t need a specialist who talks in riddles. They need someone who <span class="reason">once couldn’t make sense of it themselves</span> and explains it step by step.</p>
+        <p class="now">Now I work with people who come with the same kind of question: I name the time and the price in advance and show every step.</p>
+        <ul class="facts">
+          {{#each proofs}}<li>{{title}}</li>
+          {{/each}}
+        </ul>
+      </main>
+
+      <aside class="note" data-scaffold id="announce">
+        <h2>Announcement for the feed</h2>
+        <p class="para">Once I spent half a year unable to get a clear answer to a question of my own, and that changed my work. Now I explain people’s matters the way I wished someone had explained mine: briefly, step by step and with a stated time. That is why <span class="reason">I once couldn’t make sense of it myself</span> has become my main rule.</p>
+      </aside>
+    </div>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'lines-per-language', kind: 'count', selector: 'header p.line', min: { brief: 'languages' } },
+				{ id: 'no-blanks', kind: 'text', selector: '#story-all', matches: '^[^…]*$' },
+				{ id: 'line-short', kind: 'text', selector: 'header p.line', matches: '^[^.!?]*[.!?]?\\s*$' },
+				{ id: 'reason-in-line', kind: 'exists', selector: 'header p.line span.reason' },
+				{ id: 'reason-in-para', kind: 'exists', selector: '#announce p.para span.reason' },
+				{ id: 'reason-in-page', kind: 'exists', selector: '#about span.reason' },
+				{ id: 'para-length', kind: 'text', selector: '#announce p.para', matches: '^\\s*(\\S+\\s+){19}\\S+' },
+				{ id: 'page-parts', kind: 'count', selector: '#about p', min: 3 },
+				{ id: 'turn-concrete', kind: 'text', selector: '#about p.turn', matches: '\\d|\\b(?:in|at|on|near)\\s+[A-Z]' },
+				{ id: 'facts-kept', kind: 'field', selector: '#about ul.facts', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{ id: 'no-empty-words', kind: 'text', selector: '#story-all', matches: '^(?![\\s\\S]*(?:[Pp]rofessionals?\\b|[Pp]ersonali[sz]ed|[Ii]ndividual approach|\\b[Bb]est\\b|[Uu]nique|[Cc]ustomer[- ](?:focused|centric)|[Ww]ealth of experience|[Dd]edicated))[\\s\\S]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How does a brand story differ from a founder’s story?',
+				options: [
+					'A brand story answers “why are we here and for whom”, a founder’s story answers “why can this person be trusted”',
+					'It doesn’t: they’re the same thing',
+					'A founder’s story is always longer'
+				],
+				answer: 0,
+				why: [
+					'Yes. On a small site they’re often joined on one page, but the questions are different.',
+					'No: they’re written from different questions, although they share facts.',
+					'No: length depends on the place, not the subject.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the point of the “swap test”?',
+				options: [
+					'Could the sentence go on a competitor’s site unchanged? If so, it’s empty',
+					'Replace every word with a synonym',
+					'Replace the heading with a picture'
+				],
+				answer: 0,
+				why: [
+					'Yes: an empty sentence says nothing about you in particular.',
+					'No: synonyms don’t make a sentence meatier.',
+					'No: a picture doesn’t replace a fact.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a founder’s story convincing?',
+				options: [
+					'A concrete event with a date or a place',
+					'An explanation of what the event taught',
+					'Phrases such as “we care about every client”',
+					'What the person does now for the people the site is for'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: a concrete event is easy to picture.',
+					'Yes: the lesson links the past with the work.',
+					'No: that’s an empty phrase, with no fact in it.',
+					'Yes: the story should lead to what you offer now.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the parts of a founder’s story in order',
+				items: ['The turning event', 'What it taught', 'What I do now for the reader', 'Which facts back it up']
+			},
+			{
+				type: 'match',
+				prompt: 'Match the length of the version to the place',
+				pairs: [
+					['A line under the name', 'one line'],
+					['An announcement in a feed or an email', 'a paragraph'],
+					['The “About” page', 'three paragraphs or more'],
+					['All three', 'the same reason']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do you make the page’s version in a second language?',
+				options: [
+					'Retell the story for a reader of that language and check the facts, rather than translating word for word',
+					'Run the text through a machine translator and don’t read the result',
+					'Don’t: a second language isn’t needed'
+				],
+				answer: 0,
+				why: [
+					'Yes: languages have different turns of phrase and tone, and the facts need checking.',
+					'No: machine translation gets shades wrong, and for professional texts that is a risk.',
+					'No: if the site is bilingual, the story is needed in both.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-brand-vs-founder', front: 'How does a brand story differ from a founder’s story?', back: 'The brand: why we are here and for whom. The founder: why this person can be trusted. On a small site it’s one page.' },
+			{ id: 'story-swap-test', front: 'What is the swap test?', back: 'Put the sentence on a competitor’s site. If nothing changes, it’s empty. Replace it with a fact: a number, a date, a place.' },
+			{ id: 'story-founder-3', front: 'What are the three parts of a founder’s story?', back: 'The turning event with a date or a place, what it taught, and what the person does now for the reader.' },
+			{ id: 'story-three-lengths', front: 'What are the three lengths of a story?', back: 'A line (a caption), a paragraph (an announcement), a page (three paragraphs or more). The same reason in all.' }
+		],
+		sources: [
+			{ title: 'Creating helpful, reliable, people-first content (Google Search Central)', url: 'https://developers.google.com/search/docs/fundamentals/creating-helpful-content', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google rater guidelines and E-E-A-T (Google Search Central)', url: 'https://developers.google.com/search/blog/2022/12/google-raters-guidelines-e-e-a-t', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Brand (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Brand', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Storytelling (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Storytelling', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now you’ll write the story of why you do what you do. Three times: as a line, a paragraph and a page. The reason in them is one.',
+			hints: [
+				'Start with the turning point: when and where something happened. A date or a place name makes a story real.',
+				'Choose one reason and wrap it in every version with a span element that has the class reason.',
+				'Take out “professional” and “personalized approach”: name a fact instead.'
+			],
+			mistakes: {
+				'lines-per-language': 'You need a line under the name for each language of your site.',
+				'no-blanks': 'There’s an ellipsis “…” left somewhere. Replace it with text.',
+				'line-short': 'The line under the name must be one sentence.',
+				'reason-in-line': 'The line has no marked reason: wrap it in a span with the class reason.',
+				'reason-in-para': 'The announcement has no marked reason: wrap it in a span with the class reason.',
+				'reason-in-page': 'The page has no marked reason: wrap it in a span with the class reason.',
+				'para-length': 'The announcement is too short: it needs at least twenty words.',
+				'page-parts': 'The page needs three paragraphs: the event, the lesson, what you do now.',
+				'turn-concrete': 'The turning event needs a date, a year or a place: for example “in Riverbend” or “in autumn 2012”.',
+				'facts-kept': 'The list of supporting facts from the brief has to stay on the page.',
+				'no-empty-words': 'Empty words such as “professional” or “personalized approach” are still in the text. Replace them with a fact.'
+			},
+			outro: 'You have the founder’s story in three lengths, with one reason in all of them. Next we look at another kind of proof: a working case, or case study.'
+		},
+		say: { 'E-E-A-T': 'E E A T' }
+	};
+</script>
+
+<script>
+	import EmptyPromises from '../../diagrams/EmptyPromises.svelte';
+</script>
+
+## Two questions
+
+Somewhere on a site, a person pauses and thinks: “Who are these people?” That is what the “About” page, or “About me”, is for. There are two stories you can tell on it, and they answer different questions.
+
+- **The brand (project) story.** Why all this exists, and for whom. Its hero is again the visitor, and the project is a guide that has a reason to exist.
+- **The founder’s story.** Why this particular person can be trusted. Its hero is the founder, but for one scene only: it is there to show where the guide’s empathy and experience come from.
+
+On a small site this is almost always one page. For a solo expert it is called “About me”: the brand story and the founder’s story are the same.
+
+<details>
+<summary>Check yourself: what question does the founder’s story answer?</summary>
+
+“Why can this person be trusted?” It shows where the guide’s experience and empathy come from.
+
+</details>
+
+## What a brand story is made of
+
+A good brand story has three things.
+
+1. **A reason.** Why this project appeared: what you saw, what you weren’t happy with. Not “we always dreamed”, but “I saw how…”.
+2. **Beliefs as choices.** Instead of “we value honesty”, write the decision you made for its sake: “we quote the price before the work starts”. Values you can’t check aren’t values, they’re slogans.
+3. **Proof.** Facts the reader can check: a length of time, a number, a document.
+
+Two familiar moves are best avoided. The first is the heroic founding myth (“we started in a garage, and now…”), which reads the same at a thousand companies. The second is a string of judging words such as “professionalism, responsibility, a personalized approach”.
+
+## The swap test
+
+A simple way to find an empty sentence: **put it on a competitor’s site**. If nothing changes, it is empty. “We are a team of dedicated professionals with a wealth of experience” fits anyone. “Since 2012 we have helped the owners of 140 lots confirm their boundaries” belongs to you alone.
+
+A second test is **“so what?”** “We take a personalized approach.” So what? If that can’t be answered with a fact (“we name the time and price before the work”), the sentence should be replaced.
+
+A third is **“prove it”**: for every claim there should be a document, a number or a case.
+
+Try it on the diagram: it underlines stock phrases and counts the sentences with no number or date. Paste in your own text. The program is crude. It suggests where to look, and a person decides.
+
+<EmptyPromises />
+
+<details>
+<summary>Check yourself: how does the swap test work?</summary>
+
+Move the sentence to a competitor’s site. If nothing changes, it’s empty: replace it with a fact that only you have.
+
+</details>
+
+## The founder’s story
+
+A strong founder’s story is short and built on one event.
+
+1. **The turn.** What happened, and when or where. “In autumn 2012, in Riverbend, I spent half a year unable to get a clear answer to a question of my own.”
+2. **What it taught.** Not a moral, but a conclusion for the work: “people need someone who explains step by step”.
+3. **What you do now.** How the conclusion became your practice for the people the site is for.
+
+Beside it stand **supporting facts**: documents, lengths of time, memberships. For experts this matters especially: a person must be able to tell a story from a checkable fact.
+
+Four rules:
+
+- **Modesty.** You are no savior. One scene is enough, and the victories belong in case studies.
+- **Truth.** Only what happened. An invented founder’s story falls apart at the first check.
+- **Consent.** If other people are in the story, name them only with their permission, and more often not at all.
+- **Use to the reader.** The story must lead to what you offer, not to your biography for its own sake.
+
+Such a page also helps with search engines: Google’s quality rater guidelines talk about the author’s first-hand experience and expertise (E-E-A-T), and about readers being able to tell who stands behind a site.
+
+<details>
+<summary>Check yourself: what should a founder’s story teach?</summary>
+
+What the event taught, and how that became your practice for the reader. Not a moral, but a conclusion for the work.
+
+</details>
+
+## Three lengths
+
+You need to be able to tell the same story at three sizes.
+
+- **A line** (up to fifteen words): a caption under the name, a line in a profile.
+- **A paragraph** (about sixty words): an announcement on the home page, an email, a post.
+- **A page** (three paragraphs or more): the “About” page itself.
+
+The trick is that **the reason is one**: in the line it sounds like “because I once couldn’t make sense of it myself”, in the paragraph it is unfolded, on the page it becomes a scene. If the reason differs, the reader hears three different people. That is why in the practice you mark it in all three.
+
+## Language and tone
+
+If a site has two languages, each needs its own version of the line, and ideally of the page. This is not word-for-word translation but a retelling for a reader of the other language: the turns of phrase and tone differ, and the facts need checking. Machine translation of a text that has legal weight risks distortion, and we will come back to it in the part on law.
+
+Take the tone from the brief. A calm project suits a restrained “I”, a bold one short sentences, but neither has empty words.
+
+## Practice
+
+Write an “About” page in three lengths.
+
+1. **A line** under the name: one for each language of the site. One sentence.
+2. **A page** of three paragraphs: the turn (with a date or a place), the lesson, what you do now. The supporting facts from the brief stay as a list at the bottom.
+3. **An announcement** in a working note: about twenty words or more.
+4. **One reason:** mark it in each length with a `span` element of the class `reason`. You can remove the marking afterwards if you don’t need it.
+
+Don’t write “professional”, “personalized approach”, “best” or “unique”: name facts instead of judging words.
+
+## What was wrong with 2010
+
+In the era of WordPress and ready-made themes, the “About us” page was often left as the theme’s empty placeholder with Latin filler text, or a set of judging words. A good theme couldn’t give a site a voice: you had to write one yourself. Today it is the same with AI: it will happily compose “a team of dedicated professionals with a wealth of experience”. The swap test is still done by hand.

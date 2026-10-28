@@ -1,0 +1,350 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/12-storytelling/07-landing-story.svx. */
+	export const metadata = {
+		id: '12-storytelling/07-landing-story',
+		part: 12,
+		order: 7,
+		title: 'A story on a landing page',
+		definition: 'A landing page plot is the order of its sections as the acts of a story: first screen and problem, then guide and proof, and a call to action at the end.',
+		summary:
+			'You’ll turn a page into a plot: put the sections in acts, make the first screen an “ordinary world with a want”, bring proof and a testimonial to life, and decide what the page should not narrate. Afterwards you have a page that reads top to bottom as a story with an ending.',
+		minutes: 30,
+		teaches: ['story-landing-narrative'],
+		requires: ['story-storybrand-page', 'story-three-act'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'flowchart', label: 'first screen|problem|call', caption: 'A page is a plot', say: 'The acts map onto sections: recognition first, then the guide and proof, and a call to action at the end.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'Welcome!', say: 'That tells nobody anything. The first screen needs a scene of recognition: people see themselves and their task.' },
+				{ mood: 'hint', prop: 'sheet', label: 'testimonial', say: 'A testimonial as a scene, but a real one, with permission. And keep plots out of the price table and the form.' }
+			]
+		},
+		practice: {
+			id: 'story-landing',
+			title: 'A home page as a plot',
+			task: 'Build a page of five sections in the right order: first screen, problem, proof, plan, call to action. On the first screen write the visitor’s ordinary world and their want (not “welcome”). For each proof from the brief, add what it means for the visitor. Add one testimonial scene with a number or a date and a signature, and leave only facts in the contacts. Replace every “…”.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <section id="land-hero">
+        <h1>{{title}}</h1>
+        <p class="ordinary">…</p>
+        <p class="desire">…</p>
+        <a class="cta" href="#land-cta">{{mainAction.label}}</a>
+      </section>
+
+      <section id="land-problem">
+        <h2>…</h2>
+        <p>…</p>
+      </section>
+
+      <section id="land-proof">
+        <h2>…</h2>
+        <ul>
+          {{#each proofs}}<li><strong>{{title}}</strong>: …</li>
+          {{/each}}
+        </ul>
+        <blockquote>
+          <p>…</p>
+          <cite>…</cite>
+        </blockquote>
+      </section>
+
+      <section id="land-plan">
+        <h2>…</h2>
+        <ol>
+          <li>…</li>
+          <li>…</li>
+          <li>…</li>
+        </ol>
+      </section>
+
+      <section id="land-cta">
+        <h2>{{mainAction.label}}</h2>
+        <p>{{contacts.phone}} {{contacts.email}}</p>
+      </section>
+    </main>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <section id="land-hero">
+        <h1>{{title}}</h1>
+        <p class="ordinary">You are busy with your own affairs, and one important question has been waiting its turn for a long time.</p>
+        <p class="desire">You want to close it at last, calmly and without extra trips.</p>
+        <a class="cta" href="#land-cta">{{mainAction.label}}</a>
+      </section>
+
+      <section id="land-problem">
+        <h2>The longer you wait, the harder it gets</h2>
+        <p>Deadlines pass, papers pile up, and each next step feels heavier than the last.</p>
+      </section>
+
+      <section id="land-proof">
+        <h2>Why you can trust us</h2>
+        <ul>
+          {{#each proofs}}<li><strong>{{title}}</strong>: which means you can check it yourself.</li>
+          {{/each}}
+        </ul>
+        <blockquote>
+          <p>In March we came with a question we hadn’t been able to settle for 3 months, and within two weeks we had a clear plan.</p>
+          <cite>From practice, name changed</cite>
+        </blockquote>
+      </section>
+
+      <section id="land-plan">
+        <h2>How it works</h2>
+        <ol>
+          <li>You tell us about your situation.</li>
+          <li>We name a time and a price.</li>
+          <li>You get the result and a next step.</li>
+        </ol>
+      </section>
+
+      <section id="land-cta">
+        <h2>{{mainAction.label}}</h2>
+        <p>{{contacts.phone}} {{contacts.email}}</p>
+      </section>
+    </main>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'order', kind: 'exists', selector: '#land-hero ~ #land-problem ~ #land-proof ~ #land-plan ~ #land-cta' },
+				{ id: 'no-blanks', kind: 'text', selector: 'main', matches: '^[^…]*$' },
+				{ id: 'ordinary', kind: 'text', selector: '#land-hero p.ordinary', matches: '^\\s*(\\S+\\s+){5}\\S+' },
+				{ id: 'desire', kind: 'text', selector: '#land-hero p.desire', matches: '^\\s*(\\S+\\s+){4}\\S+' },
+				{ id: 'no-welcome', kind: 'text', selector: '#land-hero', matches: '^(?![\\s\\S]*(?:[Ww]elcome|[Gg]reetings))[\\s\\S]*$' },
+				{ id: 'cta-guard', kind: 'field', selector: '#land-hero a.cta', field: 'mainAction.label' },
+				{ id: 'proofs-kept', kind: 'field', selector: '#land-proof li', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{ id: 'proofs-meaning', kind: 'text', selector: '#land-proof ul', matches: '^[^…]*$' },
+				{ id: 'scene-quote', kind: 'text', selector: '#land-proof blockquote p', matches: '^(?=[\\s\\S]*\\d)\\s*(\\S+\\s+){11}\\S+' },
+				{ id: 'scene-cite', kind: 'text', selector: '#land-proof cite', matches: '\\S{3,}' },
+				{ id: 'plan-three', kind: 'count', selector: '#land-plan li', min: 3, max: 4 },
+				{ id: 'contacts-facts', kind: 'field', selector: '#land-cta', field: 'contacts.phone', when: { brief: 'contacts.phone' } },
+				{ id: 'contacts-plain', kind: 'text', selector: '#land-cta', matches: '^(?![\\s\\S]*(?:[Oo]nce upon|[Oo]ne day|[Ll]ong ago))[\\s\\S]*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put the sections of a page in plot order',
+				items: ['First screen: ordinary world and want', 'The problem', 'Proof and the guide', 'The plan', 'Call to action and contacts']
+			},
+			{
+				type: 'single',
+				prompt: 'What belongs on the first screen of a story-page?',
+				options: [
+					'A recognizable situation of the visitor, what they want, and a button',
+					'A greeting and a long history of the company',
+					'The hardest part: prices and terms'
+				],
+				answer: 0,
+				why: [
+					'Yes: in seconds, a person has to recognize themselves and see what to do.',
+					'No: “welcome” and background create no recognition. They just take up room.',
+					'No: prices matter, but not on the very first screen unless they are themselves the reason to visit.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'What a page narrates and what it doesn’t',
+				pairs: [
+					['The first screen', 'a brief scene with a want'],
+					['A price table', 'facts with no plot'],
+					['A privacy policy', 'exact legal wording'],
+					['A client testimonial', 'a mini-scene with a detail']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is “proof as a mini-story”?',
+				options: [
+					'A fact (a document, a length of time, a case) with a line added on what it means for the visitor',
+					'An invented example with a nice ending',
+					'A loud quotation from an advertisement'
+				],
+				answer: 0,
+				why: [
+					'Yes: “A surveyor’s license since 2009” is a dry fact, but “which means the county will accept your plan” is already an episode.',
+					'No: invented examples must not be passed off as real ones.',
+					'No: quotations from advertising are no substitute for proof.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a testimonial scene honest?',
+				options: [
+					'It is real, and the person gave permission to publish it',
+					'It has a concrete detail: a time, a number, a place',
+					'The site’s author made it up but signed it with a client’s name',
+					'For some professions, advertising testimonials may be restricted by rules, and that has to be checked'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: you can’t publish without consent, and certainly can’t invent one.',
+					'Yes: a detail makes a scene believable.',
+					'No: that is a fake review, and it must not be done. In the US the FTC has banned fake reviews outright.',
+					'Yes: for example, lawyers face state bar rules on advertising. The lesson on ethics comes back to this.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why aren’t contacts and prices written as a story?',
+				options: [
+					'The person is carrying out a task and wants the answer as fast as possible',
+					'Because that is how it is done',
+					'Because stories are forbidden by law'
+				],
+				answer: 0,
+				why: [
+					'Yes: a plot gets in the way when you need to call or count.',
+					'No: “that’s how it’s done” is not a reason.',
+					'No: there is no such ban.'
+				]
+			}
+		],
+		cards: [
+			{ id: 'story-page-acts', front: 'How do a page’s sections relate to the acts?', back: 'First screen and problem: setup. Guide, proof and plan: confrontation. Call to action and contacts: resolution.' },
+			{ id: 'story-hero-block', front: 'What belongs on the first screen?', back: 'The visitor’s ordinary world and their want in a sentence or two, and the main button. No “welcome”.' },
+			{ id: 'story-proof-story', front: 'How do you turn proof into a mini-story?', back: 'Add to the fact (a document, a length of time, a case) what it means for the visitor. The fact stays, and meaning arrives.' },
+			{ id: 'story-not-narrate', front: 'What does a page not narrate?', back: 'Menus, prices, terms, forms, contacts and legal text: there the person is carrying out a task, and a plot gets in their way.' }
+		],
+		sources: [
+			{ title: 'Scrolling and Attention (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/scrolling-and-attention/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'The Fold Manifesto: Why the Page Fold Still Matters (Nielsen Norman Group)', url: 'https://www.nngroup.com/articles/page-fold-manifesto/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Landing page (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Landing_page', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Social proof (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Social_proof', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: '16 CFR Part 465: Rule on the use of consumer reviews and testimonials (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-D/part-465', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Creating helpful, reliable, people-first content (Google Search Central)', url: 'https://developers.google.com/search/docs/fundamentals/creating-helpful-content', licence: 'CC-BY', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Now the page gets a plot: from recognition to the button. We won’t narrate everything, only the parts where a person chooses whether to trust you.',
+			hints: [
+				'The first screen: first the person’s ordinary life, then what they want. No greetings.',
+				'Add to each proof what it means for the visitor: “which means…”.',
+				'The testimonial scene should be concrete: a number, a length of time or a place. And the contacts need no storytelling at all.'
+			],
+			mistakes: {
+				order: 'The sections must come in this order: first screen, problem, proof, plan, call to action.',
+				'no-blanks': 'There’s an ellipsis “…” left somewhere. Replace it with text.',
+				ordinary: 'Describe the visitor’s ordinary world in at least six words.',
+				desire: 'Describe the visitor’s want in at least five words.',
+				'no-welcome': 'Take out “welcome” and “greetings”: start with the visitor’s life.',
+				'cta-guard': 'The button on the first screen has to stay, with the label of your main action.',
+				'proofs-kept': 'The names of the proofs from the brief have to stay on the page.',
+				'proofs-meaning': 'A proof still has an ellipsis: add what it means for the visitor.',
+				'scene-quote': 'The testimonial scene needs at least twelve words and one number or date.',
+				'scene-cite': 'The testimonial needs a signature below it: for example “From practice, name changed”.',
+				'plan-three': 'The plan needs three or four steps.',
+				'contacts-facts': 'The call to action block has to keep the contacts from the brief.',
+				'contacts-plain': 'There’s no room for a story in the contacts: leave only facts.'
+			},
+			outro: 'Now the page reads like a story with an ending, and the facts stand where people look for them. The next step: the “About” page and the founder’s story.'
+		},
+		say: {}
+	};
+</script>
+
+<script>
+	import LandingStory from '../../diagrams/LandingStory.svelte';
+</script>
+
+## A page is a plot read by scrolling
+
+We already know the forms: acts, the pyramid, the hero’s journey, the seven blocks. What remains is to see that **a page is itself a plot**. A person scrolls from top to bottom, and each section is shown to them as a scene. Research from Nielsen Norman Group shows that attention on a page usually falls off as you go down, but people do scroll if the top gave them a reason. So the order of the sections is the composition of the story.
+
+The layout by acts is this.
+
+- **Act 1, setup.** The first screen and the problem.
+- **Act 2, confrontation.** The guide, the proof, the plan.
+- **Act 3, resolution.** The call to action and the contacts.
+
+But not all of a page is narrative. The diagram marks which parts follow the plot and which stand beside it and work as reference.
+
+<LandingStory />
+
+<details>
+<summary>Check yourself: which parts of a page don’t tell a story?</summary>
+
+The menu, prices and terms, forms, contacts and legal text. There the person is carrying out a task, and a plot gets in their way.
+
+</details>
+
+## The first screen: ordinary world and want
+
+The first seconds decide whether a person stays. The first screen needs a **scene of recognition**: a situation in which readers see themselves (“your heel snapped before an important meeting”), and a **want** you promise to satisfy. That is the ordinary world and the call from the hero’s journey, in two sentences.
+
+What must not be on the first screen:
+
+- “Welcome to our website”. It tells nobody anything.
+- A long company history. It can wait lower down.
+- Metaphors that only you understand. The headline should read without explanation.
+
+The main-action button stands right there: a person who has recognized themselves must be able to decide at once.
+
+## The problem: tension rises
+
+The second section makes the problem tangible: what happens while the person does nothing. It is honest and short. It is enough to show the trouble growing: deadlines, papers, worry. There is no need to scare anyone.
+
+## Proof as mini-stories
+
+A list of proofs is usually a dry set: “license”, “membership”, “12 years of experience”. The dry fact is needed, but it narrates nothing. Add one line on **what it means for the visitor**: “a licensed land surveyor, which means the county will accept your plan”. A fact turns into an episode: who, what they did, how it helped.
+
+It is important not to invent. A fact stays a fact, and only the delivery changes: meaning appears beside it.
+
+## A testimonial as a scene
+
+A good testimonial is built like a small story: a person came with a problem, something happened, they left with a result. “Great job, highly recommended” reads like an ad, while “in March we had spent three months stuck, and in two weeks we had a plan” reads like a scene: it has a length of time and a detail.
+
+Three rules to remember in advance.
+
+1. **A testimonial must be real**, and the person must give permission to publish it. Faking reviews is an unfair practice. In the US, the FTC’s rule on consumer reviews and testimonials (16 CFR Part 465, in force since October 2024) prohibits fake reviews and testimonials, and the FTC’s Endorsement Guides (16 CFR Part 255) expect that a material connection, such as a payment or a free product, is disclosed. In the UK the CAP Code (section 3) requires that testimonials be genuine and that you can show they are.
+2. **A detail beats adjectives:** a time, a number, a place.
+3. **Check the rules of your profession.** Some professionals (lawyers, for example, whose advertising is governed by state bar rules in the US, or health professionals handling patient information) face limits on testimonials. The lesson on ethics comes back to this.
+
+This is general information, not legal advice. For your own case, ask the regulator or a qualified attorney: in the US the FTC, in the UK the ASA and CAP.
+
+In the practice below you may invent a testimonial to feel the form. On a real site you must not.
+
+<details>
+<summary>Check yourself: what turns a testimonial into a scene?</summary>
+
+A concrete detail: a length of time, a number, a place, not adjectives like “great” and “recommended”.
+
+</details>
+
+## What not to narrate
+
+The rule is simple: **if a person is carrying out a task, don’t get in their way with a plot.** A price table, a booking form, contacts, a data policy: these need clarity and precision. A good sign: if any sentence can be cut from a block without losing meaning, it is narrative; if not, it is facts.
+
+There is one exception: a short human line beside the numbers (“the price includes the site visit and the report”) doesn’t get in the way, it helps.
+
+## Practice
+
+Build a page of five sections in strict order.
+
+1. **The first screen.** The headline and button are there. Finish the “ordinary world” and the “want”.
+2. **The problem.** A heading and a couple of lines on how the trouble grows.
+3. **The proof.** For each proof from the brief, add what it means for the visitor. Then write a testimonial scene (in the practice it may be invented) with a number or a date and a signature.
+4. **The plan.** Three steps.
+5. **The call to action.** A heading and contacts. Nothing needs narrating here.
+
+Then read the page from top to bottom, without skipping a line. If it was easy to read, and the button at the end looks like a natural continuation, the plot works.
