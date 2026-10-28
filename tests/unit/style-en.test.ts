@@ -76,9 +76,12 @@ const BRITISH = new RegExp(
 	'gi'
 );
 
+/** Names that are spelled the British way by their owners; the course writes them as they are. */
+const BRITISH_NAMES = /Open Government Licence/g;
+
 /** The British spellings in a text. */
 export function britishSpellings(text: string): string[] {
-	return [...text.matchAll(BRITISH)].map((m) => m[0]);
+	return [...text.replace(BRITISH_NAMES, ' ').matchAll(BRITISH)].map((m) => m[0]);
 }
 
 const en = loadEdition('en');
