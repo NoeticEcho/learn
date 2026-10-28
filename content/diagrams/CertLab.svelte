@@ -101,6 +101,7 @@
 		}
 	});
 
+	type Fn = (s: string) => string;
 	let domain = $state(W.domain);
 	let wildcard = $state(false);
 	let challenge = $state<'http' | 'dns'>('http');
@@ -119,8 +120,8 @@
 	const names = $derived(wildcard ? [domain, `*.${domain}`] : [domain, `www.${domain}`]);
 	const steps = $derived(
 		effective === 'http'
-			? [W.http[0](names.join(W.and)), W.http[1](domain), W.http[2], W.http[3], W.http[4]]
-			: [W.dns[0](names.join(W.and)), W.dns[1](domain), W.dns[2], W.dns[3], W.dns[4](domain)]
+			? [(W.http[0] as Fn)(names.join(W.and)), (W.http[1] as Fn)(domain), W.http[2] as string, W.http[3] as string, W.http[4] as string]
+			: [(W.dns[0] as Fn)(names.join(W.and)), (W.dns[1] as Fn)(domain), W.dns[2] as string, W.dns[3] as string, (W.dns[4] as Fn)(domain)]
 	);
 
 	type Fault = { label: string; code: string; sees: string; why: string; fix: string };
