@@ -81,13 +81,13 @@ comic: {
 
 ## English edition (engine, 28.10.2026)
 
-The textbook is bilingual. Russian is the source edition and is complete; English follows part by part, written by translators into `content/en/`. The English edition is **localised, not translated**: it teaches the same concepts with the same practice, but in the world an English-speaking reader lives in.
+The textbook is bilingual. Russian is the source edition and is complete; English follows part by part, written by translators into `content/en/`. The English edition is **localized, not translated**: it teaches the same concepts with the same practice, but in the world an English-speaking reader lives in.
 
 ### How it is wired
 
 - **Addresses.** Russian stays at `/learn/…`, as it always was. English is `/learn/en/…`, the same paths below it: `/learn/en/lesson/00-start/01-how-to-learn/`. Every screen (home, map, review, gallery, settings) exists in both. Every lesson has an English page too: the lesson when it is translated, and otherwise an honest «This lesson isn't in English yet» page that links to the Russian one, says `noindex` and is left out of the English sitemap and `en/llms.txt`.
 - **The header's switch** goes to the same page in the other edition. From a Russian lesson English does not have yet, it goes to that lesson's part on the English map. The choice is remembered in this browser (`localStorage` `learn.lang`), and a person who chose English and opens the Russian home is sent to the English one. Settings has the same choice under «Language».
-- **One store for both.** Progress, cards, practice files and the brief are keyed by ids the editions share (lesson id, card id, practice step id), so a learner who switches keeps everything. A card keeps the language it was learnt in, and review marks it with `lang`.
+- **One store for both.** Progress, cards, practice files and the brief are keyed by ids the editions share (lesson id, card id, practice step id), so a learner who switches keeps everything. A card keeps the language it was learned in, and review marks it with `lang`.
 - **The head.** `<html lang>`, the canonical, `hreflang` for `ru`, `en` and `x-default` (Russian) on every page that exists in both, `og:locale` and `og:locale:alternate`, `inLanguage` in the structured data, an English Open Graph card (`og/en-…png`), sitemap entries with `xhtml:link` alternates, and `en/llms.txt` and `en/llms-full.txt`.
 - **UI strings** are `src/lib/i18n/ru.json` and `en.json`, with the same keys: `npm run check` fails on a key one has and the other lacks (`KeysMatch` in `index.ts`), and `tests/unit/i18n.test.ts` also holds placeholders and plural forms (three in Russian, two in English). A new string goes into both, written in each language, not translated by machine.
 - **Project templates.** `src/lib/persona/default.en.json` and `templates.en.json` are the English examples: Kate Alder, a land surveyor and expert witness in boundary disputes, and seven other projects, all in the invented town of Riverbend, with numbers made of zeros. They have the Russian templates' structure item for item, so every check passes for both (`tests/unit/persona.test.ts`). An empty field of the learner's brief takes the template of the page's edition; what the learner wrote is theirs and is never translated.
@@ -102,14 +102,14 @@ The textbook is bilingual. Russian is the source edition and is complete; Englis
 6. **Concepts** need no new entry: every part and concept already has an English title in `content/en/curriculum.yaml`. Use the title as the lesson's term; if the lesson shows the title is wrong, fix it there in the same commit.
 7. Run `npm run content:check`, `npm test -- --run` (including `tests/unit/style-en.test.ts`) and look at the page at `/learn/en/lesson/<id>/`.
 
-### Localisation rules
+### Localization rules
 
 - **Law.** A lesson that teaches Russian law teaches the English-speaking reader's equivalents instead, with Russia's kept as one example where the course compares jurisdictions:
   - personal data: GDPR and UK GDPR (and the US state laws by name), in place of 152-ФЗ; cookies: the ePrivacy Directive and PECR;
   - advertising: the FTC's endorsement guides and the ASA and the CAP Code, in place of the Russian ad law and ОРД; email: CAN-SPAM, PECR and GDPR consent;
   - accessibility: WCAG 2.2 with the ADA, the European Accessibility Act and EN 301 549, in place of ГОСТ Р 52872-2019;
   - consumer law: the EU and UK distance-selling rules (the Consumer Contracts Regulations), in place of the Russian law on consumer rights;
-  - data localisation: what GDPR says about transfers, with Russia's localisation rule as the strict case it is.
+  - data localization: what GDPR says about transfers, with Russia's localization rule as the strict case it is.
   Every lesson on law carries a note that it is general information, not legal advice, and names the authority to ask. The legal facts are checked against the primary text, as `docs/legal-review.md` asks of the Russian ones.
 - **Russian tools and the Runet** stay where the lesson's point is history or a real example (the history of the Runet, Яндекс beside Google, VK and Telegram as one market among others, Tilda and 1С-Битрикс beside Wix, Squarespace and Shopify, Яндекс Метрика beside GA4 and the privacy-friendly counters). They are named in their Latin form (Yandex, Yandex Metrica, 1C-Bitrix) and explained once.
 - **Money and places.** Prices in pounds in the templates, «Riverbend» for the town, a «Russian host» becomes «an ordinary host».
@@ -117,7 +117,7 @@ The textbook is bilingual. Russian is the source edition and is complete; Englis
 
 ### English house style (`tests/unit/style-en.test.ts`)
 
-- **British spelling** (colour, licence as a noun, organise, behaviour), the spelling the code and the docs already use.
+- **American spelling** (color, license, organize, behavior, center, catalog, gray), because the code a learner writes is American (`color`, `center`, `behavior`) and prose spelled «colour» beside it confuses a beginner. The test refuses the usual British forms; the `licence:` key of a source and the keys of the i18n catalog are code, not prose, and keep their names. Decided 28.10.2026, replacing the British spelling this section first set.
 - **Headings and titles in sentence case**: «Cards and spaced repetition», not «Cards and Spaced Repetition». A capital after the first word only for a name, an acronym or a word with capitals inside it (JavaScript); a name a lesson needs is added to `NAMES` in the test. After a colon the next word is lower case.
 - **Typographic quotes and apostrophes** in prose: “ ” and ’, never " or '. A label the learner presses is quoted: press “Save progress”.
 - **No dash in a sentence**, as in Russian: two sentences, a colon or a comma instead. A definition defines with «is»: «DNS is a distributed system that…».

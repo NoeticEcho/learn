@@ -3,7 +3,9 @@
 //   word with capitals inside it (JavaScript), and the first word after a colon stays lower case;
 // - no Cyrillic in the English text (a Russian source's title is the source's, and is skipped);
 // - typographic quotes and apostrophes in prose: “ ” and ’, never " or ' (code is skipped);
-// - no dash in a sentence, as in Russian; a definition may define with «is», never with a dash.
+// - no dash in a sentence, as in Russian; a definition may define with «is», never with a dash;
+// - American spelling (color, license, organize, behavior): the code a learner writes is American,
+//   and prose spelled «colour» beside `color` confuses a beginner.
 // Prose is what tests/unit/style.test.ts reads: the body outside code and tags, and the words of
 // the metadata, not practice files, checks, sources or the pronunciation map.
 import { describe, expect, test } from 'vitest';
@@ -57,6 +59,27 @@ export function notSentenceCase(heading: string): string[] {
 		});
 }
 
+/** British spellings that have an American form. A stem or a whole word; add to it when a lesson shows another. */
+const BRITISH = new RegExp(
+	'\\b(?:' +
+		[
+			'colour\\w*', 'behaviour\\w*', 'favour\\w*', 'honour\\w*', 'humour\\w*', 'flavour\\w*', 'neighbour\\w*', 'labour\\w*', 'rumour\\w*',
+			'centres?', 'centred', 'centring', 'metres?', 'litres?', 'theatres?', 'fibres?', 'calibres?',
+			'licences?', 'licencing', 'defence\\w*', 'offence\\w*', 'pretence', 'catalogue[sd]?', 'dialogues?', 'analogues?', 'programmes?',
+			'grey\\w*', 'artefacts?', 'judgement\\w*', 'ageing', 'sceptic\\w*', 'whilst', 'amongst', 'learnt', 'spelt', 'fulfil', 'enrol', 'cheques?', 'tyres?', 'plough\\w*', 'mould\\w*',
+			'cancell(?:ed|ing|ation)', 'labell(?:ed|ing)', 'modell(?:ed|ing)', 'travell(?:ed|ing|er|ers)', 'signall(?:ed|ing)', 'fuell(?:ed|ing)', 'levell(?:ed|ing)',
+			'(?:organ|recogn|real|summar|custom|optim|initial|normal|local|person|priorit|visual|util|standard|memor|special|general|serial|final|apolog|critic|categor|capital|author|synchron|minim|maxim|monet|digit|sanit|stabil|character|mobil|neutral|legal|modern|commercial|item|jeopard|fertil|hospital|colon|ration|emphas|itemi|harmon|fantas|theor|sympath|vandal|burglar|privat|publicis|globalis|industrial|memoris|familiar|centralis|decentral|pasteur|equal|tokenis|containeris|virtualis|parameteris|generalis|randomis|sanitis|prioritis|minimis|maximis|finalis|materialis|capitalis)is(?:e|es|ed|ing|ation|ations|er|ers)',
+			'analys(?:e|es|ed|ing)', 'paralys(?:e|ed|ing)'
+		].join('|') +
+		')\\b',
+	'gi'
+);
+
+/** The British spellings in a text. */
+export function britishSpellings(text: string): string[] {
+	return [...text.matchAll(BRITISH)].map((m) => m[0]);
+}
+
 const en = loadEdition('en');
 
 describe('English house style', () => {
@@ -64,6 +87,12 @@ describe('English house style', () => {
 		expect(notSentenceCase('Cards and spaced repetition')).toEqual([]);
 		expect(notSentenceCase('Cards And Spaced Repetition')).toEqual(['And', 'Spaced', 'Repetition']);
 		expect(notSentenceCase('Echo, and what to do in JavaScript with HTML')).toEqual([]);
+	});
+	test('the American-spelling rule itself', () => {
+		expect(britishSpellings('Colour, behaviour, a licence, organise, the centre, a catalogue, labelling, grey')).toEqual([
+			'Colour', 'behaviour', 'licence', 'organise', 'centre', 'catalogue', 'labelling', 'grey'
+		]);
+		expect(britishSpellings('Color, behavior, a license, organize, the center, a catalog, exercise, promise, advertising')).toEqual([]);
 	});
 	for (const lesson of en.lessons) {
 		const file = `content/en/${lesson.id}.svx`;
@@ -79,6 +108,7 @@ describe('English house style', () => {
 		test(`${lesson.id}: typographic quotes and apostrophes`, () => {
 			expect(prose.split('\n').filter((l) => /["']/.test(l))).toEqual([]);
 		});
+		test(`${lesson.id}: American spelling`, () => expect(britishSpellings(prose)).toEqual([]));
 		test(`${lesson.id}: no dash in a sentence`, () => expect(prose.split('\n').filter((l) => / [—–] /.test(l))).toEqual([]));
 	}
 });
