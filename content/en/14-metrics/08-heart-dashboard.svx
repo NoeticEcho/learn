@@ -1,0 +1,336 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/08-heart-dashboard.svx. */
+	export const metadata = {
+		id: '14-metrics/08-heart-dashboard',
+		part: 14,
+		order: 8,
+		title: 'HEART, the North Star and a dashboard',
+		definition: 'HEART is Google’s framework of five groups of metrics: happiness, engagement, adoption, retention, task success. With a North Star they make up a dashboard.',
+		summary:
+			'You’ll choose a few metrics that speak of the project’s health and build from them a dashboard that is pleasant and useful to look at. Afterwards you have a HEART table filled in for your project, a North Star tied to the main action from the brief, and a dashboard of five measures, each with its data source and the decision it supports.',
+		minutes: 25,
+		teaches: ['metrics-heart', 'metrics-dashboard'],
+		requires: ['metrics-conversion-basics', 'metrics-cohorts-retention', 'copy-north-star', 'metrics-vanity-goodhart'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'HEART', caption: 'Google’s framework', say: 'Happiness, engagement, adoption, retention, task success. In order: the goal, then the signal, and only then the metric.' },
+				{ mood: 'hmm', side: 'right', prop: 'sheet', label: '34 charts', caption: 'The dashboard', say: 'Extra hides the main thing: no more than five measures. For each, write what we do if the number fell.' },
+				{ mood: 'cheer', prop: 'sheet', label: 'once a week', caption: 'A rhythm', say: 'A dashboard no one looks at isn’t needed. Set a day, look and decide. Don’t hide the bad numbers.' }
+			]
+		},
+		practice: {
+			id: 'heart-dashboard',
+			title: 'HEART, the North Star and a dashboard of five measures',
+			task: 'Build a dashboard for your project in the note. 1) The HEART table: for each of the five sides enter a goal, a signal and a metric (the metric at least three words; the “Task success” row must hold the main action from the brief in the same words). 2) The North Star: one metric that names the main action from the brief, a period (“a month”, “a week”) and for whom (the “for whom” wording from the brief); without the words “traffic”, “visits” or “page views”. 3) The dashboard: three to five measures, each with a name (at least two words), a data source (Analytics, GA4, CRM, survey, form, spreadsheet) and the decision it supports (at least four words). There must be no vanity measures (“page views”, “number of likes”, “followers of all time”) on the dashboard. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="board">
+      <h2>HEART for the project</h2>
+      <table id="heart">
+        <tr><th>Side</th><th>Goal</th><th>Signal</th><th>Metric</th></tr>
+        <tr id="h-happiness" class="h"><th>Happiness</th><td class="h-goal">…</td><td class="h-signal">…</td><td class="h-metric">…</td></tr>
+        <tr id="h-engagement" class="h"><th>Engagement</th><td class="h-goal">…</td><td class="h-signal">…</td><td class="h-metric">…</td></tr>
+        <tr id="h-adoption" class="h"><th>Adoption</th><td class="h-goal">…</td><td class="h-signal">…</td><td class="h-metric">…</td></tr>
+        <tr id="h-retention" class="h"><th>Retention</th><td class="h-goal">…</td><td class="h-signal">…</td><td class="h-metric">…</td></tr>
+        <tr id="h-task" class="h"><th>Task success</th><td class="h-goal">…</td><td class="h-signal">…</td><td class="h-metric">…</td></tr>
+      </table>
+
+      <h2>North Star</h2>
+      <p id="ns">…</p>
+
+      <h2>The dashboard</h2>
+      <ol id="dash">
+        <li class="d"><span class="d-name">…</span>. Source: <span class="d-source">…</span>. Decision: <span class="d-decision">…</span></li>
+        <li class="d"><span class="d-name">…</span>. Source: <span class="d-source">…</span>. Decision: <span class="d-decision">…</span></li>
+        <li class="d"><span class="d-name">…</span>. Source: <span class="d-source">…</span>. Decision: <span class="d-decision">…</span></li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="board">
+      <h2>HEART for the project</h2>
+      <table id="heart">
+        <tr><th>Side</th><th>Goal</th><th>Signal</th><th>Metric</th></tr>
+        <tr id="h-happiness" class="h"><th>Happiness</th><td class="h-goal">the person leaves feeling they were understood</td><td class="h-signal">a rating in the email after the first contact</td><td class="h-metric">the share of ratings of 4 and 5 out of 5</td></tr>
+        <tr id="h-engagement" class="h"><th>Engagement</th><td class="h-goal">the person reads instead of skimming</td><td class="h-signal">scrolling to the proof</td><td class="h-metric">the share of visits that scroll to 75 percent</td></tr>
+        <tr id="h-adoption" class="h"><th>Adoption</th><td class="h-goal">a new person takes the first step</td><td class="h-signal">reached the “{{sections.0}}” section</td><td class="h-metric">the share of new visitors who reached the section</td></tr>
+        <tr id="h-retention" class="h"><th>Retention</th><td class="h-goal">the person stays in touch</td><td class="h-signal">opens the emails and follows links</td><td class="h-metric">the share of subscribers who followed a link in 30 days</td></tr>
+        <tr id="h-task" class="h"><th>Task success</th><td class="h-goal">the action goes through without difficulty</td><td class="h-signal">sent the form after starting it</td><td class="h-metric">the share of those who started “{{mainAction.label}}” who finished it</td></tr>
+      </table>
+
+      <h2>North Star</h2>
+      <p id="ns">The number of people from the group “{{forWhom}}” who took the action “{{mainAction.label}}”, a month</p>
+
+      <h2>The dashboard</h2>
+      <ol id="dash">
+        <li class="d"><span class="d-name">North Star per month</span>. Source: <span class="d-source">Analytics, key event, form</span>. Decision: <span class="d-decision">whether we need to change something to get more people</span></li>
+        <li class="d"><span class="d-name">Conversion of the form page</span>. Source: <span class="d-source">Analytics</span>. Decision: <span class="d-decision">whether to rewrite the form page</span></li>
+        <li class="d"><span class="d-name">Share of leads from the right segment</span>. Source: <span class="d-source">spreadsheet of leads</span>. Decision: <span class="d-decision">where to draw people from and whom not to invite</span></li>
+        <li class="d"><span class="d-name">Subscribers returning after a month</span>. Source: <span class="d-source">email service</span>. Decision: <span class="d-decision">whether to change the emails and their frequency</span></li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#board', matches: '^[^…]*$' },
+				{ id: 'happiness', kind: 'text', selector: '#h-happiness .h-metric', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'engagement', kind: 'text', selector: '#h-engagement .h-metric', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'adoption', kind: 'text', selector: '#h-adoption .h-metric', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'retention', kind: 'text', selector: '#h-retention .h-metric', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'task', kind: 'text', selector: '#h-task .h-metric', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'task-action', kind: 'field', selector: '#h-task', field: 'mainAction.label' },
+				{ id: 'ns-action', kind: 'field', selector: '#ns', field: 'mainAction.label' },
+				{ id: 'ns-who', kind: 'field', selector: '#ns', field: 'forWhom' },
+				{ id: 'ns-period', kind: 'text', selector: '#ns', matches: '(?:a month|per month|a week|per week|each month|each week|a day|per day|a quarter|per quarter|monthly|weekly)' },
+				{ id: 'ns-not-traffic', kind: 'text', selector: '#ns', matches: '^(?![\\s\\S]*(?:[Tt]raffic|[Pp]age views|[Vv]isits))[\\s\\S]*\\S' },
+				{ id: 'dash-count', kind: 'count', selector: '#dash .d', min: 3, max: 5 },
+				{ id: 'dash-name', kind: 'text', selector: '#dash .d-name', matches: '^\\s*\\S+(?:\\s+\\S+){1,}' },
+				{ id: 'dash-source', kind: 'text', selector: '#dash .d-source', matches: '(?:Analytics|GA4|Metrica|Matomo|Plausible|Search Console|CRM|survey|form|spreadsheet|table|email|mail)' },
+				{ id: 'dash-decision', kind: 'text', selector: '#dash .d-decision', matches: '^\\s*\\S+(?:\\s+\\S+){3,}' },
+				{ id: 'dash-no-vanity', kind: 'text', selector: '#dash', matches: '^(?![\\s\\S]*(?:[Pp]age views|number of likes|[Ll]ikes|followers of all time))[\\s\\S]*\\S' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each side of HEART with the question it answers',
+				pairs: [
+					['Happiness', 'Is the person satisfied? Ratings, surveys, recommendations'],
+					['Engagement', 'How deeply do they use it? Read, got as far as, stayed'],
+					['Adoption', 'Has a new person started using it?'],
+					['Retention', 'Do they come back or stay in touch?'],
+					['Task success', 'Can they do what they came for?']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the process “goals, signals, metrics” in HEART mean?',
+				options: [
+					'For each side you first decide the goal, then find the signal by which its achievement shows, and only then choose the metric',
+					'You first gather every possible number, then invent goals',
+					'You pick the metric first, because it is easy to count'
+				],
+				answer: 0,
+				why: [
+					'Yes. The authors of HEART (Google, 2010) suggest going from the goal to the signal to the metric, so that the number measures what you need and not what is easiest to count.',
+					'That is how vanity metrics arise: you count what is there.',
+					'That is the road to Goodhart’s law: what is convenient is measured, not what is important.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What marks a good dashboard?',
+				options: [
+					'It has five measures or fewer',
+					'Each has a data source',
+					'For each it is known which decision it supports',
+					'It has twenty measures so that nothing is missed'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: attention is limited, and many numbers hide the main one.',
+					'Yes: a person should know where a number comes from and how to check it.',
+					'Yes: a measure with no decision is a vanity metric.',
+					'No: an overloaded dashboard turns into decoration.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which North Star is better for a consultation site?',
+				options: [
+					'The number of people from our audience who booked a consultation, a month',
+					'The number of visitors a month',
+					'Satisfied clients'
+				],
+				answer: 0,
+				why: [
+					'Yes. It names the action, the period and the audience; the metric rises before revenue and is tied to the person’s benefit.',
+					'Traffic rises to no purpose.',
+					'“Satisfied” can’t be measured without surveys, and you learn it late.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You built a dashboard of page views, likes, followers of all time, average time and visitors. What is wrong with it?',
+				options: [
+					'Every measure is vanity or ambiguous: none says what to do',
+					'Nothing: there are five measures',
+					'Too few pictures'
+				],
+				answer: 0,
+				why: [
+					'Yes. The number of measures is not the main thing. What matters is whether each supports a decision. Replace them with shares and results (conversion, the share of right leads, return).',
+					'Five measures are not enough if all are vanity.',
+					'Pictures don’t make a dashboard more useful.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of building a dashboard in order',
+				items: [
+					'Choose the North Star for the main action',
+					'Fill in HEART: a goal, a signal and a metric for each side',
+					'Choose up to five measures and give each a source',
+					'Write for each the decision it supports',
+					'Set a day when the dashboard is looked at and decisions made'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-heart-def',
+				front: 'What is HEART?',
+				back: 'A framework of user experience metrics (Rodden, Hutchinson and Fu, Google, 2010): Happiness, Engagement, Adoption, Retention, Task success. You go from the goal to the signal to the metric.'
+			},
+			{
+				id: 'metrics-goals-signals',
+				front: 'What are goals, signals and metrics?',
+				back: 'A goal: what we want for the person. A signal: what in their behavior shows the goal was reached. A metric: how we count it. Go in that order.'
+			},
+			{
+				id: 'metrics-north-star-dash',
+				front: 'What should a project’s North Star be like?',
+				back: 'One metric that names an action, a period and an audience, about the person’s benefit and not traffic. Beside it a quality metric, so that it isn’t fudged.'
+			},
+			{
+				id: 'metrics-dashboard-rules',
+				front: 'What rules are used to build a dashboard?',
+				back: 'No more than five measures, each with a data source and the decision it supports. No vanity metrics. Once a week or a month it is looked at and decisions are made.'
+			},
+			{
+				id: 'metrics-tools-dash',
+				front: 'What do you build a dashboard with?',
+				back: 'For a small project a spreadsheet into which five numbers are entered by hand once a week is enough. Separate services (for example Looker Studio, or Yandex DataLens in Russia) are needed when there are many numbers or they must update themselves.'
+			}
+		],
+		sources: [
+			{ title: 'Rodden, Hutchinson, Fu (Google): Measuring the user experience on a large scale (HEART)', url: 'https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Google Analytics Data API: metrics and dimensions', url: 'https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Vanity metric (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Vanity_metric', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Performance indicator (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Performance_indicator', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A dashboard doesn’t have to be pretty. It is needed so that once a week, in five minutes, you can see what to do next.',
+			hints: [
+				'For each side of HEART, first a goal for the person, then a signal in their behavior, then a metric. A metric is a share or a count per something, at least three words.',
+				'In the “Task success” row name the main action in the same words as the brief: “the share of those who started … who finished it”.',
+				'The North Star is one phrase: how many people from your audience took the main action, and in what period.',
+				'The dashboard has three to five rows. For each: a source (Analytics, a form, a spreadsheet, email) and a decision: “whether to change…”, “where to direct…”.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in HEART, the North Star and the dashboard.',
+				happiness: 'Describe the metric in the “Happiness” row in at least three words.',
+				engagement: 'Describe the metric in the “Engagement” row in at least three words.',
+				adoption: 'Describe the metric in the “Adoption” row in at least three words.',
+				retention: 'Describe the metric in the “Retention” row in at least three words.',
+				task: 'Describe the metric in the “Task success” row in at least three words.',
+				'task-action': 'In the “Task success” row name the main action in the same words as the brief.',
+				'ns-action': 'In the North Star name the main action in the same words as the brief.',
+				'ns-who': 'The North Star must have the “for whom” wording from the brief.',
+				'ns-period': 'The North Star needs a period: “a month”, “a week” or “a day”.',
+				'ns-not-traffic': 'The North Star must not be about traffic, visits or page views: remove those words.',
+				'dash-count': 'The dashboard must have three to five measures.',
+				'dash-name': 'Write the measure’s name in at least two words.',
+				'dash-source': 'Each measure needs a source: Analytics, GA4, CRM, a survey, a form, a spreadsheet or an email service.',
+				'dash-decision': 'Describe the decision the measure supports in at least four words.',
+				'dash-no-vanity': 'There is still a vanity measure on the dashboard (page views, likes or followers of all time). Replace it.'
+			},
+			outro: 'Now you have a North Star, HEART and a dashboard of five measures, each of which leads to a decision. The part on metrics is finished: next come quality, speed and the law.'
+		},
+		say: { HEART: 'heart', 'North Star': 'north star', CRM: 'C R M', GA4: 'G A four', DataLens: 'data lens', 'Looker Studio': 'looker studio' }
+	};
+</script>
+
+<script>
+	import HeartBoard from '../../diagrams/HeartBoard.svelte';
+</script>
+
+## From many numbers to a few
+
+After seven lessons you have many possible numbers: visitors, page views, bounces, time, scroll depth, conversions by step, retention, test results. If you put them all out, you get a wall of numbers that nobody looks at. So the last task of this part is: **choose the few things that speak of the project’s health** and build from them a **dashboard** that can be glanced at in five minutes to understand what to do.
+
+There are two supports for choosing. The first you already know: the **North Star,** one metric about the person’s benefit, from [the lesson on growth](../../11-copywriting/09-growth/). The second is **HEART:** five sides by which to check whether all is well.
+
+## HEART
+
+**Where from.** In 2010 Kerry Rodden, Hilary Hutchinson and Xin Fu of Google described how to measure the quality of user experience at large scale. They proposed five categories of metrics, after the first letters of the English words: **HEART.** The paper is in the sources.
+
+- **Happiness.** Is the person satisfied: ratings, surveys (“would you recommend us”), reviews.
+- **Engagement.** How deeply does the person use it: how much they read, how far they got, whether they stayed.
+- **Adoption.** Has a new person started using it: did they take a first step.
+- **Retention.** Do they come back, do they stay in touch (you counted this by cohorts).
+- **Task success.** Can the person do what they came for: errors, time, the share who finished.
+
+The value of this framework is not in the five words but in the **process** the authors propose: for each side, first write the **goal** (what we want for the person), then the **signal** (what in their behavior shows that the goal was reached) and only then the **metric** (how we count it). The order matters. If you start from the metric, you will count what is easy to count and return to vanity numbers.
+
+You needn’t fill in all five sides for every project: for a business-card site retention often means “stayed in touch”. But going through all five and consciously skipping something is useful: you’ll see what you hadn’t thought about.
+
+Open the diagram. Choose a type of project: the goals, signals and metrics are shown for it. Switch on “show the vanity substitutes” and you’ll see which numbers people usually take instead of working ones. Below, play with a panel of ten candidates.
+
+<HeartBoard />
+
+## The North Star on the dashboard
+
+Here the North Star is the dashboard’s main measure. The demands on it are those of the lesson on growth: it names the **action, the period and the audience;** the metric is about **benefit,** not traffic; it rises **before revenue;** it can be measured by a counter or a form. An example: “the number of people from the group ‘…’ who booked a consultation, a month”. Beside it stands a quality metric, so the number isn’t fudged ([Goodhart’s law](../05-metrics-that-lie/)).
+
+## A dashboard of five measures
+
+A **dashboard** is the place where the project’s main numbers are gathered. A good one has several properties:
+
+1. **No more than five measures.** Attention is limited, and the extra hides the main thing.
+2. **Each has a data source.** Analytics, a spreadsheet of leads, an email service, a survey. A person should know where the number comes from and how to check it.
+3. **Each has a decision.** For each measure it is written: “if the number fell, we…”. A measure with no decision is vanity (the last lesson).
+4. **A combination.** A typical set: the North Star, the conversion of the main page or form, the share of right leads (quality), return or contact (retention), one measure of speed or errors.
+5. **A rhythm.** Set a day when you look at the dashboard and decide: once a week or once a month. A dashboard nobody looks at isn’t needed.
+6. **Honesty.** Show beside a number the period and what you compare it with. Don’t hide the bad numbers.
+
+**What to build it with.** For a small project a spreadsheet is enough, with five numbers entered by hand once a week. Separate dashboard services (Looker Studio, say, or Yandex DataLens in Russia) are needed when there are many numbers or they must update themselves. Don’t start with a tool: first decide which five numbers and why.
+
+**Sources of data and privacy.** Some numbers come from the counter, some from your forms and spreadsheets (for example, how many leads reached a conversation). Remember what you learned in the earlier lessons: the dashboard holds numbers and shares, not personal data. Names and phones don’t belong on a dashboard.
+
+<details>
+<summary>Check yourself: why does a dashboard have no more than five measures, each with a decision?</summary>
+
+Because attention is limited: more than five numbers turn a dashboard into decoration. And a measure that supports no decision is a vanity one: it suggests nothing.
+
+</details>
+
+## What next
+
+This part finishes the chain “attract, measure, understand”: you can find people (the part on growth), count what they do, test changes and look at the site through their eyes with respect for their privacy. Next in the course come quality and the law: the speed and accessibility of the site, security, personal data, advertising and a checklist before launch.
+
+## Practice
+
+Build a dashboard for your project.
+
+1. **HEART:** a goal, a signal and a metric for each of the five sides; in the “Task success” row the main action from the brief.
+2. **The North Star:** one phrase with the action, the period and the audience from the brief.
+3. **The dashboard:** three to five measures, each with a name, a source and a decision. No vanity ones.
+
+The check looks at form: the fields are filled in, the North Star names the action, the audience and the period, the dashboard has no more than five rows with sources and decisions. Whether your dashboard is good is for you to decide: imagine it is Monday tomorrow and you look at it for the first time this week. Is it clear in five minutes what to do?

@@ -8,13 +8,14 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
 
-	type Row = { dim: string; goal: string; signal: string; metric: string; vanity: string };
-	const kinds = ['expert', 'shop', 'venue', 'community', 'event', 'saas'] as const;
-	type Kind = (typeof kinds)[number];
-	const names: Record<Kind, string> = { expert: 'Эксперт', shop: 'Магазин', venue: 'Кафе, салон', community: 'Сообщество', event: 'Событие', saas: 'Сервис' };
-	const dims = ['Happiness: счастье', 'Engagement: вовлечённость', 'Adoption: принятие', 'Retention: удержание', 'Task success: успех задач'];
-	const data: Record<Kind, Omit<Row, 'dim'>[]> = {
+
+	const W = pick({
+		ru: {
+			names: { expert: 'Эксперт', shop: 'Магазин', venue: 'Кафе, салон', community: 'Сообщество', event: 'Событие', saas: 'Сервис' },
+			dims: ['Happiness: счастье', 'Engagement: вовлечённость', 'Adoption: принятие', 'Retention: удержание', 'Task success: успех задач'],
+			data: {
 		expert: [
 			{ goal: 'Человек уходит с ощущением, что ему ответили', signal: 'оценка в письме после консультации', metric: 'доля оценивших на 4 и 5 из 5', vanity: 'число лайков' },
 			{ goal: 'Человек читает, а не пролистывает', signal: 'дочитал статью', metric: 'доля визитов с прокруткой до 75%', vanity: 'просмотры страниц' },
@@ -57,13 +58,8 @@
 			{ goal: 'Пользователь остаётся', signal: 'вернулся на четвёртой неделе', metric: 'доля вернувшихся на четвёртой неделе от когорты', vanity: 'зарегистрированных всего' },
 			{ goal: 'Задача решается без трудностей', signal: 'экспортировал смету', metric: 'доля начатых смет, доведённых до экспорта', vanity: 'число кликов' }
 		]
-	};
-
-	let kind = $state<Kind>('expert');
-	let showVanity = $state(false);
-	const rows = $derived(data[kind].map((r, i) => ({ dim: dims[i], ...r })));
-
-	const pool = [
+	},
+			pool: [
 		{ t: 'Просмотры страниц за месяц', vain: true },
 		{ t: 'Посетители за всё время', vain: true },
 		{ t: 'Подписчики канала за всё время', vain: true },
@@ -74,24 +70,129 @@
 		{ t: 'Доля заявок, дошедших до разговора', vain: false },
 		{ t: 'Доля вернувшихся через месяц из тех, кто оставил почту', vain: false },
 		{ t: 'Доля посетителей из поиска, дошедших до формы', vain: false }
-	];
+	],
+			caption: 'HEART: пять сторон здоровья проекта',
+			group: 'Тип проекта',
+			vanityLabel: 'показать тщеславные подмены',
+			head: ['Сторона', 'Цель', 'Сигнал', 'Метрика'],
+			panel: 'Панель из пяти показателей',
+			choose: 'Выберите не больше пяти. Какие из них будут вести к решениям?',
+			tagVain: 'тщеславная или двусмысленная',
+			tagWork: 'рабочая',
+			chosen: 'Выбрано',
+			of5: 'из 5',
+			start: 'Начните с того, что поддерживает решения.',
+			most: 'Больше половины панели тщеславные: она украшает отчёт и ничего не подсказывает.',
+			some: 'Среди выбранных есть тщеславные: оставьте их, только если можете назвать решение, которое они поддерживают.',
+			good: 'Панель собрана из рабочих показателей.',
+			note: 'Строки таблицы примеры автора, а не данные. Рамка HEART описана Роденом, Хатчинсоном и Фу из Google в 2010 году.'
+		},
+		en: {
+			names: { expert: 'Expert', shop: 'Shop', venue: 'Café, salon', community: 'Community', event: 'Event', saas: 'Service' },
+			dims: ['Happiness', 'Engagement', 'Adoption', 'Retention', 'Task success'],
+			data: {
+		expert: [
+			{ goal: 'The person leaves feeling they got an answer', signal: 'a rating in the email after the consultation', metric: 'the share who rate 4 or 5 out of 5', vanity: 'the number of likes' },
+			{ goal: 'The person reads instead of skimming', signal: 'read an article to the end', metric: 'the share of visits that scroll to 75%', vanity: 'page views' },
+			{ goal: 'A new person takes the first step', signal: 'opened the prices or downloaded a checklist', metric: 'the share of new visitors who reached the prices', vanity: 'the number of visitors' },
+			{ goal: 'The person stays in touch', signal: 'opens the emails, reads the channel', metric: 'the share of subscribers who clicked a link in 30 days', vanity: 'followers of all time' },
+			{ goal: 'Booking goes through without difficulty', signal: 'sent the form', metric: 'the share who started the form and sent it', vanity: 'requests without sorting' }
+		],
+		shop: [
+			{ goal: 'The buyer is pleased with the order', signal: 'a product rating after delivery', metric: 'the share of ratings of 4 and 5', vanity: 'the number of reviews' },
+			{ goal: 'The buyer looks at products', signal: 'opened three product pages or more', metric: 'the share of visits with three product pages', vanity: 'views' },
+			{ goal: 'A new buyer puts something in the cart', signal: 'added a product to the cart', metric: 'the share of new visitors with a cart', vanity: 'the number of visitors' },
+			{ goal: 'The buyer comes back', signal: 'a second order', metric: 'the share of buyers with a second order in 90 days', vanity: 'total followers' },
+			{ goal: 'Checkout doesn’t get in the way', signal: 'paid for the order', metric: 'the share who started checkout and paid', vanity: 'the number of carts' }
+		],
+		venue: [
+			{ goal: 'The guest is pleased', signal: 'a review on the map', metric: 'the average rating over a quarter and the share of reviews answered', vanity: 'the number of reviews' },
+			{ goal: 'The person studies the menu and the hours', signal: 'opened the menu and “how to find us”', metric: 'the share of visits with the menu and the address', vanity: 'views' },
+			{ goal: 'A new guest makes a booking', signal: 'pressed “book a table”', metric: 'the share of new visitors who pressed book', vanity: 'the number of visitors' },
+			{ goal: 'The guest comes again', signal: 'a repeat booking', metric: 'the share of guests with a repeat booking in 60 days', vanity: 'total followers' },
+			{ goal: 'Booking goes through easily', signal: 'a confirmed booking', metric: 'the share of started bookings that were confirmed', vanity: 'the number of presses' }
+		],
+		community: [
+			{ goal: 'The member feels they belong', signal: 'an answer to “will you stay”', metric: 'the share who answered yes', vanity: 'the number of likes' },
+			{ goal: 'The member comes to meetings', signal: 'attended an event', metric: 'the share of members who came to at least one meeting a month', vanity: 'views of announcements' },
+			{ goal: 'A new person joins', signal: 'sent an application', metric: 'the share of new visitors who applied', vanity: 'the number of visitors' },
+			{ goal: 'The member stays', signal: 'active in the third month', metric: 'the share of joiners still active after three months', vanity: 'total members' },
+			{ goal: 'Joining is simple', signal: 'application sent', metric: 'the share who started the application and sent it', vanity: 'the number of presses' }
+		],
+		event: [
+			{ goal: 'The guest is pleased with the event', signal: 'a rating after the event', metric: 'the share of ratings of 4 and 5', vanity: 'reach of announcements' },
+			{ goal: 'The person studies the program', signal: 'opened the program and the speakers', metric: 'the share of visits with the program', vanity: 'views' },
+			{ goal: 'A new person goes for a ticket', signal: 'pressed “buy a ticket”', metric: 'the share of new visitors who pressed the ticket button', vanity: 'the number of visitors' },
+			{ goal: 'The guest comes back next year', signal: 'subscribed to the news', metric: 'the share of buyers who stayed subscribed', vanity: 'total followers' },
+			{ goal: 'Buying a ticket goes through easily', signal: 'a paid ticket', metric: 'the share who started the purchase and paid', vanity: 'the number of presses' }
+		],
+		saas: [
+			{ goal: 'The user is pleased', signal: 'an answer to “would you recommend us”', metric: 'the share who would recommend', vanity: 'the number of likes' },
+			{ goal: 'The user works in the service', signal: 'made an estimate', metric: 'the share of users with at least one estimate a week', vanity: 'the number of sign-ins' },
+			{ goal: 'A new person tries it', signal: 'created a first estimate', metric: 'the share of sign-ups with a first estimate in three days', vanity: 'the number of sign-ups' },
+			{ goal: 'The user stays', signal: 'came back in the fourth week', metric: 'the share of a cohort that came back in the fourth week', vanity: 'total registered' },
+			{ goal: 'The task is solved without difficulty', signal: 'exported an estimate', metric: 'the share of started estimates taken to export', vanity: 'the number of clicks' }
+		]
+	},
+			pool: [
+		{ t: 'Page views per month', vain: true },
+		{ t: 'Visitors of all time', vain: true },
+		{ t: 'Channel followers of all time', vain: true },
+		{ t: 'The number of likes', vain: true },
+		{ t: 'Average time on the site', vain: true },
+		{ t: 'Leads a month from the right segment', vain: false },
+		{ t: 'The share who started the form and sent it', vain: false },
+		{ t: 'The share of leads that reached a conversation', vain: false },
+		{ t: 'The share of those who left an email who came back after a month', vain: false },
+		{ t: 'The share of search visitors who reached the form', vain: false }
+	],
+			caption: 'HEART: five sides of a project’s health',
+			group: 'Type of project',
+			vanityLabel: 'show the vanity substitutes',
+			head: ['Side', 'Goal', 'Signal', 'Metric'],
+			panel: 'A panel of five measures',
+			choose: 'Choose no more than five. Which of them will lead to decisions?',
+			tagVain: 'vanity or ambiguous',
+			tagWork: 'actionable',
+			chosen: 'Chosen',
+			of5: 'of 5',
+			start: 'Start with what supports decisions.',
+			most: 'More than half of the panel is vanity: it decorates the report and suggests nothing.',
+			some: 'There are vanity measures among those chosen: keep them only if you can name the decision they support.',
+			good: 'The panel is made of actionable measures.',
+			note: 'The rows of the table are the author’s examples, not data. The HEART framework was described by Rodden, Hutchinson and Fu of Google in 2010.'
+		}
+	});
+
+	type Row = { dim: string; goal: string; signal: string; metric: string; vanity: string };
+	const kinds = ['expert', 'shop', 'venue', 'community', 'event', 'saas'] as const;
+	type Kind = (typeof kinds)[number];
+	const names: Record<Kind, string> = W.names;
+	const dims = W.dims;
+	const data: Record<Kind, Omit<Row, 'dim'>[]> = W.data;
+
+	let kind = $state<Kind>('expert');
+	let showVanity = $state(false);
+	const rows = $derived(data[kind].map((r, i) => ({ dim: dims[i], ...r })));
+
+	const pool = W.pool;
 	let picked = $state<boolean[]>(pool.map(() => false));
 	const count = $derived(picked.filter(Boolean).length);
 	const vain = $derived(picked.filter((p, i) => p && pool[i].vain).length);
 </script>
 
 <figure class="dg">
-	<figcaption>HEART: пять сторон здоровья проекта</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Тип проекта">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.group}>
 		{#each kinds as k (k)}
 			<button type="button" aria-pressed={kind === k} onclick={() => (kind = k)}>{names[k]}</button>
 		{/each}
-		<label><input type="checkbox" bind:checked={showVanity} /> показать тщеславные подмены</label>
+		<label><input type="checkbox" bind:checked={showVanity} /> {W.vanityLabel}</label>
 	</div>
 	<div class="wrap">
 		<table>
 			<thead>
-				<tr><th scope="col">Сторона</th><th scope="col">Цель</th><th scope="col">Сигнал</th><th scope="col">Метрика</th></tr>
+				<tr><th scope="col">{W.head[0]}</th><th scope="col">{W.head[1]}</th><th scope="col">{W.head[2]}</th><th scope="col">{W.head[3]}</th></tr>
 			</thead>
 			<tbody>
 				{#each rows as r (r.dim)}
@@ -106,20 +207,20 @@
 		</table>
 	</div>
 
-	<div class="dh">Панель из пяти показателей</div>
-	<p class="dg-out">Выберите не больше пяти. Какие из них будут вести к решениям?</p>
+	<div class="dh">{W.panel}</div>
+	<p class="dg-out">{W.choose}</p>
 	<ul class="pool">
 		{#each pool as p, i (i)}
 			<li>
 				<label><input type="checkbox" bind:checked={picked[i]} disabled={!picked[i] && count >= 5} /> {p.t}</label>
-				{#if picked[i]}<span class="tag">{p.vain ? 'тщеславная или двусмысленная' : 'рабочая'}</span>{/if}
+				{#if picked[i]}<span class="tag">{p.vain ? W.tagVain : W.tagWork}</span>{/if}
 			</li>
 		{/each}
 	</ul>
 	<p class="dg-out" aria-live="polite">
-		Выбрано {count} из 5. {#if count === 0}Начните с того, что поддерживает решения.{:else if vain > count / 2}Больше половины панели тщеславные: она украшает отчёт и ничего не подсказывает.{:else if vain > 0}Среди выбранных есть тщеславные: оставьте их, только если можете назвать решение, которое они поддерживают.{:else}Панель собрана из рабочих показателей.{/if}
+		{W.chosen} {count} {W.of5}. {#if count === 0}{W.start}{:else if vain > count / 2}{W.most}{:else if vain > 0}{W.some}{:else}{W.good}{/if}
 	</p>
-	<p class="dg-out">Строки таблицы примеры автора, а не данные. Рамка HEART описана Роденом, Хатчинсоном и Фу из Google в 2010 году.</p>
+	<p class="dg-out">{W.note}</p>
 </figure>
 
 <style>
