@@ -1,0 +1,429 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/02-wcag22.svx. */
+	export const metadata = {
+		id: '15-quality/02-wcag22',
+		part: 15,
+		order: 2,
+		title: 'Accessibility in depth: WCAG 2.2 and a walkthrough',
+		definition: 'WCAG 2.2 is the international web accessibility standard, with criteria at levels A, AA and AAA. It is checked with tools, a keyboard and a screen reader.',
+		summary:
+			'In the HTML part you made a first accessibility pass. Afterwards you know what is new in WCAG 2.2, you can check a page three ways (with tools, with a keyboard and with a screen reader), and you fix the usual faults: contrast, focus, the size of a touch target, field labels, language and error messages.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'crt',
+					label: 'gray on white',
+					caption: 'A sunny day',
+					say: 'Reading on your phone outdoors? The light gray text just vanished.'
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'Tab → Tab → Tab',
+					caption: 'No mouse',
+					say: [
+						{ text: 'Where did the focus ring go?' },
+						{ who: 'The page', text: 'Removed. It looked ugly.' }
+					]
+				},
+				{
+					mood: 'cheer',
+					prop: 'sheet',
+					label: '4.5 : 1',
+					caption: 'The check',
+					say: 'Three passes: tools, keyboard, screen reader. Each sees something the others miss.'
+				}
+			]
+		},
+		teaches: ['quality-wcag22', 'quality-a11y-audit'],
+		requires: ['html-a11y-basics', 'html-aria-first-rule', 'css-contrast', 'design-contrast', 'css-reduced-motion'],
+		practice: {
+			id: 'a11y-fix-pass',
+			title: 'Fixing a page to WCAG 2.2',
+			task: 'You get a page with faults. Fix it: 1) lang=en on html, a “Skip to content” link as the first thing in body, and id=main on main; 2) one h1 on the page (turn the second into a paragraph); 3) contrast: .muted and .btn at 4.5 to 1 or better; 4) .icon-btn at least 44 by 44 (min-width, min-height) with an aria-label; 5) bring the focus ring back: remove outline: none, add :focus-visible with a visible outline, and for the fixed header set scroll-padding-top on html; 6) every field gets a label and autocomplete (name, tel, current-password), and the password field allows pasting; 7) the error message gets role=status; 8) every evidence image gets a meaningful alt, and every lang-note paragraph gets its own lang for the language from the brief; 9) respect prefers-reduced-motion for scrolling. In the note write three problems you found yourself, each with its criterion number (for example 2.4.7) and the fix. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      html { scroll-behavior: smooth; }
+      body { margin: 0; font-family: system-ui, sans-serif; background: #fff; color: #1d2430; line-height: 1.5; }
+      .top { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #eef1f6; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      .muted { color: #aeb4bd; }
+      .btn { background: #7fb3ff; color: #fff; border: 0; padding: 0.6rem 1rem; }
+      .icon-btn { width: 16px; height: 16px; padding: 0; border: 0; background: none; }
+      a:focus, button:focus, input:focus { outline: none; }
+      input { padding: 0.5rem; border: 1px solid #888; }
+    <\/style>
+  </head>
+  <body>
+    <header class="top">
+      <strong>{{name}}</strong>
+      <button class="icon-btn" type="button">×</button>
+    </header>
+    <main>
+      <h1>{{title}}</h1>
+      <h1>{{who}}</h1>
+      <p class="muted">{{forWhom}}</p>
+      {{#each languages}}<p class="lang-note">Language of this version: {{.}}</p>
+      {{/each}}
+      <section id="proofs">
+        <h2>Credentials</h2>
+        {{#each proofs}}<figure>
+          <img src="doc.jpg" width="120" height="160">
+          <figcaption>{{title}}</figcaption>
+        </figure>
+        {{/each}}
+      </section>
+      <form action="/inquiry" method="post">
+        <h2>{{mainAction.label}}</h2>
+        <p><input type="text" name="name" placeholder="Name"></p>
+        <p><input type="tel" name="phone" placeholder="Phone"></p>
+        <p><input type="password" name="pw" placeholder="Password for your account" onpaste="return false"></p>
+        <p id="err" class="muted"></p>
+        <button class="btn" type="submit">{{mainAction.label}}</button>
+      </form>
+    </main>
+    <aside data-scaffold id="a11y-found">
+      <h2>Three problems found</h2>
+      <ol>
+        <li id="f1">…</li>
+        <li id="f2">…</li>
+        <li id="f3">…</li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+      body { margin: 0; font-family: system-ui, sans-serif; background: #fff; color: #1d2430; line-height: 1.5; }
+      .skip { position: absolute; left: -999px; }
+      .skip:focus { left: 0; background: #fff; padding: 0.5rem; }
+      .top { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #eef1f6; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      .muted { color: #4a5562; }
+      .btn { background: #0b3d91; color: #fff; border: 0; padding: 0.6rem 1rem; }
+      .icon-btn { min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; }
+      :focus-visible { outline: 3px solid #0b3d91; outline-offset: 2px; }
+      input { padding: 0.5rem; border: 1px solid #888; }
+    <\/style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <strong>{{name}}</strong>
+      <button class="icon-btn" type="button" aria-label="Close">×</button>
+    </header>
+    <main id="main">
+      <h1>{{title}}</h1>
+      <p class="muted">{{who}}</p>
+      <p class="muted">{{forWhom}}</p>
+      {{#each languages}}<p class="lang-note" lang="{{.}}">Language of this version: {{.}}</p>
+      {{/each}}
+      <section id="proofs">
+        <h2>Credentials</h2>
+        {{#each proofs}}<figure>
+          <img src="doc.jpg" width="120" height="160" alt="Scan of a document: {{title}}">
+          <figcaption>{{title}}</figcaption>
+        </figure>
+        {{/each}}
+      </section>
+      <form action="/inquiry" method="post">
+        <h2>{{mainAction.label}}</h2>
+        <p><label for="f-name">Name</label><br><input id="f-name" type="text" name="name" autocomplete="name"></p>
+        <p><label for="f-phone">Phone</label><br><input id="f-phone" type="tel" name="phone" autocomplete="tel"></p>
+        <p><label for="f-pw">Password for your account</label><br><input id="f-pw" type="password" name="pw" autocomplete="current-password"></p>
+        <p id="err" class="muted" role="status"></p>
+        <button class="btn" type="submit">{{mainAction.label}}</button>
+      </form>
+    </main>
+    <aside data-scaffold id="a11y-found">
+      <h2>Three problems found</h2>
+      <ol>
+        <li id="f1">2.4.7: links and fields had no focus ring; I added :focus-visible.</li>
+        <li id="f2">1.4.3: the light gray text was hard to read; I darkened it to a contrast above 4.5 to 1.</li>
+        <li id="f3">2.5.8: the close button was 16 by 16; I enlarged it to 44 by 44.</li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'lang', kind: 'lang', equals: 'en' },
+				{ id: 'skip', kind: 'exists', selector: 'body > a:first-child[href="#main"]' },
+				{ id: 'main-id', kind: 'exists', selector: 'main#main' },
+				{ id: 'one-h1', kind: 'count', selector: 'h1', min: 1, max: 1 },
+				{ id: 'contrast-text', kind: 'contrast', selector: '.muted', min: 4.5 },
+				{ id: 'contrast-btn', kind: 'contrast', selector: '.btn', min: 4.5 },
+				{ id: 'target-w', kind: 'style', selector: '.icon-btn', prop: 'min-width', matches: '^(4[4-9]|[5-9]\\d)(\\.\\d+)?px$' },
+				{ id: 'target-h', kind: 'style', selector: '.icon-btn', prop: 'min-height', matches: '^(4[4-9]|[5-9]\\d)(\\.\\d+)?px$' },
+				{ id: 'icon-name', kind: 'attr', selector: 'button.icon-btn', name: 'aria-label', matches: '\\S' },
+				{ id: 'focus-visible', kind: 'text', selector: 'style', matches: ':focus-visible\\s*\\{[^}]*outline' },
+				{ id: 'no-outline-none', kind: 'text', selector: 'style', matches: '^(?![\\s\\S]*outline:\\s*(none|0)\\s*[;}])' },
+				{ id: 'scroll-padding', kind: 'text', selector: 'style', matches: 'scroll-padding-top:\\s*\\d' },
+				{ id: 'reduced-motion', kind: 'text', selector: 'style', matches: 'prefers-reduced-motion' },
+				{ id: 'labels', kind: 'label' },
+				{ id: 'autocomplete', kind: 'count', selector: 'input:not([autocomplete])', max: 0 },
+				{ id: 'paste', kind: 'count', selector: '[onpaste]', max: 0 },
+				{ id: 'status', kind: 'exists', selector: '[role="status"], [role="alert"], [aria-live]' },
+				{ id: 'alt', kind: 'count', selector: 'figure img:not([alt]), figure img[alt=""]', max: 0 },
+				{ id: 'lang-notes', kind: 'count', selector: 'p.lang-note:not([lang])', max: 0 },
+				{ id: 'found-1', kind: 'text', selector: '#f1', matches: '\\d\\.\\d\\.\\d+' },
+				{ id: 'found-2', kind: 'text', selector: '#f2', matches: '\\d\\.\\d\\.\\d+' },
+				{ id: 'found-3', kind: 'text', selector: '#f3', matches: '\\d\\.\\d\\.\\d+' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What is the minimum size of a touch target in WCAG 2.2, level AA (criterion 2.5.8)?',
+				options: ['24 by 24 CSS pixels (with exceptions)', '8 by 8 pixels', '100 by 100 pixels'],
+				answer: 0,
+				why: [
+					'Yes. 24 by 24 CSS pixels is the minimum, and for a finger 44 by 44 is more comfortable (platform guidelines aim at that size too). The exception: if a target is smaller, there has to be enough free space around it.',
+					'No. A finger cannot press a target that small.',
+					'No. Nothing like that is required.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which criteria are new in WCAG 2.2?',
+				options: [
+					'Focus Not Obscured (2.4.11)',
+					'Text contrast of 4.5 to 1 (1.4.3)',
+					'Target Size, Minimum (2.5.8)',
+					'Accessible Authentication, Minimum (3.3.8)'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: a focused element must not be hidden entirely behind a fixed header or banner.',
+					'No. Text contrast has been in WCAG since version 2.0.',
+					'Yes: a touch target of at least 24 by 24 pixels.',
+					'Yes: logging in must not demand remembering a password or solving a puzzle with no workaround (such as pasting from a password manager).'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each WCAG 2.2 criterion with its meaning',
+				pairs: [
+					['2.5.7 Dragging Movements', 'an action done by dragging also has a way to do it without dragging'],
+					['3.3.7 Redundant Entry', 'don’t ask again for what the person already entered in this process'],
+					['3.2.6 Consistent Help', 'the link to help or contacts sits in the same place on every page'],
+					['2.4.11 Focus Not Obscured', 'the focused element isn’t entirely hidden behind a fixed block']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'An automated check (Lighthouse, axe) found zero errors. Does that mean the site is accessible?',
+				options: [
+					'No: tools find only some of the problems, and the rest show up only by hand and with a screen reader',
+					'Yes: zero errors means full WCAG conformance',
+					'Yes, but only for level AAA'
+				],
+				answer: 0,
+				why: [
+					'Yes. A tool notices a missing alt but cannot tell whether the alt describes the picture well. It sees low contrast but cannot say whether the focus order is comfortable or the error message is clear.',
+					'No. Automated checks cover only some of the criteria, and a person checks the rest.',
+					'No. Tools don’t assess AAA separately, and they don’t replace manual checks.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A form field has no label, only a hint inside it (the placeholder “Phone”). What is wrong?',
+				options: [
+					'The hint disappears as you type, and not every screen reader reliably treats it as the field’s name; a visible label is needed',
+					'Nothing: a placeholder is a label',
+					'The only problem is the color of the hint'
+				],
+				answer: 0,
+				why: [
+					'Yes. A label has to stay in view while the person types, and it has to be tied to the field. A hint inside the field adds to a label but doesn’t replace it.',
+					'No. A placeholder doesn’t replace a label.',
+					'No. Color matters too (contrast is needed), but it isn’t the main problem.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a phone field with a visible label “Phone” and the autocomplete hint for the browser: tel',
+				starter: '',
+				checks: [
+					{ id: 'input', kind: 'exists', selector: 'input[type=tel][autocomplete=tel]' },
+					{ id: 'label', kind: 'label' },
+					{ id: 'text', kind: 'text', selector: 'label', matches: 'Phone' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-wcag-whatsnew',
+				front: 'What is new in WCAG 2.2 that you’ll meet most often?',
+				back: 'Focus not hidden by a header (2.4.11), dragging with a fallback (2.5.7), a touch target of at least 24 by 24 (2.5.8), consistent help (3.2.6), no redundant entry (3.3.7), accessible authentication (3.3.8). Criterion 4.1.1 was removed.'
+			},
+			{
+				id: 'quality-wcag-contrast',
+				front: 'The contrast thresholds in WCAG AA?',
+				back: 'Normal text 4.5 to 1. Large text and interface parts (field borders, icons, the focus ring) 3 to 1. Large means 24 pixels or more, or 18.66 pixels or more in bold.'
+			},
+			{
+				id: 'quality-wcag-three-passes',
+				front: 'The three passes of an accessibility check?',
+				back: 'Tools (Lighthouse, axe), keyboard (Tab, Enter, Space, visible focus, zoom to 200%), screen reader (NVDA, VoiceOver: name, role, state). Each sees what the others don’t.'
+			},
+			{
+				id: 'quality-wcag-form',
+				front: 'What does a form need for accessibility?',
+				back: 'A visible label on every field, autocomplete where it fits, errors in words next to the field and in role=status or role=alert, no asking for what was already entered, and no blocking paste into a password field.'
+			},
+			{
+				id: 'quality-wcag-levels',
+				front: 'What does “the site conforms to WCAG 2.2 AA” mean?',
+				back: 'The page meets all the criteria of levels A and AA, not some of them. You have to check criterion by criterion, and claim conformance only after checking.'
+			}
+		],
+		sources: [
+			{ title: 'Web Content Accessibility Guidelines (WCAG) 2.2', url: 'https://www.w3.org/TR/WCAG22/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'What’s New in WCAG 2.2 (W3C WAI)', url: 'https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'How to Meet WCAG: a quick reference (W3C WAI)', url: 'https://www.w3.org/WAI/WCAG22/quickref/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Easy checks: a first review of web accessibility (W3C WAI)', url: 'https://www.w3.org/WAI/test-evaluate/preliminary/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'The WebAIM Million: an accessibility analysis of the top 1,000,000 home pages', url: 'https://webaim.org/projects/million/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Learn Accessibility (web.dev)', url: 'https://web.dev/learn/accessibility', licence: 'CC-BY', kind: 'course', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is a page with the faults that are found every year on most sites. Walk through it as a person with no mouse, and as a person with poor eyesight.',
+			hints: [
+				'Start with the obvious: lang on html, a “Skip to content” link, main with id=main, one h1.',
+				'Contrast is fixed with color: .muted can be #4a5562, and .btn can have the background #0b3d91 with white text. The focus ring: :focus-visible { outline: 3px solid #0b3d91; outline-offset: 2px; } and remove outline: none.',
+				'Every field needs a <label for=…> and an autocomplete value (name, tel, current-password). The error message needs role=status, each evidence image a meaningful alt, and each .lang-note its own lang.',
+				'In the note, three problems with criterion numbers, for example “2.4.7: no focus ring; I added :focus-visible”.'
+			],
+			mistakes: {
+				lang: 'The html element must have lang=en.',
+				skip: 'The first element in body should be a link: <a href=#main>Skip to content</a>.',
+				'main-id': 'The main element needs id=main.',
+				'one-h1': 'The page must have exactly one h1. Turn the second into a paragraph.',
+				'contrast-text': 'The text of .muted is too light: it needs a contrast of at least 4.5 to 1.',
+				'contrast-btn': 'The text and background of .btn have a contrast below 4.5 to 1: make the background darker.',
+				'target-w': 'The min-width of .icon-btn must be at least 44px.',
+				'target-h': 'The min-height of .icon-btn must be at least 44px.',
+				'icon-name': 'The icon button has no name: add an aria-label such as Close.',
+				'focus-visible': 'Add a :focus-visible rule with an outline so that the focus is visible.',
+				'no-outline-none': 'Remove outline: none unless you replace the ring with something visible.',
+				'scroll-padding': 'For the fixed header add html { scroll-padding-top: 4rem } so that the focus doesn’t slip under it.',
+				'reduced-motion': 'Wrap smooth scrolling in @media (prefers-reduced-motion: reduce) with scroll-behavior: auto.',
+				labels: 'Some field has no label.',
+				autocomplete: 'Every field needs an autocomplete value: name, tel, current-password.',
+				paste: 'Remove the onpaste handler that blocks pasting: password managers and people need paste.',
+				status: 'The container of the error message needs role=status (or role=alert).',
+				alt: 'The evidence images must have a non-empty alt.',
+				'lang-notes': 'Each .lang-note paragraph needs its own lang for the language of the version: lang=en or lang=ru.',
+				'found-1': 'In the first problem give a criterion number, for example 2.4.7.',
+				'found-2': 'In the second problem give a criterion number, for example 1.4.3.',
+				'found-3': 'In the third problem give a criterion number, for example 2.5.8.'
+			},
+			outro: 'Now the page can be used with a finger, a keyboard and a screen reader. It is too early to claim conformance: these are walks down a list, not a guarantee, and a final check with real people remains.'
+		},
+		say: { WCAG: 'wuh-cag', AA: 'A A', AAA: 'A A A', Lighthouse: 'lighthouse', axe: 'axe', NVDA: 'N V D A', VoiceOver: 'voice over', autocomplete: 'auto complete', placeholder: 'place holder', label: 'label', aria: 'AR-ee-uh', WebAIM: 'web A I M' }
+	};
+</script>
+
+<script>
+	import A11yViews from '../../diagrams/A11yViews.svelte';
+</script>
+
+## What the first pass missed
+
+In [the lesson on accessibility](../../02-html/08-accessibility/) you made a first pass: alt text, field labels, focus order. Now let’s see how it all fits together. Start with the WebAIM Million study you met there. In its 2026 report, WCAG 2 failures were found on about 96 percent of home pages, with an average of more than fifty errors per page. The six most common: low text contrast (more than 80 percent of pages), images without alt (more than half), form fields without labels (about half), empty links, empty buttons and no page language. You know how to find and fix all six. That is the good news: most of the contribution to accessibility comes not from rare tricks but from things this part has been talking about for a while.
+
+The bad news: WCAG 2.2 asks for more than “alt text and labels.” Let’s take the standard in parts.
+
+## Versions and levels
+
+The WCAG standard develops in versions. 2.0 came out in 2008, 2.1 added requirements for mobile devices and people with low vision in 2018, and 2.2 became a W3C Recommendation in October 2023. Versions are backward compatible: a page that meets 2.2 meets 2.1 too (apart from one removed item).
+
+The success criteria are grouped under the POUR principles you know, and divided into **levels**: A (the necessary minimum), AA (the usual target) and AAA (the strictest, not always achievable). The requirement “conforms to WCAG 2.2 AA” means that the page meets **all** the A and AA criteria, and in version 2.2 there are fifty-five of them. Meeting half of them and calling it conformance isn’t allowed.
+
+## What is new in WCAG 2.2
+
+The version added nine criteria and removed one (4.1.1 Parsing, because modern browsers cope with markup errors themselves). Here are the ones you’ll meet on an ordinary site.
+
+- **2.4.11 Focus Not Obscured** (AA). When you press Tab, the focused element must not be entirely hidden under a fixed header, a cookie banner or a chat. The cure: `scroll-padding-top` on `html` equal to the height of the fixed header, and banners that don’t cover the whole page.
+- **2.5.7 Dragging Movements** (AA). If an action is done by dragging (a slider, sorting a list), there must be a way without dragging: “up” and “down” buttons, or a field to type a number.
+- **2.5.8 Target Size, Minimum** (AA). A touch target (a button, a link, an icon) is at least 24 by 24 CSS pixels, and if it is smaller, there must be enough free space around it. Fingers find 44 by 44 more comfortable, and a mouse in a shaky hand will thank you too.
+- **3.2.6 Consistent Help** (A). Contacts, chat and the link to help are in the same place on every page.
+- **3.3.7 Redundant Entry** (A). Don’t ask again for what the person already entered in this process: a delivery address twice, for example. Offer to fill it in.
+- **3.3.8 Accessible Authentication, Minimum** (AA). Logging in must not require remembering a password or solving a puzzle unless there is a workaround. In practice: allow pasting into the password field and filling it in with a password manager (the parts on authentication and passkeys), and don’t make people retype a string of characters from a picture.
+
+The other three new criteria (2.4.12, 2.4.13 and 3.3.9) are at level AAA, and you meet them if you wish.
+
+<details>
+<summary>Check yourself: which WCAG 2.2 criterion says a focused element must not be hidden under a fixed header?</summary>
+
+2.4.11 Focus Not Obscured (Minimum), level AA. It is cured with a scroll offset, `scroll-padding-top`.
+
+</details>
+
+## What is usually checked, by topic
+
+There are many criteria, so it is easier to keep topics in mind. For each topic from the HTML and CSS parts you already have a tool.
+
+- **Text and color.** The thresholds from [the lesson on color and contrast](../../04-design/05-colour-contrast/): normal text at least 4.5 to 1, large text (from 24 pixels, or from 18.66 if bold) at least 3 to 1 (criterion 1.4.3). Field borders, icons and the focus ring at least 3 to 1 (1.4.11). Meaning must not rest on color alone (1.4.1): a red border needs an asterisk or a word.
+- **Size and width.** The page reads when the text is enlarged to 200 percent (1.4.4) and at a width of 320 CSS pixels without horizontal scrolling (1.4.10, the same as 400 percent zoom on a screen 1280 wide). If you have to scroll sideways on a narrow screen to read, that is a failure.
+- **Keyboard.** Everything done with a mouse can be done with a key (2.1.1). No focus traps (2.1.2). The focus order is sensible (2.4.3). The focus is visible (2.4.7). There is a way to skip the repeated menu (2.4.1).
+- **Forms.** A label on every field (3.3.2, 1.3.1). Autofill where it fits, with the `autocomplete` attribute (1.3.5). An error is named in words, next to the field, with a hint on how to fix it (3.3.1, 3.3.3), and announced to a screen reader (4.1.3).
+- **Movement and time.** Nothing flashes more than three times a second (2.3.1). Whatever moves for more than five seconds (a carousel, a video background) can be stopped (2.2.2). Animations respect `prefers-reduced-motion`, as in the part on motion. A time limit can be extended (2.2.1).
+- **Media.** Video has captions and audio has a transcript (1.2.x).
+- **Language.** The language of the page and of its parts (3.1.1, 3.1.2): a screen reader picks its voice by `lang`.
+- **Name, role, state.** A custom element tells a screen reader what it is and what state it is in (4.1.2). More on this in the next lesson.
+
+## Three passes
+
+Checking accessibility isn’t one tool but three different points of view.
+
+1. **Automated.** Lighthouse in Chrome (the Accessibility section), the axe DevTools extension, WAVE. They quickly find contrast, missing alt, empty links and wrong roles. They find **some** of the problems, and they will never say that an alt is meaningful or that the focus order is comfortable. Zero errors in Lighthouse doesn’t mean “accessible.”
+2. **Keyboard.** Put the mouse away. Go through the whole page with Tab, Shift+Tab, Enter, Space and Esc. Can you see where the focus is? Did you get stuck? Can you submit the form? Then zoom the page to 200 percent and narrow the window to 320 pixels.
+3. **Screen reader.** Turn on a screen reader (NVDA is free on Windows, VoiceOver comes with macOS and iOS, TalkBack with Android) and go through the main actions: what is announced on a button, on a field, on an error. More on this in the next lesson.
+
+The diagram below is one contact page with nine faults. For each you can see how it looks from the three sides, and it is at once clear why one check is not enough.
+
+<A11yViews />
+
+It is best to record the result of a check as a table: the criterion, where it fails, how much it matters (does it stop the main action), how to fix it, and whether it is fixed. Then you fix first whatever blocks the **main action** from the brief (book, buy, call), and leave the cosmetics for later.
+
+<details>
+<summary>Check yourself: why doesn’t a clean Lighthouse run prove accessibility?</summary>
+
+Tools catch only some of the criteria. They can’t judge whether an alt is meaningful, whether the focus order is comfortable or whether error messages are clear. People check that by hand and with a screen reader.
+
+</details>
+
+## Practice
+
+You are in the era of 2014: sites have become responsive, and it is time to fix what stops people using them. You get a page with the faults from the diagram and a few more. Fix them and write down three problems you found yourself, with the criterion number of each.
+
+The check looks at markup and styles: at the contrast of text and button, sizes, the focus ring, labels and languages. What it can’t see, check by hand: open the page, press Tab and go through it without a mouse, zoom to 200 percent. A criterion counts as met only when it worked for you.
+
+If your project is in a site builder, pick a high-contrast theme, check the button colors and make sure the form fields have labels: in builders this is often set in the same place as everything else.
+
+## What used to be different
+
+Before WCAG 2.0 (2008), sites were called accessible for having a version “for the visually impaired”: a separate simplified page, black on white with a huge font. It was rarely updated and fell behind the main one. Today we know that a separate version isn’t needed. One page, built properly, is. And 2.2 added what nobody thought about in 2008: fingers on phones, fixed headers and password managers. The standard keeps changing; always check the current version on the W3C site.

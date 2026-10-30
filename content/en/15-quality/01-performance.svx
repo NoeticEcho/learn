@@ -1,0 +1,410 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/01-performance.svx. */
+	export const metadata = {
+		id: '15-quality/01-performance',
+		part: 15,
+		order: 1,
+		title: 'Speed: Core Web Vitals and a budget',
+		definition: 'Core Web Vitals are three measures of page speed: LCP (main content shown), INP (response) and CLS (layout shift). A budget sets the limits in advance.',
+		summary:
+			'A slow site loses people before they have read the first word. Afterwards you know the three measures of speed (LCP, INP and CLS) and their thresholds, you can find the main element of your page, fix the usual causes of slow loading and jumping layouts, and write down a budget: how many kilobytes and requests your page is allowed.',
+		minutes: 25,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser',
+					label: 'blank screen… 6 s',
+					caption: 'A mobile network',
+					say: [
+						{ text: 'A person waits for the main picture.' },
+						{ who: 'Browser', text: 'Downloading. Nine hundred kilobytes.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'width × height',
+					caption: 'Room reserved',
+					say: 'Put the picture’s size in the markup: the space is ready and the text stays put.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'flowchart',
+					label: 'measure|fix|write down',
+					caption: 'A budget',
+					say: 'Measure, fix one thing, measure again, and write the limit down.'
+				}
+			]
+		},
+		teaches: ['quality-core-web-vitals', 'quality-performance-budget'],
+		requires: ['net-rendering-pipeline', 'html-images', 'css-responsive', 'js-events', 'infra-cdn', 'css-web-fonts'],
+		practice: {
+			id: 'perf-budget',
+			title: 'Page speed and a budget',
+			task: 'Speed the page up and write down a budget. 1) Mark the main picture of the first screen (it is in the .hero section) with fetchpriority=high and remove its loading=lazy: it is the LCP element. 2) Give every image a width and a height. 3) Add srcset and sizes (two sizes) to the first-screen image and keep loading=lazy on the other images. 4) Load the script with defer. 5) In @font-face set font-display: swap, and for the Cyrillic face limit the characters with unicode-range (U+0400-04FF). 6) In the note, write the name of the first-screen section from the brief (the first item of its list of sections) and say what kind of element it is; write the budget in numbers: how many kilobytes and requests the page must not exceed and in how many seconds it must show the main thing. Every “…” has to be replaced.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      @font-face { font-family: "Site Sans"; src: url("site-sans-latin.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "Site Sans"; src: url("site-sans-cyrillic.woff2") format("woff2"); font-weight: 400; }
+      body { margin: 0; font-family: "Site Sans", system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main { max-width: 44rem; margin: 0 auto; padding: 1rem; }
+      img { max-width: 100%; height: auto; }
+      .hero img { width: 100%; }
+      .cards { display: grid; gap: 1rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>{{title}}</h1>
+        <p>{{who}}</p>
+        <img src="hero.jpg" loading="lazy" alt="{{name}}: {{profession}}">
+      </section>
+
+      <section>
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+        <img src="photo.jpg" alt="A moment at work">
+      </section>
+
+      <section>
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article>
+            <img src="card.jpg" alt="">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+    </main>
+
+    <aside data-scaffold id="perf-note">
+      <h2>Speed note</h2>
+      <p>First-screen section: <span id="lcp-where">…</span></p>
+      <p>Main element (LCP): <span id="lcp-el">…</span></p>
+      <p>Budget: the page weighs no more than <span id="b-kb">…</span> KB, makes no more than <span id="b-req">…</span> requests, and shows the main thing within <span id="b-lcp">…</span> s.</p>
+    </aside>
+
+    <script src="chat.js"><\/script>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      @font-face { font-family: "Site Sans"; src: url("site-sans-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0000-00FF; }
+      @font-face { font-family: "Site Sans"; src: url("site-sans-cyrillic.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0400-04FF; }
+      body { margin: 0; font-family: "Site Sans", system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main { max-width: 44rem; margin: 0 auto; padding: 1rem; }
+      img { max-width: 100%; height: auto; }
+      .hero img { width: 100%; }
+      .cards { display: grid; gap: 1rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>{{title}}</h1>
+        <p>{{who}}</p>
+        <img src="hero-800.jpg" srcset="hero-480.jpg 480w, hero-800.jpg 800w" sizes="(max-width: 48rem) 100vw, 44rem" width="800" height="450" fetchpriority="high" alt="{{name}}: {{profession}}">
+      </section>
+
+      <section>
+        <h2>{{sections.0}}</h2>
+        <p>A couple of sentences about this section.</p>
+        <img src="photo.jpg" width="600" height="400" loading="lazy" alt="A moment at work">
+      </section>
+
+      <section>
+        <h2>What we offer</h2>
+        <div class="cards">
+          {{#each items}}<article>
+            <img src="card.jpg" width="320" height="180" loading="lazy" alt="">
+            <h3>{{title}}</h3>
+            <p>{{text}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+    </main>
+
+    <aside data-scaffold id="perf-note">
+      <h2>Speed note</h2>
+      <p>First-screen section: <span id="lcp-where">{{sections.0}}</span></p>
+      <p>Main element (LCP): <span id="lcp-el">the image on the first screen</span></p>
+      <p>Budget: the page weighs no more than <span id="b-kb">500</span> KB, makes no more than <span id="b-req">15</span> requests, and shows the main thing within <span id="b-lcp">2.5</span> s.</p>
+    </aside>
+
+    <script src="chat.js" defer><\/script>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'hero-prio', kind: 'exists', selector: '.hero img[fetchpriority="high"]' },
+				{ id: 'hero-lazy', kind: 'count', selector: '.hero img[loading="lazy"]', max: 0 },
+				{ id: 'dims', kind: 'count', selector: 'img:not([width]), img:not([height])', max: 0 },
+				{ id: 'srcset', kind: 'exists', selector: '.hero img[srcset][sizes]' },
+				{ id: 'lazy-rest', kind: 'count', selector: 'img[loading="lazy"]', min: 1 },
+				{ id: 'defer', kind: 'count', selector: 'script[src]:not([defer]):not([async]):not([type="module"])', max: 0 },
+				{ id: 'font-swap', kind: 'text', selector: 'style', matches: 'font-display:\\s*swap' },
+				{ id: 'cyr-subset', kind: 'text', selector: 'style', matches: 'unicode-range:\\s*U\\+0400', when: { brief: 'languages', contains: 'ru' } },
+				{ id: 'lcp-where', kind: 'field', selector: '#lcp-where', field: 'sections[0]' },
+				{ id: 'lcp-el', kind: 'text', selector: '#lcp-el', matches: '[Ii]mage|[Pp]icture|[Pp]hoto|[Hh]eading|[Hh]eadline|[Tt]ext|[Pp]aragraph' },
+				{ id: 'b-kb', kind: 'text', selector: '#b-kb', matches: '^\\s*\\d{2,4}\\s*$' },
+				{ id: 'b-req', kind: 'text', selector: '#b-req', matches: '^\\s*\\d{1,3}\\s*$' },
+				{ id: 'b-lcp', kind: 'text', selector: '#b-lcp', matches: '^\\s*[1-4]([,.]\\d)?\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each measure with what it measures',
+				pairs: [
+					['LCP', 'how long until the biggest element of the first screen is visible'],
+					['INP', 'how quickly the page responds to taps, clicks and typing'],
+					['CLS', 'how much the content moves while the page loads']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A page shows some text, then a banner is suddenly inserted above it, the text slides down and the person taps the wrong button. Which measure catches this?',
+				options: ['CLS: the accumulated layout shift', 'LCP: the largest element', 'INP: the response to an action'],
+				answer: 0,
+				why: [
+					'Yes. CLS adds up unexpected shifts. The cure is to give images their sizes and to reserve space for anything inserted later.',
+					'No. LCP is about when the biggest element appears, not about jumping.',
+					'No. INP is about the delay in answering a tap, and here the page moved by itself.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What helps the main picture (the LCP element) appear sooner?',
+				options: [
+					'Compress the picture and serve a mobile size through srcset',
+					'Put loading=lazy on the main picture so that it “doesn’t get in the way”',
+					'Add fetchpriority=high to the main picture',
+					'Load a big script with defer rather than without it'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: fewer bytes arrive sooner.',
+					'No. Lazy loading postpones the download until the layout is known, and the main picture is needed at once. You postpone what sits below the first screen.',
+					'Yes: the browser learns the picture is important and starts fetching it straight away.',
+					'Yes: defer doesn’t hold up showing the page while the script downloads.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of speed work in order',
+				items: [
+					'Measure the page and find the heaviest part',
+					'Fix one thing, the biggest',
+					'Measure again and compare',
+					'Write down a budget so that the speed doesn’t slip back'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Why can Lighthouse in your browser and a report on real visitors show different numbers?',
+				options: [
+					'Lighthouse is one run under artificial conditions, while the report is gathered from real people with different phones and networks',
+					'One of them is always wrong',
+					'Real visitors have no effect on speed'
+				],
+				answer: 0,
+				why: [
+					'Yes. A lab run is handy for hunting causes, while the Core Web Vitals assessment looks at real visits at the 75th percentile, that is, at how the page works for most people, including those on slow devices.',
+					'No. Both are honest, but they answer different questions.',
+					'No. Their devices and networks decide the result.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write an image with the address hero.jpg, a description and a set width and height, so the layout doesn’t jump',
+				starter: '',
+				checks: [
+					{ id: 'img', kind: 'exists', selector: 'img[src^=hero]' },
+					{ id: 'alt', kind: 'attr', selector: 'img', name: 'alt', matches: '\\S' },
+					{ id: 'size', kind: 'count', selector: 'img[width][height]', min: 1 }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-cwv-three',
+				front: 'Name the three Core Web Vitals and the “good” thresholds',
+				back: 'LCP up to 2.5 s (when the main element is visible), INP up to 200 ms (response), CLS up to 0.1 (layout shifts). Scored at the 75th percentile of real visits.'
+			},
+			{
+				id: 'quality-cwv-lcp-fix',
+				front: 'How do you speed up LCP?',
+				back: 'Find the LCP element, compress it and pick the right size, never lazy-load it, give it fetchpriority=high, don’t block rendering with scripts and styles, and serve it through a CDN.'
+			},
+			{
+				id: 'quality-cwv-cls-fix',
+				front: 'How do you get rid of layout jumps?',
+				back: 'Give images a width and a height (or aspect-ratio), reserve space for banners and inserts, and never insert content above what is already shown.'
+			},
+			{
+				id: 'quality-cwv-inp-fix',
+				front: 'What ruins INP, and how do you cure it?',
+				back: 'Long tasks on the main thread: heavy scripts and third-party widgets. Ship less code, use defer, load chat and analytics late, and keep event handlers short.'
+			},
+			{
+				id: 'quality-perf-budget',
+				front: 'What is a performance budget?',
+				back: 'A limit you set in advance: page weight, number of requests, time to show. It turns “it would be nice to be faster” into a condition you can check.'
+			}
+		],
+		sources: [
+			{ title: 'Web Vitals (web.dev)', url: 'https://web.dev/articles/vitals', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Optimize Largest Contentful Paint (web.dev)', url: 'https://web.dev/articles/optimize-lcp', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Optimize Cumulative Layout Shift (web.dev)', url: 'https://web.dev/articles/optimize-cls', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Interaction to Next Paint, INP (web.dev)', url: 'https://web.dev/articles/inp', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Performance budgets 101 (web.dev)', url: 'https://web.dev/articles/performance-budgets-101', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Web Almanac 2024: Performance', url: 'https://almanac.httparchive.org/en/2024/performance', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to do what is done to every site before launch: find the main element, take the extra weight out of the load, and write down how much the page is allowed to weigh.',
+			hints: [
+				'The main picture of the first screen: <img … fetchpriority=high> with no loading attribute. For the other images loading=lazy is fine.',
+				'Every image needs a width and a height (plain numbers, no units): <img src=… width=800 height=450 alt=…>.',
+				'For the script: <script src=chat.js defer><\/script>. Inside @font-face: font-display: swap; and for the Cyrillic file also unicode-range: U+0400-04FF;',
+				'In the note, replace every “…”: the name of the first section from the brief, what kind of element is the main one, and the three budget numbers (kilobytes, number of requests, seconds).'
+			],
+			mistakes: {
+				'hero-prio': 'The main picture of the first screen (.hero) needs the attribute fetchpriority=high.',
+				'hero-lazy': 'The main picture must not have loading=lazy: it has to load at once.',
+				dims: 'An image has no width or no height. Give it both so the browser can leave room in advance.',
+				srcset: 'Give the main picture a srcset with two sizes, and sizes.',
+				'lazy-rest': 'Images below the first screen are worth loading lazily: loading=lazy.',
+				defer: 'A script is left without defer. It blocks showing the page.',
+				'font-swap': 'Add font-display: swap; to @font-face.',
+				'cyr-subset': 'For the Cyrillic face add unicode-range: U+0400-04FF;',
+				'lcp-where': 'Write the name of the first section from the brief into the note.',
+				'lcp-el': 'Say what kind of element is the main one: an image, a heading or a paragraph.',
+				'b-kb': 'The weight budget is a number of kilobytes, for example 500.',
+				'b-req': 'The request budget is a number, for example 15.',
+				'b-lcp': 'The time to show the main thing is a number of seconds from 1 to 4, for example 2.5.'
+			},
+			outro: 'Now the page has a main element that loads first, room is reserved for the images, and a limit is written down. From here you’ll check speed every time something is added to the site.'
+		},
+		say: { LCP: 'L C P', INP: 'I N P', CLS: 'C L S', 'Core Web Vitals': 'core web vitals', Lighthouse: 'lighthouse', srcset: 'source set', sizes: 'sizes', defer: 'defer', swap: 'swap', fetchpriority: 'fetch priority', lazy: 'lazy', CDN: 'C D N', WebP: 'web P', AVIF: 'A V I F' }
+	};
+</script>
+
+<script>
+	import PerfWaterfall from '../../diagrams/PerfWaterfall.svelte';
+</script>
+
+## Why speed matters at all
+
+Speed is respect for other people’s time. Someone opens your page on a phone on the subway, the signal comes and goes, and a white screen that lasts too long reads as “the site is broken.” They don’t wait to find out. They press back and go to the next link in the results. You will never see this person in your inquiries: they never reached the first word.
+
+At the start of the course we set ourselves a bar: the main content of the course site shows in under 2.5 seconds on an average phone on a 4G network. The number isn’t invented for the course. It is the “good” threshold of the **Core Web Vitals**, a set of measures that Google published to describe how a page feels to real people, and that everyone now uses, from search engines to developers. We talked about the search side of this in the part on SEO. Here the subject is how to measure it and fix it.
+
+## Three measures
+
+Today the Core Web Vitals are three numbers. Each answers a question a person has:
+
+- **LCP** (Largest Contentful Paint). The question: *can I see the main thing yet?* It is the time until the biggest element of the first screen appeared, usually the main picture or a large heading with a paragraph. Good: up to **2.5 s**. Poor: over **4 s**.
+- **INP** (Interaction to Next Paint). The question: *does the page hear me?* A person taps, and this is the time until the screen answers. The slowest of the significant interactions in a visit counts. Good: up to **200 ms**. Poor: over **500 ms**. Since 2024 it has replaced the older FID.
+- **CLS** (Cumulative Layout Shift). The question: *does the page stay put?* It is the sum of unexpected shifts: a banner slid in at the top, or an image loaded and pushed the text aside. Good: up to **0.1**. Poor: over **0.25**. CLS has no units: it is the fraction of the screen that moved, multiplied by how far it moved.
+
+The thresholds apply to the **75th percentile** of real visits. For a page to count as good, it must be fast not on average but for three people out of four, including those with an old phone and a bad connection. That is why you test under slow conditions and not on your own fast laptop.
+
+<details>
+<summary>Check yourself: which measure answers the question “does the page stay put?”</summary>
+
+CLS, the cumulative layout shift. LCP tells you when the main thing is visible, and INP tells you how quickly the page answers.
+
+</details>
+
+## Lab data and field data
+
+Speed is measured in two ways, and the numbers differ.
+
+A **lab measurement** is one run under set conditions. This is how **Lighthouse** works (it is built into Chrome’s developer tools and runs inside PageSpeed Insights): it simulates a slow phone and a network of about 1.6 Mbit/s with a delay of around 150 ms. The plus: you can repeat it and hunt for the cause by changing one thing at a time. The minus: it is a single run on an imaginary network.
+
+**Field data** is measurements from real visitors. Chrome keeps a report on real users, which PageSpeed Insights shows for sites with enough visitors. Analytics tools often have something similar, with page load times for real visits. The plus: this is the truth about people. The minus: the data arrives weeks later, and it doesn’t say what is wrong.
+
+A working routine: **find the problem in field data, find the cause in the lab, fix it, and confirm with field data some time later**. A small site with no traffic can make do with the lab: fix the obvious, and don’t agonize over how it looks to real people.
+
+## The main element (LCP): what it is and how to speed it up
+
+Open any page in PageSpeed Insights and find the line “Largest Contentful Paint element” in the report. It names the element. Most often it is an image on the first screen. The LCP time has four parts: the server’s response, the delay before the main resource starts loading, the loading itself, and the delay before it is shown. You treat each in turn:
+
+1. **The server’s response:** a CDN, a cache, fast hosting (we covered these in the part on infrastructure).
+2. **The start delay:** don’t hide the main picture behind a script or a style, don’t put `loading="lazy"` on it, and give the browser the hint `fetchpriority="high"` that this one is to be fetched first.
+3. **The loading:** compress the picture, use modern formats (WebP, AVIF), and serve the **right size** through `srcset` and `sizes`. Why send a phone a picture 3,000 pixels wide?
+4. **The showing:** don’t block rendering with extra styles and scripts in the `head`, use `defer` for scripts, and use `font-display: swap` for fonts so the text appears straight away in a fallback font.
+
+The rule from [the lesson on images](../../02-html/04-links-images-media/) stands: `lazy` only for images **below** the first screen, so that they don’t take network capacity from the main one.
+
+<details>
+<summary>Check yourself: why is loading=lazy harmful for the main picture?</summary>
+
+The browser postpones loading such an image until it has laid out the page and worked out that the image is in view. You are slowing down the very thing that should load first.
+
+</details>
+
+## Layout jumps (CLS)
+
+You know where jumps come from from [the lesson on rendering](../../01-internet/08-rendering/): the browser didn’t know how much room something still loading would take. The cure is to tell it in advance.
+
+- **Image sizes.** The `width` and `height` attributes in the markup: the browser reserves room by the aspect ratio even before the image arrives. `aspect-ratio` in CSS works too.
+- **Room for inserts:** a cookie banner, a chat, an ad, a video. Give the container a height, and don’t insert content above what is already shown.
+- **Fonts:** while a font loads, the browser shows a fallback and then swaps, and lines can re-flow. Hosting your own font, choosing a close fallback and loading only the characters you need all help.
+- **Animations** with `transform` and `opacity`, not by changing `top`, `width` and `height`.
+
+## Response (INP)
+
+A page answers a tap when the browser’s main thread is free. If it is busy with a heavy script at that moment, the tap waits. The usual culprits are third-party widgets: chats, counters, social feeds and maps, which pull in hundreds of kilobytes of code. What you can do:
+
+- remove what nobody uses, and don’t add things “just in case”;
+- load the chat and maps **after the first tap** or on a button press, not together with the page;
+- load scripts with `defer`, split long tasks and keep event handlers short;
+- remember **progressive enhancement** (the part on JavaScript): a page that works without the script doesn’t depend on whether the script managed to load.
+
+## A performance budget
+
+Speed gets worse a bit at a time: a counter was added, then a chat, then a pretty slider, and each step is “hardly noticeable.” A **performance budget** is a limit set in advance that isn’t up for discussion at the moment of temptation: “the page weighs no more than 500 KB, makes no more than 15 requests, and shows the main thing within 2.5 seconds on a slow network.” Then a new feature isn’t simply “added.” It has to displace something, or justify why the budget should rise.
+
+How to choose a number. As a rough guide, a slow network delivers about 200 KB a second. So everything the main thing needs (the HTML, the styles, the main picture) has to fit into about 200 to 300 KB to show up in a couple of seconds. The budget for the whole page is bigger, because the rest loads after the first screen. Your numbers depend on your audience: stricter for a site read on the subway over a mobile network, looser for an internal tool on an office network.
+
+A budget is also a check. Lighthouse CI runs a measurement on every deploy and fails when the page goes over the limit; this is exactly how this textbook is checked (at the start of the course we named the limit: the first route under 150 KB of compressed JavaScript). For a small project it is enough to write the number down and open PageSpeed Insights once a month.
+
+Play with the diagram: switch fixes on and see which one moves what. Notice that someone else’s chat is the heaviest thing on the page: even deferred, it weighs 250 KB, and the page’s total weight can’t come down without dealing with it.
+
+<PerfWaterfall />
+
+## Practice
+
+You are in the era of 2019: sites have grown heavy and speed has started to be measured in numbers. You get a page with the usual ailments: a main picture loaded lazily, images without sizes, a script without `defer`, and a font that holds up the text. Fix them and write a speed note: which section of the brief opens first, what the main element in it is, and the budget in numbers.
+
+The check reads markup and text. It cannot show you a real load time, so come back to the page after the lesson: open it on a phone and in PageSpeed Insights, and compare it with the budget.
+
+If you build your site in a site builder (Wix, Squarespace, WordPress with a theme), you have no access to the markup, but you do have settings: turn on compression and modern image formats, lazy loading for images below the first screen, and keep plugins and widgets to a minimum.
+
+## What used to be different
+
+In the 2000s and 2010s a “fast site” meant a site without heavy Flash. Speed was measured with a stopwatch and a feeling, and giant background images and a dozen included libraries were normal, because the developer had a fast laptop and a wired connection. Now most people arrive from a phone, and Core Web Vitals gave everyone a common language: three numbers, three thresholds, one tool. They are still changing: INP replaced FID in 2024, and thresholds get revised too. Check the current values on web.dev.

@@ -32,6 +32,9 @@ for (const n of ['Freytag’s', 'Duarte’s', 'Aristotle', 'Aristotle’s', 'Har
 // Added by parts 13 and 14 (growth and metrics): the products and places a heading names.
 for (const n of ['Bing', 'Facebook', 'Instagram', 'Reddit', 'Mailchimp', 'Klaviyo', 'Meta', 'Microsoft', 'Hotjar', 'Clarity', 'Analytics', 'Console', 'Webmaster', 'Tools', 'Search', 'Yandex', 'Wikipedia', 'Marketo', 'HubSpot', 'Amazon', 'Netflix', 'Facebook’s', 'Google’s', 'Meta’s', 'Goodhart’s', 'Simpson’s', 'Simpson', 'Goodhart', 'Ries', 'Ries’s', 'Nielsen', 'Cohen’s']) NAMES.add(n);
 
+// Added by part 15 (quality and law): the names a heading carries.
+for (const n of ['Core', 'Vitals']) NAMES.add(n);
+
 function body(file: string): string {
 	// the module and instance scripts open the file, each closed by a `</script>` at a line's start
 	let prose = readFileSync(file, 'utf8').trimStart();
