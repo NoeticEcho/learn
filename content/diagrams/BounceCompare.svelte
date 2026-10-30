@@ -10,6 +10,59 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+
+	const W = pick({
+		ru: {
+			caption: 'Одно и то же посещение, два ответа',
+			seconds: 'Секунд на странице',
+			views: 'Просмотров за визит',
+			notBounce: "отправлено событие «неотказ» (ym(…, 'notBounce'))",
+			keyEvent: 'совершено ключевое действие (цель, заявка)',
+			accurate: 'в Метрике включён accurateTrackBounce',
+			ym: 'Яндекс Метрика',
+			bounce: 'Отказ',
+			notBounceWord: 'Не отказ',
+			ymRule: 'Отказ, если сразу: не больше одного просмотра, короче 15 секунд и нет «неотказа».',
+			ga4Engaged: 'Вовлечённый сеанс',
+			ga4Not: 'Невовлечённый: считается отказом',
+			ga4Rule: 'Вовлечённый, если дольше 10 секунд, или есть ключевое событие, или два просмотра и больше.',
+			ymName: 'Метрика',
+			split: (a: string, b: string) => `Счётчики разошлись: ${a} считает визит отказом, а ${b} нет. Одно и то же поведение даёт разные «отказы», поэтому цифры из двух систем нельзя сравнивать напрямую.`,
+			agree: 'Здесь счётчики согласны, но подвиньте ползунки: разница появится при 10–15 секундах и одном просмотре.',
+			scrollHead: 'Глубина прокрутки',
+			reached: 'Дошёл до',
+			got: 'достигнут',
+			no: 'нет',
+			auto: (hit: boolean) => (hit ? 'автоматическое событие scroll в GA4 сработало' : 'автоматическое событие scroll в GA4 нет'),
+			made: 'Числа и посетители выдуманы. Определения отказа взяты из справок Яндекса и Google; проверьте их на дату, когда настраиваете счётчик.'
+		},
+		en: {
+			caption: 'One and the same visit, two answers',
+			seconds: 'Seconds on the page',
+			views: 'Page views in the visit',
+			notBounce: "the “not a bounce” event was sent (ym(…, 'notBounce'))",
+			keyEvent: 'a key action was done (a goal, a lead)',
+			accurate: 'accurateTrackBounce is on in Metrica',
+			ym: 'Yandex Metrica',
+			bounce: 'Bounce',
+			notBounceWord: 'Not a bounce',
+			ymRule: 'A bounce if all together: at most one page view, shorter than 15 seconds, and no “not a bounce” event.',
+			ga4Engaged: 'An engaged session',
+			ga4Not: 'Not engaged: counts as a bounce',
+			ga4Rule: 'Engaged if it lasts over 10 seconds, or has a key event, or has two or more page views.',
+			ymName: 'Yandex Metrica',
+			split: (a: string, b: string) => `The counters disagree: ${a} counts the visit as a bounce, and ${b} does not. The same behavior gives different “bounces”, so numbers from two systems can’t be compared directly.`,
+			agree: 'Here the counters agree, but move the sliders: a difference appears at 10 to 15 seconds and one page view.',
+			scrollHead: 'Scroll depth',
+			reached: 'Got as far as',
+			got: 'reached',
+			no: 'no',
+			auto: (hit: boolean) => (hit ? 'the automatic scroll event in GA4 fired' : 'the automatic scroll event in GA4 did not fire'),
+			made: 'The numbers and visitors are invented. The bounce definitions come from the help pages of Yandex and Google; check them on the date you set up your counter.'
+		}
+	});
 
 	let seconds = $state(8);
 	let views = $state(1);
@@ -24,42 +77,42 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Одно и то же посещение, два ответа</figcaption>
+	<figcaption>{W.caption}</figcaption>
 	<div class="grid">
-		<label>Секунд на странице: <strong>{seconds}</strong><input type="range" min="0" max="60" bind:value={seconds} /></label>
-		<label>Просмотров за визит: <strong>{views}</strong><input type="range" min="1" max="4" bind:value={views} /></label>
-		<label><input type="checkbox" bind:checked={notBounce} /> отправлено событие «неотказ» (ym(…, 'notBounce'))</label>
-		<label><input type="checkbox" bind:checked={keyEvent} /> совершено ключевое действие (цель, заявка)</label>
-		<label><input type="checkbox" bind:checked={accurate} /> в Метрике включён accurateTrackBounce</label>
+		<label>{W.seconds}: <strong>{seconds}</strong><input type="range" min="0" max="60" bind:value={seconds} /></label>
+		<label>{W.views}: <strong>{views}</strong><input type="range" min="1" max="4" bind:value={views} /></label>
+		<label><input type="checkbox" bind:checked={notBounce} /> {W.notBounce}</label>
+		<label><input type="checkbox" bind:checked={keyEvent} /> {W.keyEvent}</label>
+		<label><input type="checkbox" bind:checked={accurate} /> {W.accurate}</label>
 	</div>
 
 	<div class="two">
 		<div class="dg-box" class:hit={ymBounce}>
-			<div class="dh">Яндекс Метрика</div>
-			<p><strong>{ymBounce ? 'Отказ' : 'Не отказ'}</strong></p>
-			<p>Отказ, если сразу: не больше одного просмотра, короче 15 секунд и нет «неотказа».</p>
+			<div class="dh">{W.ym}</div>
+			<p><strong>{ymBounce ? W.bounce : W.notBounceWord}</strong></p>
+			<p>{W.ymRule}</p>
 		</div>
 		<div class="dg-box" class:hit={!ga4Engaged}>
 			<div class="dh">GA4</div>
-			<p><strong>{ga4Engaged ? 'Вовлечённый сеанс' : 'Невовлечённый: считается отказом'}</strong></p>
-			<p>Вовлечённый, если дольше 10 секунд, или есть ключевое событие, или два просмотра и больше.</p>
+			<p><strong>{ga4Engaged ? W.ga4Engaged : W.ga4Not}</strong></p>
+			<p>{W.ga4Rule}</p>
 		</div>
 	</div>
 	<p class="dg-out" aria-live="polite">
 		{#if ymBounce !== !ga4Engaged}
-			Счётчики разошлись: {ymBounce ? 'Метрика' : 'GA4'} считает визит отказом, а {ymBounce ? 'GA4' : 'Метрика'} нет. Одно и то же поведение даёт разные «отказы», поэтому цифры из двух систем нельзя сравнивать напрямую.
+			{W.split(ymBounce ? W.ymName : 'GA4', ymBounce ? 'GA4' : W.ymName)}
 		{:else}
-			Здесь счётчики согласны, но подвиньте ползунки: разница появится при 10–15 секундах и одном просмотре.
+			{W.agree}
 		{/if}
 	</p>
 
-	<div class="dh sub">Глубина прокрутки</div>
-	<label>Дошёл до: <strong>{scroll}%</strong><input type="range" min="0" max="100" step="5" bind:value={scroll} /></label>
+	<div class="dh sub">{W.scrollHead}</div>
+	<label>{W.reached}: <strong>{scroll}%</strong><input type="range" min="0" max="100" step="5" bind:value={scroll} /></label>
 	<ul class="thr">
-		{#each thresholds as t (t)}<li class:got={scroll >= t}>{t}%: {scroll >= t ? 'достигнут' : 'нет'}</li>{/each}
-		<li class:got={scroll >= 90}>90%: {scroll >= 90 ? 'автоматическое событие scroll в GA4 сработало' : 'автоматическое событие scroll в GA4 нет'}</li>
+		{#each thresholds as t (t)}<li class:got={scroll >= t}>{t}%: {scroll >= t ? W.got : W.no}</li>{/each}
+		<li class:got={scroll >= 90}>90%: {W.auto(scroll >= 90)}</li>
 	</ul>
-	<p class="dg-out">Числа и посетители выдуманы. Определения отказа взяты из справок Яндекса и Google; проверьте их на дату, когда настраиваете счётчик.</p>
+	<p class="dg-out">{W.made}</p>
 </figure>
 
 <style>

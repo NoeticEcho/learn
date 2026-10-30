@@ -1,0 +1,375 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/04-conversion-cohorts.svx. */
+	export const metadata = {
+		id: '14-metrics/04-conversion-cohorts',
+		part: 14,
+		order: 4,
+		title: 'Conversion, funnels, cohorts and retention',
+		definition: 'Conversion is the share who did the wanted action out of those who could. A funnel shows at which step people are lost, and cohorts show whether they come back.',
+		summary:
+			'You’ll learn to measure results instead of traffic: to count conversion with the right denominator, find the weak step of a funnel and read a retention table by cohorts. Afterwards you have worked out the conversion of each step and the weekly retention on sample data, and named your project’s micro-conversions.',
+		minutes: 30,
+		teaches: ['metrics-conversion-basics', 'metrics-funnels', 'metrics-cohorts-retention'],
+		requires: ['metrics-bounce-definitions', 'copy-funnel', 'copy-aarrr'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: '30 ÷ 1000 = 3%', caption: 'Conversion', say: 'Divide those who did the wanted action by those who could: 1000 came, 30 left a request.' },
+				{ mood: 'hint', side: 'right', prop: 'flowchart', label: 'came|saw|pressed|sent', caption: 'A funnel', say: 'Count the share that goes on at each step. Fix the steps in advance, or they’ll be picked to suit a convenient picture.' },
+				{ mood: 'cheer', prop: 'cards', label: 'cohorts', say: 'One overall “came back” percentage mixes old and new and hides change. A cohort is people with a shared start.' }
+			]
+		},
+		practice: {
+			id: 'conversion-and-retention',
+			title: 'A funnel and retention on sample data',
+			task: 'Work with the sample numbers in the note. 1) The funnel: name the steps in your own words (the first begins with the source, for example “came from search”, and the last names the main action from the brief in the same words) and enter what percent of the previous step reached each next one. 2) Enter the overall conversion (from the first step to the last, in percent) and the weakest step with its share. 3) Name at least two micro-conversions for your project; at least one is tied to a section of the site from the brief. 4) In the cohort table enter what percent of each cohort came back in the given week (the number only). Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="conv">
+      <h2>The funnel (sample data)</h2>
+      <table id="funnel">
+        <tr><th>Step</th><th>People</th><th>Reached from the previous step, %</th></tr>
+        <tr class="f"><td class="f-name">…</td><td class="f-n">2000</td><td class="f-c">first step</td></tr>
+        <tr class="f"><td class="f-name">…</td><td class="f-n">800</td><td class="f-c">…</td></tr>
+        <tr class="f"><td class="f-name">…</td><td class="f-n">240</td><td class="f-c">…</td></tr>
+        <tr class="f"><td class="f-name">…</td><td class="f-n">120</td><td class="f-c">…</td></tr>
+        <tr class="f"><td class="f-name">…</td><td class="f-n">60</td><td class="f-c">…</td></tr>
+      </table>
+      <p>Overall conversion, %: <span id="overall">…</span></p>
+      <p>The weakest step and its share: <span id="weakest">…</span></p>
+
+      <h3>Micro-conversions</h3>
+      <ul id="micro">
+        <li class="mc">…</li>
+        <li class="mc">…</li>
+      </ul>
+
+      <h2>Cohorts (sample data)</h2>
+      <table id="cohorts">
+        <tr><th>Cohort</th><th>Week 1</th><th>Week 2</th><th>Week 3</th></tr>
+        <tr><th>6 October, 200 people</th><td>70 came back: <span id="r-a1">…</span> %</td><td>50 came back: <span id="r-a2">…</span> %</td><td>40 came back: <span id="r-a3">…</span> %</td></tr>
+        <tr><th>13 October, 160 people</th><td>48 came back: <span id="r-b1">…</span> %</td><td>32 came back: <span id="r-b2">…</span> %</td><td>not reached yet</td></tr>
+        <tr><th>20 October, 120 people</th><td>48 came back: <span id="r-c1">…</span> %</td><td>not reached yet</td><td>not reached yet</td></tr>
+      </table>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="conv">
+      <h2>The funnel (sample data)</h2>
+      <table id="funnel">
+        <tr><th>Step</th><th>People</th><th>Reached from the previous step, %</th></tr>
+        <tr class="f"><td class="f-name">Came from search</td><td class="f-n">2000</td><td class="f-c">first step</td></tr>
+        <tr class="f"><td class="f-name">Saw the offer</td><td class="f-n">800</td><td class="f-c">40</td></tr>
+        <tr class="f"><td class="f-name">Pressed the button</td><td class="f-n">240</td><td class="f-c">30</td></tr>
+        <tr class="f"><td class="f-name">Started filling in the form</td><td class="f-n">120</td><td class="f-c">50</td></tr>
+        <tr class="f"><td class="f-name">{{mainAction.label}}</td><td class="f-n">60</td><td class="f-c">50</td></tr>
+      </table>
+      <p>Overall conversion, %: <span id="overall">3</span></p>
+      <p>The weakest step and its share: <span id="weakest">pressed the button, 30 %</span></p>
+
+      <h3>Micro-conversions</h3>
+      <ul id="micro">
+        <li class="mc">reached the “{{sections.0}}” section</li>
+        <li class="mc">tapped the phone number or the email in the contact details</li>
+      </ul>
+
+      <h2>Cohorts (sample data)</h2>
+      <table id="cohorts">
+        <tr><th>Cohort</th><th>Week 1</th><th>Week 2</th><th>Week 3</th></tr>
+        <tr><th>6 October, 200 people</th><td>70 came back: <span id="r-a1">35</span> %</td><td>50 came back: <span id="r-a2">25</span> %</td><td>40 came back: <span id="r-a3">20</span> %</td></tr>
+        <tr><th>13 October, 160 people</th><td>48 came back: <span id="r-b1">30</span> %</td><td>32 came back: <span id="r-b2">20</span> %</td><td>not reached yet</td></tr>
+        <tr><th>20 October, 120 people</th><td>48 came back: <span id="r-c1">40</span> %</td><td>not reached yet</td><td>not reached yet</td></tr>
+      </table>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#conv', matches: '^[^…]*$' },
+				{ id: 'first-step', kind: 'text', selector: '#funnel tr.f:nth-child(2) .f-name', matches: '(?:[Ss]earch|[Ss]ocial|[Cc]hannel|[Ss]ource|[Ee]mail|[Aa]d\\b|[Aa]ds\\b|[Cc]ame|[Aa]rrived|[Vv]isited|[Rr]eferr|LinkedIn|Facebook|Instagram|Telegram)' },
+				{ id: 'last-step', kind: 'field', selector: '#funnel tr.f:last-child .f-name', field: 'mainAction.label' },
+				{ id: 'conv-1', kind: 'text', selector: '#funnel tr.f:nth-child(3) .f-c', matches: '^\\s*40\\s*%?\\s*$' },
+				{ id: 'conv-2', kind: 'text', selector: '#funnel tr.f:nth-child(4) .f-c', matches: '^\\s*30\\s*%?\\s*$' },
+				{ id: 'conv-3', kind: 'text', selector: '#funnel tr.f:nth-child(5) .f-c', matches: '^\\s*50\\s*%?\\s*$' },
+				{ id: 'conv-4', kind: 'text', selector: '#funnel tr.f:nth-child(6) .f-c', matches: '^\\s*50\\s*%?\\s*$' },
+				{ id: 'overall', kind: 'text', selector: '#overall', matches: '^\\s*3(?:[.,]0+)?\\s*%?\\s*$' },
+				{ id: 'weakest', kind: 'text', selector: '#weakest', matches: '30' },
+				{ id: 'micro', kind: 'count', selector: '#micro .mc', min: 2 },
+				{ id: 'micro-brief', kind: 'field', selector: '#micro', field: 'sections', min: 1 },
+				{ id: 'ret-a1', kind: 'text', selector: '#r-a1', matches: '^\\s*35\\s*$' },
+				{ id: 'ret-a2', kind: 'text', selector: '#r-a2', matches: '^\\s*25\\s*$' },
+				{ id: 'ret-a3', kind: 'text', selector: '#r-a3', matches: '^\\s*20\\s*$' },
+				{ id: 'ret-b1', kind: 'text', selector: '#r-b1', matches: '^\\s*30\\s*$' },
+				{ id: 'ret-b2', kind: 'text', selector: '#r-b2', matches: '^\\s*20\\s*$' },
+				{ id: 'ret-c1', kind: 'text', selector: '#r-c1', matches: '^\\s*40\\s*$' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: '1000 people came to the site, 30 left a request. Conversion is 3%. The next week 5000 came, with 100 requests. What happened?',
+				options: [
+					'There are more requests, but conversion fell to 2%: more traffic, a smaller share who decided',
+					'Everything got better: there are more requests',
+					'Nothing changed'
+				],
+				answer: 0,
+				why: [
+					'Yes. Conversion is a share, so it shows how well the page turns people into requests. If the traffic came from people who don’t need you, there will be more requests and a smaller share.',
+					'There are more requests, but ask what they cost and where the people came from.',
+					'Conversion fell from 3% to 2%.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each idea with an example',
+				pairs: [
+					['Macro-conversion', 'The main action from the brief: sent a request for a consultation'],
+					['Micro-conversion', 'A small step toward the main one: tapped the phone, reached the prices, downloaded a checklist'],
+					['A funnel step', 'One of the successive actions on the path from arriving to the main one'],
+					['Cohort', 'A group of people with a shared start: for example those who first subscribed in the same week']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In a funnel with steps 2000 → 800 → 240 → 120 → 60, which step is the weakest by the share that goes on?',
+				options: [
+					'The second transition, 800 → 240: only 30% got through',
+					'The first transition, 2000 → 800: the most people lost by number',
+					'The last, 120 → 60'
+				],
+				answer: 0,
+				why: [
+					'Yes. The shares are 40%, 30%, 50%, 50%. The lowest percent is at the step “pressed the button”. That is the place for the first hypothesis.',
+					'By number 1200 people are lost, but the share that goes on is 40%, higher than at the second step; at the start there are always many who “just looked in”.',
+					'There it is 50%: twice as good.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A cohort arrived on 20 October, and you look at it on 25 October. The “week 2” column is empty. What is it?',
+				options: [
+					'The time has not come yet: it is not a zero but an absence of data',
+					'Everyone left',
+					'A counter error'
+				],
+				answer: 0,
+				why: [
+					'Yes. Empty cells at the lower right of a table usually mean “not reached yet”. A cell is a zero only if the week has passed and no one came back.',
+					'No: a return can’t be measured yet.',
+					'No: that is how a normal cohort table looks.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What gets in the way of reading a funnel correctly?',
+				options: [
+					'Different denominators: one step counts visits, another counts people',
+					'Small numbers at the lower steps',
+					'Mixed sources: people from ads and from emails behave differently',
+					'Dividing into steps chosen in advance'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: only like can be compared with like.',
+					'Yes: three people out of five prove nothing.',
+					'Yes: that is why a funnel is looked at separately by source.',
+					'No: the steps are exactly what must be fixed in advance, or you will fit them to the result.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A service is bought once in several years. How does it make sense to measure retention for it?',
+				options: [
+					'See whether people stay in touch (a subscription, a channel) and whether they come back for new material before a request',
+					'Count how many people come to the site every day',
+					'Don’t measure it'
+				],
+				answer: 0,
+				why: [
+					'Yes. “Retention” is chosen to fit the rhythm of the product: for a one-off service it is not daily visits but contact, replies to emails, repeat requests and referrals.',
+					'Daily visits are neither expected nor needed for such a project.',
+					'It can and should be measured, but with the right measure.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-conversion-def',
+				front: 'How do you count conversion?',
+				back: 'The share of people who did the action out of those who could: requests ÷ visitors. Always name the denominator (visitors, visits, visitors to the page) and the period.'
+			},
+			{
+				id: 'metrics-micro-conversion',
+				front: 'What is a micro-conversion?',
+				back: 'A small step toward the main action: a tap on the phone, scrolling to the prices, downloading a material. It helps you see where people are lost when there are few requests.'
+			},
+			{
+				id: 'metrics-weakest-step',
+				front: 'How do you find the weak step of a funnel?',
+				back: 'Work out the share that goes on at each step (next ÷ previous) and find the lowest, not the biggest loss by number. Then find the reason by looking at the page through a person’s eyes.'
+			},
+			{
+				id: 'metrics-cohort',
+				front: 'What is a cohort and a retention table?',
+				back: 'A cohort is a group of people with a shared start (for example a first request in one week). A retention table shows, for each cohort, the share who came back after 1, 2, 3 weeks.'
+			},
+			{
+				id: 'metrics-empty-cell',
+				front: 'What does an empty cell in a cohort table mean?',
+				back: 'The time has not come yet, it is not a zero. A cell is a zero only when the period has passed and no one came back.'
+			}
+		],
+		sources: [
+			{ title: 'Conversion rate (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Conversion_rate', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Cohort analysis (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Cohort_analysis', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Recommended events and funnel explorations (Analytics Help)', url: 'https://support.google.com/analytics/answer/9267735?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Rodden, Hutchinson, Fu (Google): Measuring the user experience on a large scale (HEART)', url: 'https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'The number of visitors says nothing about results. Here you count what does: the share who reached the main thing, and the share who came back.',
+			hints: [
+				'The share that goes on is the next step divided by the previous one: for example 800 out of 2000 is 40 percent.',
+				'The overall conversion is the last step divided by the first: 60 out of 2000.',
+				'The weakest step is the one with the lowest percent that goes on, not the one where most people dropped out.',
+				'A cohort’s retention: how many came back, divided by the size of the cohort. 70 out of 200 is 35 percent.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in all the step names, the shares, the micro-conversions and the percentages.',
+				'first-step': 'The first step must name a source: for example “came from search” or “came from an email”.',
+				'last-step': 'The last step must name the main action in the same words as the brief.',
+				'conv-1': 'The transition from the second step to the third: 240 out of 800. Work out the percent.',
+				'conv-2': 'The transition from the third to the fourth: 120 out of 240.',
+				'conv-3': 'The transition from the fourth to the fifth: 60 out of 120.',
+				'conv-4': 'Check the last share: 60 out of 120.',
+				overall: 'The overall conversion: 60 out of 2000, that is 3 percent.',
+				weakest: 'The weakest step is the one with the lowest share that goes on. Name it and its share.',
+				micro: 'You need at least two micro-conversions.',
+				'micro-brief': 'At least one micro-conversion must name a section of the site from the brief.',
+				'ret-a1': 'The 6 October cohort, week 1: 70 out of 200.',
+				'ret-a2': 'The 6 October cohort, week 2: 50 out of 200.',
+				'ret-a3': 'The 6 October cohort, week 3: 40 out of 200.',
+				'ret-b1': 'The 13 October cohort, week 1: 48 out of 160.',
+				'ret-b2': 'The 13 October cohort, week 2: 32 out of 160.',
+				'ret-c1': 'The 20 October cohort, week 1: 48 out of 120.'
+			},
+			outro: 'Now you can count a share, find a weak step and read retention. Next we’ll warn about numbers that look convincing and deceive.'
+		},
+		say: { SQL: 'sequel', HEART: 'heart', AARRR: 'A A R R R' }
+	};
+</script>
+
+<script>
+	import FunnelCohort from '../../diagrams/FunnelCohort.svelte';
+</script>
+
+## Not how many came, but what came of it
+
+In the last lessons you installed a counter and studied bounces. But the number of visitors and page views tells you **how many people passed by,** not **what they did.** The project exists for the main action from the brief, so the main question is: **what share of those who came did that action, and where were the rest lost?** The answer comes from conversion, the funnel and, for those who return, retention.
+
+## Conversion
+
+**Conversion** is the share of people who did the wanted action out of those who could:
+
+> conversion = those who did it ÷ those who could
+
+An example: in a month 1000 people came to the page with the form, 30 sent a request, conversion 3%. Everything important hides in the words “**out of those who could**” (the denominator). It can be the **visitors** to the whole site, the **visitors to this page,** the **visits** or the **people from one source.** If you don’t say who it was counted out of, the number is unclear. So write it down: “3% of visitors to the page with the form”.
+
+**Where the word comes from.** “Conversion” in marketing means “turning”: a visitor is turned into a client, a subscriber, an inquirer. The idea is old, from direct marketing, where response rates were counted long before the internet.
+
+A few rules:
+
+1. **Count on the main action from the brief.** A “conversion” of page views into page views is no use.
+2. **Look at conversion by source separately.** People from search, from a newsletter and from ads behave differently, and an overall figure wipes out the difference.
+3. **Don’t confuse a growth in number with a growth in share.** Advertising can bring people you don’t need: there will be more requests and conversion will fall. What is good in that is decided by the cost of a lead (the lesson on paid traffic).
+4. **On small numbers** a share jumps about (three people out of fifty-six is 5.4%, and four people is 7.1%). Don’t draw conclusions from single digits.
+
+**Micro-conversions.** The main action can be rare: an expert’s service gets few requests. Then **micro-conversions** help: small steps that bring a person nearer to the main one: tapped the phone or the email, reached the prices, downloaded a document, subscribed to a channel. There are many, they pile up faster, and they show where people are lost. But don’t make them an end in themselves: a micro-conversion shows the path, not the result (more in the next lesson).
+
+## The funnel
+
+You know the funnel as a sketch from [the lesson on the funnel](../../11-copywriting/08-funnel/). Here it becomes a **table of numbers:** what steps a person goes through and how many get through each.
+
+A typical funnel for a page with a form: **came,** **saw the offer,** **pressed the button,** **started filling in the form,** **sent it.** GA4 and Yandex Metrica can build such funnels themselves: in GA4 it is a “funnel exploration” in the Explore section, and in Metrica a compound goal of successive steps.
+
+You count the **share that goes on at each step:** the next step divided by the previous. The weakest step is where this percent is lowest, not where most people dropped out by number: at the start of a funnel many who just looked in always drop out.
+
+Cautions:
+
+- **Fix the steps in advance.** Otherwise you will pick steps to suit a convenient picture.
+- **A funnel shows the place of loss, not the cause.** Look for the cause through the person’s eyes (heatmaps, recordings, asking people; the lesson on session recording is about that).
+- **People don’t go strictly by the steps.** So the order of steps in funnels is sometimes made “open”, but that is a subtlety.
+
+Open the diagram. At the top is the funnel of an invented site: move the sliders and see how the numbers and the result change. These are the same numbers as in the practice.
+
+<FunnelCohort />
+
+## Cohorts and retention
+
+Conversion and the funnel answer the question “what do people do in one visit.” **Retention** answers the question “**do they come back.**” That needs a new tool: the **cohort.**
+
+A **cohort** is a group of people with a shared start: for example everyone who first sent a request or subscribed to a channel in the same week. For each cohort you count what share came back after one week, two, three. The result is a **retention table:**
+
+- Rows: cohorts by the week of their start.
+- Columns: “after 1 week”, “after 2 weeks” and so on.
+- In a cell: the share of the cohort who came back by that time (did some specified action).
+- At the lower right the table is “cut off”: for fresh cohorts the later weeks have not come yet. Those are not zeros but emptiness.
+
+Why this matters: **an overall “came back” percentage mixes old and new and hides change.** Cohorts show whether those who came after your change are retained better than those who came before. If a new cohort is retained worse than earlier ones, you will see it at once.
+
+**What “came back” means for your project.** For an app it is “uses it again.” For the site of an expert with a service bought rarely it doesn’t work like that (you saw this at the Retention stage in [the lesson on AARRR](../../11-copywriting/09-growth/)): a person doesn’t visit daily. So “retention” there means something else: **stayed in touch** (didn’t unsubscribe, opens the emails, reads the channel), or **came back before a request** (almost all decisions are made over two or three visits), or **got in touch again.** Choosing the definition is part of the decision.
+
+An example row for a cohort: 200 people first subscribed in the week of 6 October. The next week 70 came back: that is **35%.** After two weeks, 50: **25%.** After three, 40: **20%.** The curve falls fast at the start and then levels off: a typical shape.
+
+**To count it yourself,** once the data is in a table, you need the query language SQL. Here is what a query that counts how many people of a cohort came back in each week looks like (you ran such queries yourself in [the lessons on SQL](../../07-data/02-sql-basics/); here is only the idea):
+
+```sql
+SELECT cohort_week, weeks_after, COUNT(DISTINCT user_id) AS returned
+FROM visits_by_user_week
+GROUP BY cohort_week, weeks_after
+ORDER BY cohort_week, weeks_after;
+```
+
+The query reads almost like a sentence: take from the table by weeks, group by cohort and week number, count the distinct people, sort.
+
+<details>
+<summary>Check yourself: what does an empty cell at the lower right of a retention table mean?</summary>
+
+That the time has not come yet: the cohort is too fresh to measure the later weeks. It is not a zero. A cell is a zero only if the period has passed and no one came back.
+
+</details>
+
+## Practice
+
+Work with the sample numbers.
+
+1. **The funnel.** Name the steps in your own words: the first names the source, the last the main action from the brief in the same words. Enter the share that goes on at each step.
+2. **The totals.** The overall conversion and the weakest step with its share.
+3. **Micro-conversions.** At least two; at least one tied to a section of the site from the brief.
+4. **Cohorts.** Enter the percentages of those who came back for each cell of the table.
+
+In this practice the numbers are sample ones, and the check compares your calculations with the right ones. You will count your own retention and conversion when you have gathered data on your own site. Think which of the micro-conversions is nearest to your main action, and why.

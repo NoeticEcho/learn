@@ -1,0 +1,317 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/03-engagement.svx. */
+	export const metadata = {
+		id: '14-metrics/03-engagement',
+		part: 14,
+		order: 3,
+		title: 'Bounces, time, scroll depth and CTR',
+		definition: 'A bounce is a counter’s definition, not a verdict on a page. In GA4 it is a session that wasn’t engaged; in Yandex Metrica a short one-page visit.',
+		summary:
+			'You’ll understand how a bounce is counted in GA4 and in Yandex Metrica, why the numbers differ, what time on page, scroll depth and CTR mean, and which numbers not to trust. Afterwards you have a measure chosen in place of “bounces”, a non-bounce condition for the page with the main action and scroll thresholds for long pages.',
+		minutes: 25,
+		teaches: ['metrics-bounce-definitions', 'metrics-time-scroll-ctr'],
+		requires: ['metrics-counter-setup', 'metrics-visits-events'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'bounce?', caption: 'A word as a verdict', say: '“Bounce” sounds like a sentence, but it is a counter’s definition. Metrica and GA4 understand it differently.' },
+				{ mood: 'explain', side: 'right', prop: 'browser', label: 'answer found', say: 'For a reference page a high bounce rate is normal: the person found the answer and left. There is no single norm.' },
+				{ mood: 'hint', prop: 'sheet', label: 'median', caption: 'Time on page', say: 'An average of about a minute hides everything: some leave in seconds, others forgot the tab. The median is sounder.' }
+			]
+		},
+		practice: {
+			id: 'bounce-replacement',
+			title: 'What to use instead of bounces',
+			task: 'Fill in the note. 1) Choose the measure that will replace “bounces” for your site: “goal completion”, “scroll depth” or “non-bounce”; explain the reason (at least eight words). 2) Explain in one sentence how the definitions of a bounce differ in Yandex Metrica and in GA4: name both counters and both thresholds (15 and 10 seconds). 3) For the page where a person does the main action without leaving it, write the condition under which the visit does not count as a bounce: name the main action in the same words as the brief (at least eight words). 4) List at least two pages where scroll depth matters (the names of sections from the brief) and the thresholds 25, 50 and 75 percent. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="engage">
+      <h2>What to use instead of bounces</h2>
+      <p>Measure: <span id="metric-instead">…</span></p>
+      <p>Why: <span id="why">…</span></p>
+      <p>How Yandex Metrica and GA4 differ: <span id="diff">…</span></p>
+      <p>The non-bounce condition on the page with the main action: <span id="nonbounce">…</span></p>
+
+      <h3>Where scroll depth is needed</h3>
+      <ul id="scroll">
+        <li class="sc"><span class="sc-page">…</span>: thresholds <span class="sc-th">…</span></li>
+        <li class="sc"><span class="sc-page">…</span>: thresholds <span class="sc-th">…</span></li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="engage">
+      <h2>What to use instead of bounces</h2>
+      <p>Measure: <span id="metric-instead">goal completion</span></p>
+      <p>Why: <span id="why">on our site a person often does everything on one page, so a bounce says nothing about usefulness, while a goal does</span></p>
+      <p>How Yandex Metrica and GA4 differ: <span id="diff">Yandex Metrica counts as a bounce a visit shorter than 15 seconds with one page view and no non-bounce event, while GA4 counts as a bounce a session that was not engaged, that is, not longer than 10 seconds, with no key event and one page view</span></p>
+      <p>The non-bounce condition on the page with the main action: <span id="nonbounce">we send a non-bounce event when the person has started the “{{mainAction.label}}” action: pressed the button or started filling in the form</span></p>
+
+      <h3>Where scroll depth is needed</h3>
+      <ul id="scroll">
+        <li class="sc"><span class="sc-page">{{sections.0}}</span>: thresholds <span class="sc-th">25, 50, 75, 100</span></li>
+        <li class="sc"><span class="sc-page">{{sections.1}}</span>: thresholds <span class="sc-th">25, 50, 75, 100</span></li>
+      </ul>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#engage', matches: '^[^…]*$' },
+				{ id: 'metric', kind: 'text', selector: '#metric-instead', matches: '(?:[Gg]oal|[Ss]croll|[Nn]on-?bounce|not a bounce|engage)' },
+				{ id: 'why', kind: 'text', selector: '#why', matches: '^\\s*\\S+(?:\\s+\\S+){7,}' },
+				{ id: 'diff-both', kind: 'text', selector: '#diff', matches: '^(?=[\\s\\S]*Metrica)(?=[\\s\\S]*GA4)[\\s\\S]*\\S' },
+				{ id: 'diff-numbers', kind: 'text', selector: '#diff', matches: '^(?=[\\s\\S]*15)(?=[\\s\\S]*10)[\\s\\S]*\\S' },
+				{ id: 'nonbounce', kind: 'text', selector: '#nonbounce', matches: '^\\s*\\S+(?:\\s+\\S+){7,}' },
+				{ id: 'nonbounce-action', kind: 'field', selector: '#nonbounce', field: 'mainAction.label' },
+				{ id: 'scroll-pages', kind: 'count', selector: '#scroll .sc', min: 2 },
+				{ id: 'scroll-sections', kind: 'field', selector: '#scroll .sc-page', field: 'sections', min: 1 },
+				{ id: 'scroll-thresholds', kind: 'text', selector: '#scroll', matches: '^(?=[\\s\\S]*25)(?=[\\s\\S]*50)(?=[\\s\\S]*75)[\\s\\S]*\\S' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each counter with its definition of a bounce',
+				pairs: [
+					['Yandex Metrica', 'A visit with one page view, shorter than the threshold (15 seconds by default) and with no “not a bounce” event'],
+					['Google Analytics 4', 'The share of sessions that were not engaged: not longer than 10 seconds, no key event and one page view'],
+					['Universal Analytics (the former version)', 'A session of a single page view, whatever the time the person spent on it']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'On a one-page site a person read the page for twenty seconds, found the phone number and left to call. What will a bounce rate tell you?',
+				options: [
+					'Nothing reliable: such a visit can be counted as a bounce although it was a success, so you need a goal such as “tapped the phone number”',
+					'That the site is bad',
+					'That the site is good'
+				],
+				answer: 0,
+				why: [
+					'Yes. A bounce shows only “left from the very first page”, not “left disappointed”. For a one-page site the goal (a tap on the phone, a form sent) and a non-bounce event matter more. (In GA4 a visit over ten seconds would count as engaged, but the lesson holds for shorter ones and for older definitions.)',
+					'No: you can’t judge the quality of a site from that visit.',
+					'No: you can’t either, without knowing what the person wanted.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Why can “average time on page” mislead?',
+				options: [
+					'A few very long visits (a person left a tab open and went away) pull the average up',
+					'In classic counters the last page of a visit has no time until the person goes on',
+					'The average hides the spread: some leave at once, some stay long',
+					'Time is always measured exactly'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: that is why people look at the median (the middle) or the share of visits longer than a threshold.',
+					'Yes: that is why the precise-bounce setting and activity events were devised.',
+					'Yes: by NN/g’s data the average is about a minute and the spread is huge.',
+					'No: it depends on the way of measuring and on people’s behavior.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'One promotional email got 5% clicks, a second got 8%. But the second misled people with its subject. What about the second CTR?',
+				options: [
+					'It is high but shows no value: CTR can be inflated by bait, so you also look at what the person did after the click',
+					'The second email is better',
+					'CTR can’t be counted at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. CTR (the share who clicked out of those shown) measures interest in a promise, not value. If the promise is false, CTR rises and conversion falls. This is Goodhart’s law in miniature.',
+					'No: you don’t know what people did after the click.',
+					'It can and should be counted, but together with what happened afterwards.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put scroll-depth thresholds in order, from the smallest to the largest',
+				items: ['25%', '50%', '75%', '100%']
+			},
+			{
+				type: 'single',
+				prompt: 'What does CTR mean?',
+				options: [
+					'Click-through rate: the share who clicked out of those it was shown to (impressions, emails, ads, buttons)',
+					'The number of visits a day',
+					'The speed of loading a page'
+				],
+				answer: 0,
+				why: [
+					'Yes. Clicks divided by impressions. Compare CTR for the same places and audiences: an ad in first position has a higher one than in fifth.',
+					'No: that is the number of visits.',
+					'No: speed is measured by other measures.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-bounce-ym',
+				front: 'How does Yandex Metrica define a bounce?',
+				back: 'A visit with at most one page view, shorter than a threshold (15 seconds by default), with no service “not a bounce” event sent. The accurateTrackBounce setting is needed for exact counting.'
+			},
+			{
+				id: 'metrics-bounce-ga4',
+				front: 'How does GA4 define a bounce?',
+				back: 'It is the share of sessions that were not engaged. An engaged session lasts longer than 10 seconds, or has a key event, or has two or more page views.'
+			},
+			{
+				id: 'metrics-bounce-not-bad',
+				front: 'Is a bounce always bad?',
+				back: 'No. On a one-page site or a reference page a person may get what they wanted and leave. So you look at goals and “not a bounce”, not only at bounces.'
+			},
+			{
+				id: 'metrics-time-average',
+				front: 'Why does average time on page let you down?',
+				back: 'Long visits pull the average up, the spread is huge, and the last page of a visit may have no time. It is better to look at the median or the share of visits longer than a threshold.'
+			},
+			{
+				id: 'metrics-ctr',
+				front: 'What is CTR and how does it let you down?',
+				back: 'The share who clicked out of impressions. It measures interest in a promise, not value; bait raises it while the behavior afterwards falls.'
+			}
+		],
+		sources: [
+			{ title: '[GA4] Engagement rate and bounce rate (Analytics Help)', url: 'https://support.google.com/analytics/answer/12195621?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Google Analytics Data API schema: bounceRate, engagementRate, engagedSessions', url: 'https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Automatically collected events, including scroll (Analytics Help)', url: 'https://support.google.com/analytics/answer/9234069?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Bounce rate (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Bounce_rate', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'NN/g: How long do users stay on web pages?', url: 'https://www.nngroup.com/articles/how-long-do-users-stay-on-web-pages/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Yandex Metrica: the notBounce event (for the Russian market)', url: 'https://yandex.ru/support/metrica/en/objects/notbounce', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Yandex Metrica: initializing the counter, accurateTrackBounce (for the Russian market)', url: 'https://yandex.ru/support/metrica/en/code/counter-initialize', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A bounce sounds like a verdict, but is really a counter’s definition. Find out how it is counted, and decide what you’ll look at instead.',
+			hints: [
+				'For a site where everything is done on one page, “goal completion” will do: it speaks of the result, not of where the person went.',
+				'In the sentence on the differences name both counters and both thresholds: Yandex Metrica 15 seconds, GA4 10 seconds.',
+				'Tie the non-bounce condition to the action from the brief: for example, the person pressed the button or started filling in the form.',
+				'Scroll thresholds: 25, 50, 75 and 100 percent. Name the pages as the sections in the brief are named.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the measure, the explanations and the list of pages.',
+				metric: 'Name the measure to use instead of bounces: “goal completion”, “scroll depth” or “non-bounce”.',
+				why: 'Write the reason for the choice in at least eight words.',
+				'diff-both': 'In the sentence on the differences name both Yandex Metrica and GA4.',
+				'diff-numbers': 'In the sentence on the differences give the thresholds: 15 seconds (Metrica) and 10 seconds (GA4).',
+				nonbounce: 'Describe the non-bounce condition in at least eight words.',
+				'nonbounce-action': 'In the condition name the main action in the same words as the brief.',
+				'scroll-pages': 'You need at least two pages with scroll thresholds.',
+				'scroll-sections': 'Name the pages after sections from the brief.',
+				'scroll-thresholds': 'Among the thresholds there must be 25, 50 and 75 percent.'
+			},
+			outro: 'Now you know what hides behind the word “bounce”, and can choose an honest measure. Next, how to measure the result: conversion, funnels and cohorts.'
+		},
+		say: { CTR: 'C T R', GA4: 'G A four', notBounce: 'not bounce', accurateTrackBounce: 'accurate track bounce', NN: 'N N', Metrica: 'metrica' }
+	};
+</script>
+
+<script>
+	import BounceCompare from '../../diagrams/BounceCompare.svelte';
+</script>
+
+## A word that sounds like a verdict
+
+Every counter’s report has a **bounce rate**, and it is very tempting: the word “bounce” sounds like a sentence passed on a page. But a bounce is not a verdict but a **definition**, and different counters define it differently. Behind it is a question we actually want to answer: **did the person get what they came for?** A bounce answers that badly. This lesson teaches you to read such numbers without being fooled.
+
+In the last lesson you installed a counter and learned what a visit, a page view, an event and a goal are. Now we look at four measures of behavior: bounces, time on page, scroll depth and CTR.
+
+## A bounce in GA4 and in Yandex Metrica
+
+**In GA4** you look from the other side. First an **engaged session** is defined: one that lasts **longer than 10 seconds**, **or** has a key event, **or** has **two or more page views**. A **bounce** is then the share of sessions that were not engaged. Bounce rate and engagement rate are two sides of one coin. (GA4 added a bounce rate metric in 2022.)
+
+**In Universal Analytics,** the former Google version that stopped processing data in 2023, a bounce was simpler: a session of one page view. So when you see a bounce figure in an article or in someone else’s report, ask **in which system and by which definition** it was counted.
+
+**The Russian market.** In Yandex Metrica a visit counts as a bounce when all three conditions hold together: it has **at most one page view,** it is **shorter than a threshold,** 15 seconds by default, and no service **“not a bounce”** event was recorded in it. You can send that event yourself, `ym(counter, 'notBounce')`, and the `accurateTrackBounce` setting makes the counter itself record “not a bounce” after the set time. Without it a page that was open and read for ten minutes, with no event sent, still counts as a bounce.
+
+Matomo, Plausible and other privacy-friendly counters have definitions of their own, so read the help of the one you use.
+
+Open the diagram. Set the behavior of one visit and see how the two counters would judge it. The zone around 10 to 15 seconds on one page is especially interesting: that is where they disagree.
+
+<BounceCompare />
+
+**The conclusion.** You can’t compare “bounces” from Metrica with “bounces” from GA4, and you can’t take a “good” bounce percentage as a norm: there is no norm, it depends on the type of site. For a reference page a high bounce rate is normal (the person found the answer and left), for a shop with a catalog it is worrying. So for your own page you need to choose a more honest measure.
+
+## What to look at instead of bounces
+
+Three options that more often say more:
+
+- **Goal completion.** The person did what you built the page for: tapped the phone, sent the form, downloaded a document. That is what you set up in the last lesson.
+- **A “not a bounce” event.** You define for yourself what “the person didn’t leave disappointed” means: they started filling in the form, scrolled to the prices, pressed the button, stayed over a minute. Then a one-page site stops looking “bouncy” because of normal behavior.
+- **Scroll depth** (below), if the page is long and you care whether people read it to the end.
+
+The choice depends on the page. For a page with the main action (a form, a booking), the goal and “not a bounce” matter. For an article, time and scroll. For a “Thank you” page neither is needed: it exists so that you can count the goal.
+
+## Time on page
+
+**How it is counted.** In classic counters time on page is counted as the difference between this page view and the next. An unpleasant consequence follows: **the last page of a visit has no time** until the person moves on. Modern counters (GA4 does) can measure the time while the page was in the foreground, but even then a tab opened and forgotten can distort the figure.
+
+**Why the average lets you down.** NN/g, drawing on research by Microsoft Research on about 205,000 pages, showed that time on a page is distributed unevenly. Some leave in a few seconds, others stay for minutes, and an average of about a minute hides this. A few very long visits (a forgotten tab) easily pull it up. So it is sounder to use:
+
+- **the median** (the middle: half the visits are shorter, half longer);
+- **the share of visits longer than a threshold** (“longer than 30 seconds”): choose such a threshold remembering that the decision to stay is most often made in the first seconds.
+
+And remember that a long time is not always good. If a form is unclear, a person can wander in it for long.
+
+## Scroll depth
+
+For long pages (an article, a landing page of many blocks) an important question is **how far people read.** Yandex Metrica shows it on a **scroll map:** what share of visitors reached each place on the page. You can also set up events for reaching **25, 50, 75 and 100 percent** of a page (in GA4 the standard `scroll` event fires at 90 percent, and the other thresholds you set up yourself, for example in Google Tag Manager).
+
+What you do with it: if a fifth of visitors reach the block of proof, and the button sits under it, most never see the button. That is a strong hypothesis for the next lessons.
+
+A caution: scrolling is not reading. A person may have flicked through quickly.
+
+## CTR
+
+**CTR** (click-through rate) is the share who clicked out of those it was shown to. For search results it is the clicks on your result divided by impressions (Google Search Console and Bing Webmaster Tools show it). For an ad, clicks per impression. For an email, clicks per delivered message. For a button on a page, clicks per page view.
+
+Three cautions:
+
+1. **Compare like with like.** A result in first position gets far more clicks than one in fifth, so the CTR of two pages in different positions is not compared.
+2. **CTR measures a promise, not value.** An intriguing headline raises CTR and sinks what happens next. So always look at what the person did after the click.
+3. **Small numbers.** Three clicks out of fifty impressions is 6%, but the random swing here is huge (the lesson on the value ladder).
+
+<details>
+<summary>Check yourself: why can a one-page site with a high “bounce rate” be successful?</summary>
+
+Because a bounce means “left from the very first page”, not “left disappointed”: on one page a person could have found the phone number, called and got everything they needed. So for such a site you look at goals and the “not a bounce” event.
+
+</details>
+
+## Practice
+
+Choose what you will use instead of bounces.
+
+1. **A measure in place of bounces,** and the reason.
+2. **The difference** between the definitions of Yandex Metrica and GA4, in one sentence, with the thresholds of 15 and 10 seconds.
+3. **A non-bounce condition** for the page with the main action.
+4. **Pages with scroll depth:** at least two, with thresholds of 25, 50 and 75 percent.
+
+The check looks at form: the counters and thresholds are named, the condition is tied to the main action from the brief, there are pages and thresholds. Whether the measure you chose is good is for you to decide: imagine the number halved, and ask yourself what you would then do.
