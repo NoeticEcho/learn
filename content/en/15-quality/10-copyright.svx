@@ -1,0 +1,361 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/10-copyright.svx, localized: US copyright law (17 U.S.C.), with UK and EU notes. */
+	export const metadata = {
+		id: '15-quality/10-copyright',
+		part: 15,
+		order: 10,
+		title: 'Copyright: photos, fonts, texts and licenses',
+		definition: 'Copyright arises for an author when a work is created, with no registration. Other people’s work is used under a license or in cases the law names outright.',
+		summary:
+			'Finding a picture is not the same as having the right to it. Afterwards you know how copyright arises in the US and the UK, what ownership and a license are, you can read Creative Commons, Unsplash, SIL OFL and MIT licenses, you tell a quotation from borrowing, you know what a photo of a person needs, and you write a register of your site’s materials with their licenses, replacing whatever you have no right to. This is a guide as of 30 October 2026, not legal advice.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser',
+					label: 'images: “flowers”',
+					caption: 'Search results',
+					say: [
+						{ text: 'Pretty. I’ll use it on the home page.' },
+						{ who: 'The results', text: 'Whose it is, I won’t say.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'author · license · link',
+					caption: 'The register',
+					say: 'A row for each material: where from, whose, on what terms. No row, no right.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'CC BY-SA 4.0',
+					caption: 'And your own site',
+					say: 'License your own texts too, so that others know what they may do.'
+				}
+			]
+		},
+		teaches: ['quality-copyright-images'],
+		requires: ['html-images', 'texts-expert-text', 'css-web-fonts'],
+		practice: {
+			id: 'licence-audit',
+			title: 'A license audit: the register of the site’s materials',
+			task: 'Audit the site’s materials. In the #audit register every material (a tr.asset row) has four cells: source, author, license and link. 1) Replace the materials you have no right to: they say “unknown,” “from an image search” and data-license=unknown. Choose a source with a clear license (Wikimedia Commons, Unsplash, Pexels, your own shot) and write it in, and replace data-license with cc0, cc-by, cc-by-sa, unsplash, own, ofl or mit. 2) A material under CC BY-NC (data-license=cc-by-nc) does not suit a commercial site: replace it. 3) For cc-by and cc-by-sa materials set data-credited=yes and put the credit in the footer (footer.credits: the words “Photo,” “Author” or “Source”). 4) For each person in the brief (if there are any) write in their row that written consent to publish the photo has been received. 5) In #own-license write the license of your own texts and images (for example © with a year, or CC BY 4.0). Leave no “…”. The rows for the brief’s items, people and proofs are already in the table.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside data-scaffold id="rights">
+      <h2>Register of the site’s materials</h2>
+      <table id="audit">
+        <thead><tr><th>Material</th><th>Source</th><th>Author</th><th>License</th><th>Link</th></tr></thead>
+        <tbody>
+          <tr class="asset" data-kind="font" data-license="ofl" data-credited="yes"><td class="what">Site Sans font</td><td class="src">Google Fonts, the file on our server</td><td class="author">the font’s authors</td><td class="license">SIL OFL 1.1</td><td class="url">https://openfontlicense.org/</td></tr>
+          <tr class="asset" data-kind="icon" data-license="mit" data-credited="yes"><td class="what">Interface icons</td><td class="src">an open icon set</td><td class="author">the set’s authors</td><td class="license">MIT</td><td class="url">https://opensource.org/licenses/MIT</td></tr>
+          <tr class="asset" data-kind="image" data-license="unknown"><td class="what">Main photo of the first screen</td><td class="src">from an image search</td><td class="author">don’t know</td><td class="license">unknown</td><td class="url">…</td></tr>
+          <tr class="asset" data-kind="image" data-license="cc-by-nc"><td class="what">Photo for the section “{{sections.0}}”</td><td class="src">Flickr</td><td class="author">The photographer</td><td class="license">CC BY-NC 2.0</td><td class="url">https://creativecommons.org/licenses/by-nc/2.0/</td></tr>
+          <tr class="asset" data-kind="image" data-license="cc-by" data-credited="no"><td class="what">Photo of a workplace</td><td class="src">Wikimedia Commons</td><td class="author">The photographer</td><td class="license">CC BY 4.0</td><td class="url">https://commons.wikimedia.org/wiki/File:Example.jpg</td></tr>
+          {{#each items}}<tr class="asset" data-kind="image" data-license="unknown"><td class="what">Image for “{{title}}”</td><td class="src">from an image search</td><td class="author">don’t know</td><td class="license">unknown</td><td class="url">…</td></tr>
+          {{/each}}
+          {{#each people}}<tr class="asset" data-kind="person" data-license="unknown"><td class="what">Photo of a person: {{name}}</td><td class="src">from social media</td><td class="author">don’t know</td><td class="license">no consent</td><td class="url">…</td></tr>
+          {{/each}}
+          {{#each proofs}}<tr class="asset" data-kind="scan" data-license="own"><td class="what">Scan: {{title}}</td><td class="src">my own document</td><td class="author">me</td><td class="license">my own work; personal numbers covered</td><td class="url">none</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+      <p>License of my texts and images: <span id="own-license">…</span></p>
+    </aside>
+
+    <footer class="credits"><p>…</p></footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside data-scaffold id="rights">
+      <h2>Register of the site’s materials</h2>
+      <table id="audit">
+        <thead><tr><th>Material</th><th>Source</th><th>Author</th><th>License</th><th>Link</th></tr></thead>
+        <tbody>
+          <tr class="asset" data-kind="font" data-license="ofl" data-credited="yes"><td class="what">Site Sans font</td><td class="src">Google Fonts, the file on our server</td><td class="author">the font’s authors</td><td class="license">SIL OFL 1.1</td><td class="url">https://openfontlicense.org/</td></tr>
+          <tr class="asset" data-kind="icon" data-license="mit" data-credited="yes"><td class="what">Interface icons</td><td class="src">an open icon set</td><td class="author">the set’s authors</td><td class="license">MIT</td><td class="url">https://opensource.org/licenses/MIT</td></tr>
+          <tr class="asset" data-kind="image" data-license="own"><td class="what">Main photo of the first screen</td><td class="src">my own shot</td><td class="author">me ({{name}})</td><td class="license">my own work</td><td class="url">none, I hold the file</td></tr>
+          <tr class="asset" data-kind="image" data-license="cc0"><td class="what">Photo for the section “{{sections.0}}”</td><td class="src">Wikimedia Commons, public domain</td><td class="author">The photographer</td><td class="license">CC0 1.0</td><td class="url">https://commons.wikimedia.org/wiki/File:Example.jpg</td></tr>
+          <tr class="asset" data-kind="image" data-license="cc-by" data-credited="yes"><td class="what">Photo of a workplace</td><td class="src">Wikimedia Commons</td><td class="author">The photographer</td><td class="license">CC BY 4.0</td><td class="url">https://commons.wikimedia.org/wiki/File:Example.jpg</td></tr>
+          {{#each items}}<tr class="asset" data-kind="image" data-license="unsplash"><td class="what">Image for “{{title}}”</td><td class="src">Unsplash</td><td class="author">a photographer on Unsplash</td><td class="license">Unsplash License</td><td class="url">https://unsplash.com/license</td></tr>
+          {{/each}}
+          {{#each people}}<tr class="asset" data-kind="person" data-license="own"><td class="what">Photo of a person: {{name}}</td><td class="src">my own shot</td><td class="author">me</td><td class="license">written consent to publish the photo (a signed release) received</td><td class="url">the release is kept by me</td></tr>
+          {{/each}}
+          {{#each proofs}}<tr class="asset" data-kind="scan" data-license="own"><td class="what">Scan: {{title}}</td><td class="src">my own document</td><td class="author">me</td><td class="license">my own work; personal numbers covered</td><td class="url">none</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+      <p>License of my texts and images: <span id="own-license">© {{name}}, 2026, all rights reserved; texts may be quoted with a link</span></p>
+    </aside>
+
+    <footer class="credits"><p>Photo of a workplace: the photographer, Wikimedia Commons, CC BY 4.0. Site Sans font: SIL OFL 1.1.</p></footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'rows', kind: 'count', selector: 'tr.asset', min: 5 },
+				{ id: 'gaps', kind: 'text', selector: '#audit', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'no-unknown', kind: 'text', selector: '#audit', matches: '^(?![\\s\\S]*(unknown|don’t know|image search|from the internet|downloaded|not stated|no consent))' },
+				{ id: 'no-unknown-attr', kind: 'count', selector: '.asset[data-license="unknown"]', max: 0 },
+				{ id: 'no-nc', kind: 'count', selector: '.asset[data-license="cc-by-nc"]', max: 0 },
+				{ id: 'credited', kind: 'count', selector: '.asset[data-license="cc-by"]:not([data-credited="yes"]), .asset[data-license="cc-by-sa"]:not([data-credited="yes"])', max: 0 },
+				{ id: 'credits-footer', kind: 'text', selector: 'footer.credits', matches: '[Pp]hoto|[Aa]uthor|[Ss]ource|[Ff]ont|[Cc]redit' },
+				{ id: 'credits-gaps', kind: 'text', selector: 'footer.credits', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'font', kind: 'exists', selector: '.asset[data-kind="font"]' },
+				{ id: 'items', kind: 'field', selector: '#audit', field: 'items[].title', when: { brief: 'items[].title' } },
+				{ id: 'proofs', kind: 'field', selector: '#audit', field: 'proofs[].title', when: { brief: 'proofs[].title' } },
+				{ id: 'people', kind: 'text', selector: '.asset[data-kind="person"]', matches: '[Ww]ritten|release', when: { brief: 'people[].name' } },
+				{ id: 'own-licence', kind: 'text', selector: '#own-license', matches: '(?=[\\s\\S]*(©|CC BY|CC0|all rights|Apache|MIT))(?=[\\s\\S]*\\d{4})' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'You found a pretty photograph with no caption in a search engine’s image results and put it on your site. What about the right to it?',
+				options: [
+					'You have no right to it: the results show neither author nor license, and you can’t use it without permission',
+					'All is well: what is on the internet is common property',
+					'All is well if you add the © sign'
+				],
+				answer: 0,
+				why: [
+					'Yes. Copyright arises for the author when the work is created, with no registration (in the US, 17 U.S.C. § 102 protects original works fixed in a tangible medium), and by default the rights belong to the author. You may use a work only with a license or permission.',
+					'No. Being publicly visible is not the same as a free license.',
+					'No. The © notice is optional and put there by the owner. It creates no right for someone who copies another’s picture.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each license with its main condition',
+				pairs: [
+					['CC BY', 'you may use it, commercially too, if you credit the author and give the license'],
+					['CC BY-SA', 'the same, and derivative works are released under the same license'],
+					['CC BY-NC', 'non-commercial use only: not for a site that sells services'],
+					['CC0', 'the author has given up their rights, and you may use it with no conditions']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these is acceptable on a commercial site if the conditions are met?',
+				options: [
+					'A photo from Wikipedia under CC BY-SA, with the author, the license and a link',
+					'A photo under CC BY-NC, because you don’t sell the photo itself',
+					'A font under SIL OFL, hosted on your server',
+					'A short quotation, naming the author and source, no longer than its purpose needs'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: the license’s conditions are met.',
+					'No. The site sells services, and that is a commercial use of the material. NC does not allow it.',
+					'Yes: the OFL allows commercial use, and the license stays with the file.',
+					'Yes: this can be fair use in the US (17 U.S.C. § 107) and fair dealing for quotation in the UK (CDPA section 30), judged by the facts.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A designer made your logo and a photographer shot photos for the site. How do you secure the rights?',
+				options: [
+					'With a written agreement that says whether you received ownership or a license, for what period and in what territory',
+					'A spoken agreement is enough: you paid for the work',
+					'The rights stay with you automatically'
+				],
+				answer: 0,
+				why: [
+					'Yes. In the US a transfer of copyright ownership is not valid unless it is in writing and signed by the owner (17 U.S.C. § 204(a)); an exclusive license counts as a transfer, while a non-exclusive one can be looser but is worth writing down too. In the UK an assignment must also be in writing signed by the assignor. Without a written agreement, a paid-for result may stay with the creator, who has only given you an implied license.',
+					'No. Paying for the work is not the same as transferring the right.',
+					'No. Rights arise for the author, not the client. The exceptions are an employee’s work and certain specially commissioned works, both described below.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'On the “About” page you want to put a photo of a member of staff. What do you need?',
+				options: [
+					'The right to the photograph itself and the person’s written permission (a model release)',
+					'Nothing: they work for you',
+					'Only the consent to data processing from the form'
+				],
+				answer: 0,
+				why: [
+					'Yes. You need the right to the photo (your own shot or a photographer’s license), and in the US using a person’s likeness to promote a business can breach state right-of-publicity law, so a signed release is the safe way. In the UK and EU a photo of an identifiable person is also personal data, so record the consent and its period.',
+					'No. Consent to work is not consent to publish an image.',
+					'No. The form’s consent concerns a visitor’s data, not an employee’s.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a caption for a photo, “Photo: author, Wikimedia Commons, CC BY 4.0,” in a figcaption tag',
+				starter: '',
+				checks: [
+					{ id: 'figcaption', kind: 'text', selector: 'figcaption', matches: '(?=[\\s\\S]*[Pp]hoto)(?=[\\s\\S]*CC BY)' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-copy-origin',
+				front: 'How does copyright arise in the US and the UK?',
+				back: 'From the moment an original work is created, with no registration and no © sign needed. In the US the term is generally the author’s life plus 70 years (17 U.S.C. § 302); in the UK also life plus 70 years. Registration matters in the US for a lawsuit (§ 411) and for statutory damages (§ 412).'
+			},
+			{
+				id: 'quality-copy-licence',
+				front: 'What do you need to use someone else’s work?',
+				back: 'A license (an agreement, or an open license such as Creative Commons) or another lawful basis, such as fair use or fair dealing for quotation. Without it, use is infringement; in the US statutory damages run from $750 to $30,000 per work, up to $150,000 if willful (§ 504(c)).'
+			},
+			{
+				id: 'quality-copy-cc',
+				front: 'How do you read Creative Commons licenses?',
+				back: 'BY: credit the author. SA: derivatives under the same license. NC: non-commercial only. ND: no changes. CC0: no conditions. NC does not suit a commercial site. A credit gives the title, the author, the source and the license.'
+			},
+			{
+				id: 'quality-copy-people',
+				front: 'What does a photo of a person need?',
+				back: 'The right to the photograph, plus the person’s written permission (a model release): in the US, state right-of-publicity laws protect a person’s likeness in advertising. In the UK and EU the photo is also personal data.'
+			},
+			{
+				id: 'quality-copy-register',
+				front: 'What goes into the register of materials?',
+				back: 'For each material: the source, the author, the license, the link, the conditions (credit, prohibitions) and where they are met. Plus the license of the site’s own content.'
+			}
+		],
+		sources: [
+			{ title: 'Title 17 of the United States Code: Copyright (Cornell LII)', url: 'https://www.law.cornell.edu/uscode/text/17', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: '17 U.S.C. § 107: Limitations on exclusive rights, fair use (Cornell LII)', url: 'https://www.law.cornell.edu/uscode/text/17/107', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'U.S. Copyright Office: Copyright Basics (Circular 1)', url: 'https://www.copyright.gov/circs/circ01.pdf', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Copyright, Designs and Patents Act 1988 (legislation.gov.uk)', url: 'https://www.legislation.gov.uk/ukpga/1988/48/contents', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Creative Commons: Share your work, licenses explained', url: 'https://creativecommons.org/share-your-work/cclicenses/', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Creative Commons: Best practices for attribution', url: 'https://wiki.creativecommons.org/wiki/Best_practices_for_attribution', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Unsplash License', url: 'https://unsplash.com/license', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Pexels License', url: 'https://www.pexels.com/license/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Google Fonts: Licensing and FAQ', url: 'https://developers.google.com/fonts/faq', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Copyright (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Copyright', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to check what your site has the right to. The register will show where it is empty, and you’ll replace those materials with ones under a clear license.',
+			hints: [
+				'In the rows that say “unknown” and “from an image search,” replace the source (Unsplash, Wikimedia Commons, your own shot), the author and the license, add a link and change data-license to unsplash, cc0 or own.',
+				'Replace the CC BY-NC row: a site with services uses materials commercially. For the cc-by and cc-by-sa rows set data-credited=yes and write the credit in footer.credits.',
+				'For each person in the brief write “written consent to publish the photo received.” In #own-license, for example “© name, 2026, all rights reserved” or “CC BY 4.0.”',
+				'The register must have no “…”, “unknown” or “don’t know” left.'
+			],
+			mistakes: {
+				rows: 'The register must have at least five materials.',
+				gaps: 'There are still “…” in the register. Fill in the source, the author, the license and the link.',
+				'no-unknown': 'Something says “unknown,” “don’t know,” “image search” or “no consent”: replace materials whose right is unclear.',
+				'no-unknown-attr': 'Some row has data-license=unknown: choose a source with a clear license.',
+				'no-nc': 'A CC BY-NC license does not suit a site that sells services. Replace the material.',
+				credited: 'For cc-by and cc-by-sa materials put in the credit and set data-credited=yes.',
+				'credits-footer': 'In footer.credits write the credit: “Photo: …”.',
+				'credits-gaps': 'There are still “…” in the footer.',
+				font: 'The register needs a row for the font.',
+				items: 'The register needs a row for each service or product from the brief.',
+				proofs: 'The register needs rows for the credentials from the brief.',
+				people: 'For the photos of people from the brief, write that written consent has been received.',
+				'own-licence': 'Say under which license your texts and images are, and give a year.'
+			},
+			outro: 'Now for every material on the site it is known where it is from, whose it is and on what terms. Update the register whenever you add a picture, and keep the written consents and agreements: they are your evidence.'
+		},
+		say: { CC: 'C C', 'CC BY-SA': 'C C by S A', 'CC BY-NC': 'C C by N C', CC0: 'C C zero', OFL: 'O F L', MIT: 'M I T', Unsplash: 'un-splash', Pexels: 'pex-els', Wikimedia: 'wiki-media', DMCA: 'D M C A' }
+	};
+</script>
+
+<script>
+	import LicenceGame from '../../diagrams/LicenceGame.svelte';
+</script>
+
+## Found does not mean yours
+
+A site is made of other people’s materials almost more than of yours: photographs, fonts, icons, sometimes quotations, sometimes scraps of code. Each belongs to someone. Not knowing doesn’t release you from responsibility, and the way to check is simple: **for each material you must have written down the author, the source, the license and a link.** This is called a register, and you will write one for your site.
+
+A caveat that, as in the earlier lessons, is obligatory: this lesson is a guide, dated 30 October 2026, and it does not replace a lawyer. The rules below are from US federal law (Title 17 of the United States Code, the Copyright Act), with notes on the United Kingdom (the Copyright, Designs and Patents Act 1988, “CDPA”) and the European Union. Read the texts of licenses on the licenses’ own sites.
+
+## How copyright works
+
+- **It arises by itself.** The author gets the right the moment the work is created: an article, a photograph, a drawing, a font as a work, a program. In the US, copyright protects original works of authorship fixed in a tangible medium of expression (17 U.S.C. § 102). **No registration is needed** to own the copyright, and the © notice is optional: it is a reminder, and it helps against a defense of “innocent infringement.” The UK works the same way.
+- **Registration matters in the US for enforcement.** For a US work, the owner generally cannot sue for infringement until the work is registered (§ 411(a)), and statutory damages and attorney’s fees are generally unavailable for infringement that began before registration (§ 412), with a three-month grace period after publication. So registration is a tool for owners, not a condition of owning.
+- **Form is protected, not the idea.** Ideas, methods and facts are not protected (§ 102(b)), but the way you express them (your text, your photograph) is. So “saying the same thing in your own words” is fine, and “taking someone else’s text and swapping words” is not. Works of the US federal government are not protected by copyright (§ 105), which is why many NASA images and government reports are free to use.
+- **A bundle of rights.** The owner has the exclusive rights to reproduce the work, make derivative works, distribute it and display it publicly (§ 106), which includes publishing it on the internet. Ownership can belong to the author or be transferred. In the UK and EU the author also keeps **moral rights**, such as being named and objecting to derogatory treatment; the UK asks that the right to be identified be asserted (CDPA section 78). US law gives only narrow moral rights to visual artists (§ 106A).
+- **How long.** For works created since 1978 the US term is the author’s life plus **70 years** (§ 302(a)); for anonymous works and works made for hire it is 95 years from publication or 120 years from creation, whichever ends first (§ 302(c)). The UK term is also life plus 70 years. Afterwards the work is in the public domain.
+- **Using another’s work needs a license**, or one of the cases the law names, such as quotation and fair use.
+- **What it can cost.** An infringer can be made to pay the owner’s actual losses and profits, or, if the owner chose, **statutory damages** of $750 to $30,000 per work, up to $150,000 per work if the infringement was willful (§ 504(c)); the court may also award attorney’s fees. These are lawsuits, not just complaints. For comparison, in Russia the compensation under Article 1301 of the Civil Code runs from 10,000 to 5,000,000 rubles, by the court’s decision.
+
+<details>
+<summary>Check yourself: is registration needed for a photographer to hold the copyright in a picture?</summary>
+
+No. The right arises when the work is created, and neither the © sign nor registration creates it. In the US, registration matters for suing and for statutory damages.
+
+</details>
+
+## Licenses: how to get the right
+
+A **license** is the author’s permission for particular uses. An **exclusive** license is only for you; a **non-exclusive** one is for you and others. In the US a transfer of ownership (and an exclusive license counts as one) must be in a **signed writing** (§ 204(a)); a non-exclusive license can be informal, but you should have it in writing to be able to prove it. For mass use, **open licenses** were invented: the author allows everyone, in advance, to use the work on published terms.
+
+The commonest open licenses for a site:
+
+- **Creative Commons.** A set of conditions in the form of letters. **BY**: credit the author. **SA**: derivative works under the same license (this textbook is licensed that way, CC BY-SA 4.0). **NC**: non-commercial use only. **ND**: no changes. **CC0**: the author has given up their rights. For a site that sells services, NC material is no good: your use is commercial even if the picture itself is free. A credit follows a formula of four parts: title, author, source, license (with a link).
+- **Photo libraries with their own licenses.** For example Unsplash and Pexels: under their licenses photos can be used for free, commercially too, with no required credit (though it is kind to give one), but you may not sell a photo as it is. The Pexels license also asks you not to show identifiable people in a bad light, not to imply their endorsement, and not to use a photo as part of a trademark. Neither license lifts the rights of the people and trademarks shown in a picture.
+- **SIL OFL** (an open font license, the one most Google Fonts use; you saw how to host such a font yourself in [the lesson on typography](../../03-css/03-typography-colour/)) and **MIT** and **Apache 2.0** (for libraries and icons): free use, with one condition: keep the text of the license and the notice about the authors.
+- **Paid photo libraries and fonts.** The license sets where and how many times you may use the item: one license for the web, another for print, and a font often has a separate web license (sometimes by number of page views).
+
+And two rules that deserve a paragraph of their own. **Quoting** without permission can be lawful. In the US the doctrine of **fair use** (§ 107) weighs four factors: the purpose and character of the use (including whether it is commercial), the nature of the work, how much was used, and the effect on the market for the work. Purposes such as criticism, comment, news reporting, teaching, scholarship and research are the typical ones. It is decided case by case, so it is a defense and not a permit. In the UK the narrower **fair dealing** applies: a quotation is allowed if the work has been made available to the public, the use is fair dealing, it is no longer than the purpose requires and it has sufficient acknowledgement (CDPA section 30(1ZA)). A quotation put in “for decoration” does not qualify. And **rewritten text of someone else’s** is still a derivative work: the infringement remains, and such a duplicate also hurts the site in search.
+
+Open the diagram and decide for eleven materials whether you may use them.
+
+<LicenceGame />
+
+<details>
+<summary>Check yourself: why does a photo under CC BY-NC not suit a lawyer’s or an expert’s site?</summary>
+
+The site offers paid services, so using the material is commercial (although the picture itself is free). NC allows only non-commercial use.
+
+</details>
+
+## People, documents, commissioned work
+
+- **A photo of a person.** The copyright in a photograph belongs to the photographer, not the person pictured. Taking a photo of someone in public is generally lawful in the US, but using a person’s name or likeness for advertising or to promote a business needs their permission under state **right-of-publicity** laws (California’s Civil Code § 3344, for example). A **signed model release** is the safe way. In the UK there is no general image right, but an identifiable face is personal data (see the lesson on personal data law), and in the EU several countries protect personal image strongly. For the people in your brief, record both the consent and the period of publication.
+- **Scans of documents** (diplomas, licenses, memberships). The official documents themselves are generally not creative works, but the personal data on them must be protected: cover the numbers and details you don’t need as proof.
+- **Commissioned work.** Was the logo or the photographs for the site made by a designer, a photographer, an agency? The rule is the opposite of what people expect: the creator is the first owner, and a client gets rights only by a **signed written agreement** (§ 204(a)). Two exceptions matter. A **work made for hire** belongs to the employer (§ 101, § 201(b)), and that covers work by an *employee* within the scope of employment. A *freelancer’s* work is a work made for hire only if it falls in one of nine listed categories (for example a contribution to a collective work, a translation or a compilation) *and* both parties sign a writing saying so. A logo or website photo from a freelancer generally isn’t on that list, so the safe route is a written **assignment** or a written license. In the UK, an employer owns an employee’s work (CDPA section 11(2)), and a commissioned freelancer owns it unless they assign it in writing. Without a written agreement, a paid-for result can stay with the author.
+- **AI tools.** US copyright law requires human authorship. In its report of 29 January 2025 on the copyrightability of AI outputs, the US Copyright Office took the view that output generated purely from prompts is not protected, while a human’s own creative contributions (selecting, arranging, modifying) can be. The picture may also resemble other people’s works, and the service’s terms decide whether you may use it commercially. Read the terms, don’t pass an image off as a photo of a real person or place, and leave the question of rights to a lawyer.
+- **Code and libraries.** A library’s license is in its `LICENSE` file. Permissive licenses (MIT, Apache) ask you to keep the notice; some (GPL) have requirements for distributing code. This textbook opens its code under Apache-2.0 and its texts under CC BY-SA 4.0.
+- **If someone sends you a takedown notice.** In the US, the Digital Millennium Copyright Act (17 U.S.C. § 512) gives hosting services a safe harbor if they remove material promptly on a valid notice. If your host forwards you such a notice about a picture, check the register: if you have the right, you can send a counter-notice (§ 512(g)); if not, remove the picture. Knowingly sending a false notice or counter-notice carries liability (§ 512(f)).
+
+## The license of your own site
+
+Others will want to take something from you too. Write down on what terms: “© name, 2026, all rights reserved,” if you allow nothing, or “texts under the CC BY 4.0 license,” if you allow use with credit to the author. It is better to decide in advance and write it down: then well-meaning people will know what they may do, and you won’t have to answer queries.
+
+## Practice
+
+You are in the era of 2019: sites are built from ready-made blocks and other people’s materials. Run an audit: you get a register where some rows hold materials you have no right to. Replace them, write in sources, licenses and links, put the credit for CC BY materials in the footer, record the consents for photos of people and the license of your own materials.
+
+The check reads the table: that no “unknown,” NC or empty cells remain, that the credit for CC BY is in place and that the rows hold the services, credentials and people from the brief. You will do the real check yourself: open the source page of each material and make sure the license on it is just what your register says.
+
+## What used to be different
+
+In the 2000s pictures were taken from search, and authors seldom made claims: they didn’t know how to find where their work was used. Now they do: there is reverse image search, and services that find copies automatically, and claims arrive with a demand for compensation. At the same time a culture of free licenses has grown: Creative Commons, photo libraries, open fonts. So the honest way has become simpler and cheaper than the dishonest one.
