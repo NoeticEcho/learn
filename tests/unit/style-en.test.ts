@@ -80,7 +80,7 @@ const BRITISH = new RegExp(
 			'centres?', 'centred', 'centring', 'metres?', 'litres?', 'theatres?', 'fibres?', 'calibres?',
 			'licences?', 'licencing', 'defence\\w*', 'offence\\w*', 'pretence', 'catalogue[sd]?', 'dialogues?', 'analogues?', 'programmes?',
 			'grey\\w*', 'artefacts?', 'judgement\\w*', 'ageing', 'sceptic\\w*', 'whilst', 'amongst', 'learnt', 'spelt', 'fulfil', 'enrol', 'cheques?', 'tyres?', 'plough\\w*', 'mould\\w*',
-			'cancell(?:ed|ing|ation)', 'labell(?:ed|ing)', 'modell(?:ed|ing)', 'travell(?:ed|ing|er|ers)', 'signall(?:ed|ing)', 'fuell(?:ed|ing)', 'levell(?:ed|ing)',
+			'cancell(?:ed|ing)', 'labell(?:ed|ing)', 'modell(?:ed|ing)', 'travell(?:ed|ing|er|ers)', 'signall(?:ed|ing)', 'fuell(?:ed|ing)', 'levell(?:ed|ing)',
 			'(?:organ|recogn|real|summar|custom|optim|initial|normal|local|person|priorit|visual|util|standard|memor|special|general|serial|final|apolog|critic|categor|capital|author|synchron|minim|maxim|monet|digit|sanit|stabil|character|mobil|neutral|legal|modern|commercial|item|jeopard|fertil|hospital|colon|ration|emphas|itemi|harmon|fantas|theor|sympath|vandal|burglar|privat|publicis|globalis|industrial|memoris|familiar|centralis|decentral|pasteur|equal|tokenis|containeris|virtualis|parameteris|generalis|randomis|sanitis|prioritis|minimis|maximis|finalis|materialis|capitalis)is(?:e|es|ed|ing|ation|ations|er|ers)',
 			'analys(?:e|es|ed|ing)', 'paralys(?:e|ed|ing)'
 		].join('|') +
