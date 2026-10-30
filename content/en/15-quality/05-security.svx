@@ -1,0 +1,427 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/05-security.svx. */
+	export const metadata = {
+		id: '15-quality/05-security',
+		part: 15,
+		order: 5,
+		title: 'Site security: OWASP, HTTPS, updates and passwords',
+		definition: 'The OWASP Top 10 is a list of the most common classes of web application weakness. HTTPS, updates, passwords and a second factor guard against mass attacks.',
+		summary:
+			'Sites aren’t hacked out of personal dislike but automatically and in bulk, by catching on out-of-date plugins, weak passwords and forgotten keys. Afterwards you know the ten commonest classes of problem on the OWASP Top 10 list in plain words, you set up HTTPS and security headers, you turn on two-factor login, and you write a short protection plan for your project.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'server',
+					label: '/wp-login · /.env',
+					caption: 'At night, 03:12',
+					say: [
+						{ text: 'Who is knocking at the admin door?' },
+						{ who: 'A bot', text: 'I knock at everyone’s. Your site is on my way.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'lock',
+					label: 'HTTPS · 2FA · updates',
+					caption: 'Boring protection',
+					say: 'Against mass attacks the boring things work: encryption, updates and a second factor.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'sheet',
+					label: 'protection plan',
+					caption: 'Written down',
+					say: 'A one-page plan and a date: who checks it, and when.'
+				}
+			]
+		},
+		teaches: ['quality-owasp-basics', 'quality-site-hygiene', 'quality-security-headers'],
+		requires: ['server-authentication', 'server-sessions-and-cookies', 'net-tls', 'infra-tls-certificates', 'data-sql-select', 'infra-ci-cd'],
+		practice: {
+			id: 'security-plan',
+			title: 'A protection plan: headers, accounts, secrets',
+			task: 'Draw up a protection plan for the site. 1) In the #headers block finish the headers file (the _headers format): Strict-Transport-Security with max-age; Content-Security-Policy with default-src set to self, object-src set to none, frame-ancestors and form-action set to self (CSP writes these keywords in single quotes, as the example in the lesson shows), with no unsafe-inline and no unsafe-eval; X-Content-Type-Options: nosniff; and Referrer-Policy. 2) In the #accounts table, for each of the five accounts write its protection: a second factor (an authenticator app, a hardware key or a passkey). 3) In #updates say what you update, how often and who is responsible. 4) In #secrets say where keys and passwords are kept (not in the repository). 5) In #form-note write what data the project’s main action (named in the brief’s words) takes and why the form may send it only to your own domain. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside data-scaffold id="sec">
+      <h2>Protection plan</h2>
+
+      <h3>Headers (the _headers file)</h3>
+      <textarea id="headers" rows="9" cols="90">/*
+  Strict-Transport-Security: …
+  Content-Security-Policy: default-src 'self'; …
+  X-Content-Type-Options: …
+  Referrer-Policy: …
+<\/textarea>
+
+      <h3>Accounts and a second factor</h3>
+      <table id="accounts">
+        <thead><tr><th>Account</th><th>Second factor</th></tr></thead>
+        <tbody>
+          <tr><td>Owner’s email</td><td class="twofa">…</td></tr>
+          <tr><td>Hosting or deployment service</td><td class="twofa">…</td></tr>
+          <tr><td>Domain registrar</td><td class="twofa">…</td></tr>
+          <tr><td>Code repository</td><td class="twofa">…</td></tr>
+          <tr><td>Site admin</td><td class="twofa">…</td></tr>
+        </tbody>
+      </table>
+
+      <p>Updates: <span id="updates">…</span></p>
+      <p>Secrets (keys, passwords): <span id="secrets">…</span></p>
+      <p>The main action form: <span id="form-note">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside data-scaffold id="sec">
+      <h2>Protection plan</h2>
+
+      <h3>Headers (the _headers file)</h3>
+      <textarea id="headers" rows="9" cols="90">/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+<\/textarea>
+
+      <h3>Accounts and a second factor</h3>
+      <table id="accounts">
+        <thead><tr><th>Account</th><th>Second factor</th></tr></thead>
+        <tbody>
+          <tr><td>Owner’s email</td><td class="twofa">authenticator app, with backup codes in a safe</td></tr>
+          <tr><td>Hosting or deployment service</td><td class="twofa">authenticator app</td></tr>
+          <tr><td>Domain registrar</td><td class="twofa">hardware key</td></tr>
+          <tr><td>Code repository</td><td class="twofa">passkey</td></tr>
+          <tr><td>Site admin</td><td class="twofa">authenticator app</td></tr>
+        </tbody>
+      </table>
+
+      <p>Updates: <span id="updates">once a month I check updates for the CMS, plugins and dependencies and install critical ones at once; I am responsible</span></p>
+      <p>Secrets (keys, passwords): <span id="secrets">in environment variables and a password manager, not in the repository; the .env file is in .gitignore</span></p>
+      <p>The main action form: <span id="form-note">“{{mainAction.label}}” takes a name and a phone number; form-action 'self' stops them being sent to someone else’s address, even if a foreign form is injected into the page</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'hsts', kind: 'text', selector: '#headers', matches: 'Strict-Transport-Security:\\s*max-age=\\d{7,}' },
+				{ id: 'csp-default', kind: 'text', selector: '#headers', matches: "Content-Security-Policy:[^\\n]*default-src\\s+'self'" },
+				{ id: 'csp-object', kind: 'text', selector: '#headers', matches: "object-src\\s+'none'" },
+				{ id: 'csp-frame', kind: 'text', selector: '#headers', matches: "frame-ancestors\\s+('none'|'self')" },
+				{ id: 'csp-form', kind: 'text', selector: '#headers', matches: "form-action\\s+'self'" },
+				{ id: 'csp-no-unsafe', kind: 'text', selector: '#headers', matches: "^(?![\\s\\S]*'unsafe-(inline|eval)')" },
+				{ id: 'nosniff', kind: 'text', selector: '#headers', matches: 'X-Content-Type-Options:\\s*nosniff' },
+				{ id: 'referrer', kind: 'text', selector: '#headers', matches: 'Referrer-Policy:\\s*[a-z-]{6,}' },
+				{ id: 'headers-gaps', kind: 'text', selector: '#headers', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'twofa-count', kind: 'count', selector: 'td.twofa', min: 5 },
+				{ id: 'twofa-gaps', kind: 'text', selector: '#accounts', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'twofa-method', kind: 'text', selector: '#accounts', matches: '[Aa]uthenticator|[Aa]pp\\b|[Kk]ey|[Pp]asskey' },
+				{ id: 'updates', kind: 'text', selector: '#updates', matches: '(?=[\\s\\S]*(once a|every|each|monthly|weekly|automatic|per month))(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+)' },
+				{ id: 'secrets', kind: 'text', selector: '#secrets', matches: '(?=[\\s\\S]*(environment|secret|manager|\\.env))(?=[\\s\\S]*(not in the repo|gitignore|outside the repo|never stored|not stored|not committed))' },
+				{ id: 'form-note', kind: 'field', selector: '#form-note', field: 'mainAction.label' },
+				{ id: 'form-why', kind: 'text', selector: '#form-note', matches: 'form-action|own domain|our domain|only to|someone else|another address|foreign' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each OWASP Top 10 class of problem with how it looks on a site',
+				pairs: [
+					['Broken access control', 'a person changes the number in the address and sees someone else’s request'],
+					['Injection', 'typed text is run as code or as part of a database query'],
+					['Software supply chain failures', 'a plugin or library you included was hacked or hasn’t been updated for ages'],
+					['Security misconfiguration', 'a default password is left, the control panel is open, headers are not set']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does the Strict-Transport-Security (HSTS) header do?',
+				options: [
+					'Tells the browser to visit the site only over HTTPS for a set period, even if the person typed http',
+					'Encrypts the page content in place of a certificate',
+					'Forbids search engines to index the site'
+				],
+				answer: 0,
+				why: [
+					'Yes. The certificate encrypts the connection, and HSTS stops the browser sliding back to unprotected http, whether by mistake or through someone’s interference.',
+					'No. Encryption is done by TLS and the certificate. HSTS only requires that they be used.',
+					'No. Indexing is controlled by robots.txt and meta tags.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What belongs to sensible password hygiene?',
+				options: [
+					'A unique long password for every site, kept by a password manager',
+					'One good password for all sites, so as not to forget it',
+					'Two-factor login with an app, a hardware key or a passkey',
+					'Forcing everyone to change all passwords every week, whatever the reason'
+				],
+				answer: [0, 2],
+				why: [
+					'Yes: breaking into one site doesn’t open the others, and the manager remembers the long password.',
+					'No. When that password leaks from any one site, all of them open.',
+					'Yes: even a stolen password doesn’t open a login without the second factor. SMS is better than nothing, but weaker than an app or a key.',
+					'No. Current guidance (NIST) says to change a password when a leak is suspected, not on a schedule: frequent changes lead to weak, predictable passwords.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You published an access key in a public repository by mistake and deleted the file a minute later. What do you do?',
+				options: [
+					'Treat the key as compromised: revoke it with the service, issue a new one, then check whether it was used',
+					'Nothing: the file is deleted, so the key is gone',
+					'Wait a week and see whether anything odd happens'
+				],
+				answer: 0,
+				why: [
+					'Yes. The repository’s history keeps the file, and automatic scanners find keys within seconds. The only reliable action is to revoke the key.',
+					'No. Deleting a file doesn’t delete it from the history, and the key may already have been copied.',
+					'No. If the key was stolen, it can be used within a week.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does Content-Security-Policy do?',
+				options: [
+					'Lists where a page may load scripts, styles and images from and where forms may be sent; foreign code won’t run',
+					'Compresses the page so that it loads faster',
+					'Checks the visitor’s password'
+				],
+				answer: 0,
+				why: [
+					'Yes. CSP is a second line of defense against XSS: even if a script got into the page, the browser won’t run it if its source isn’t allowed. That is why a policy never keeps unsafe-inline.',
+					'No. That is the job of compression and the cache.',
+					'No. Passwords are checked by the server.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a meta tag carrying the policy Content-Security-Policy with default-src set to self (in single quotes)',
+				starter: '',
+				checks: [
+					{ id: 'meta', kind: 'attr', selector: 'meta[http-equiv=Content-Security-Policy]', name: 'content', matches: 'default-src\\s+.self.' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-sec-owasp',
+				front: 'What is the OWASP Top 10?',
+				back: 'A list of the ten commonest classes of web application weakness, compiled by the OWASP community. It isn’t a complete checklist but a compass: the 2025 edition begins with broken access control.'
+			},
+			{
+				id: 'quality-sec-https',
+				front: 'What does a protected connection need?',
+				back: 'HTTPS with a valid certificate, a redirect from http, HSTS (the browser uses only https), and the flags Secure, HttpOnly and SameSite on cookies.'
+			},
+			{
+				id: 'quality-sec-csp',
+				front: 'Why CSP, and which rules are essential?',
+				back: 'It limits the sources of code and the addresses forms send to. The basic set is default-src, object-src, base-uri, frame-ancestors and form-action, with self and none written in single quotes. No unsafe-inline.'
+			},
+			{
+				id: 'quality-sec-accounts',
+				front: 'Which accounts do you protect first?',
+				back: 'The owner’s email (the other passwords are reset through it), the domain registrar, the hosting, the repository and the admin. On each: a unique password from a manager and a second factor.'
+			},
+			{
+				id: 'quality-sec-secrets',
+				front: 'Where do you keep keys and passwords?',
+				back: 'In environment variables and a secrets manager, never in the code or the repository (.env goes in .gitignore). If a secret reaches the repository, revoke it and issue a new one.'
+			}
+		],
+		sources: [
+			{ title: 'OWASP Top 10:2025', url: 'https://top10.owasp.org/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OWASP Cheat Sheet Series', url: 'https://cheatsheetseries.owasp.org/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Content Security Policy (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'MDN HTTP Observatory', url: 'https://developer.mozilla.org/en-US/observatory', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OWASP: Password Storage Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'NIST SP 800-63B: Digital Identity Guidelines, Authentication', url: 'https://pages.nist.gov/800-63-4/sp800-63b.html', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Have I Been Pwned: check an email address against known breaches', url: 'https://haveibeenpwned.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Web Almanac 2024: Security', url: 'https://almanac.httparchive.org/en/2024/security', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’ll write a one-page protection plan. It won’t make the site invulnerable, but it will close what mass attacks use.',
+			hints: [
+				'Headers in the _headers format: after the line /* come lines indented by two spaces, one header on each. The lesson’s text has a full Content-Security-Policy line you can follow.',
+				'For CSP, use default-src, object-src, base-uri, frame-ancestors and form-action as in the lesson, with the keywords self and none in single quotes. Don’t add unsafe-inline.',
+				'In the accounts table, name the method in every cell: authenticator app, hardware key or passkey.',
+				'Updates: once a month, critical ones at once, and say who is responsible. Secrets: in environment variables, not in the repository, with .env in .gitignore.'
+			],
+			mistakes: {
+				hsts: 'You need a line Strict-Transport-Security: max-age=31536000 (a number of seconds, at least seven digits).',
+				'csp-default': 'Content-Security-Policy needs default-src set to self, in single quotes.',
+				'csp-object': 'Add object-src set to none, in single quotes.',
+				'csp-frame': 'Add frame-ancestors set to none (or self), in single quotes, so that the site can’t be embedded in someone else’s page.',
+				'csp-form': 'Add form-action set to self, in single quotes: the form can then send data only to your own address.',
+				'csp-no-unsafe': 'Remove unsafe-inline and unsafe-eval: they cancel out the CSP.',
+				nosniff: 'You need a line X-Content-Type-Options: nosniff.',
+				referrer: 'You need a line Referrer-Policy with a value, for example strict-origin-when-cross-origin.',
+				'headers-gaps': 'There are still “…” in the headers. Finish all the values.',
+				'twofa-count': 'The table must have five cells for the second factor.',
+				'twofa-gaps': 'There are still “…” in the table. Fill in every cell.',
+				'twofa-method': 'Name the second-factor method: an authenticator app, a hardware key or a passkey.',
+				updates: 'In updates say how often and who is responsible: for example “once a month, I am responsible.”',
+				secrets: 'In secrets say where they are kept (environment variables, a password manager) and that they are not in the repository.',
+				'form-note': 'In the form note, name the project’s main action in the brief’s words.',
+				'form-why': 'Explain why the form should send data only to your own domain (form-action).'
+			},
+			outro: 'Now you have a plan: headers, accounts, updates, secrets. Open the MDN HTTP Observatory, test your real site and write down the grade. And put the date of the next check in your calendar.'
+		},
+		say: { OWASP: 'oh-wasp', HTTPS: 'H T T P S', HSTS: 'H S T S', CSP: 'C S P', XSS: 'X S S', SQL: 'sequel', NIST: 'nist', passkey: 'pass key', CMS: 'C M S', 'Content-Security-Policy': 'content security policy', TLS: 'T L S', nosniff: 'no sniff', SMS: 'S M S', SameSite: 'same site', HttpOnly: 'H T T P only' }
+	};
+</script>
+
+<script>
+	import AttackFeed from '../../diagrams/AttackFeed.svelte';
+</script>
+
+## Who gets hacked
+
+The first thought: “who needs my little site?” The answer: a bot. Break-ins today are almost always **automatic**. Programs go round the clock through addresses on the internet, knock at `/wp-login.php`, look for a `.env` file, try the known hole of a known plugin, and if they find a way in, they take what there is: they plant hidden ads and links to their own sites, send spam from your address, steal inquiries and passwords. They don’t care what the site is. What matters is that it is open.
+
+A practical conclusion follows. You don’t need a defense against intelligence agencies. You need to **close what can be closed cheaply**: updates, passwords with a second factor, encryption, input, keys. It is boring, and it works. The rest is a question of the project’s size.
+
+This lesson is about the site as a whole, and the next one is about the form on its own.
+
+## OWASP and its list of ten
+
+**OWASP** (the Open Worldwide Application Security Project, formerly the Open Web Application Security Project) is an open nonprofit community that publishes free materials on application security. Its best-known product is the **OWASP Top 10**: a list of the ten commonest classes of problem, updated every few years. The latest edition came out in 2025. It isn’t a checklist but a compass: “here is where things most often get broken in practice.”
+
+Let’s read all ten in plain words, with what the author of a small site does about each.
+
+1. **A01 Broken access control.** A person gets what they aren’t entitled to: they changed the number in the address `/request/105` to `106` and saw someone else’s request; they opened `/admin` without logging in. The cure: the server checks permissions **on every request** and doesn’t trust what arrived.
+2. **A02 Security misconfiguration.** A default password, an open control panel, debugging left on, no security headers, a file listing visible to all. The cure: configure and check, and turn off what isn’t needed.
+3. **A03 Software supply chain failures.** The site rests on other people’s work: the CMS, plugins, themes, libraries, build tools. If there is a hole there, or someone swapped a package, the hole is yours. The cure: update, don’t install extras, and take things from reliable sources.
+4. **A04 Cryptographic failures.** No HTTPS, passwords stored in plain text or with a weak hash, secrets lying around anywhere. The cure: HTTPS everywhere, hash passwords (see [the lesson on authentication](../../06-server/07-authentication/)), keep secrets apart.
+5. **A05 Injection.** Text typed by a person turns into **code or part of a query**. If you paste text as it is into a database query, a quotation mark and a scrap of SQL can pull out the whole database (SQL injection). If you print someone else’s text on a page without escaping it, someone else’s script runs for other visitors (XSS, cross-site scripting). The cure: parameterized queries, escaping on output, and checking input.
+6. **A06 Insecure design.** The mistake isn’t in the code but in the idea: a password reset by date of birth, a form with no rate limit whose spam can’t be stopped. The cure: think about abuse before building.
+7. **A07 Authentication failures.** Weak passwords, no second factor, no protection against guessing. The cure: long unique passwords, a second factor, a limit on attempts.
+8. **A08 Software or data integrity failures.** Code or data changes without being checked: a script was included from someone else’s server with no check of authenticity, or an auto-update with no signature check. The cure: verify the source, pin versions, and give included scripts a checksum (Subresource Integrity).
+9. **A09 Security logging and alerting failures.** An attack goes unseen because nobody records or reads errors and odd logins. The cure: a log of errors and logins, and an alert on anything unusual.
+10. **A10 Mishandling of exceptional conditions.** An error shows the visitor the insides (a file path, a database query), or makes a protection “switch off.” The cure: a clear message for the person, details in the log, and when something fails, deny rather than allow.
+
+The diagram below shows the link between this list and the measures. Switch measures on and see which automatic attempts are stopped.
+
+<AttackFeed />
+
+<details>
+<summary>Check yourself: what is an injection and how is it prevented?</summary>
+
+Text typed by a person gets into code or a query as part of a command. It is prevented with query parameters (the value travels apart from the query text), with escaping when printing to a page, and with checking input on the server.
+
+</details>
+
+## What an injection looks like
+
+SQL injection is simpler than it seems. Suppose a site looks up an inquiry by phone number like this:
+
+```text
+query = "SELECT * FROM requests WHERE phone = '" + phone + "'"
+```
+
+If the person types an ordinary number, everything works. But if they type `' OR '1'='1`, the query becomes “select all inquiries where the phone equals nothing or one equals one,” that is, it returns **the whole table**. The right way is to pass the value **apart** from the query text:
+
+```text
+SELECT * FROM requests WHERE phone = $1      (the value is passed separately)
+```
+
+The database itself knows that `$1` is a value and not a command, and typed text never becomes part of the query. You saw such parameters in the lessons on SQL. XSS works the same way, only the victim is different: not the database but the browser of another visitor. Modern templating systems (Svelte, for example) escape output automatically until you ask them to insert “raw” HTML.
+
+## HTTPS and security headers
+
+You learned about certificates in [the lesson on HTTPS and TLS](../../01-internet/07-https-tls/) and in [the lesson on certificates in practice](../../09-infrastructure/03-tls-practice/). Here is what to add.
+
+- **HTTPS everywhere.** The whole site, all resources (or the browser blocks “mixed content”), and a redirect from `http://` to `https://`.
+- **HSTS** is the header `Strict-Transport-Security: max-age=31536000`. It tells the browser: for a year, visit this site only over HTTPS and don’t even think of http. Without it, a person who types the address without `https` travels for a moment over an open connection, and can be intercepted. Turn it on when you are sure the whole site works over HTTPS.
+- **Content-Security-Policy (CSP)** is a list of sources from which the page may take scripts, styles and images, and where it may send forms. A script that got into the page through XSS but didn’t come from an allowed source will not be run by the browser. A reliable minimum: `default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'`. Services you embed (an analytics counter, a map) are added to the policy explicitly. The words `'unsafe-inline'` and `'unsafe-eval'` almost entirely drain the policy of meaning: avoid them.
+- **X-Content-Type-Options: nosniff** means the browser doesn’t “guess” a file’s type and doesn’t run an image as a script.
+- **Referrer-Policy: strict-origin-when-cross-origin** means that only your site’s name goes to other sites, not the full page address (which may hold data).
+- **frame-ancestors** (in CSP) or the older X-Frame-Options stop your site being embedded in someone else’s page. Otherwise “clickjacking” is possible: an invisible layer with your button beneath someone else’s picture.
+- **Cookie flags** (you know them from [the lesson on authentication](../../06-server/07-authentication/)): `Secure` (only over HTTPS), `HttpOnly` (unavailable to scripts), `SameSite=Lax` (not sent from other sites).
+
+Where these headers are set. In the web server’s settings (nginx, Caddy), in a `_headers` file on Netlify and Cloudflare Pages (a line with the path `/*`, and the headers below it, indented), or in the platform’s settings. **Not every platform allows it**: on GitHub Pages you can’t set your own headers (part of a policy can be passed through a `meta` tag, but not all of it: `frame-ancestors` doesn’t work in `meta`). If you can’t do without them, put a proxy or a CDN in front of the site to add the headers.
+
+You check the result with the free **MDN HTTP Observatory**: it opens your site and gives a grade with a list of what isn’t configured. Write down the grade “before” and “after,” and come back to it when you add a new library: it is easy to break what you configured.
+
+<details>
+<summary>Check yourself: why is unsafe-inline never left in a CSP?</summary>
+
+It allows a script written straight into the page to run, and that is exactly how XSS works: the injected script ends up inside the page. With unsafe-inline the policy hardly protects at all.
+
+</details>
+
+## Updates
+
+Most sites are broken into through **something out of date**: a CMS version, a plugin, a theme, a library. The holes are published, and automatic scanners check who hasn’t closed them yet. So:
+
+- **Update regularly,** and critical fixes at once. For WordPress and other CMSs, turn on automatic security updates. For a project in code: an `npm audit` report, GitHub Dependabot or similar.
+- **Don’t install extras.** Every plugin is someone else’s code and your responsibility. If you turned it off and don’t use it, delete it.
+- **Take things from reliable sources,** and look at when a plugin was last updated and how many people use it. An abandoned plugin is a hole on a delay.
+- **Pin versions** and check the sources when you include scripts from other servers (this is the very A03 and A08).
+- **Have a copy, and know how to restore it** (the lesson on backups in the infrastructure part): an update sometimes breaks the site, and a rollback has to be possible.
+
+## Passwords and a second factor
+
+The commonest way in is a stolen or guessed password. What works.
+
+- **A unique long password for every site,** remembered by a **password manager** (Bitwarden, KeePass and others; the managers built into browsers and systems are fine too). If one site loses its database, the rest stay closed.
+- **Length matters more than cleverness.** Current guidance (NIST SP 800-63B) recommends long passwords, allowing paste and managers, checking against lists of leaked passwords, and **not** changing a password on a schedule for no reason: frequent changes breed “Password1,” “Password2.”
+- **A second factor** (2FA): besides the password, something else is needed. An authenticator app (codes that change every thirty seconds), a hardware key or a passkey (from [the lesson on authentication](../../06-server/07-authentication/)) is stronger than SMS (a number can be intercepted). But SMS is better than nothing.
+- **Protect the chain.** First protect the **owner’s email**: the other passwords are reset through it. Then the domain registrar (whoever owns the domain owns the site), the hosting or deployment service, the repository and the site admin.
+- **Save the backup codes** of the second factor somewhere safe: a lost phone must not become a lost site.
+- **Visitors’ passwords** (if you have a login) are not stored by you: only a hash made with a slow function (argon2id, bcrypt), as in [the lesson on authentication](../../06-server/07-authentication/). Better not to create a login at all if you can do without it.
+
+You can check whether your email address has appeared in known breaches in a service called Have I Been Pwned (in the sources): it shows which leaks included the address.
+
+## Secrets
+
+A key to a payment system, a database password, a receiver’s token: all of these are **secrets**. Their main rule: **a secret must not get into the repository.** For that, put it in your server’s or platform’s **environment variables** (every deployment service does this) or in a secrets manager, and add the local `.env` file to `.gitignore`. If a secret did get into the repository, even for a minute, consider it **compromised**: revoke it and issue a new one. Automatic scanners find keys in public repositories within seconds, and deleting a file doesn’t delete it from the history.
+
+## If you are hacked anyway
+
+Tell yourself in advance what you will do while nothing is on fire.
+
+1. **Stop the damage:** take the site down (a holding page) and close the way into the admin.
+2. **Change the access:** the passwords and keys of all linked accounts, revoke tokens, end other people’s sessions.
+3. **Restore from a clean copy** and update everything that was out of date. Simply “cleaning” a hacked site is unreliable: you don’t know what remains.
+4. **Find how they got in,** from the logs, or it will happen again.
+5. **Assess whether people’s data leaked,** and if it did, notify whoever the law says. When a leak touches personal data, the organization in charge of that data has duties and deadlines. The next lessons cover them: GDPR requires notifying the regulator within 72 hours in many cases, and US states have their own breach notification laws.
+
+## Practice
+
+You are in the era of 2022: the site builds automatically and deploys to a platform. Draw up a one-page protection plan for your project: a headers file, a second factor for five accounts, an update rule, a place for secrets and a note on the main action form.
+
+The check reads text: it makes sure the headers include HSTS, a CSP with the needed rules and without `'unsafe-inline'`, `nosniff` and a referrer policy, and that the accounts table names the protection. It can’t check that you really turned on a second factor. You will do that: open each account’s settings and turn it on, then test your real site in the Observatory.
+
+## What used to be different
+
+In the 2000s “security” often meant one password for everything and no updates: sites on home-made scripts weren’t updated for years. Forms built an SQL query by gluing strings together, and passwords were stored as plain text, which people learned from reports of leaks. Platforms and standards appeared, and with them habits: HTTPS became the norm (with free certificates), browsers began to warn about unsafe sites, and the OWASP lists became a common language. But the main enemy stayed the same: “I’ll update later” and “I have nothing worth stealing.”
