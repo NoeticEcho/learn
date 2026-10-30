@@ -8,11 +8,14 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+	/** One string per edition (docs/content-plan/README.md, «English edition»): the Russian stays as written. */
+	const t = (ru: string, en: string) => pick({ ru, en });
 
 	type State = 'none' | 'ok' | 'bad';
 	type Check = { id: string; text: string; blocker?: boolean; from: string };
 	type Block = { id: string; name: string; checks: Check[] };
-	const blocks: Block[] = [
+	const blocksRu: Block[] = [
 		{ id: 'speed', name: 'Скорость и надёжность', checks: [
 			{ id: 's1', text: 'LCP, INP и CLS в зелёной зоне на мобильной сети', from: 'урок 1' },
 			{ id: 's2', text: 'Картинки сжаты, с размерами, главная не ленивая', from: 'урок 1' },
@@ -56,8 +59,53 @@
 			{ id: 'm5', text: 'Нет ссылок на 404, тексты вычитаны', from: 'практика' }
 		] }
 	];
+	const blocksEn: Block[] = [
+		{ id: 'speed', name: 'Speed and reliability', checks: [
+			{ id: 's1', text: 'LCP, INP and CLS in the green zone on a mobile network', from: 'lesson 1' },
+			{ id: 's2', text: 'Images compressed, with sizes, and the main one not lazy', from: 'lesson 1' },
+			{ id: 's3', text: 'A budget is written down and the page is within it', from: 'lesson 1' },
+			{ id: 's4', text: 'There is a backup and its restoration has been tested', blocker: true, from: 'part 9' },
+			{ id: 's5', text: 'There is a way to roll back a deploy, and uptime monitoring', blocker: true, from: 'part 9' }
+		] },
+		{ id: 'a11y', name: 'Accessibility', checks: [
+			{ id: 'a1', text: 'An automated check with no serious errors', from: 'lesson 2' },
+			{ id: 'a2', text: 'The whole site can be used with a keyboard, and focus is visible', blocker: true, from: 'lesson 2' },
+			{ id: 'a3', text: 'Contrast at least 4.5 to 1, touch targets at least 24 pixels', from: 'lesson 2' },
+			{ id: 'a4', text: 'The main action works with a screen reader', from: 'lesson 3' },
+			{ id: 'a5', text: 'An accessibility statement is published and honest', from: 'lesson 13' }
+		] },
+		{ id: 'sec', name: 'Security', checks: [
+			{ id: 'c1', text: 'HTTPS everywhere, HSTS on', blocker: true, from: 'lesson 5' },
+			{ id: 'c2', text: 'CSP and security headers set, the Observatory grade recorded', from: 'lesson 5' },
+			{ id: 'c3', text: 'A second factor on email, domain, hosting and repository', blocker: true, from: 'lesson 5' },
+			{ id: 'c4', text: 'No keys or passwords in the repository', blocker: true, from: 'lesson 5' },
+			{ id: 'c5', text: 'The form is checked on the server, and spam is stopped without a CAPTCHA', from: 'lesson 6' }
+		] },
+		{ id: 'law', name: 'Law', checks: [
+			{ id: 'l1', text: 'A record of processing is written, and you know where the data is stored and whether it leaves the UK or EEA', blocker: true, from: 'lesson 7' },
+			{ id: 'l2', text: 'A separate empty consent where you rely on consent, and a privacy notice with a date and a version', blocker: true, from: 'lesson 8' },
+			{ id: 'l3', text: 'A cookie table and an honest banner; the counter sleeps until the choice, and GPC is honored', from: 'lesson 9' },
+			{ id: 'l4', text: 'A register of materials with licenses, and written consent for photos of people', from: 'lesson 10' },
+			{ id: 'l5', text: 'Texts checked against advertising law and your profession’s rules; a terms page if you sell', blocker: true, from: 'lessons 11 and 12' }
+		] },
+		{ id: 'seo', name: 'Search and analytics', checks: [
+			{ id: 'e1', text: 'Titles, descriptions and page addresses are set', from: 'part 13' },
+			{ id: 'e2', text: 'robots.txt, sitemap and canonical addresses are set up', from: 'part 13' },
+			{ id: 'e3', text: 'The link preview (Open Graph) looks right', from: 'part 2' },
+			{ id: 'e4', text: 'A counter is installed, goals are set and UTM tags are kept', from: 'part 14' },
+			{ id: 'e5', text: 'The site is added to the search engines’ webmaster tools', from: 'part 13' }
+		] },
+		{ id: 'action', name: 'The main action and content', checks: [
+			{ id: 'm1', text: 'The main action works on a phone from start to finish', blocker: true, from: 'lesson 4' },
+			{ id: 'm2', text: 'It works even where the script did not load', from: 'part 5' },
+			{ id: 'm3', text: 'Phone, email and address match on every page', blocker: true, from: 'practice' },
+			{ id: 'm4', text: 'End-to-end tests are green', from: 'lesson 4' },
+			{ id: 'm5', text: 'No links to a 404, and the texts are proofread', from: 'practice' }
+		] }
+	];
+	const blocks = pick({ ru: blocksRu, en: blocksEn });
 	let st = $state<Record<string, State>>({});
-	const label: Record<State, string> = { none: 'не проверено', ok: 'в порядке', bad: 'проблема' };
+	const label: Record<State, string> = { none: t('не проверено', 'not checked'), ok: t('в порядке', 'OK'), bad: t('проблема', 'problem') };
 	const next = (s: State | undefined): State => (s === 'ok' ? 'bad' : s === 'bad' ? 'none' : 'ok');
 
 	const all = blocks.flatMap((b) => b.checks);
@@ -69,13 +117,13 @@
 		if (s.every((x) => x === 'ok')) return 'green';
 		return 'yellow';
 	}
-	const word = { green: '● зелёный', yellow: '▲ жёлтый', red: '■ красный' } as const;
+	const word = { green: t('● зелёный', '● green'), yellow: t('▲ жёлтый', '▲ yellow'), red: t('■ красный', '■ red') } as const;
 	const ready = $derived(blockers.length === 0);
 </script>
 
 <figure class="dg">
-	<figcaption>Панель запуска: шесть блоков, тридцать проверок</figcaption>
-	<p class="dg-out">Нажимайте на проверку, чтобы менять её состояние: не проверено, в порядке, проблема. Проверки с пометкой «блокер» нельзя оставлять неисправленными. Какие считать блокерами в вашем проекте, решаете вы.</p>
+	<figcaption>{t('Панель запуска: шесть блоков, тридцать проверок', 'The launch panel: six blocks, thirty checks')}</figcaption>
+	<p class="dg-out">{t('Нажимайте на проверку, чтобы менять её состояние: не проверено, в порядке, проблема. Проверки с пометкой «блокер» нельзя оставлять неисправленными. Какие считать блокерами в вашем проекте, решаете вы.', 'Press a check to change its state: not checked, OK, problem. Checks marked “blocker” must not be left unfixed. Which ones count as blockers in your project is for you to decide.')}</p>
 
 	{#each blocks as b (b.id)}
 		<section class="blk {colour(b)}">
@@ -84,7 +132,7 @@
 				{#each b.checks as c (c.id)}
 					<li>
 						<button type="button" class="chk {st[c.id] ?? 'none'}" aria-label="{c.text}: {label[st[c.id] ?? 'none']}" onclick={() => (st[c.id] = next(st[c.id]))}>{st[c.id] === 'ok' ? '✓' : st[c.id] === 'bad' ? '✕' : '·'}</button>
-						<span>{c.text}{#if c.blocker} <span class="tag">блокер</span>{/if} <span class="dim">({c.from})</span></span>
+						<span>{c.text}{#if c.blocker} <span class="tag">{t('блокер', 'blocker')}</span>{/if} <span class="dim">({c.from})</span></span>
 					</li>
 				{/each}
 			</ul>
@@ -92,10 +140,10 @@
 	{/each}
 
 	<div class="sum" aria-live="polite">
-		<p class="dg-out"><strong>Готовность: {okN} из {all.length}.</strong> <strong>{ready ? 'Готов к запуску: блокеров нет.' : `Не готов: блокеров ${blockers.length}.`}</strong></p>
+		<p class="dg-out"><strong>{t('Готовность:', 'Readiness:')} {okN} {t('из', 'of')} {all.length}.</strong> <strong>{ready ? t('Готов к запуску: блокеров нет.', 'Ready to launch: no blockers.') : t(`Не готов: блокеров ${blockers.length}.`, `Not ready: ${blockers.length} blockers.`)}</strong></p>
 		{#if !ready}<ul class="bl">{#each blockers as c (c.id)}<li>{c.text} ({label[st[c.id] ?? 'none']})</li>{/each}</ul>{/if}
 	</div>
-	<p class="dg-out alt"><strong>Текстовая альтернатива:</strong> панель из тридцати проверок в шести блоках: скорость и надёжность, доступность, безопасность, право, поиск и аналитика, главное действие и содержимое. У каждой три состояния. Блок красный, если есть проблема с блокером или две проблемы, зелёный, если всё в порядке, иначе жёлтый. Запуск разрешён, когда все проверки с пометкой блокер в порядке.</p>
+	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('панель из тридцати проверок в шести блоках: скорость и надёжность, доступность, безопасность, право, поиск и аналитика, главное действие и содержимое. У каждой три состояния. Блок красный, если есть проблема с блокером или две проблемы, зелёный, если всё в порядке, иначе жёлтый. Запуск разрешён, когда все проверки с пометкой блокер в порядке.', 'a panel of thirty checks in six blocks: speed and reliability, accessibility, security, law, search and analytics, and the main action and content. Each check has three states. A block is red if a blocker has a problem or two checks have problems, green if everything is OK, and yellow otherwise. The launch is allowed when every check marked as a blocker is OK.')}</p>
 </figure>
 
 <style>

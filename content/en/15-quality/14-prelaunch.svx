@@ -1,0 +1,399 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/14-prelaunch.svx, with the law block on the laws of the English-speaking edition (GDPR and UK GDPR, ePrivacy and PECR, US state laws, FTC rules, ADA, EAA). */
+	export const metadata = {
+		id: '15-quality/14-prelaunch',
+		part: 15,
+		order: 14,
+		title: 'The pre-launch checklist',
+		definition: 'A pre-launch checklist is a list of checks in six blocks to pass before a site goes live. A blocker is never left unfixed, and every other finding gets a date.',
+		summary:
+			'A launch is not a moment of inspiration but a list that is gone through item by item. Afterwards you gather thirty checks from the whole part into six blocks (speed and reliability, accessibility, security, law, search and analytics, the main action), you can tell a blocker from a remark, and you write a “ready or not ready” report for your project: the color of each block, the red items with a date and an owner, a check on a phone and a rollback plan.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'flowchart',
+					label: 'press|deploy|…',
+					caption: 'Friday, 6 p.m.',
+					say: [
+						{ text: 'Shall we deploy? It all seems to work.' },
+						{ who: 'The list', text: 'Seems, or checked?' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: '6 blocks · 30 checks',
+					caption: 'The checklist',
+					say: 'Six blocks. A blocker doesn’t ship; everything else is written down with an owner and a date.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'not ready · due 4 Nov',
+					caption: 'An honest report',
+					say: '“Not ready” with a plan beats “ready” with no check.'
+				}
+			]
+		},
+		teaches: ['quality-prelaunch-checklist'],
+		requires: [
+			'quality-core-web-vitals',
+			'quality-wcag22',
+			'quality-e2e-testing',
+			'quality-security-headers',
+			'quality-forms-spam-security',
+			'quality-152fz',
+			'quality-privacy-notice',
+			'quality-cookies',
+			'quality-copyright-images',
+			'quality-ad-law-ethics',
+			'quality-consumer-law',
+			'quality-a11y-law',
+			'growth-technical-seo',
+			'infra-backups'
+		],
+		practice: {
+			id: 'launch-report',
+			title: 'A launch readiness report',
+			task: 'Write the readiness report. 1) In each of the six blocks (.block with the ids b-speed, b-a11y, b-security, b-law, b-seo, b-action) set data-status to green, yellow or red, and write one main conclusion in the .note (leave no “…”). 2) In the #fixes table, for every red or yellow item write what to fix, who is responsible, and a date such as 4 November 2026. 3) #mobile: say that the project’s main action (named in the brief’s words) has been gone through on a phone. 4) #nojs: what happens if the script did not load. 5) #backup: where the backup is and how to roll back a deploy. 6) In the #contacts table, for the three places (header, footer, contacts page) write the phone and email from the brief and mark that they match. 7) The #verdict, with a data-ready attribute (yes or no) and the words “ready” or “not ready.” Leave no “…”.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+
+    <aside data-scaffold id="launch">
+      <h2>Launch readiness report</h2>
+
+      <section class="block" id="b-speed" data-status=""><h3>Speed and reliability</h3><p class="note">…</p></section>
+      <section class="block" id="b-a11y" data-status=""><h3>Accessibility</h3><p class="note">…</p></section>
+      <section class="block" id="b-security" data-status=""><h3>Security</h3><p class="note">…</p></section>
+      <section class="block" id="b-law" data-status=""><h3>Law</h3><p class="note">…</p></section>
+      <section class="block" id="b-seo" data-status=""><h3>Search and analytics</h3><p class="note">…</p></section>
+      <section class="block" id="b-action" data-status=""><h3>The main action and content</h3><p class="note">…</p></section>
+
+      <h3>What to fix</h3>
+      <table id="fixes">
+        <thead><tr><th>What</th><th>Owner</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr class="fix"><td class="what">…</td><td class="owner">…</td><td class="due">…</td></tr>
+        </tbody>
+      </table>
+
+      <p>Check on a phone: <span id="mobile">…</span></p>
+      <p>Without the script: <span id="nojs">…</span></p>
+      <p>Backup and rollback: <span id="backup">…</span></p>
+
+      <h3>Contacts in every place</h3>
+      <table id="contacts">
+        <thead><tr><th>Place</th><th>Phone and email</th><th>Matches</th></tr></thead>
+        <tbody>
+          <tr class="contact"><td class="place">Header</td><td class="value">…</td><td class="same">…</td></tr>
+          <tr class="contact"><td class="place">Footer</td><td class="value">…</td><td class="same">…</td></tr>
+          <tr class="contact"><td class="place">Contacts page</td><td class="value">…</td><td class="same">…</td></tr>
+        </tbody>
+      </table>
+
+      <p id="verdict" data-ready="">Verdict: …</p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+
+    <aside data-scaffold id="launch">
+      <h2>Launch readiness report</h2>
+
+      <section class="block" id="b-speed" data-status="green"><h3>Speed and reliability</h3><p class="note">LCP is in the green zone, the budget is kept, and the backup is tested.</p></section>
+      <section class="block" id="b-a11y" data-status="yellow"><h3>Accessibility</h3><p class="note">The keyboard and screen reader are done for the main action, the other pages are not yet.</p></section>
+      <section class="block" id="b-security" data-status="green"><h3>Security</h3><p class="note">The headers are set, the second factor is on, and there are no secrets in the repository.</p></section>
+      <section class="block" id="b-law" data-status="red"><h3>Law</h3><p class="note">A lawyer has not yet reviewed the privacy notice, and the processor contracts are not signed.</p></section>
+      <section class="block" id="b-seo" data-status="green"><h3>Search and analytics</h3><p class="note">The sitemap, the counter and the goals are set up.</p></section>
+      <section class="block" id="b-action" data-status="green"><h3>The main action and content</h3><p class="note">It works on a phone, the tests are green and the links are intact.</p></section>
+
+      <h3>What to fix</h3>
+      <table id="fixes">
+        <thead><tr><th>What</th><th>Owner</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr class="fix"><td class="what">Show the privacy notice and consent to a lawyer, and sign the processor contracts</td><td class="owner">the site owner</td><td class="due">4 November 2026</td></tr>
+          <tr class="fix"><td class="what">Check the other pages with a screen reader</td><td class="owner">the site owner</td><td class="due">11 November 2026</td></tr>
+        </tbody>
+      </table>
+
+      <p>Check on a phone: <span id="mobile">the “{{mainAction.label}}” action was gone through from start to finish on a phone on a mobile network</span></p>
+      <p>Without the script: <span id="nojs">the form submits with an ordinary request and the script only enhances it; it works without JavaScript</span></p>
+      <p>Backup and rollback: <span id="backup">a copy of the site and the database is kept off the server and its restoration is tested; rollback: restore the previous deploy with one button</span></p>
+
+      <h3>Contacts in every place</h3>
+      <table id="contacts">
+        <thead><tr><th>Place</th><th>Phone and email</th><th>Matches</th></tr></thead>
+        <tbody>
+          <tr class="contact"><td class="place">Header</td><td class="value">{{phone}}, {{email}}</td><td class="same">yes, it matches</td></tr>
+          <tr class="contact"><td class="place">Footer</td><td class="value">{{phone}}, {{email}}</td><td class="same">yes, it matches</td></tr>
+          <tr class="contact"><td class="place">Contacts page</td><td class="value">{{phone}}, {{email}}</td><td class="same">yes, it matches</td></tr>
+        </tbody>
+      </table>
+
+      <p id="verdict" data-ready="no">Verdict: not ready until a lawyer has reviewed the privacy notice and the contracts are signed (due 4 November 2026).</p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'blocks', kind: 'count', selector: '.block', min: 6 },
+				{ id: 'status-valid', kind: 'count', selector: '.block:not([data-status="green"]):not([data-status="yellow"]):not([data-status="red"])', max: 0 },
+				{ id: 'notes', kind: 'text', selector: '#launch .note', matches: '\\S{3,}' },
+				{ id: 'gaps', kind: 'text', selector: '#launch', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'fix-rows', kind: 'count', selector: 'tr.fix', min: 1 },
+				{ id: 'fix-owner', kind: 'text', selector: 'td.owner', matches: '\\S{3,}' },
+				{ id: 'fix-due', kind: 'text', selector: 'td.due', matches: '\\d{1,2}\\s+[A-Z][a-z]+\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2}|\\d{1,2}/\\d{1,2}/\\d{4}|\\d{1,2}\\.\\d{1,2}\\.\\d{4}' },
+				{ id: 'mobile', kind: 'field', selector: '#mobile', field: 'mainAction.label' },
+				{ id: 'mobile-phone', kind: 'text', selector: '#mobile', matches: 'phone|mobile|375' },
+				{ id: 'nojs', kind: 'text', selector: '#nojs', matches: 'without (JavaScript|the script|a script)|works without|ordinary request|plain request' },
+				{ id: 'backup', kind: 'text', selector: '#backup', matches: '(?=[\\s\\S]*(backup|copy))(?=[\\s\\S]*(roll ?back|restor|revert))' },
+				{ id: 'contact-rows', kind: 'count', selector: 'tr.contact', min: 3 },
+				{ id: 'contact-phone', kind: 'field', selector: '#contacts', field: 'phone' },
+				{ id: 'contact-email', kind: 'field', selector: '#contacts', field: 'email' },
+				{ id: 'contact-same', kind: 'text', selector: 'td.same', matches: 'yes|match|same' },
+				{ id: 'verdict-attr', kind: 'exists', selector: '#verdict[data-ready="yes"], #verdict[data-ready="no"]' },
+				{ id: 'verdict-words', kind: 'text', selector: '#verdict', matches: 'ready|not ready' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each checklist item with its block',
+				pairs: [
+					['LCP in the green zone on a mobile network', 'speed and reliability'],
+					['The whole site can be used with a keyboard, and focus is visible', 'accessibility'],
+					['A separate empty consent and a privacy notice with a date', 'law'],
+					['A sitemap and canonical addresses', 'search and analytics']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is a blocker in a launch checklist?',
+				options: [
+					'A check without which you do not launch: until it is in order, the site is not ready',
+					'Any small shortfall',
+					'An item that does not need checking'
+				],
+				answer: 0,
+				why: [
+					'Yes. Blockers are chosen in advance: a backup and a rollback, HTTPS, a second factor, consent and a privacy notice, the main action on a phone. The rest is written down with an owner and a date, and you launch if that is acceptable.',
+					'No. Small things do not block a launch; they go on the list of fixes.',
+					'No. A blocker is exactly the item you check first.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What must be checked on a real phone, not only on a computer?',
+				options: [
+					'That the main action can be done from start to finish',
+					'That touch targets are big enough and the text reads without zooming',
+					'That the site’s code is clean',
+					'That the speed is acceptable on a mobile network'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: on a narrow screen and with a finger everything is different.',
+					'Yes: the size of targets and the readability show only on a real screen.',
+					'No. A phone doesn’t show whether code is clean.',
+					'Yes: phones are where the network is most often slow.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In the report the “Law” block is red, but the verdict says “ready.” What is wrong?',
+				options: [
+					'The report contradicts itself: a red blocker means “not ready,” with a plan to fix it',
+					'All is well: red is only a warning',
+					'The block should be recolored green'
+				],
+				answer: 0,
+				why: [
+					'Yes. The verdict must follow from the report: a red block with a blocker makes the launch premature. An honest report says “not ready” and names a date and an owner.',
+					'No. Red means “no.”',
+					'No. The color reflects the state; it is not bent to match what you wish.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put launch day in order',
+				items: [
+					'Freeze changes and go through the checklist',
+					'Make a fresh backup and make sure a rollback is possible',
+					'Deploy the site',
+					'Check the live site: the main action, the pages, the headers, the contacts',
+					'Watch monitoring and analytics, ready to roll back'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a block of the report: a section with the class block, the attribute data-status set to red and a paragraph with the class note',
+				starter: '',
+				checks: [
+					{ id: 'block', kind: 'exists', selector: 'section.block[data-status=red] p.note' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-launch-blocks',
+				front: 'The six blocks of the launch checklist?',
+				back: 'Speed and reliability, accessibility, security, law, search and analytics, the main action and content. Each has several checks, and each block has a color: green, yellow or red.'
+			},
+			{
+				id: 'quality-launch-blocker',
+				front: 'What is a blocker?',
+				back: 'A check without which you do not launch: a backup and a rollback, HTTPS, a second factor, consent and a privacy notice, the main action on a phone. Other findings are written down with an owner and a date.'
+			},
+			{
+				id: 'quality-launch-report',
+				front: 'What does an honest readiness report look like?',
+				back: 'The color of each block, the red and yellow items with an owner and a date, and a verdict “ready” or “not ready” that follows from the report. “Not ready” with a plan beats “ready” with no check.'
+			},
+			{
+				id: 'quality-launch-mobile',
+				front: 'What do you check by hand before launch?',
+				back: 'The main action on a real phone, the site without the script where that is possible, contacts and prices in every place, and the rollback and the restoring of a backup.'
+			},
+			{
+				id: 'quality-launch-after',
+				front: 'What do you do after launch?',
+				back: 'Watch accessibility and errors, read the speed and counter reports, add the site to webmaster tools, and review the privacy notice and the cookie table whenever a new service arrives.'
+			}
+		],
+		sources: [
+			{ title: 'Web Vitals (web.dev)', url: 'https://web.dev/articles/vitals', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'Learn Accessibility (web.dev)', url: 'https://web.dev/learn/accessibility', licence: 'CC-BY', kind: 'course', lang: 'en' },
+			{ title: 'OWASP Cheat Sheet Series', url: 'https://cheatsheetseries.owasp.org/', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'MDN HTTP Observatory', url: 'https://developer.mozilla.org/en-US/observatory', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: SEO Starter Guide', url: 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Lighthouse overview (Chrome for Developers)', url: 'https://developer.chrome.com/docs/lighthouse/overview', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'A guide to the UK GDPR (Information Commissioner’s Office)', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'FTC: Advertising and Marketing (business guidance)', url: 'https://www.ftc.gov/business-guidance/advertising-marketing', licence: 'PD', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'This is the last lesson of the part: you’ll gather everything into one report and say honestly whether the site is ready.',
+			hints: [
+				'Give each block a data-status of green (all is well), yellow (there are remarks) or red (there is a blocker), and write the main conclusion in the .note in one phrase.',
+				'In the fixes table: what, who is responsible and a date such as 4 November 2026. In #mobile name the project’s main action in the brief’s words and say it was gone through on a phone.',
+				'#nojs: “the form works with an ordinary request, the script only enhances.” #backup: “a copy off the server, restoration tested, rollback with one button.”',
+				'Contacts: in each of the three places the phone and email from the brief and the words “yes, it matches.” The verdict: a paragraph with the id verdict and data-ready set to no, reading “Verdict: not ready until…”.'
+			],
+			mistakes: {
+				blocks: 'You need six .block elements.',
+				'status-valid': 'Each block’s data-status must be green, yellow or red.',
+				notes: 'Every block needs a conclusion in its .note.',
+				gaps: 'There are still “…” in the report. Fill everything in.',
+				'fix-rows': 'The fixes table needs at least one row.',
+				'fix-owner': 'In the fixes, name an owner.',
+				'fix-due': 'In the fixes, give a date such as 4 November 2026.',
+				mobile: 'In #mobile, name the project’s main action in the brief’s words.',
+				'mobile-phone': 'In #mobile, say that the check was on a phone.',
+				nojs: 'In #nojs, say that it works without the script.',
+				backup: 'In #backup, say something about the backup and about the rollback.',
+				'contact-rows': 'You need three rows of contacts: header, footer, contacts page.',
+				'contact-phone': 'The contacts need the phone from the brief.',
+				'contact-email': 'The contacts need the email from the brief.',
+				'contact-same': 'Mark that the contacts match: “yes, it matches.”',
+				'verdict-attr': '#verdict needs data-ready set to yes or no.',
+				'verdict-words': 'In the verdict write “ready” or “not ready.”'
+			},
+			outro: 'Now you have a report that shows what is ready, what isn’t, and who fixes what. This ends the part on quality and law. Ahead is the last part, where you build a site with the help of AI and check it yourself the way you have here.'
+		},
+		say: { LCP: 'L C P', INP: 'I N P', CLS: 'C L S', HTTPS: 'H T T P S', HSTS: 'H S T S', UTM: 'U T M', CSP: 'C S P', 'Open Graph': 'open graph', URL: 'U R L', GDPR: 'G D P R', GPC: 'G P C' }
+	};
+</script>
+
+<script>
+	import LaunchPanel from '../../diagrams/LaunchPanel.svelte';
+</script>
+
+## A launch as a list, not as a mood
+
+So far in this part you have checked the site in pieces: speed, accessibility, security, the form, the law. One last step remains: to gather everything and decide **whether it can go live**. That decision is made not by feeling (“it seems to work”) but by a list that you go through item by item and write down. A list doesn’t guarantee a perfect site. It guarantees that you won’t launch a site on which you didn’t check the most important things.
+
+Three principles make a list work.
+
+1. **A blocker and a remark are different things.** A blocker is an item without which you don’t launch: a broken form, HTTPS without HSTS, no backup, an empty consent under a form that collects data. A remark is a shortfall you can launch with, if you write it down and give it an owner and a date. You choose the blockers in advance, while there is no temptation to say “oh, it’ll be fine.”
+2. **A block’s color comes from facts.** A block is green when everything is checked and in order; yellow when there are remarks; red when there is a blocker. The color is not bent to match what you wish.
+3. **The verdict follows from the report.** A red block means “not ready,” with a date and an owner in the report. “Not ready” with a plan beats “ready” with no check.
+
+## The six blocks
+
+The blocks repeat what you have been through. In brackets, where an item comes from.
+
+1. **Speed and reliability.** The measures in the green zone on a mobile network, images with sizes, a written budget (lesson 1); a backup with a tested restoration and uptime monitoring (the part on infrastructure), and a way to roll back a deploy.
+2. **Accessibility.** Automated checks with no serious errors, a keyboard walkthrough, contrast and target sizes, the main action with a screen reader (lessons 2 and 3), and an honest accessibility statement (lesson 13).
+3. **Security.** HTTPS and HSTS, headers and CSP, a second factor on email, domain, hosting and repository, no keys in the repository, and the form checked on the server (lessons 5 and 6).
+4. **Law.** A record of processing, with where the data is stored and any transfer outside the UK or EEA; a separate consent where you rely on consent, and a privacy notice; a cookie table and a banner (with Global Privacy Control honored); a register of materials with licenses; texts checked against advertising law and your profession’s rules; and a terms page if you sell (lessons 7 to 12). All with the caveat that the final verdict is a lawyer’s.
+5. **Search and analytics.** Titles and descriptions, a sitemap and canonical addresses, link previews, a counter with goals and tags, and the site in webmaster tools (the parts on SEO and metrics).
+6. **The main action and content.** The main action works on a phone from start to finish, and also where the script didn’t load; end-to-end tests are green; contacts are the same everywhere; there are no broken links, and the texts are proofread.
+
+The thirty checks, five to a block, are gathered in the diagram. Mark them and watch how the colors of the blocks and the verdict change.
+
+<LaunchPanel />
+
+<details>
+<summary>Check yourself: how does a blocker differ from a remark?</summary>
+
+A blocker must not be left unfixed at launch (no backup, say, or an empty consent). A remark is written down with an owner and a date, and the site can launch if that is acceptable.
+
+</details>
+
+## What to check by hand
+
+Tools and tests help, but some things only a person sees.
+
+- **A phone.** Take a real phone, go onto a mobile network and go through the brief’s main action from the first page to the result. Does everything read without zooming? Does your finger land on the buttons? Does a banner cover the form?
+- **Without the script, and on a bad network.** What happens if the script didn’t load? Does the form submit with an ordinary request, do links lead to addresses? (Progressive enhancement from the JavaScript part.)
+- **Contacts.** The phone, email and address are the same in the header, the footer, the contacts page, the privacy notice, the map listing and the profiles. A mismatch undermines trust and hurts local search.
+- **The live site, not only the test one.** After the deploy, open the main pages again and go through the main action. The certificate, the redirects and the headers at the live address can differ from the test one.
+- **A backup and a rollback.** You know how to return the previous version, and you have tried it.
+- **People.** Ask one person who didn’t build the site to do the main action, with no prompting. Three minutes of watching finds what the checks don’t.
+- **A last look at the law.** Read your privacy notice against what the site really does today; check the cookie table against the developer tools; check that every photo and font is in the register. Ask a lawyer, or the authority itself (the ICO, your national data protection authority, the FTC), about anything you are unsure of.
+
+## Launch day and after
+
+Launch day goes calmly if it has an order.
+
+1. Freeze changes and go through the checklist.
+2. Make a fresh backup and make sure a rollback is possible.
+3. Deploy.
+4. Check the live site.
+5. Turn on monitoring and watch it.
+
+Work doesn’t end at launch. **Watch** accessibility and errors, read the speed and counter reports, add the site to webmaster tools, **review** the privacy notice and the cookie table whenever a new service is added, and put the checklist in your calendar (once a quarter at least).
+
+## Practice
+
+You are in the era of “next”: a site is built from a brief and deployed at once, so checking before launch matters more than ever. Write a readiness report for your project: the color of each of the six blocks with a conclusion, a list of fixes with an owner and a date, the phone check, what happens without the script, the backup and rollback, contacts in three places and a verdict.
+
+The check reads structure: that the blocks have colors and conclusions, the fixes have an owner and a date, the main action is named and the verdict is there. Whether the report is true is up to you: go through the checklist on a real site, not on this teaching one.
+
+If you make an honest report for a real project and it has red items, that is a good result: a launch without a list looks green only because nothing was checked.
+
+## What used to be different
+
+In the FTP era a site was “launched” by uploading files and phoning the client: “Take a look.” There were no checks, no backups, and a rollback meant an old folder on the desktop. Then came automatic checks, deploys on a commit and monitoring, and a launch became an event that can be repeated without fear. But the decision “ready” is still taken by a person, and an honest list helps make it without self-deception.
