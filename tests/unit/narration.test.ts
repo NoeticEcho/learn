@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { parse } from 'yaml';
 import { cardinal, ordinal, speakNumbers, speakPercents, speakYears } from '#lib/narration/numbers.ts';
-import { narrate, sentences, speak, stressMark, bodyOf, type Lexicon } from '#lib/narration/script.ts';
+import { narrate, plain, sentences, speak, stressMark, bodyOf, type Lexicon } from '#lib/narration/script.ts';
 import { heardAs, match, script, sectionHash, manifest, type Manifest } from '#lib/narration/narration.server.ts';
 import { align, wer, words } from '#lib/narration/wer.ts';
 import { loadContent } from '#lib/content/load.ts';
@@ -67,6 +67,11 @@ describe('speaking', () => {
 	test('a domain is read with «точка»', () => {
 		expect(speak('Имя example.com удобно', lex)).toBe('Имя экзампл точка ком удобно');
 		expect(speak('Зона .ru создана', lex)).toBe('Зона точка ру создана');
+	});
+	test('an address is read aloud as a person would', () => {
+		expect(speak('пишет на name@example.ru', lex)).toBe('пишет на name собака экзампл точка ру');
+		expect(plain('адрес `/page?id=7384&x=1` длинный')).toBe('адрес page вопрос id равно 7384 и x равно 1 длинный');
+		expect(plain('атрибут `rel="noopener"`')).toBe('атрибут rel равно noopener');
 	});
 	test('units after a number', () => {
 		expect(speak('отступ 16px', lex)).toBe('отступ шестнадцать пикселей');
@@ -137,6 +142,7 @@ describe('the script', () => {
 		expect(s.map((x) => x.key)).toEqual(['intro', '1', '3']);
 		expect(s.map((x) => x.heading)).toEqual(['Урок', 'Зачем это знать', 'Что было не так раньше']);
 		expect(s[0].sentences[0]).toBe('Урок.');
+		for (const x of s) for (const t of x.sentences) expect(t[0], t).toBe(t[0].toUpperCase());
 	});
 	test('code becomes one phrase; a component is not read; a self-check is read with its answer', () => {
 		const said = s[1].sentences.join(' ');
@@ -145,7 +151,7 @@ describe('the script', () => {
 		expect(said).not.toContain('Thing');
 		expect(said).toContain('Проверьте себя: зачем это всё?');
 		expect(said).toContain('Ответ: Затем, что так устроен веб');
-		expect(said).toContain('деловой: что чувствуется: собранность, доверие.');
+		expect(said).toContain('Деловой: что чувствуется: собранность, доверие.');
 		expect(said).toContain('ди-эн-эс');
 		expect(said).toContain('ссылку,');
 		expect(said).toContain('тэгом аш один внутри');

@@ -62,7 +62,11 @@ function speakCode(code: string): string {
 	const closing = /^<\/\w/.test(code);
 	const words = code
 		.replace(/^<\/?|\/?>$/g, '')
-		.replace(/[<>{}()[\];"'`=*$\\|^~]+/g, ' ')
+		.replace(/^\/(?=\p{L})/u, '')
+		.replace(/\s*=\s*/g, ' равно ')
+		.replace(/\s*&\s*/g, ' и ')
+		.replace(/(?<=\p{L})\?(?=\p{L})/gu, ' вопрос ')
+		.replace(/[<>{}()[\];"'`*$\\|^~]+/g, ' ')
 		.replace(/^[:!.#@-]+(?=\w)/, '')
 		.replace(/:\/\/$/, '')
 		.replace(/\s+/g, ' ')
@@ -239,6 +243,7 @@ function applyMap(s: string, map: Record<string, string>): string {
 /** Domain names and URLs: «www.example.ru» → «www точка example точка ru», «.ru» → «точка ru». */
 function speakDomains(s: string): string {
 	return s
+		.replace(/(?<![\p{L}\p{N}])([\p{L}\p{N}._-]+)@(?=[\p{L}\p{N}-]+\.)/gu, '$1 собака ')
 		.replace(/\bhttps?:\/\/(?=\S)/g, (m) => (m.startsWith('https') ? 'HTTPS ' : 'HTTP '))
 		.replace(/(?<![\p{L}\p{N}@])((?:[a-zа-яё0-9-]+\.)+[a-zа-яё]{2,})(?:\/\S*)?(?![\p{L}\p{N}])/giu, (m, host: string) =>
 			/\.(html|css|js|json|svg|png|jpg|txt|md|xml|webp|woff2|ts|py)$/i.test(host) || !/\./.test(host) ? m.replace(/\./g, ' точка ') : host.split('.').join(' точка ')
@@ -323,7 +328,10 @@ export function narrate(source: string, lesson: LessonText, lex: Lexicon): Secti
 			// the heading stays an utterance of its own: the player pauses after it
 			const [head, ...rest] = s.texts;
 			const body = rest.flatMap((t) => sentences(t)).map((t) => speak(t, lex, say));
-			return { key: s.key, heading: s.heading, sentences: [speak(head, lex, say), ...body].filter(Boolean) };
+			// a sentence starts with a capital even when the written one starts with a term: the voice
+			// took «эм-икс: почтовый сервер» for the middle of something, and swallowed the term
+			const said = [speak(head, lex, say), ...body].filter(Boolean).map((t) => t[0].toUpperCase() + t.slice(1));
+			return { key: s.key, heading: s.heading, sentences: said };
 		})
 		.filter((s) => s.sentences.length > 1);
 }
