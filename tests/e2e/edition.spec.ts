@@ -3,7 +3,7 @@
 // counterpart, a lesson not yet translated is an honest page, the choice is remembered, and the
 // two editions share one store, so progress made in one shows in the other.
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 
 const PUBLIC = 'https://open.noeticecho.space/learn/';
 const REFERENCE = 'lesson/00-start/01-how-to-learn/';
@@ -37,16 +37,25 @@ test('an English page says it is English, in its head and its <html>', async ({ 
 	expect(ru).toContain(`<link rel="alternate" hreflang="en" href="${PUBLIC}en/${REFERENCE}"/>`);
 });
 
+// A lesson English has no translation of yet, while there is one: this spec named a fixed lesson
+// until the translators reached it, and then four tests failed on nothing but the course's progress.
+const untranslated = readdirSync('content/ru', { recursive: true, encoding: 'utf8' })
+	.filter((f) => f.endsWith('.svx'))
+	.map((f) => f.replace(/\.svx$/, ''))
+	.sort()
+	.find((id) => !existsSync(`content/en/${id}.svx`));
+
 test('a lesson not yet translated is a noindex page that links to the Russian one', async ({ page, request }) => {
-	const head = await html(request, 'en/lesson/02-html/01-first-page/');
+	test.skip(!untranslated, 'every lesson is translated');
+	const head = await html(request, `en/lesson/${untranslated}/`);
 	expect(head).toContain('<meta name="robots" content="noindex"/>');
 	expect(head).not.toMatch(/rel="canonical"|hreflang="en"/);
-	await page.goto('./en/lesson/02-html/01-first-page/');
+	await page.goto(`./en/lesson/${untranslated}/`);
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('This lesson isn’t in English yet');
 	const original = page.getByRole('link', { name: 'Read it in Russian' });
-	await expect(original).toHaveAttribute('href', /lesson\/02-html\/01-first-page\/$/);
+	await expect(original).toHaveAttribute('href', new RegExp(`lesson/${untranslated}/$`));
 	await original.click();
-	await page.waitForURL(/\/learn\/lesson\/02-html\/01-first-page\/$/);
+	await page.waitForURL(new RegExp(`/learn/lesson/${untranslated}/$`));
 	await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
 });
 
@@ -54,7 +63,7 @@ test('sitemap and llms.txt: the English pages written in English, and nothing el
 	const sitemap = await html(request, 'sitemap.xml');
 	expect(sitemap).toContain(`<loc>${PUBLIC}en/</loc>`);
 	expect(sitemap).toContain(`<loc>${PUBLIC}en/${REFERENCE}</loc>`);
-	expect(sitemap).not.toContain(`<loc>${PUBLIC}en/lesson/02-html/01-first-page/</loc>`);
+	if (untranslated) expect(sitemap).not.toContain(`<loc>${PUBLIC}en/lesson/${untranslated}/</loc>`);
 	const llms = await html(request, 'en/llms.txt');
 	expect(llms.startsWith('# Through Time')).toBe(true);
 	expect(llms).toContain(`(${PUBLIC}en/${REFERENCE}): `);
@@ -74,9 +83,11 @@ test('the switch goes to the counterpart, or to the part on the map, and the cho
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Through Time');
 
 	// a lesson English does not have yet: the switch opens its part on the English map
-	await page.goto('./lesson/02-html/01-first-page/');
-	const href = await page.getByRole('link', { name: 'English', exact: true }).getAttribute('href');
-	expect(href).toMatch(/en\/map\/#part-2$/);
+	if (untranslated) {
+		await page.goto(`./lesson/${untranslated}/`);
+		const href = await page.getByRole('link', { name: 'English', exact: true }).getAttribute('href');
+		expect(href).toMatch(new RegExp(`en/map/#part-${Number(untranslated.slice(0, 2))}$`));
+	}
 
 	// back to Russian, and remembered too
 	await page.goto(`./en/${REFERENCE}`);

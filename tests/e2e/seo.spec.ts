@@ -3,6 +3,7 @@
 // the pages (the cards, sitemap.xml, robots.txt, llms.txt), the lesson's text in the HTML
 // itself, and the share buttons. Telegram and VK build a preview from og:title, og:description
 // and og:image without running scripts, so every check here reads the HTML as served.
+import { existsSync } from 'node:fs';
 import { test, expect, type APIRequestContext } from '@playwright/test';
 
 const LESSON = 'lesson/02-html/01-first-page/';
@@ -37,7 +38,8 @@ test('a lesson’s head: description, canonical, Open Graph, the card, and its s
 	expect(meta('twitter:card')).toBe('summary_large_image');
 	expect(decode(meta('og:image:alt')!)).toContain('Первая страница');
 	expect(meta('twitter:image')).toBe(meta('og:image'));
-	expect(html).not.toMatch(/rel="alternate" hreflang/); // not translated into English yet
+	// the English counterpart is named exactly when there is one
+	expect(/rel="alternate" hreflang="en"/.test(html)).toBe(existsSync(`content/en/${LESSON.replace(/^lesson\/|\/$/g, '')}.svx`));
 
 	const image = meta('og:image')!;
 	expect(image).toMatch(new RegExp(`^${PUBLIC}og/lesson-02-html-01-first-page-[0-9a-f]{10}\\.png$`));
