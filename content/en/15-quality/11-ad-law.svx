@@ -1,0 +1,341 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/11-ad-law.svx, localized: the FTC Act, the CAP Code and the EU/UK unfair commercial practices rules, with Russia’s law on advertising as a comparison. */
+	export const metadata = {
+		id: '15-quality/11-ad-law',
+		part: 15,
+		order: 11,
+		title: 'Advertising law and the rules of your profession',
+		definition: 'Advertising law bans claims that are misleading, unsubstantiated or hide their conditions. A professional’s own rules, such as a lawyer’s, are often stricter.',
+		summary:
+			'The description of your services on a site is most likely advertising, and the law applies to it. Afterwards you know what counts as advertising, what the FTC Act, the UK’s CAP Code and the EU’s unfair commercial practices rules ask of a claim, which phrases break them most often, how a profession’s own rules (a lawyer’s, for example) limit how you talk about yourself, and you check your site’s texts against a list. This is a guide as of 30 October 2026, not legal advice.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'postcard',
+					label: 'THE BEST · GUARANTEED',
+					caption: 'A postcard',
+					say: [
+						{ text: 'The best in town. Guaranteed.' },
+						{ who: 'The law', text: 'What’s your proof?' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'fact · basis · terms',
+					caption: 'The check',
+					say: 'Three questions for every phrase: is it true, can you prove it, are the terms stated?'
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'since 2012 · 480 jobs',
+					caption: 'A fact, not a rating',
+					say: 'A number and a document persuade better than any “best.”'
+				}
+			]
+		},
+		teaches: ['quality-ad-law-ethics'],
+		requires: ['story-expert-ethics', 'growth-ad-labelling', 'texts-expert-text'],
+		practice: {
+			id: 'ad-claims-audit',
+			title: 'An audit of the site’s advertising phrases',
+			task: 'You get a paragraph of a site with six risky phrases. 1) In the #claims table, for each phrase (a tr.claim row) fill in the cells: type (what is wrong: superlative, guarantee, hidden condition, false urgency, unverifiable figure or comparison), rewrite (an honest replacement) and basis (what supports it: a document, a register, a number, or “removed”). 2) In the basis of at least one phrase name a proof from the brief (one of the credentials). 3) Rewrite the #final-text paragraph: take out superlatives, guarantees, “today only,” “thousands,” comparisons and asterisks, keep the project’s name and what it does from the brief, and keep at least one number or date. 4) In #profession-rules write which rules of your profession you checked (a code of ethics, a licensing board, a bar association, the law) and what they forbid, at least five words. Leave no “…”.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p id="final-text">{{name}} is the best: {{profession}}. We guarantee a positive result. Free consultation!* 50% off today only! Thousands of clients trust us. Cheaper than our competitors.</p>
+
+    <aside data-scaffold id="audit">
+      <h2>Audit of phrases</h2>
+      <table id="claims">
+        <thead><tr><th>Phrase</th><th>What is wrong</th><th>Honest replacement</th><th>What supports it</th></tr></thead>
+        <tbody>
+          <tr class="claim"><td class="original">The best in town</td><td class="type">…</td><td class="rewrite">…</td><td class="basis">…</td></tr>
+          <tr class="claim"><td class="original">We guarantee a positive result</td><td class="type">…</td><td class="rewrite">…</td><td class="basis">…</td></tr>
+          <tr class="claim"><td class="original">Free consultation!*</td><td class="type">…</td><td class="rewrite">…</td><td class="basis">…</td></tr>
+          <tr class="claim"><td class="original">50% off today only!</td><td class="type">…</td><td class="rewrite">…</td><td class="basis">…</td></tr>
+          <tr class="claim"><td class="original">Thousands of clients trust us</td><td class="type">…</td><td class="rewrite">…</td><td class="basis">…</td></tr>
+          <tr class="claim"><td class="original">Cheaper than our competitors</td><td class="type">…</td><td class="rewrite">…</td><td class="basis">…</td></tr>
+        </tbody>
+      </table>
+      <p>The rules of my profession that I checked: <span id="profession-rules">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p id="final-text">{{name}}: {{profession}}. I have worked since 2012 and completed 480 jobs. The first consultation of up to 20 minutes is free on Tuesdays, for requests received before 12:00. The price from 1 to 15 November 2026 is $600 instead of $800. After reviewing your documents I will tell you what your chances are.</p>
+
+    <aside data-scaffold id="audit">
+      <h2>Audit of phrases</h2>
+      <table id="claims">
+        <thead><tr><th>Phrase</th><th>What is wrong</th><th>Honest replacement</th><th>What supports it</th></tr></thead>
+        <tbody>
+          <tr class="claim"><td class="original">The best in town</td><td class="type">superlative with no criterion</td><td class="rewrite">I have worked since 2012 and completed 480 jobs</td><td class="basis">documents: {{#each proofs}}{{title}}; {{/each}}the job register</td></tr>
+          <tr class="claim"><td class="original">We guarantee a positive result</td><td class="type">guarantee of a result</td><td class="rewrite">After reviewing your documents I will tell you what your chances are</td><td class="basis">removed: the outcome does not depend on me alone</td></tr>
+          <tr class="claim"><td class="original">Free consultation!*</td><td class="type">hidden condition</td><td class="rewrite">Up to 20 minutes free, on Tuesdays, for requests before 12:00</td><td class="basis">the condition stated next to the promise (FTC guidance on clear and conspicuous disclosures)</td></tr>
+          <tr class="claim"><td class="original">50% off today only!</td><td class="type">false urgency</td><td class="rewrite">From 1 to 15 November 2026: $600 instead of $800</td><td class="basis">the price list and the order setting the price, number 12</td></tr>
+          <tr class="claim"><td class="original">Thousands of clients trust us</td><td class="type">unverifiable figure</td><td class="rewrite">480 jobs completed since 2012</td><td class="basis">the job register, record numbers match</td></tr>
+          <tr class="claim"><td class="original">Cheaper than our competitors</td><td class="type">unfair comparison</td><td class="rewrite">Boundary survey from $800, with the site visit and the plan included</td><td class="basis">removed the comparison, the price list</td></tr>
+        </tbody>
+      </table>
+      <p>The rules of my profession that I checked: <span id="profession-rules">my state bar’s rules based on ABA Model Rule 7.1, and the FTC’s advertising rules: guarantees of outcome and unsupported comparisons with colleagues are not allowed</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'claims', kind: 'count', selector: 'tr.claim', min: 6 },
+				{ id: 'gaps', kind: 'text', selector: '#claims', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'type', kind: 'text', selector: 'td.type', matches: 'superlative|guarantee|hidden|urgen|figure|number|comparison|unverifiable|unsubstantiated' },
+				{ id: 'basis-source', kind: 'text', selector: 'td.basis', matches: 'document|register|number|№|§|section|removed|contract|law|price list|guidance' },
+				{ id: 'basis-proof', kind: 'field', selector: 'td.basis', field: 'proofs[].title', min: 1, when: { brief: 'proofs[].title' } },
+				{ id: 'final-clean', kind: 'text', selector: '#final-text', matches: '^(?![\\s\\S]*(\\bbest|guarantee|№\\s?1|#1|\\bNo\\. ?1|\\bthe most|cheaper|today only|thousands|\\*))' },
+				{ id: 'final-name', kind: 'field', selector: '#final-text', field: 'name' },
+				{ id: 'final-what', kind: 'field', selector: '#final-text', field: 'profession' },
+				{ id: 'final-facts', kind: 'text', selector: '#final-text', matches: '\\d' },
+				{ id: 'profession-rules', kind: 'text', selector: '#profession-rules', matches: '(?=[\\s\\S]*(Code|code|bar|board|association|Association|law|rules|Rule|regulation|FTC|ASA|CAP))(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?![\\s\\S]*…)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'A page of your site describes your services and prices. Is that advertising in the legal sense?',
+				options: [
+					'Most likely yes: it is information addressed to the public that promotes your service, so it is safest to assume the advertising rules apply',
+					'No: advertising exists only on banners',
+					'No, if you don’t pay for placing it'
+				],
+				answer: 0,
+				why: [
+					'Yes. The FTC Act reaches deceptive practices “in or affecting commerce,” the CAP Code covers claims on a marketer’s own website, and the EU’s unfair commercial practices rules cover any practice directly connected with promoting a product. The border with plain information is thin, so it is safer to treat the page as advertising.',
+					'No. The form and the place do not matter.',
+					'No. You need not pay for placement: the purpose and the audience are enough.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each example with what is wrong with it',
+				pairs: [
+					['“Cheaper than our competitors,” with no word on whom or by what measure', 'an unfair comparison'],
+					['“We guarantee you’ll win”', 'a guarantee of a result that does not depend on you'],
+					['“Free*,” with the condition in small print on another page', 'a material condition is hidden'],
+					['A paid post by an influencer with no “ad” label', 'hidden advertising, a breach of the disclosure rules']
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these wordings are an honest replacement for “The best specialist in town”?',
+				options: [
+					'I have worked in the profession for 12 years and completed 400 jobs (the job register is on the site)',
+					'One of the best specialists in town',
+					'The best in our clients’ opinion',
+					'A member of the licensing board, registration number in the “Credentials” section'
+				],
+				answer: [0, 3],
+				why: [
+					'Yes: these are facts that can be checked.',
+					'No. “One of the best” is still a rating without a criterion. (Pure puffery is tolerated in the US, but a claim a reader takes as fact is not puffery, and it is risky under the CAP Code and in the EU.)',
+					'No. Opinions are not a criterion unless you can show how and from where they were gathered.',
+					'Yes: membership is checkable against the body’s register.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You are a lawyer. You have kept to the advertising law. Is that enough?',
+				options: [
+					'No: your profession has rules of its own (state bar rules modeled on ABA Model Rule 7.1), which can be stricter and cover, for example, how you talk about cases and results',
+					'Yes: the law is the same for everyone',
+					'Yes, if you state that it is advertising'
+				],
+				answer: 0,
+				why: [
+					'Yes. A profession’s rules apply alongside the law: find them at your bar, board or association. For other professions (a surveyor, an expert witness, a doctor, a notary) the same holds: they have their own documents.',
+					'No. Individual professions are regulated in addition.',
+					'No. A note saying “advertising” does not make allowed what the profession’s rules forbid.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put in order the check of each phrase on a site',
+				items: [
+					'Write the phrase out and work out which promise or statement is in it',
+					'Ask whether it is true and whether a document or number supports it',
+					'Check whether the terms are stated beside it and whether the comparison is fair',
+					'Check whether the rules of your profession allow it',
+					'Rewrite the phrase as a fact, or delete it, and record the basis'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write, in a paragraph, an honest phrase for a site in place of “The best in town”: with a number and a year',
+				starter: '',
+				checks: [
+					{ id: 'fact', kind: 'text', selector: 'p', matches: '^(?![\\s\\S]*(\\bbest|#1|\\bNo\\. ?1|\\bthe most))(?=[\\s\\S]*\\d{4})(?=[\\s\\S]*\\d)' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-ad-def',
+				front: 'What counts as advertising in the law?',
+				back: 'There is no single definition. Section 5 of the FTC Act (15 U.S.C. § 45) bans deceptive or unfair practices in commerce, the UK CAP Code covers marketing communications including a marketer’s own website, and the EU’s unfair commercial practices rules cover practices tied to promoting a product. Treat the description of your services on a site as advertising.'
+			},
+			{
+				id: 'quality-ad-art5',
+				front: 'What do the FTC Act and the CAP Code require of a claim?',
+				back: 'It must be truthful and not misleading, and objective claims need evidence in hand beforehand (the FTC’s substantiation doctrine; CAP Code rules 3.1 and 3.7). Material conditions are stated clearly beside the claim (CAP Code 3.9; FTC “clear and conspicuous” guidance). Comparisons must be fair and verifiable. Endorsements and reviews must be real and disclosed.'
+			},
+			{
+				id: 'quality-ad-fact',
+				front: 'What do you replace “best” and “guaranteed” with?',
+				back: 'Facts with proof (years in practice, documents, the number of jobs) and a description of the process: what you do and what the outcome depends on. State a promotion’s terms beside the promise.'
+			},
+			{
+				id: 'quality-ad-prof',
+				front: 'Why is it not enough to know the advertising law?',
+				back: 'A profession can have rules of its own, often stricter: for a lawyer, state bar rules modeled on ABA Model Rule 7.1, for others a licensing board or an association. They cover testimonials, case results, comparisons and confidentiality.'
+			},
+			{
+				id: 'quality-ad-who',
+				front: 'Who polices advertising, and what is the risk?',
+				back: 'In the US the FTC (orders, injunctions, refunds, and civil penalties for rule violations of up to $53,088 each) and state attorneys general; competitors can sue under the Lanham Act. In the UK the ASA (rulings, withdrawal of the ad) and the CMA, with fines of up to 10 percent of global turnover under the DMCC Act 2024. A profession adds discipline.'
+			}
+		],
+		sources: [
+			{ title: '15 U.S.C. § 45: Unfair methods of competition unlawful (Cornell LII)', url: 'https://www.law.cornell.edu/uscode/text/15/45', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'FTC Policy Statement on Deception (1983)', url: 'https://www.ftc.gov/legal-library/browse/ftc-policy-statement-deception', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: '16 CFR Part 465: Consumer Reviews and Testimonials Rule (Cornell LII)', url: 'https://www.law.cornell.edu/cfr/text/16/part-465', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: '16 CFR Part 233: Guides Against Deceptive Pricing (Cornell LII)', url: 'https://www.law.cornell.edu/cfr/text/16/part-233', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'The CAP Code, section 3: Misleading advertising (ASA)', url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Unfair Commercial Practices Directive 2005/29/EC (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32005L0029', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'ABA Model Rules of Professional Conduct, including Rule 7.1 (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Model_Rules_of_Professional_Conduct', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Federal Law “On Advertising” No. 38-FZ (ConsultantPlus, in Russian, for comparison)', url: 'https://www.consultant.ru/document/cons_doc_LAW_58968/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to check six familiar phrases and rewrite the paragraph so that every word can be backed up.',
+			hints: [
+				'For each phrase: “what is wrong” (superlative, guarantee, hidden condition, false urgency, unverifiable figure, comparison), a “replacement” with a fact, and “what supports it” (a document, a register, a number or “removed”).',
+				'In one of the “what supports it” cells, name a proof from the brief word for word (for example, the title of a document from the list of credentials).',
+				'The #final-text paragraph: keep the project’s name and what it does from the brief, take out “best,” “guarantee,” “thousands,” “today only,” the asterisk and the comparisons, and add a number or a year.',
+				'Profession rules: for example “my state bar’s rules and the FTC’s advertising rules: guarantees of outcome and unsupported comparisons are not allowed.”'
+			],
+			mistakes: {
+				claims: 'The table must have six rows of phrases.',
+				gaps: 'There are still “…” in the table. Fill in “what is wrong,” the replacement and the support.',
+				type: 'Say what is wrong: a superlative, a guarantee, a hidden condition, false urgency, an unverifiable figure or a comparison.',
+				'basis-source': 'In “what supports it,” name a document, a register, a number, or write “removed.”',
+				'basis-proof': 'In one of the “what supports it” cells, name a proof from the brief.',
+				'final-clean': 'The paragraph still has a superlative, a guarantee, “today only,” “thousands,” a comparison or an asterisk.',
+				'final-name': 'The paragraph must have the project’s name from the brief.',
+				'final-what': 'The paragraph must say what the project does, in the brief’s words.',
+				'final-facts': 'Add a number or a date to the paragraph that you can back up.',
+				'profession-rules': 'Name the rules of your profession that you checked (a code, a board, a bar, the law) and what they forbid, in at least five words.'
+			},
+			outro: 'Now every phrase has a basis, and the paragraph says what you can show. Before publishing, show it to a lawyer and to your professional body or board: they know rules that this lesson does not.'
+		},
+		say: { FTC: 'F T C', ASA: 'A S A', CAP: 'cap', CMA: 'C M A', ABA: 'A B A', DMCC: 'D M C C', Lanham: 'lan-um', UCPD: 'U C P D' }
+	};
+</script>
+
+<script>
+	import ClaimLens from '../../diagrams/ClaimLens.svelte';
+</script>
+
+## Is this advertising?
+
+The earlier lessons in the parts on writing and marketing have been leading to a question: is the description of a service on a site plain information, or advertising? There is no one definition. In the **United States**, section 5 of the Federal Trade Commission Act (15 U.S.C. § 45) bans “unfair or deceptive acts or practices in or affecting commerce,” which reaches any claim you make to attract customers. In the **United Kingdom**, the CAP Code applies to “marketing communications,” which include claims on a marketer’s own website and social media. In the **European Union**, the Unfair Commercial Practices Directive (2005/29/EC) covers any practice directly connected with promoting a product to consumers. A page with services and prices fits all three. The border with ordinary information can be thin and may be argued, so it is safer to live as if the page were advertising. This is the same position as in [the lesson on legal and expert texts](../../10-writing/06-legal-expert/).
+
+A caveat, as in the earlier lessons: this lesson is a guide, dated **30 October 2026**. It is general information, not legal advice, and the law changes. Where you need a decision, ask a lawyer, the regulator (the FTC in the US, the ASA in the UK) or your professional body.
+
+## What a claim must be
+
+The rules in the three places differ in wording, but ask nearly the same things.
+
+- **Truthful, not misleading.** In the US an advertisement is deceptive if it contains a representation, omission or practice that is likely to mislead a reasonable consumer, and the misleading element is material (the FTC’s 1983 Policy Statement on Deception). It judges the **net impression**, not each word alone. The CAP Code (rule 3.1) says marketing communications must not materially mislead or be likely to do so. The EU directive bans misleading actions and omissions (Articles 6 and 7).
+- **Substantiated before you say it.** The FTC expects an advertiser to have a **reasonable basis** for an objective claim before making it. CAP Code rule 3.7 says marketers must hold documentary evidence to prove claims that consumers are likely to regard as objective. “Thousands of clients trust us” needs a number you can document.
+- **Terms stated beside the promise.** An asterisk that leads to fine print at the bottom is the textbook failure. FTC guidance says a disclosure must be clear and conspicuous, near the claim. CAP Code rule 3.9 says marketing communications must not mislead by omitting significant limitations and qualifications.
+- **Fair comparisons.** A comparison with a competitor is lawful when it is truthful and can be backed up. Under the CAP Code, comparisons should objectively compare relevant, verifiable and representative features (rule 3.34), and must not mislead about the competitor (rule 3.32).
+- **Prices and “free.”** The FTC’s Guides Against Deceptive Pricing (16 CFR Part 233) concern “was” prices, which must be genuine. Its guide on the word “free” (16 CFR Part 251) concerns conditions on free offers. In the EU, an announcement of a price reduction must show the previous price as the lowest price applied in the 30 days before, and a false claim that an offer is available for a very limited time is on the always-banned list (Annex I to the directive).
+- **Real endorsements and reviews.** An endorsement must be honest and a material connection disclosed (16 CFR Part 255). Since October 2024 the FTC’s rule on consumer reviews and testimonials (16 CFR Part 465) bans fake reviews, buying reviews, and review suppression. The UK’s Digital Markets, Competition and Consumers Act 2024 and the EU directive ban fake reviews as well. The earlier lessons on ads and local search have more on this.
+- **Puffery is different from a claim.** In the US, vague, subjective boasting that no reasonable person takes as a fact (“the best coffee in the world”) is called puffery, and is not treated as deceptive. But “the best lawyer in town” on a lawyer’s site, or “number one” with a number, reads as a fact claim and needs a basis, and in a regulated profession the profession’s rules usually bar it.
+
+Open the diagram and check the six phrases that most often appear on experts’ sites: for each, say what is wrong with it and choose an honest replacement.
+
+<ClaimLens />
+
+<details>
+<summary>Check yourself: what do you replace “We guarantee a result” with?</summary>
+
+A description of the process: what you do, what the outcome depends on, and what chances a person has after you have reviewed their documents. You must not promise a result that does not depend on you.
+
+</details>
+
+## More in the rules
+
+The general rule is only the start. There are rules for particular cases you will meet on a site.
+
+- **Promotions, contests and sweepstakes.** State the terms, dates and how to claim a prize in the advertisement itself. US states add their own sweepstakes and contest laws, and in the UK the CAP Code has a section on promotional marketing.
+- **Marketing by phone, text and email.** Mostly with advance consent (the rules of the earlier email lesson: PECR and the GDPR in the UK and EU, CAN-SPAM and the TCPA in the US).
+- **Subscriptions and free trials.** See the next lesson.
+- **Regulated products and services.** Financial services, health claims, alcohol, gambling and others have special requirements. If your project is in such a field, find the rules for it.
+
+## The rules of your profession
+
+Advertising law is common to everyone. On top of it, some professions have rules of their own, often stricter. The lesson on an expert’s ethics covers them; here they are in brief.
+
+- **Lawyers.** In the US each state’s highest court sets rules of professional conduct, mostly modeled on the ABA Model Rules. Rule 7.1 bars false or misleading communications about a lawyer’s services, and its comments say that a truthful statement can mislead if it creates an unjustified expectation. States add their own rules on testimonials, past results, disclaimers and specialization. In England and Wales the Solicitors Regulation Authority and the Bar Standards Board set theirs. A promised outcome or a boast of wins is usually forbidden or must be heavily qualified.
+- **Expert witnesses.** An expert is independent and answers to the court for their opinion: promising a conclusion cannot be reconciled with that, and many codes bar fees contingent on the outcome.
+- **Surveyors, engineers, accountants, doctors, notaries and others.** Each has a licensing board or association with rules on advertising and misrepresenting qualifications.
+
+The practical conclusion is the same: **find the rules of your profession and your body** and check the site’s texts against them. If you can’t find them, ask the body directly. Client reviews and stories of cases won are allowed for some professions and banned for others: your bar or board decides, not this textbook.
+
+## Who checks, and what is at risk
+
+In the **United States** the FTC can order an advertiser to stop, bring a federal court action, and seek refunds for consumers. For violations of a trade regulation rule, such as the reviews rule, it can seek civil penalties of up to $53,088 per violation (the figure adjusted for inflation in 2025; check the current amount). State attorneys general enforce state laws against unfair and deceptive practices, and a competitor can sue for false advertising under the Lanham Act. In the **United Kingdom** the Advertising Standards Authority (ASA) rules on complaints and can require an ad to be withdrawn or changed, publish its rulings and refer persistent offenders to enforcers; since 6 April 2025 the Competition and Markets Authority (CMA) can itself fine businesses for breaches of consumer law by up to 10 percent of global turnover under the Digital Markets, Competition and Consumers Act 2024. In the **EU** national authorities apply the directive, with fines set by each member state. And a lawyer or another licensed professional faces **discipline** from the bar or board too.
+
+**Russia, for comparison.** Russia’s Federal Law No. 38-FZ “On Advertising” also defines advertising broadly (information addressed to an indefinite circle of persons and meant to draw attention to an object) and in Article 5 requires it to be fair and truthful, banning unfair comparisons, false statements, omitted material conditions and hidden advertising. The Federal Antimonopoly Service enforces it, and paid ads on the internet there must be marked. These details come from the Russian edition and change, so a Russian audience should read the current law.
+
+## How to check your own texts
+
+Five questions for every statement on the site. The ideas themselves (verifiability, modesty, accuracy) you met in [the lesson on legal and expert texts](../../10-writing/06-legal-expert/); here they are gathered into one list.
+
+1. **Is it true?** Can you show it with a document, a number, a register?
+2. **Can you back it up?** Do you have a paper you can show if asked?
+3. **Are the terms stated?** The price “from” what, how long a promotion lasts, what is included. Beside the promise, not in small print.
+4. **Is the comparison fair?** With whom, by what measure, can it be verified? If not, take the comparison out and tell people about yourself.
+5. **Does the profession allow it?** Reviews, case results, clients, outcomes.
+
+The fifth question is usually the most important, and you can’t get its answer from a textbook.
+
+## Practice
+
+You are in the era of 2025: a site can be built in an evening, and the texts on it are written quickly too, and seldom checked. You get a paragraph with six risky phrases. Take each apart in the table: what is wrong with it, what to replace it with, what backs it up. Then rewrite the paragraph, leaving only what you can show.
+
+The check reads text: it will find the words “best,” “guarantee,” “today only,” “thousands” and the asterisk, and it requires a number or a date and proofs from the brief. It does not know what your profession permits: that is your job, and in the note you write which rules you checked. Before publishing, show the text to a lawyer and to your professional body.
+
+## What used to be different
+
+In the 1990s and 2000s “the best in town” and “guaranteed results” on leaflets were the norm, and checks were rare. Now a site has a history, a phrase has a screenshot, and complaints are filed by competitors and clients alike. Automatic checks of advertising and rules on disclosure have appeared. The method stays simple and old: say what you can show, and state the terms at once.
