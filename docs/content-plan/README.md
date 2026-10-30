@@ -81,11 +81,11 @@ comic: {
 
 ## English edition (engine, 28.10.2026)
 
-The textbook is bilingual. Russian is the source edition and is complete; English follows part by part, written by translators into `content/en/`. The English edition is **localized, not translated**: it teaches the same concepts with the same practice, but in the world an English-speaking reader lives in.
+The textbook is bilingual. Russian is the source edition; the English edition was written part by part by translators into `content/en/` and has been complete since 30.10.2026 (154 of 154 lessons, read as one book in `docs/qa-en-2026-10-30.md`). The English edition is **localized, not translated**: it teaches the same concepts with the same practice, but in the world an English-speaking reader lives in.
 
 ### How it is wired
 
-- **Addresses.** Russian stays at `/learn/…`, as it always was. English is `/learn/en/…`, the same paths below it: `/learn/en/lesson/00-start/01-how-to-learn/`. Every screen (home, map, review, gallery, settings) exists in both. Every lesson has an English page too: the lesson when it is translated, and otherwise an honest «This lesson isn't in English yet» page that links to the Russian one, says `noindex` and is left out of the English sitemap and `en/llms.txt`.
+- **Addresses.** Russian stays at `/learn/…`, as it always was. English is `/learn/en/…`, the same paths below it: `/learn/en/lesson/00-start/01-how-to-learn/`. Every screen (home, map, review, gallery, settings) exists in both. Every lesson has an English page too: the lesson (today all of them), and for a Russian lesson added before its translation an honest «This lesson isn't in English yet» page that links to the Russian one, says `noindex` and is left out of the English sitemap and `en/llms.txt`.
 - **The header's switch** goes to the same page in the other edition. From a Russian lesson English does not have yet, it goes to that lesson's part on the English map. The choice is remembered in this browser (`localStorage` `learn.lang`), and a person who chose English and opens the Russian home is sent to the English one. Settings has the same choice under «Language».
 - **One store for both.** Progress, cards, practice files and the brief are keyed by ids the editions share (lesson id, card id, practice step id), so a learner who switches keeps everything. A card keeps the language it was learned in, and review marks it with `lang`.
 - **The head.** `<html lang>`, the canonical, `hreflang` for `ru`, `en` and `x-default` (Russian) on every page that exists in both, `og:locale` and `og:locale:alternate`, `inLanguage` in the structured data, an English Open Graph card (`og/en-…png`), sitemap entries with `xhtml:link` alternates, and `en/llms.txt` and `en/llms-full.txt`.
