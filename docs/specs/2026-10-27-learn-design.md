@@ -387,6 +387,11 @@ Every lesson has the same parts, so the engine can render, test and track it:
 Martin, 27.10: every lesson can be listened to, because listening is easier than
 reading for people far from IT. The quality matters.
 
+**Decided 28.10, after the spike and listening:** Qwen3-TTS 0.6B CustomVoice, speaker `serena`, not the
+engines below. The player highlights the section being read, not the sentence, and audio is cached
+only for a lesson the learner downloads, not with every lesson. What was built is in
+[`docs/narration.md`](../narration.md); the rest of this section is the plan as it stood.
+
 - **Pre-generated, not live.** Each lesson's theory is synthesised once, at build time, into static Opus files: one per section, so that a text edit re-renders only that section. A player reads along, highlighting the current sentence from per-sentence timestamps. The audio is cached offline with the lesson.
 - **The engine:** CosyVoice 3 (`Fun-CosyVoice3-0.5B`, FunAudioLLM, Apache-2.0; it lists Russian among its nine languages), run locally.
   - **The fallback:** Silero (`v5_ru`), which already runs here for Приборка's training videos. Its models are CC BY-NC, which sits badly with CC BY-SA lessons, so it is used only if CosyVoice fails the spike.
