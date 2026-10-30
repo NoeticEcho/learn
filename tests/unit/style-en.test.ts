@@ -30,7 +30,7 @@ for (const n of ['Framer']) NAMES.add(n);
 for (const n of ['Freytag’s', 'Duarte’s', 'Aristotle', 'Aristotle’s', 'Harmon’s', 'Vonnegut', 'Vonnegut’s']) NAMES.add(n);
 
 // Added by parts 13 and 14 (growth and metrics): the products and places a heading names.
-for (const n of ['Bing', 'Facebook', 'Instagram', 'Reddit', 'Mailchimp', 'Klaviyo', 'Meta', 'Microsoft', 'Hotjar', 'Clarity', 'Analytics', 'Console', 'Webmaster', 'Tools', 'Search', 'Yandex', 'Wikipedia', 'Marketo', 'HubSpot', 'Amazon', 'Netflix', 'Facebook’s', 'Google’s', 'Meta’s']) NAMES.add(n);
+for (const n of ['Bing', 'Facebook', 'Instagram', 'Reddit', 'Mailchimp', 'Klaviyo', 'Meta', 'Microsoft', 'Hotjar', 'Clarity', 'Analytics', 'Console', 'Webmaster', 'Tools', 'Search', 'Yandex', 'Wikipedia', 'Marketo', 'HubSpot', 'Amazon', 'Netflix', 'Facebook’s', 'Google’s', 'Meta’s', 'Goodhart’s', 'Simpson’s', 'Simpson', 'Goodhart', 'Ries', 'Ries’s', 'Nielsen', 'Cohen’s']) NAMES.add(n);
 
 function body(file: string): string {
 	// the module and instance scripts open the file, each closed by a `</script>` at a line's start

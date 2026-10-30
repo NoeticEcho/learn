@@ -1,0 +1,354 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/05-metrics-that-lie.svx. */
+	export const metadata = {
+		id: '14-metrics/05-metrics-that-lie',
+		part: 14,
+		order: 5,
+		title: 'Metrics that mislead: vanity numbers and Goodhart’s law',
+		definition: 'Vanity metrics are pleasant to see but lead to no decision. Goodhart’s law: when a measure becomes a target, it ceases to be a good measure.',
+		summary:
+			'You’ll learn to tell numbers that help you decide from numbers that are only pleasant to see, and to guard against traps: Goodhart’s law, mixed groups, small numbers. Afterwards you have taken apart a sample dashboard, rewritten three vanity measures into working ones and written a safeguard for your project’s main metric.',
+		minutes: 25,
+		teaches: ['metrics-vanity-goodhart'],
+		requires: ['metrics-conversion-basics', 'copy-north-star'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'page views ×2', caption: 'A vanity metric', say: 'Page views doubled. And what will I do differently? If there’s no answer, the number only decorates the report.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'leads and calls', caption: 'Goodhart’s law', say: 'Once leads are the target, the number can be pumped. Beside it I put quality: leads that became a conversation.' },
+				{ mood: 'hint', prop: 'cards', label: '5 questions', say: 'Of any number I ask: what was counted? Out of what? And which decision does it support?' }
+			]
+		},
+		practice: {
+			id: 'metrics-audit',
+			title: 'Taking apart a sample dashboard and guarding the main metric',
+			task: 'Take apart the dashboard in the note. 1) In the table mark each measure with one of three words: “vanity”, “actionable” or “misleading”, and write which decision it supports (for actionable ones, at least three words). 2) Choose three measures that you would rewrite, and for each enter what it was and what you rewrote it as: the new version must be a share or be counted per something (per visitor, out of what number, in percent). 3) Write a safeguard for your project’s main metric: the main action from the brief in the same words, and which second metric you will look at beside it so as not to get a fudge (at least twelve words). Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="lies">
+      <h2>The sample dashboard</h2>
+      <p>Words to mark with: “vanity”, “actionable”, “misleading”.</p>
+      <table id="sample">
+        <tr><th>Measure</th><th>What it is</th><th>The decision it supports</th></tr>
+        <tr id="m1" class="m"><td>Page views per month</td><td class="kind">…</td><td class="decision">…</td></tr>
+        <tr id="m2" class="m"><td>Channel followers of all time</td><td class="kind">…</td><td class="decision">…</td></tr>
+        <tr id="m3" class="m"><td>Leads with a working phone number from the right segment per month</td><td class="kind">…</td><td class="decision">…</td></tr>
+        <tr id="m4" class="m"><td>Average time on the site</td><td class="kind">…</td><td class="decision">…</td></tr>
+        <tr id="m5" class="m"><td>Share of search visitors who reached the form</td><td class="kind">…</td><td class="decision">…</td></tr>
+        <tr id="m6" class="m"><td>Number of likes under posts</td><td class="kind">…</td><td class="decision">…</td></tr>
+      </table>
+
+      <h3>The three measures you rewrote</h3>
+      <ul id="rewrites">
+        <li class="rw"><span class="old">…</span> → <span class="new">…</span></li>
+        <li class="rw"><span class="old">…</span> → <span class="new">…</span></li>
+        <li class="rw"><span class="old">…</span> → <span class="new">…</span></li>
+      </ul>
+
+      <p>Safeguard for the main metric: <span id="guard">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="lies">
+      <h2>The sample dashboard</h2>
+      <p>Words to mark with: “vanity”, “actionable”, “misleading”.</p>
+      <table id="sample">
+        <tr><th>Measure</th><th>What it is</th><th>The decision it supports</th></tr>
+        <tr id="m1" class="m"><td>Page views per month</td><td class="kind">vanity</td><td class="decision">none, the number grows to no purpose</td></tr>
+        <tr id="m2" class="m"><td>Channel followers of all time</td><td class="kind">vanity</td><td class="decision">almost none: those who left are counted too</td></tr>
+        <tr id="m3" class="m"><td>Leads with a working phone number from the right segment per month</td><td class="kind">actionable</td><td class="decision">whether to change the form and where to get people from</td></tr>
+        <tr id="m4" class="m"><td>Average time on the site</td><td class="kind">misleading</td><td class="decision">too ambiguous: confused or reading</td></tr>
+        <tr id="m5" class="m"><td>Share of search visitors who reached the form</td><td class="kind">actionable</td><td class="decision">whether to rewrite the page for those who come from search</td></tr>
+        <tr id="m6" class="m"><td>Number of likes under posts</td><td class="kind">vanity</td><td class="decision">almost none</td></tr>
+      </table>
+
+      <h3>The three measures you rewrote</h3>
+      <ul id="rewrites">
+        <li class="rw"><span class="old">page views per month</span> → <span class="new">the share of visitors who reached the form, out of all visitors</span></li>
+        <li class="rw"><span class="old">channel followers of all time</span> → <span class="new">the number of followers who went on to the site in a month, out of the number of followers</span></li>
+        <li class="rw"><span class="old">average time on the site</span> → <span class="new">the share of visits longer than 30 seconds, in percent</span></li>
+      </ul>
+
+      <p>Safeguard for the main metric: <span id="guard">we count “{{mainAction.label}}” per month, and beside it we look at the share of those requests that reached a conversation: if the number grows while the share falls, we are fudging the number, not improving the site</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#lies', matches: '^[^…]*$' },
+				{ id: 'm1', kind: 'text', selector: '#m1 .kind', matches: '[Vv]anity' },
+				{ id: 'm2', kind: 'text', selector: '#m2 .kind', matches: '(?:[Vv]anity|[Mm]isleading)' },
+				{ id: 'm3', kind: 'text', selector: '#m3 .kind', matches: '[Aa]ctionable|[Ww]orking' },
+				{ id: 'm4', kind: 'text', selector: '#m4 .kind', matches: '[Mm]isleading' },
+				{ id: 'm5', kind: 'text', selector: '#m5 .kind', matches: '[Aa]ctionable|[Ww]orking' },
+				{ id: 'm6', kind: 'text', selector: '#m6 .kind', matches: '[Vv]anity' },
+				{ id: 'decision-3', kind: 'text', selector: '#m3 .decision', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'decision-5', kind: 'text', selector: '#m5 .decision', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'rewrites', kind: 'count', selector: '#rewrites .rw', min: 3 },
+				{ id: 'rewrite-ratio', kind: 'text', selector: '#rewrites .new', matches: '(?:[Ss]hare|[Rr]ate|out of|per |of all|of the|percent|%|\\bby \\d)' },
+				{ id: 'guard', kind: 'text', selector: '#guard', matches: '^\\s*\\S+(?:\\s+\\S+){11,}' },
+				{ id: 'guard-action', kind: 'field', selector: '#guard', field: 'mainAction.label' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Which question best tells a working metric from a vanity one?',
+				options: [
+					'If this number changes by half, what will I do differently?',
+					'Does it look good on a chart?',
+					'Do many people latch on to it in reports?'
+				],
+				answer: 0,
+				why: [
+					'Yes. If there is no answer, the number only decorates the report. A working metric supports a specific decision. Eric Ries called such metrics “actionable” and the rest “vanity”.',
+					'A chart can look good at any number.',
+					'Popularity in reports is no sign of use.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You are given a bonus for the number of leads. By Goodhart’s law, what is likely to happen?',
+				options: [
+					'There will be more leads through spam and “anything for a phone number”, while useful ones don’t grow',
+					'The leads will get better',
+					'Nothing will change'
+				],
+				answer: 0,
+				why: [
+					'Yes. Goodhart’s law in Marilyn Strathern’s wording: when a measure becomes a target, it ceases to be a good measure. People improve what is rewarded, by any means.',
+					'No: the quality of leads wasn’t part of the reward.',
+					'No: people’s behavior changes when a reward is at stake.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can protect against the Goodhart trap?',
+				options: [
+					'Look at a quality metric beside the main one',
+					'Check from time to time that the number is still tied to what you want',
+					'Reward only the main number',
+					'Change the main metric when it stops describing value'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: “leads” beside “leads that reached a conversation”.',
+					'Yes: the link between the number and the aim has to be rechecked.',
+					'No: a reward for one number is exactly what starts the fudging.',
+					'Yes: metrics aren’t sacred, they are chosen for the aim.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'In both groups (phones and computers) conversion rose, but the overall figure fell. What explains it?',
+				options: [
+					'The mix changed: more people came from the group where conversion is lower (Simpson’s paradox)',
+					'The counter broke',
+					'Not all groups rose'
+				],
+				answer: 0,
+				why: [
+					'Yes. The overall share is a weighted average: if more people come from the low-conversion group, the overall figure falls even when everything improved within the groups. That is why metrics are looked at by group.',
+					'The counter has nothing to do with it: the arithmetic is right.',
+					'The conditions say both rose.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each trap with an example',
+				pairs: [
+					['A vanity metric', 'A number of page views that grows and leads to no decision'],
+					['Goodhart’s law', 'You are rewarded for the number of leads, and empty leads appear'],
+					['Simpson’s paradox', 'Better in every group but worse overall because of the mix of visitors'],
+					['Small numbers', 'Three clicks against five are taken for a 66% change']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What should you find out about any number in a report before believing it?',
+				options: [
+					'What exactly was counted, out of what number, for what period, what it is compared with and which decision it supports',
+					'Only what it is called',
+					'Only how round it is'
+				],
+				answer: 0,
+				why: [
+					'Yes. Five questions: what, out of whom (the denominator), for what period, compared with what, which decision will change.',
+					'A name often hides a definition (remember “bounce”).',
+					'A number’s roundness says nothing about it.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-vanity',
+				front: 'What is a vanity metric?',
+				back: 'A number that is pleasant to see but leads to no decision: page views, followers of all time, likes. The term is Eric Ries’s (The Lean Startup); its opposite is an actionable metric.'
+			},
+			{
+				id: 'metrics-actionable-test',
+				front: 'How do you test whether a metric is working?',
+				back: 'Ask: if the number changes by half, what will I do differently? No answer means the metric isn’t working. A good metric is a share or counted per something, and supports a specific decision.'
+			},
+			{
+				id: 'metrics-goodhart',
+				front: 'What does Goodhart’s law say?',
+				back: 'When a measure becomes a target, it ceases to be a good measure (Marilyn Strathern’s wording of Charles Goodhart’s observation). The safeguard: look at a quality metric beside it and recheck the link between the number and the aim.'
+			},
+			{
+				id: 'metrics-simpson',
+				front: 'What is Simpson’s paradox?',
+				back: 'A situation in which a measure rose in every group but fell overall (or the reverse) because the mix of groups changed. So important measures are looked at by group.'
+			},
+			{
+				id: 'metrics-five-questions',
+				front: 'The five questions to any number?',
+				back: 'What was counted? Out of what number (the denominator)? For what period? Compared with what? Which decision does this number support?'
+			}
+		],
+		sources: [
+			{ title: 'Goodhart’s law (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Goodhart%27s_law', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Vanity metric (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Vanity_metric', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Simpson’s paradox (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Simpson%27s_paradox', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Lean startup (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Lean_startup', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Almost all the numbers you’ll be shown are true. The trouble is that they answer a question you didn’t ask.',
+			hints: [
+				'For each measure ask: if the number changes by half, what will I do differently? No answer means vanity.',
+				'“Average time on the site” is misleading: a person may have been reading or may have been confused.',
+				'To rewrite a measure is to make it a share or count it per something: “out of visitors”, “per person”, “in percent”.',
+				'Write the safeguard as a pair: the main metric plus a second one that will show it isn’t being fudged.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the table, the three rewritten measures and the safeguard.',
+				m1: 'Page views per month are a vanity metric: they grow to no purpose.',
+				m2: 'Followers of all time are also vanity or misleading: those who left are counted too.',
+				m3: 'Leads with a working phone number from the right segment are an actionable metric.',
+				m4: 'Average time on the site is misleading: a person may be reading or may be confused.',
+				m5: 'The share of search visitors who reached the form is an actionable metric.',
+				m6: 'Likes are a vanity metric.',
+				'decision-3': 'For an actionable metric write which decision it supports, in at least three words.',
+				'decision-5': 'For an actionable metric write which decision it supports, in at least three words.',
+				rewrites: 'You need three rewritten measures.',
+				'rewrite-ratio': 'The new version must be a share or be counted per something: “share of…”, “out of…”, “per…”, “in percent”.',
+				guard: 'Describe the safeguard in at least twelve words.',
+				'guard-action': 'In the safeguard name the main action in the same words as the brief.'
+			},
+			outro: 'Now you have a habit of testing a number with the question “and what will I do differently?”. Next we learn to test changes with an experiment, so that noise isn’t taken for an effect.'
+		},
+		say: { Goodhart: 'good-heart', Strathern: 'strath-ern', Simpson: 'simpson', Ries: 'rees' }
+	};
+</script>
+
+<script>
+	import MetricTraps from '../../diagrams/MetricTraps.svelte';
+</script>
+
+## Numbers convince more than words
+
+Numbers look like facts. They seem more honest than opinions, and so they are believed. The trouble is not that numbers lie but that they **answer a question you didn’t ask.** “Page views doubled” is true, but it isn’t clear what to do about it. This lesson teaches four habits: check whether a number leads to a decision, remember Goodhart’s law, look at groups and don’t believe single digits.
+
+## Vanity and actionable metrics
+
+The American entrepreneur Eric Ries, in *The Lean Startup* (2011), divided metrics into two kinds. **Vanity** metrics are pleasant to see, only grow and lead to no decision: total page views, followers of all time, likes. **Actionable** metrics show the link “action → result”, so that you can tell what worked. To that is added a simple test, still the best:
+
+> If this number changes by half, what will I do differently?
+
+If there is no answer, the number decorates the report. Examples:
+
+- **Page views per month.** Doubled? It isn’t clear: did the right people come or random ones, did they find what they were looking for or not. Vanity.
+- **Channel followers of all time.** They include those long gone. Vanity.
+- **The share of search visitors who reached the form.** If it fell, you’ll go and rewrite the page for people from search. Actionable.
+- **Leads with a working phone number from the right segment.** If there are fewer, you’ll go and look into the form and the sources. Actionable.
+
+What sets actionable metrics apart? Most often they are a **share** or are **counted per something** (per visitor, per source, per segment), have a **denominator** and a **period** and are tied to a decision. Vanity metrics are usually “bare numbers” with no denominator and no decision.
+
+## Goodhart’s law
+
+In 1975 the British economist Charles Goodhart, analyzing monetary policy, formulated an observation that is now applied to any measure. In the short wording of the anthropologist Marilyn Strathern (1997) it goes: **when a measure becomes a target, it ceases to be a good measure.** Donald Campbell made a close observation.
+
+How this looks on a site. Say you chose “the number of leads” as the main metric (the way we chose a North Star in [the lesson on growth](../../11-copywriting/09-growth/), where we warned about this) and began to **reward** its growth: with a bonus, with pride, with a chart on the wall. What will happen? There will be more leads, because the easiest way to grow the number is to remove fields from the form, add a pop-up or promise a gift for a phone number. And the useful leads will grow no more, they will be fewer: “anything for a phone number” and spam will come. A metric that measured value well while no pressure was put on it has stopped measuring it.
+
+Other examples:
+
+- **CTR** (the share of clicks) grows from an intriguing headline, while the benefit to the reader falls.
+- **Time on the site** grows if you muddle the navigation.
+- **The number of reviews** grows if you pay for them, and stops meaning anything.
+- **Speed of reply** grows if you answer “received” instead of solving the task.
+
+**What to do.**
+
+1. **Put a quality metric beside it:** “leads” plus “leads that reached a conversation”. If the first grows and the second falls, you are fudging the number.
+2. **Don’t reward one number.** A reward starts the fudging.
+3. **Recheck the link** between the number and what you want, once a quarter.
+4. **Change the metric** when it has stopped describing value. Metrics aren’t sacred.
+
+Open the diagram. On the first tab you can “press” on the number of leads and see what happens to the real leads. The formulas are simplified: it is an illustration of the law, not a measurement.
+
+<MetricTraps />
+
+## Other traps
+
+**Mixed groups (Simpson’s paradox).** On the second tab of the diagram conversion rose in each group but fell overall. The reason is the mix: in week two more people came on phones, where conversion is lower. An overall average mixes groups, and when the mix changes it can say the opposite of what happens inside each. So important measures are looked at **by group:** by device, by source, by new and returning visitors.
+
+**Small numbers.** You saw this in [the lesson on the ladder in practice](../../13-growth/03-ladder-in-practice/) and in [the lesson on the funnel and cohorts](../04-conversion-cohorts/): three against five look like a change of two thirds, but are really random scatter. Don’t draw conclusions from single digits.
+
+**Correlation is not cause.** If in months when you wrote more in the channel there were more leads, that doesn’t yet mean the channel is the cause: seasonality, advertising or someone’s post could have done it. A cause is tested with an experiment (the next lesson), not by lining up charts.
+
+**Average and median.** The average is pulled up by rare large values. For time and for sums the median (the middle) is sounder.
+
+**Surplus traffic.** Counters pick up robots, internal traffic (you and your colleagues) and spam referrals. They distort everything. A counter can filter them out, but the filters have to be switched on and checked.
+
+**The time window.** You can’t compare a Monday with a Sunday; compare periods of the same structure (a week with a week, a month with the same month of last year) and write down what happened in them (a promotion, a holiday).
+
+## Five questions for any number
+
+When you are shown a figure, ask:
+
+1. **What exactly was counted?** The definition (remember “bounce”).
+2. **Out of what number?** The denominator.
+3. **For what period?** And is it comparable.
+4. **Compared with what?** With a previous period, with another group.
+5. **Which decision does this number support?** If none, it is vanity.
+
+<details>
+<summary>Check yourself: leads doubled, but the share of leads that reached a conversation fell from 60% to 20%. What do you suspect?</summary>
+
+That the number of leads was being “fudged”: it became easier to leave a request (a shorter form, bait), and people came who don’t really need you. This is the Goodhart trap: the number rose, the value did not.
+
+</details>
+
+## Practice
+
+Take apart the sample dashboard and protect your metric.
+
+1. **The table.** For six measures mark “vanity”, “actionable” or “misleading” and enter which decision it supports.
+2. **Three rewritten measures.** What it was and what you rewrote it as: a share, or a count per something.
+3. **A safeguard for your project’s main metric:** the main action and a second metric beside it.
+
+The check looks at the marks on the measures where the answer is clear, at the form of the rewritten measures and at the safeguard. Whether the safeguard is sensible for your project is for you to decide: imagine the easiest way to “improve” your main number to no purpose, and make sure the second metric would show it.
