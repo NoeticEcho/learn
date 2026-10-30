@@ -10,6 +10,47 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+
+	const W = pick({
+		ru: {
+			caption: 'Сколько «побед» у двух одинаковых вариантов',
+			group: 'Посетителей на вариант',
+			per: (s: number) => `${s} на вариант`,
+			peek: 'подглядывать 10 раз и остановиться при первой «победе»',
+			real: 'у варианта B на самом деле 6% вместо 5%',
+			go: 'Провести 300 экспериментов',
+			noticed: 'Эксперимент заметил настоящую разницу (6% против 5%) в',
+			cases: 'случаев из',
+			needMore: (need: number) => `Для такой разницы нужно примерно ${need} человек на вариант: при меньшем числе тест часто не видит настоящего эффекта.`,
+			enough: 'Выборка достаточна для этой разницы.',
+			declaredA: '«Победителем» объявлен один из двух',
+			identical: 'одинаковых',
+			declaredB: 'вариантов в',
+			peekNote: 'Честная норма около 5%: подглядывание умножило ложные победы.',
+			onceNote: 'Один взгляд в конце даёт около 5%: так и задумано при выбранном пороге.',
+			rule: (need: number) => `Правило для оценки: чтобы заметить разницу в d процентных пунктов при доле p, нужно около 16·p·(1−p)/d² человек на вариант. Для 5% против 6% это около ${need}. Это грубая оценка для привычных порогов (5% ложных побед и 80% шанса заметить). Всё в схеме смоделировано, настоящих людей нет.`
+		},
+		en: {
+			caption: 'How many “wins” two identical variants get',
+			group: 'Visitors per variant',
+			per: (s: number) => `${s} per variant`,
+			peek: 'peek 10 times and stop at the first “win”',
+			real: 'variant B really converts at 6% instead of 5%',
+			go: 'Run 300 experiments',
+			noticed: 'The experiment noticed the real difference (6% against 5%) in',
+			cases: 'cases out of',
+			needMore: (need: number) => `For a difference like that you need about ${need} people per variant: with fewer, the test often misses the real effect.`,
+			enough: 'The sample is enough for this difference.',
+			declaredA: 'One of the two',
+			identical: 'identical',
+			declaredB: 'variants was declared the “winner” in',
+			peekNote: 'The honest rate is about 5%: peeking multiplied the false wins.',
+			onceNote: 'One look at the end gives about 5%: that is by design at the chosen threshold.',
+			rule: (need: number) => `A rule of thumb: to notice a difference of d percentage points at a share p, you need about 16·p·(1−p)/d² people per variant. For 5% against 6% that is about ${need}. It is a rough estimate for the usual thresholds (5% false wins and an 80% chance of noticing). Everything in the diagram is simulated, there are no real people.`
+		}
+	});
 
 	const sizes = [200, 1000, 3000, 7600, 15000];
 	let n = $state(1000);
@@ -53,26 +94,26 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Сколько «побед» у двух одинаковых вариантов</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Посетителей на вариант">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.group}>
 		{#each sizes as s (s)}
-			<button type="button" aria-pressed={n === s} onclick={() => ((n = s), (result = null))}>{s} на вариант</button>
+			<button type="button" aria-pressed={n === s} onclick={() => ((n = s), (result = null))}>{W.per(s)}</button>
 		{/each}
 	</div>
 	<div class="dg-ctl">
-		<label><input type="checkbox" bind:checked={peek} onchange={() => (result = null)} /> подглядывать 10 раз и остановиться при первой «победе»</label>
-		<label><input type="checkbox" bind:checked={real} onchange={() => (result = null)} /> у варианта B на самом деле 6% вместо 5%</label>
+		<label><input type="checkbox" bind:checked={peek} onchange={() => (result = null)} /> {W.peek}</label>
+		<label><input type="checkbox" bind:checked={real} onchange={() => (result = null)} /> {W.real}</label>
 	</div>
-	<div class="dg-ctl"><button type="button" onclick={go}>Провести 300 экспериментов</button></div>
+	<div class="dg-ctl"><button type="button" onclick={go}>{W.go}</button></div>
 
 	{#if result}
 		<p class="dg-out" aria-live="polite">
 			{#if real}
-				Эксперимент заметил настоящую разницу (6% против 5%) в <strong>{Math.round((result.wins / result.trials) * 100)}%</strong> случаев из {result.trials}. {n < need ? 'Для такой разницы нужно примерно ' + need + ' человек на вариант: при меньшем числе тест часто не видит настоящего эффекта.' : 'Выборка достаточна для этой разницы.'}
+				{W.noticed} <strong>{Math.round((result.wins / result.trials) * 100)}%</strong> {W.cases} {result.trials}. {n < need ? W.needMore(need) : W.enough}
 			{:else}
-				«Победителем» объявлен один из двух <em>одинаковых</em> вариантов в <strong>{Math.round((result.wins / result.trials) * 100)}%</strong> случаев из {result.trials}. {peek ? 'Честная норма около 5%: подглядывание умножило ложные победы.' : 'Один взгляд в конце даёт около 5%: так и задумано при выбранном пороге.'}
+				{W.declaredA} <em>{W.identical}</em> {W.declaredB} <strong>{Math.round((result.wins / result.trials) * 100)}%</strong> {W.cases} {result.trials}. {peek ? W.peekNote : W.onceNote}
 			{/if}
 		</p>
 	{/if}
-	<p class="dg-out">Правило для оценки: чтобы заметить разницу в d процентных пунктов при доле p, нужно около 16·p·(1−p)/d² человек на вариант. Для 5% против 6% это около {need}. Это грубая оценка для привычных порогов (5% ложных побед и 80% шанса заметить). Всё в схеме смоделировано, настоящих людей нет.</p>
+	<p class="dg-out">{W.rule(need)}</p>
 </figure>

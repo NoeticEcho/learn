@@ -1,0 +1,338 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/06-ab-tests.svx. */
+	export const metadata = {
+		id: '14-metrics/06-ab-tests',
+		part: 14,
+		order: 6,
+		title: 'A/B tests and their traps',
+		definition: 'An A/B test is an experiment: half the visitors see version A, half version B, and a metric chosen in advance is compared. Traps: small samples, peeking.',
+		summary:
+			'You’ll learn to test a change with an experiment and not take noise for an effect: sample size, peeking, many metrics at once, seasonality. Afterwards you have a plan for one A/B test of your hypothesis with a metric, a sample size, a duration and a stopping rule, and an honest alternative for small traffic.',
+		minutes: 30,
+		teaches: ['metrics-ab-tests'],
+		requires: ['metrics-attention-behaviour', 'metrics-conversion-basics', 'metrics-vanity-goodhart'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'A / B', caption: 'Random groups', say: 'Show versions at the same time to random people. If B runs in the morning and A in the evening, you can’t tell why.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'day 5: B leads', caption: 'Peeking', say: 'You want to stop the test. Write the duration and sample size down before launch, and look at the result once.' },
+				{ mood: 'hint', prop: 'sheet', label: '40 a month', caption: 'When not to test', say: 'With forty visitors a test is pointless. Then make big changes instead of small ones, and compare months.' }
+			]
+		},
+		practice: {
+			id: 'ab-plan',
+			title: 'A plan for one A/B test',
+			task: 'Make a plan for a test of one of your hypotheses. Enter: the hypothesis; one main metric tied to the main action from the brief (name the action in the same words); the metric’s current value in percent (an assumption), the minimum interesting difference in percentage points, the sample needed per variant (a number of at least three digits; estimate it by the rule 16·p·(1−p)/d²), visitors a day to the page and the duration in days; a stopping rule that shows you won’t stop before the end (at least eight words); what you do not change during the test (at least five words). Name two traps and how you’ll avoid each. And write what you’ll do if traffic is small (at least ten words). Every “…” has to be replaced.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="abplan">
+      <h2>The test plan</h2>
+      <p>Hypothesis: <span id="hyp">…</span></p>
+      <p>Main metric: <span id="primary">…</span></p>
+      <p>Current value, %: <span id="baseline">…</span></p>
+      <p>Minimum interesting difference, percentage points: <span id="mde">…</span></p>
+      <p>Sample per variant, people: <span id="n">…</span></p>
+      <p>Visitors a day to the page: <span id="daily">…</span></p>
+      <p>Duration, days: <span id="days">…</span></p>
+      <p>Stopping rule: <span id="stop">…</span></p>
+      <p>We do not change during the test: <span id="frozen">…</span></p>
+
+      <h3>Two traps</h3>
+      <ul id="traps">
+        <li class="trap"><span class="what">…</span> How we avoid it: <span class="avoid">…</span></li>
+        <li class="trap"><span class="what">…</span> How we avoid it: <span class="avoid">…</span></li>
+      </ul>
+
+      <p>If traffic is small: <span id="low">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="abplan">
+      <h2>The test plan</h2>
+      <p>Hypothesis: <span id="hyp">if we move the button onto the first screen, then the share who click will rise, because a person won’t have to look for it</span></p>
+      <p>Main metric: <span id="primary">the share of the page’s visitors who take the “{{mainAction.label}}” action</span></p>
+      <p>Current value, %: <span id="baseline">5</span></p>
+      <p>Minimum interesting difference, percentage points: <span id="mde">1</span></p>
+      <p>Sample per variant, people: <span id="n">7600</span></p>
+      <p>Visitors a day to the page: <span id="daily">600</span></p>
+      <p>Duration, days: <span id="days">28</span></p>
+      <p>Stopping rule: <span id="stop">we will not stop before 28 days have passed and each variant has been seen by 7600 people, and we will look at the result once</span></p>
+      <p>We do not change during the test: <span id="frozen">the texts, the prices, the advertising, the sources and the test itself</span></p>
+
+      <h3>Two traps</h3>
+      <ul id="traps">
+        <li class="trap"><span class="what">Peeking: stopping the test as soon as a difference appears.</span> How we avoid it: <span class="avoid">the duration and sample size are written down in advance, and we look once at the end</span></li>
+        <li class="trap"><span class="what">Seasonality: a week with a promotion is not like an ordinary one.</span> How we avoid it: <span class="avoid">we take only full weeks and write down everything that happened</span></li>
+      </ul>
+
+      <p>If traffic is small: <span id="low">we run not a test but successive big changes, compare months and talk to five people from our audience about what gets in their way</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#abplan', matches: '^[^…]*$' },
+				{ id: 'hyp', kind: 'text', selector: '#hyp', matches: '^\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'primary', kind: 'field', selector: '#primary', field: 'mainAction.label' },
+				{ id: 'baseline', kind: 'text', selector: '#baseline', matches: '\\d' },
+				{ id: 'mde', kind: 'text', selector: '#mde', matches: '\\d' },
+				{ id: 'sample', kind: 'text', selector: '#n', matches: '\\d[\\d\\s\\u00a0,]{2,}' },
+				{ id: 'daily', kind: 'text', selector: '#daily', matches: '\\d' },
+				{ id: 'days', kind: 'text', selector: '#days', matches: '\\d' },
+				{ id: 'stop', kind: 'text', selector: '#stop', matches: '^(?=[\\s\\S]*(?:not before|no earlier|not earlier|only after|until|to the end|once each|has been seen|have been seen))\\s*\\S+(?:\\s+\\S+){7,}' },
+				{ id: 'frozen', kind: 'text', selector: '#frozen', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' },
+				{ id: 'traps', kind: 'count', selector: '#traps .trap', min: 2 },
+				{ id: 'avoid', kind: 'text', selector: '#traps .avoid', matches: '^\\s*\\S+(?:\\s+\\S+){3,}' },
+				{ id: 'low', kind: 'text', selector: '#low', matches: '^\\s*\\S+(?:\\s+\\S+){9,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'The share is 5% now, and you want to notice a rise to 6%. How many people per variant does the rule 16·p·(1−p)/d² call for?',
+				options: [
+					'About 7,600',
+					'About 100',
+					'About 50,000'
+				],
+				answer: 0,
+				why: [
+					'Yes. 16 × 0.05 × 0.95 ÷ (0.01 × 0.01) = 7,600. The rule is rough and built for the usual thresholds: 5% false wins and an 80% chance of noticing a real difference.',
+					'A hundred people notice only huge differences, such as 5% against 25%.',
+					'That is more than a difference like this needs.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You look at the test result every day and stop it as soon as the difference is “significant”. What is wrong?',
+				options: [
+					'The more often you look and the sooner you stop, the greater the chance of taking chance for an effect',
+					'Nothing: it is quicker',
+					'You should look less than once a year'
+				],
+				answer: 0,
+				why: [
+					'Yes. This is “peeking”, and the lesson’s diagram shows how false wins become several times more. Sample size and duration are written down in advance, and you look at the end.',
+					'Speed here is bought with false conclusions.',
+					'You may look, but you must not decide to stop on each look.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these spoil a test?',
+				options: [
+					'Changing the text of the page during the test',
+					'Comparing twenty metrics and being glad of the one that “rose”',
+					'Running a test in a week with a promotion and comparing it with an ordinary one',
+					'Writing down the main metric and the sample size in advance'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: a test checks one difference, not a moving target.',
+					'Yes: with twenty metrics at the 5% level, a false win in at least one will come up in nearly two cases out of three (the multiple comparisons problem).',
+					'Yes: seasonality and events get mixed with the effect.',
+					'No: that is exactly the right preparation.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A page has 40 visitors a month. What is sensible in place of an A/B test?',
+				options: [
+					'Make a big change, compare months and talk to several people from the audience',
+					'Run a test and wait until it becomes visible',
+					'Change the page every week without recording what you changed'
+				],
+				answer: 0,
+				why: [
+					'Yes. With small traffic a statistical test will not notice a difference: thousands of people are needed. Visible changes, observation and conversations give more (by Nielsen and Landauer’s estimate, five people are enough to find about 85% of usability problems).',
+					'“Until it becomes visible” is peeking, and with small traffic it never will.',
+					'Without records you won’t know what worked.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each trap with a safeguard',
+				pairs: [
+					['Peeking', 'The sample size and duration are written down in advance, and the decision is made at the end'],
+					['Many metrics', 'One main metric, the others only for control'],
+					['Seasonality', 'Full weeks, and a note of promotions and holidays'],
+					['Novelty', 'The test runs long enough for people to get used to the new look']
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of planning a test in order',
+				items: [
+					'Write down the hypothesis and the main metric',
+					'Estimate the current share and the minimum interesting difference',
+					'Work out the sample per variant and the duration',
+					'Write down the stopping rule and what stays unchanged',
+					'Launch without peeking and decide at the end'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-ab-def',
+				front: 'What is an A/B test?',
+				back: 'An experiment in which randomly chosen visitors see variant A or variant B, and then one metric chosen in advance is compared. The random split is there so that the difference can be explained only by the change.'
+			},
+			{
+				id: 'metrics-sample-size',
+				front: 'How do you roughly estimate sample size?',
+				back: 'Per variant about 16·p·(1−p)/d² people, where p is the current share and d the minimum interesting difference (as a fraction). For 5% and a difference of 1 percentage point that is about 7,600 people.'
+			},
+			{
+				id: 'metrics-peeking',
+				front: 'What is peeking?',
+				back: 'Stopping a test at the moment the difference looks significant. The more often you look, the more false wins. Write down the duration and sample size in advance.'
+			},
+			{
+				id: 'metrics-multiple-comparisons',
+				front: 'Why can’t you look at twenty metrics at once?',
+				back: 'At the 5% level for each, a false win in at least one is almost certain (about 64% with twenty). Choose one main metric, and make the others controls.'
+			},
+			{
+				id: 'metrics-low-traffic',
+				front: 'What do you do if traffic is small?',
+				back: 'Don’t run a test. Make big changes, compare periods, watch recordings and talk to people: five conversations find a large share of usability problems.'
+			}
+		],
+		sources: [
+			{ title: 'Evan Miller: How not to run an A/B test', url: 'https://www.evanmiller.org/how-not-to-run-an-ab-test.html', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'A/B testing (Wikipedia)', url: 'https://en.wikipedia.org/wiki/A/B_testing', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Multiple comparisons problem (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Multiple_comparisons_problem', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Sample size determination (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Sample_size_determination', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Google Optimize (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Google_Optimize', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'NN/g: Why you only need to test with 5 users', url: 'https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/', licence: 'proprietary-link', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A test is a promise not to look before the end. Everything you write down in advance protects you from your own hopes.',
+			hints: [
+				'There is one main metric, and it is about the main action from the brief: for example “the share of the page’s visitors who take the action …”.',
+				'Estimating the sample: 16 × share × (1 − share) ÷ (difference × difference). For 5% and a difference of 1 percentage point that is 7,600. The share and difference as fractions: 0.05 and 0.01.',
+				'The duration: the sample per variant times two, divided by the visitors a day, rounded up to whole weeks.',
+				'The stopping rule: “not before such-and-such a time and such-and-such a sample, and we look once”.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the whole plan.',
+				hyp: 'Write the hypothesis in at least six words: “if… then… because…”.',
+				primary: 'The main metric must name the main action in the same words as the brief.',
+				baseline: 'Enter the metric’s current value as a number (an assumption).',
+				mde: 'Enter the minimum interesting difference as a number in percentage points.',
+				sample: 'Enter the sample per variant as a number of at least a hundred, ideally estimated by the rule.',
+				daily: 'Enter the number of visitors a day as a number.',
+				days: 'Enter the duration in days, as a number.',
+				stop: 'The stopping rule must show that you will not stop before the end (“not before…”, “only after…”), in at least eight words.',
+				frozen: 'Describe what you do not change during the test, in at least five words.',
+				traps: 'You need two traps.',
+				avoid: 'For “How we avoid it” describe the safeguard in at least four words.',
+				low: 'Describe what you will do with small traffic, in at least ten words.'
+			},
+			outro: 'Now you have a plan that can’t be fitted to the result, and an honest alternative for small traffic. Next we look through a person’s eyes: heatmaps and recordings, with respect for their data.'
+		},
+		say: { 'A/B': 'A B', 'p-value': 'P value', peeking: 'peeking', Evan: 'evan', Miller: 'miller', Nielsen: 'neel-sen', Landauer: 'land-auer' }
+	};
+</script>
+
+<script>
+	import AbPeek from '../../diagrams/AbPeek.svelte';
+</script>
+
+## How to know that a change helped
+
+You already have hypotheses, a counter and an idea of which numbers mislead. One question remains: **how do you check that a change really helped?** The most reliable way known is an **experiment**. On the web it is called an **A/B test:** half the visitors are shown version A (as it is), the other half version B (with the change), and then one metric chosen in advance is compared.
+
+**Where it comes from.** The idea of a random split into groups is older than the internet: in the 1920s the statistician Ronald Fisher described randomized experiments on fields, and in medicine this is how drugs are tested (a placebo against a drug). On the web A/B tests became widespread in the 2000s, when large companies began to test versions of pages on millions of visitors. Google retired its free tool Optimize in September 2023, but the method remains, and the services for it vary: built into site builders, standalone or homemade.
+
+Why randomness? If you show version B in the mornings and A in the evenings, you won’t know whether it was the version or the time of day. A random split (each person lands in one of the versions and **always sees the same one**) makes the groups alike in everything but the change. Then the difference is explained by the change.
+
+## The main idea: noise
+
+People behave differently, and two identical groups will never give identical conversion. In the lesson on testing versions of text on readers you saw two **identical** texts “beat” each other on small numbers. That is called **noise.** An experiment has to tell a real effect from noise, and for that it needs two things: **enough people** and **an honest stopping rule.**
+
+## How many people are needed
+
+The smaller the difference you want to notice, the more people you need. A rough rule for shares: per variant
+
+> n ≈ 16 × p × (1 − p) ÷ d²
+
+where **p** is the current share (say 0.05 for 5%) and **d** is the **minimum interesting difference** as a fraction (0.01 if you want to notice a rise from 5% to 6%). The number 16 matches the usual thresholds: a false win in 5% of cases and an 80% chance of noticing a real difference.
+
+An example. p = 0.05, d = 0.01: n ≈ 16 × 0.05 × 0.95 ÷ 0.0001 = **7,600 people per variant,** that is 15,200 in all. If 600 people a day come to the page, that takes about 25 days. And if you have 40 people a month, such a test will never end. For comparison: to notice a difference between 5% and 25%, a few dozen people per variant are enough, but a single edit rarely brings an improvement like that.
+
+This formula is rough, and for exact calculations there are sample size calculators (search for one by that name). More important is what it teaches: **the sample is worked out before the test, not after.**
+
+## Peeking
+
+The most popular mistake. You launched a test, you look every day, and on the fifth day variant B is “significantly” better. You want to stop and rejoice. You can’t: **the more often you look and the sooner you are ready to stop, the greater the chance of declaring a winner something that won by chance.** Every look is a new chance to take noise for an effect. Evan Miller, in his article “How not to run an A/B test” (in the sources), shows this in numbers: a test stopped at the first “significance” is wrong several times more often than claimed.
+
+Open the diagram. Set the number of visitors and run three hundred experiments with two **identical** variants. Without peeking there are about five percent “winners”. With ten peeks there are many more. Then switch on a real difference of one percentage point and see how often the test notices it at different sample sizes.
+
+<AbPeek />
+
+**The safeguard:** the duration and sample size are written down **before** launch, and the result is looked at **once,** at the end. If you badly want to keep watch, watch the health of the test (the number of people in the variants is about equal, nothing is broken), but make no decision.
+
+## Other traps
+
+- **Many metrics.** If you look at twenty metrics at the five percent level, at least one will “significantly” change by chance in about two cases out of three (the multiple comparisons problem). So you choose **one main metric** before the test and keep the others only for control (to check that nothing important got worse).
+- **Seasonality and events.** A week with a promotion is not like an ordinary one. Take **full weeks** (because behavior on weekdays and weekends differs) and write down everything that happened.
+- **Novelty.** A new look draws attention just because it is new. A test must run long enough for people to get used to it.
+- **Changing things during the test.** Editing the text, the price or the advertising in the middle of a test turns it into another test. Everything is frozen.
+- **A different mix.** If one variant happens to get only mobile visitors, the difference is explained by the mix. The random split is made per person, not per visit.
+- **Goodhart’s law.** The main metric must be what you really want (the lesson on metrics that mislead), with a control beside it.
+- **Ethics.** Testing on people without telling them is common practice, but no excuse for deceit: don’t test dark patterns, and don’t hide the price.
+
+## When not to test
+
+A test needs people. If a page has forty visitors a month, a test is pointless. Then the honest alternatives are:
+
+- **Big changes instead of small ones.** A strong improvement (a clear promise, a short form) shows even on small numbers, and a change of a button’s color does not.
+- **Successive changes.** Make changes one at a time, write down the date and compare periods (with caveats about seasonality).
+- **Qualitative research.** Talk to five people from your audience and watch how they use the site. By Jakob Nielsen and Thomas Landauer’s estimate (1993), five people find about 85% of usability problems.
+- **A one-line survey.** On the “Thank you” page: “What nearly stopped you before you sent the request?”
+
+And one more honest reason not to test: when a change obviously fixes an error (the form didn’t send), you simply make it.
+
+<details>
+<summary>Check yourself: why can’t you stop a test as soon as the difference becomes “significant”?</summary>
+
+Because every look at the result is a chance to see a random difference and take it for an effect. The more often you look, the more false wins. The duration and sample are written down in advance and looked at once.
+
+</details>
+
+## Practice
+
+Make a plan for one test.
+
+1. **The hypothesis** (from the first lesson of the part) and a **main metric** about the main action from the brief.
+2. **The numbers:** the current value (an assumption), the minimum interesting difference, the sample per variant by the rule, visitors a day, the duration.
+3. **The stopping rule** and **what we do not change.**
+4. **Two traps** and the safeguards.
+5. **Small traffic:** what you’ll do in place of a test.
+
+The check looks at the form of the plan. Whether your assumptions are sensible is for you to decide: if the duration comes out as half a year, don’t launch a test but take the plan for small traffic.

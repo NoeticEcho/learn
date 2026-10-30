@@ -1,0 +1,464 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/07-heatmaps-privacy.svx. */
+	export const metadata = {
+		id: '14-metrics/07-heatmaps-privacy',
+		part: 14,
+		order: 7,
+		title: 'Heatmaps, session recordings and cookie consent',
+		definition: 'Heatmaps show where people click and how far they scroll, and session recordings replay a visitor’s actions. Both need masked fields and consent.',
+		summary:
+			'You’ll learn to see a site through people’s eyes with click and scroll maps and session recordings without violating their privacy: masking fields, recording only the pages needed, limiting retention and access, asking for consent. Afterwards you have a consent banner that does not deceive and does not start the counter early, form fields hidden from recording, and recording rules for your site.',
+		minutes: 30,
+		teaches: ['metrics-heatmaps-replay', 'metrics-analytics-ethics'],
+		requires: ['metrics-counter-setup', 'texts-legal-text', 'data-privacy-by-design'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'where they clicked', caption: 'A heatmap', say: 'Numbers say where people are lost, and maps and recordings hint why. Begin with the weakest step of the funnel.' },
+				{ mood: 'hmm', side: 'right', prop: 'lock', label: 'field hidden', caption: 'Privacy of a recording', say: 'Unmasked, a recording shows names, phones and case details. Mask fields, and record no more than you need.' },
+				{ mood: 'hint', prop: 'browser', label: 'Accept | Reject', caption: 'An honest banner', say: 'Two buttons of one look, and the counter sleeps until consent. A bright Accept and a faint refusal is a dark pattern.' }
+			]
+		},
+		practice: {
+			id: 'consent-and-replay',
+			title: 'A consent banner, masking and recording rules',
+			task: 'Fix the page and write the rules. 1) The banner: it must have a dialog role, two buttons of one look, “Accept” and “Reject”, a link to the policy with the word “policy”, and an “allow analytics” box not ticked in advance. 2) The counter must not start before consent: make the Google Analytics code a script of the type text/plain with a data-consent attribute set to analytics, and in the one ordinary script (it must remain the only active one) write a loader that runs that code only after consent; the active script must not contain a gtag( call. 3) Put the attribute data-clarity-mask (or data-hj-suppress) on the form fields (at least two). 4) In the session recording rules: on which pages from the brief (names), what is hidden, what is excluded (at least five words), the retention in days as a number, who sees them (at least three words), and what the policy says (at least twelve words, with the word “record”). If the brief includes Russian, add the policy in Russian. Every “…” has to be replaced.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"><\/script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXX');
+    <\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+
+      <section id="action">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/request" method="post">
+          <p>
+            <label for="f-name">What should we call you</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name">
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel">
+          </p>
+          <p>
+            <label for="f-comment">Tell us briefly about the task</label><br>
+            <textarea id="f-comment" name="comment" rows="3"></textarea>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <div id="consent">
+      <p>We use cookies. <a href="#">More</a></p>
+      <p><label><input type="checkbox" name="analytics" checked> Allow analytics</label></p>
+      <p><button type="button" class="btn primary">I agree</button> <a href="#">Settings</a></p>
+    </div>
+
+    <aside class="note" data-scaffold id="rules">
+      <h2>Session recording rules</h2>
+      <p>On which pages: <span class="r-pages">…</span></p>
+      <p>What is hidden: <span class="r-masked">…</span></p>
+      <p>What is excluded: <span class="r-excluded">…</span></p>
+      <p>Retention, days: <span class="r-keep">…</span></p>
+      <p>Who sees them: <span class="r-who">…</span></p>
+      <p>What the policy says: <span class="r-policy">…</span></p>
+      <p>The same in Russian: <span class="r-policy-ru">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <script type="text/plain" data-consent="analytics">
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXX');
+    <\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+
+      <section id="action">
+        <h2>{{mainAction.label}}</h2>
+        <form action="/request" method="post">
+          <p>
+            <label for="f-name">What should we call you</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name" data-clarity-mask="True">
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" data-clarity-mask="True">
+          </p>
+          <p>
+            <label for="f-comment">Tell us briefly about the task</label><br>
+            <textarea id="f-comment" name="comment" rows="3" data-clarity-mask="True"></textarea>
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <div id="consent" role="dialog" aria-label="Cookie choices">
+      <p>We use Google Analytics cookies to understand how the site is used. <a href="cookies.html">Cookie policy</a></p>
+      <p><label><input type="checkbox" name="analytics"> Allow analytics</label></p>
+      <p><button type="button" class="btn" id="consent-accept">Accept</button> <button type="button" class="btn" id="consent-reject">Reject</button></p>
+    </div>
+
+    <script>
+      function allowAnalytics() {
+        document.querySelectorAll('script[data-consent="analytics"]').forEach(function (s) {
+          var n = document.createElement('script');
+          n.text = s.text;
+          document.head.appendChild(n);
+        });
+      }
+      function choose(answer) {
+        try { localStorage.setItem('consent', answer); } catch (e) {}
+        document.getElementById('consent').hidden = true;
+        if (answer === 'yes') { allowAnalytics(); }
+      }
+      try { if (localStorage.getItem('consent') === 'yes') { allowAnalytics(); } } catch (e) {}
+      document.getElementById('consent-accept').addEventListener('click', function () { choose('yes'); });
+      document.getElementById('consent-reject').addEventListener('click', function () { choose('no'); });
+    <\/script>
+
+    <aside class="note" data-scaffold id="rules">
+      <h2>Session recording rules</h2>
+      <p>On which pages: <span class="r-pages">{{sections.0}} and {{sections.1}}: pages with no data entry</span></p>
+      <p>What is hidden: <span class="r-masked">all form fields (the data-clarity-mask attribute) and blocks with contact details</span></p>
+      <p>What is excluded: <span class="r-excluded">pages where a person describes their case, and the customer account, are not recorded</span></p>
+      <p>Retention, days: <span class="r-keep">30</span></p>
+      <p>Who sees them: <span class="r-who">only the project owner and one assistant</span></p>
+      <p>What the policy says: <span class="r-policy">We record visitors’ actions on the site (clicks and scrolling), without the contents of forms, to improve the pages. Recordings are kept for 30 days and can be seen by two staff members.</span></p>
+      <p>The same in Russian: <span class="r-policy-ru">Мы записываем действия посетителей на сайте, такие как клики и прокрутка, без содержимого форм, чтобы улучшать страницы. Записи хранятся 30 дней.</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#rules', matches: '^[^…]*$' },
+				{ id: 'label', kind: 'label' },
+				{ id: 'dialog', kind: 'exists', selector: '#consent[role="dialog"]' },
+				{ id: 'two-buttons', kind: 'count', selector: '#consent button', min: 2 },
+				{ id: 'accept', kind: 'text', selector: '#consent button', matches: '^\\s*Accept(?: all)?\\s*$' },
+				{ id: 'reject', kind: 'text', selector: '#consent button', matches: '^\\s*(?:Reject|Decline)(?: all)?\\s*$' },
+				{ id: 'box', kind: 'count', selector: '#consent input[type="checkbox"]', min: 1 },
+				{ id: 'unchecked', kind: 'count', selector: '#consent input[type="checkbox"][checked]', max: 0 },
+				{ id: 'policy-link', kind: 'text', selector: '#consent a[href]', matches: '[Pp]olic' },
+				{ id: 'gated', kind: 'count', selector: 'script[data-consent="analytics"][type="text/plain"]', min: 1 },
+				{ id: 'one-active', kind: 'count', selector: 'script:not([type="text/plain"]):not([type="application/ld+json"])', max: 1 },
+				{ id: 'no-eager', kind: 'text', selector: 'script:not([type="text/plain"])', matches: '^(?![\\s\\S]*gtag\\()[\\s\\S]*\\S' },
+				{ id: 'masked-fields', kind: 'count', selector: 'form input[data-clarity-mask], form textarea[data-clarity-mask], form input[data-hj-suppress], form textarea[data-hj-suppress]', min: 2 },
+				{ id: 'pages', kind: 'field', selector: '#rules .r-pages', field: 'sections', min: 1 },
+				{ id: 'masked-text', kind: 'text', selector: '#rules .r-masked', matches: '(?:data-clarity-mask|data-hj-suppress|[Mm]ask)' },
+				{ id: 'excluded', kind: 'text', selector: '#rules .r-excluded', matches: '^\\s*\\S+(?:\\s+\\S+){4,}' },
+				{ id: 'keep', kind: 'text', selector: '#rules .r-keep', matches: '\\d' },
+				{ id: 'who', kind: 'text', selector: '#rules .r-who', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'policy', kind: 'text', selector: '#rules .r-policy', matches: '^(?=[\\s\\S]*record)\\s*\\S+(?:\\s+\\S+){11,}' },
+				{ id: 'policy-en', kind: 'text', selector: '#rules .r-policy-ru', matches: '^(?=[\\s\\S]*[А-Яа-яЁё]{3})\\s*\\S+(?:\\s+\\S+){9,}', when: { brief: 'languages', contains: 'ru' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each tool with what it shows',
+				pairs: [
+					['Click map', 'Where people clicked on the page, including places that weren’t links'],
+					['Scroll map', 'What share of visitors got as far as each place on the page'],
+					['Session recording (Clarity, Hotjar, Webvisor)', 'A replay of one visitor’s actions: movement, clicks, scrolling'],
+					['Form analytics', 'Where people abandon filling in: at which field they stopped']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is most dangerous in session recording?',
+				options: [
+					'That what a person types into fields, and the description of someone’s case, gets into the recording',
+					'That a recording takes up space',
+					'That click maps are colored'
+				],
+				answer: 0,
+				why: [
+					'Yes. A recording can store names, phones and texts that the person never meant to show you for good. So fields are masked, and pages with a description of a case are not recorded at all.',
+					'Space is a technical matter, not an ethical one.',
+					'The color of a map is harmless.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a cookie consent banner honest?',
+				options: [
+					'The Accept and Reject buttons are equally noticeable',
+					'The analytics box is not ticked in advance',
+					'The analytics code runs only after consent',
+					'Refusing is possible only through three screens of settings'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: if refusal is hidden or pale, the consent can’t be called free. France’s regulator fined Google and Facebook in 2022 for making refusal harder than acceptance.',
+					'Yes: a pre-ticked box is consent “for the person”, and the EU’s top court has said it is not valid (Planet49, 2019).',
+					'Yes: a banner that does not block the counter is only decoration.',
+					'No: that is a dark pattern (a “refusal barrier”).'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Session recording is on for a page where a person describes their case. You are an attorney or an expert. What do you do?',
+				options: [
+					'Exclude such pages from recording and mask fields everywhere',
+					'Leave it: the data harms no one',
+					'Switch recording on for the customer account page too'
+				],
+				answer: 0,
+				why: [
+					'Yes. Details of clients’ cases are especially sensitive, and experts and attorneys also have a professional duty of confidentiality. Recording such pages creates a risk that is not justified by the benefit (a guideline, not legal advice).',
+					'Harm is possible: a leak, access by third parties, a breach of confidentiality.',
+					'The account also holds personal data: it should not be recorded.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of setting up session recording in order',
+				items: [
+					'Decide on which pages recording is needed and why',
+					'Mask fields and exclude pages with sensitive data',
+					'Set the retention period and who may see the recordings',
+					'Say so in the privacy policy and on the banner',
+					'Watch recordings by plan and delete them when the period ends'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A heatmap shows many clicks on an image that is not a link. What does it mean?',
+				options: [
+					'People expect the image to be clickable: that is a hypothesis to test, not a conclusion',
+					'The image must be removed at once',
+					'The map is wrong'
+				],
+				answer: 0,
+				why: [
+					'Yes. A map shows “where” but not “why”. It is a reason to make the image a link or move the real link, and then to check.',
+					'It is too early to remove it without understanding the cause.',
+					'The map shows the clicks correctly, and the conclusion is drawn by a person.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-heatmap-types',
+				front: 'What kinds of heatmap are there?',
+				back: 'A click map (where they pressed), a scroll map (how far they got) and a mouse-movement map. They show “where” but not “why”: the cause has to be tested.'
+			},
+			{
+				id: 'metrics-replay',
+				front: 'What is a session recording?',
+				back: 'A replay of one visitor’s actions on a page (Microsoft Clarity, Hotjar, Yandex Webvisor). It helps you see difficulties, but it collects sensitive data, so it is restricted.'
+			},
+			{
+				id: 'metrics-masking',
+				front: 'How do you hide fields from a recording?',
+				back: 'In Clarity, the data-clarity-mask attribute on an element (and Clarity masks the content of input boxes in every mode); in Hotjar, data-hj-suppress; in Yandex Metrica, the class ym-disable-keys on a field. Never record passwords or payment data.'
+			},
+			{
+				id: 'metrics-consent-honest',
+				front: 'What should an honest cookie banner be like?',
+				back: 'Equally noticeable Accept and Reject buttons, boxes not ticked in advance, the counter starting only after consent, easy refusal and withdrawal of consent, and a link to the policy.'
+			},
+			{
+				id: 'metrics-record-rules',
+				front: 'What rules does session recording need?',
+				back: 'Where we record, what we hide, what we exclude (pages with clients’ cases), how long we keep it, who sees it, and how the policy says so.'
+			}
+		],
+		sources: [
+			{ title: 'Microsoft Clarity documentation (heatmaps, recordings, masking, consent)', url: 'https://learn.microsoft.com/en-us/clarity/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Clarity masking (Microsoft Learn)', url: 'https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-masking', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Clarity Consent Mode (Microsoft Learn)', url: 'https://learn.microsoft.com/en-us/clarity/setup-and-installation/consent-mode', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Session replay (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Session_replay', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'HTTP cookie (Wikipedia)', url: 'https://en.wikipedia.org/wiki/HTTP_cookie', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Directive 2002/58/EC, the ePrivacy Directive, Article 5(3) (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32002L0058', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Regulation (EU) 2016/679, the GDPR, Articles 4(11), 5 and 7 (EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'EDPB Guidelines 05/2020 on consent', url: 'https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'EDPB report of the cookie banner taskforce (January 2023)', url: 'https://www.edpb.europa.eu/system/files/2023-01/edpb_20230118_report_cookie_banner_taskforce_en.pdf', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'ICO: guidance on the use of storage and access technologies (PECR)', url: 'https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Global Privacy Control', url: 'https://globalprivacycontrol.org/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Web Almanac 2024: Privacy', url: 'https://almanac.httparchive.org/en/2024/privacy', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A session recording is a look over a person’s shoulder. Look exactly as much as you need, and in a way they won’t regret you saw.',
+			hints: [
+				'The banner: two buttons, “Accept” and “Reject”, in one style, a box without checked, a link with the word “policy”. Give it the dialog role.',
+				'The Google Analytics code becomes “sleeping”: the type text/plain and a data-consent attribute set to analytics. The ordinary script keeps only the loader, with no gtag( in it.',
+				'Put the data-clarity-mask attribute on every form field where a person types: input and textarea.',
+				'In the policy say it in plain words: what we record, why, how long we keep it and who sees it.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in all the recording rules.',
+				label: 'Every form field needs a label.',
+				dialog: 'The banner needs the dialog role.',
+				'two-buttons': 'The banner needs two buttons: “Accept” and “Reject”.',
+				accept: 'The consent button must be called “Accept”.',
+				reject: 'You need a “Reject” button of the same look as “Accept”.',
+				box: 'The banner needs an “allow analytics” box.',
+				unchecked: 'The box must not be ticked in advance: remove checked.',
+				'policy-link': 'The banner needs a link to the policy with the word “policy”.',
+				gated: 'The Google Analytics code must be a script of the type text/plain with a data-consent attribute set to analytics.',
+				'one-active': 'Only one script should stay active: the loader. Move the analytics into the “sleeping” script.',
+				'no-eager': 'The active script still has a gtag( call: the analytics starts before consent. Move it into the “sleeping” script.',
+				'masked-fields': 'Put the data-clarity-mask attribute on at least two form fields.',
+				pages: 'Name the pages where recording is needed, by sections from the brief.',
+				'masked-text': 'Say what is hidden: for example the data-clarity-mask attribute or “masking of fields”.',
+				excluded: 'Describe what is excluded from recording, in at least five words.',
+				keep: 'Write the retention in days, as a number.',
+				who: 'Describe who sees the recordings, in at least three words.',
+				policy: 'The policy needs the word “record” and at least twelve words.',
+				'policy-en': 'The brief includes Russian: add the policy in Russian, in at least ten words.'
+			},
+			outro: 'Now you watch people without crossing their boundaries: the banner is honest, the fields are hidden, the rules are written down. The last lesson of the part gathers the metrics into a dashboard.'
+		},
+		say: { Webvisor: 'web-visor', Clarity: 'clarity', Hotjar: 'hot-jar', cookie: 'cookie', UTM: 'U T M', GDPR: 'G D P R', PECR: 'peck-er', CCPA: 'C C P A', GPC: 'G P C' }
+	};
+</script>
+
+<script>
+	import SessionMask from '../../diagrams/SessionMask.svelte';
+</script>
+
+## Looking through a person’s eyes
+
+The numbers of the earlier lessons show **where** people are lost: at the step “pressed the button” only 30% get through. But they don’t answer **why.** To see the cause you have to look at how people use the page. There are two tools for that.
+
+**Heatmaps.** On a picture of the page, color shows where something happens.
+
+- **A click map:** where people pressed, including places that weren’t links. Many clicks on an image with no link mean people expected it to do something.
+- **A scroll map:** what share of visitors got as far as each place on the page (you saw it in the lesson on bounces and scrolling).
+- **A mouse-movement map:** where they looked. The link with attention is approximate, so it is trusted less.
+
+**Session recordings.** A program records one visitor’s actions (mouse movement, clicks, scrolling) and replays them like a video. Microsoft’s **Clarity** is free; **Hotjar** and similar paid tools do the same, and Yandex Metrica has **Webvisor.** Recordings help you see what the numbers don’t show: a person pressing again and again on something that doesn’t work (“rage clicks”), looking long for a button, abandoning a form at the same field.
+
+They are valuable, but they have a price. A recording is **data about a particular person:** what they pressed, what they typed, what they read. So the rest of the lesson is about how to look without doing harm.
+
+## How to watch to good effect
+
+1. **Start with a number.** In the funnel find the weakest step (the last lesson) and watch only the recordings of those who stopped there.
+2. **Watch by plan.** Twenty recordings at the weak step are worth more than two hundred random ones.
+3. **Look for what repeats.** One person with odd behavior is an incident, five with the same difficulty is a find.
+4. **Write the conclusion as a hypothesis** (the first lesson): “people don’t see the button under the image”, and then test it.
+5. **Remember devices.** Maps and recordings on a phone and on a computer look different, and a conclusion from one can’t be carried to the other.
+6. **Don’t fit the facts.** If you look for confirmation of your idea, you’ll find it in any recording. Formulate what will count as a refutation.
+7. **Remember small numbers.** A map of forty visits is not statistics but a hint.
+
+Maps and recordings don’t replace talking to people either. They show what the person did, not what they thought as they did it.
+
+## The privacy of a recording
+
+Open the diagram. It is an invented visitor filling in a form, and what gets into the recording. Switch rules on and off and see what the site’s owner sees.
+
+<SessionMask />
+
+The alarming thing in the diagram is that, unmasked, a recording shows the name, the phone and the particulars of someone’s case. Everyone with access to the dashboard sees such recordings, and they are kept until you delete them. So there are rules around session recording.
+
+**What to do.**
+
+- **Record exactly what you need.** Switch recording on not across the whole site but on the pages where you are looking for a problem (the principle of data minimization: the amount of data should fit the purpose; it is in GDPR Article 5 and in most privacy laws).
+- **Mask the fields.** Clarity masks the content of input boxes in every masking mode, and you can mask other elements by a setting or with the `data-clarity-mask` attribute. Hotjar suppresses keystrokes in fields by default and has its own `data-hj-suppress` attribute for elements. Yandex Metrica uses the class `ym-disable-keys` for a field and `ym-hide-content` for a block. Never record passwords or payment details.
+- **Exclude sensitive pages:** where a person describes their case, the customer account, pages with documents. If you are an expert, an attorney or a doctor, you also have a professional duty of confidentiality: recording the description of someone else’s case is not acceptable.
+- **Set a retention period and a circle of people.** A recording is needed while you work through the problem; then it is deleted. Only those who need it for their work should watch. Retention in the service is limited by its settings (see the help), and the rules themselves you write into the policy.
+- **Tell the person.** The privacy policy (the lesson on legal texts) must say that you record actions, why, for how long you keep them and who sees them.
+- **Where the data goes.** Where a tool stores data matters. For visitors in the EU, transfers outside the EU have their own rules under the GDPR, and in Russia the personal data law requires the first recording and storing of Russian citizens’ data to happen in databases in Russia (the Russian edition covers it).
+- **Wiretapping claims in the US.** Session replay has been the target of lawsuits that call it unlawful interception under state wiretap laws (California’s CIPA is a common one). Courts have not agreed on this, so the cautious practice is the same: tell visitors, ask for consent where the law might require it, and mask.
+
+This is general information, not legal advice. Ask a lawyer, or the regulator: the ICO in the UK, your national data protection authority in the EU, the state attorney general or the FTC in the US.
+
+## Cookie consent: a banner that does not deceive
+
+**Cookies** are small files a site stores in a person’s browser. Counters use them to tell a new visitor from a returning one. What the law says depends on where your visitors are:
+
+- **In the EU.** The ePrivacy Directive (Article 5(3)) requires consent before storing or reading information on a person’s device, except for what is strictly necessary to provide the service they asked for. Consent has the meaning of the GDPR: freely given, specific, informed and unambiguous, by a clear affirmative act (Article 4(11), Article 7). A pre-ticked box doesn’t count (the CJEU’s *Planet49* judgment, 2019), refusing has to be as easy as agreeing, and a “cookie wall” that blocks access unless you accept is generally not acceptable, according to the European Data Protection Board. In 2022 the French regulator, the CNIL, fined Google €150 million and Facebook €60 million, in part because refusing cookies took more steps than accepting them. Some regulators let narrowly limited audience measurement run without consent, and the CNIL publishes the conditions.
+- **In the UK.** The Privacy and Electronic Communications Regulations (PECR, regulation 6) say the same in substance, and the ICO enforces them. The Data (Use and Access) Act 2025 adds narrow new exceptions for some analytics cookies, so check the current ICO guidance before relying on one.
+- **In the US.** There is no general cookie-consent law. The state privacy laws work differently: in California, the CCPA as amended by the CPRA gives people the right to opt out of the “sale” or “sharing” of their personal data, which advertising cookies can amount to; a business that does this must post a clear opt-out link and honor the Global Privacy Control signal that a browser can send. Several other states have similar laws, and some require honoring such a signal too. Your banner may need an opt-out rather than an opt-in.
+- **For Russia,** there is no separate cookie law, but the personal data law applies to data that identifies a person.
+
+Because the rules differ, the safest design is the strictest one that your audience might be covered by: **two equal buttons, nothing pre-ticked, nothing starting before consent, and an opt-out that works.** This is general information, not legal advice; show your banner and policy to a lawyer.
+
+**Signs of an honest banner:**
+
+1. **Two buttons of one look:** “Accept” and “Reject”. If “Accept” is bright and refusal is a small link, that is a dark pattern (the lesson on the limit of manipulation).
+2. **Nothing ticked in advance.** The “allow analytics” box is empty.
+3. **The counter does not start before consent.** A banner without blocking is decoration. For that the counter code is made “sleeping”: the browser does not run `type="text/plain"`, so it waits for the person’s answer.
+4. **Refusing is as easy as agreeing,** and afterwards a person can change their mind (a “Cookie settings” link in the footer).
+5. **There is a link to the policy.**
+6. **No “cookie wall”:** refusing does not shut the person out of the site.
+
+How a “sleeping” connection looks in its minimal form. The analytics code is written like this:
+
+```text
+<script type="text/plain" data-consent="analytics">
+  ...the counter code...
+</script>
+```
+
+And the one active script on the page runs it after consent:
+
+```text
+<script>
+  function allowAnalytics() {
+    document.querySelectorAll('script[data-consent="analytics"]').forEach(function (s) {
+      var n = document.createElement('script');
+      n.text = s.text;
+      document.head.appendChild(n);
+    });
+  }
+  // on consent call allowAnalytics(), on refusal do nothing
+</script>
+```
+
+This skeleton is simplified: in a real banner you also remember the person’s choice (in `localStorage`) and don’t ask again. If the project has several services, each has its own `data-consent`. Note that the Google tag’s own loader (`gtag/js`) must also sit inside the sleeping code, or it will fetch Google’s script before the person has answered. Google also offers a Consent Mode for its tags, and Clarity has one too: since 31 October 2025 Clarity requires a consent signal for visitors from the EEA, the UK and Switzerland.
+
+<details>
+<summary>Check yourself: how does “sleeping” counter code differ from ordinary code?</summary>
+
+The sleeping code has the type text/plain, so the browser does not run it and sends no data until the person has agreed: the loader runs it only after “Accept” is pressed. Ordinary code works the moment the page opens.
+
+</details>
+
+## Practice
+
+Fix the page and write the rules.
+
+1. **The banner:** a dialog role, two equal buttons, a link to the policy, an empty box.
+2. **The counter:** the analytics code in a “sleeping” script, the one active script being a loader without `gtag(`.
+3. **Masking:** the `data-clarity-mask` attribute on the form fields.
+4. **Session recording rules:** the pages from the brief, what is hidden, what is excluded, the retention as a number, who sees them, the text for the policy (and in Russian if the brief includes Russian).
+
+The check looks at structure: the buttons, the empty box, the “sleeping” code, the masking attribute and the entries in the rules. Whether your banner is honest is for you to decide: open the page and ask yourself what a person would feel for whom refusing was harder than agreeing. Show the policy texts to a lawyer before publishing.

@@ -8,6 +8,69 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+
+	const W = pick({
+		ru: {
+			titles: { prices: 'Цены', contacts: 'Контакты и заявка', case: 'Расскажите о вашем деле' },
+			scroll: 'Прокрутка',
+			scrollText: 'дошёл до таблицы цен, остановился на 12 секунд',
+			name: 'Имя',
+			nameText: 'Иван Петров',
+			phone: 'Телефон',
+			phoneText: '+7 900 000-00-00',
+			desc: 'Описание',
+			descText: 'Сосед сдвинул забор на мой участок, у меня есть старый план и свидетель',
+			caption: 'Одна запись: что в неё попадает',
+			pageGroup: 'Страница, которую открыл посетитель',
+			rules: 'Правила записи',
+			rec: 'запись сессий включена',
+			mask: 'поля формы замаскированы',
+			excl: 'страница с описанием дела не записывается',
+			does: 'Что делает посетитель',
+			page: 'Страница',
+			sees: 'Что видно в записи',
+			nothing: 'Ничего',
+			excluded: 'эта страница исключена из записи',
+			off: 'запись выключена',
+			leakA: 'Запись содержит личные сведения человека',
+			leakB: ' и подробности его дела',
+			leakC: 'Человек об этом не знает, если вы ему не сказали, а вы теперь отвечаете за эти данные.',
+			safe: 'Данные не собираются. Это самый безопасный вариант, но вы не узнаете, где людям трудно.',
+			ok: 'В записи только поведение: куда нажал, докуда прокрутил. Содержимое полей скрыто.',
+			made: 'Посетитель и его слова выдуманы. Принцип настоящий: записывайте поведение, а не содержимое.'
+		},
+		en: {
+			titles: { prices: 'Prices', contacts: 'Contact and request', case: 'Tell us about your case' },
+			scroll: 'Scrolling',
+			scrollText: 'reached the price table and stayed 12 seconds',
+			name: 'Name',
+			nameText: 'Ivan Peters',
+			phone: 'Phone',
+			phoneText: '+1 000 000 0000',
+			desc: 'Description',
+			descText: 'A neighbor moved the fence onto my lot, and I have an old plan and a witness',
+			caption: 'One recording: what gets into it',
+			pageGroup: 'The page the visitor opened',
+			rules: 'Recording rules',
+			rec: 'session recording is on',
+			mask: 'the form fields are masked',
+			excl: 'the page with the description of the case is not recorded',
+			does: 'What the visitor does',
+			page: 'Page',
+			sees: 'What shows in the recording',
+			nothing: 'Nothing',
+			excluded: 'this page is excluded from recording',
+			off: 'recording is off',
+			leakA: 'The recording contains the person’s personal details',
+			leakB: ' and the particulars of their case',
+			leakC: 'The person doesn’t know, if you haven’t told them, and you are now responsible for this data.',
+			safe: 'No data is collected. This is the safest option, but you won’t learn where people find it hard.',
+			ok: 'The recording holds only behavior: where they pressed, how far they scrolled. The contents of the fields are hidden.',
+			made: 'The visitor and their words are invented. The principle is real: record behavior, not content.'
+		}
+	});
 
 	type Page = 'prices' | 'contacts' | 'case';
 	let page = $state<Page>('contacts');
@@ -15,16 +78,16 @@
 	let masked = $state(false);
 	let excludeCase = $state(false);
 
-	const titles: Record<Page, string> = { prices: 'Цены', contacts: 'Контакты и заявка', case: 'Расскажите о вашем деле' };
+	const titles: Record<Page, string> = W.titles;
 	const typed = $derived(
 		page === 'prices'
-			? [{ label: 'Прокрутка', text: 'дошёл до таблицы цен, остановился на 12 секунд' }]
+			? [{ label: W.scroll, text: W.scrollText }]
 			: page === 'contacts'
 				? [
-						{ label: 'Имя', text: 'Иван Петров' },
-						{ label: 'Телефон', text: '+7 900 000-00-00' }
+						{ label: W.name, text: W.nameText },
+						{ label: W.phone, text: W.phoneText }
 					]
-				: [{ label: 'Описание', text: 'Сосед сдвинул забор на мой участок, у меня есть старый план и свидетель' }]
+				: [{ label: W.desc, text: W.descText }]
 	);
 	const blocked = $derived(!recording || (excludeCase && page === 'case'));
 	const star = (s: string) => '•'.repeat(Math.min(12, s.length));
@@ -32,30 +95,30 @@
 </script>
 
 <figure class="dg">
-	<figcaption>Одна запись: что в неё попадает</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Страница, которую открыл посетитель">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.pageGroup}>
 		{#each Object.keys(titles) as p (p)}
 			<button type="button" aria-pressed={page === p} onclick={() => (page = p as Page)}>{titles[p as Page]}</button>
 		{/each}
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Правила записи">
-		<label><input type="checkbox" bind:checked={recording} /> запись сессий включена</label>
-		<label><input type="checkbox" bind:checked={masked} /> поля формы замаскированы</label>
-		<label><input type="checkbox" bind:checked={excludeCase} /> страница с описанием дела не записывается</label>
+	<div class="dg-ctl" role="group" aria-label={W.rules}>
+		<label><input type="checkbox" bind:checked={recording} /> {W.rec}</label>
+		<label><input type="checkbox" bind:checked={masked} /> {W.mask}</label>
+		<label><input type="checkbox" bind:checked={excludeCase} /> {W.excl}</label>
 	</div>
 
 	<div class="two">
 		<div class="dg-box">
-			<div class="dh">Что делает посетитель</div>
-			<p>Страница: {titles[page]}</p>
+			<div class="dh">{W.does}</div>
+			<p>{W.page}: {titles[page]}</p>
 			<ul>
 				{#each typed as t (t.label)}<li>{t.label}: {t.text}</li>{/each}
 			</ul>
 		</div>
 		<div class="dg-box" class:bad={leaked}>
-			<div class="dh">Что видно в записи</div>
+			<div class="dh">{W.sees}</div>
 			{#if blocked}
-				<p>Ничего: {recording ? 'эта страница исключена из записи' : 'запись выключена'}.</p>
+				<p>{W.nothing}: {recording ? W.excluded : W.off}.</p>
 			{:else}
 				<ul>
 					{#each typed as t (t.label)}
@@ -67,14 +130,14 @@
 	</div>
 	<p class="dg-out" aria-live="polite">
 		{#if leaked}
-			Запись содержит личные сведения человека{page === 'case' ? ' и подробности его дела' : ''}. Человек об этом не знает, если вы ему не сказали, а вы теперь отвечаете за эти данные.
+			{W.leakA}{page === 'case' ? W.leakB : ''}. {W.leakC}
 		{:else if blocked}
-			Данные не собираются. Это самый безопасный вариант, но вы не узнаете, где людям трудно.
+			{W.safe}
 		{:else}
-			В записи только поведение: куда нажал, докуда прокрутил. Содержимое полей скрыто.
+			{W.ok}
 		{/if}
 	</p>
-	<p class="dg-out">Посетитель и его слова выдуманы. Принцип настоящий: записывайте поведение, а не содержимое.</p>
+	<p class="dg-out">{W.made}</p>
 </figure>
 
 <style>
