@@ -207,7 +207,7 @@ describe('the manifest', () => {
 
 describe('the listening test', () => {
 	test('words are compared without case, ё, hyphens or punctuation', () => {
-		expect(words('Ди-эн-эс, ёлка!')).toEqual(['ди', 'эн', 'эс', 'елка']);
+		expect(words('Ди-эн-эс, ёлка!')).toEqual(['диэнэс', 'елка']);
 		expect(words('8 эпох')).toEqual(['восемь', 'эпох']);
 		expect(wer('один два три четыре', 'один два три четыре')).toBe(0);
 		expect(wer('один два три четыре', 'один три четыре')).toBe(0.25);

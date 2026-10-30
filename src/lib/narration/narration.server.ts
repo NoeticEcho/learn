@@ -61,6 +61,13 @@ export function spoken(text: string, lesson: Pick<LessonMeta, 'say'>, lang: Loca
 	return lex ? speak(text, lex, lesson.say ?? {}) : text;
 }
 
+/** Every word the maps can put in a sentence: Whisper writes these in Latin, so the renderer's ear skips them. */
+export function mappedWords(lessons: Pick<LessonMeta, 'say'>[], lang: Locale): string[] {
+	const lex = lexicons[lang];
+	const values = [...Object.values(lex?.letters ?? {}), ...Object.values(lex?.words ?? {}), ...lessons.flatMap((l) => Object.values(l.say ?? {}))];
+	return [...new Set(values.flatMap((v) => v.toLowerCase().replace(/ё/g, 'е').split(/[^а-я]+/).filter(Boolean)))].sort();
+}
+
 export function manifest(lang: Locale): Manifest | null {
 	return manifests[lang] ?? null;
 }

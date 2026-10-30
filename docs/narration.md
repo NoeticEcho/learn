@@ -17,7 +17,8 @@ repository of its own. This page is how a lesson's audio is made, published and 
 | `content/narration/ru.json` | the manifest the build reads: lesson → sections → file, duration, hash |
 | `scripts/narration.ts` | `npm run narration -- script / wer / status` |
 | `tools/narration/render.py` | the renderer (Python, local) |
-| `tools/narration/transcribe.py` | Whisper's transcript of each rendered section |
+| `tools/narration/listen.py` | the renderer's ear: is this take the sentence? |
+| `tools/narration/transcribe.py` | Whisper's transcript of each rendered section, for the WER report |
 | `tools/narration/run.sh`, `publish.sh` | the whole run, part by part, and publishing |
 | `src/lib/narration/Listen.svelte`, `Player.svelte` | «Слушать» and the player |
 | [NoeticEcho/learn-audio](https://github.com/NoeticEcho/learn-audio) | the audio files and the renderer's manifest |
@@ -86,15 +87,32 @@ whose file and hash are there is never rendered twice. Two renders never share a
 directory (`.render.lock`). `kill -TERM <pid>` stops it after the current section.
 
 The renderer loads the model once and renders a section's sentences in one batch (seeded by the
-section's hash, so a re-render is reproducible), retries any sentence whose length is implausible
-for its text (the model's known failure: a runaway or a swallowed sentence), trims and spaces the
-sentences, normalises the section to −16 LUFS (two-pass `loudnorm`), encodes Opus at 32 kbps mono,
-records it, and at the end unloads and exits. Nothing stays running.
+section's hash, so a re-render is reproducible), then **listens to each sentence** (`listen.py`),
+trims and spaces the sentences, normalises the section to −16 LUFS (two-pass `loudnorm`), encodes
+Opus at 32 kbps mono, records it, and at the end unloads and exits. Nothing stays running.
 
-**Memory.** The GPU's memory is the system's (Strix Halo, 32 GB shared), and other work runs here.
-Before every section the renderer reads `MemAvailable`: below 6 GB, or while a `mix test` or
-`mix precommit` is running, it pauses, and resumes only at 8 GB with no test run. It starts only at
-8 GB. The model needs about 3 GB. Measured RTF on this machine: 0.25–0.5 per section in batch.
+Listening exists because of what the pilot found. About 1 sentence in 120 **drifts**: the model
+starts well or not at all and goes on in fluent syllables of no language, at a plausible length
+(«Вы меняете только свою копию…» came out «…только неблизёда, то всё сосужи кости…»). A duration
+check cannot see it, and a section-level WER only says the section is bad. So each take is sent to
+Whisper and compared with its sentence on content words (Cyrillic, four letters or more, fuzzily;
+numbers and the spoken forms of Latin terms left out, because Whisper writes those as digits and
+Latin). Recall under 0.7 or precision under 0.5 is a failed take, and the sentence is rendered again
+alone with another seed, up to three times; the best take is kept, and a sentence still failing is
+logged as `FLAGGED` in `render.log`. These thresholds separated the pilot's drifted sentences from
+its other 870. It costs about 0.4 s a sentence. If Whisper is down the run goes on unheard and says
+how many at the end.
+
+To render a section again by hand (a mispronunciation only an ear finds):
+`render.py --scripts … --audio … --redo <lesson>#<key>,… --salt 2`. The file keeps its name, because
+its text did not change.
+
+**Memory.** The GPU's memory is the system's (Strix Halo, 32 GB shared) and does not show in the
+process's RSS, and other work runs here. Before every section the renderer reads `MemAvailable`:
+below 8 GB, or while a `mix test` or `mix precommit` is running anywhere on the machine (read from
+`/proc`, argument by argument, because an agent's prompt may merely mention them), it pauses and
+logs that it did. So the wall-clock time of a run depends on what else the machine is doing. Measured
+RTF while it runs: 0.25–0.5 per section in batch. `kill -TERM` stops it, even during a pause.
 
 ## Checking by ear, without ears
 
@@ -103,8 +121,11 @@ Before every section the renderer reads `MemAvailable`: below 6 GB, or while a `
 spoken form by the same rules (so «DNS» and «ди-эн-эс» are the same word) and numbers into words.
 Sections above 5% are listed with their errors: the candidates for a lexicon entry or a lesson's
 `say`. Fix the map, run the same parts again (only the changed sections re-render), re-check.
-Whisper is a proxy: it forgives a wrong stress and sometimes mishears a right word, so the report
-is a list to look at, not a verdict.
+Whisper is a proxy, and the report is a list to look at, not a verdict. It forgives a wrong stress,
+it sometimes mishears a right word, and it writes terms in its own spelling («Let's Encrypt» for
+«летс энкрипт»), which counts as an error unless a map folds it. Lessons dense in acronyms score worse
+than they sound. Sentence-level drift is the renderer's job above; this report finds what the maps
+should say.
 
 ## Publishing
 

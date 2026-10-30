@@ -11,24 +11,32 @@ rendered again only when its text changed (its hash did). Two runs never share a
 directory: the second refuses, naming the first one's pid.
 
 Polite: other work runs on this machine, and the GPU's memory is the system's. Before every
-section it reads MemAvailable: below --min-free-gb (6), or while a `mix test`/`mix precommit`
+section it reads MemAvailable: below --min-free-gb (8), or while a `mix test`/`mix precommit`
 run is active, it waits until --resume-free-gb (8) is available and the run is over, checking
-every minute and logging the pause.
+every ten seconds and logging the pause.
+
+Listening: every sentence it renders is heard by Whisper (listen.py) and rendered again if it is not
+the sentence (the model sometimes drifts into syllables of no language). A sentence still wrong
+after three retakes is kept and logged as FLAGGED.
 
 usage: render.py --scripts .cache/narration/ru.scripts.json --audio ../learn-audio
                  [--parts 0,1] [--lessons id,id] [--log private/narration/render.log]
-                 [--min-free-gb 6] [--resume-free-gb 8] [--dry-run]
+                 [--min-free-gb 8] [--resume-free-gb 8] [--dry-run]
                  [--redo id#key,id#key --salt 2]   another sample of sections Whisper flagged
 """
 import argparse, json, os, signal, subprocess, sys, tempfile, time, wave
 from datetime import datetime
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # python -I leaves the script's own directory out
+import listen
+
 MODEL_DIR = Path.home() / ".cache/learn-tts/models/Qwen3-TTS-12Hz-0.6B-CustomVoice"
 LUFS, TRUE_PEAK, BITRATE = -16, -1.5, "32k"
 GAP_AFTER_HEADING, GAP, TAIL = 0.7, 0.35, 0.6
 CHARS_PER_SECOND = 14.0  # serena's Russian, measured in the spike
 BATCH_SENTENCES, BATCH_CHARS = 12, 2400
+RETAKES, MIN_RECALL, MIN_PRECISION = 3, 0.7, 0.5  # the thresholds separate the pilot's drifted sentences from the rest (docs/narration.md)
 
 log_file = None
 STOP = {"now": False}
@@ -162,7 +170,7 @@ def main():
     ap.add_argument("--parts")
     ap.add_argument("--lessons")
     ap.add_argument("--log")
-    ap.add_argument("--min-free-gb", type=float, default=6.0, help="pause below this much available memory")
+    ap.add_argument("--min-free-gb", type=float, default=8.0, help="pause below this much available memory")
     ap.add_argument("--resume-free-gb", type=float, default=8.0, help="and resume only at this much")
     ap.add_argument("--redo", help="lesson#key,…: render these sections again although they have audio (another sample)")
     ap.add_argument("--salt", type=int, default=1, help="with --redo: which other sample (the seed is shifted by it)")
@@ -231,7 +239,23 @@ def main():
         torch.cuda.synchronize()
         return [np.asarray(w, dtype=np.float32) for w in wavs], sr
 
-    rendered, audio_s, synth_s, retries = 0, 0.0, 0.0, 0
+    ignore = frozenset(scripts.get("ignore", []))
+    deaf = {"n": 0}
+
+    def judge(text, w, sr):
+        """Is this take the sentence? rank orders takes when none is good."""
+        seconds = len(w) / sr
+        fits = plausible(text, seconds)
+        heard = listen.transcribe_pcm((np.clip(w, -1, 1) * 32767).astype("<i2").tobytes(), sr, lang)
+        if heard is None:  # Whisper is not answering: say so, and do not hold the run up
+            deaf["n"] += 1
+            return {"ok": fits, "why": f"{seconds:.1f}s for {len(text)} chars", "rank": 0.0, "heard": None}
+        recall, precision, _ = listen.score(text, heard, ignore)
+        ok = fits and recall >= MIN_RECALL and precision >= MIN_PRECISION
+        why = "" if ok else f"{seconds:.1f}s for {len(text)} chars, recall {recall:.2f}, precision {precision:.2f}"
+        return {"ok": ok, "why": why, "rank": min(recall, precision) if fits else min(recall, precision) / 2, "heard": heard}
+
+    rendered, audio_s, synth_s, retries, flagged = 0, 0.0, 0.0, 0, 0
     try:
         for lesson, sec in todo:
             if stop["now"]:
@@ -248,18 +272,25 @@ def main():
                 wavs, sr = synth([sents[i] for i in b], seed + b[0])
                 for i, w in zip(b, wavs):
                     out[i] = trim(w, sr, np)
-            # an utterance far too long or too short for its text is a known failure of the model
-            # (a runaway, or a sentence swallowed): render it again alone, with another seed
+            # The model's known failures: a runaway or a swallowed sentence (a length no sentence
+            # has), and a sentence that drifts into syllables of no language at a plausible length,
+            # about 1 in 120 in the pilot, which only an ear catches. Either: render it again,
+            # alone, with another seed, and keep the best take.
             for i, s in enumerate(sents):
+                verdict = judge(s, out[i], sr)
                 tries = 0
-                while not plausible(s, len(out[i]) / sr) and tries < 3:
+                while not verdict["ok"] and tries < RETAKES:
                     tries += 1
                     retries += 1
-                    log(f"retry {lesson['id']}#{sec['key']} sentence {i}: {len(out[i]) / sr:.1f}s for {len(s)} chars")
+                    log(f"retake {lesson['id']}#{sec['key']} sentence {i} ({verdict['why']}): {s[:60]}")
                     w, sr = synth([s], seed + 1000 * tries + i)
-                    out[i] = trim(w[0], sr, np)
-                if not plausible(s, len(out[i]) / sr):
-                    log(f"implausible {lesson['id']}#{sec['key']} sentence {i} kept: {len(out[i]) / sr:.1f}s for {len(s)} chars")
+                    take = trim(w[0], sr, np)
+                    v = judge(s, take, sr)
+                    if v["ok"] or v["rank"] > verdict["rank"]:
+                        out[i], verdict = take, v
+                if not verdict["ok"]:
+                    flagged += 1
+                    log(f"FLAGGED {lesson['id']}#{sec['key']} sentence {i} kept after {tries} retakes ({verdict['why']}): {s[:80]} => {(verdict['heard'] or '')[:80]}")
             chunks, starts, t = [], [], 0.0
             for i, w in enumerate(out):
                 starts.append(round(t, 2))
@@ -292,7 +323,7 @@ def main():
         lockfile.unlink(missing_ok=True)
     finish_lessons(lessons, manifest, manifest_path, audio, done)
     log(f"{'stopped' if stop['now'] else 'done'}: {rendered} section(s), {audio_s / 60:.1f} min of audio in {synth_s / 60:.1f} min, "
-        f"{retries} retried sentence(s); the model is unloaded")
+        f"{retries} retake(s), {flagged} sentence(s) flagged, {deaf['n']} not heard (Whisper down); the model is unloaded")
 
 
 def finish_lessons(lessons, manifest, manifest_path, audio, done):

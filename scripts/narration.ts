@@ -21,6 +21,7 @@ type Mod = {
 	script: (l: Lesson, lang: 'ru') => Section[] | null;
 	narration: (l: Lesson, lang: 'ru') => unknown;
 	spoken: (text: string, l: Lesson, lang: 'ru') => string;
+	mappedWords: (l: Lesson[], lang: 'ru') => string[];
 	manifest: (lang: 'ru') => { lessons: Record<string, { sections: { hash: string }[] }> } | null;
 	VOICE: Record<string, string>;
 	SCRIPT_VERSION: number;
@@ -57,7 +58,7 @@ const code = await withApp(async (load) => {
 			return { id: l.id, part: l.part, sections: s };
 		});
 		mkdirSync(dirname(out), { recursive: true });
-		writeFileSync(out, JSON.stringify({ version: n.SCRIPT_VERSION, voice: n.VOICE, lang: 'ru', lessons: data }, null, '\t') + '\n');
+		writeFileSync(out, JSON.stringify({ version: n.SCRIPT_VERSION, voice: n.VOICE, lang: 'ru', ignore: n.mappedWords(loadContent().lessons, 'ru'), lessons: data }, null, '\t') + '\n');
 		console.log(`narration: ${data.length} lesson(s), ${sections} section(s), ${chars} characters (~${Math.round(chars / 14 / 60)} min of speech) → ${out}`);
 		const top = [...latin].sort((a, b) => b[1] - a[1]);
 		console.log(`latin words left after the maps: ${top.length} distinct`);
@@ -80,7 +81,10 @@ const code = await withApp(async (load) => {
 				if (!h || h.hash !== s.hash) continue;
 				const ref = w.words(s.sentences.join(' '));
 				// Whisper spells an acronym it heard letter by letter as «H T T P S»: one word again
-				const said = h.text.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''));
+				// and writes one in lower case when it has no vowel to read: «ttl», «rf»
+				const said = h.text
+					.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''))
+					.replace(/(?<![\p{L}\p{N}])[bcdfghjklmnpqrstvwxz]{2,6}(?![\p{L}\p{N}])/g, (m: string) => m.toUpperCase());
 				const { errors, ops } = w.align(ref, w.words(n.spoken(said, l, 'ru')));
 				refWords += ref.length;
 				errs += errors;

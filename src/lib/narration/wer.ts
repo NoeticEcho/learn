@@ -3,7 +3,7 @@
  * listening test (docs/narration.md). Both sides are first put into spoken form by the same
  * rules (script.ts `speak`), because Whisper writes «DNS» and «1995 году» where the voice was
  * given «ди-эн-эс» and «тысяча девятьсот девяносто пятом году»: a term counts as right when
- * it was heard, in either spelling. Then: numbers as words (Whisper writes «8» for «восемь»), lower case, ё as е, hyphens as spaces, no punctuation.
+ * it was heard, in either spelling. Then: numbers as words (Whisper writes «8» for «восемь»), lower case, ё as е, hyphens gone (an acronym is one word), no punctuation.
  */
 
 import { cardinal } from './numbers.ts';
@@ -13,6 +13,7 @@ export function words(s: string): string[] {
 		.replace(/(?<![\d.,])\d{1,6}(?![\d.,]\d)/g, (n) => ` ${cardinal(Number(n))} `)
 		.toLowerCase()
 		.replace(/ё/g, 'е')
+		.replace(/(?<=\p{L})[-‐](?=\p{L})/gu, '') // «ди-эн-эс» and «Бернерс-Ли» are one word, as Whisper writes them
 		.replace(/[-‐–—]/g, ' ')
 		.replace(/[^\p{L}\p{N}\s]/gu, ' ')
 		.split(/\s+/)
