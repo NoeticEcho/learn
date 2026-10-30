@@ -23,7 +23,7 @@
 		{ id: 'sell', label: 'Продаёт онлайн людям (товары или услуги)' },
 		{ id: 'public', label: 'Коммерческий сайт, открытый всем' }
 	];
-	let w = $state<Record<string, boolean>>(pick({ ru: { ru: true }, en: { us: true } }));
+	let w = $state<Record<string, boolean>>(pick<Record<string, boolean>>({ ru: { ru: true }, en: { us: true } }));
 	let d = $state<Record<string, boolean>>({});
 
 	type Regime = { id: string; name: string; when: () => boolean; what: string; do: string; risk: string };
