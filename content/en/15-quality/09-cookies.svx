@@ -1,0 +1,410 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/09-cookies.svx, localized: the ePrivacy Directive, PECR, the CCPA and Global Privacy Control, with Russia as a comparison. */
+	export const metadata = {
+		id: '15-quality/09-cookies',
+		part: 15,
+		order: 9,
+		title: 'Cookies, trackers and an honest banner',
+		definition: 'Cookies are small files kept in the browser, grouped as necessary, preferences, analytics and advertising. An honest banner gives an equal choice.',
+		summary:
+			'Almost every site sets cookies, and they are not all alike. Afterwards you can tell necessary cookies from analytics and advertising ones, you know what the EU and UK rules (ePrivacy and PECR), the US state laws (the CCPA and the Global Privacy Control signal) and Russia’s practice say about them, and you make a cookie table for your project and a banner where “Accept” and “Reject” are equal and the counter does not start before the choice. This is a guide as of 30 October 2026, not legal advice.',
+		minutes: 25,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'cards',
+					label: 'ACCEPT ALL · refuse…',
+					caption: 'The banner',
+					say: [
+						{ text: 'Where is “reject”?' },
+						{ who: 'The banner', text: 'In settings. Third screen.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'sheet',
+					label: 'name · why · how long · who',
+					caption: 'The table',
+					say: 'First an inventory: what is set, why, for how long and by whom. Only then the banner.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'lock',
+					label: 'Accept | Reject',
+					caption: 'Equal',
+					say: 'Two buttons of the same kind. The counter sleeps until the person has chosen.'
+				}
+			]
+		},
+		teaches: ['quality-cookies'],
+		requires: ['quality-152fz', 'metrics-counter-setup', 'metrics-analytics-ethics', 'server-sessions-and-cookies', 'net-http-status-headers'],
+		practice: {
+			id: 'cookie-inventory',
+			title: 'A cookie table and an honest banner',
+			task: 'Describe your project’s cookies and build a banner. 1) In the #cookies table (rows tr.cookie) list at least five cookies: every row has a data-cat attribute (necessary, prefs, analytics or ads) and a data-consent attribute (yes or no: whether consent is needed). Necessary cookies need no consent, analytics ones do. At least one row must name the project’s main action in the brief’s words. 2) The #cookie-banner banner: role=dialog and an aria-label, three buttons with the same class btn: #accept, #reject and #settings; no primary class; and a link to the notice #privacy. 3) Make the counter code “dormant”: a script of type text/plain with data-consent=analytics. 4) In the footer, a link or button with a data-cookie-settings attribute, so that a person can change their mind. 5) In the #eu-note note say what you do for visitors from the EU and UK (consent before analytics starts) and name the language or audience from the brief. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main, footer { max-width: 44rem; margin: 0 auto; padding: 1rem; }
+      .btn { font: inherit; padding: 0.6rem 1rem; background: #fff; color: #1d2430; border: 2px solid #1d2430; cursor: pointer; }
+      #cookie-banner { position: static; border: 2px solid #1d2430; padding: 1rem; margin: 1rem 0; }
+      table { border-collapse: collapse; }
+      td, th { border: 1px solid #888; padding: 0.3rem 0.6rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+
+      <section id="cookies">
+        <h2>Cookies on this site</h2>
+        <table>
+          <thead><tr><th>Name</th><th>Why</th><th>How long</th><th>Set by</th></tr></thead>
+          <tbody>
+            <tr class="cookie"><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div id="cookie-banner">
+        <p>We use cookies.</p>
+        <button class="btn primary" id="accept">Accept all</button>
+      </div>
+
+      <script>
+        (function () { /* the counter, starts at once */ })();
+      <\/script>
+
+      <aside data-scaffold id="eu-box">
+        <p>Visitors from the EU and UK: <span id="eu-note">…</span></p>
+      </aside>
+    </main>
+    <footer><p>{{name}}</p></footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main, footer { max-width: 44rem; margin: 0 auto; padding: 1rem; }
+      .btn { font: inherit; padding: 0.6rem 1rem; background: #fff; color: #1d2430; border: 2px solid #1d2430; cursor: pointer; }
+      #cookie-banner { position: static; border: 2px solid #1d2430; padding: 1rem; margin: 1rem 0; }
+      table { border-collapse: collapse; }
+      td, th { border: 1px solid #888; padding: 0.3rem 0.6rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+
+      <section id="cookies">
+        <h2>Cookies on this site</h2>
+        <table>
+          <thead><tr><th>Name</th><th>Why</th><th>How long</th><th>Set by</th><th>Consent needed</th></tr></thead>
+          <tbody>
+            <tr class="cookie" data-cat="necessary" data-consent="no"><td>session</td><td>Remembers the progress of “{{mainAction.label}}”</td><td>until the browser closes</td><td>our site</td><td>no</td></tr>
+            <tr class="cookie" data-cat="necessary" data-consent="no"><td>csrf</td><td>Protects the form from request forgery</td><td>until the browser closes</td><td>our site</td><td>no</td></tr>
+            <tr class="cookie" data-cat="necessary" data-consent="no"><td>cookie_consent</td><td>Remembers your choice in this banner</td><td>6 months</td><td>our site</td><td>no</td></tr>
+            <tr class="cookie" data-cat="prefs" data-consent="yes"><td>lang</td><td>Remembers the language you chose</td><td>1 year</td><td>our site</td><td>yes</td></tr>
+            <tr class="cookie" data-cat="analytics" data-consent="yes"><td>_ga</td><td>Tells a new visitor from a returning one</td><td>as stated in the service’s help</td><td>the analytics service</td><td>yes</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div id="cookie-banner" role="dialog" aria-label="Cookie settings">
+        <p>Necessary cookies always work. The others switch on only when you choose. <a href="#privacy">Privacy notice</a></p>
+        <button class="btn" id="accept">Accept all</button>
+        <button class="btn" id="reject">Reject all</button>
+        <button class="btn" id="settings">Settings</button>
+      </div>
+
+      <script type="text/plain" data-consent="analytics">
+        (function () { /* the counter, starts after consent */ })();
+      <\/script>
+
+      <aside data-scaffold id="eu-box">
+        <p>Visitors from the EU and UK: <span id="eu-note">for the English version and an audience in Europe, analytics starts only after consent, with an equal choice and a way back through the footer link</span></p>
+      </aside>
+    </main>
+    <footer><p>{{name}} · <a href="#" data-cookie-settings>Cookie settings</a> · <a href="#privacy">Privacy notice</a></p></footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'rows', kind: 'count', selector: 'tr.cookie[data-cat][data-consent]', min: 5 },
+				{ id: 'gaps', kind: 'text', selector: '#cookies', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'necessary', kind: 'count', selector: 'tr.cookie[data-cat="necessary"][data-consent="no"]', min: 1 },
+				{ id: 'necessary-no-consent', kind: 'count', selector: 'tr.cookie[data-cat="necessary"][data-consent="yes"]', max: 0 },
+				{ id: 'analytics', kind: 'count', selector: 'tr.cookie[data-cat="analytics"][data-consent="yes"]', min: 1 },
+				{ id: 'analytics-no', kind: 'count', selector: 'tr.cookie[data-cat="analytics"][data-consent="no"]', max: 0 },
+				{ id: 'action-cookie', kind: 'field', selector: 'tr.cookie', field: 'mainAction.label' },
+				{ id: 'banner-role', kind: 'exists', selector: '#cookie-banner[role="dialog"][aria-label]' },
+				{ id: 'three-buttons', kind: 'count', selector: '#cookie-banner #accept.btn, #cookie-banner #reject.btn', min: 2 },
+				{ id: 'equal-buttons', kind: 'count', selector: '#cookie-banner button.btn', min: 3 },
+				{ id: 'no-primary', kind: 'count', selector: '#cookie-banner .primary, #cookie-banner .btn-primary', max: 0 },
+				{ id: 'reject', kind: 'exists', selector: '#cookie-banner #reject' },
+				{ id: 'settings', kind: 'exists', selector: '#cookie-banner #settings' },
+				{ id: 'policy-link', kind: 'exists', selector: '#cookie-banner a[href="#privacy"], #cookie-banner a[href$="privacy.html"]' },
+				{ id: 'dormant', kind: 'exists', selector: 'script[type="text/plain"][data-consent="analytics"]' },
+				{ id: 'no-active-counter', kind: 'count', selector: 'script:not([type]):not([src])', max: 0 },
+				{ id: 'reopen', kind: 'exists', selector: 'footer [data-cookie-settings]' },
+				{ id: 'eu-note', kind: 'text', selector: '#eu-note', matches: '(?=[\\s\\S]*(EU|Europe|UK|EEA))(?=[\\s\\S]*(consent|after the choice|before))(?![\\s\\S]*…)' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each cookie category with an example',
+				pairs: [
+					['Necessary', 'the session, form protection, a record of your choice in the banner'],
+					['Preferences', 'the chosen language or color theme'],
+					['Analytics', 'a visitor identifier in a counter'],
+					['Advertising', 'an identifier that follows interests between sites']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Is consent needed for cookies without which the inquiry form simply does not work (the session, protection against request forgery)?',
+				options: [
+					'No: they are necessary cookies, but you mention them in the notice',
+					'Yes, as for any cookie',
+					'Only if the site is for visitors from the EU'
+				],
+				answer: 0,
+				why: [
+					'Yes. The ePrivacy Directive and PECR exempt storage that is strictly necessary for a service the person has asked for. The table and the notice still name them.',
+					'No. If you demand consent for everything, the banner turns into noise.',
+					'No. The split between necessary cookies and the rest does not depend on the country.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes a cookie banner honest?',
+				options: [
+					'“Accept” and “Reject” are equal in look and place',
+					'The analytics and advertising switches are on in advance',
+					'The counter does not start until the person has chosen',
+					'A person can change their mind later: the footer has a link to the settings'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: in 2022 France’s regulator, the CNIL, fined Google and Facebook because refusing was harder than agreeing.',
+					'No. Pre-ticked does not count as consent (the Court of Justice of the EU decided so in Planet49 in 2019).',
+					'Yes: a banner that does not hold back the counter is only decoration.',
+					'Yes: withdrawing consent must be as easy as giving it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Does the United States have one federal law about cookies?',
+				options: [
+					'No: but state laws such as California’s CCPA let people opt out of the sale or sharing of their data for advertising, and require businesses to honor opt-out signals such as Global Privacy Control',
+					'Yes, and it requires a consent banner on every site',
+					'No, so cookies need not be mentioned at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. In the US the question is less “did you get consent first” and more “can the person opt out, and did you honor it.” This is a guide as of 30 October 2026, and the state laws keep changing, so ask a lawyer.',
+					'No. There is no such federal requirement.',
+					'No. A business that sells or shares personal information must say so, and a policy that misdescribes your trackers can be treated as a deceptive practice.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How does the EU and UK rule for non-essential cookies differ from the usual American approach?',
+				options: [
+					'In the EU and UK, consent must be obtained before non-essential cookies are set (ePrivacy Directive and PECR, with GDPR-standard consent); in most of the US the person opts out afterward',
+					'There is no difference, the rules are the same',
+					'In the EU cookies are banned'
+				],
+				answer: 0,
+				why: [
+					'Yes. If your site addresses visitors from the EU or UK (an English version, sales to Europe), their rules apply to those visitors, and often it is simpler to apply one high standard to everyone.',
+					'No. The EU and UK rule is stricter, in Article 5(3) of the ePrivacy Directive and regulation 6 of PECR.',
+					'No. There is no ban: a choice is needed.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write two banner buttons of the same kind: “Accept” with the id accept and “Reject” with the id reject, both with the class btn',
+				starter: '',
+				checks: [
+					{ id: 'accept', kind: 'exists', selector: 'button#accept.btn' },
+					{ id: 'reject', kind: 'exists', selector: 'button#reject.btn' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-cookie-cats',
+				front: 'The four categories of cookies?',
+				back: 'Necessary (session, protection, a record of the choice), preferences (language), analytics (a counter), advertising (tracking between sites). Consent is needed for the non-essential ones, and the necessary ones are named in the notice.'
+			},
+			{
+				id: 'quality-cookie-ru',
+				front: 'What about cookies in Russia?',
+				back: 'There is no separate cookie law. A visitor identifier may be personal data (152-FZ), so cookies are described in the notice and a choice is offered for the non-essential ones. Practice and readings change: check with a lawyer.'
+			},
+			{
+				id: 'quality-cookie-eu',
+				front: 'What does the EU and UK require of a banner?',
+				back: 'Consent before non-essential cookies are set; pre-ticked switches are not consent; refusing is as easy as agreeing; consent can be withdrawn. The basis: the ePrivacy Directive (Article 5(3)) and the GDPR in the EU, PECR (regulation 6) and the UK GDPR in the UK.'
+			},
+			{
+				id: 'quality-cookie-banner',
+				front: 'The marks of an honest banner?',
+				back: 'Accept and Reject are equal, nothing is switched on in advance, the counter sleeps until the choice, the site opens if you refuse, and there are a link to the notice and a way to change your mind.'
+			},
+			{
+				id: 'quality-cookie-inventory',
+				front: 'How do you make a cookie inventory?',
+				back: 'Open the developer tools (Application, then Cookies and Local storage), look before and after consent, and write down the name, the reason, the period, who sets it and the category. Do not forget other people’s embeds: video, maps, fonts, chats.'
+			}
+		],
+		sources: [
+			{ title: 'Using HTTP cookies (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Third-party cookies (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/Third-party_cookies', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Web Almanac 2024: Privacy', url: 'https://almanac.httparchive.org/en/2024/privacy', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'EDPB: Guidelines 05/2020 on consent under GDPR', url: 'https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-052020-consent-under-regulation-2016679_en', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'ICO: Guidance on the use of storage and access technologies', url: 'https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'The Privacy and Electronic Communications (EC Directive) Regulations 2003, regulation 6 (legislation.gov.uk)', url: 'https://www.legislation.gov.uk/uksi/2003/2426/regulation/6', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Global Privacy Control', url: 'https://globalprivacycontrol.org/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'California Consumer Privacy Act: frequently asked questions (California Privacy Protection Agency)', url: 'https://cppa.ca.gov/faq.html', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Federal Law “On Personal Data” No. 152-FZ (ConsultantPlus, in Russian, for comparison)', url: 'https://www.consultant.ru/document/cons_doc_LAW_61801/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'First the inventory, then the banner: you cannot honestly ask about what you haven’t counted.',
+			hints: [
+				'A table row: <tr class=cookie data-cat=necessary data-consent=no>…</tr>. Necessary cookies get consent no, analytics ones consent yes.',
+				'One row must speak about the project’s main action: “Remembers the progress of …” in the brief’s words.',
+				'The banner: a div with the id cookie-banner, role=dialog and an aria-label, and three buttons with the class btn: accept, reject and settings. No primary class.',
+				'The counter: a script of type text/plain with data-consent=analytics, and no ordinary script without a type left. In the footer, a link with a data-cookie-settings attribute.'
+			],
+			mistakes: {
+				rows: 'The table needs at least five tr.cookie rows with data-cat and data-consent.',
+				gaps: 'There are still “…” in the table. Fill in every cell.',
+				necessary: 'You need at least one necessary cookie with data-consent=no.',
+				'necessary-no-consent': 'A necessary cookie needs no consent: set data-consent=no.',
+				analytics: 'You need an analytics cookie with data-consent=yes.',
+				'analytics-no': 'An analytics cookie needs consent: data-consent=yes.',
+				'action-cookie': 'One row must name the project’s main action in the brief’s words.',
+				'banner-role': '#cookie-banner needs role=dialog and an aria-label.',
+				'three-buttons': 'The banner needs the buttons #accept and #reject with the class btn.',
+				'equal-buttons': 'You need three buttons with the same class btn: accept, reject, settings.',
+				'no-primary': 'Remove the primary class: the buttons must be equal.',
+				reject: 'The banner needs a #reject button.',
+				settings: 'The banner needs a #settings button.',
+				'policy-link': 'The banner needs a link to the notice, #privacy.',
+				dormant: 'Make the counter code dormant: a script of type text/plain with data-consent=analytics.',
+				'no-active-counter': 'An ordinary script is left: the counter must not start before consent.',
+				reopen: 'The footer needs a link with a data-cookie-settings attribute, so that a person can change their mind.',
+				'eu-note': 'In the note, say that for visitors from the EU and UK analytics starts after consent, and name the language or audience.'
+			},
+			outro: 'Now you have an inventory and a banner where the choice is real. Don’t forget to add the table to the notice and to review it whenever a new service arrives: new embeds set new cookies.'
+		},
+		say: { cookie: 'cookie', ePrivacy: 'ee-privacy', PECR: 'peck-er', GDPR: 'G D P R', EDPB: 'E D P B', CNIL: 'C N I L', Planet49: 'planet forty-nine', CCPA: 'C C P A', GPC: 'G P C', 'data-consent': 'data consent' }
+	};
+</script>
+
+<script>
+	import CookieInspector from '../../diagrams/CookieInspector.svelte';
+</script>
+
+## What your site does in a person’s browser
+
+We call “cookies” the small files a site keeps in the browser (see [the lesson on authentication](../../06-server/07-authentication/), where a cookie holds a session number). But other things do the same: **local storage** (`localStorage`), **pixels** (invisible images that report that a page was opened), **counter scripts** and device **“fingerprints”** (from the set of fonts, the screen and other things). That is why lawyers say “cookies and similar technologies,” and why we say “trackers” for short.
+
+Some of these are what the site cannot work without, and some are what follows people. The law and common sense tell them apart. So the first step is always an inventory: what your site sets in a person’s browser, why, for how long and who sets it.
+
+## Categories
+
+Four categories are used everywhere.
+
+- **Necessary.** The thing the person asked for doesn’t work without them: the session at login or an inquiry, protection of the form against request forgery, a record that the person has already answered the banner. They need no consent, but you name them in the notice.
+- **Preferences** (functional). Convenience: language, a color theme, a remembered city. The site works without them. On a strict reading of the EU rules they need consent, and some regulators exempt a setting the person chose themselves; in practice many sites treat them as necessary if the person made the choice. To avoid arguing, list them in the table.
+- **Analytics.** A visitor identifier in a counter: telling a new visitor from a returning one, counting visits. Google Analytics, for example, sets cookies with names like `_ga` (see the service’s help for the list and the periods).
+- **Advertising.** Identifiers that follow interests between sites and show ads. The most sensitive category.
+
+Third-party embeds set cookies too, and you answer for them as for your own: a video player, a map, a social widget, a chat. That is why this textbook opens video only after a click. Loading fonts from another server also hands that server the visitor’s address. In January 2022 a court in Munich awarded €100 to a visitor whose IP address was sent to Google by fonts embedded from Google’s servers without consent. Other German courts have not all agreed, but it is simplest to host your fonts yourself, and the page loads faster too (the first lesson of this part).
+
+Open the diagram. In the first part, sort the cookies into categories; in the second, build a banner and see what nudging looks like.
+
+<CookieInspector />
+
+<details>
+<summary>Check yourself: which category is a cookie that remembers that the person has already answered the banner?</summary>
+
+Necessary: without it the banner would ask every time. It needs no consent, but it is named in the table and the notice.
+
+</details>
+
+## What the law says
+
+**In the European Union** the rule is in Article 5(3) of the ePrivacy Directive (2002/58/EC, as amended in 2009). Storing information on a person’s device, or gaining access to information already stored there, is allowed only with the person’s **consent, after clear and comprehensive information**. The exceptions are narrow: storage whose sole purpose is carrying out a transmission, and storage strictly necessary to provide a service the person has explicitly requested. Consent has the meaning it has in the GDPR: freely given, specific, informed and unambiguous, and as easy to withdraw as to give. In 2019 the Court of Justice of the EU decided in *Planet49* (case C-673/17) that a pre-ticked box is not valid consent for cookies. In January 2022 the French regulator, the CNIL, fined Google €150 million and Facebook (Meta Ireland) €60 million, because on their sites accepting cookies took one click and refusing took several. Several regulators allow a narrow exception for strictly anonymous audience measurement, so check your own country’s regulator.
+
+**In the United Kingdom** the same rule is in regulation 6 of the Privacy and Electronic Communications (EC Directive) Regulations 2003 (PECR): a person must not store information, or gain access to information stored, in a user’s device unless the exceptions in Schedule A1 apply, or the user has given consent. The Data (Use and Access) Act 2025 added new exceptions (for example a narrow one for purely statistical analytics about how your own service is used) and raised the penalties for PECR breaches. The ICO reads the exceptions narrowly, and according to commentators on its guidance, an ordinary third-party analytics tool whose provider reuses the data for its own purposes may not qualify. Read the ICO’s current guidance before deciding that your analytics needs no banner.
+
+**In the United States** there is no federal cookie law. Instead the state privacy laws apply to the *purpose*. Under California’s CCPA, giving personal information to third parties for cross-context behavioral advertising is “sharing,” and a consumer has the right to **opt out** of the sale or sharing of their information. A covered business must give a way to opt out (a link such as “Do Not Sell or Share My Personal Information”) and must treat an **opt-out preference signal** as a valid request. The best-known signal is **Global Privacy Control (GPC)**: a browser setting or extension that tells every site you visit that you opt out. In August 2022 the California Attorney General announced a $1.2 million settlement with Sephora, the first CCPA enforcement action, which alleged that it failed to disclose that it sold personal information and failed to honor opt-outs sent through GPC. Several other states have laws with a similar opt-out signal rule. The laws apply only above their thresholds (see the lesson on personal data law), but the practice of honoring GPC is cheap, and the browser sends it for you: a `Sec-GPC: 1` request header, and `navigator.globalPrivacyControl` in a script. Also be aware that in the US some plaintiffs have used older wiretapping and privacy statutes, such as California’s Invasion of Privacy Act, against trackers and session recording; ask a lawyer if you use them.
+
+**In Russia**, as a comparison: there is no separate cookie law (as of 30 October 2026). But 152-FZ defines personal data broadly, so a visitor identifier together with an address or behavior may fall under it. In practice, Russian sites mention cookies in the policy and give a choice for the non-essential ones, and lawyers differ about how far a Russian audience requires a banner. A foreign counter or chat is also a data transfer abroad.
+
+This guide is a snapshot, and the rules and their readings change; for a real project discuss it with a lawyer.
+
+<details>
+<summary>Check yourself: is consent needed for an analytics cookie in the EU, and when?</summary>
+
+Yes, before it is set: the site must not set analytics until the person has chosen. (In the UK a narrow exception for purely statistical analytics now exists, but the ICO reads it strictly.)
+
+</details>
+
+## How to make an inventory
+
+1. Open the site in a window with no history, and in the developer tools open the “Application” tab: the “Cookies” and “Local storage” sections.
+2. Write down everything that is there **before** a choice in the banner. Then press “Accept” and write down what was **added**. Then clear it all and press “Reject”: nothing non-essential should be added.
+3. For each entry, a table row: **name, why, how long, who sets it, category, whether consent is needed**.
+4. Go through the pages with embeds (video, a map, a chat): they set their own.
+5. Update the inventory whenever a new service is added. Free scanners also find cookies, but they don’t know why you have them.
+
+## The banner
+
+You saw the rules of an honest banner in [the lesson on analytics ethics](../../14-metrics/07-heatmaps-privacy/): two equal buttons, nothing on in advance, the counter not started before the choice, and the chance to change your mind. Here is what practice adds.
+
+- **Equality in look and place.** “Accept” and “Reject” of the same shape, color and size, side by side. A bright “Accept” next to a tiny refusal link is a dark pattern from [the lesson on the limit of manipulation](../../11-copywriting/06-persuasion/), and it is exactly what was fined in the EU.
+- **Three choices:** accept all, reject all, set by category. Necessary cookies cannot be switched off.
+- **Blocking before the choice.** A banner without blocking is decoration. The “dormant” script technique (`type="text/plain"`) from the lesson on analytics ethics is practiced right here.
+- **A record of the choice:** the date, the banner version and the choice. It is the same “consent as a record” as in the lesson on personal data law.
+- **A way to change your mind:** a “Cookie settings” link in the footer of every page.
+- **It doesn’t get in the way.** The banner doesn’t cover the content entirely or hide the focus (WCAG 2.4.11), it opens with the keyboard, it has a name, and its buttons have visible focus.
+- **It doesn’t come back** every time after a refusal: the choice is remembered for a reasonable period (six months or a year).
+- **No wall:** the site opens whatever the choice.
+- **Browser signals.** Honor Global Privacy Control where the law counts it (California and other states); elsewhere it is good practice. Treat a GPC signal as an opt-out of the sale or sharing of data and as a refusal of advertising cookies.
+
+## Practice
+
+You are in the era of 2022: the site collects statistics, and you should say so honestly. Make a cookie table for your project (at least five rows, with a category and a consent flag), make a banner of three identical buttons, make the counter dormant and add a link in the footer for changing your mind.
+
+The check reads markup: the categories and the consent flag, a banner with three equal buttons, a dormant script. Whether it is honest in fact, and whether the table is real, is for you to decide: open the developer tools on a real site and compare.
+
+## What used to be different
+
+In the 2000s cookies were “cookies” and bothered no one. Then advertising networks appeared that followed people between sites, and in 2009 and 2011 the EU introduced the consent rule. The first banners were a line saying “by continuing to use the site you agree,” and then they became a maze where refusing took five screens. Regulators began to punish the maze itself. In the US the answer came later and took a different form, with opt-outs and signals such as GPC. Russian practice rests for now on the law on personal data and on site owners’ caution, but it is changing too.
