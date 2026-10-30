@@ -1,0 +1,425 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/03-keyboard-reader.svx. */
+	export const metadata = {
+		id: '15-quality/03-keyboard-reader',
+		part: 15,
+		order: 3,
+		title: 'Keyboard and screen reader: name, role, state',
+		definition: 'The accessibility tree is what a browser builds from markup for assistive software: every element has a name, a role and a state. Native elements supply them.',
+		summary:
+			'A person using a screen reader doesn’t see the page but listens to its tree: every element has a name, a role and a state. Afterwards you understand how a browser assembles that tree, you build a menu button, a dialog and navigation that a keyboard and a screen reader can handle, and you can check your page with NVDA or VoiceOver in five minutes.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'cards',
+					label: '<div onclick>',
+					caption: 'Not a button',
+					say: [
+						{ text: 'I press Tab. Silence.' },
+						{ who: 'div', text: 'I’m a button! For mice.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'lock',
+					label: 'name · role · state',
+					caption: 'The tree',
+					say: 'A screen reader hears three things: what it’s called, what it is and what condition it’s in.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'crt',
+					label: 'button',
+					caption: 'Native',
+					say: 'A real button already does all of this. It only needs a name.'
+				}
+			]
+		},
+		teaches: ['quality-keyboard-screen-reader'],
+		requires: ['quality-wcag22', 'html-forms', 'js-events'],
+		practice: {
+			id: 'a11y-reader-pass',
+			title: 'A menu, a dialog and navigation for keyboard and screen reader',
+			task: 'On this page the “buttons” are made of div elements and work only with a mouse. Rewrite the markup so that it works with a keyboard and a screen reader. 1) The header, navigation, main content and footer: header, nav, main and footer elements; the nav has a name of its own (aria-label), and the current item has aria-current=page. 2) The page heading is an h1 with the project’s name from the brief. 3) The menu button is a button with id=menu-toggle, aria-expanded=false and aria-controls=menu; the navigation holds links (a) to all the sections from the brief. 4) The main action button is a button with id=open-d, aria-haspopup=dialog and the action’s text from the brief. 5) The dialog is a dialog with id=d, aria-labelledby and an h2 heading with the action’s text, and a “Close” button inside. 6) The search icon button is a button with an aria-label and an svg with aria-hidden=true. 7) A place for messages: role=status. 8) Leave no div with onclick or role=button. In the note write what a screen reader will say on the menu button (role and state) and on the dialog. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; color: #1d2430; background: #fff; line-height: 1.5; }
+      .header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: 0.75rem 1rem; background: #eef1f6; }
+      .menu-btn, .btn { cursor: pointer; padding: 0.6rem 1rem; background: #0b3d91; color: #fff; border: 0; font: inherit; }
+      .nav-link { padding: 0.4rem 0; }
+      .content { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      .title { font-size: 2rem; font-weight: bold; }
+      .footer { padding: 1rem; background: #eef1f6; }
+      dialog { padding: 1.5rem; border: 2px solid #1d2430; }
+    <\/style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">{{name}}</div>
+      <div class="menu-btn" id="menu-toggle">Menu</div>
+      <div class="nav" id="menu" hidden>
+        {{#each sections}}<div class="nav-link">{{.}}</div>
+        {{/each}}
+      </div>
+      <div class="search" onclick="alert('Search')"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="8" cy="8" r="6" fill="none" stroke="#1d2430" stroke-width="2"></circle><path d="M13 13l5 5" stroke="#1d2430" stroke-width="2"></path></svg></div>
+    </div>
+    <div class="content">
+      <div class="title">{{title}}</div>
+      <div class="text">{{who}}</div>
+      <div class="btn" id="open-d">{{mainAction.label}}</div>
+      <div class="modal" id="d" hidden>
+        <div class="modal-title">{{mainAction.label}}</div>
+        <div class="btn" id="close-d">Close</div>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+    <div class="footer">{{name}}, {{city}}</div>
+
+    <aside data-scaffold id="reader-note">
+      <h2>What the screen reader will say</h2>
+      <p>On the menu button: <span id="say-menu">…</span></p>
+      <p>On the dialog: <span id="say-dialog">…</span></p>
+    </aside>
+
+    <script type="module" id="ui-js">
+      const toggle = document.getElementById('menu-toggle');
+      const menu = document.getElementById('menu');
+      toggle?.addEventListener('click', () => {
+        const opening = menu.hidden;
+        menu.hidden = !opening;
+        toggle.setAttribute('aria-expanded', String(opening));
+      });
+      const dlg = document.getElementById('d');
+      document.getElementById('open-d')?.addEventListener('click', () => dlg.showModal?.());
+      document.getElementById('close-d')?.addEventListener('click', () => dlg.close?.());
+    <\/script>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { margin: 0; font-family: system-ui, sans-serif; color: #1d2430; background: #fff; line-height: 1.5; }
+      header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: 0.75rem 1rem; background: #eef1f6; }
+      button { cursor: pointer; min-height: 44px; padding: 0.6rem 1rem; background: #0b3d91; color: #fff; border: 0; font: inherit; }
+      button.search { background: none; color: inherit; min-width: 44px; }
+      nav a { display: inline-block; padding: 0.4rem 0.5rem; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      footer { padding: 1rem; background: #eef1f6; }
+      dialog { padding: 1.5rem; border: 2px solid #1d2430; }
+      :focus-visible { outline: 3px solid #0b3d91; outline-offset: 2px; }
+    <\/style>
+  </head>
+  <body>
+    <header>
+      <p class="logo">{{name}}</p>
+      <button type="button" id="menu-toggle" aria-expanded="false" aria-controls="menu">Menu</button>
+      <nav id="menu" aria-label="Site sections" hidden>
+        {{#each sections}}<a href="#main">{{.}}</a>
+        {{/each}}
+        <a href="#main" aria-current="page">Home</a>
+      </nav>
+      <button type="button" class="search" aria-label="Search"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20"><circle cx="8" cy="8" r="6" fill="none" stroke="#1d2430" stroke-width="2"></circle><path d="M13 13l5 5" stroke="#1d2430" stroke-width="2"></path></svg></button>
+    </header>
+    <main id="main">
+      <h1>{{title}}</h1>
+      <p>{{who}}</p>
+      <button type="button" id="open-d" aria-haspopup="dialog">{{mainAction.label}}</button>
+      <dialog id="d" aria-labelledby="d-title">
+        <h2 id="d-title">{{mainAction.label}}</h2>
+        <button type="button" id="close-d">Close</button>
+      </dialog>
+      <p id="status" role="status"></p>
+    </main>
+    <footer>{{name}}, {{city}}</footer>
+
+    <aside data-scaffold id="reader-note">
+      <h2>What the screen reader will say</h2>
+      <p>On the menu button: <span id="say-menu">“Menu, button, collapsed”</span></p>
+      <p>On the dialog: <span id="say-dialog">“Name of the action, dialog”</span></p>
+    </aside>
+
+    <script type="module" id="ui-js">
+      const toggle = document.getElementById('menu-toggle');
+      const menu = document.getElementById('menu');
+      toggle?.addEventListener('click', () => {
+        const opening = menu.hidden;
+        menu.hidden = !opening;
+        toggle.setAttribute('aria-expanded', String(opening));
+      });
+      const dlg = document.getElementById('d');
+      document.getElementById('open-d')?.addEventListener('click', () => dlg.showModal?.());
+      document.getElementById('close-d')?.addEventListener('click', () => dlg.close?.());
+    <\/script>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'landmarks', kind: 'count', selector: 'header, nav, main, footer', min: 4 },
+				{ id: 'nav-name', kind: 'exists', selector: 'nav[aria-label]' },
+				{ id: 'nav-current', kind: 'exists', selector: 'nav a[aria-current="page"]' },
+				{ id: 'h1', kind: 'field', selector: 'h1', field: 'title' },
+				{ id: 'menu-btn', kind: 'exists', selector: 'button#menu-toggle[aria-expanded][aria-controls="menu"]' },
+				{ id: 'nav-links', kind: 'field', selector: 'nav a', field: 'sections' },
+				{ id: 'open-btn', kind: 'field', selector: 'button#open-d[aria-haspopup="dialog"]', field: 'mainAction.label' },
+				{ id: 'dialog', kind: 'exists', selector: 'dialog#d[aria-labelledby]' },
+				{ id: 'dialog-title', kind: 'field', selector: 'dialog h2', field: 'mainAction.label' },
+				{ id: 'dialog-close', kind: 'text', selector: 'dialog button', matches: 'Close' },
+				{ id: 'icon-name', kind: 'exists', selector: 'button[aria-label] svg[aria-hidden="true"]' },
+				{ id: 'status', kind: 'exists', selector: '[role="status"], [role="alert"], [aria-live]' },
+				{ id: 'no-fake', kind: 'count', selector: 'div[onclick], span[onclick], [role="button"]', max: 0 },
+				{ id: 'say-menu', kind: 'text', selector: '#say-menu', matches: '(?=[\\s\\S]*[Bb]utton)(?=[\\s\\S]*(collapsed|expanded|closed|open))' },
+				{ id: 'say-dialog', kind: 'text', selector: '#say-dialog', matches: '[Dd]ialog|[Ww]indow|[Mm]odal' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Which element gets focus from the Tab key and is pressed with Enter without a single line of script?',
+				options: ['button', 'a div with onclick', 'a span with role=button'],
+				answer: 0,
+				why: [
+					'Yes. A native button is already in the tab order, is pressed with Enter and Space, and a screen reader calls it a button.',
+					'No. A div doesn’t get focus, and Enter does nothing on it. It works only with a mouse.',
+					'No. A role changes only what a screen reader says. It adds no behavior.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What gives an input field a name that a screen reader will announce?',
+				options: [
+					'A label with a for attribute pointing at the field’s id',
+					'An aria-label on the field itself',
+					'Only a placeholder inside the field',
+					'A class attribute containing the word “phone”'
+				],
+				answer: [0, 1],
+				why: [
+					'Yes: the best option, because the label is visible to everyone and a click on it puts focus in the field.',
+					'Yes: it gives a screen reader the name, but a sighted person won’t see a label. It suits places where a visible label is impossible (a search field with a button).',
+					'No. A placeholder vanishes as you type, and not every program reliably uses it as the name.',
+					'No. A class is for styles, and a screen reader doesn’t read it.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each attribute with what it tells a screen reader',
+				pairs: [
+					['aria-expanded', 'whether the block this element controls is open'],
+					['aria-current=page', 'this link points to the current page'],
+					['aria-describedby', 'which text additionally describes the element (a hint)'],
+					['role=status', 'messages appear here, and they should be spoken without moving focus']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A link or button has aria-hidden=true, but it stays on the page and can be reached with Tab. What happens?',
+				options: [
+					'Keyboard focus reaches it, but the screen reader says nothing about it: the person lands on an “empty” spot',
+					'It disappears for both the eyes and the keyboard',
+					'Nothing: the attribute only affects search'
+				],
+				answer: 0,
+				why: [
+					'Yes. aria-hidden hides an element only from assistive software, and doesn’t remove it from the focus order. So it is used only for what is decorative and never focusable.',
+					'No. For the eyes and for the keyboard nothing changes.',
+					'No. It is an attribute for the accessibility tree, and search engines have nothing to do with it.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put in order how a modal dialog should behave',
+				items: [
+					'The person presses a button and the dialog opens',
+					'Focus moves inside the dialog, to its heading or its first element',
+					'While the dialog is open, Tab moves only inside it, and the rest of the page is unreachable',
+					'Esc or the “Close” button closes the dialog',
+					'Focus returns to the button that opened the dialog'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a “Menu” button that tells assistive software the block with the id menu it controls is currently collapsed',
+				starter: '',
+				checks: [
+					{ id: 'btn', kind: 'exists', selector: 'button[aria-expanded=false][aria-controls=menu]' },
+					{ id: 'text', kind: 'text', selector: 'button', matches: 'Menu' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-reader-tree',
+				front: 'What does a person with a screen reader hear?',
+				back: 'Not a picture but the accessibility tree: every element has a name, a role and a state (for example “Menu, button, collapsed”). The browser builds it from the markup.'
+			},
+			{
+				id: 'quality-reader-native',
+				front: 'Why are native elements better than home-made ones?',
+				back: 'button, a, input, label and dialog already take focus, answer to keys and announce their role. A div with onclick has none of that, and ARIA only changes what is announced, never the behavior.'
+			},
+			{
+				id: 'quality-reader-dialog',
+				front: 'What must a modal dialog do?',
+				back: 'Move focus inside, keep Tab from leaving, close on Esc and return focus to the button. A native dialog opened with showModal() does all of this itself.'
+			},
+			{
+				id: 'quality-reader-status',
+				front: 'How do you announce a message without moving focus?',
+				back: 'A container with role=status (politely) or role=alert (urgently) is already in the page, and text is inserted into it later. The screen reader reads it on its own.'
+			},
+			{
+				id: 'quality-reader-test',
+				front: 'The five-minute screen reader check?',
+				back: 'Turn on NVDA or VoiceOver. Move by headings (the H key), regions (D) and form fields (F). Do the main action without looking at the screen: can you hear what it is and what happened?'
+			}
+		],
+		sources: [
+			{ title: 'ARIA Authoring Practices Guide (W3C WAI)', url: 'https://www.w3.org/WAI/ARIA/apg/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'APG: Modal Dialog pattern', url: 'https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'APG: Disclosure pattern', url: 'https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: '<dialog> (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'ARIA live regions (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Manual Screen Reader Testing (WebAIM)', url: 'https://webaim.org/articles/screenreader_testing/', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Screen Reader User Survey #11 (WebAIM, 2026)', url: 'https://webaim.org/projects/screenreadersurvey11/', licence: 'link-only', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to replace the “buttons made of div” with real ones. Everything you change is already understood by the keyboard and the screen reader.',
+			hints: [
+				'The basics: header, nav, main, footer. The menu: <button id=menu-toggle aria-expanded=false aria-controls=menu>Menu</button>, and the nav gets id=menu and an aria-label.',
+				'The dialog: <dialog id=d aria-labelledby=d-title><h2 id=d-title>…</h2><button id=close-d>Close</button></dialog>. The opening button: <button id=open-d aria-haspopup=dialog>.',
+				'The icon button: <button aria-label=Search><svg aria-hidden=true>…</svg></button>. Messages: <p id=status role=status></p>.',
+				'The script at the end of the page is already attached. It finds elements by id, so the ids must not change.'
+			],
+			mistakes: {
+				landmarks: 'You need header, nav, main and footer elements instead of div.',
+				'nav-name': 'The nav must have a name: aria-label, for example Site sections.',
+				'nav-current': 'Give the current navigation item aria-current=page.',
+				h1: 'The project’s name from the brief belongs in the h1.',
+				'menu-btn': 'The menu button: a button with id=menu-toggle, aria-expanded=false and aria-controls=menu.',
+				'nav-links': 'The nav must hold links (a) to all the sections from the brief.',
+				'open-btn': 'The main action button: a button with id=open-d, aria-haspopup=dialog and the action’s text from the brief.',
+				dialog: 'You need a dialog element with id=d and aria-labelledby.',
+				'dialog-title': 'The dialog needs an h2 heading with the action’s name from the brief.',
+				'dialog-close': 'The dialog needs a “Close” button.',
+				'icon-name': 'The icon button: an aria-label on the button and aria-hidden=true on the svg.',
+				status: 'Add a place for messages with role=status.',
+				'no-fake': 'A div or span with onclick or role=button is left. Replace it with native elements.',
+				'say-menu': 'Write what the screen reader will say on the menu button: the role “button” and the state (collapsed).',
+				'say-dialog': 'Write what the screen reader will say on the dialog: the name and the word “dialog”.'
+			},
+			outro: 'Now the menu and the dialog work without a mouse, and a screen reader knows what the elements are. Next, walk through the page at least once with NVDA or VoiceOver: your ears will catch what your eyes don’t.'
+		},
+		say: { NVDA: 'N V D A', JAWS: 'jaws', VoiceOver: 'voice over', TalkBack: 'talk back', ARIA: 'AR-ee-uh', aria: 'AR-ee-uh', dialog: 'dialog', Tab: 'tab', Esc: 'escape', Enter: 'enter', landmark: 'landmark', live: 'live', WebAIM: 'web A I M', APG: 'A P G' }
+	};
+</script>
+
+<script>
+	import AccName from '../../diagrams/AccName.svelte';
+</script>
+
+## A page that is listened to
+
+A person who can’t see the screen doesn’t “listen to a picture.” They listen to the **accessibility tree**: a parallel tree the browser builds from your markup especially for assistive software. In it every element has three things:
+
+- a **name**: what it is called. A button is “Menu,” a field is “Phone,” an image has its alternative text;
+- a **role**: what it is. A link, a button, a heading, a field, a list, navigation;
+- a **state**: the condition it is in. Expanded, pressed, selected, current page, an error.
+
+A screen reader (software that reads the screen aloud) puts them together into a phrase like “Menu, button, collapsed.” A large part of making an interface accessible is making sure that phrase is true.
+
+Where does the browser get the name, role and state? The role and behavior come from **the element itself**: `button` is a button, `a` with an `href` is a link, `h2` is a second-level heading. The name is assembled in order from several places: `aria-labelledby`, `aria-label`, then the content or a linked label (`label` for a field, `alt` for an image), and last of all `title`. The state comes from attributes (`checked`, `disabled`, `aria-expanded`, `aria-current`).
+
+The conclusion you already know from the first lesson on ARIA: **a native element gives all three at once**, and a `div` gives none. So most often it is enough to choose the right element and give it a name.
+
+## How a page is listened to
+
+A screen reader is used differently from the way eyes read. In the WebAIM survey (the eleventh, July and August 2026, with about 1,800 valid responses), most people said that on a long page they begin by going through the headings: roughly two in three. So in browse mode, quick-navigation keys jump between elements of one kind: **H** to the next heading, **D** to the next region, **F** to the next form field, **K** to a link, **B** to a button. A screen reader can also show a list of all the headings, all the regions and all the links.
+
+From this follows what you do by hand:
+
+- **Headings** go in order, there is one h1, and you can understand the page from them as from a table of contents.
+- **Regions** (landmarks) are marked by the semantic elements you know: `header`, `nav`, `main`, `aside`, `footer`. If there are two navigations, each has its own name in `aria-label`: “Site sections,” “Footer.”
+- **Links** make sense out of context. “Read more” in a list of ten links sounds the same ten times. Write “Read more about the service: boundary surveys.”
+- **Fields** are labeled. Without a label a screen reader says “edit text” and the person doesn’t know what to type.
+
+Screen readers also differ. By the same survey, on computers people most often use JAWS (paid) and NVDA (free), and on phones VoiceOver on the iPhone and TalkBack on Android. The words differ a little between programs, and the sense is the same.
+
+<details>
+<summary>Check yourself: what does a screen reader build “Menu, button, collapsed” from?</summary>
+
+The name “Menu” comes from the button’s content, the role “button” from the button element itself, and the state “collapsed” from the attribute aria-expanded=false.
+
+</details>
+
+## Keyboard: order, focus and control
+
+You know focus and order from the first pass. Here is what to add for complex elements.
+
+- **Tab** moves between elements, **Shift+Tab** back. Inside composite elements (a set of radio buttons, tabs, a menu) **the arrow keys** move between the items, and Tab passes the whole group in one go. For home-made widgets this has to be programmed. The ARIA Authoring Practices Guide describes the expected behavior of each.
+- **Enter** activates a link and a button, **Space** activates a button and ticks a checkbox, **Esc** closes a dialog, a pop-up menu or a tooltip.
+- **Expanding blocks** are easiest to make with a button carrying `aria-expanded` and `aria-controls`: a screen reader announces “collapsed” or “expanded.” This pattern is called *disclosure*, and it is worth using in place of home-made “menus” with the `menu` role, which promises more than it delivers.
+- **Dialogs.** A modal dialog must move focus inside, keep Tab from leaving, close on Esc and return focus to the button that opened it. The native `dialog` element with the `showModal()` method does all this itself. It is enough to give it a name through `aria-labelledby`.
+
+<details>
+<summary>Check yourself: what does a dialog element do for the keyboard after showModal()?</summary>
+
+It moves focus inside, makes the rest of the page unreachable, closes on Esc and returns focus to the button that opened the dialog.
+
+</details>
+
+## Messages: what changed on the page
+
+A page changes without reloading: an error appeared, an item went into the cart, a submission went through. A sighted person notices, and a screen reader doesn’t know where to look. The solution is **live regions**. A container with `role="status"` (politely: read it when the screen reader is free) or `role="alert"` (urgently, interrupting the reading) sits in the page in advance, and text is inserted into it later. The screen reader reads the inserted text on its own, and focus doesn’t move.
+
+Two rules. The container must exist **before** the text is inserted, or many programs won’t announce it. And don’t announce everything: ten messages in a second make a page unbearable.
+
+## Hidden: who sees what
+
+- `display: none` and the `hidden` attribute remove an element **for the eyes, the screen reader and the keyboard alike**. This is how you hide what is truly not needed (a closed menu).
+- `aria-hidden="true"` removes an element **only for the screen reader**. Focus can still reach it. It is used to hide what is decorative (an icon beside text) and is **never** put on anything that can take focus.
+- A “screen reader only” class (the text is shifted off the screen but stays in the tree) is for naming an icon that has no words. Often an `aria-label` attribute is simpler.
+
+The diagram below has three elements, each written in several ways. See whether Tab reaches it, whether Enter works and what the screen reader says.
+
+<AccName />
+
+## A five-minute check
+
+Turn on a screen reader: NVDA for Windows is free, and VoiceOver in macOS starts with Command+F5. Then:
+
+1. Close your eyes or look away from the monitor (or turn the screen off).
+2. Go through the headings with the H key. Does a table of contents build up?
+3. Go through the regions with the D key. Is there navigation and main content?
+4. Reach the form with the F key. Did you hear the label of every field?
+5. Do the main action from the brief (a booking, an order). Did you get there? Did you hear the result?
+
+If one of the points failed, that is a priority to fix. For a first time you don’t need to know all the commands: these five keys are enough.
+
+## Practice
+
+You stay in the era of 2014. On this page a menu and a dialog are made of div elements and work only with a mouse. Rewrite them with native elements and write in the note what a screen reader will say. The script at the bottom is already attached: it finds elements by `id` and toggles `aria-expanded`.
+
+The check looks at markup: at regions, names, states and the absence of home-made buttons. It can’t hear the result. After the lesson, turn on a screen reader and go through the page with your own five-minute routine.
+
+## What used to be different
+
+In the jQuery era menus were made of `div` and `span` with click handlers, and dialogs of semi-transparent layers, and all of it looked good in a screenshot. For a screen reader such pages were a set of nameless blocks, and a keyboard could not get through them. ARIA appeared to describe what HTML lacked. Now most of what it was invented for exists in HTML itself: `button`, `dialog`, `details`, `search`. The rule is unchanged: a native element first, and ARIA only after.
