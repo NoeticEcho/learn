@@ -13,7 +13,7 @@ export const ORIGIN = 'https://open.noeticecho.space';
 export const SITE_NAMES: Record<Locale, string> = { ru: 'Сквозь время', en: 'Through Time' };
 export const SITE_NAME = SITE_NAMES.ru;
 /** Open Graph's locale of each edition. */
-export const OG_LOCALES: Record<Locale, string> = { ru: 'ru_RU', en: 'en_GB' };
+export const OG_LOCALES: Record<Locale, string> = { ru: 'ru_RU', en: 'en_US' };
 export const LOCALE = OG_LOCALES.ru;
 export const LANG = 'ru';
 export const LICENCE_URL = 'https://creativecommons.org/licenses/by-sa/4.0/';

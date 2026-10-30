@@ -1,6 +1,7 @@
 // The English edition (docs/content-plan/README.md, «English edition»): its pages speak English
 // and say so, every page of it survives hydration, the language switch finds a page's
-// counterpart, a lesson not yet translated is an honest page, the choice is remembered, and the
+// counterpart, a lesson not yet translated is an honest page (tested while there is one, and as a
+// component always, since every lesson is translated today), the choice is remembered, and the
 // two editions share one store, so progress made in one shows in the other.
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { existsSync, readdirSync } from 'node:fs';
@@ -12,6 +13,7 @@ const translated = new Set(
 		.filter((f) => f.endsWith('.svx'))
 		.map((f) => f.slice(0, -4))
 );
+const FIRST = '02-html/01-first-page';
 
 const html = async (request: APIRequestContext, path: string) => {
 	const res = await request.get(path);
@@ -27,7 +29,7 @@ test('an English page says it is English, in its head and its <html>', async ({ 
 	expect(page).toContain(`<link rel="alternate" hreflang="ru" href="${PUBLIC}${REFERENCE}"/>`);
 	expect(page).toContain(`<link rel="alternate" hreflang="en" href="${PUBLIC}en/${REFERENCE}"/>`);
 	expect(page).toContain(`<link rel="alternate" hreflang="x-default" href="${PUBLIC}${REFERENCE}"/>`);
-	expect(page).toContain('<meta property="og:locale" content="en_GB"/>');
+	expect(page).toContain('<meta property="og:locale" content="en_US"/>');
 	expect(page).toContain('<meta property="og:locale:alternate" content="ru_RU"/>');
 	expect(page).toMatch(/"inLanguage":"en"/);
 	expect(page).toMatch(/og\/en-lesson-00-start-01-how-to-learn-[0-9a-f]{10}\.png/);
@@ -59,18 +61,29 @@ test('a lesson not yet translated is a noindex page that links to the Russian on
 	await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
 });
 
+test('a translated lesson is an indexable pair with its Russian original, both ways', async ({ request }) => {
+	test.skip(!translated.has(FIRST), `${FIRST} is not translated`);
+	const ru = await html(request, `lesson/${FIRST}/`);
+	expect(ru).toContain(`<link rel="alternate" hreflang="en" href="${PUBLIC}en/lesson/${FIRST}/"/>`);
+	const en = await html(request, `en/lesson/${FIRST}/`);
+	expect(en).not.toContain('<meta name="robots" content="noindex"/>');
+	expect(en).toContain(`<link rel="canonical" href="${PUBLIC}en/lesson/${FIRST}/"/>`);
+});
+
 test('sitemap and llms.txt: the English pages written in English, and nothing else', async ({ request }) => {
 	const sitemap = await html(request, 'sitemap.xml');
 	expect(sitemap).toContain(`<loc>${PUBLIC}en/</loc>`);
 	expect(sitemap).toContain(`<loc>${PUBLIC}en/${REFERENCE}</loc>`);
 	if (untranslated) expect(sitemap).not.toContain(`<loc>${PUBLIC}en/lesson/${untranslated}/</loc>`);
+	for (const id of translated) expect(sitemap).toContain(`<loc>${PUBLIC}en/lesson/${id}/</loc>`);
 	const llms = await html(request, 'en/llms.txt');
 	expect(llms.startsWith('# Through Time')).toBe(true);
 	expect(llms).toContain(`(${PUBLIC}en/${REFERENCE}): `);
+	for (const id of translated) expect(llms).toContain(`(${PUBLIC}en/lesson/${id}/): `);
 	expect((await request.get('en/llms-full.txt')).status()).toBe(200);
 });
 
-test('the switch goes to the counterpart, or to the part on the map, and the choice is remembered', async ({ page }) => {
+test('the switch goes to the counterpart, and the choice is remembered', async ({ page }) => {
 	await page.goto(`./${REFERENCE}`);
 	await page.getByRole('link', { name: 'English', exact: true }).click();
 	await page.waitForURL(new RegExp(`/learn/en/${REFERENCE}$`));
@@ -87,6 +100,14 @@ test('the switch goes to the counterpart, or to the part on the map, and the cho
 		await page.goto(`./lesson/${untranslated}/`);
 		const href = await page.getByRole('link', { name: 'English', exact: true }).getAttribute('href');
 		expect(href).toMatch(new RegExp(`en/map/#part-${Number(untranslated.slice(0, 2))}$`));
+	}
+
+	// a lesson English has: the switch opens that lesson, from the Russian page
+	if (translated.has(FIRST)) {
+		await page.goto(`./lesson/${FIRST}/`);
+		await page.getByRole('link', { name: 'English', exact: true }).click();
+		await page.waitForURL(new RegExp(`/learn/en/lesson/${FIRST}/$`));
+		await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your first page: tags, a heading, a link');
 	}
 
 	// back to Russian, and remembered too

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const routes = ['./', './map/', './lesson/02-html/01-first-page/', './lesson/00-start/01-how-to-learn/', './lesson/00-start/04-brief/', './review/', './gallery/', './settings/'];
-// The English edition: its screens, its translated lesson and a lesson not yet translated.
+// The English edition: its screens and two of its lessons.
 routes.push('./en/', './en/map/', './en/lesson/00-start/01-how-to-learn/', './en/lesson/02-html/01-first-page/', './en/review/', './en/gallery/', './en/settings/');
 
 for (const scheme of ['dark', 'light'] as const)

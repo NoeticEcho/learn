@@ -33,7 +33,9 @@ const about = (n: number, lang: Locale) => {
 	if (lang === 'ru')
 		return `Открытый интерактивный учебник веба на русском языке: от первой страницы 1991 года до агентного веба. ${n} уроков в ${parts} частях; каждый урок открывается определением своей темы, затем теория, живая схема, практика на собственном сайте читателя, тест, карточки для повторения и источники. Бесплатно, без регистрации. Тексты уроков: CC BY-SA 4.0 (${LICENCE_URL}).`;
 	const all = loadContent().lessons.length;
-	return `An open, interactive textbook of the web in English: from the first web page of 1991 to the agentic web. The English edition is being translated from the Russian one, part by part: ${n} of ${all} lessons in ${parts} parts so far. Each lesson opens with a definition of its topic, then theory, a live diagram, practice on the reader's own site, a test, review cards and sources. Free, no sign-up. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`;
+	// The edition is complete (154 of 154); a lesson that is missing would be counted, not hidden.
+	const count = n < all ? `${n} of ${all} lessons in ${parts} parts, the rest still in Russian only` : `${n} lessons in ${parts} parts`;
+	return `An open, interactive textbook of the web in English: from the first web page of 1991 to the agentic web. ${count}. Each lesson opens with a definition of its topic, then theory, a live diagram, practice on the reader's own site, a test, review cards and sources. Free, no sign-up. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`;
 };
 
 export function llmsTxt(lang: Locale = 'ru'): string {
@@ -46,7 +48,7 @@ export function llmsTxt(lang: Locale = 'ru'): string {
 		'',
 		lang === 'ru'
 			? `Адрес учебника: ${at.home()}. Карта курса со связями уроков: ${at.map()}. Полный текст всех уроков одним файлом: ${at.editionFile('llms-full.txt')}. Английское издание: ${at.editionFile('llms.txt', 'en')}.`
-			: `The textbook: ${at.home('en')}. The course map, with how the lessons connect: ${at.map('en')}. The full text of every translated lesson in one file: ${at.editionFile('llms-full.txt', 'en')}. The complete Russian edition: ${at.editionFile('llms.txt')}.`,
+			: `The textbook: ${at.home('en')}. The course map, with how the lessons connect: ${at.map('en')}. The full text of every lesson in one file: ${at.editionFile('llms-full.txt', 'en')}. The complete Russian edition: ${at.editionFile('llms.txt')}.`,
 		''
 	];
 	for (const { part, lessons } of parts) {

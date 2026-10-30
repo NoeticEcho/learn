@@ -1,5 +1,6 @@
 // npm run links:check: every source and video URL in the content answers. A YouTube video is
 // alive when its oEmbed answers 200 (the watch page answers 200 even for a deleted video).
+// Both editions are checked: the English lessons cite sources of their own.
 // Results are cached in .cache/links.json for 24 hours. Non-zero on any dead link.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { withApp } from './vite-load.ts';
@@ -38,8 +39,11 @@ async function probe(url: string): Promise<{ ok: boolean; status: number }> {
 }
 
 const lessons = await withApp(async (load) => {
-	const mod = (await load('/src/lib/content/load.ts')) as { loadContent: () => { lessons: Lesson[] } };
-	return mod.loadContent().lessons;
+	const mod = (await load('/src/lib/content/load.ts')) as { loadContent: () => { lessons: Lesson[] }; loadEdition: (lang: 'en') => { lessons: Lesson[] } };
+	return [
+		...mod.loadContent().lessons.map((l) => ({ ...l, id: l.id })),
+		...mod.loadEdition('en').lessons.map((l) => ({ ...l, id: `en/${l.id}` }))
+	];
 });
 
 const urls = new Map<string, string[]>();
