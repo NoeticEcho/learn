@@ -1,0 +1,397 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/07-geo.svx. */
+	export const metadata = {
+		id: '13-growth/07-geo',
+		part: 13,
+		order: 7,
+		title: 'GEO: getting into AI answers',
+		definition: 'GEO (generative engine optimization) is work to get pages cited in AI search answers. What probably helps: an answer in the first sentence, facts in a list.',
+		summary:
+			'You’ll understand how AI search builds an answer from pages, what is known about it and what is not, and make pages that can be cited: an answer in the first sentence, facts in a list, an author and a date. Afterwards you have two rewritten pages and written decisions on bots and on an llms.txt file.',
+		minutes: 25,
+		teaches: ['growth-geo'],
+		requires: ['growth-seo-crawl-index-rank', 'html-semantic-elements', 'texts-inverted-pyramid'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'browser', label: 'AI answer', caption: 'An answer instead of links', say: 'The person got an answer and left, so clicks may fall. But a cited source gains trust.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'answer first', say: 'Only the companies know how a system picks sources. I take what helps people too: the answer in the first sentence.' },
+				{ mood: 'hint', prop: 'sheet', label: 'llms.txt', caption: 'Honest about the file', say: 'The big search engines haven’t confirmed that they read llms.txt. We don’t count it as a lever.' }
+			]
+		},
+		practice: {
+			id: 'geo-pages',
+			title: 'Two citable pages and decisions on bots',
+			task: 'Prepare two pages. On each: a heading that is a question (ending with a question mark), a first paragraph of one sentence that answers that question, a line with the author and the date of the update (a time tag with a datetime attribute like 2026-10-27), and a list of at least three facts. Across the two pages there are at least six facts; if the brief has services, name them among the facts. There must be no hidden text. Then fill in the decisions for bots: at least three rows with a decision (allow or block) and a reason of at least four words, and a decision on an llms.txt file (at least eight words). Every “…” has to be replaced.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: project website</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+
+      <section class="page" id="page-1">
+        <h2 class="question">…</h2>
+        <p class="answer">…</p>
+        <p class="byline">By <span class="author">…</span>. Updated: <time datetime="…">…</time></p>
+        <h3>The facts in brief</h3>
+        <ul class="facts">
+          <li>…</li>
+          <li>…</li>
+          <li>…</li>
+        </ul>
+      </section>
+
+      <section class="page" id="page-2">
+        <h2 class="question">…</h2>
+        <p class="answer">…</p>
+        <p class="byline">By <span class="author">…</span>. Updated: <time datetime="…">…</time></p>
+        <h3>The facts in brief</h3>
+        <ul class="facts">
+          <li>…</li>
+          <li>…</li>
+          <li>…</li>
+        </ul>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="decisions">
+      <h2>Decisions for bots</h2>
+      <table id="bots">
+        <tr><th>Bot</th><th>Decision</th><th>Reason</th></tr>
+        <tr class="bot-row"><td class="bot">…</td><td class="decision">…</td><td class="reason">…</td></tr>
+        <tr class="bot-row"><td class="bot">…</td><td class="decision">…</td><td class="reason">…</td></tr>
+        <tr class="bot-row"><td class="bot">…</td><td class="decision">…</td><td class="reason">…</td></tr>
+      </table>
+      <p>The llms.txt file: <span id="llms">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: project website</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+
+      <section class="page" id="page-1">
+        <h2 class="question">What does {{name}} do, and where do you start?</h2>
+        <p class="answer">{{name}} is {{who}}, and you can start with “{{mainAction.label}}”.</p>
+        <p class="byline">By <span class="author">{{name}}</span>{{#each people}}, <span class="role">{{name}}</span>{{/each}}. Updated: <time datetime="2026-10-27">27 October 2026</time></p>
+        <h3>The facts in brief</h3>
+        <ul class="facts">
+          <li>Town: {{city}}</li>
+          <li>Phone: {{phone}}</li>
+          <li>Email: {{email}}</li>
+          {{#each items}}<li>{{title}}: {{text}}</li>
+          {{/each}}
+        </ul>
+      </section>
+
+      <section class="page" id="page-2">
+        <h2 class="question">Who is the project for, and what does the first step look like?</h2>
+        <p class="answer">The project is for those who need it: {{forWhom}}, and the first action is always the same: “{{mainAction.label}}”.</p>
+        <p class="byline">By <span class="author">{{name}}</span>. Updated: <time datetime="2026-10-27">27 October 2026</time></p>
+        <h3>The facts in brief</h3>
+        <ul class="facts">
+          <li>The main action: {{mainAction.label}}</li>
+          <li>Who it is for: {{forWhom}}</li>
+          <li>Contact: {{email}}</li>
+        </ul>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="decisions">
+      <h2>Decisions for bots</h2>
+      <table id="bots">
+        <tr><th>Bot</th><th>Decision</th><th>Reason</th></tr>
+        <tr class="bot-row"><td class="bot">Googlebot, Bingbot, OAI-SearchBot, Claude-SearchBot, PerplexityBot</td><td class="decision">Allow</td><td class="reason">we want to be found and cited in search answers</td></tr>
+        <tr class="bot-row"><td class="bot">GPTBot, ClaudeBot, Google-Extended</td><td class="decision">Block</td><td class="reason">we don’t want to hand our texts over for model training without an agreement</td></tr>
+        <tr class="bot-row"><td class="bot">ChatGPT-User, Claude-User, Perplexity-User</td><td class="decision">Allow</td><td class="reason">the person themselves asked to open our page</td></tr>
+      </table>
+      <p>The llms.txt file: <span id="llms">not for now: the big search engines don’t confirm they use it, and clear pages with a sitemap give the same</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#decisions', matches: '^[^…]*$' },
+				{ id: 'no-blanks-pages', kind: 'text', selector: 'main', matches: '^[^…]*$' },
+				{ id: 'two-pages', kind: 'count', selector: '.page', min: 2 },
+				{ id: 'question', kind: 'text', selector: '.page .question', matches: '\\?\\s*$' },
+				{ id: 'answer', kind: 'text', selector: '.page .answer', matches: '^\\s*[^.!?]{20,250}[.!?]\\s*$' },
+				{ id: 'author', kind: 'text', selector: '.page .author', matches: '\\S' },
+				{ id: 'author-brief', kind: 'field', selector: '.byline', field: 'people[].name', min: 1, when: { brief: 'people[].name' } },
+				{ id: 'date', kind: 'attr', selector: '.page time', name: 'datetime', matches: '^\\d{4}-\\d{2}-\\d{2}$' },
+				{ id: 'facts', kind: 'count', selector: '.page .facts li', min: 6 },
+				{ id: 'facts-from-brief', kind: 'field', selector: '.facts', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'no-hidden', kind: 'count', selector: '[hidden], [style*="display:none"], [style*="display: none"]', max: 0 },
+				{ id: 'bots', kind: 'count', selector: '#bots tr.bot-row', min: 3 },
+				{ id: 'bot-names', kind: 'text', selector: '#bots', matches: '(?:GPTBot|OAI-SearchBot|ClaudeBot|Claude-SearchBot|Google-Extended|Googlebot|Bingbot|YandexBot|PerplexityBot)' },
+				{ id: 'decision', kind: 'text', selector: '#bots .decision', matches: '^\\s*(?:Allow|Block|Disallow|Permit)' },
+				{ id: 'reason', kind: 'text', selector: '#bots .reason', matches: '^\\s*\\S+(?:\\s+\\S+){3,}' },
+				{ id: 'llms', kind: 'text', selector: '#llms', matches: '^\\s*\\S+(?:\\s+\\S+){7,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'How is the answer of AI search different from ordinary results?',
+				options: [
+					'The system finds pages, and a language model builds a coherent answer from them and may link to the sources',
+					'It is just a list of links, as before',
+					'The model knows everything itself and reads no pages'
+				],
+				answer: 0,
+				why: [
+					'Yes. This design is called retrieval-augmented generation: first suitable pages are found, then the model words an answer from them. If you are cited, the person sees your link, and if not, you are not in the answer.',
+					'No: the answer is coherent text, and the links are footnotes to it.',
+					'The model does “remember” part of the world from training, but current answers with sources are built from the pages found.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these probably helps to be cited?',
+				options: [
+					'The first sentence answers the question',
+					'Facts are put in a list or a table',
+					'The author and the date of the update are named',
+					'The text is stuffed with keywords'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: the inverted pyramid suits people and machines alike.',
+					'Yes: structured facts are easy to pull out and check.',
+					'Yes: the author and the date show that the source can be trusted and how fresh it is.',
+					'No: in the study by the authors of GEO, keyword stuffing did not help, and such text is unreadable.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does Google write about whether you need to do anything special to appear in AI Overviews and AI Mode?',
+				options: [
+					'There are no additional requirements: the SEO basics are enough, and no new files or markup are needed',
+					'You must create an llms.txt file',
+					'You need special schema.org markup just for AI'
+				],
+				answer: 0,
+				why: [
+					'Yes. Google’s documentation says outright that no special optimizations are needed, and that you don’t need new machine-readable files, AI text files or markup. Treat any claim of a “secret method” with suspicion.',
+					'No: Google doesn’t ask for such a file.',
+					'No: Google says there is no special structured data you need to add.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each bot with what it does (by OpenAI’s and Anthropic’s documentation)',
+				pairs: [
+					['OAI-SearchBot', 'Finds pages so that sites can be shown in ChatGPT search'],
+					['GPTBot', 'Collects material that may be used to train models'],
+					['ChatGPT-User', 'Opens a page when the person asks for it in the chat'],
+					['Claude-SearchBot', 'Navigates the web to improve the quality of Claude’s search results']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You blocked every AI bot in robots.txt “so as not to hand over our texts”. What side effect is possible?',
+				options: [
+					'If you also block the search bots, your pages can’t be cited in answers',
+					'Your pages will vanish from ordinary Google',
+					'None: a closed site is cited better'
+				],
+				answer: 0,
+				why: [
+					'Yes. Different bots do different jobs: some gather data for training, others are needed for search. Decide for each one separately, and know that blocking a search bot lowers the chance of getting into answers.',
+					'Ordinary Google uses Googlebot and doesn’t depend on blocking other bots.',
+					'No: a blocked page can’t be cited.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What is the most honest way to check whether you get into AI answers?',
+				options: [
+					'Ask a few dozen typical questions of your audience in several AI searches and record whether you are mentioned and whether it is right',
+					'Believe a paid service that promises an exact “AI ranking”',
+					'Ask once and draw a conclusion'
+				],
+				answer: 0,
+				why: [
+					'Yes. Answers change from time to time, so you need a series of questions and a record of the results. You’ll also see what the AI says about you wrongly, and fix your pages.',
+					'Such services can be useful, but their numbers are estimates too; check them against a manual test.',
+					'One answer is chance: tomorrow it may be different.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-geo-def',
+				front: 'What is GEO?',
+				back: 'Generative Engine Optimization: work so that pages are used and cited in the answers of AI search. The term comes from a paper by Aggarwal and colleagues (2023). The basis is the same as in SEO: clear, useful, verifiable pages. Google calls it simply SEO for a new kind of result.'
+			},
+			{
+				id: 'growth-geo-works',
+				front: 'What probably helps citation?',
+				back: 'An answer in the first sentence, facts in a list or a table, a named author and date, links to sources, unique data. Keyword stuffing and hidden text don’t help.'
+			},
+			{
+				id: 'growth-bots-kinds',
+				front: 'What kinds of AI bots are there?',
+				back: 'For training models (GPTBot, ClaudeBot, Google-Extended), for search (OAI-SearchBot, Claude-SearchBot, PerplexityBot) and ones that open a page at a person’s request (ChatGPT-User, Claude-User, Perplexity-User). Decide for each kind.'
+			},
+			{
+				id: 'growth-llms-txt',
+				front: 'What is llms.txt?',
+				back: 'A file at the root of the site, proposed in 2024, with a short description for language models. The big search engines haven’t confirmed that they use it, and Google says new files aren’t needed.'
+			},
+			{
+				id: 'growth-geo-measure',
+				front: 'How do you check your presence in AI answers?',
+				back: 'A series of typical questions in several AI searches, noting whether you are mentioned and whether it is right; and the sources of visits in your counter. One answer proves nothing.'
+			}
+		],
+		sources: [
+			{ title: 'Google Search Central: AI features and your website', url: 'https://developers.google.com/search/docs/appearance/ai-features', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Optimizing your website for generative AI features on Google Search', url: 'https://developers.google.com/search/docs/fundamentals/ai-optimization-guide', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central Blog: Introducing Search generative AI performance reports in Search Console (June 2026)', url: 'https://developers.google.com/search/blog/2026/06/gen-ai-performance-reports', licence: 'CC-BY', kind: 'article', lang: 'en' },
+			{ title: 'GEO: Generative Engine Optimization (Aggarwal et al., arXiv)', url: 'https://arxiv.org/abs/2311.09735', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Generative engine optimization (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Generative_engine_optimization', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Retrieval-augmented generation (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Retrieval-augmented_generation', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'The /llms.txt file (llmstxt.org)', url: 'https://llmstxt.org/', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'OpenAI: Overview of OpenAI crawlers', url: 'https://developers.openai.com/api/docs/bots', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Anthropic: Anthropic crawlers', url: 'https://support.claude.com/en/articles/8896518-anthropic-crawlers', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Perplexity: Perplexity crawlers', url: 'https://docs.perplexity.ai/guides/bots', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: Google’s common crawlers (including Google-Extended)', url: 'https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Directive (EU) 2019/790 on copyright in the Digital Single Market, Article 4 (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32019L0790', licence: 'link-only', kind: 'spec', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'AI search hasn’t invented new rules: it needs the same clear, reliable pages, only clearer still. Rewrite two pages so that an answer can be taken from them.',
+			hints: [
+				'Make the page’s heading a question and end it with a question mark. The first paragraph is one sentence that answers that question, with no “firstly” and no preamble.',
+				'Write the date in a time tag whose datetime attribute reads 2026-10-27 and whose text reads 27 October 2026. Name the author in the “By” line.',
+				'Across the two pages there must be at least six facts: three on each. If the brief has services, name them.',
+				'In the decisions for bots each row has the word “Allow” or “Block” and a reason of at least four words.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” in the decisions for bots. Fill in the table and the llms.txt line.',
+				'no-blanks-pages': 'The pages still have “…”: fill in the questions, answers, authors, dates and facts.',
+				'two-pages': 'You need two pages with the class page.',
+				question: 'The page’s heading has to be a question and end with a question mark.',
+				answer: 'The first paragraph must be a single sentence (20 to 250 characters), with no full stops inside and one at the end.',
+				author: 'Every page needs an author: put the name in a span with the class author.',
+				'author-brief': 'In the author line name a person from the brief (the “people” field).',
+				date: 'Write the date of the update in a time tag with a datetime attribute like 2026-10-27.',
+				facts: 'Across the two pages there must be at least six facts.',
+				'facts-from-brief': 'Among the facts name at least one service or item from the brief.',
+				'no-hidden': 'The page has hidden text (hidden or display:none). Remove it: hidden text counts as deceit.',
+				bots: 'The decisions table needs at least three rows.',
+				'bot-names': 'Name at least one bot in the table: for example GPTBot or Googlebot.',
+				decision: 'The decision has to begin with the word “Allow” or “Block”.',
+				reason: 'Write the reason in at least four words.',
+				llms: 'Write about llms.txt in at least eight words: whether you write one, and why.'
+			},
+			outro: 'Now your pages can be not only read but cited. Next, local search: how people who search for “near me” find you.'
+		},
+		say: { GEO: 'G E O', 'llms.txt': 'L L M S dot T X T', GPTBot: 'G P T bot', ClaudeBot: 'claude bot', 'robots.txt': 'robots', LLM: 'L L M', ChatGPT: 'chat G P T', RAG: 'rag', KDD: 'K D D', AEO: 'A E O' }
+	};
+</script>
+
+<script>
+	import AnswerLab from '../../diagrams/AnswerLab.svelte';
+</script>
+
+## When a text answers instead of a list of links
+
+Ask a modern search engine “how do I find where my property boundary runs”. Instead of the familiar list of ten links you will often see a **ready answer** written as one coherent text, with small numbers that lead to sources. That is how “AI Overviews” and “AI Mode” work in Google, how Copilot works in Bing, how ChatGPT search, Perplexity and other AI assistants with search work, and, in Russia, Yandex’s “Neuro”.
+
+How they work is clear in outline. First the system **finds** suitable pages (by the same principles of crawling, index and ranking that you studied in the lessons on SEO). Then a **language model**, a program trained on huge amounts of text, **words an answer** from the pages it found and adds links. This design has a name: retrieval-augmented generation, or RAG (an article is in the sources). Google’s own guide uses the same words, and adds that its systems may fan a question out into several related searches to find more pages.
+
+Two facts follow for you.
+
+- **If you are cited, you gain trust.** The person sees that the source gave the answer and can go to you.
+- **If you aren’t cited, you are not in that answer at all.** Ordinary results had places from first to tenth, but here there is one answer, with three or four sources in it.
+
+Another consequence: visits to the site may become **fewer**. The person got the answer and left (this is called “zero click”). So the value of getting into an answer is not only in clicks but also in the project’s name being heard.
+
+## What GEO is, and what is known about it
+
+**GEO** (generative engine optimization) is the name for work so that your pages are used and cited in such answers. The term was introduced in 2023 by researchers led by Pranjal Aggarwal, in a paper presented at the KDD conference in 2024 (a link is in the sources). On a test set of questions they tried several techniques and reported that some raised the “visibility” of a page in answers, such as adding quotations, references to sources and statistics, while others did not, such as keyword stuffing. Remember this is a result on **their** set and **their** system. The paper does not guarantee what will happen with real systems.
+
+Now what **no one knows except the companies themselves**: how a particular system chooses its sources. Those rules are closed and change. So there is a lot of noise around GEO: “secret techniques”, paid “rankings” and promises of “guaranteed inclusion in the answer”. Treat them like the promises of a “guaranteed top 1” from the lesson on SEO.
+
+What do the companies themselves say? **As of 28 October 2026,** Google’s documentation says that to appear in AI Overviews and AI Mode there are **no additional requirements and no special optimizations**: a page must be indexed and eligible to be shown in Search with a snippet, and you don’t need new machine-readable files, AI text files or special markup. A newer Google guide, “Optimizing your website for generative AI features on Google Search” (published in 2026), says that from Search’s point of view optimizing for generative AI search is still SEO, and what it asks for is valuable, non-commodity content. It even names the terms “AEO” (answer engine optimization) and “GEO” and advises caution with third-party services selling them. This is the soberest starting point: **GEO is SEO plus clarity**. Claims about what companies do change quickly, so reread the sources on the day you work.
+
+## What probably helps
+
+These are techniques worth using whether or not anyone confirms them. They make a page better for people and for machines, so you lose nothing even if it turns out they change nothing.
+
+1. **The answer in the first sentence.** You know the inverted pyramid: the main thing first. The page’s first sentence answers the question of its heading. “A property’s boundaries are set by the recorded deed and plat, and a licensed land surveyor marks them on the ground”, not “Sooner or later many homeowners wonder”.
+2. **A heading that is a question** where the page answers a question. That is the wording the person types.
+3. **Facts in a list or a table.** Prices, times, documents, addresses. A fact is pulled from a list more easily than from a paragraph, and a person checks it by eye.
+4. **An author and a date.** Who wrote it, with what qualifications, when it was updated. Where an error is costly, as in law, this matters most: laws change, and an outdated answer does harm.
+5. **Links to sources** (a law, a document, a study) and **your own data**: figures and examples others don’t have. They are what makes a source worth having.
+6. **Markup** from the last lesson, matching what is visible on the page.
+7. **Access for bots.** If the bot is blocked, citing is impossible.
+8. **Mentions of you elsewhere:** professional communities, directories, articles. The clearer it is across the web who you are, the easier it is to name you.
+
+What **not to do**: stuff the text with keywords, hide text from people (hidden, display:none, white on white), or multiply hundreds of identical pages with generated text. All of that is spam, and search engines have fought it for a long time.
+
+## A toy model
+
+Open the diagram. It is a simplified model: it shows the direction, not real weights. Switch on features of your page and watch the answer change and see the moment your page starts to be cited. See how the deceitful techniques and a blocked bot act.
+
+<AnswerLab />
+
+<details>
+<summary>Check yourself: why does stuffing a page with keywords help neither SEO nor GEO?</summary>
+
+Search engines recognized such text long ago and don’t count it as useful, and a language model picks a page from which a clear answer is easy to take. A stuffed text has no answer, and it is hard for a person to read.
+
+</details>
+
+## Which bots to let in
+
+In robots.txt (the lesson on technical SEO) you can allow and forbid robots one by one. AI systems have robots with different jobs, and they are worth telling apart. By the documentation of OpenAI, Anthropic, Perplexity and Google:
+
+- **Training bots:** GPTBot (OpenAI), ClaudeBot (Anthropic) and Google-Extended (a token that controls whether content Google crawled is used by some of its generative products, and has no effect on Google Search). If you block them, you signal that your pages should not go into model training.
+- **Search bots:** OAI-SearchBot (ChatGPT search), Claude-SearchBot (Claude’s search), PerplexityBot, and the ordinary Googlebot and Bingbot. If you block them, your site won’t be shown in the corresponding search or in answers. OpenAI says that a site opted out of OAI-SearchBot will not be shown in ChatGPT search answers, though it may still appear as a navigational link.
+- **“At the person’s request” bots:** ChatGPT-User, Claude-User, Perplexity-User. They open a page when the person asks about it in the chat. For that reason OpenAI says robots.txt rules may not apply to ChatGPT-User the way they do to ordinary robots.
+
+The decision is yours and depends on your aims. If you want to be found and cited, allow the search bots. If you don’t want to hand over your texts for training, block the training bots. An expert also has the question of copyright in their own texts. In the EU, the copyright exception for text and data mining (Directive 2019/790, Article 4) applies unless the rightsholder has reserved their rights in a machine-readable way, and a robots.txt rule is one way people do that; elsewhere the rules differ and are still being decided in courts and parliaments. If it matters to you, talk to a lawyer: this is general information, not legal advice.
+
+Two honest caveats. **A robots.txt file is a request, not a lock:** companies say they honor it, but you can’t check that from outside. And **bot names change:** check them against the documentation on the day you read this, with links in the sources.
+
+## The llms.txt file
+
+In 2024 the American researcher Jeremy Howard proposed an `llms.txt` file: a short description of a site in Markdown at its root, meant to help language models understand what is on the site and where. It is a nice idea, and the description is at llmstxt.org.
+
+The honest picture today: **the big search engines haven’t confirmed that they read this file**, and Google’s documentation says new special files aren’t needed. Making the file is cheap and does no harm. But don’t build a strategy on it. So it makes sense to write the decision down with a reason, as you will in the practice, and to come back to it if anything changes.
+
+## How to check that you are in the answers
+
+- **A series of questions.** Write down twenty or thirty questions your audience asks (remember the “for whom” field). Ask them in several AI searches and record: were you mentioned, were you cited, what was said, was it right. Answers change from time to time, so one question is not enough.
+- **Sources of visits.** In your counter (the part on metrics) see whether people arrive from AI assistants’ sites. Google also added generative AI performance reports to Search Console in 2026, so look in the consoles you verified.
+- **Wrong answers.** If an AI says something untrue about you or your field, fix your pages so that the right answer is clear and has a source. Watch legal topics especially: an AI answer is not legal advice, and your site can say so outright.
+
+## Practice
+
+Prepare two pages and the decisions.
+
+1. **Two pages.** Each: a question as heading, a first paragraph of one sentence with the answer, an author and a date of the update, a list of three facts. If the brief has services, name them among the facts. No hidden text.
+2. **Decisions for bots.** At least three rows: the bot, “Allow” or “Block”, and a reason.
+3. **The decision on llms.txt** with a reason.
+
+The check looks at form: a question mark, one sentence in the answer, a date in a time tag, the number of facts, no hidden text, reasons. Whether the answer is useful to a person from “for whom” is for you to decide: read only the heading and the first sentence and ask yourself whether that is enough for a person to grasp the main thing.

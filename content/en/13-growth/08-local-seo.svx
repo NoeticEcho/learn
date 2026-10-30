@@ -1,0 +1,413 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/08-local-seo.svx. */
+	export const metadata = {
+		id: '13-growth/08-local-seo',
+		part: 13,
+		order: 8,
+		title: 'Local SEO: the business listing and LocalBusiness markup',
+		definition: 'Local SEO is work so that a business is found by “near me” queries: a map listing, the same address and phone everywhere, and LocalBusiness markup.',
+		summary:
+			'You’ll make yourself findable by “near me” and “in my town” queries: fill in a business listing and put on the site data and LocalBusiness markup that agree with it. Afterwards you have the data for a listing (name, address or service area, hours, categories) and a markup block with the same facts.',
+		minutes: 25,
+		teaches: ['growth-local-seo'],
+		requires: ['growth-technical-seo', 'growth-structured-data', 'copy-four-p-picture'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'sheet', label: 'NAP', caption: 'The same everywhere', say: 'The name, address and phone must match everywhere: on the site and on the map listing.' },
+				{ mood: 'hmm', side: 'right', prop: 'browser', label: 'Cheap land surveyor near me', caption: 'A name with keywords', say: 'Keywords don’t go into the name. It is the same as on the sign and on the site.' },
+				{ mood: 'hint', prop: 'cards', label: 'reviews', say: 'You ask for reviews, you don’t buy them. A happy client leaves one more readily if you show how.' }
+			]
+		},
+		practice: {
+			id: 'local-card',
+			title: 'A business listing and LocalBusiness markup',
+			task: 'Prepare the data for the listing and the markup. 1) In the “Listing” block write the name, address and phone in the same words as the brief (the phone field gets the number from the brief), the opening hours (with a time like 10:00), one to three categories, a list of services (if the brief has services, name them), the service area (for a project without an office, describe where you travel, or say you see clients at the address) and a description without guarantees or comparisons (“best”, “guarantee”, “number one”). 2) In the head, JSON-LD markup of the type LocalBusiness (or a suitable subtype): name, address, phone, opening hours and service area. Every “…” has to be replaced.',
+			era: 5,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: contact and how to find us</title>
+    <script type="application/ld+json">…<\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <section id="nap">
+        <h2>Contact</h2>
+        <p class="nap-name">{{name}}</p>
+        <p class="nap-address">{{contacts.address}}</p>
+        <p class="nap-phone"><a href="tel:{{phone}}">{{phone}}</a></p>
+        <p class="nap-hours">Opening hours: …</p>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="card">
+      <h2>Business listing</h2>
+      <dl>
+        <dt>Name</dt><dd class="c-name">…</dd>
+        <dt>Address</dt><dd class="c-address">…</dd>
+        <dt>Phone</dt><dd class="c-phone">…</dd>
+        <dt>Opening hours</dt><dd class="c-hours">…</dd>
+        <dt>Categories</dt><dd><ul><li class="c-cat">…</li></ul></dd>
+        <dt>Services</dt><dd class="c-services">…</dd>
+        <dt>Service area</dt><dd class="c-area">…</dd>
+        <dt>Description</dt><dd class="c-about">…</dd>
+      </dl>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{name}}: contact and how to find us</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "{{name}}",
+      "url": "https://riverbend.example/",
+      "telephone": "{{phone}}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{contacts.address}}",
+        "addressLocality": "{{city}}",
+        "addressCountry": "US"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "10:00",
+        "closes": "18:00"
+      },
+      "areaServed": "{{city}} and the surrounding area"
+    }
+    <\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <section id="nap">
+        <h2>Contact</h2>
+        <p class="nap-name">{{name}}</p>
+        <p class="nap-address">{{contacts.address}}</p>
+        <p class="nap-phone"><a href="tel:{{phone}}">{{phone}}</a></p>
+        <p class="nap-hours">Opening hours: Mon to Fri, 10:00 to 18:00</p>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="card">
+      <h2>Business listing</h2>
+      <dl>
+        <dt>Name</dt><dd class="c-name">{{name}}</dd>
+        <dt>Address</dt><dd class="c-address">{{contacts.address}}</dd>
+        <dt>Phone</dt><dd class="c-phone">{{phone}}</dd>
+        <dt>Opening hours</dt><dd class="c-hours">Mon to Fri, 10:00 to 18:00</dd>
+        <dt>Categories</dt><dd><ul><li class="c-cat">The main category from the platform’s list</li></ul></dd>
+        <dt>Services</dt><dd class="c-services">{{#each items}}{{title}}; {{/each}}consultation by appointment</dd>
+        <dt>Service area</dt><dd class="c-area">{{city}} and the surrounding area, visits to the client by arrangement</dd>
+        <dt>Description</dt><dd class="c-about">{{who}}. We work by appointment, and the terms and prices are on the site.</dd>
+      </dl>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#card', matches: '^[^…]*$' },
+				{ id: 'nap-name', kind: 'field', selector: '#card .c-name', field: 'name' },
+				{ id: 'nap-address', kind: 'field', selector: '#card .c-address', field: 'contacts.address' },
+				{ id: 'nap-phone', kind: 'field', selector: '#card .c-phone', field: 'phone' },
+				{ id: 'hours', kind: 'text', selector: '#card .c-hours', matches: '\\d{1,2}[:.]\\d{2}' },
+				{ id: 'site-hours', kind: 'text', selector: '#nap .nap-hours', matches: '\\d{1,2}[:.]\\d{2}' },
+				{ id: 'categories', kind: 'count', selector: '#card .c-cat', min: 1, max: 3 },
+				{ id: 'services', kind: 'field', selector: '#card .c-services', field: 'items[].title', min: 1, when: { brief: 'items[].title' } },
+				{ id: 'area', kind: 'text', selector: '#card .c-area', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'no-promises', kind: 'text', selector: '#card', matches: '^(?![\\s\\S]*(?:[Gg]uarantee|\\b[Bb]est\\b|[Nn]umber one|No\\. ?1|#1|100 ?%|[Mm]ost experienced|[Tt]op-rated))[\\s\\S]*\\S' },
+				{
+					id: 'ld-type',
+					kind: 'text',
+					selector: 'script[type="application/ld+json"]',
+					matches: '"@type"\\s*:\\s*"(?:LocalBusiness|ProfessionalService|LegalService|Store|CafeOrCoffeeShop|Restaurant|HealthAndBeautyBusiness|EventVenue|HomeAndConstructionBusiness|FoodEstablishment)"'
+				},
+				{ id: 'ld-name', kind: 'field', selector: 'script[type="application/ld+json"]', field: 'name' },
+				{ id: 'ld-phone', kind: 'field', selector: 'script[type="application/ld+json"]', field: 'phone' },
+				{ id: 'ld-address', kind: 'field', selector: 'script[type="application/ld+json"]', field: 'contacts.address' },
+				{ id: 'ld-hours', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"openingHours(?:Specification)?"' },
+				{ id: 'ld-area', kind: 'text', selector: 'script[type="application/ld+json"]', matches: '"areaServed"' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'What does NAP mean in local search?',
+				options: [
+					'Name, address, phone: they must match everywhere you are mentioned',
+					'News, announcements, promotions',
+					'Number, article code, price'
+				],
+				answer: 0,
+				why: [
+					'Yes. If the name, address or phone differ between the site, the listing and the directories, a search engine and a person see different businesses, and trust falls.',
+					'No: NAP is Name, Address, Phone.',
+					'No, that has nothing to do with local search.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What can you do for local search?',
+				options: [
+					'Fill in the business listing fully and accurately',
+					'Bring the name, address and phone to one form everywhere',
+					'Ask happy clients to leave an honest review',
+					'Invent reviews or buy them'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: a complete listing matches queries better.',
+					'Yes: consistent data raises trust.',
+					'Yes, as long as you set no conditions such as “a review in exchange for a discount” and don’t ask only for positive ones. Platforms’ rules may ask for more; read them.',
+					'No: fake reviews break the platforms’ rules and the law (in the US the FTC’s rule on consumer reviews bans fake reviews and buying them), and destroy trust when found out.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You have no office: you travel to clients. What do you do about the address?',
+				options: [
+					'Describe the service area and don’t pass off someone else’s address or an apartment as an office',
+					'Give the address of any business center so the listing looks more solid',
+					'Don’t create a listing'
+				],
+				answer: 0,
+				why: [
+					'Yes. The platforms let you say that you work without an office or travel to the client. A false address breaks the rules and misleads people.',
+					'No: an invented address breaks the platforms’ rules and leads to the listing being suspended.',
+					'Not necessarily: a service area makes you findable by “near me” queries.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each factor of local search with what you can do',
+				pairs: [
+					['Relevance', 'An exact category, a description of services, clear pages on the site'],
+					['Distance', 'Almost nothing: it depends on where the person is; you can state the address or area accurately'],
+					['Prominence', 'Honest reviews, mentions in directories and professional sources']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What must not be written in the listing of an expert in a regulated profession (an attorney, for example)?',
+				options: [
+					'Guarantees of results and comparisons with other specialists (“best”, “number one”)',
+					'The address, phone and opening hours',
+					'A list of services'
+				],
+				answer: 0,
+				why: [
+					'Yes. Advertising law bans misleading claims and unfair comparisons, and professional rules (for attorneys, the state bar rules based on ABA Model Rule 7.1) restrict advertising even more. A guideline, not legal advice: check with a lawyer or your licensing body.',
+					'That is ordinary information about how to reach you.',
+					'A list of services is allowed if it is accurate.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the work on a local listing in order',
+				items: [
+					'Gather the exact name, address or area, phone and hours',
+					'Choose categories from the platform’s list',
+					'Fill in the listing and pass the business verification',
+					'Put the same data and LocalBusiness markup on the site',
+					'Once a quarter, compare the listing and the site and answer reviews'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-nap',
+				front: 'What is NAP?',
+				back: 'Name, Address, Phone. They must be identical on the site, in the listing and wherever you are mentioned.'
+			},
+			{
+				id: 'growth-local-factors',
+				front: 'What does local search weigh?',
+				back: 'By Google’s description: relevance, distance and prominence. You can’t change distance, but you can change relevance and prominence: categories, description, site, honest reviews.'
+			},
+			{
+				id: 'growth-service-area',
+				front: 'What should a project without an office do?',
+				back: 'Describe the service area (a town, districts) and not pass off someone else’s address as its own. In markup there is areaServed for this.'
+			},
+			{
+				id: 'growth-localbusiness',
+				front: 'What does LocalBusiness markup include?',
+				back: 'The name, address (PostalAddress), phone, opening hours (openingHoursSpecification), service area (areaServed) and the site’s address. The facts must match what is visible on the page and in the listing.'
+			},
+			{
+				id: 'growth-reviews',
+				front: 'How do you work with reviews honestly?',
+				back: 'Ask happy clients, don’t pay for glowing ones, answer all of them (bad ones too), don’t fake. Faking breaks the platforms’ rules and the law.'
+			}
+		],
+		sources: [
+			{ title: 'Tips to improve your local ranking on Google (Google Business Profile Help)', url: 'https://support.google.com/business/answer/7091?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Guidelines for representing your business on Google (Google Business Profile Help)', url: 'https://support.google.com/business/answer/3038177?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Prohibited and restricted content: fake and misleading reviews (Google Maps contribution policy)', url: 'https://support.google.com/contributionpolicy/answer/7400114?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Google Search Central: LocalBusiness structured data', url: 'https://developers.google.com/search/docs/appearance/structured-data/local-business', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'schema.org: LocalBusiness', url: 'https://schema.org/LocalBusiness', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Local search engine optimization (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Local_search_engine_optimization', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Bing Places for Business', url: 'https://www.bingplaces.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Apple Business Connect', url: 'https://businessconnect.apple.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: '16 CFR Part 465: Rule on the use of consumer reviews and testimonials (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-D/part-465', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Yandex Business help (for the Russian market)', url: 'https://yandex.ru/support/business-priority/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' },
+			{ title: '2ГИС (Wikipedia, in Russian, for the Russian market)', url: 'https://ru.wikipedia.org/wiki/2ГИС', licence: 'CC-BY-SA', kind: 'article', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A person who searches “near me” wants to see one thing: that you can be found and reached by phone. Make it the same everywhere.',
+			hints: [
+				'Copy the name, address and phone in the listing word for word from the brief: the check compares exactly with the brief.',
+				'Write the opening hours with a time like 10:00. The same in the markup, in the opens and closes fields.',
+				'For a project without an office, write in the service area where you travel. In markup it is areaServed.',
+				'The description must not contain “best”, “guarantee” or “number one”.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” in the listing. Fill in all the fields.',
+				'nap-name': 'The name in the listing must match the name from the brief.',
+				'nap-address': 'The address in the listing must match the address from the brief word for word.',
+				'nap-phone': 'The phone in the listing must match the phone from the brief.',
+				hours: 'The opening hours in the listing need a time like 10:00.',
+				'site-hours': 'On the site, the “Opening hours” line needs a time like 10:00.',
+				categories: 'Give one to three categories.',
+				services: 'In the list of services name the services from the brief.',
+				area: 'Describe the service area in at least three words.',
+				'no-promises': 'The listing still has words of guarantee or comparison (“guarantee”, “best”, “number one”, “100%”). Remove them.',
+				'ld-type': 'The markup needs the type LocalBusiness or a subtype, for example ProfessionalService.',
+				'ld-name': 'In the markup the name must match the name from the brief.',
+				'ld-phone': 'The markup needs the phone from the brief.',
+				'ld-address': 'The markup needs the address from the brief in the streetAddress field.',
+				'ld-hours': 'The markup needs opening hours: openingHoursSpecification or openingHours.',
+				'ld-area': 'The markup needs a service area: areaServed.'
+			},
+			outro: 'Now you can be found by a “near me” query too, and the data is the same everywhere. The last thing in the part on growth: paid advertising, and what the law asks of it.'
+		},
+		say: { NAP: 'nap', LocalBusiness: 'local business', JSON: 'jay-son', 'JSON-LD': 'jay-son L D', Google: 'google', Bing: 'bing', Yandex: 'yan-dex', ABA: 'A B A', FTC: 'F T C' }
+	};
+</script>
+
+<script>
+	import LocalNap from '../../diagrams/LocalNap.svelte';
+</script>
+
+## “Near me”
+
+If you are a land surveyor, a coffee shop or a workshop, your clients most often don’t search for “the best land surveyor in the world” but for “land surveyor near me” or “coffee on the waterfront”. For such queries a person wants to see **a map, an address, hours and a phone**, not an article. This part of search is called **local**, and the work on it is called **local SEO**.
+
+What the person sees: above the ordinary results, and often instead of them, a map and a list of businesses. These aren’t pages of your site but **business listings** on mapping services. In English-speaking countries the main one is **Google Business Profile** (it shows on Google Search and Google Maps). Beside it are **Apple Business Connect** (Apple Maps), **Bing Places** and directories such as Yelp. Which features exist in your region changes, so check before spending time on one.
+
+**The Russian market.** In Russia the main services are **Yandex Maps** (the listing is made in the Yandex Business service) and **2GIS**, which began in 1999 in Novosibirsk. The principle is the same: a name, address, phone and category, checked and shown on a map.
+
+**Where it comes from.** Paper directories such as the Yellow Pages worked on the same principle: a name, an address, a phone, a heading. The first electronic directories moved this onto the internet, and maps and mobile phones made such search ordinary: a person stands in the street and searches “pharmacy near me”.
+
+## Three factors of local search
+
+Google’s help page names three factors by which it picks businesses for a “near me” query: **relevance**, **distance** and **prominence**. Other platforms use similar logic. The weights aren’t published, but what you can do is clear:
+
+- **Relevance.** How well your listing matches the query: the right **category**, a complete **description of services**, hours, a site on which all of it is confirmed. This is where you work.
+- **Distance.** From the person’s position to you. You can’t change it. You can only state the address or service area accurately.
+- **Prominence.** How well known you are: **reviews** (their number, freshness and rating), mentions in directories and on sites, links to your site. It grows only by honest means.
+
+## NAP: the same everywhere
+
+**NAP** is **N**ame, **A**ddress, **P**hone. The main rule of local SEO is that they must be **identical everywhere**: on the site, in the listing, in directories, on social networks. If the site says “Alder Boundary Surveys, +1 555…” and the listing says “K. Alder Surveys LLC, 555…”, to a machine and to a person these can be two different businesses. A “+1” against no country code is enough to make them not match.
+
+Open the diagram. In two columns are the same three facts: what the site says and what the listing says. Bring them to one form, then play with the three factors and see what affects what (the model is for teaching, the weights are invented).
+
+<LocalNap />
+
+## The listing: what goes in it
+
+Everything you thought about in the lessons on the brief is needed here in exact wording.
+
+1. **The name.** As on the sign and on the site. Don’t add keywords to the name (“Cheap Land Surveyor Riverbend”): it breaks the platforms’ rules and counts as spam.
+2. **The address or the service area.** If there is a place where you can be found, its address. If you travel or work remotely, you can say in the listing that you work without an office, and in which area. **Don’t pass off someone else’s address or an apartment as an office**: it breaks the rules and misleads people.
+3. **The phone,** in one form, the same as on the site.
+4. **Opening hours.** Including holidays and breaks. Wrong hours are worse than none.
+5. **Categories.** Chosen from the platform’s list; a main one and a couple of extra ones. They decide which queries you answer.
+6. **Services and prices,** if possible.
+7. **Photographs.** Real ones: the entrance, the premises, the work. Other people’s pictures and stock photos mislead.
+8. **The description.** What you do and for whom, in plain words, **with no guarantees of results and no comparisons**.
+9. **The site.** A link to the page where everything is confirmed.
+
+To create the listing you have to **verify** that the business is yours (a call, a code by mail or another way the platform offers).
+
+## Reviews, honestly
+
+Reviews strongly affect choice: people believe them. And that is where the temptations are greatest.
+
+- **Ask.** A happy client will gladly leave a review if you ask and show how.
+- **Don’t buy or invent them.** Faking breaks the platforms’ rules (listings are suspended), and in the US the FTC’s rule on consumer reviews and testimonials (16 CFR Part 465, in force since October 2024) bans fake reviews and paying for reviews of a set sentiment. In the UK the Digital Markets, Competition and Consumers Act 2024 bans fake reviews too, and EU rules require businesses to say how they check reviews.
+- **Don’t make it conditional.** “A discount for a positive review” is buying a review, and Google’s policy names incentives for reviews as prohibited.
+- **Answer all of them,** bad ones included: calmly, to the point, without accusing. Everyone who comes to the page later reads the answer.
+- **Remember confidentiality.** An expert, attorney or doctor doesn’t discuss a client’s case in public, even when defending against a bad review.
+
+## Limits for regulated professions
+
+If you are an expert, an attorney, a doctor or a notary, extra limits apply to the description and the reviews: advertising law bans misleading claims and unfair comparisons (“best”, “number one”, “most experienced”), and professional rules restrict advertising even further. For attorneys in the US, the state bar rules are based on ABA Model Rule 7.1, which forbids false or misleading communications about a lawyer’s services, and many states add disclaimers; for solicitors in England and Wales the Solicitors Regulation Authority has its own rules. You talked about this in the lesson on expert texts and ethics. **This is a guideline, not legal advice:** show the text of the listing to a lawyer, your licensing body or your professional association before publishing. No guarantees of results, no “we win 100% of cases”, and no reviews that disclose another person’s case.
+
+## LocalBusiness markup
+
+The facts from the listing have to be repeated **on the site**: in visible words (a Contact page) and in markup in the head. You already know how to write JSON-LD. For a place the type is `LocalBusiness` or its more exact subtype (`ProfessionalService`, `Store`, `CafeOrCoffeeShop` and so on: the list is on schema.org). The minimum looks like this:
+
+```text
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Name",
+  "url": "https://riverbend.example/",
+  "telephone": "+1 555 000 0000",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "0 Bank Street",
+    "addressLocality": "Riverbend",
+    "addressCountry": "US"
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "opens": "10:00",
+    "closes": "18:00"
+  },
+  "areaServed": "Riverbend and the surrounding area"
+}
+```
+
+Three rules to remember:
+
+1. **The markup restates what is visible on the page and in the listing.** The hours in the markup and on the page must match.
+2. **For a project without an office,** give a service area (`areaServed`) and a town in place of an exact address; don’t invent addresses.
+3. **The days of the week in markup are in English** (Monday and so on) in any language: that is schema.org’s vocabulary, not text for a person.
+
+<details>
+<summary>Check yourself: why must the name, address and phone match on the site and in the listing?</summary>
+
+The search engine and the person match them to be sure it is one business. A mismatch looks like two different businesses or like outdated data, and trust falls.
+
+</details>
+
+## Practice
+
+Prepare the listing and the markup.
+
+1. **The listing.** The name, address and phone from the brief word for word, the hours, one to three categories, a list of services (from the brief), the service area and a description without guarantees or comparisons.
+2. **The markup.** JSON-LD with the type LocalBusiness (or a subtype): name, address, phone, hours, service area.
+
+The check compares the listing and the markup with the brief and looks for words of promise. Whether your listing is accurate is for you to decide: call the number given and walk the path of a person who is looking for you nearby.
