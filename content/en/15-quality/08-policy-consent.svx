@@ -1,0 +1,415 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/08-policy-consent.svx, localized to the GDPR, the UK GDPR and the US state laws. */
+	export const metadata = {
+		id: '15-quality/08-policy-consent',
+		part: 15,
+		order: 8,
+		title: 'A privacy notice and consent on a site',
+		definition: 'A privacy notice is a public document saying what is done with visitors’ data. Consent is a person’s own action, with a text of its own.',
+		summary:
+			'The record from the last lesson turns into two documents: a privacy notice that anyone can read, and a consent that a person gives themselves. Afterwards you know what sections a notice has, how to set up consent apart from other terms, what must not be in it, and you build, for your form, a ten-section notice and an honest consent with a separate checkbox for the newsletter.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'sheet',
+					label: '☑ I accept it all',
+					caption: 'A checkbox with a surprise',
+					say: [
+						{ text: 'Terms, data and it’s already ticked.' },
+						{ who: 'The form', text: 'It’s shorter!' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'lock',
+					label: '☐ I agree: name and phone',
+					caption: 'Separate and empty',
+					say: 'Its own checkbox, its own text: who, which data and why. The person ticks it.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: 'notice v3 · 30 Oct 2026',
+					caption: 'A date and a version',
+					say: 'The notice tells the truth, sits behind a link and carries a date.'
+				}
+			]
+		},
+		teaches: ['quality-privacy-notice'],
+		requires: ['quality-152fz', 'texts-legal-text', 'html-form-validation', 'html-lang-i18n'],
+		practice: {
+			id: 'policy-consent',
+			title: 'A ten-section notice and an honest consent',
+			task: 'Put the form and the notice in order. 1) The consent in the #consent block: the checkbox named consent must be empty (no checked) and required; the text must not mention “terms”; it names the controller (the project’s name from the brief), the data and the purpose (“to…” or “in order to…”), the word “process,” and a link to the notice (#privacy). 2) The newsletter is a separate checkbox named newsletter: empty and not required. 3) A link to #privacy in the footer. 4) The notice: ten sections with the ids p-operator, p-data, p-purposes, p-basis, p-keep, p-recipients, p-storage, p-rights, p-cookies, p-version. In p-operator give the name and city from the brief; in p-rights the email from the brief, a time to answer of one month and the right to withdraw consent; in p-keep a period as a number; in p-storage the country or region and any transfer abroad; in p-recipients the services; in p-cookies the analytics counter; in p-version a date such as 30 October 2026. If the brief has English, say which text prevails. Leave no “…”.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main, footer { max-width: 42rem; margin: 0 auto; padding: 1rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <form id="request" action="/request" method="post">
+        <h2>{{mainAction.label}}</h2>
+        <p><label for="f-name">Name</label><br><input id="f-name" name="name" autocomplete="name" required></p>
+        <p><label for="f-phone">Phone</label><br><input id="f-phone" name="phone" type="tel" autocomplete="tel" required></p>
+        <div id="consent">
+          <label><input type="checkbox" name="consent" checked> I accept the terms of sale and agree to the processing of my personal data</label>
+        </div>
+        <p><button type="submit">{{mainAction.label}}</button></p>
+      </form>
+
+      <section id="privacy">
+        <h2>Privacy notice</h2>
+        <section id="p-operator"><h3>1. Controller</h3><p>…</p></section>
+        <section id="p-data"><h3>2. What data</h3><p>…</p></section>
+        <section id="p-purposes"><h3>3. Purposes</h3><p>…</p></section>
+        <section id="p-basis"><h3>4. Lawful basis</h3><p>…</p></section>
+        <section id="p-keep"><h3>5. How long we keep it</h3><p>…</p></section>
+        <section id="p-recipients"><h3>6. Who receives the data</h3><p>…</p></section>
+        <section id="p-storage"><h3>7. Where it is stored and how it is protected</h3><p>…</p></section>
+        <section id="p-rights"><h3>8. Your rights</h3><p>…</p></section>
+        <section id="p-cookies"><h3>9. Cookies and counters</h3><p>…</p></section>
+        <section id="p-version"><h3>10. Version and changes</h3><p>…</p></section>
+      </section>
+    </main>
+    <footer><p>{{name}}</p></footer>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main, footer { max-width: 42rem; margin: 0 auto; padding: 1rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <form id="request" action="/request" method="post">
+        <h2>{{mainAction.label}}</h2>
+        <p><label for="f-name">Name</label><br><input id="f-name" name="name" autocomplete="name" required></p>
+        <p><label for="f-phone">Phone</label><br><input id="f-phone" name="phone" type="tel" autocomplete="tel" required></p>
+        <div id="consent">
+          <p><label><input type="checkbox" name="consent" required> I agree that {{name}} will process my name and phone number in order to reply to my inquiry. <a href="#privacy">Privacy notice</a></label></p>
+          <p><label><input type="checkbox" name="newsletter"> I would like to receive news by email (I can unsubscribe at any time)</label></p>
+        </div>
+        <p><button type="submit">{{mainAction.label}}</button></p>
+      </form>
+
+      <section id="privacy">
+        <h2>Privacy notice</h2>
+        <section id="p-operator"><h3>1. Controller</h3><p>Controller: {{name}}, {{city}}. To contact us about your data: {{email}}.</p></section>
+        <section id="p-data"><h3>2. What data</h3><p>Your name, phone number and the text of the message you type into the form.</p></section>
+        <section id="p-purposes"><h3>3. Purposes</h3><p>To reply to your inquiry and prepare a consultation. We use your details for the newsletter only if you separately agree.</p></section>
+        <section id="p-basis"><h3>4. Lawful basis</h3><p>To reply to an inquiry: steps you ask us to take before a contract. For the newsletter: your consent, which you give with a separate checkbox.</p></section>
+        <section id="p-keep"><h3>5. How long we keep it</h3><p>Three years after your last contact, then we delete the data; the message text is kept for one year.</p></section>
+        <section id="p-recipients"><h3>6. Who receives the data</h3><p>Our hosting provider and email service, which process data on our instructions, and our analytics counter (without your name or phone number).</p></section>
+        <section id="p-storage"><h3>7. Where it is stored and how it is protected</h3><p>On servers in the EU; your data does not leave the EEA. Protection: HTTPS, password access with two-factor login, regular updates.</p></section>
+        <section id="p-rights"><h3>8. Your rights</h3><p>You can ask what data we hold, have it corrected or deleted, and withdraw your consent. Write to {{email}}: we reply within one month. You can complain to your data protection authority (in the UK, the ICO).</p></section>
+        <section id="p-cookies"><h3>9. Cookies and counters</h3><p>The site uses an analytics counter; it starts only after you choose to allow it. A detailed list is in the cookie table.</p></section>
+        <section id="p-version"><h3>10. Version and changes</h3><p>Version 3, 30 October 2026. Earlier versions are kept. The English text prevails; any other version is a translation.</p></section>
+      </section>
+    </main>
+    <footer><p>{{name}} · <a href="#privacy">Privacy notice</a></p></footer>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'labels', kind: 'label' },
+				{ id: 'consent-box', kind: 'exists', selector: '#consent input[type="checkbox"][name="consent"][required]:not([checked])' },
+				{ id: 'consent-no-offer', kind: 'text', selector: '#consent', matches: '^(?![\\s\\S]*(terms|offer|conditions))' },
+				{ id: 'consent-purpose', kind: 'text', selector: '#consent', matches: '(?=[\\s\\S]*process)(?=[\\s\\S]*(to |in order|so that|purpose))' },
+				{ id: 'consent-operator', kind: 'field', selector: '#consent', field: 'name' },
+				{ id: 'consent-link', kind: 'exists', selector: '#consent a[href="#privacy"], #consent a[href$="privacy.html"]' },
+				{ id: 'newsletter', kind: 'exists', selector: 'input[name="newsletter"]:not([required]):not([checked])' },
+				{ id: 'footer-link', kind: 'exists', selector: 'footer a[href="#privacy"], footer a[href$="privacy.html"]' },
+				{ id: 'ten-sections', kind: 'count', selector: '#p-operator, #p-data, #p-purposes, #p-basis, #p-keep, #p-recipients, #p-storage, #p-rights, #p-cookies, #p-version', min: 10 },
+				{ id: 'no-gaps', kind: 'text', selector: '#privacy', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'operator', kind: 'field', selector: '#p-operator', field: 'name' },
+				{ id: 'city', kind: 'field', selector: '#p-operator', field: 'city' },
+				{ id: 'keep', kind: 'text', selector: '#p-keep', matches: '\\d|[Tt]hree|[Oo]ne|[Tt]wo|[Yy]ear|[Mm]onth' },
+				{ id: 'recipients', kind: 'text', selector: '#p-recipients', matches: 'analytics|counter|email|host|CRM|service|processor' },
+				{ id: 'storage', kind: 'text', selector: '#p-storage', matches: 'EU|EEA|UK|United Kingdom|US|United States|Europe|country|region|server' },
+				{ id: 'rights-email', kind: 'field', selector: '#p-rights', field: 'email' },
+				{ id: 'rights-term', kind: 'text', selector: '#p-rights', matches: '(?=[\\s\\S]*(month|30 days|45 days|thirty|forty-five))(?=[\\s\\S]*(withdraw))' },
+				{ id: 'cookies', kind: 'text', selector: '#p-cookies', matches: '[Cc]ookie|counter|analytics' },
+				{ id: 'version', kind: 'text', selector: '#p-version', matches: '\\d{1,2}\\s+[A-Z][a-z]+\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2}|\\d{1,2}/\\d{1,2}/\\d{4}|\\d{1,2}\\.\\d{1,2}\\.\\d{4}' },
+				{ id: 'lang-force', kind: 'text', selector: '#privacy', matches: '[Ee]nglish|prevail|govern', when: { brief: 'languages', contains: 'en' } }
+			]
+		},
+		quiz: [
+			{
+				type: 'multiple',
+				prompt: 'Which of these lines under a form meet the requirements for consent, as the lesson describes them?',
+				options: [
+					'An empty checkbox: “I agree that Sam Carter will process my name and phone number in order to reply to my inquiry. Privacy notice”',
+					'A checkbox that is already ticked: “I agree to the processing of my data”',
+					'An empty checkbox: “I accept the terms of sale and agree to the processing of my data”',
+					'A separate, empty, optional checkbox “I would like to receive news” beside the first'
+				],
+				answer: [0, 3],
+				why: [
+					'Yes: empty, separate, and it names the controller, the data and the purpose, with a link to the notice.',
+					'No. A pre-ticked box does not show a clear affirmative action (Recital 32).',
+					'No. The consent is mixed with the terms of sale, and under Article 7(2) a request for consent made in a document that covers other matters must be clearly distinguishable from them.',
+					'Yes: a newsletter is a separate purpose with its own consent, and declining it does not stop the inquiry being sent.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each section of the notice with what is written in it',
+				pairs: [
+					['Controller', 'who you are and how to contact you about data'],
+					['Retention', 'how long the data is kept and when it is deleted'],
+					['Recipients', 'the host, the email service, the counter and other receivers'],
+					['Your rights', 'how to find out, correct, delete, withdraw consent and where to complain']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You copied another site’s privacy notice and changed the name. What is wrong?',
+				options: [
+					'It describes someone else’s processing: the periods, the services and the place of storage may differ, and a gap between the text and your practice makes the text untrue',
+					'Nothing: privacy notices are all alike',
+					'It is enough to change the date'
+				],
+				answer: 0,
+				why: [
+					'Yes. A notice describes what you do, not what other people have written. You can copy the structure, but you write the content from your own record. In the US, a notice that misstates your practice can be treated as a deceptive practice.',
+					'No. A notice depends on which data you process, why, and where.',
+					'No. A date does not make the content true.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The privacy notice exists only as a PDF in a closed customer area. What is wrong?',
+				options: [
+					'The information must be given when the data is collected and be easily accessible; the link belongs beside the form and in the footer, on an ordinary page',
+					'Nothing: a PDF counts as a document',
+					'Only that a PDF is heavy'
+				],
+				answer: 0,
+				why: [
+					'Yes. Articles 12 and 13 require information that is easily accessible and given at the time of collection. And California’s CalOPPA requires a commercial site that collects personal information from Californians to conspicuously post its privacy policy. An ordinary page is better: a screen reader and search can see it, and it opens on a phone.',
+					'No. Behind a closed door, the document is unavailable to those who have not yet become customers.',
+					'No. It is not about weight.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A site has an English and a Russian version. Which text of the notice prevails?',
+				options: [
+					'The one you name yourself: say so in the notice, and have a person, not a machine, translate legal text',
+					'Always the English one',
+					'It makes no difference'
+				],
+				answer: 0,
+				why: [
+					'Yes. If the notice says which text is the main one, differences are read against it. The notice must also be understandable to the people it addresses, in a language they read. A machine translation of a legal text can distort the sense, so a person checks it.',
+					'No. The law sets no such rule.',
+					'No. In a dispute you need to know which text is the main one.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a consent: an empty required checkbox named consent, with a label that has the word “process,” a purpose and a link to #privacy',
+				starter: '',
+				checks: [
+					{ id: 'box', kind: 'exists', selector: 'input[type=checkbox][name=consent][required]:not([checked])' },
+					{ id: 'text', kind: 'text', selector: 'label', matches: '(?=[\\s\\S]*process)(?=[\\s\\S]*(to |in order|so that|purpose))' },
+					{ id: 'link', kind: 'exists', selector: 'label a[href=\\#privacy]' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-policy-sections',
+				front: 'What sections does a privacy notice have?',
+				back: 'The controller and contacts; what data; purposes; lawful basis; retention; who receives it; where it is stored and how it is protected; the person’s rights; cookies and counters; a date, a version and changes.'
+			},
+			{
+				id: 'quality-policy-truth',
+				front: 'What is the main requirement for the text of a notice?',
+				back: 'It describes your real practice. Another site’s notice with your name on it describes someone else’s processing and makes the text untrue. You may copy the structure; write the content from your own record.'
+			},
+			{
+				id: 'quality-consent-markup',
+				front: 'What does proper consent look like in markup?',
+				back: 'A separate empty checkbox named consent, with required if consent is the basis for what the form does, a label naming the controller, the data and the purpose, and a link to the notice; the newsletter as a separate optional checkbox; and a record of the consent with a date and a version.'
+			},
+			{
+				id: 'quality-policy-access',
+				front: 'Where should the notice be?',
+				back: 'On the site in free access: a page with a link beside the form and in the footer of every page. Not in a closed customer area and not only as a PDF.'
+			},
+			{
+				id: 'quality-policy-lang',
+				front: 'What about a notice in two languages?',
+				back: 'Say in the text which language prevails. A person should translate legal text; a machine translation may distort the sense.'
+			}
+		],
+		sources: [
+			{ title: 'GDPR, Article 13: information to be provided where personal data are collected from the data subject', url: 'https://gdpr-info.eu/art-13-gdpr/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'GDPR, Article 7: conditions for consent', url: 'https://gdpr-info.eu/art-7-gdpr/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Right to be informed: privacy information (Information Commissioner’s Office)', url: 'https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'California Business and Professions Code § 22575 (CalOPPA)', url: 'https://california.public.law/codes/business_and_professions_code_section_22575', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: '16 CFR Part 312: Children’s Online Privacy Protection Rule (Cornell LII)', url: 'https://www.law.cornell.edu/cfr/text/16/part-312', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: 'Web Almanac 2024: Privacy', url: 'https://almanac.httparchive.org/en/2024/privacy', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Federal Law “On Personal Data” No. 152-FZ (ConsultantPlus, in Russian, for comparison)', url: 'https://www.consultant.ru/document/cons_doc_LAW_61801/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You get a form with a typical mistake (a pre-ticked checkbox bundled with terms) and an empty frame for the notice. Fix the form and write the notice from your own record.',
+			hints: [
+				'The consent: a label holding an input of type checkbox named consent, with required, then text such as “I agree that (the controller) will process my name and phone number in order to reply to my inquiry,” then a link to #privacy. The word “terms” must go, and so must checked.',
+				'The newsletter is a separate checkbox named newsletter, with no required and no checked. In the footer, a link to #privacy.',
+				'In p-operator, the name and city from the brief. In p-rights, the email from the brief, “we reply within one month” and “withdraw consent.”',
+				'In p-keep a period (“three years”), in p-storage “on servers in the EU,” and in p-version a date such as 30 October 2026. If the brief has English, add “the English text prevails.”'
+			],
+			mistakes: {
+				labels: 'Some field has no label.',
+				'consent-box': 'The consent checkbox named consent must be required and empty (no checked).',
+				'consent-no-offer': 'Take the terms out of the consent text: it must be separate.',
+				'consent-purpose': 'The consent needs the word “process” and a purpose: “in order to reply to my inquiry.”',
+				'consent-operator': 'The consent names the controller: the project’s name from the brief.',
+				'consent-link': 'The consent needs a link to the notice, an a element pointing at #privacy.',
+				newsletter: 'The newsletter needs a checkbox of its own named newsletter: empty and not required.',
+				'footer-link': 'The footer needs a link to the notice.',
+				'ten-sections': 'The notice must have ten sections with the ids given.',
+				'no-gaps': 'There are still “…” in the notice. Fill in every section.',
+				operator: 'In p-operator, name the controller: the name from the brief.',
+				city: 'In p-operator, give the city from the brief.',
+				keep: 'In p-keep, give a period: for example “three years.”',
+				recipients: 'In p-recipients, name the receivers: the host, the email service, the counter.',
+				storage: 'In p-storage, say in which country or region the data is stored.',
+				'rights-email': 'In p-rights, give the email from the brief.',
+				'rights-term': 'In p-rights, write the time to answer (one month) and that consent can be withdrawn.',
+				cookies: 'In p-cookies, say something about cookies and the counter.',
+				version: 'p-version needs a date such as 30 October 2026.',
+				'lang-force': 'In the notice, say which language prevails (for example English).'
+			},
+			outro: 'Now the form asks for consent honestly, and the notice sits behind a link and says what you do. Show it to a lawyer, and set a reminder to review it whenever a new service arrives and at least once a year.'
+		},
+		say: { PDF: 'P D F', CRM: 'C R M', GDPR: 'G D P R', ICO: 'I C O', CalOPPA: 'cal-oh-pa', COPPA: 'koh-pa', HTTPS: 'H T T P S', EEA: 'E E A' }
+	};
+</script>
+
+<script>
+	import ConsentDesign from '../../diagrams/ConsentDesign.svelte';
+</script>
+
+## Two documents, two purposes
+
+Out of the record in the last lesson grow two texts, and they must not be confused.
+
+- A **privacy notice** is a public document of description. It answers “who are you, what do you do with the data, why, how long do you keep it, who do you pass it to, and how can a person use their rights?” Everyone reads it, including people who have sent nothing, and the authorities. The GDPR (Articles 12 to 14) requires the information to be given in a concise, transparent, intelligible and easily accessible form, in clear and plain language, **at the time the data is collected**. In California, the California Online Privacy Protection Act (CalOPPA, Business and Professions Code § 22575) requires an operator of a commercial website that collects personal information from Californians to **conspicuously post** its privacy policy, and the CCPA adds a **notice at collection** for businesses it covers.
+- **Consent** is a **person’s action**: an empty checkbox that they tick themselves, under a text that says what they agree to. Under the GDPR it must be distinguishable from other matters (Article 7(2)). It belongs to the person and is kept as a record.
+
+[The lesson on legal texts](../../10-writing/06-legal-expert/) taught you to write them clearly, in two layers: short at the top, detailed below. Here you add what makes the notice complete.
+
+## The notice: ten sections
+
+The law does not dictate an exact form for a notice, but by its sense it must show a person what happens to their data. Article 13 of the GDPR lists what has to be said: the controller’s identity and contacts, the purposes and the legal basis, the recipients, any transfer to another country, the retention period, the person’s rights, the right to withdraw consent, the right to complain to a supervisory authority, and whether giving the data is required. A reliable structure that you fill in from your record:
+
+1. **Controller.** A name, a city, how to contact you about data (an email). For a company: the full name and address.
+2. **What data.** A concrete list: name, phone, the text of a message. If there is an analytics counter, say what it collects.
+3. **Purposes.** For each group of data, a purpose of its own in your own words (“reply to the inquiry”), not “for marketing purposes.”
+4. **Lawful basis.** Consent, contract, legal obligation, legitimate interests: what you wrote in the record.
+5. **Retention.** As a number and with a condition for deletion: “three years after the last contact, then we delete it.”
+6. **Who receives the data.** The host, the email service, the CRM, the payment service, the counter: every recipient from the record. A transfer to another country is named separately, with the safeguard you rely on.
+7. **Where it is stored and how it is protected.** The country or region, and briefly: HTTPS, access by role, a second factor, backups.
+8. **The person’s rights.** To find out, correct, delete, withdraw consent, complain to the authority (in the UK, the ICO; in the EU, the national data protection authority); an email for requests; the time to answer (one month under the GDPR; for California requests under the CCPA, 45 days).
+9. **Cookies and counters.** What the site sets, why, and how to refuse (in detail in the next lesson).
+10. **Version and changes.** A date, a version number and what changed; earlier versions are kept.
+
+Rules that are easy to break.
+
+- **The notice tells the truth,** that is, it describes your real practice (the rule from the lesson on legal texts). The commonest mistake is **another site’s notice with your name on it**. You may copy the structure; you write the content from your own record. A generator or a model gives only a draft. A new service appears in the notice before it appears on the site. In the US this matters twice over: a policy that misdescribes what you do can be treated by the Federal Trade Commission as a deceptive practice (the lesson on advertising law returns to this).
+- **The notice is accessible.** An ordinary page of the site (HTML), not only a PDF in a closed customer area; a link beside the form and in the footer of every page. An ordinary page reads on a phone and with a screen reader.
+- **The notice is understandable.** Two layers, as above: a short summary, then the full text. Use the language your visitors read.
+- **The notice has a date and a version,** so that you can say which text applied when a person agreed. Every version is kept.
+- **Languages.** If the site has two versions (English and Russian, say), state in the notice which text prevails. Legal text is better translated by a person than by a machine: an unnoticed mistake in a word such as “may” or “must” changes the sense.
+
+<details>
+<summary>Check yourself: why can’t a notice be copied from a competitor with the name changed?</summary>
+
+It describes someone else’s practice: other services, periods and place of storage. A gap between it and what you really do makes the text untrue. You can borrow the structure, but the content has to be written from your own record.
+
+</details>
+
+## Consent: markup and record
+
+Now you will see five ways to write a consent line under a form. Three of them don’t work, and it matters to see why.
+
+<ConsentDesign />
+
+A proper consent in markup looks like this:
+
+```text
+<label>
+  <input type="checkbox" name="consent" required>
+  I agree that Sam Carter will process my name and phone number
+  in order to reply to my inquiry. <a href="#privacy">Privacy notice</a>
+</label>
+<label>
+  <input type="checkbox" name="newsletter">
+  I would like to receive news by email
+</label>
+```
+
+A note on honesty before the details. A **required** consent tick on an inquiry form is a simplification we use to practice the markup. Regulators point out that consent is the right basis only when the person has a real choice. If you need the details to answer the inquiry at all, the honest basis is usually the “steps at the person’s request before a contract” or legitimate interests (see the last lesson), and then you do not need the tick: you put a short line and a link to the notice beside the button instead. Consent is the right tool where the person can truly say no without losing the service: a newsletter, a callback about other offers, non-essential cookies. What follows is how consent must be built whenever you do use it.
+
+- **An empty checkbox.** No `checked`. The person ticks it.
+- **Separate purposes, separate tick.** A **newsletter** is optional and separate, because it is a different purpose (the rules on email marketing are in [the email lesson](../../13-growth/02-email/)). Under Article 7(4), when you judge whether consent is freely given, you must take account of whether a service is made conditional on consent to processing that isn’t necessary for it.
+- **A text of its own.** It has no terms of sale, no user agreement and no other documents. It has the controller, the data, the purpose and a link to the notice. If your text is long, with a list of actions and periods, put it on a separate page with a link next to the tick.
+- **The link to the notice** opens in a new tab or in a clear place, so that the person doesn’t lose the form they filled in.
+- **A record** of the consent: the date and time, the version of the text, the purpose, and the link to the inquiry (Article 7(1): you must be able to demonstrate it). Then you can tell the person what they accepted and when, and show it to a regulator. If the person withdrew consent, that is a record too.
+- **Withdrawal.** It must be as easy as giving consent (Article 7(3)): an email to the address in the notice is the minimum, and for a newsletter a one-click unsubscribe link. On receiving a withdrawal you stop the processing that rests on it, and delete the data unless another basis lets you keep it.
+
+Then the exceptions. Consent is **not needed** where the processing rests on another basis, such as a contract or a legal duty. And **children** have special rules: under the GDPR a child’s own consent to an online service is valid from 16, and member states may lower the age to no less than 13 (Article 8); the UK sets it at 13; and in the US the Children’s Online Privacy Protection Rule (COPPA, 16 CFR Part 312) requires verifiable parental consent before collecting personal information from a child under 13 on a site directed to children or with actual knowledge. If your site is aimed at young people, take advice.
+
+<details>
+<summary>Check yourself: why is the newsletter ticked separately and not together with consent to process the inquiry?</summary>
+
+They have different purposes: replying to an inquiry and sending promotional email. A person may accept one and refuse the other, and a refusal of the newsletter must not stop the inquiry being sent.
+
+</details>
+
+## What these texts never contain
+
+- **“By pressing the button you agree.”** Pressing a button sends a form. It is not a clear affirmative action expressing consent.
+- **Consent to “any processing by any means.”** It isn’t specific.
+- **Consent inside terms of sale or a user agreement.** It isn’t distinguishable.
+- **A notice that doesn’t mention the counters and services** that are on the site.
+- **A link to a notice that doesn’t open,** and a notice with no date.
+- **Demanding consent where none is called for:** for example, to view the site.
+
+## Practice
+
+You are in the era of 2014: a form has appeared on the site, and it is time to put it in legal order. You get a form with a pre-ticked box bundled with terms that shouldn’t be there, and a frame of a notice with no text. Fix the consent, add the newsletter as a separate checkbox, add a link in the footer and fill in the ten sections of the notice from your own record in the last lesson.
+
+The check reads structure: an empty required checkbox without the word “terms,” a controller, a purpose and a link; a separate newsletter checkbox; ten sections with the needed words and a date. Whether the notice is good in substance is for a lawyer to decide: before you publish it, show it to one, as we said in the lesson on legal texts.
+
+## What used to be different
+
+Consent used to be a line of small print at the foot of the page, or a button that “itself” sent the form. A notice was a copy from the internet, thirty pages long in legal language, and nobody, the owner included, read it. Today the requirements for consent are stricter, and the value of openness is clear even without a law: a person who has been honestly told what happens to their data trusts you more and more often sends the inquiry.
