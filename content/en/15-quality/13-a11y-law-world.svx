@@ -1,0 +1,375 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/13-a11y-law-world.svx, localized: the ADA, Section 508, the Equality Act 2010, the European Accessibility Act and EN 301 549, with Russia’s GOST R 52872-2019 as a comparison. */
+	export const metadata = {
+		id: '15-quality/13-a11y-law-world',
+		part: 15,
+		order: 13,
+		title: 'Accessibility and the law, and visitors from other countries',
+		definition: 'An accessibility statement is a page that says honestly what has been checked on a site and what has not. Most accessibility laws point to WCAG.',
+		summary:
+			'A site is read in more than one country. Afterwards you know what the US (ADA, Section 508), the UK (Equality Act 2010) and the EU (European Accessibility Act, EN 301 549) say about accessible websites, how GDPR, ePrivacy and US state privacy laws differ and when they reach a small site, how Russia’s GOST R 52872-2019 compares, and you make an audience map and an honest accessibility statement for your project. This is a guide as of 30 October 2026, not legal advice.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'network',
+					label: 'en · de · ?',
+					caption: 'A visitor from Berlin',
+					say: [
+						{ text: 'My site is in English. Does Europe count?' },
+						{ who: 'GDPR', text: 'If you offer services to people in the EU, yes.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'cards',
+					label: 'WCAG 2.2 AA',
+					caption: 'A common yardstick',
+					say: 'Countries have different laws, but almost everywhere accessibility is measured against WCAG.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'sheet',
+					label: 'statement · date',
+					caption: 'Honest',
+					say: 'Write what was checked, what wasn’t, and where to report a problem.'
+				}
+			]
+		},
+		teaches: ['quality-a11y-law', 'quality-intl-law'],
+		requires: ['quality-wcag22', 'quality-keyboard-screen-reader', 'quality-152fz', 'quality-cookies', 'html-lang-i18n'],
+		practice: {
+			id: 'audience-and-statement',
+			title: 'An audience map and an accessibility statement',
+			task: 'Make two things. 1) An audience map: in the #audience table there is already a row (tr.aud) for each language in the brief. For each, write where the audience lives, which rules sit beside it (GDPR, UK GDPR, ePrivacy, PECR, CCPA, EAA, ADA, Equality Act) and what you do about it. For English, don’t forget GDPR. 2) An accessibility statement in the #a11y-statement section: the target (WCAG 2.2, level AA), the status of the check (partly checked, what was not checked), the date of the check such as 30 October 2026, a list of known limitations (at least two items in the #limits list) and the email for reporting problems from the brief. Don’t write “fully conforms”: until it has been checked, that is untrue. Leave no “…”.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+
+      <section id="a11y-statement">
+        <h2>Accessibility statement</h2>
+        <p id="target">Target: …</p>
+        <p id="status">Status: …</p>
+        <p id="date">Date of the check: …</p>
+        <h3>Known limitations</h3>
+        <ul id="limits"><li>…</li><li>…</li></ul>
+        <p id="feedback">Report a problem: …</p>
+      </section>
+    </main>
+
+    <aside data-scaffold id="map">
+      <h2>Audience map</h2>
+      <table id="audience">
+        <thead><tr><th>Language</th><th>Where the audience is</th><th>Which rules sit beside it</th><th>What I do</th></tr></thead>
+        <tbody>
+          {{#each languages}}<tr class="aud"><td class="lang">{{.}}</td><td class="where">…</td><td class="regime">…</td><td class="do">…</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+
+      <section id="a11y-statement">
+        <h2>Accessibility statement</h2>
+        <p id="target">Target: conformance with WCAG 2.2, level AA.</p>
+        <p id="status">Status: partly checked: with an automated tool, a keyboard and the NVDA screen reader for the main action; the other pages were not checked.</p>
+        <p id="date">Date of the check: 30 October 2026.</p>
+        <h3>Known limitations</h3>
+        <ul id="limits"><li>Some scans of documents have no detailed text description.</li><li>Videos without captions will be fixed before the end of the year.</li></ul>
+        <p id="feedback">Report a problem: {{email}}; we reply within ten business days.</p>
+      </section>
+    </main>
+
+    <aside data-scaffold id="map">
+      <h2>Audience map</h2>
+      <table id="audience">
+        <thead><tr><th>Language</th><th>Where the audience is</th><th>Which rules sit beside it</th><th>What I do</th></tr></thead>
+        <tbody>
+          {{#each languages}}<tr class="aud"><td class="lang">{{.}}</td><td class="where">mainly the US and the UK, some visitors from the EU</td><td class="regime">US state privacy laws (CCPA where it applies), the ADA, UK GDPR and PECR, GDPR and ePrivacy for visitors from the EU, the EAA if I sell to EU consumers, and WCAG as the accessibility yardstick</td><td class="do">a privacy notice and consent text, a banner with an equal choice, analytics after consent, an accessibility statement</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'aud-count', kind: 'count', selector: 'tr.aud', min: { brief: 'languages' } },
+				{ id: 'aud-gaps', kind: 'text', selector: '#audience', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'aud-regime', kind: 'text', selector: 'td.regime', matches: 'GDPR|ePrivacy|PECR|CCPA|EAA|ADA|Equality Act|152' },
+				{ id: 'aud-gdpr', kind: 'text', selector: '#audience', matches: 'GDPR', when: { brief: 'languages', contains: 'en' } },
+				{ id: 'target', kind: 'text', selector: '#target', matches: '(?=[\\s\\S]*WCAG\\s*2\\.[12])(?=[\\s\\S]*AA)' },
+				{ id: 'status', kind: 'text', selector: '#status', matches: '(?=[\\s\\S]*(partly|partially|not checked|wasn’t checked|were not checked|checked))(?=[\\s\\S]*\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+\\S+)(?![\\s\\S]*…)' },
+				{ id: 'no-overclaim', kind: 'text', selector: '#a11y-statement', matches: '^(?![\\s\\S]*(fully conforms|full conformance|fully compliant|guarantee accessibility))' },
+				{ id: 'date', kind: 'text', selector: '#date', matches: '\\d{1,2}\\s+[A-Z][a-z]+\\s+\\d{4}|\\d{4}-\\d{2}-\\d{2}|\\d{1,2}/\\d{1,2}/\\d{4}|\\d{1,2}\\.\\d{1,2}\\.\\d{4}' },
+				{ id: 'limits', kind: 'count', selector: '#limits li', min: 2 },
+				{ id: 'limits-gaps', kind: 'text', selector: '#limits', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'feedback', kind: 'field', selector: '#feedback', field: 'email' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'Which statement about accessibility law for a private business website in the United States is right?',
+				options: [
+					'There is no federal technical standard for private sites; the ADA bars discrimination by businesses open to the public, courts differ on how far that reaches websites, and WCAG is the working benchmark',
+					'The ADA requires every private site to meet WCAG 2.2 AAA by statute',
+					'Accessibility law applies only to government sites'
+				],
+				answer: 0,
+				why: [
+					'Yes. The Department of Justice says the ADA applies to the web offerings of public accommodations, but it has no regulation setting detailed standards for private sites, and points to WCAG and the Section 508 standards as helpful guidance. Courts disagree on the details, and lawsuits are filed every year.',
+					'No. No statute names WCAG 2.2 AAA for private sites.',
+					'No. Government sites have the clearest rules (Section 508 for federal agencies, and a 2024 Justice Department rule for state and local governments), but the ADA reaches businesses too.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which signs show that a site is “aimed” at visitors from the European Union, so that the GDPR may reach it wherever its owner is?',
+				options: [
+					'The site offers goods or services to people in EU countries (languages, prices in euros, delivery to the EU)',
+					'The site monitors the behavior of people in the EU (analytics on them)',
+					'Visitors from Germany sometimes open the site, but the service is only in your town',
+					'The site mentions customers in the EU'
+				],
+				answer: [0, 1, 3],
+				why: [
+					'Yes: offering goods or services to people in the EU is the main sign (GDPR, Article 3(2)).',
+					'Yes: monitoring the behavior of people in the EU counts too.',
+					'No. Being reachable from Europe, or an English-language page, doesn’t by itself prove that you are targeting it.',
+					'Yes: mentions of EU customers are among the factors that the GDPR’s recitals give.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each act with what it is about',
+				pairs: [
+					['GDPR', 'protection of the personal data of people in the EU: lawful bases, rights, fines of up to 4 percent of turnover'],
+					['ePrivacy Directive', 'consent before non-essential cookies and similar technologies'],
+					['European Accessibility Act', 'accessibility of e-commerce, consumer banking and other services for consumers in the EU, from 28 June 2025'],
+					['ADA (United States)', 'a ban on discrimination against people with disabilities; accessibility lawsuits over inaccessible websites are brought under it']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You checked the site with an automated tool and a keyboard on one page. What may you write in the accessibility statement?',
+				options: [
+					'That the target is WCAG 2.2 AA, that one page was checked with a tool and a keyboard, that the rest wasn’t checked, and then list the limitations and an email',
+					'That the site fully conforms to WCAG 2.2 AA',
+					'Nothing: a statement isn’t needed if there are no complaints'
+				],
+				answer: 0,
+				why: [
+					'Yes. An honest statement says what was checked, what wasn’t, and where to report problems. A loud “fully conforms” without a full check misleads people (and in the US it can itself be treated as a deceptive claim).',
+					'No. One page doesn’t prove that the whole site conforms, and the claim would be untrue.',
+					'No. The statement is for people who want to know whether the site will suit them, and where to write about a problem. For public sector sites in the UK and EU it is a legal requirement.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What do the accessibility requirements of different countries have in common?',
+				options: [
+					'The benchmark is nearly everywhere WCAG (in the EU through the standard EN 301 549, in the US through Section 508 and court and Justice Department practice, in the UK in the public sector rules, in Russia GOST R 52872-2019 built on it)',
+					'Nothing: every country has its own technology',
+					'Every country requires a separate version of the site for disabled people'
+				],
+				answer: 0,
+				why: [
+					'Yes. So a site checked against WCAG 2.2 AA is usually in a better position everywhere. It is a benchmark, not a guarantee of compliance with the law of a particular country.',
+					'No. The benchmarks are very close.',
+					'No. A separate version is long out of favor; the main site should be accessible.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put in order how to write an accessibility statement',
+				items: [
+					'Check the site: with a tool, a keyboard and a screen reader',
+					'Write down the target, for example WCAG 2.2 AA',
+					'Write what was checked and when, and what was not',
+					'List the known limitations and the plan to fix them',
+					'Say where to report problems, and update the statement after each check'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-a11y-gost',
+				front: 'What is Russia’s GOST R 52872-2019?',
+				back: 'A national standard on the accessibility of internet resources and applications for people with disabilities (Rosstandart order No. 589-st of 29 August 2019, in force from 1 April 2020). It is based on WCAG 2.1, at levels A, AA and AAA. It is voluntary, but acts and contracts refer to it.'
+			},
+			{
+				id: 'quality-a11y-gov',
+				front: 'What do US law and the UK’s Equality Act say about accessible sites?',
+				back: 'US: the ADA bars discrimination by businesses open to the public, with no federal technical standard for private sites; Section 508 binds federal agencies (WCAG 2.0 AA), and a 2024 DOJ rule binds state and local governments (WCAG 2.1 AA). UK: the Equality Act 2010 requires reasonable adjustments (sections 20 and 29), and public sector sites must meet WCAG 2.2 AA and publish a statement.'
+			},
+			{
+				id: 'quality-intl-gdpr',
+				front: 'When does the GDPR reach a site outside the EU?',
+				back: 'If the site offers goods or services to people in the EU or monitors their behavior there (Article 3(2)). English alone does not prove targeting. The lawful bases, people’s rights, the 72-hour breach notice, and fines of up to 4 percent of turnover follow.'
+			},
+			{
+				id: 'quality-intl-eaa',
+				front: 'What is the European Accessibility Act?',
+				back: 'EU Directive 2019/882: since 28 June 2025, e-commerce and several other consumer services in the EU must be accessible (the benchmark is WCAG through EN 301 549). Microenterprises providing services are exempt (fewer than 10 people and turnover or balance sheet up to €2 million).'
+			},
+			{
+				id: 'quality-a11y-statement',
+				front: 'What does an honest accessibility statement look like?',
+				back: 'The target (WCAG 2.2 AA), what was checked and when, what wasn’t checked, the known limitations with a plan, and an email for reporting problems. No “fully conforms” until a full check has been done.'
+			}
+		],
+		sources: [
+			{ title: 'W3C WAI: Web Accessibility Laws and Policies', url: 'https://www.w3.org/WAI/policies/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'W3C WAI: Developing an Accessibility Statement', url: 'https://www.w3.org/WAI/planning/statements/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'ADA.gov: Guidance on Web Accessibility and the ADA', url: 'https://www.ada.gov/resources/web-guidance/', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Section508.gov: laws and policies', url: 'https://www.section508.gov/manage/laws-and-policies/', licence: 'PD', kind: 'docs', lang: 'en' },
+			{ title: 'Equality Act 2010, section 20: duty to make adjustments (legislation.gov.uk)', url: 'https://www.legislation.gov.uk/ukpga/2010/15/section/20', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'GOV.UK: accessibility requirements for public sector websites and apps', url: 'https://www.gov.uk/guidance/accessibility-requirements-for-public-sector-websites-and-apps', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'European Accessibility Act (European Commission)', url: 'https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/union-equality-strategy-rights-persons-disabilities-2021-2030/european-accessibility-act_en', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'EAA guidelines for microenterprises (Competition and Consumer Protection Commission, Ireland)', url: 'https://www.ccpc.ie/business/enforcement/accessibility/european-accessibility-act-guidelines-for-microenterprises/', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'GDPR, Article 3: territorial scope', url: 'https://gdpr-info.eu/art-3-gdpr/', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'GOST R 52872-2019 (Rosstandart order No. 589-st, in Russian, for comparison)', url: 'https://legalacts.ru/doc/prikaz-rosstandarta-ot-29082019-n-589-st-ob-utverzhdenii-natsionalnogo/', licence: 'proprietary-link', kind: 'docs', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to make two short things: a map of whose rules sit beside your site, and an honest accessibility statement.',
+			hints: [
+				'In the audience table, for each language: where the audience is (the US, the UK, Europe), which rules sit beside it (GDPR, UK GDPR, ePrivacy, CCPA, EAA, ADA) and what you do about it.',
+				'The target: “WCAG 2.2, level AA.” The status: what was checked (a tool, a keyboard, a screen reader) and what was not. The date: for example 30 October 2026.',
+				'The list of limitations has at least two items, and for feedback use the email from the brief. Don’t write “fully conforms.”'
+			],
+			mistakes: {
+				'aud-count': 'The table needs a row for each language in the brief.',
+				'aud-gaps': 'There are still “…” in the audience table.',
+				'aud-regime': 'In “Which rules sit beside it,” name the acts: GDPR, UK GDPR, ePrivacy, PECR, CCPA, EAA, ADA or the Equality Act.',
+				'aud-gdpr': 'For the English version, name GDPR.',
+				target: 'The target: WCAG 2.2, level AA.',
+				status: 'In the status, say what was checked and what wasn’t (at least five words).',
+				'no-overclaim': 'Take out “fully conforms”: without a full check it is untrue.',
+				date: 'The date of the check, in a form such as 30 October 2026.',
+				limits: 'The list needs at least two known limitations.',
+				'limits-gaps': 'There are still “…” in the limitations.',
+				feedback: 'Give the email from the brief for reporting problems.'
+			},
+			outro: 'Now you have a map of the rules and an honest statement. Update the statement after each check, and put the question of what exactly applies to you to a lawyer: here you learned how to put it.'
+		},
+		say: { GDPR: 'G D P R', ePrivacy: 'ee-privacy', PECR: 'peck-er', EAA: 'E A A', ADA: 'A D A', WCAG: 'wuh-cag', 'EN 301 549': 'E N three oh one five forty-nine', GOST: 'gost', NVDA: 'N V D A', CCPA: 'C C P A' }
+	};
+</script>
+
+<script>
+	import RegimeMatrix from '../../diagrams/RegimeMatrix.svelte';
+</script>
+
+## A caveat
+
+This is the topic where the law changes fastest and where precision matters. So at once: this lesson is a **guide, dated 30 October 2026**, and it does not replace a lawyer. The facts about the laws of different countries are gathered so that you understand what to ask, not so that you decide what applies to your site. The sources are listed at the bottom.
+
+## Accessibility law, country by country
+
+In this part you learned [the WCAG 2.2 criteria](../02-wcag22/) and checked your site. Here is what the law says in the places an English-speaking site is most likely to meet.
+
+**United States.**
+- The **Americans with Disabilities Act (ADA)** bars discrimination against people with disabilities. **Title III** covers “public accommodations,” that is, businesses open to the public. The Department of Justice has long taken the position that the ADA applies to the web offerings of such businesses, but it has **no regulation setting detailed technical standards for private sites**; it points to WCAG and the Section 508 standards as helpful guidance. Courts disagree on how far Title III reaches a website, in particular whether it must be tied to a physical place, yet accessibility lawsuits and demand letters are filed in large numbers every year, and several states, such as California, have their own civil rights laws used in these claims.
+- **Title II** covers state and local governments. A Justice Department rule of 2024 requires their web content and mobile apps to meet WCAG 2.1 level AA. An interim final rule published in April 2026 pushed its compliance dates back by a year (to April 2027 for larger entities and April 2028 for smaller ones), according to reports; check the current dates.
+- **Section 508 of the Rehabilitation Act** requires federal agencies to make their electronic and information technology accessible, and the Revised 508 Standards build on WCAG 2.0. **Section 504** covers recipients of federal money.
+- For a private small site, the practical rule: there is no federal checklist, but WCAG 2.2 AA is what a plaintiff, a settlement or a court will measure you against.
+
+**United Kingdom.**
+- The **Equality Act 2010** bars discrimination by those who provide services to the public. A service provider must make **reasonable adjustments** for disabled people (sections 20 and 29), and this duty is “anticipatory”: it applies before a particular person complains. The Act sets no technical standard, but WCAG is the practical benchmark.
+- **Public sector bodies** have to meet WCAG 2.2 AA under the Public Sector Bodies (Websites and Mobile Applications) Accessibility Regulations 2018, and to publish an accessibility statement.
+
+**European Union.**
+- The **European Accessibility Act** (Directive 2019/882) has applied since **28 June 2025**. Among the products and services it covers for consumers are **e-commerce services**, consumer banking services, e-books and electronic communications. **Microenterprises providing services** (fewer than ten people and a turnover or balance sheet of up to €2 million) are exempt from the service requirements. It reaches businesses outside the EU that sell to EU consumers. The technical benchmark is the European standard **EN 301 549**, which for web content points to WCAG 2.1 AA (a newer version based on WCAG 2.2 is in preparation). The penalties are set by each member state.
+- The **Web Accessibility Directive** (2016/2102) covers public sector sites, with an accessibility statement.
+
+**Russia, for comparison.** **GOST R 52872-2019** is a national standard on the accessibility of internet resources, approved by Rosstandart order No. 589-st of 29 August 2019 and in force since 1 April 2020. It is based on WCAG 2.1 and defines levels A, AA and AAA. National standards are voluntary in general, but become binding where an act or a contract refers to them. Reports say that a 2026 Government decree (No. 102) sets accessibility requirements for the websites of public authorities. For an ordinary commercial site we found no direct general duty in the Russian text, and lawyers differ. These details come from the Russian edition, so check the current text.
+
+The conclusion for a small project is simple: take WCAG 2.2 AA as the yardstick, check the site in three passes, fix the main things and say honestly what has been done.
+
+## The accessibility statement
+
+An **accessibility statement** is a page where you speak **honestly** about the accessibility of the site. It is needed by a person who wants to know whether the site will suit them and where to report a problem, and it shows that you take the matter seriously. For UK and EU public sector bodies it is a legal requirement; for a private site it is good practice and a sign of good faith. What it contains.
+
+1. **The target:** for example “WCAG 2.2, level AA.”
+2. **The status:** what was checked and when (a tool, a keyboard, a screen reader, which pages), and what wasn’t checked.
+3. **Known limitations** and, where possible, when they will be fixed.
+4. **How to report a problem:** an email or a form, and the time in which you will answer.
+5. **The date** and who did the checking.
+
+The main rule: **don’t say “fully conforms”** until a full check (by the criteria, with real people) has been done. It is the same as in [the lesson on advertising law](../11-ad-law/): a claim without substantiation, and in the US an inaccurate claim can itself be treated as deceptive. An honest “partly checked, here is what and here is what not” is worth more than a loud and untrue one.
+
+<details>
+<summary>Check yourself: what may you write in the statement if only one page has been checked?</summary>
+
+The target (WCAG 2.2 AA), exactly what was checked and when, what wasn’t checked, the known limitations and an email for reports. You must not write “fully conforms.”
+
+</details>
+
+## If your visitors are not only from your own country
+
+An English-language site can be read by anyone, and an expert’s service may be wanted abroad. The rules of another country apply to you not because the page opens there, but because you **target** the people there. The ones met most often follow.
+
+**GDPR** (the General Data Protection Regulation, EU Regulation 2016/679, applying since 25 May 2018). It protects the personal data of people **in the EU**. It reaches you wherever you are if you **offer them goods or services** or **monitor their behavior** (Article 3(2)). Signs of targeting: the languages of EU countries, prices in euros, delivery to the EU, mentions of customers in the EU; English alone and chance visits prove nothing. What matters in it: lawful bases, people’s rights (access, correction, erasure, portability, objection), a breach notice to the regulator within 72 hours, and fines of up to €20 million or 4 percent of worldwide annual turnover (Article 83). The **UK GDPR** is its UK counterpart. You know the principles from [the lesson on personal data law](../07-152fz/).
+
+**ePrivacy** (Directive 2002/58/EC, Article 5(3), as amended in 2009) and its UK counterpart **PECR**. The cookie rule: **consent before** non-essential cookies and similar technologies are set (see [the lesson on cookies and an honest banner](../09-cookies/)). It is implemented by the laws of member states, which differ.
+
+**The European Accessibility Act**, described above. It touches those who **sell to consumers in the EU**.
+
+**The ADA** in the US, described above. If you have customers in the US, ask an American lawyer.
+
+**US privacy laws.** There is no single federal law, but there are state laws (California’s CCPA is the best known) with thresholds on the size of the business, and the consumer’s right to opt out of the sale or sharing of data, including by Global Privacy Control.
+
+**Consumer and advertising rules** follow the buyer. A consumer in the EU or UK generally keeps the protections of their own country’s consumer law even if your terms say another law governs, when your business is aimed at them (see [the lesson on consumer protection](../12-consumer/)).
+
+Open the diagram, tick where your visitors come from and what the site does, and see which rules are worth asking about.
+
+<RegimeMatrix />
+
+<details>
+<summary>Check yourself: the site is in English and its services are provided only in Riverbend. Does the GDPR reach it because of the English?</summary>
+
+English on its own and chance visits from Europe don’t prove targeting: you must offer services or goods to people in the EU, or monitor their behavior. But if you really are attracting clients from the EU, the GDPR does reach you.
+
+</details>
+
+## One high bar or different regimes
+
+A small project has two possible strategies. **Different regimes:** show Europeans one banner, Britons another and Americans a third. That is complicated and brittle: you must work out who is from where, and maintain three sets of rules. **One high bar:** do for everyone what is strictest: separate consent, an equal choice in the banner, analytics after consent, WCAG AA, a clear notice. For a small site the second path is usually simpler and more honest: it covers most requirements at once, and the special cases (payment data, children, health) are added as they arise.
+
+## Practice
+
+You are in the era of the future, where a site is built from a brief and at once visible to people in many countries. Make an audience map for each language of your project and an accessibility statement with an honest status.
+
+The check reads structure: that there is a row for each language, that rules are named (for English, GDPR), that the statement has a target, a date, a status, two limitations and an email, and that the words “fully conforms” are absent. A lawyer decides whether the right rules are named for you in particular; and whether the statement is true is shown by the passes: do them first.
+
+## What used to be different
+
+In the 2000s accessibility meant a version “for the visually impaired,” and data law was thought to be a matter for banks. Today one page falls under several regimes at once, and accessibility has become a legal requirement in the EU and the US, in the UK and in Russia for public sites. At the same time the laws of different countries increasingly look at the same things: what you collect, why, and whether a person can use it. So the best preparation is not to study each country’s rules but to build the site so that you wouldn’t be ashamed to show it to any inspector.
