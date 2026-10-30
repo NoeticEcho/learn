@@ -56,7 +56,7 @@
 			v13: 'v13: the new version',
 			vOld: 'v12: the previous version',
 			caption: 'What happens between “Publish” and the visitor',
-			intro: 'A model with invented seconds. Tick a stage that will “break”, then walk through the path of an edit step by step.',
+			intro: 'A model with invented seconds. Check a stage that will “break”, then walk through the path of an edit step by step.',
 			break: 'break it',
 			publish: 'Publish',
 			next: 'Next',

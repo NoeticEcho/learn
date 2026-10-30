@@ -9,7 +9,7 @@
 		summary: 'You’ll see why a query can be slow and how an index speeds it up, and what a transaction does when a crash strikes between two writes. Afterwards you can read a query plan, create an index where one is needed, and say what ACID means.',
 		comic: {
 			panels: [
-				{ mood: 'hmm', prop: 'sheet', label: '2,000,000 rows', caption: 'No index', say: 'I want one enquiry, and I read all two million rows in a row.' },
+				{ mood: 'hmm', prop: 'sheet', label: '2,000,000 rows', caption: 'No index', say: 'I want one inquiry, and I read all two million rows in a row.' },
 				{
 					mood: 'explain',
 					side: 'right',
@@ -35,8 +35,8 @@
 		requires: ['data-sql-join', 'data-sql-write'],
 		practice: {
 			id: 'data-index-tx',
-			title: 'An index for a query and a transaction for an enquiry',
-			task: 'The page already has the tables items (2,000 rows), requests and notifications. 1) In the first box, ask for the query plan with EXPLAIN SELECT: the items of category 7, newest first, the first ten (WHERE category_id = 7, ORDER BY day DESC, LIMIT 10). 2) In the second box, create an index on the column from the WHERE and ask for the plan again. Write how many rows were read before and after on the line under the box (the number from the result). 3) In the third box, write a transaction of two inserts (an enquiry and a notification) with BEGIN and COMMIT. 4) In the fourth box, do the same, but make the second insert fail (for example, NULL in text) and don’t write COMMIT. 5) In the fifth box, roll the transaction back and check that no enquiries were added. 6) Answer what price a write pays for every extra index. Every “…” has to be replaced.',
+			title: 'An index for a query and a transaction for an inquiry',
+			task: 'The page already has the tables items (2,000 rows), requests and notifications. 1) In the first box, ask for the query plan with EXPLAIN SELECT: the items of category 7, newest first, the first ten (WHERE category_id = 7, ORDER BY day DESC, LIMIT 10). 2) In the second box, create an index on the column from the WHERE and ask for the plan again. Write how many rows were read before and after on the line under the box (the number from the result). 3) In the third box, write a transaction of two inserts (an inquiry and a notification) with BEGIN and COMMIT. 4) In the fourth box, do the same, but make the second insert fail (for example, NULL in text) and don’t write COMMIT. 5) In the fifth box, roll the transaction back and check that no inquiries were added. 6) Answer what price a write pays for every extra index. Every “…” has to be replaced.',
 			era: 6,
 			files: {
 				'index.html': `<!doctype html>
@@ -62,7 +62,7 @@
     <main id="main">
       <h1>{{name}}<\/h1>
       <p>{{who}}<\/p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}<\/a><\/p>
 
       <section id="sec-1">
         <h2>{{sections.0}}<\/h2>
@@ -91,9 +91,9 @@
         <\/div>
       <\/section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}<\/h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?<\/label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -111,8 +111,8 @@
       <h2>An index and a transaction on your table<\/h2>
       <p>Three tables are already created. Write the queries right in the boxes; the result appears under each one (this is a practice sandbox, not real PostgreSQL). The boxes run in order, top to bottom.<\/p>
       <pre>items(id, title, category_id, day)  -- 2000 rows, category_id from 1 to 20, day from 1 to 365
-requests(id, name, phone, item_id)  -- enquiries: item_id points to the service
-notifications(id, request_id, text) -- notifications: request_id points to the enquiry<\/pre>
+requests(id, name, phone, item_id)  -- inquiries: item_id points to the service
+notifications(id, request_id, text) -- notifications: request_id points to the inquiry<\/pre>
 
       <h3>1. Ask for the query plan before the index<\/h3>
       <textarea aria-label="1. Ask for the query plan before the index" class="sql" id="q-before" rows="3">-- EXPLAIN SELECT: the items of category 7, newest first, the first ten
@@ -126,8 +126,8 @@ EXPLAIN …<\/textarea>
       <div class="out" id="q-index-out"><\/div>
       <p>Rows read before the index: <span id="rows-before">…<\/span>, after: <span id="rows-after">…<\/span><\/p>
 
-      <h3>3. An enquiry and a notification in one transaction<\/h3>
-      <textarea aria-label="3. An enquiry and a notification in one transaction" class="sql" id="q-tx-ok" rows="7">BEGIN;
+      <h3>3. An inquiry and a notification in one transaction<\/h3>
+      <textarea aria-label="3. An inquiry and a notification in one transaction" class="sql" id="q-tx-ok" rows="7">BEGIN;
 INSERT INTO requests …
 INSERT INTO notifications …
 …<\/textarea>
@@ -138,8 +138,8 @@ INSERT INTO notifications …
 …<\/textarea>
       <div class="out" id="q-tx-fail-out"><\/div>
 
-      <h3>5. Roll back and check that nothing is left of the failed enquiry<\/h3>
-      <textarea aria-label="5. Roll back and check that nothing is left of the failed enquiry" class="sql" id="q-tx-after" rows="3">…<\/textarea>
+      <h3>5. Roll back and check that nothing is left of the failed inquiry<\/h3>
+      <textarea aria-label="5. Roll back and check that nothing is left of the failed inquiry" class="sql" id="q-tx-after" rows="3">…<\/textarea>
       <div class="out" id="q-tx-after-out"><\/div>
 
       <p>The price a write pays for every extra index: <span id="index-cost">…<\/span><\/p>
@@ -1190,7 +1190,7 @@ input {
     <main id="main">
       <h1>{{name}}<\/h1>
       <p>{{who}}<\/p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}<\/a><\/p>
 
       <section id="sec-1">
         <h2>{{sections.0}}<\/h2>
@@ -1219,9 +1219,9 @@ input {
         <\/div>
       <\/section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}<\/h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?<\/label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -1239,8 +1239,8 @@ input {
       <h2>An index and a transaction on your table<\/h2>
       <p>Three tables are already created. Write the queries right in the boxes; the result appears under each one (this is a practice sandbox, not real PostgreSQL). The boxes run in order, top to bottom.<\/p>
       <pre>items(id, title, category_id, day)  -- 2000 rows, category_id from 1 to 20, day from 1 to 365
-requests(id, name, phone, item_id)  -- enquiries: item_id points to the service
-notifications(id, request_id, text) -- notifications: request_id points to the enquiry<\/pre>
+requests(id, name, phone, item_id)  -- inquiries: item_id points to the service
+notifications(id, request_id, text) -- notifications: request_id points to the inquiry<\/pre>
 
       <h3>1. Ask for the query plan before the index<\/h3>
       <textarea aria-label="1. Ask for the query plan before the index" class="sql" id="q-before" rows="3">EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/textarea>
@@ -1252,10 +1252,10 @@ EXPLAIN SELECT * FROM items WHERE category_id = 7 ORDER BY day DESC LIMIT 10;<\/
       <div class="out" id="q-index-out"><\/div>
       <p>Rows read before the index: <span id="rows-before">2000<\/span>, after: <span id="rows-after">100<\/span><\/p>
 
-      <h3>3. An enquiry and a notification in one transaction<\/h3>
-      <textarea aria-label="3. An enquiry and a notification in one transaction" class="sql" id="q-tx-ok" rows="7">BEGIN;
+      <h3>3. An inquiry and a notification in one transaction<\/h3>
+      <textarea aria-label="3. An inquiry and a notification in one transaction" class="sql" id="q-tx-ok" rows="7">BEGIN;
 INSERT INTO requests (name, phone, item_id) VALUES ('Test visitor', '+1 000 000 0000', 1);
-INSERT INTO notifications (request_id, text) VALUES (1, 'New enquiry');
+INSERT INTO notifications (request_id, text) VALUES (1, 'New inquiry');
 COMMIT;
 SELECT COUNT(*) FROM requests;<\/textarea>
       <div class="out" id="q-tx-ok-out"><\/div>
@@ -1266,8 +1266,8 @@ INSERT INTO requests (name, phone, item_id) VALUES ('Second visitor', '+1 000 00
 INSERT INTO notifications (request_id, text) VALUES (2, NULL);<\/textarea>
       <div class="out" id="q-tx-fail-out"><\/div>
 
-      <h3>5. Roll back and check that nothing is left of the failed enquiry<\/h3>
-      <textarea aria-label="5. Roll back and check that nothing is left of the failed enquiry" class="sql" id="q-tx-after" rows="3">ROLLBACK;
+      <h3>5. Roll back and check that nothing is left of the failed inquiry<\/h3>
+      <textarea aria-label="5. Roll back and check that nothing is left of the failed inquiry" class="sql" id="q-tx-after" rows="3">ROLLBACK;
 SELECT COUNT(*) FROM requests;<\/textarea>
       <div class="out" id="q-tx-after-out"><\/div>
 
@@ -2399,12 +2399,12 @@ input {
 			},
 			{
 				type: 'single',
-				prompt: 'A transaction has two inserts: an enquiry and a notification. The second ended with an error, and then a ROLLBACK was run. What is left in the database?',
-				options: ['Nothing: both inserts are undone', 'The enquiry: the first insert had already gone through', 'A notification without an enquiry'],
+				prompt: 'A transaction has two inserts: an inquiry and a notification. The second ended with an error, and then a ROLLBACK was run. What is left in the database?',
+				options: ['Nothing: both inserts are undone', 'The inquiry: the first insert had already gone through', 'A notification without an inquiry'],
 				answer: 0,
 				why: [
 					'Yes. Until COMMIT, everything done inside a transaction is temporary. ROLLBACK returns the tables to the state they had at BEGIN.',
-					'No: that is exactly what a transaction is for. Without one, the enquiry would be left alone, with no notification.',
+					'No: that is exactly what a transaction is for. Without one, the inquiry would be left alone, with no notification.',
 					'No: the insert of the notification is the one that failed.'
 				]
 			},
@@ -2494,7 +2494,7 @@ input {
 			}
 		],
 		guide: {
-			intro: 'The table has two thousand rows. First we’ll ask the database how it searches it without an index, then build an index and compare. After that we’ll record an enquiry so that a crash can’t spoil it.',
+			intro: 'The table has two thousand rows. First we’ll ask the database how it searches it without an index, then build an index and compare. After that we’ll record an inquiry so that a crash can’t spoil it.',
 			hints: [
 				'You ask for a plan by putting the word EXPLAIN before an ordinary SELECT. Our condition in WHERE is on the column category_id.',
 				'An index is built on the column that appears in WHERE: CREATE INDEX items_category_idx ON items (category_id). Read the numbers “before” and “after” in the sandbox’s answer, where it says “rows read”.',
@@ -2510,7 +2510,7 @@ input {
 				'rows-after': 'The “after the index” line needs the number from the second plan.',
 				'tx-ok': 'The third box needs the chain: BEGIN, INSERT INTO requests …, INSERT INTO notifications …, COMMIT.',
 				'tx-fail-open': 'The fourth box needs BEGIN and two inserts, but no COMMIT: the transaction must stay open after the error.',
-				'tx-rollback': 'In the fifth box write ROLLBACK, then SELECT COUNT(*) FROM requests, to check that nothing is left of the failed enquiry.',
+				'tx-rollback': 'In the fifth box write ROLLBACK, then SELECT COUNT(*) FROM requests, to check that nothing is left of the failed inquiry.',
 				'index-cost': 'Say what is bad about an extra index: writing slows down because the index is updated along with the table, and it takes up space.'
 			},
 			outro: 'Now you know how to speed up a query and how to protect a pair of writes. Next we’ll look at databases that are built differently from tables.'
@@ -2535,13 +2535,13 @@ input {
 
 ## Why a query can be slow
 
-When you ask the database for all the services of category 7, by default it does the simplest thing: it **reads the table row by row** and checks each one. This is called a **full scan** (in a query plan it is called `Seq Scan`, short for sequential scan). On a hundred rows you won’t notice it. On a million rows you will: the database reads a million rows to find ten.
+When you ask the database for all the services of category 7, by default it does the simplest thing: it **reads the table row by row** and checks each one. This is called a **full scan** (in a query plan it’s called `Seq Scan`, short for sequential scan). On a hundred rows you won’t notice it. On a million rows you will: the database reads a million rows to find ten.
 
 ## The index: the pointer at the back of a book
 
-A good book has an alphabetical index at the back: “contract: 14, 87, 203”. You don’t leaf through the whole book for the word “contract”, you look it up in the index and go to the right pages. A database **index** works the same way: it is a separate ordered structure of column values and pointers to rows.
+A good book has an alphabetical index at the back: “contract: 14, 87, 203”. You don’t leaf through the whole book for the word “contract”, you look it up in the index and go to the right pages. A database **index** works the same way: it’s a separate ordered structure of column values and pointers to rows.
 
-Most often it is a **tree**: on each level the values are laid out in order, and one step discards almost everything. A tree that branches hundreds of ways finds one row among millions in three or four steps. That is why a search through an index barely slows down when the table grows a thousand times.
+Most often it’s a **tree**: on each level the values are laid out in order, and one step discards almost everything. A tree that branches hundreds of ways finds one row among millions in three or four steps. That’s why a search through an index barely slows down when the table grows a thousand times.
 
 Play with the diagram. The table-size slider and the “how many rows match” choice show how many pages the database reads with an index and without one. Try the smallest tables and the most common values.
 
@@ -2549,20 +2549,20 @@ Play with the diagram. The table-size slider and the “how many rows match” c
 
 What you should have noticed.
 
-- **The gain grows with the table.** On a table of a hundred rows there is no difference. On a million rows with a rare value, the index reads hundreds of times less.
-- **An index isn’t always needed.** If half the table matches (gender, yes/no, “active”), it is simpler to read it all: a trip through the index for every row costs more. The planner (the part of the database that chooses how to run a query) decides this itself.
-- **Every index costs something.** An insert or an update has to change the table and every index. Five indexes mean five extra writes with every enquiry. They also take up space.
+- **The gain grows with the table.** On a table of a hundred rows there’s no difference. On a million rows with a rare value, the index reads hundreds of times less.
+- **An index isn’t always needed.** If half the table matches (gender, yes/no, “active”), it’s simpler to read it all: a trip through the index for every row costs more. The planner (the part of the database that chooses how to run a query) decides this itself.
+- **Every index costs something.** An insert or an update has to change the table and every index. Five indexes mean five extra writes with every inquiry. They also take up space.
 
 The rules that follow:
 
 1. Build an index for a **specific, frequent query** that is slow, not “just in case” on every column.
-2. A primary key and columns marked `UNIQUE` get an index automatically. But on **foreign keys** (`category_id`) PostgreSQL does not create an index by itself, and joins on them often get faster after you add one by hand.
+2. A primary key and columns marked `UNIQUE` get an index automatically. But on **foreign keys** (`category_id`) PostgreSQL doesn’t create an index by itself, and joins on them often get faster after you add one by hand.
 3. An index can be **composite**: `ON items (category_id, day)` helps queries that filter by category (and by date as well). The order of the columns matters: such an index serves queries on `category_id` and on the pair, but not queries on `day` alone.
 
 <details>
 <summary>Check yourself: is an index on a yes/no column worth building?</summary>
 
-Almost never. The condition “active = true” matches about half the table, and it is simpler to read the table straight through than to make a trip through the index for every row.
+Almost never. The condition “active = true” matches about half the table, and it’s simpler to read the table straight through than to make a trip through the index for every row.
 
 </details>
 
@@ -2574,13 +2574,13 @@ You don’t have to guess: before any query you can write the word `EXPLAIN`, an
 EXPLAIN SELECT * FROM items WHERE category_id = 7;
 ```
 
-In the plan of real PostgreSQL you will see `Seq Scan on items` (reads everything) or `Index Scan using … on items` (goes through the index), and also an estimate of the cost in arbitrary units. The `EXPLAIN ANALYZE` version also runs the query and measures the real time. In the practice below the sandbox prints a simplified model of a plan: how many rows it read. It is a teaching interpreter, not real PostgreSQL, and the numbers in its plan are different, but you can see the same difference between scanning the whole table and using an index.
+In the plan of real PostgreSQL you’ll see `Seq Scan on items` (reads everything) or `Index Scan using … on items` (goes through the index), and also an estimate of the cost in arbitrary units. The `EXPLAIN ANALYZE` version also runs the query and measures the real time. In the practice below the sandbox prints a simplified model of a plan: how many rows it read. It’s a teaching interpreter, not real PostgreSQL, and the numbers in its plan are different, but you can see the same difference between scanning the whole table and using an index.
 
 ## A transaction: all or nothing
 
 Now the second topic, about crashes. Buying a ticket is **two writes**: take the seat off and record the order. If the server falls over between them, we get a seat taken with no order. The ticket is lost, and nobody will know. The two writes need to go through **together or not at all**.
 
-That is what a **transaction** does: a group of commands that the database treats as one indivisible action.
+That’s what a **transaction** does: a group of commands that the database treats as one indivisible action.
 
 ```sql
 BEGIN;
@@ -2600,13 +2600,13 @@ The properties of transactions are gathered into the word **ACID**:
 
 Isolation has **levels**: the stricter it is, the safer, and the more often transactions have to wait for each other. By default PostgreSQL chooses a moderate one (`READ COMMITTED`), and the strictest is called `SERIALIZABLE`. On your site the moderate one is almost always enough.
 
-One last detail, but it saves you in shops and in booking appointments. Two buyers press “buy” for the last seat at the same moment. You can’t first **read** the number of seats and then **write** “that number minus one”: between those steps the second buyer reads the same number. It is safer in one statement: `UPDATE seats SET free = free - 1 WHERE free > 0`, and then check whether a row was changed. The condition and the change run indivisibly, and the second buyer is refused.
+One last detail, but it saves you in shops and in booking appointments. Two buyers press “buy” for the last seat at the same moment. You can’t first **read** the number of seats and then **write** “that number minus one”: between those steps the second buyer reads the same number. It’s safer in one statement: `UPDATE seats SET free = free - 1 WHERE free > 0`, and then check whether a row was changed. The condition and the change run indivisibly, and the second buyer is refused.
 
 ## Practice
 
-You are in the era of 2022: sites now live on cloud databases, and designers think about load in advance. Take a table of two thousand services and speed up the query by category, then record an enquiry so that a crash can’t spoil it.
+You’re in the era of 2022: sites now live on cloud databases, and designers think about load in advance. Take a table of two thousand services and speed up the query by category, then record an inquiry so that a crash can’t spoil it.
 
-The page has three ready tables and five boxes. In the first, ask for the plan before the index; in the second, create an index and ask again (how many rows were read, write the numbers on the line under the box). Then in the third write a transaction of two inserts, in the fourth imitate a crash (no COMMIT), and in the fifth roll back and make sure there are no new enquiries.
+The page has three ready tables and five boxes. In the first, ask for the plan before the index; in the second, create an index and ask again (how many rows were read, write the numbers on the line under the box). Then in the third write a transaction of two inserts, in the fourth imitate a crash (no COMMIT), and in the fifth roll back and make sure there are no new inquiries.
 
 ## What was wrong with MySQL: no transactions
 

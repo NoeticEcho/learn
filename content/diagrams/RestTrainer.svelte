@@ -54,7 +54,7 @@
 			one: 'One resource, by the number in the address.',
 			missing: 'No such resource: an honest 404 and an error in the shared format.',
 			create: 'Creating: POST, a 201 answer and the address of the new resource.',
-			createSpec: '/requests:\n  post:\n    requestBody: { required: true }\n    responses:\n      \'201\': { description: Enquiry created }',
+			createSpec: '/requests:\n  post:\n    requestBody: { required: true }\n    responses:\n      \'201\': { description: Inquiry created }',
 			bad: 'The data is wrong: 400 and a clear message, not a 500.',
 			del: 'Not everybody may delete: without signing in the answer is 401 (sign-in is in the lesson on authentication).',
 			badget: 'Wrong: there is a verb in the address and, worse, GET changed data. Any robot or browser extension that follows such a link will delete the item.',

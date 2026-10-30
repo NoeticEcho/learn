@@ -68,7 +68,7 @@
     <main id="main">
       <h1>{{name}}<\/h1>
       <p>{{who}}<\/p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}<\/a><\/p>
 
       <section id="sec-1">
         <h2>{{sections.0}}<\/h2>
@@ -97,9 +97,9 @@
         <\/div>
       <\/section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}<\/h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?<\/label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -1192,7 +1192,7 @@ input {
     <main id="main">
       <h1>{{name}}<\/h1>
       <p>{{who}}<\/p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}<\/a><\/p>
 
       <section id="sec-1">
         <h2>{{sections.0}}<\/h2>
@@ -1221,9 +1221,9 @@ input {
         <\/div>
       <\/section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}<\/h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?<\/label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -2380,14 +2380,14 @@ input {
 				prompt: 'When is it reasonable to break normalization and keep a copy of the data?',
 				options: [
 					'An order needs the price at the time of purchase, even if the service’s price changes later',
-					'The number of enquiries is stored ready-made, so it need not be recounted every time the page is shown',
+					'The number of inquiries is stored ready-made, so it need not be recounted every time the page is shown',
 					'To avoid creating extra tables, because queries are simpler for a beginner to write that way',
 					'A copy for search: a separate structure holds the service’s text glued together'
 				],
 				answer: [0, 1, 3],
 				why: [
 					'Yes. This is not a mistake but a historical fact: an order must remember what the service cost then.',
-					'Yes, when reads are far more frequent than writes. But the counter has to be updated with every enquiry.',
+					'Yes, when reads are far more frequent than writes. But the counter has to be updated with every inquiry.',
 					'No: laziness is not a reason. A copy you forget about will sooner or later drift away from the original.',
 					'Yes: a search index is a copy built specially for reading. You pay by having to keep the copy up to date.'
 				]
@@ -2508,7 +2508,7 @@ Back to orders. The most obvious solution is one table with everything in each r
 A big table has three troubles, and each has a name.
 
 - **The update anomaly.** A service appears in three orders, so its price is written in three rows. You change two and forget the third: now the database holds two prices for one service, and nobody knows which is right.
-- **The insert anomaly.** There is nowhere to add a new service that has no orders yet: every row of this table is an order.
+- **The insert anomaly.** There’s nowhere to add a new service that has no orders yet: every row of this table is an order.
 - **The delete anomaly.** A customer canceled their only order, we deleted the row, and with it went their phone number and everything else we knew about them.
 
 The cure is called **normalization**. The idea is one: **every fact is stored exactly once**, and every other place points to it by key. The price lives in the services table, the phone number in the customers table, and an order holds just a pair of numbers: “customer 3, service 2”.
@@ -2532,7 +2532,7 @@ The name depends on the category, not on the service. If it were stored beside e
 
 ## JOIN: putting it back together
 
-Data that has been spread out has to be put back together. That is what `JOIN` does. It takes the rows of two tables and glues the pairs whose keys match.
+Data that has been spread out has to be put back together. That’s what `JOIN` does. It takes the rows of two tables and glues the pairs whose keys match.
 
 ```sql
 SELECT items.title, categories.name
@@ -2543,8 +2543,8 @@ JOIN categories ON items.category_id = categories.id;
 The part after `ON` is called the **join condition**: it says which column of one table equals which column of the other. Column names are written with the table name and a dot (`items.title`): when both tables have an `id` column, it would otherwise be unclear which one is meant. Switch between the kinds of JOIN on the first tab of the diagram and watch what stays in the answer.
 
 - **INNER JOIN** (also written just `JOIN`) keeps only the matching pairs. A service with no category drops out of the answer: it found no match.
-- **LEFT JOIN** keeps **all** the rows of the left table. Where there is no match, the right side is `NULL`. After the ordinary join, this is the most useful kind: it answers the question “what is missing?”
-- **RIGHT JOIN** is the same for the right table. It can almost always be replaced by a LEFT JOIN with the tables swapped, so it is rarely written. There is also FULL JOIN (keep both sides) and CROSS JOIN (every pair), but websites rarely need them.
+- **LEFT JOIN** keeps **all** the rows of the left table. Where there’s no match, the right side is `NULL`. After the ordinary join, this is the most useful kind: it answers the question “what is missing?”
+- **RIGHT JOIN** is the same for the right table. It can almost always be replaced by a LEFT JOIN with the tables swapped, so it’s rarely written. There’s also FULL JOIN (keep both sides) and CROSS JOIN (every pair), but websites rarely need them.
 
 A trick that is used all the time: **how to find rows with no match**. You need a `LEFT JOIN` and the condition `WHERE right_table.id IS NULL`:
 
@@ -2561,20 +2561,20 @@ Two traps. The first: if a key repeats in one of the tables, the rows **multiply
 
 ## When normalization is broken on purpose
 
-Normalization is not a religion, it is a way to avoid contradictions. Sometimes a copy of the data is justified:
+Normalization isn’t a religion, it’s a way to avoid contradictions. Sometimes a copy of the data is justified:
 
-- **A historical fact.** An order needs the price **at the time of purchase**. If the service’s price changes later, old orders must still show the old one. Here the price in the order is not a duplicate but a different fact: “what was paid”.
-- **Speed of reading.** The number of enquiries shown on every page can be stored as a ready number instead of being counted by a query each time. The price: the number has to be updated with every new enquiry, or it drifts from the truth.
-- **A search copy.** For search, a separate structure is built with the text glued together (lesson 6). That is a copy too, built for reading.
+- **A historical fact.** An order needs the price **at the time of purchase**. If the service’s price changes later, old orders must still show the old one. Here the price in the order isn’t a duplicate but a different fact: “what was paid”.
+- **Speed of reading.** The number of inquiries shown on every page can be stored as a ready number instead of being counted by a query each time. The price: the number has to be updated with every new inquiry, or it drifts from the truth.
+- **A search copy.** For search, a separate structure is built with the text glued together (lesson 6). That’s a copy too, built for reading.
 
-The general rule: normalize first, and make a copy when you have **measured** that it is slow without one and you know who keeps the copy up to date. A copy that nobody updates is worse than a slow query.
+The general rule: normalize first, and make a copy when you have **measured** that it’s slow without one and you know who keeps the copy up to date. A copy that nobody updates is worse than a slow query.
 
 ## Practice
 
-You are in the era of 2010. CMS-based sites already spread their data across tables: posts apart, categories apart, authors apart, with the page put together by JOINs. Do the same for your own project.
+You’re in the era of 2010. CMS-based sites already spread their data across tables: posts apart, categories apart, authors apart, with the page put together by JOINs. Do the same for your own project.
 
 The page has four boxes with SQL. Create the tables categories and people, and link items to them with foreign keys. Add the data from your brief, leaving one service without a category. Write a query with two JOINs, and a query with a LEFT JOIN that finds the service without a category. On the last line, say where a copy of the data is justified in your project.
 
 ## What was wrong with 2010
 
-Many CMSs of that time kept “everything else” in one table of the form “owner, field name, value”. WordPress’s extra fields for posts are built like that, for example. It is convenient: a new field is added without changing the schema. But the price is paid in joins: to assemble one page with a dozen fields, the table has to be joined to itself a dozen times, and on big sites that is slow. A flexible schema and fast queries pull in different directions, and each CMS chooses in its own way. We’ll come back to this in part 8.
+Many CMSs of that time kept “everything else” in one table of the form “owner, field name, value”. WordPress’s extra fields for posts are built like that, for example. It’s convenient: a new field is added without changing the schema. But the price is paid in joins: to assemble one page with a dozen fields, the table has to be joined to itself a dozen times, and on big sites that is slow. A flexible schema and fast queries pull in different directions, and each CMS chooses in its own way. We’ll come back to this in part 8.

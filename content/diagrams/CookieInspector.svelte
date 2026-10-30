@@ -2,7 +2,7 @@
 	«Инспектор cookie» (part 15, lesson 9). Two parts. First, seven cookies and storage entries of a
 	small site: the person sorts each into necessary, preferences, analytics or advertising and checks
 	the answer. Second, a cookie banner whose choices the person sets (the accept and reject buttons,
-	pre-ticked switches, how hard it is to refuse), and a count of the signs of a pattern that steers
+	pre-checked switches, how hard it is to refuse), and a count of the signs of a pattern that steers
 	people towards «accept». The categories are the lesson's teaching reading of the EU practice and
 	of what the Russian practice recommends; neither is legal advice.
 -->
@@ -55,7 +55,7 @@
 						{#each cats as c (c.id)}<option value={c.id}>{c.label}</option>{/each}
 					</select>
 				</label>
-				{#if checked}<p class="why" aria-live="polite">{pick[i.name] === i.truth ? t('Верно.', 'Correct.') : `Нет: ${cats.find((c) => c.id === i.truth)!.label.toLowerCase()}.`} {i.why}</p>{/if}
+				{#if checked}<p class="why" aria-live="polite">{pick[i.name] === i.truth ? t('Верно.', 'Correct.') : t(`Нет: ${cats.find((c) => c.id === i.truth)!.label.toLowerCase()}.`, `No: ${cats.find((c) => c.id === i.truth)!.label.toLowerCase()}.`)} {i.why}</p>{/if}
 			</li>
 		{/each}
 	</ul>
@@ -80,7 +80,7 @@
 	</div>
 	<p class="dg-out" aria-live="polite"><strong>{t('Признаков подталкивания:', 'Signs of nudging:')} {signs.length}.</strong>
 		{#if signs.length}{signs.join('; ')}{t('. Такой баннер нельзя назвать честным: выбор должен быть настоящим.', '. Such a banner can’t be called honest: the choice must be real.')}{:else} {t('Баннер честный: «Принять» и «Отклонить» равны, ничего не включено заранее, сайт открыт при любом ответе.', 'The banner is honest: “Accept” and “Reject” are equal, nothing is on in advance, and the site is open whatever the answer.')}{/if}</p>
-	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('в первой части семь cookie (сессия, защита формы, язык, запись согласия, идентификатор Метрики, чат, рекламный идентификатор) нужно отнести к необходимым, предпочтениям, аналитике или рекламе. Во второй части баннер оценивается по пяти признакам подталкивания к согласию: заметная кнопка принятия, спрятанный отказ, предварительно включённые переключатели, стена из cookie и повторные запросы.', 'in the first part, seven cookies (a session, form protection, language, a record of consent, an analytics identifier, a chat, an advertising identifier) must be sorted into necessary, preferences, analytics or advertising. In the second part the banner is assessed on five signs of nudging toward consent: a prominent accept button, a hidden refusal, pre-ticked switches, a cookie wall and repeated prompts.')}</p>
+	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('в первой части семь cookie (сессия, защита формы, язык, запись согласия, идентификатор Метрики, чат, рекламный идентификатор) нужно отнести к необходимым, предпочтениям, аналитике или рекламе. Во второй части баннер оценивается по пяти признакам подталкивания к согласию: заметная кнопка принятия, спрятанный отказ, предварительно включённые переключатели, стена из cookie и повторные запросы.', 'in the first part, seven cookies (a session, form protection, language, a record of consent, an analytics identifier, a chat, an advertising identifier) must be sorted into necessary, preferences, analytics or advertising. In the second part the banner is assessed on five signs of nudging toward consent: a prominent accept button, a hidden refusal, pre-checked switches, a cookie wall and repeated prompts.')}</p>
 </figure>
 
 <style>

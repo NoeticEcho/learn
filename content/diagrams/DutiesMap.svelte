@@ -80,7 +80,7 @@
 
 <figure class="dg">
 	<figcaption>{t('Что на мне лежит: от возможностей сайта к обязанностям', 'What rests on me: from what a site does to what the law asks')}</figcaption>
-	<p class="dg-out">{t('Отметьте, что есть на вашем сайте. Карта покажет, какие обязанности оператора персональных данных из этого следуют. Это учебная карта на 28 октября 2026 года, а не консультация: законы меняются.', 'Tick what your site has. The map shows which duties of a controller of personal data follow. This is a teaching map as of 30 October 2026, not legal advice: the laws change.')}</p>
+	<p class="dg-out">{t('Отметьте, что есть на вашем сайте. Карта покажет, какие обязанности оператора персональных данных из этого следуют. Это учебная карта на 28 октября 2026 года, а не консультация: законы меняются.', 'Check what your site has. The map shows which duties of a controller of personal data follow. This is a teaching map as of 30 October 2026, not legal advice: the laws change.')}</p>
 
 	<ul class="fs" aria-label={t('Возможности сайта', 'What the site does')}>
 		{#each features as f (f.id)}
@@ -88,7 +88,7 @@
 		{/each}
 	</ul>
 
-	<p class="dg-out" aria-live="polite"><strong>{any ? t(`Обязанностей, которые стоит проверить: ${active.length}.`, `Duties worth checking: ${active.length}.`) : t('Ничего не отмечено: сайт ничего не знает о людях, и обязанностей по персональным данным нет.', 'Nothing ticked: the site knows nothing about people, so there are no personal data duties.')}</strong></p>
+	<p class="dg-out" aria-live="polite"><strong>{any ? t(`Обязанностей, которые стоит проверить: ${active.length}.`, `Duties worth checking: ${active.length}.`) : t('Ничего не отмечено: сайт ничего не знает о людях, и обязанностей по персональным данным нет.', 'Nothing checked: the site knows nothing about people, so there are no personal data duties.')}</strong></p>
 	<ol class="duties" aria-live="polite">
 		{#each active as d (d.id)}
 			<li>

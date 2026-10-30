@@ -59,7 +59,7 @@
 			facts: 'Text with facts about you: experience, numbers, proof',
 			form: (a: string) => `A form for the action “${a}”: receiving a visitor’s data`,
 			payment: 'Payment or a deposit on the site',
-			policy: 'The privacy policy and consent',
+			policy: 'The privacy notice and consent',
 			login: 'Sign-in for the owner and a panel with requests',
 			names: { free: 'AI without a check', check: 'AI with a check', human: 'a person' },
 			dataWhy: 'touches visitors’ personal data',

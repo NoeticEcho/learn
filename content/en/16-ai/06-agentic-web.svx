@@ -230,26 +230,26 @@ ${acts.map((a, i) => `          <tr class="act"><td>${a}</td><td class="fmt">${r
 
 ## A visitor who isn’t a person
 
-Sites used to be visited by people and by search robots. The robots read pages to show you in search results, and a person had to decide what to do. Now there is a third visitor: **an AI agent**. It is a program with a language model inside that, at a person’s request, goes through sites and services by itself: reads prices, compares, fills in forms, books appointments. The person says “find a land surveyor and book me in for tomorrow”, and the agent does it.
+Sites used to be visited by people and by search robots. The robots read pages to show you in search results, and a person had to decide what to do. Now there’s a third visitor: **an AI agent**. It’s a program with a language model inside that, at a person’s request, goes through sites and services by itself: reads prices, compares, fills in forms, books appointments. The person says “find a land surveyor and book me in for tomorrow”, and the agent does it.
 
-What this means for a site’s owner. An agent reads your site much as screen readers do: through the structure of the page, labels and headings (in many browser agents it is the accessibility tree and the markup that serve as the basis). If a page is built from `div` with no meaning and the buttons aren’t buttons, the agent makes mistakes and picks someone else. So everything you learned in the parts on HTML and accessibility (in the [lesson on accessibility](../../02-html/08-accessibility/), for instance) works on agents too. And agents get “doors” of their own: ways a site can give them data and actions directly, without making them guess from pixels.
+What this means for a site’s owner. An agent reads your site much as screen readers do: through the structure of the page, labels and headings (in many browser agents it’s the accessibility tree and the markup that serve as the basis). If a page is built from `div` with no meaning and the buttons aren’t buttons, the agent makes mistakes and picks someone else. So everything you learned in the parts on HTML and accessibility (in the [lesson on accessibility](../../02-html/08-accessibility/), for instance) works on agents too. And agents get “doors” of their own: ways a site can give them data and actions directly, without making them guess from pixels.
 
 Here, as in the [lesson on AI site builders](../01-ai-builders/), the field changes fast. Everything named below is true as of October 2026, and some of it is still proposals, not standards.
 
 ## Doors for agents, from simple to complex
 
-1. **Good markup and structured data.** Meaningful elements, labels, headings, `schema.org` (you went through it in the [lesson on technical SEO](../../13-growth/06-technical-seo/)). There is nothing new to write, and the benefit is at once for people, search engines and agents. For most small sites this is the only door they need.
-2. **Decisions about bots, and `llms.txt`.** Which AI bots to let in and whether to have a file describing the site. You decided this in the [lesson on GEO](../../13-growth/07-geo/), and there is no need to repeat it.
+1. **Good markup and structured data.** Meaningful elements, labels, headings, `schema.org` (you went through it in the [lesson on technical SEO](../../13-growth/06-technical-seo/)). There’s nothing new to write, and the benefit is at once for people, search engines and agents. For most small sites this is the only door they need.
+2. **Decisions about bots, and `llms.txt`.** Which AI bots to let in and whether to have a file describing the site. You decided this in the [lesson on GEO](../../13-growth/07-geo/), and there’s no need to repeat it.
 3. **An API.** If you have a service (booking, ordering), it may have an interface described in OpenAPI, as in the [lesson on APIs and REST](../../06-server/05-rest-api/). An agent calls it like any client.
 4. **An MCP server.** **MCP** (the Model Context Protocol) is an open protocol that Anthropic introduced in November 2024 and in December 2025 donated to the Agentic AI Foundation, a fund under the Linux Foundation. It describes how an agent calls **tools** (functions with a name, a description and a schema of arguments) and reads **resources** (data) at an outside system. There are three parties: the **host** (the application with the model), the **client** (the connection to one server) and the **server** (what offers the tools, yours or a provider’s). Messages go in the JSON-RPC format. Big model providers have supported it, but the specification keeps changing: its current revision, dated 28 July 2026, replaced the older handshake-based revisions, with guidance on compatibility. The takeaway for you: an MCP server makes sense when you have something to put behind it (booking, a catalog) and are ready to maintain it.
 5. **NLWeb.** An open project, from Microsoft: a site gets an `ask` endpoint that takes a question in natural language and returns an answer from the site’s data in `schema.org` form; every instance also works as an MCP server. It suits sites with a structured list (catalogs, recipes, reviews).
-6. **WebMCP.** A proposal for browsers: the page itself declares tools (a name, a description, an input schema) that an agent in the browser calls through the page’s own JavaScript, instead of pressing buttons blindly. It is still a draft and experimental, so it is too early to build a project on it.
+6. **WebMCP.** A proposal for browsers: the page itself declares tools (a name, a description, an input schema) that an agent in the browser calls through the page’s own JavaScript, instead of pressing buttons blindly. It’s still a draft and experimental, so it’s too early to build a project on it.
 
 ## A2A: agents talk to agents
 
-Sometimes one agent needs to hand part of the work to another (an assistant agent asks a booking agent to find a time). For that there is **A2A** (Agent2Agent): an open protocol that Google began and donated to the Linux Foundation, supported by representatives of many companies. Through it agents find each other, delegate tasks and exchange results without revealing their insides. The documentation describes it as **a complement to MCP**, not a replacement: **MCP connects an agent to tools, A2A connects agents to each other.**
+Sometimes one agent needs to hand part of the work to another (an assistant agent asks a booking agent to find a time). For that there’s **A2A** (Agent2Agent): an open protocol that Google began and donated to the Linux Foundation, supported by representatives of many companies. Through it agents find each other, delegate tasks and exchange results without revealing their insides. The documentation describes it as **a complement to MCP**, not a replacement: **MCP connects an agent to tools, A2A connects agents to each other.**
 
-For a small site in 2026 you don’t need to write A2A. It is useful to know: you’ll understand talk of a “network of agents” in which the agents of projects, people and services make agreements with each other, and a site turns from a page into a participant in such a network.
+For a small site in 2026 you don’t need to write A2A. It’s useful to know: you’ll understand talk of a “network of agents” in which the agents of projects, people and services make agreements with each other, and a site turns from a page into a participant in such a network.
 
 <details>
 <summary>Check yourself: how does MCP differ from A2A?</summary>
@@ -262,7 +262,7 @@ MCP connects an agent to tools and data (a calendar, a database, search). A2A co
 
 The more you give agents, the more room there is for mistakes and abuse. Three main risks.
 
-**Planted instructions** (prompt injection). A model doesn’t always tell the owner’s instruction from the data it reads. So the text on a page, a service’s answer or a **tool’s description** may hold a hidden “instruction” that the agent takes for real. For tool descriptions this is called “tool poisoning”; researchers described it in April 2025. At OWASP it is risk number one for applications built on language models (the link is in the sources).
+**Planted instructions** (prompt injection). A model doesn’t always tell the owner’s instruction from the data it reads. So the text on a page, a service’s answer or a **tool’s description** may hold a hidden “instruction” that the agent takes for real. For tool descriptions this is called “tool poisoning”; researchers described it in April 2025. At OWASP it’s risk number one for applications built on language models (the link is in the sources).
 
 **Excess rights.** If you open booking and payment to an agent with no confirmation, any planted instruction or mistake turns into a booking in the wrong place or a payment to the wrong person. The rule: **minimal rights**, exactly what the action needs. You may open reading, and **booking and payment only with a person’s confirmation**.
 
@@ -270,7 +270,7 @@ The more you give agents, the more room there is for mistakes and abuse. Three m
 
 And three more habits for any door open to agents: **check input on the server** (an agent is a client like a browser, and can’t be assumed honest), **limit the rate** and **keep a log**.
 
-Play with the diagram. Choose levels for the four actions, switch on a planted instruction and answers with contacts, and see when a planted instruction leads to trouble. It is a teaching model: the calls are written out by hand in the manner of MCP.
+Play with the diagram. Choose levels for the four actions, switch on a planted instruction and answers with contacts, and see when a planted instruction leads to trouble. It’s a teaching model: the calls are written out by hand in the manner of MCP.
 
 <AgentDoors />
 
@@ -283,9 +283,9 @@ An agent may make a mistake or fall for a planted instruction. A person’s conf
 
 ## Practice
 
-Decide what your site gives to agents. In the table, for the four actions (read the offers, book your main action, ask a question, pay), enter the format, the rights and a person’s confirmation. Then name the data that is not given at all, the risks you take into account, and your decision on `llms.txt`, MCP and NLWeb, with a reason.
+Decide what your site gives to agents. In the table, for the four actions (read the offers, book your main action, ask a question, pay), enter the format, the rights and a person’s confirmation. Then name the data that’s not given at all, the risks you take into account, and your decision on `llms.txt`, MCP and NLWeb, with a reason.
 
-For a small site the typical honest answer is: clean markup and structured data, no MCP and NLWeb for now, because there is no service worth opening. If you do have booking by API, you can lay it out as an MCP tool: with a person’s confirmation and no contacts in the answers. The check reads your table and paragraphs: it will see that booking has a confirmation, that the data not given is named, and both risks, while the decision itself stays yours.
+For a small site the typical honest answer is: clean markup and structured data, no MCP and NLWeb for now, because there’s no service worth opening. If you do have booking by API, you can lay it out as an MCP tool: with a person’s confirmation and no contacts in the answers. The check reads your table and paragraphs: it will see that booking has a confirmation, that the data not given is named, and both risks, while the decision itself stays yours.
 
 ## What was wrong with 2025
 

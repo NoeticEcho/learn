@@ -115,7 +115,7 @@
 			headShape: 'Shape',
 			headFit: 'Rating',
 			alt: 'Text alternative:',
-			altText: 'for each of the six questions (selecting by category, links several steps deep, a session by token, a counter, a document with arbitrary fields, enquiries with a report) the diagram says which storage shape fits naturally, which tolerably and which awkwardly. The ratings are the lesson author’s judgment, not a measurement.',
+			altText: 'for each of the six questions (selecting by category, links several steps deep, a session by token, a counter, a document with arbitrary fields, inquiries with a report) the diagram says which storage shape fits naturally, which tolerably and which awkwardly. The ratings are the lesson author’s judgment, not a measurement.',
 			questions: [
 				{
 					q: 'All the services in one category',
@@ -163,10 +163,10 @@
 					}
 				},
 				{
-					q: 'Enquiries that point to a service and contact details, plus a monthly report',
+					q: 'Inquiries that point to a service and contact details, plus a monthly report',
 					fit: {
-						table: ['good', 'Enquiries, services and contacts are tied by keys, and the report is a GROUP BY. Integrity and transactions are in place.'],
-						doc: ['bad', 'Links and reports over them are done by hand in document databases, and the service nested in each enquiry has to be duplicated.'],
+						table: ['good', 'Inquiries, services and contacts are tied by keys, and the report is a GROUP BY. Integrity and transactions are in place.'],
+						doc: ['bad', 'Links and reports over them are done by hand in document databases, and the service nested in each inquiry has to be duplicated.'],
 						kv: ['bad', 'Key-value stores are not built for reports over values.'],
 						graph: ['ok', 'Links can be shown, but ordinary reports with sums and dates are less convenient in graphs.']
 					}

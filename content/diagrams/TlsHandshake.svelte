@@ -47,7 +47,7 @@
 			host: 'www.example.com',
 			other: 'www.other-site.com',
 			guest: 'Anna',
-			path: '/enquiry',
+			path: '/inquiry',
 			who: { bs: 'Browser → server', sb: 'Server → browser', check: 'The browser checks', both: 'Both sides' },
 			hello: 'ClientHello: “I want to talk to www.example.com. I know these ciphers. Here is my half of the shared secret.”',
 			helloSeen: 'visible: that the browser went to www.example.com, and the list of ciphers. No page content has been sent yet.',

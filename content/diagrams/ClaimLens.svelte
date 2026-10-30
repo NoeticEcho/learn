@@ -51,7 +51,7 @@
 				</fieldset>
 				<div class="dg-ctl"><button type="button" onclick={() => (shown[c.id] = true)}>{t('Проверить', 'Check')}</button></div>
 				{#if shown[c.id]}
-					<p class="why" aria-live="polite"><strong>{kindPick[c.id] === c.kind ? t('Причина названа верно.', 'The reason is named correctly.') : `Не то: здесь «${kinds[c.kind].toLowerCase()}».`} {optPick[c.id] === c.right ? t('Замена честная.', 'The replacement is honest.') : t('Другая замена честнее.', 'Another replacement is more honest.')}</strong> {c.why}</p>
+					<p class="why" aria-live="polite"><strong>{kindPick[c.id] === c.kind ? t('Причина названа верно.', 'The reason is named correctly.') : t(`Не то: здесь «${kinds[c.kind].toLowerCase()}».`, `Not that reason: this claim is “${kinds[c.kind].toLowerCase()}”.`)} {optPick[c.id] === c.right ? t('Замена честная.', 'The replacement is honest.') : t('Другая замена честнее.', 'Another replacement is more honest.')}</strong> {c.why}</p>
 				{/if}
 			</li>
 		{/each}

@@ -34,7 +34,7 @@
 		},
 		en: {
 			name: 'Anna',
-			path: 'enquiry',
+			path: 'inquiry',
 			host: 'riverbend.example',
 			caption: 'From a form to a request',
 			methodLabel: 'Sending method',
@@ -48,8 +48,8 @@
 			requestTitle: 'The request the browser will build',
 			validation: 'What the browser’s validation says',
 			allGood: 'All fields are fine: the browser would send the form.',
-			get: 'GET puts the data straight into the address. It stays in the history, in the server’s logs and in any link someone shares. That suits a search box, but never an enquiry with a phone number in it.',
-			post: 'POST puts the data in the body of the request, not in the address. That’s how enquiries and anything that changes something on a server are sent. The body is still readable on an unprotected connection, which is why forms are served only over HTTPS.',
+			get: 'GET puts the data straight into the address. It stays in the history, in the server’s logs and in any link someone shares. That suits a search box, but never an inquiry with a phone number in it.',
+			post: 'POST puts the data in the body of the request, not in the address. That’s how inquiries and anything that changes something on a server are sent. The body is still readable on an unprotected connection, which is why forms are served only over HTTPS.',
 			encoded: 'Notice “%40” in place of “@” and “+” in place of a space: form data is encoded so that it can travel in an address without loss.'
 		}
 	});

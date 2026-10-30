@@ -46,7 +46,7 @@
 		en: {
 			host: 'www.example.com',
 			lang: 'en',
-			p: { services: '/services/', servicesBare: '/services', old: '/old-section', missing: '/no-such-page', admin: '/admin/', form: '/enquiry' },
+			p: { services: '/services/', servicesBare: '/services', old: '/old-section', missing: '/no-such-page', admin: '/admin/', form: '/inquiry' },
 			bodies: {
 				broken: 'Something went wrong on the server',
 				received: 'Request received, we will be in touch',

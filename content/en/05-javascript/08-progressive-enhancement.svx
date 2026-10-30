@@ -22,7 +22,7 @@
 		practice: {
 			id: 'js-progressive-page',
 			title: 'A page that works without the script too',
-			task: 'Make the page resilient. 1) Fill in the table “What is essential and what is an enhancement”: at least five features, each marked with the word “essential” or “enhancement” and with what the visitor sees without JavaScript. 2) Make the essentials independent of the script: add an aside block with the id contacts, holding the address from the brief and tel: and mailto: links (the phone and email from the brief), and after the header put a <noscript> with a paragraph saying the page works without JavaScript too. The enquiry form keeps its action and method, and the main action is labeled with the words from the brief. 3) Search is useless without a script, so hide it in the markup (the hidden attribute on the form with the id search), and let the script show it. 4) Add a fifth script, a module script with the id enhance-code: it shows the search form (search.hidden = false) and checks the phone live: an input listener on the #f-phone field, aria-invalid and a message in a span with the id phone-hint and role status after the field. Both actions are wrapped in an “is the element there” check (if). Test without the script: on your own machine switch JavaScript off in the developer tools and reload the page. The automatic check sees the page after the scripts have run, when hidden is already removed, so that search is hidden without JavaScript can only be seen that way.',
+			task: 'Make the page resilient. 1) Fill in the table “What is essential and what is an enhancement”: at least five features, each marked with the word “essential” or “enhancement” and with what the visitor sees without JavaScript. 2) Make the essentials independent of the script: add an aside block with the id contacts, holding the address from the brief and tel: and mailto: links (the phone and email from the brief), and after the header put a <noscript> with a paragraph saying the page works without JavaScript too. The inquiry form keeps its action and method, and the main action is labeled with the words from the brief. 3) Search is useless without a script, so hide it in the markup (the hidden attribute on the form with the id search), and let the script show it. 4) Add a fifth script, a module script with the id enhance-code: it shows the search form (search.hidden = false) and checks the phone live: an input listener on the #f-phone field, aria-invalid and a message in a span with the id phone-hint and role status after the field. Both actions are wrapped in an “is the element there” check (if). Test without the script: on your own machine switch JavaScript off in the developer tools and reload the page. The automatic check sees the page after the scripts have run, when hidden is already removed, so that search is hidden without JavaScript can only be seen that way.',
 			era: 5,
 			files: {
 				'index.html': `<!doctype html>
@@ -49,7 +49,7 @@
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -87,9 +87,9 @@
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form id="request-form" action="/enquiry" method="post">
+        <form id="request-form" action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -250,7 +250,7 @@
         if (path === '/items.json') {
           return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
         }
-        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        if (path === '/inquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
         return reply({ error: 'Not found' }, 404);
       };
     <\/script>
@@ -315,16 +315,16 @@
         submit.disabled = true;
         formStatus.textContent = 'Sending…';
         try {
-          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          const response = await fetch('/inquiry', { method: 'POST', body: new FormData(form) });
           if (!response.ok) {
             throw new Error('The server replied with code ' + response.status);
           }
           const result = await response.json();
-          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          formStatus.textContent = 'Inquiry received, reference ' + result.id + '. We’ll be in touch.';
           form.reset();
         } catch (error) {
           console.error(error);
-          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+          formStatus.textContent = 'The inquiry was not sent. Your details are still in the form: try again or call us.';
         } finally {
           submit.disabled = false;
         }
@@ -461,13 +461,13 @@ input {
       </nav>
     </header>
     <noscript>
-      <p>JavaScript is switched off in your browser. The page works anyway: the list, the sections, the contacts and the enquiry form are all available, and only search and the menu do not work.</p>
+      <p>JavaScript is switched off in your browser. The page works anyway: the list, the sections, the contacts and the inquiry form are all available, and only search and the menu do not work.</p>
     </noscript>
 
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -505,9 +505,9 @@ input {
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form id="request-form" action="/enquiry" method="post">
+        <form id="request-form" action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -535,7 +535,7 @@ input {
       <table>
         <tr><th>Feature</th><th>Essential or enhancement</th><th>What the visitor sees without JavaScript</th></tr>
         <tr class="feature"><td>The list of offers</td><td>essential</td><td>All the cards are in the markup and visible at once.</td></tr>
-        <tr class="feature"><td>The main action: the enquiry form</td><td>essential</td><td>The form submits the ordinary way: the page reloads and the enquiry goes to the server.</td></tr>
+        <tr class="feature"><td>The main action: the inquiry form</td><td>essential</td><td>The form submits the ordinary way: the page reloads and the inquiry goes to the server.</td></tr>
         <tr class="feature"><td>Contacts</td><td>essential</td><td>The phone and email work as tel: and mailto: links.</td></tr>
         <tr class="feature"><td>The menu button</td><td>enhancement</td><td>The list of sections is always visible. There is no button: it appears only together with the script.</td></tr>
         <tr class="feature"><td>Search in the list</td><td>enhancement</td><td>There is no search field: it is useless without a script, so the script shows it.</td></tr>
@@ -676,7 +676,7 @@ input {
         if (path === '/items.json') {
           return reply([...snapshot, { title: 'A new item from the server', text: 'It is not in the markup: it came from items.json.', price: '' }]);
         }
-        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        if (path === '/inquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
         return reply({ error: 'Not found' }, 404);
       };
     <\/script>
@@ -741,16 +741,16 @@ input {
         submit.disabled = true;
         formStatus.textContent = 'Sending…';
         try {
-          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          const response = await fetch('/inquiry', { method: 'POST', body: new FormData(form) });
           if (!response.ok) {
             throw new Error('The server replied with code ' + response.status);
           }
           const result = await response.json();
-          formStatus.textContent = 'Enquiry received, reference ' + result.id + '. We’ll be in touch.';
+          formStatus.textContent = 'Inquiry received, reference ' + result.id + '. We’ll be in touch.';
           form.reset();
         } catch (error) {
           console.error(error);
-          formStatus.textContent = 'The enquiry was not sent. Your details are still in the form: try again or call us.';
+          formStatus.textContent = 'The inquiry was not sent. Your details are still in the form: try again or call us.';
         } finally {
           submit.disabled = false;
         }
@@ -1052,7 +1052,7 @@ input {
 				prompt: 'Which of these should be essential on a site, that is, work without JavaScript?',
 				options: [
 					'The list of offers in the markup',
-					'Sending the enquiry form the ordinary way',
+					'Sending the inquiry form the ordinary way',
 					'The tel: and mailto: links in the contacts',
 					'Highlighting a field while typing'
 				],
@@ -1165,7 +1165,7 @@ input {
 		guide: {
 			intro: 'Here you’ll check that the page doesn’t fall apart without the script, and fix what does. First make an honest list of “essential and enhancement”, then adjust the markup and the script to match it.',
 			hints: [
-				'Fill in the table: five or six features of your page (the list, the enquiry form, the contacts, the menu, search, the phone check). In the second column the word “essential” or “enhancement”, in the third what is visible without JavaScript.',
+				'Fill in the table: five or six features of your page (the list, the inquiry form, the contacts, the menu, search, the phone check). In the second column the word “essential” or “enhancement”, in the third what is visible without JavaScript.',
 				'The contacts block: an aside with the id contacts, holding the address and two links, one with a tel: address and one with a mailto: address. And a noscript element with a paragraph in it, right after the header.',
 				'Search: in the markup the form with the id search gets the hidden attribute. And in the enhance-code script: find the form with querySelector, then if (search) { search.hidden = false; }.',
 				'The phone check: the field with the id f-phone, and after it a span with the id phone-hint and role status. In the script, if (phone && hint) { phone.addEventListener with the input event } and inside the handler set aria-invalid and the text of the hint.'
@@ -1229,11 +1229,11 @@ If a page is built so that it is empty without the script, then in any of these 
 
 A page is built in layers, and each next layer only improves the previous one:
 
-1. **HTML**: content, links and forms. This layer works everywhere. The list of offers sits in the markup, the enquiry form submits the ordinary way, the phone is a `tel:` link.
+1. **HTML**: content, links and forms. This layer works everywhere. The list of offers sits in the markup, the inquiry form submits the ordinary way, the phone is a `tel:` link.
 2. **CSS**: styling and layout. If the styles didn’t load, the page is ugly but readable.
 3. **JavaScript**: conveniences. The menu folds, search filters, the phone is checked as you type, the form submits without a reload.
 
-Everything you did in the earlier lessons can be divided into “essential” and “enhancement”, and the division is very practical. The link to the enquiry form and the form itself: essential. Checking the phone while typing: an enhancement (without it the browser checks the field itself on submit, because the markup has `required` and `type="tel"`).
+Everything you did in the earlier lessons can be divided into “essential” and “enhancement”, and the division is very practical. The link to the inquiry form and the form itself: essential. Checking the phone while typing: an enhancement (without it the browser checks the field itself on submit, because the markup has `required` and `type="tel"`).
 
 Here are the techniques that follow from this.
 

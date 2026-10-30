@@ -20,16 +20,16 @@
 		},
 		practice: {
 			id: 'form-and-certificate',
-			title: 'An enquiry form over HTTPS',
+			title: 'An inquiry form over HTTPS',
 			task: 'In 2010 sites began to accept data from visitors, and now the privacy of that data depends on you. Fix the form: make it send data to a secure address (https instead of http), and give every field a visible caption, a label element (right now the fields are labeled only for screen readers, and a sighted person just sees a word beside them). And in the note about the certificate, write how you will get it (a free automatic certificate, or one from your host) and for how many days it is issued. Every “…” has to be replaced.',
 			era: 3,
 			files: {
 				'index.html':
-					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <h2>Send an enquiry</h2>\n    <form id="request" action="http://example.com/enquiry" method="post">\n      <p>Name: <input type="text" name="name" aria-label="Name"></p>\n      <p>Phone: <input type="tel" name="phone" aria-label="Phone"></p>\n      <p><button type="submit">{{mainAction.label}}</button></p>\n    </form>\n\n    <aside class="note" data-scaffold id="tls-note">\n      <h2>The certificate</h2>\n      <p id="cert">I’ll get: <span class="how">…</span>. Valid for: <span class="days">…</span> days.</p>\n    </aside>\n  </body>\n</html>\n'
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <h2>Send an inquiry</h2>\n    <form id="request" action="http://example.com/inquiry" method="post">\n      <p>Name: <input type="text" name="name" aria-label="Name"></p>\n      <p>Phone: <input type="tel" name="phone" aria-label="Phone"></p>\n      <p><button type="submit">{{mainAction.label}}</button></p>\n    </form>\n\n    <aside class="note" data-scaffold id="tls-note">\n      <h2>The certificate</h2>\n      <p id="cert">I’ll get: <span class="how">…</span>. Valid for: <span class="days">…</span> days.</p>\n    </aside>\n  </body>\n</html>\n'
 			},
 			solution: {
 				'index.html':
-					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <h2>Send an enquiry</h2>\n    <form id="request" action="https://example.com/enquiry" method="post">\n      <p><label>Name <input type="text" name="name"></label></p>\n      <p><label>Phone <input type="tel" name="phone"></label></p>\n      <p><button type="submit">{{mainAction.label}}</button></p>\n    </form>\n\n    <aside class="note" data-scaffold id="tls-note">\n      <h2>The certificate</h2>\n      <p id="cert">I’ll get: <span class="how">a free automatic Let’s Encrypt certificate</span>. Valid for: <span class="days">90</span> days.</p>\n    </aside>\n  </body>\n</html>\n'
+					'<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8">\n    <title>{{title}}</title>\n  </head>\n  <body>\n    <h1>{{title}}</h1>\n    <p>{{who}}</p>\n\n    <h2>Send an inquiry</h2>\n    <form id="request" action="https://example.com/inquiry" method="post">\n      <p><label>Name <input type="text" name="name"></label></p>\n      <p><label>Phone <input type="tel" name="phone"></label></p>\n      <p><button type="submit">{{mainAction.label}}</button></p>\n    </form>\n\n    <aside class="note" data-scaffold id="tls-note">\n      <h2>The certificate</h2>\n      <p id="cert">I’ll get: <span class="how">a free automatic Let’s Encrypt certificate</span>. Valid for: <span class="days">90</span> days.</p>\n    </aside>\n  </body>\n</html>\n'
 			},
 			checks: [
 				{ id: 'https-action', kind: 'attr', selector: '#request', name: 'action', matches: '^https://' },
@@ -110,10 +110,10 @@
 			},
 			{
 				type: 'code',
-				prompt: 'Make a form that sends data to https://example.com/enquiry by the post method, with one field labeled “Name”.',
+				prompt: 'Make a form that sends data to https://example.com/inquiry by the post method, with one field labeled “Name”.',
 				starter: '',
 				checks: [
-					{ id: 'form-https', kind: 'attr', selector: 'form', name: 'action', matches: '^https://example\\.com/enquiry' },
+					{ id: 'form-https', kind: 'attr', selector: 'form', name: 'action', matches: '^https://example\\.com/inquiry' },
 					{ id: 'form-field', kind: 'exists', selector: 'form input' },
 					{ id: 'form-label', kind: 'label' }
 				]
@@ -184,26 +184,26 @@
 
 ## A postcard and a sealed letter
 
-Plain HTTP is like a postcard: everyone who touches it on the way can read it. That includes the owner of the café’s Wi-Fi, the provider, any station in between. While a site is being read for the news, that is tolerable. But as soon as there is a form asking for a phone number or a password, the postcard becomes dangerous. What’s more, whoever sits on the path can do more than read: they can change things, inserting ads into someone else’s page or slipping a virus into a downloaded file.
+Plain HTTP is like a postcard: everyone who touches it on the way can read it. That includes the owner of the café’s Wi-Fi, the provider, any station in between. While a site is being read for the news, that is tolerable. But as soon as there’s a form asking for a phone number or a password, the postcard becomes dangerous. What’s more, whoever sits on the path can do more than read: they can change things, inserting ads into someone else’s page or slipping a virus into a downloaded file.
 
 **HTTPS** is the same HTTP, but inside a protected channel built by the **TLS** protocol (Transport Layer Security; its former name, SSL, is still heard in conversation). It gives three things:
 
 1. **Encryption**: an eavesdropper sees noise.
 2. **Integrity**: if someone changes the data on the way, it will be detected.
-3. **Checking the server**: you are talking to the owner of the domain, not a fake.
+3. **Checking the server**: you’re talking to the owner of the domain, not a fake.
 
-That is why browsers mark HTTP sites as “Not secure”, and a number of features (location, the camera, offline mode) are allowed only on HTTPS. Search engines also count HTTPS as a plus.
+That’s why browsers mark HTTP sites as “Not secure”, and a number of features (location, the camera, offline mode) are allowed only on HTTPS. Search engines also count HTTPS as a plus.
 
 <details>
 <summary>Check yourself: what does HTTPS give you besides encryption?</summary>
 
-Integrity (a change to the data on the way won’t go unnoticed) and a check of the server (you are talking to the owner of the domain).
+Integrity (a change to the data on the way won’t go unnoticed) and a check of the server (you’re talking to the owner of the domain).
 
 </details>
 
 ## How to agree on a secret in front of everyone
 
-Here is a paradox. To encrypt a conversation, both sides need a shared secret key. But how do you agree on one if someone is listening in? The answer was devised by mathematicians in the 1970s, and it is easy to explain with paints.
+Here is a paradox. To encrypt a conversation, both sides need a shared secret key. But how do you agree on one if someone is listening in? The answer was devised by mathematicians in the 1970s, and it’s easy to explain with paints.
 
 Suppose we have a tub of yellow paint that everyone knows about. You secretly choose your own paint and mix it with the yellow, and the server does the same with its own. You exchange the resulting mixtures openly. Now each of you adds **your own** secret paint to the other’s mixture, and you both end up with the same color. An eavesdropper sees the yellow tub and two mixtures. They can’t subtract a paint from a mixture.
 
@@ -226,27 +226,27 @@ Noise: a set of bytes from which nothing can be read without the key. All that i
 
 ## The certificate
 
-Encryption doesn’t answer the question “am I talking to the right one?”. For that there is a **certificate**: an electronic document, like a site’s ID card. It records:
+Encryption doesn’t answer the question “am I talking to the right one?”. For that there’s a **certificate**: an electronic document, like a site’s ID card. It records:
 
 - the name (or names) it was issued for;
 - the site’s **public key** (every site has a pair of keys, public and secret);
 - the validity period;
 - the signature of whoever issued it.
 
-Certificates are issued by a **certificate authority** (CA). Every browser and system has a list of authorities it trusts. A certificate counts as genuine if it is signed by such an authority, directly or through a chain (“the root authority signed an intermediate one, and that signed the site’s certificate”). The browser checks four things: the signature, the name, the date, and that the certificate hasn’t been revoked. Every certificate issued is also recorded in open logs, where anyone can see who got a certificate for which name.
+Certificates are issued by a **certificate authority** (CA). Every browser and system has a list of authorities it trusts. A certificate counts as genuine if it’s signed by such an authority, directly or through a chain (“the root authority signed an intermediate one, and that signed the site’s certificate”). The browser checks four things: the signature, the name, the date, and that the certificate hasn’t been revoked. Every certificate issued is also recorded in open logs, where anyone can see who got a certificate for which name.
 
-What a certificate confirms: **that you are talking to whoever controls the domain**. What it doesn’t confirm: that the owner of the domain is honest. A certificate for a fraudulent site’s domain is as easy to get as one for yours: the authority checks only control of the domain. So the padlock in the address bar means “the channel is protected”, not “the site is safe”. It is useful to know this difference, and we’ll come back to it in the parts on security and the law.
+What a certificate confirms: **that you are talking to whoever controls the domain**. What it doesn’t confirm: that the owner of the domain is honest. A certificate for a fraudulent site’s domain is as easy to get as one for yours: the authority checks only control of the domain. So the padlock in the address bar means “the channel is protected”, not “the site is safe”. It’s useful to know this difference, and we’ll come back to it in the parts on security and the law.
 
 <details>
 <summary>Check yourself: what does a certificate confirm, and what doesn’t it?</summary>
 
-It confirms that you are talking to the owner of the domain. It doesn’t confirm that the owner is honest or that the site is safe.
+It confirms that you’re talking to the owner of the domain. It doesn’t confirm that the owner is honest or that the site is safe.
 
 </details>
 
 ## How to get a certificate
 
-Certificates used to cost money and be ordered by hand. Today there is a free way. The authority Let’s Encrypt issues certificates automatically: a special program on the server proves to the authority that it controls the domain (it puts a particular file on the site, or a particular TXT record in DNS, which you know from the DNS lesson), gets the certificate and renews it.
+Certificates used to cost money and be ordered by hand. Today there’s a free way. The authority Let’s Encrypt issues certificates automatically: a special program on the server proves to the authority that it controls the domain (it puts a particular file on the site, or a particular TXT record in DNS, which you know from the DNS lesson), gets the certificate and renews it.
 
 There are three ways:
 
@@ -254,13 +254,13 @@ There are three ways:
 - **Automatically on your own server**, with a program such as Certbot.
 - **A paid certificate** from an authority: needed in special cases, more often by corporations.
 
-A certificate’s validity is limited, and it is being shortened step by step so that a stolen certificate is dangerous only briefly. Today at Let’s Encrypt it is 90 days. The authority has announced that from 10 February 2027 the default will be 64 days, and from 16 February 2028 it will be 45 days. The shorter the term, the more important it is that renewal is automatic: nobody can keep up with that rhythm by hand.
+A certificate’s validity is limited, and it’s being shortened step by step so that a stolen certificate is dangerous only briefly. Today at Let’s Encrypt it’s 90 days. The authority has announced that from 10 February 2027 the default will be 64 days, and from 16 February 2028 it will be 45 days. The shorter the term, the more important it’s that renewal is automatic: nobody can keep up with that rhythm by hand.
 
 Two more things worth knowing. The page and everything in it (pictures, scripts) must be served over HTTPS: one picture over HTTP leaves the protection incomplete, and the browser complains about “mixed content”. And old `http://` addresses should be redirected to `https://` with a 301, as in the HTTP lesson.
 
 ## Practice
 
-You are in the era of 2010, and the site begins to accept data. Under the heading is an enquiry form. It has two mistakes: it sends data over `http`, and the fields have no captions, so a screen reader won’t tell a person what to type in each field. Fix both. Then complete the note about the certificate: how you will get it and for how many days.
+You’re in the era of 2010, and the site begins to accept data. Under the heading is an inquiry form. It has two mistakes: it sends data over `http`, and the fields have no captions, so a screen reader won’t tell a person what to type in each field. Fix both. Then complete the note about the certificate: how you’ll get it and for how many days.
 
 The form’s button is labeled with your main action from the brief: it is for that that a visitor leaves their details.
 

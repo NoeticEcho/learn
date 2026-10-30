@@ -85,7 +85,7 @@
 			badPhrase: (w: string) => `an empty formula “${w}”`,
 			factsFail: (x: string) => `Fact check: ${x}.`,
 			factsOk: 'Every number is in the brief, and there are no empty formulas.',
-			html: { lang: 'en', name: 'Name', phone: 'Phone', consent: 'I agree to the processing of my data,', policy: 'privacy policy', url: 'https://example.com/leads', policyUrl: '/privacy/' },
+			html: { lang: 'en', name: 'Name', phone: 'Phone', consent: 'I agree to the processing of my data,', policy: 'privacy notice', url: 'https://example.com/leads', policyUrl: '/privacy/' },
 			noLang: 'no lang',
 			h1: (n: number) => `h1: ${n} instead of one`,
 			noAlt: 'an image without alt',

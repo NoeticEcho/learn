@@ -44,7 +44,7 @@ jobs:
         run: npm run check:links && npm run check:html
       - name: Build the pages
         run: npm run build
-      - name: The privacy policy and consent page is there
+      - name: The privacy notice and consent page is there
         run: test -f dist/privacy/index.html
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -84,7 +84,7 @@ jobs:
 		practice: {
 			id: 'infra-pipeline-file',
 			title: 'A pipeline file for your site',
-			task: 'Finish the pipeline file for GitHub Actions. 1) The name and the trigger: on every push to the main branch. 2) The job check: get the code, check links and markup, build the pages, and if the site has a form, check that the privacy policy and consent page is there. 3) The job deploy with needs: check, so that the deploy runs only after the checks succeed. 4) Take secrets (the chat address) from the service’s settings as secrets.NAME, and don’t write them into the file. 5) Under the file, write what the build checks for each section of the project (name every section from the brief) and how to roll back a bad version. Every “…” has to be replaced.',
+			task: 'Finish the pipeline file for GitHub Actions. 1) The name and the trigger: on every push to the main branch. 2) The job check: get the code, check links and markup, build the pages, and if the site has a form, check that the privacy notice and consent page is there. 3) The job deploy with needs: check, so that the deploy runs only after the checks succeed. 4) Take secrets (the chat address) from the service’s settings as secrets.NAME, and don’t write them into the file. 5) Under the file, write what the build checks for each section of the project (name every section from the brief) and how to roll back a bad version. Every “…” has to be replaced.',
 			era: 6,
 			files: files({ lang: 'en', scaffold: plan({ yaml: starter, pages: '…', rollback: '…' }) }),
 			solution: files({
@@ -162,7 +162,7 @@ jobs:
 				options: [
 					'That there are no broken links',
 					'That all the pages build',
-					'That the page with the form has a link to the privacy policy and consent',
+					'That the page with the form has a link to the privacy notice and consent',
 					'That the writing is good and persuasive'
 				],
 				answer: [0, 1, 2],
@@ -227,7 +227,7 @@ jobs:
 			hints: [
 				'The trigger: on: push: branches: [main]. The name can be anything clear.',
 				'The deploy job runs only after check: write needs: check. Secrets are taken as secrets.NAME, for example secrets.NOTIFY_URL, and the value is kept in the settings.',
-				'If the site has a form, check in one step that the privacy policy and consent page exists (for example test -f dist/privacy/index.html).',
+				'If the site has a form, check in one step that the privacy notice and consent page exists (for example test -f dist/privacy/index.html).',
 				'Under the file, name every section of the project and say how to roll back: git revert and push, or an earlier deploy in the panel.'
 			],
 			mistakes: {
@@ -240,10 +240,10 @@ jobs:
 				'links-html': 'The check job needs a check of links and markup.',
 				'secrets-in-settings': 'Take the secret from the settings: secrets.NAME (for example secrets.NOTIFY_URL).',
 				'no-token-in-file': 'A token or a password is written in the file. Remove it: the value is kept in the service’s settings.',
-				'consent-form': 'Your project has a form: add a step that checks the privacy policy and consent page.',
-				'consent-book': 'Your project has booking: add a step that checks the privacy policy and consent page.',
-				'consent-signup': 'Your project has sign-up: add a step that checks the privacy policy and consent page.',
-				'consent-buy': 'Your project has purchases: add a step that checks the privacy policy and consent page.',
+				'consent-form': 'Your project has a form: add a step that checks the privacy notice and consent page.',
+				'consent-book': 'Your project has booking: add a step that checks the privacy notice and consent page.',
+				'consent-signup': 'Your project has sign-up: add a step that checks the privacy notice and consent page.',
+				'consent-buy': 'Your project has purchases: add a step that checks the privacy notice and consent page.',
 				'pages-all': 'Name every section of the project from the brief, in full.',
 				rollback: 'Say how to roll back a bad version: git revert and push, or an earlier deploy.'
 			},
@@ -328,7 +328,7 @@ jobs:
         run: npm run check:links && npm run check:html
       - name: Build the pages
         run: npm run build
-      - name: The privacy policy and consent page is there
+      - name: The privacy notice and consent page is there
         run: test -f dist/privacy/index.html
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -343,7 +343,7 @@ jobs:
 
 Read it as instructions. `on: push: branches: [main]`: run on every commit to `main`. There are two **jobs**: `check` (check and build) and `deploy`. The line `needs: check` says the deploy waits for the checks to succeed, and if they are red it won’t run. Each **step** is either a ready-made action (`uses:`, for example getting the code) or a command (`run:`). The version numbers of the actions (`@v7`, `@v5`) keep changing: the current ones are in the documentation (in the sources), and these were the latest releases in October 2026.
 
-Lines such as `npm run check:links` are your own commands: they are defined in the project. What each does depends on the tools you chose: a link checker, a markup checker, a bundler. This textbook is checked the same way: on every change it runs type checks, tests, an accessibility check, a link check and a content check, and only then is the main branch deployed to Pages. If the site has a form, add a check that the privacy policy and consent page exists (a step in the example): that way the important page won’t be lost in the next edit.
+Lines such as `npm run check:links` are your own commands: they are defined in the project. What each does depends on the tools you chose: a link checker, a markup checker, a bundler. This textbook is checked the same way: on every change it runs type checks, tests, an accessibility check, a link check and a content check, and only then is the main branch deployed to Pages. If the site has a form, add a check that the privacy notice and consent page exists (a step in the example): that way the important page won’t be lost in the next edit.
 
 GitLab writes the same thing in a file called `.gitlab-ci.yml`, and platforms such as Netlify, Vercel and Cloudflare Pages manage with no file at all: connect a repository, and they build and deploy on every commit themselves. That is the simplest pipeline, and for many sites it is enough.
 

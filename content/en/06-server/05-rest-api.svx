@@ -22,7 +22,7 @@
 		practice: {
 			id: 'server-openapi',
 			title: 'An OpenAPI description of your project’s API',
-			task: 'The sandbox does not check YAML, so write the description as text in the pre block with the id openapi (in place of the “…”), like an openapi.yaml file, and compare it with the example in the lesson. Describe the API for your offerings and enquiries. 1) The version: openapi: 3.1.0, info, and servers with the address https://…/api/v1. 2) Paths are plural nouns: /items for the list of offerings (get) and /items/{id} for one, and /requests (post) for an enquiry from the form. There must be no verbs in the paths. 3) GET has no side effects; an enquiry is created with POST and answers 201 (or 202). 4) Describe the 200, 400 and 404 answers and a shared error format in components.schemas.Error (the fields code and message). 5) List the required fields of the enquiry with required, and say that personal data is accepted only over HTTPS.',
+			task: 'The sandbox does not check YAML, so write the description as text in the pre block with the id openapi (in place of the “…”), like an openapi.yaml file, and compare it with the example in the lesson. Describe the API for your offerings and inquiries. 1) The version: openapi: 3.1.0, info, and servers with the address https://…/api/v1. 2) Paths are plural nouns: /items for the list of offerings (get) and /items/{id} for one, and /requests (post) for an inquiry from the form. There must be no verbs in the paths. 3) GET has no side effects; an inquiry is created with POST and answers 201 (or 202). 4) Describe the 200, 400 and 404 answers and a shared error format in components.schemas.Error (the fields code and message). 5) List the required fields of the inquiry with required, and say that personal data is accepted only over HTTPS.',
 			era: 6,
 			files: {
 				'index.html': `<!doctype html>
@@ -48,7 +48,7 @@
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -77,9 +77,9 @@
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -231,7 +231,7 @@ input {
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -260,9 +260,9 @@ input {
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -318,7 +318,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /requests:
     post:
-      summary: Create an enquiry from the form
+      summary: Create an inquiry from the form
       description: Takes the visitor’s personal data, so it works only over HTTPS.
       requestBody:
         required: true
@@ -336,9 +336,9 @@ paths:
                   type: string
       responses:
         '201':
-          description: Enquiry created
+          description: Inquiry created
         '400':
-          description: The enquiry data is wrong
+          description: The inquiry data is wrong
           content:
             application/json:
               schema:
@@ -589,11 +589,11 @@ input {
 			},
 			{
 				type: 'single',
-				prompt: 'An enquiry has been accepted and created on the server. Which status code is expected?',
+				prompt: 'An inquiry has been accepted and created on the server. Which status code is expected?',
 				options: ['201 Created, usually with a Location header', '200 OK with no explanation', '404 Not Found'],
 				answer: 0,
 				why: [
-					'Yes. 201 says a resource was created, and Location gives its address. Use 202 when the enquiry was accepted but will be processed later.',
+					'Yes. 201 says a resource was created, and Location gives its address. Use 202 when the inquiry was accepted but will be processed later.',
 					'It is allowed, but 201 is more informative: it says specifically that something was created.',
 					'No: 404 means something is missing, not that it was created.'
 				]
@@ -716,8 +716,8 @@ input {
 			hints: [
 				'The start: openapi: 3.1.0, info with a title and a version, and servers: - url: https://riverbend.example/api/v1. Indentation is two spaces a level.',
 				'Paths are indented two spaces and start with a slash: /items: and /items/{id}: and /requests:. The method goes two more spaces in: get: or post:.',
-				'Responses: responses: and under it the codes in quotes: “200”, “404”, and for the enquiry “201” and “400”. Move the shared error into components: schemas: Error: with the fields code and message.',
-				'For the enquiry: required: [name, phone] and a sentence in description: “personal data is accepted only over HTTPS”.'
+				'Responses: responses: and under it the codes in quotes: “200”, “404”, and for the inquiry “201” and “400”. Move the shared error into components: schemas: Error: with the fields code and message.',
+				'For the inquiry: required: [name, phone] and a sentence in description: “personal data is accepted only over HTTPS”.'
 			],
 			mistakes: {
 				'spec-section': 'You need a section with the id api-spec holding a pre with the id openapi. Put it back.',
@@ -728,11 +728,11 @@ input {
 				'no-verbs': 'There must be no verbs in the paths (getItems, createRequest, delete…): the method says the action.',
 				'one-item-path': 'You need the path of one resource with a parameter: /items/{id}.',
 				'get-operation': 'You need a read operation: get: inside a path.',
-				'post-creates': 'An enquiry is created with post and answers with the code “201” (or “202”).',
+				'post-creates': 'An inquiry is created with post and answers with the code “201” (or “202”).',
 				statuses: 'Describe the 200, 400 and 404 answers.',
 				'error-schema': 'The shared error format: components, then schemas, then Error with the fields code and message.',
-				'required-fields': 'List the required fields of the enquiry: required: [name, phone].',
-				'https-personal-data': 'Write that personal data is accepted only over HTTPS (in the description of the enquiry).'
+				'required-fields': 'List the required fields of the inquiry: required: [name, phone].',
+				'https-personal-data': 'Write that personal data is accepted only over HTTPS (in the description of the inquiry).'
 			},
 			outro: 'Your project now has a contract: any programmer (and any AI model) can read this file and know how to talk to it. Paste the text into the Swagger editor (editor.swagger.io) and it draws interactive documentation.'
 		},
@@ -763,7 +763,7 @@ input {
 
 ## Programs talk too
 
-So far the “client” of a server has been a browser, and a person read the answer. But more and more on the web, **programs** talk to each other. Your page asks a server for the list of offerings (you did that in the lesson on fetch). A mobile app sends an enquiry. A shop’s site asks a courier service for a price. An AI model reads data through a tool. Such conversations need rules: what to ask, in what form, and which answers are possible. A set of such rules is called an **API** (Application Programming Interface).
+So far the “client” of a server has been a browser, and a person read the answer. But more and more on the web, **programs** talk to each other. Your page asks a server for the list of offerings (you did that in the lesson on fetch). A mobile app sends an inquiry. A shop’s site asks a courier service for a price. An AI model reads data through a tool. Such conversations need rules: what to ask, in what form, and which answers are possible. A set of such rules is called an **API** (Application Programming Interface).
 
 Most often a web API is plain HTTP, which you already know: a request with a method and an address, a response with a status code and a body, and usually the body is JSON. The only difference from a page is that the response is meant for a program, not for eyes.
 
@@ -771,7 +771,7 @@ Most often a web API is plain HTTP, which you already know: a request with a met
 
 The most common style of such APIs is called **REST** (Representational State Transfer). Roy Fielding, one of the authors of HTTP, described it in his doctoral dissertation in 2000. The idea is to use HTTP the way it was designed:
 
-- the address names a **resource**, a noun in the plural: `/items` (offerings), `/items/7` (offering number seven), `/requests` (enquiries);
+- the address names a **resource**, a noun in the plural: `/items` (offerings), `/items/7` (offering number seven), `/requests` (inquiries);
 - the **action** is expressed by the HTTP method, not by a word in the address;
 - the **status code** reports the result;
 - the server keeps nothing about the client between requests: everything needed arrives in the request itself.
@@ -783,7 +783,7 @@ To be honest, what the industry calls a “REST API” usually follows this idea
 Each method has an agreed meaning, written down in the HTTP standard (RFC 9110):
 
 - **GET**: read. It is **safe**: it changes nothing, so anybody can call it any number of times (a browser, a search robot, an extension).
-- **POST**: create a new resource or perform an action (“send an enquiry”). A repeat may create a second copy, so POST is not idempotent.
+- **POST**: create a new resource or perform an action (“send an inquiry”). A repeat may create a second copy, so POST is not idempotent.
 - **PUT**: replace a resource entirely.
 - **PATCH**: change some of its fields.
 - **DELETE**: remove it.
@@ -829,10 +829,10 @@ So as not to explain an API in words, it is described by a file in the **OpenAPI
 paths:
   /requests:
     post:
-      summary: Create an enquiry from the form
+      summary: Create an inquiry from the form
       responses:
         '201':
-          description: Enquiry created
+          description: Inquiry created
 ```
 
 Indentation with spaces matters: in YAML, nesting is set by it.
@@ -843,9 +843,9 @@ Three ways, and none needs special software. The Network tab in the developer to
 
 ## Practice
 
-You are on a site from the 2022 era, when sites talk through APIs (the time of Jamstack). Describe your project’s API in an OpenAPI file: the list of your offerings, one offering, and creating an enquiry from the form. You write the text in a pre block right on the page, and the checks read it.
+You are on a site from the 2022 era, when sites talk through APIs (the time of Jamstack). Describe your project’s API in an OpenAPI file: the list of your offerings, one offering, and creating an inquiry from the form. You write the text in a pre block right on the page, and the checks read it.
 
-Three rules the checks will catch: paths are plural nouns with no verbs; GET reads, while an enquiry is created with POST and answers 201; the 200, 400 and 404 answers and a shared error format are described. And one rule the checks won’t understand but data protection law will: personal data from the form is accepted only over HTTPS. Write that in the description of the enquiry.
+Three rules the checks will catch: paths are plural nouns with no verbs; GET reads, while an inquiry is created with POST and answers 201; the 200, 400 and 404 answers and a shared error format are described. And one rule the checks won’t understand but data protection law will: personal data from the form is accepted only over HTTPS. Write that in the description of the inquiry.
 
 ## What was wrong before
 

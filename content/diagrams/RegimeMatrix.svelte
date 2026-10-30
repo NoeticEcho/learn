@@ -75,7 +75,7 @@
 
 <figure class="dg">
 	<figcaption>{t('Какие правила могут быть рядом с вашим сайтом', 'Which rules may sit beside your site')}</figcaption>
-	<p class="dg-out">{t('Отметьте, откуда ваши посетители и что делает сайт. Карта подскажет, о каких правилах спросить юриста. Это ориентир на 28 октября 2026 года, а не определение того, что применимо.', 'Tick where your visitors come from and what the site does. The map suggests which rules to ask a lawyer about. This is a guide as of 30 October 2026, not a ruling on what applies.')}</p>
+	<p class="dg-out">{t('Отметьте, откуда ваши посетители и что делает сайт. Карта подскажет, о каких правилах спросить юриста. Это ориентир на 28 октября 2026 года, а не определение того, что применимо.', 'Check where your visitors come from and what the site does. The map suggests which rules to ask a lawyer about. This is a guide as of 30 October 2026, not a ruling on what applies.')}</p>
 
 	<div class="cols">
 		<fieldset>
@@ -88,7 +88,7 @@
 		</fieldset>
 	</div>
 
-	<p class="dg-out" aria-live="polite"><strong>{!anyWhere ? t('Отметьте хотя бы одну страну.', 'Tick at least one country.') : active.length ? t(`Правил, которые стоит проверить: ${active.length}.`, `Rules worth checking: ${active.length}.`) : t('Отметьте, что делает сайт.', 'Tick what the site does.')}</strong></p>
+	<p class="dg-out" aria-live="polite"><strong>{!anyWhere ? t('Отметьте хотя бы одну страну.', 'Check at least one country.') : active.length ? t(`Правил, которые стоит проверить: ${active.length}.`, `Rules worth checking: ${active.length}.`) : t('Отметьте, что делает сайт.', 'Check what the site does.')}</strong></p>
 	<ol class="regs" aria-live="polite">
 		{#each active as r (r.id)}
 			<li>
@@ -98,7 +98,7 @@
 			</li>
 		{/each}
 	</ol>
-	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('по двум наборам отметок (откуда посетители и что делает сайт) схема показывает правила, о которых нужно спросить юриста: 152-ФЗ, закон о рекламе и закон о защите прав потребителей в России; GDPR, директиву ePrivacy и European Accessibility Act для посетителей из Европейского союза; ADA и законы штатов для посетителей из США.', 'from two sets of ticks (where visitors come from and what the site does) the diagram shows the rules to ask a lawyer about: for the United States, state privacy laws, the FTC Act and the ADA; for the United Kingdom, the UK GDPR, PECR, the Consumer Contracts Regulations and the Equality Act; for the European Union, the GDPR, the ePrivacy Directive, the Consumer Rights Directive and the European Accessibility Act; and for Russia, 152-FZ, the advertising law and the consumer law.')}</p>
+	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('по двум наборам отметок (откуда посетители и что делает сайт) схема показывает правила, о которых нужно спросить юриста: 152-ФЗ, закон о рекламе и закон о защите прав потребителей в России; GDPR, директиву ePrivacy и European Accessibility Act для посетителей из Европейского союза; ADA и законы штатов для посетителей из США.', 'from two sets of checks (where visitors come from and what the site does) the diagram shows the rules to ask a lawyer about: for the United States, state privacy laws, the FTC Act and the ADA; for the United Kingdom, the UK GDPR, PECR, the Consumer Contracts Regulations and the Equality Act; for the European Union, the GDPR, the ePrivacy Directive, the Consumer Rights Directive and the European Accessibility Act; and for Russia, 152-FZ, the advertising law and the consumer law.')}</p>
 </figure>
 
 <style>

@@ -20,8 +20,8 @@
 		},
 		practice: {
 			id: 'js-fetch-items-form',
-			title: 'A list from the server and an enquiry without a reload',
-			task: 'Connect the page to a “server”. 1) Paste the server simulation block from the lesson (a fieldset and a script marked data-scaffold) before your own script: the sandbox doesn’t allow real requests, and this block replaces fetch. 2) Add to the markup: in the #offer section a paragraph with the id status and role status, and a hidden button with type button, the id retry and the label Try again; give the enquiry form the id request-form, and at the end of the form add a paragraph with the id form-status and role status. 3) A fourth script, a script tag with type module and id fetch-code. An async function loadItems requests /items.json with fetch, checks response.ok, reads response.json(), builds the cards with createElement and textContent and puts them into .cards (replaceChildren). Show Loading… in #status and remove the indicator in every outcome (finally); on a failure show a clear message, keep the previous cards and show the Try again button. 4) On the enquiry form: a submit listener with preventDefault; block the button (disabled) while sending, send the form to /enquiry with fetch, using method POST and body new FormData(form), write the result into #form-status, and enable the button again afterwards. The checks read the markup and the text of the script; switch the “connection” in the simulation and watch your page in each case.',
+			title: 'A list from the server and an inquiry without a reload',
+			task: 'Connect the page to a “server”. 1) Paste the server simulation block from the lesson (a fieldset and a script marked data-scaffold) before your own script: the sandbox doesn’t allow real requests, and this block replaces fetch. 2) Add to the markup: in the #offer section a paragraph with the id status and role status, and a hidden button with type button, the id retry and the label Try again; give the inquiry form the id request-form, and at the end of the form add a paragraph with the id form-status and role status. 3) A fourth script, a script tag with type module and id fetch-code. An async function loadItems requests /items.json with fetch, checks response.ok, reads response.json(), builds the cards with createElement and textContent and puts them into .cards (replaceChildren). Show Loading… in #status and remove the indicator in every outcome (finally); on a failure show a clear message, keep the previous cards and show the Try again button. 4) On the inquiry form: a submit listener with preventDefault; block the button (disabled) while sending, send the form to /inquiry with fetch, using method POST and body new FormData(form), write the result into #form-status, and enable the button again afterwards. The checks read the markup and the text of the script; switch the “connection” in the simulation and watch your page in each case.',
 			era: 4,
 			continues: 'js-events-menu-search',
 			files: {
@@ -67,7 +67,7 @@
       <main id="main">
         <h1>{{name}}</h1>
         <p>{{who}}</p>
-        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+        <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
         <section id="sec-1">
           <h2>{{sections.0}}</h2>
@@ -126,9 +126,9 @@
           </table>
         </section>
 
-        <section id="enquiry">
+        <section id="inquiry">
           <h2>{{mainAction.label}}</h2>
-          <form action="/enquiry" method="post">
+          <form action="/inquiry" method="post">
             <p>
               <label for="f-name">What should we call you?</label><br>
               <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -149,7 +149,7 @@
               <textarea id="f-comment" name="comment" rows="4"></textarea>
             </p>
             <p>
-              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my inquiry. <a href="privacy.html">Privacy notice</a></label>
             </p>
             <p><button type="submit">{{mainAction.label}}</button></p>
           </form>
@@ -475,7 +475,7 @@ header nav ul {
       <main id="main">
         <h1>{{name}}</h1>
         <p>{{who}}</p>
-        <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+        <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
         <section id="sec-1">
           <h2>{{sections.0}}</h2>
@@ -536,9 +536,9 @@ header nav ul {
           </table>
         </section>
 
-        <section id="enquiry">
+        <section id="inquiry">
           <h2>{{mainAction.label}}</h2>
-          <form id="request-form" action="/enquiry" method="post">
+          <form id="request-form" action="/inquiry" method="post">
             <p>
               <label for="f-name">What should we call you?</label><br>
               <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -559,7 +559,7 @@ header nav ul {
               <textarea id="f-comment" name="comment" rows="4"></textarea>
             </p>
             <p>
-              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my enquiry. <a href="privacy.html">Privacy notice</a></label>
+              <label><input type="checkbox" name="consent" required> I agree to {{name}} using these details to reply to my inquiry. <a href="privacy.html">Privacy notice</a></label>
             </p>
             <p><button type="submit">{{mainAction.label}}</button></p>
             <p id="form-status" role="status"></p>
@@ -717,7 +717,7 @@ header nav ul {
         if (path === '/items.json') {
           return reply([...snapshot, { title: 'A new item from the server', text: 'It isn’t in the markup: it came from items.json.', price: '' }]);
         }
-        if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+        if (path === '/inquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
         return reply({ error: 'Not found' }, 404);
       };
     <\/script>
@@ -782,16 +782,16 @@ header nav ul {
         submit.disabled = true;
         formStatus.textContent = 'Sending…';
         try {
-          const response = await fetch('/enquiry', { method: 'POST', body: new FormData(form) });
+          const response = await fetch('/inquiry', { method: 'POST', body: new FormData(form) });
           if (!response.ok) {
             throw new Error('The server answered with the code ' + response.status);
           }
           const result = await response.json();
-          formStatus.textContent = 'Enquiry received, reference number ' + result.id + '. We’ll be in touch.';
+          formStatus.textContent = 'Inquiry received, reference number ' + result.id + '. We’ll be in touch.';
           form.reset();
         } catch (error) {
           console.error(error);
-          formStatus.textContent = 'The enquiry wasn’t sent. Your details are still in the form: try again or give us a call.';
+          formStatus.textContent = 'The inquiry wasn’t sent. Your details are still in the form: try again or give us a call.';
         } finally {
           submit.disabled = false;
         }
@@ -959,7 +959,7 @@ header nav ul {
 				{ id: 'status-region', kind: 'exists', selector: '#offer p#status[role="status"], #offer p#status[aria-live]' },
 				{ id: 'retry-button', kind: 'exists', selector: 'button#retry[type="button"]' },
 				{ id: 'form-status', kind: 'exists', selector: '#request-form #form-status[role="status"], #request-form #form-status[aria-live]' },
-				{ id: 'form-works-without-js', kind: 'attr', selector: '#request-form', name: 'action', matches: '^/enquiry$' },
+				{ id: 'form-works-without-js', kind: 'attr', selector: '#request-form', name: 'action', matches: '^/inquiry$' },
 				{ id: 'fetch-code-exists', kind: 'exists', selector: 'script#fetch-code' },
 				{ id: 'is-module', kind: 'attr', selector: '#fetch-code', name: 'type', matches: '^module$' },
 				{ id: 'async-await', kind: 'text', selector: '#fetch-code', matches: '^(?=[\\s\\S]*\\basync\\b)(?=[\\s\\S]*\\bawait\\b)' },
@@ -1050,7 +1050,7 @@ header nav ul {
 			},
 			{
 				type: 'single',
-				prompt: 'A visitor pressed Send twice in quick succession, and two identical enquiries arrived. What should have been done?',
+				prompt: 'A visitor pressed Send twice in quick succession, and two identical inquiries arrived. What should have been done?',
 				options: [
 					'Disable the button while sending (disabled) and enable it after the answer',
 					'Simply take the button out of the form',
@@ -1059,8 +1059,8 @@ header nav ul {
 				answer: 0,
 				why: [
 					'Yes. While the request is under way the button is off, so there is no second press. And in the finally block it is turned on again, so that after a failure the visitor can retry.',
-					'No: without the button you can’t send an enquiry at all.',
-					'No: on a slow network a person doesn’t know whether the enquiry went through and presses again. That is expected behavior, and the page is what protects against it.'
+					'No: without the button you can’t send an inquiry at all.',
+					'No: on a slow network a person doesn’t know whether the inquiry went through and presses again. That is expected behavior, and the page is what protects against it.'
 				]
 			},
 			{
@@ -1118,14 +1118,14 @@ header nav ul {
 				'First paste the simulation block from the lesson before your own script (the fieldset with radio buttons and the script marked data-scaffold). Without it, fetch in the sandbox has nothing to answer it.',
 				'The markup: in #offer a paragraph with the id status and role status, and a hidden button with the id retry and type button, labeled Try again; the form gets the id request-form and, at its end, a paragraph with the id form-status and role status.',
 				'Loading: an async function loadItems with a try block that awaits fetch for /items.json, throws an error if response.ok is false, and awaits response.json(); then a catch block and a finally block.',
-				'For the form: a submit listener that is an async function. It calls event.preventDefault(), sets button.disabled to true, then in a try block awaits fetch for /enquiry with method POST and body new FormData(form), and a finally block sets button.disabled back to false.'
+				'For the form: a submit listener that is an async function. It calls event.preventDefault(), sets button.disabled to true, then in a try block awaits fetch for /inquiry with method POST and body new FormData(form), and a finally block sets button.disabled back to false.'
 			],
 			mistakes: {
 				'sim-present': 'I don’t see the server simulation block (the fieldset with the id net-sim and its radio buttons). Copy it from the lesson into the page.',
 				'status-region': 'The #offer section needs a paragraph with the id status and role status: screen readers will tell the visitor that the list is loading.',
 				'retry-button': 'You need a button with the id retry and type button, hidden to begin with.',
 				'form-status': 'The form needs a paragraph with the id form-status and role status, and the form itself must have the id request-form.',
-				'form-works-without-js': 'The form must keep its action set to /enquiry: without a script it is sent in the ordinary way.',
+				'form-works-without-js': 'The form must keep its action set to /inquiry: without a script it is sent in the ordinary way.',
 				'fetch-code-exists': 'I can’t find the fourth script: a script tag with type module and the id fetch-code.',
 				'is-module': 'The script needs the attribute type set to module.',
 				'async-await': 'The loading function must be async, and inside it must wait for the answer with await.',
@@ -1138,7 +1138,7 @@ header nav ul {
 				'no-inner-html': 'Remove innerHTML and the like: data from a server is someone else’s text too, so write it with textContent.',
 				'retry-wired': 'The Try again button needs a handler: retry.addEventListener with click and loadItems.',
 				'prevents-default': 'The form’s submit handler needs event.preventDefault().',
-				'post-form': 'An enquiry is sent with the POST method: fetch with an options object that has method set to POST.',
+				'post-form': 'An inquiry is sent with the POST method: fetch with an options object that has method set to POST.',
 				'form-data': 'Take the request body from the form: body set to new FormData(form).',
 				'no-double-submit': 'The button must be blocked while sending (button.disabled = true) and turned on again after the answer (disabled = false, best in finally).'
 			},
@@ -1170,7 +1170,7 @@ header nav ul {
 
 ## Data that doesn’t arrive at once
 
-So far the script has worked with what is already on the page. But a real site often takes data from a server: a list of events, free appointment times, the status of an order. And it sends data there: an enquiry, a review, a search. This always takes time: the request travels over the network, the server thinks, the answer travels back. A second, three, sometimes it never arrives.
+So far the script has worked with what is already on the page. But a real site often takes data from a server: a list of events, free appointment times, the status of an order. And it sends data there: an inquiry, a review, a search. This always takes time: the request travels over the network, the server thinks, the answer travels back. A second, three, sometimes it never arrives.
 
 If the script just stood still while it waited, the page would freeze: no scrolling, no clicks. To prevent that, everything connected with waiting is made **asynchronous** in JavaScript. JavaScript runs in a single thread, which means it does one thing at a time. But it hands the waiting for an answer to the browser (“send it when it comes”), gets on with everything else, and when the answer is ready the browser puts its handling in a queue, and the script reaches it in its turn. This queue is called the **event loop**, and it is why the handlers from the last lesson are called “sometime”, not at once.
 
@@ -1210,7 +1210,7 @@ The browser does the waiting, not the script. The script gets a promise and carr
 **`fetch(address)`** sends an HTTP request (the very one you studied in the lesson on HTTP) and returns a promise of the response. The default method is `GET`. To send data, you add options:
 
 ```js
-const response = await fetch('/enquiry', {
+const response = await fetch('/inquiry', {
   method: 'POST',
   body: new FormData(form)    // the form's data, as the browser would have sent it
 });
@@ -1265,7 +1265,7 @@ What the visitor sees matters more than what the console sees. They need three s
 - **success**: the data;
 - **error**: not “TypeError: Failed to fetch” but “Couldn’t refresh the list, showing the saved one. Check your connection and try again”, with a “Try again” button beside it.
 
-Technical details stay in `console.error(error)`. The submit button is switched off (`disabled`) during the request, or an impatient visitor will press twice and you’ll get two identical enquiries.
+Technical details stay in `console.error(error)`. The submit button is switched off (`disabled`) during the request, or an impatient visitor will press twice and you’ll get two identical inquiries.
 
 ## Practice
 
@@ -1305,13 +1305,13 @@ Paste the whole block at the end of `body`, before your own scripts:
       if (path === '/items.json') {
         return reply([...snapshot, { title: 'A new item from the server', text: 'It isn’t in the markup: it came from items.json.', price: '' }]);
       }
-      if (path === '/enquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
+      if (path === '/inquiry' && options.method === 'POST') return reply({ id: 17 }, 201);
       return reply({ error: 'Not found' }, 404);
     };
   </script>
 ```
 
-The rest is your part. The list of cards in the markup stays (without a script it must be visible), and when the page opens the script will ask the server for a fresh list and replace the cards with it. The simulation adds one item to the list, “A new item from the server”, so that you can see the data really came from there. The enquiry form is sent without a reload. And play with the connection switch: on “connection lost” and “500” the earlier list must stay in place, with a clear message and a “Try again” button.
+The rest is your part. The list of cards in the markup stays (without a script it must be visible), and when the page opens the script will ask the server for a fresh list and replace the cards with it. The simulation adds one item to the list, “A new item from the server”, so that you can see the data really came from there. The inquiry form is sent without a reload. And play with the connection switch: on “connection lost” and “500” the earlier list must stay in place, with a clear message and a “Try again” button.
 
 If you download the site, put a file called `items.json` beside it (the sample is above). Until it is there, the page will honestly show the cards saved in the markup and an error message.
 

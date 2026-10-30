@@ -73,7 +73,7 @@
 				name: 'Full name *',
 				phone: 'Phone *',
 				button: 'Submit',
-				consent: 'By clicking this button you agree to the privacy policy',
+				consent: 'By clicking this button you agree to the privacy notice',
 				error: 'Error 422: invalid value for field phone',
 				sent: 'Form submitted'
 			} as Words,
@@ -101,7 +101,7 @@
 					name: 'The label is a question that’s easy to answer. It stands above the field and stays visible while the person types.',
 					phone: 'The format is shown at once. Below (in the hint) you should explain why the phone number is wanted: “We’ll call to give you a time”.',
 					button: 'The button names the very action chosen in the brief. It reads as the end of the sentence “I want to…”.',
-					consent: 'The consent is a separate tick box (unticked by default), and it says which data and why. The full text is in the notice.',
+					consent: 'The consent is a separate checkbox (unchecked by default), and it says which data and why. The full text is in the notice.',
 					error: 'It says what’s wrong (“missing some digits”), what to do (“write the whole number”) and shows an example. No blame and no code.',
 					sent: 'The request is received (so it arrived), a time is given (today before 6 p.m.) and so is a fallback if they can’t reach the person.'
 				}

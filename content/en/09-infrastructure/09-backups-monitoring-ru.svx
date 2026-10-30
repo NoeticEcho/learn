@@ -59,7 +59,7 @@
 					mfast: 'within an hour during working hours; if the site is down for more than a day, I write to the visitors',
 					rwhere: 'in a database in a data center in the EU, because most of the visitors are in Europe and the US, and the form service states where it keeps the data',
 					rprov: 'a cloud provider with a data center in Frankfurt and a data processing agreement (for example Hetzner or AWS)',
-					rwhy: 'the form takes names and phone numbers, which is personal data under the GDPR, so I keep the first copy in a region I can name, I have a processing agreement with the provider, and the privacy policy says where the data goes.'
+					rwhy: 'the form takes names and phone numbers, which is personal data under the GDPR, so I keep the first copy in a region I can name, I have a processing agreement with the provider, and the privacy notice says where the data goes.'
 				})
 			}),
 			checks: [
@@ -243,13 +243,13 @@
 
 Everything you built in this part will break one day: a disk will die, the domain’s payment will lapse, someone will delete a folder by accident, the host will be unavailable for a day. That isn’t pessimism but statistics. So the last lesson of the part is about three questions asked in advance, while everything works.
 
-1. **What comes back if the data is lost?** That is the copies.
+1. **What comes back if the data is lost?** That’s the copies.
 2. **Will I find out about an outage before the visitors do?** That is monitoring.
-3. **Where does other people’s data lie, and may it lie there?** That is the law on personal data.
+3. **Where does other people’s data lie, and may it lie there?** That’s the law on personal data.
 
 ## Backups
 
-A copy is not a file next to the original. It exists for the case when the original is gone, and only what survived the outage was a copy.
+A copy isn’t a file next to the original. It exists for the case when the original is gone, and only what survived the outage was a copy.
 
 **The 3-2-1 rule.** Three copies of the data (the original and two backups), on two different media or in two different places, and one of the copies off the main site. Then you survive a broken disk, a fire or a break-in in one place, and your own mistake. A copy on the same disk as the original doesn’t count: both die with the disk.
 
@@ -257,7 +257,7 @@ A copy is not a file next to the original. It exists for the case when the origi
 
 **What to copy.** The files of a static site are in the repository, and a repository, especially with a copy under another owner, is itself a copy of the code. But it doesn’t hold what changes without you: the database of requests, the CMS content, files visitors uploaded, the receiver’s settings. A database is copied by a dump (PostgreSQL has the `pg_dump` command for it) or a disk snapshot, and files by ordinary copying.
 
-**Versions, not a mirror.** Syncing a folder with the cloud is not a copy: a mistake and ransomware are copied too. You need **earlier versions**: say, seven daily, four weekly and six monthly. Then you can go back to the day when everything was whole. Copies are best encrypted and kept so that an attacker who got to the server can’t delete them.
+**Versions, not a mirror.** Syncing a folder with the cloud isn’t a copy: a mistake and ransomware are copied too. You need **earlier versions**: say, seven daily, four weekly and six monthly. Then you can go back to the day when everything was whole. Copies are best encrypted and kept so that an attacker who got to the server can’t delete them.
 
 **And the main thing: test the restore.** A copy that has never been unpacked is guaranteed by nothing: it may be empty, broken, or missing the right settings. At least once and then regularly (say, every quarter), unpack a copy in an empty place and make sure the site and the data are there. Write the date in the passport.
 
@@ -290,7 +290,7 @@ A useful scale. “99.9% availability” sounds like “almost always”, but it
 <details>
 <summary>Check yourself: the home page opens, but the form doesn’t send. Will monitoring that checks only the home page notice?</summary>
 
-No. That is why a second check of the project’s main action is needed.
+No. That’s why a second check of the project’s main action is needed.
 
 </details>
 
@@ -298,26 +298,26 @@ No. That is why a second check of the project’s main action is needed.
 
 This section is general information, not legal advice. For a real project, ask an attorney, or the authority that supervises data protection where you live: your country’s data protection authority in the EU, the Information Commissioner’s Office (ICO) in the UK, and in the US the Federal Trade Commission or your state’s attorney general.
 
-You know the basic idea from the [lesson on privacy by design](../../07-data/07-privacy-by-design/): privacy law follows the people the data is about. The GDPR applies to a site anywhere in the world if it offers goods or services to people in the EU, or tracks their behavior (Article 3(2)), and the lesson on the GDPR covers the details of an operator’s duties. Here is the question for infrastructure: where will the data physically end up, and with whom?
+You know the basic idea from the [lesson on privacy by design](../../07-data/07-privacy-by-design/): privacy law follows the people the data is about. The GDPR applies to a site anywhere in the world if it offers goods or services to people in the EU, or tracks their behavior (Article 3(2)), and [the lesson on personal data law](../../15-quality/07-152fz/) covers the details of an operator’s duties. Here is the question for infrastructure: where will the data physically end up, and with whom?
 
-**The rules for sending data abroad.** The GDPR does not say that data must stay in the EU. It says that **the protection must travel with it**. Chapter V (Articles 44 to 50) lets personal data go to a country outside the EU in three main ways:
+**The rules for sending data abroad.** The GDPR doesn’t say that data must stay in the EU. It says that **the protection must travel with it**. Chapter V (Articles 44 to 50) lets personal data go to a country outside the EU in three main ways:
 
 - **An adequacy decision** (Article 45): the European Commission has found that the country’s protection is essentially equivalent. In October 2026 the Commission’s list includes, among others, the United Kingdom, Switzerland, Japan, Canada (commercial organizations), Korea, Brazil, and the United States for organizations that joined the EU-US Data Privacy Framework (a decision of 10 July 2023). That decision survived a challenge in the EU General Court in September 2025, and an appeal is pending, so such a framework can change. Check the Commission’s page for the current list.
 - **Safeguards** (Article 46): above all **standard contractual clauses**, a contract in a form the Commission has approved, that you and your provider sign. They usually come with a data processing agreement, which the major providers offer.
 - **Narrow exceptions** (Article 49), such as a person’s explicit consent to a particular transfer. They are meant for occasional cases, not for the everyday flow of a site’s data.
 
-The UK has the same structure under the UK GDPR, with its own tools (an international data transfer agreement and an addendum to the EU clauses). In the US there is no single federal privacy law, and a state law such as California’s CCPA regulates what a business does with personal data rather than which country the server stands in.
+The UK has the same structure under the UK GDPR, with its own tools (an international data transfer agreement and an addendum to the EU clauses). In the US there’s no single federal privacy law, and a state law such as California’s CCPA regulates what a business does with personal data rather than which country the server stands in.
 
-**The strict case, for comparison.** Russia does something different and harder: under Article 18 of its law 152-FZ, the first recording, storing and retrieving of Russian citizens’ personal data must be done in databases located in Russia. Transfers abroad afterward follow separate rules. It is a localization rule, a requirement about where, while the GDPR’s is a requirement about protection. The two show the range of what a project may meet: if your visitors are in Russia, ask a Russian attorney before choosing a platform.
+**The strict case, for comparison.** Russia does something different and harder: under Article 18 of its law 152-FZ, the first recording, storing and retrieving of Russian citizens’ personal data must be done in databases located in Russia. Transfers abroad afterward follow separate rules. It’s a localization rule, a requirement about where, while the GDPR’s is a requirement about protection. The two show the range of what a project may meet: if your visitors are in Russia, ask a Russian attorney before choosing a platform.
 
 **What follows for your site.**
 
 - A static site stores no visitor data by itself. The question starts where a form, a mailing list, a CRM, analytics or a chat sends it: find out where those services keep the data and who their sub-processors are.
 - **Backups are data too.** A copy of a database with names and phone numbers in a cloud bucket in another region is a transfer. Put the copies in a region you have thought about.
-- Choose the **region** of your database and your functions on purpose, and write it in the passport. Many providers let you pin data to a region.
-- The data has to be described in a privacy policy, and a form needs consent where the law asks for it ([the lesson on the policy and consent](../../15-quality/08-policy-consent/)).
+- Choose the **region** of your database and your functions on purpose ([the serverless lesson](../04-cdn-edge/) shows where functions run), and write it in the passport. Many providers let you pin data to a region.
+- The data has to be described in a privacy notice, and a form needs consent where the law asks for it ([the lesson on the policy and consent](../../15-quality/08-policy-consent/)).
 
-**How to choose a provider for data.** Ask: which legal entity is the provider, where exactly is the data center (a city or a region, not just “in the cloud”), do they sign a data processing agreement and standard clauses, where do the backups lie, who are the sub-processors, and can you take your data and leave. For a small site, clear terms matter more than loud certificates. For big systems there are further requirements for securing the systems that hold personal data: that is a specialist’s question.
+**How to choose a provider for data.** Ask: which legal entity is the provider, where exactly is the data center (a city or a region, not just “in the cloud”), do they sign a data processing agreement and standard clauses, where do the backups lie, who are the sub-processors, and can you take your data and leave. For a small site, clear terms matter more than loud certificates. For big systems there are further requirements for securing the systems that hold personal data: that’s a specialist’s question.
 
 <details>
 <summary>Check yourself: a form on a static site sends a name and a phone number to a form service in another country. What is the risk?</summary>
@@ -328,7 +328,7 @@ The data leaves the place whose law applies to it. If the people are in the EU, 
 
 ## Practice
 
-Fill in the operations passport. In the first part say what is copied, how often, how long it is kept, where it lies (at least two places, one off the server) and when you will test the restore. In the second say what monitoring watches (the home page and the project’s action, naming it in the words of the brief), who gets the alert and how fast it has to be answered. In the third say where the personal data from the form is kept and with which provider, and explain the choice.
+Fill in the operations passport. In the first part say what is copied, how often, how long it’s kept, where it lies (at least two places, one off the server) and when you’ll test the restore. In the second say what monitoring watches (the home page and the project’s action, naming it in the words of the brief), who gets the alert and how fast it has to be answered. In the third say where the personal data from the form is kept and with which provider, and explain the choice.
 
 The check reads the text and doesn’t prove that copies and monitoring are set up. The real check is yours: write the date of the first restore in the passport and come back to it.
 

@@ -185,7 +185,7 @@
 
 Computers find each other by IP address, while people remember names. We need a “phone book” that, given the name `example.com`, gives the address `203.0.113.10`. That book is called **DNS** (Domain Name System).
 
-At first such a book was one file: a list of “name, address” pairs, sent to everyone. By the early 1980s the network had grown so much that the file couldn’t be updated in time, and in 1983 DNS was invented. It is not one huge book but a **distributed** one: no single server knows everything, each knows a piece and can point to whom to go to next.
+At first such a book was one file: a list of “name, address” pairs, sent to everyone. By the early 1980s the network had grown so much that the file couldn’t be updated in time, and in 1983 DNS was invented. It’s not one huge book but a **distributed** one: no single server knows everything, each knows a piece and can point to whom to go to next.
 
 ## The path of one query
 
@@ -196,14 +196,14 @@ When you type `www.example.com`, this is what happens. Move through the diagram 
 Here are the parties, in order.
 
 1. **The browser and the system.** They first look in their own memory: perhaps the address is already known. If not, the system asks a resolver.
-2. **The resolver.** This is an intermediary that walks through DNS for you. It is usually your provider’s server, but you can also use public ones: Google (`8.8.8.8`), Cloudflare (`1.1.1.1`), Quad9 (`9.9.9.9`). A resolver can ask and remember.
+2. **The resolver.** This is an intermediary that walks through DNS for you. It’s usually your provider’s server, but you can also use public ones: Google (`8.8.8.8`), Cloudflare (`1.1.1.1`), Quad9 (`9.9.9.9`). A resolver can ask and remember.
 3. **The root servers.** This is the very top of the tree. They don’t know the address of your site, but they know **who is responsible for each zone**: `.com`, `.org`, `.uk`. There are thirteen root “names” (from `a` to `m`), run by twelve organizations, and behind each name stand hundreds of servers around the world.
 4. **The zone’s servers** (TLD). The `.com` zone’s server doesn’t know the site’s address either, but it knows **which servers are responsible for the domain** `example.com`.
-5. **The authoritative server** of the domain. It sits with your hosting provider or registrar and holds the domain’s **real records**. It is the one that gives the address.
+5. **The authoritative server** of the domain. It sits with your hosting provider or registrar and holds the domain’s **real records**. It’s the one that gives the address.
 
-Notice that each step only points to whom to ask next. This technique is called delegation, and it is why DNS works across the whole planet.
+Notice that each step only points to whom to ask next. This technique is called delegation, and it’s why DNS works across the whole planet.
 
-The resolver keeps the answer and gives it to everyone who later asks the same thing. That is why the root servers are asked relatively rarely: caches do most of the work.
+The resolver keeps the answer and gives it to everyone who later asks the same thing. That’s why the root servers are asked relatively rarely: caches do most of the work.
 
 <details>
 <summary>Check yourself: does a root server know the address of your site?</summary>
@@ -220,10 +220,10 @@ Records are the lines in a domain’s “book”. Each has a type, a name, a val
 - **AAAA**: the same for an IPv6 address.
 - **CNAME**: an alias. A CNAME record named `www` with the value `example.com` says: “ask about `www` as you would about `example.com`”. Such a record can’t be put on the bare domain itself (that is called the root of the domain, and is written with the sign `@`).
 - **MX**: the mail server. When someone writes to `name@example.com`, the sender asks DNS where to deliver the message. An MX has a number, its priority: the smaller it is, the earlier the server is tried.
-- **TXT**: free text. It is used to prove ownership of a domain (“put this code in a TXT record”), and also to publish rules for checking email, so that messages don’t land in spam.
+- **TXT**: free text. It’s used to prove ownership of a domain (“put this code in a TXT record”), and also to publish rules for checking email, so that messages don’t land in spam.
 - **NS**: which servers are responsible for the domain.
 
-Why this matters: a site and email have **different records**. The site can live with one company and the email with another. It is exactly this separation that you’ll set out in the practice.
+Why this matters: a site and email have **different records**. The site can live with one company and the email with another. It’s exactly this separation that you’ll set out in the practice.
 
 <details>
 <summary>Check yourself: which record decides where the email goes?</summary>
@@ -241,7 +241,7 @@ This is a trade-off.
 - **A long TTL**: fewer queries, and the address is found faster. But a change to the record takes a long time to reach everyone.
 - **A short TTL**: changes take effect quickly. But resolvers have to ask again more often.
 
-Now it is clear why, after a site’s address changes, some people get the new one and others “can’t open it” or get the old one. Nobody broadcasts news of the change. Each resolver simply keeps the old answer until its time runs out. This is called “DNS propagation”, though in fact caches are just expiring. That is why, before a site is moved, the TTL is lowered in advance (by at least the old TTL), the move is made, and then the value is put back.
+Now it’s clear why, after a site’s address changes, some people get the new one and others “can’t open it” or get the old one. Nobody broadcasts news of the change. Each resolver simply keeps the old answer until its time runs out. This is called “DNS propagation”, though in fact caches are just expiring. That’s why, before a site is moved, the TTL is lowered in advance (by at least the old TTL), the move is made, and then the value is put back.
 
 <details>
 <summary>Check yourself: when does it make sense to lower a TTL?</summary>
@@ -258,15 +258,15 @@ Every system has a command that asks DNS. In a Windows, macOS or Linux terminal:
 nslookup example.com
 ```
 
-The answer shows the address the resolver returned. There is also a more detailed command, `dig example.com` (not on Windows by default), which shows the records, their TTLs and the server that answered. And there are online services that ask DNS from different places around the world.
+The answer shows the address the resolver returned. There’s also a more detailed command, `dig example.com` (not on Windows by default), which shows the records, their TTLs and the server that answered. And there are online services that ask DNS from different places around the world.
 
-An important caveat: an ordinary DNS query is not encrypted, and your provider sees which names you ask for. Encrypted variants exist, DNS over HTTPS and over TLS, which browsers and systems are gradually turning on.
+An important caveat: an ordinary DNS query isn’t encrypted, and your provider sees which names you ask for. Encrypted variants exist, DNS over HTTPS and over TLS, which browsers and systems are gradually turning on.
 
 ## Practice
 
-You are in the era of 2010. The site and the email have become separate services, and each needs a record. Complete the table of your domain’s records: next to the A record for the site, add a CNAME for `www`, an MX for email and a TXT to prove ownership. For each, write the TTL in seconds, and explain in one sentence when it is worth lowering.
+You’re in the era of 2010. The site and the email have become separate services, and each needs a record. Complete the table of your domain’s records: next to the A record for the site, add a CNAME for `www`, an MX for email and a TXT to prove ownership. For each, write the TTL in seconds, and explain in one sentence when it’s worth lowering.
 
-Your project’s email address is filled in on the page: it is exactly its messages that the MX record must receive. If your email is with someone else’s service (for example a free mailbox), the MX record is still worth knowing about: for email on your own domain, it is required.
+Your project’s email address is filled in on the page: it’s exactly its messages that the MX record must receive. If your email is with someone else’s service (for example a free mailbox), the MX record is still worth knowing about: for email on your own domain, it’s required.
 
 ## What was wrong with 2010
 

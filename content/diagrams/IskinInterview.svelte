@@ -81,7 +81,7 @@
 			book: ['A booking form with a choice of time', 'A calendar that won’t let a taken slot be booked', 'An email to you about a new booking and a confirmation email to the visitor'],
 			buy: ['A catalog of your offers', 'Ordering and payment through a ready-made payment service (Iskin doesn’t take money itself)', 'A notice to you about every order'],
 			call: ['A call button with your number', 'A “call me back” form as a fallback'],
-			form: ['A request form with a link to the privacy policy and, where consent is the basis, a consent box', 'A receiver of requests in a database in a region you chose', 'A notice to you of a new request'],
+			form: ['A request form with a link to the privacy notice and, where consent is the basis, a consent box', 'A receiver of requests in a database in a region you chose', 'A notice to you of a new request'],
 			bookRe: /book|appointment|consult|meeting|schedule|reserve|table/,
 			buyRe: /buy|order|pay|cart|ticket/,
 			callRe: /call|phone/,
@@ -109,7 +109,7 @@
 			qo: '“',
 			qc: '”',
 			leaves: 'What Iskin leaves to you',
-			leave: ['Every claim and number: it takes them only from your answers and proof.', 'The privacy policy and consent: you agree the text with an attorney.', 'Money: you connect payment, through a ready-made service.', 'Publishing: you make the decision to “go live” after the check.'],
+			leave: ['Every claim and number: it takes them only from your answers and proof.', 'The privacy notice and consent: you agree the text with an attorney.', 'Money: you connect payment, through a ready-made service.', 'Publishing: you make the decision to “go live” after the check.'],
 			again: 'Go through it again'
 		}
 	});

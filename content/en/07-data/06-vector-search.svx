@@ -72,7 +72,7 @@
     <main id="main">
       <h1>{{name}}<\/h1>
       <p>{{who}}<\/p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}<\/a><\/p>
 
       <section id="sec-1">
         <h2>{{sections.0}}<\/h2>
@@ -101,9 +101,9 @@
         <\/div>
       <\/section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}<\/h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?<\/label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -351,7 +351,7 @@ input {
     <main id="main">
       <h1>{{name}}<\/h1>
       <p>{{who}}<\/p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}<\/a><\/p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}<\/a><\/p>
 
       <section id="sec-1">
         <h2>{{sections.0}}<\/h2>
@@ -380,9 +380,9 @@ input {
         <\/div>
       <\/section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}<\/h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?<\/label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -824,7 +824,7 @@ input {
 
 ## Search is not LIKE
 
-Say a site has a search box. The simplest idea that comes to mind is `WHERE title LIKE '%boundary%'`. That looks for a substring **letter for letter**. It finds “boundary lines” but not “boundaries”, because the ending is different. It treats “Boundary” and “boundary” as different words unless you switch to `ILIKE`. It cannot tell a page about the topic from one that mentions it in passing, it orders nothing by importance, and on a big table it is slow: an ordinary index does not help when the pattern starts with `%`. Searching text calls for a device of its own.
+Say a site has a search box. The simplest idea that comes to mind is `WHERE title LIKE '%boundary%'`. That looks for a substring **letter for letter**. It finds “boundary lines” but not “boundaries”, because the ending is different. It treats “Boundary” and “boundary” as different words unless you switch to `ILIKE`. It can’t tell a page about the topic from one that mentions it in passing, it orders nothing by importance, and on a big table it’s slow: an ordinary index doesn’t help when the pattern starts with `%`. Searching text calls for a device of its own.
 
 ## Searching by words: how it works
 
@@ -834,9 +834,9 @@ Say a site has a search box. The simplest idea that comes to mind is `WHERE titl
 2. **Normalization.** Everything is put in one case, and function words are dropped: “the”, “of”, “and”, “for”, “how”. They are everywhere and tell texts apart from nothing.
 3. **Stems.** Words are reduced to a stem: “survey”, “surveys”, “surveyed” and “surveying” all become “survey”. This is called stemming, or lemmatization (a lemma is the dictionary form). In Russian this matters far more than in English, because a Russian word has dozens of endings, but even English has plurals, tenses and “boundary” against “boundaries”.
 4. **The index.** A table is built: “stem → the texts it appears in”. This is an **inverted index**.
-5. **Ranking.** The results are put in order. The idea: a word counts for more if it is frequent in this text and rare in the whole collection (this is what TF-IDF and its improvement BM25 compute), and a match in the title weighs more than one in the body.
+5. **Ranking.** The results are put in order. The idea: a word counts for more if it’s frequent in this text and rare in the whole collection (this is what TF-IDF and its improvement BM25 compute), and a match in the title weighs more than one in the body.
 
-Play with the diagram. On the “By words” tab the search runs over your own services. Press “Another form of the word”, then switch off “Match word forms”: that is what LIKE would do.
+Play with the diagram. On the “By words” tab the search runs over your own services. Press “Another form of the word”, then switch off “Match word forms”: that’s what LIKE would do.
 
 <SearchModes />
 
@@ -853,22 +853,22 @@ CREATE INDEX items_fts_idx ON items
   USING GIN (to_tsvector('english', title || ' ' || text));
 ```
 
-The word `'english'` picks the English configuration: its stemming rules and its list of function words. Name the configuration explicitly, because with the wrong one the words are not reduced to the stems you expect.
+The word `'english'` picks the English configuration: its stemming rules and its list of function words. Name the configuration explicitly, because with the wrong one the words aren’t reduced to the stems you expect.
 
-The built-in search has limits: it does not correct typos and it does not suggest as you type. When that matters, people reach for a **separate search engine**. Meilisearch and Typesense are easy to install and handle typos and “instant” search. Elasticsearch and OpenSearch are for when the data is huge, the filters and tuning are complex, and there is somebody to run it. The price is the same as for any new database: one more server, one more copy of the data that has to be kept in step with the main one (remember the deliberate copy from lesson 3).
+The built-in search has limits: it doesn’t correct typos and it doesn’t suggest as you type. When that matters, people reach for a **separate search engine**. Meilisearch and Typesense are easy to install and handle typos and “instant” search. Elasticsearch and OpenSearch are for when the data is huge, the filters and tuning are complex, and there’s somebody to run it. The price is the same as for any new database: one more server, one more copy of the data that has to be kept in step with the main one (remember the deliberate copy from lesson 3).
 
 <details>
 <summary>Check yourself: why are function words dropped before searching?</summary>
 
-They appear in almost every text, so they do not help tell one text from another, and they would make the index swell.
+They appear in almost every text, so they don’t help tell one text from another, and they would make the index swell.
 
 </details>
 
 ## Searching by meaning
 
-Now a question that words cannot answer. A visitor types “how much does it cost”, and the page is called “Prices and billing”. They have no words in common, but the meaning is the same.
+Now a question that words can’t answer. A visitor types “how much does it cost”, and the page is called “Prices and billing”. They have no words in common, but the meaning is the same.
 
-**Embeddings** were invented for this. A special model turns a text into a list of hundreds or thousands of numbers: “coordinates of meaning”. Texts close in meaning get close coordinates, like cities on a map. To answer a question, it is turned into coordinates too, and the **nearest neighbors** are taken: the texts that lie next to it. That is how it finds things even when the words are different.
+**Embeddings** were invented for this. A special model turns a text into a list of hundreds or thousands of numbers: “coordinates of meaning”. Texts close in meaning get close coordinates, like cities on a map. To answer a question, it’s turned into coordinates too, and the **nearest neighbors** are taken: the texts that lie next to it. That’s how it finds things even when the words are different.
 
 Switch to the “By meaning” tab. There the map is drawn by hand, with just two axes instead of hundreds, and it shows the idea: a question about price lands next to “Prices and billing” and “Payment methods”, and a question about getting money back lands next to “Refund policy”. Below it you can see what a word search would have found: often nothing.
 
@@ -876,8 +876,8 @@ Storing these numbers and finding the nearest among them is the job of **vector 
 
 What search by meaning does badly:
 
-- **Exact identifiers.** An order number, a SKU or the number of a statute is not meaning. Vector search returns “similar” ones, and you need that exact one. That is why the two methods are often combined in **hybrid search**.
-- **Explainability.** It is hard to say why exactly this result came up: similarity is a number.
+- **Exact identifiers.** An order number, a SKU or the number of a statute isn’t meaning. Vector search returns “similar” ones, and you need that exact one. That’s why the two methods are often combined in **hybrid search**.
+- **Explainability.** It’s hard to say why exactly this result came up: similarity is a number.
 - **Model errors.** It may count as close two texts that are opposites (“refunds are allowed” and “refunds are not allowed”).
 
 ## RAG: how AI answers from your texts
@@ -888,21 +888,21 @@ The same embeddings stand behind most chatbots that answer “from a company’s
 2. A question comes in. Its embedding is compared with the pieces, and the few nearest are taken.
 3. The model is given the question and the pieces found: “answer using only this”.
 
-The model is not retrained, it is only shown the right pages. So an answer can be checked against its source, and for the bot to know something new, it is enough to update the texts.
+The model isn’t retrained, it’s only shown the right pages. So an answer can be checked against its source, and for the bot to know something new, it’s enough to update the texts.
 
 ## Whose texts leave, and where do they go
 
 A practical question that is often forgotten. Many people compute embeddings on **someone else’s service**: the texts go over the network to an outside provider. If those texts contain **personal data** (names, phone numbers, details of requests), then sending them is already processing personal data by a third party, with the requirements of privacy law (the next lesson is about that). What to do:
 
-- Do not send more than necessary: the pages of services and the answers to frequent questions usually hold no personal data.
+- Don’t send more than necessary: the pages of services and the answers to frequent questions usually hold no personal data.
 - Find out where the provider processes and stores the texts, and on what terms. Under GDPR a provider that handles personal data on your behalf is your **processor**, and you need a written contract with it. In the US the state privacy laws ask for similar contracts with “service providers” or “processors”.
-- If you do need to send personal data, make sure there is a legal basis (consent is one), or compute the embeddings **yourself**, on your own server, with an open model.
+- If you do need to send personal data, make sure there’s a legal basis (consent is one), or compute the embeddings **yourself**, on your own server, with an open model.
 
-The decision here is not the developer’s. It belongs to the site’s owner, together with an attorney. But the person who builds the search is the one who has to ask: “What exactly are we sending?”
+The decision here isn’t the developer’s. It belongs to the site’s owner, together with an attorney. But the person who builds the search is the one who has to ask: “What exactly are we sending?”
 
 ## Practice
 
-You are in the era of 2022: sites now have a search box that understands word forms. Add one to your project.
+You’re in the era of 2022: sites now have a search box that understands word forms. Add one to your project.
 
 The page has a demo that searches your services. Write down three forms of one word and their stem, write a PostgreSQL query with the English configuration, ranking and an index, and then answer briefly: when word search is enough for you, and when you would need meaning. The real PostgreSQL in a browser is on the PGlite site; here the text of the query is what gets checked.
 

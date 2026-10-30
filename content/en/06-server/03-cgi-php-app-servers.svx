@@ -47,7 +47,7 @@
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -76,9 +76,9 @@
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -238,7 +238,7 @@ input {
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -267,9 +267,9 @@ input {
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -625,17 +625,17 @@ In 1995 Rasmus Lerdorf, a Danish-Canadian programmer, wrote a set of small progr
 
 The server runs the insertions and sends the finished page. For a beginner it was paradise: you write a page as usual and, where you need to, you put in some code. PHP quickly became the language of “sites built from a database”, and its hosting cost pennies and was available at every provider. WordPress, Drupal and Joomla are built on it, and so are 1C-Bitrix in Russia and Magento for shops, which means an enormous share of the sites in the world.
 
-PHP’s model is very simple: **every request starts on a clean sheet.** The script runs from start to finish, the page is sent, and all the variables are forgotten. The next request knows nothing about the previous one. It is a limitation, but also a protection: there is nothing to pile up, mistakes don’t accumulate in memory, and one request can’t spoil another. Whatever has to be remembered between requests (who is logged in, what is in the basket) is kept outside: in the database, in a session file, in a cache.
+PHP’s model is very simple: **every request starts on a clean sheet.** The script runs from start to finish, the page is sent, and all the variables are forgotten. The next request knows nothing about the previous one. It’s a limitation, but also a protection: there’s nothing to pile up, mistakes don’t accumulate in memory, and one request can’t spoil another. Whatever has to be remembered between requests (who is logged in, what is in the cart) is kept outside: in the database, in a session file, in a cache.
 
-To avoid starting PHP afresh for every request, as CGI did, **FastCGI** was invented, and for PHP its implementation is **PHP-FPM** (the FastCGI Process Manager). It is a pool of ready processes: nginx hands the request to a free one, which runs the script, sends the answer, forgets the variables and waits for the next. The interpreter no longer has to be started, and the “clean sheet” stays.
+To avoid starting PHP afresh for every request, as CGI did, **FastCGI** was invented, and for PHP its implementation is **PHP-FPM** (the FastCGI Process Manager). It’s a pool of ready processes: nginx hands the request to a free one, which runs the script, sends the answer, forgets the variables and waits for the next. The interpreter no longer has to be started, and the “clean sheet” stays.
 
 ## Application servers: a program that doesn’t die
 
 For many tasks the clean sheet gets in the way. A chat holds an open connection with every visitor and has to send messages to all of them at once. An online game remembers where the players are. A dashboard with live graphs follows a stream of events. These need a program that **runs all the time**, keeps shared state in memory and takes requests itself.
 
-That is how **application servers** are built: Node.js, which runs JavaScript (since 2009), Python applications behind the WSGI and ASGI interfaces (Django stands on them), Java and C#, Go, Elixir with the Phoenix framework, Ruby on Rails. The application is started once and takes requests by the thousand, and in front of it stands the nginx you already know, as a reverse proxy.
+That’s how **application servers** are built: Node.js, which runs JavaScript (since 2009), Python applications behind the WSGI and ASGI interfaces (Django stands on them), Java and C#, Go, Elixir with the Phoenix framework, Ruby on Rails. The application is started once and takes requests by the thousand, and in front of it stands the nginx you already know, as a reverse proxy.
 
-The price of a living program is a set of cares that PHP doesn’t have: memory leaks (forgotten state piles up), the need to restart the application carefully when it is updated, and race conditions (when two requests change the same data at once). That is why, for ordinary sites “with a form and a database”, PHP’s model is still reasonable, and an application server is chosen when permanent connections or heavy processing are needed.
+The price of a living program is a set of cares that PHP doesn’t have: memory leaks (forgotten state piles up), the need to restart the application carefully when it’s updated, and race conditions (when two requests change the same data at once). That’s why, for ordinary sites “with a form and a database”, PHP’s model is still reasonable, and an application server is chosen when permanent connections or heavy processing are needed.
 
 Look at the three designs side by side. Send a few requests and watch the counter:
 
@@ -644,7 +644,7 @@ Look at the three designs side by side. Send a few requests and watch the counte
 <details>
 <summary>Check yourself: why does the counter in PHP start from zero on every request?</summary>
 
-The script runs afresh for each request, and its variables don’t survive its end. To remember something between requests, it is written to the database, a session or a cache.
+The script runs afresh for each request, and its variables don’t survive its end. To remember something between requests, it’s written to the database, a session or a cache.
 
 </details>
 
@@ -652,11 +652,11 @@ The script runs afresh for each request, and its variables don’t survive its e
 
 A language is rarely chosen on its merits. In the 2000s cheap hosting came with PHP, so WordPress appeared, so thousands of specialists and plugins appeared, so it pays to write the next site in PHP. This chain is called the ecosystem effect, and a statement like “Python is better” can’t undo it.
 
-The opposite is true too: a language with a living application is chosen when the task needs it. That is the subject of the next lesson.
+The opposite is true too: a language with a living application is chosen when the task needs it. That’s the subject of the next lesson.
 
 ## Practice
 
-You are on a site from 2010, in the age of content management systems. Take the page of a section of your project and describe, step by step, what happens to a request for it: who accepts it, who builds the page, where the data comes from and how the response goes back.
+You’re on a site from 2010, in the age of content management systems. Take the page of a section of your project and describe, step by step, what happens to a request for it: who accepts it, who builds the page, where the data comes from and how the response goes back.
 
 Then answer three questions. Which model do you choose (a process per request or a living application), and why. Where would you put a cache, and what would it store. And does cheap PHP hosting suit your project. For a business card, a shop or a blog the answer is more often yes, and for a chat or a game no.
 
@@ -664,4 +664,4 @@ Then answer three questions. Which model do you choose (a process per request or
 
 CGI scripts were written straight into the `cgi-bin` folder, and any mistake in one turned into a hole in the server: the request’s parameters went straight into commands, and the scripts ran with the server’s rights. The first PHP suffered from the same: code and markup mixed in one file, the database password right in the page, and `register_globals` let anyone set any variable through the address. A generation of sites in the 2000s was written like that, which is how PHP got its reputation as an unsafe language.
 
-Today’s PHP is quite different: it has types, frameworks (Laravel, Symfony) and strict rules. And the “one request, one process” model, which then looked like a flaw, is now considered a virtue: it is simple, reliable and scales well just by adding servers.
+Today’s PHP is quite different: it has types, frameworks (Laravel, Symfony) and strict rules. And the “one request, one process” model, which then looked like a flaw, is now considered a virtue: it’s simple, reliable and scales well just by adding servers.

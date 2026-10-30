@@ -71,7 +71,7 @@
 			n5: 'The plugin still works, but nobody will close the holes in it any more. It has to be replaced.',
 			t6: 'The host retires an old version of PHP',
 			n6: 'The theme and the plugins must work on the new version. The older they are, the more work it is.',
-			t7: 'A wave of spam through the enquiry form',
+			t7: 'A wave of spam through the inquiry form',
 			n7: 'You need protection from robots (a captcha or a hidden field). That takes time too.',
 			caption: 'A year in the life of a WordPress site',
 			model: 'This is a <strong>model</strong> with invented hours. It shows the shape of the costs, not an exact price.',

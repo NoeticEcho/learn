@@ -82,7 +82,7 @@
 			price_: ' The price of GraphQL: a separate layer on the server, harder caching and protection against queries that are too heavy.',
 			whCaption: 'A webhook signature and redelivery',
 			secretLabel: 'Shared secret (known only to the service and you)',
-			bodyLabel: 'Request body (an enquiry, made up)',
+			bodyLabel: 'Request body (an inquiry, made up)',
 			tamper: 'one character was added to the body on the way',
 			service: 'Service',
 			serviceHead: 'The service signs the body',
@@ -103,7 +103,7 @@
 			answeredAtOnce: ': a response at once',
 			ownerGets: (n: number) => `Messages the owner receives: ${n}.`,
 			deduped: 'A repeat of the same event is recognized by its id and ignored.',
-			dupes: 'Without remembering ids, each repeated delivery becomes a separate enquiry, or even a separate charge.',
+			dupes: 'Without remembering ids, each repeated delivery becomes a separate inquiry, or even a separate charge.',
 			noDupes: 'While everything arrives the first time, there is no visible difference, and no duplicates.',
 			note: 'The retry schedule is made up: every service has its own, usually with growing pauses of hours and days.'
 		}

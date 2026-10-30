@@ -7,13 +7,13 @@
 		title: 'GraphQL and webhooks',
 		definition: 'A webhook is an HTTP request a service sends by itself to a set address when an event happens. GraphQL is an API with one address where the client picks fields.',
 		summary:
-			'GraphQL returns exactly the fields the client asked for, and a webhook lets a service tell you about an event itself. Afterwards you’ll know how GraphQL differs from REST, and you’ll set up a notification for an enquiry with a signature check and protection against repeats.',
+			'GraphQL returns exactly the fields the client asked for, and a webhook lets a service tell you about an event itself. Afterwards you’ll know how GraphQL differs from REST, and you’ll set up a notification for an inquiry with a signature check and protection against repeats.',
 		minutes: 25,
 		teaches: ['server-graphql', 'server-webhooks'],
 		requires: ['server-rest'],
 		comic: {
 			panels: [
-				{ mood: 'hmm', prop: 'phone', label: 'POST /hooks/request', say: [{ text: 'Polling is “are we there yet?” from the back seat. A webhook: the service calls you when an enquiry arrives.' }, { who: 'Service', text: 'An enquiry came in, calling.' }] },
+				{ mood: 'hmm', prop: 'phone', label: 'POST /hooks/request', say: [{ text: 'Polling is “are we there yet?” from the back seat. A webhook: the service calls you when an inquiry arrives.' }, { who: 'Service', text: 'An inquiry came in, calling.' }] },
 				{ mood: 'explain', side: 'right', prop: 'lock', label: 'HMAC', caption: 'The signature', say: 'The handler’s address is no secret. A signature from the body and a shared secret proves the real service is calling.' },
 				{ mood: 'hint', prop: 'packets', label: '7 7', caption: 'Event 7, twice', say: 'The reply got lost, so the service tried again. We’ve seen number 7: answer 200 and do nothing a second time.' },
 				{ mood: 'cheer', side: 'right', prop: 'browser', label: 'items { title price }', caption: 'GraphQL', say: 'GraphQL: one address, and the client picks the fields. Ask for the title and price, and only those arrive.' }
@@ -21,8 +21,8 @@
 		},
 		practice: {
 			id: 'server-webhook',
-			title: 'An enquiry reaches the owner: a webhook and its protection',
-			task: 'A real receiver cannot run in the sandbox, so write the handler’s code as text in the pre block with the id handler, and try signatures on the diagram above. 1) In the Channel paragraph, name where the enquiry will arrive: Slack, email or another channel. 2) In the pre, write the handler (in Node.js, following the example in the lesson): the secret from process.env, an HMAC SHA-256 signature over the raw body (crypto.createHmac with sha256), a safe comparison (timingSafeEqual), a 401 answer when it does not match, a repeat of an event with the same id ignored, and a quick 200 on success. 3) In the paragraph “If the receiver is down”, describe what happens on a failure and why the enquiry is neither lost nor delivered twice. 4) In the GraphQL paragraph, compare it with REST for your data: name one item from your brief and a case where GraphQL is handier. Do not write the value of the secret into the code. Every “…” must be replaced.',
+			title: 'An inquiry reaches the owner: a webhook and its protection',
+			task: 'A real receiver cannot run in the sandbox, so write the handler’s code as text in the pre block with the id handler, and try signatures on the diagram above. 1) In the Channel paragraph, name where the inquiry will arrive: Slack, email or another channel. 2) In the pre, write the handler (in Node.js, following the example in the lesson): the secret from process.env, an HMAC SHA-256 signature over the raw body (crypto.createHmac with sha256), a safe comparison (timingSafeEqual), a 401 answer when it does not match, a repeat of an event with the same id ignored, and a quick 200 on success. 3) In the paragraph “If the receiver is down”, describe what happens on a failure and why the inquiry is neither lost nor delivered twice. 4) In the GraphQL paragraph, compare it with REST for your data: name one item from your brief and a case where GraphQL is handier. Do not write the value of the secret into the code. Every “…” must be replaced.',
 			era: 6,
 			files: {
 				'index.html': `<!doctype html>
@@ -48,7 +48,7 @@
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -77,9 +77,9 @@
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -95,7 +95,7 @@
 
 
     <section data-scaffold id="webhook-plan">
-      <h2>Enquiry, webhook, owner</h2>
+      <h2>Inquiry, webhook, owner</h2>
       <p id="channel">Channel: …</p>
       <pre id="handler">…<\/pre>
       <p id="retry">If the receiver is down: …</p>
@@ -234,7 +234,7 @@ input {
     <main id="main">
       <h1>{{name}}</h1>
       <p>{{who}}</p>
-      <p><a class="button" href="#enquiry">{{mainAction.label}}</a></p>
+      <p><a class="button" href="#inquiry">{{mainAction.label}}</a></p>
 
       <section id="sec-1">
         <h2>{{sections.0}}</h2>
@@ -263,9 +263,9 @@ input {
         </div>
       </section>
 
-      <section id="enquiry">
+      <section id="inquiry">
         <h2>{{mainAction.label}}</h2>
-        <form action="/enquiry" method="post">
+        <form action="/inquiry" method="post">
           <p>
             <label for="f-name">What should we call you?</label><br>
             <input id="f-name" name="name" type="text" autocomplete="name" required>
@@ -281,8 +281,8 @@ input {
 
 
     <section data-scaffold id="webhook-plan">
-      <h2>Enquiry, webhook, owner</h2>
-      <p id="channel">Channel: Slack. A message with the visitor’s name and phone number goes to the owner’s channel as soon as an enquiry reaches the handler. The fallback channel: an email.</p>
+      <h2>Inquiry, webhook, owner</h2>
+      <p id="channel">Channel: Slack. A message with the visitor’s name and phone number goes to the owner’s channel as soon as an inquiry reaches the handler. The fallback channel: an email.</p>
       <pre id="handler">import crypto from 'node:crypto';
 
 const SECRET = process.env.WEBHOOK_SECRET;   // the secret is in the environment, not in the code
@@ -302,7 +302,7 @@ export async function handleWebhook(req, res) {
   await sendToOwner(event);                   // a message to the owner, for example via a Slack incoming webhook
   res.status(200).end();
 }<\/pre>
-      <p id="retry">If the receiver is down: the service retries the delivery after a minute, after an hour and later. The enquiry is not lost, because the handler is idempotent (a repeat with the same event id is ignored) and answers 200 quickly, while sending to the owner goes through a queue. If it stays down for long, I look at the delivery log.</p>
+      <p id="retry">If the receiver is down: the service retries the delivery after a minute, after an hour and later. The inquiry is not lost, because the handler is idempotent (a repeat with the same event id is ignored) and answers 200 quickly, while sending to the owner goes through a queue. If it stays down for long, I look at the delivery log.</p>
       <p id="graphql">GraphQL or REST for my data: for the list with “{{items.0.title}}” and the other items REST is enough, because the requests are simple and always the same. GraphQL would be handy if different screens needed different fields of the same data.</p>
     </section>
 
@@ -520,7 +520,7 @@ input {
 				options: [
 					'To make sure the real service sent the request and the body was not changed on the way',
 					'To speed up processing',
-					'To count the enquiries'
+					'To count the inquiries'
 				],
 				answer: 0,
 				why: [
@@ -539,8 +539,8 @@ input {
 				],
 				answer: 0,
 				why: [
-					'Yes. Webhooks are delivered “at least once”, so repeats come from the service and from failures alike. If you remember the ids of processed events, the owner will not get the enquiry twice.',
-					'No: the owner would get two identical enquiries, and a payment would be charged twice.',
+					'Yes. Webhooks are delivered “at least once”, so repeats come from the service and from failures alike. If you remember the ids of processed events, the owner will not get the inquiry twice.',
+					'No: the owner would get two identical inquiries, and a payment would be charged twice.',
 					'No: a repeat shows that the service is doing what it should.'
 				]
 			},
@@ -591,7 +591,7 @@ input {
 			{
 				id: 'server-webhook',
 				front: 'What is a webhook?',
-				back: 'A callback over HTTP: when something happens in a service (a payment, an enquiry, a commit), it sends a POST describing the event to your address, so you needn’t poll it.'
+				back: 'A callback over HTTP: when something happens in a service (a payment, an inquiry, a commit), it sends a POST describing the event to your address, so you needn’t poll it.'
 			},
 			{
 				id: 'server-webhook-signature',
@@ -668,7 +668,7 @@ input {
 			}
 		],
 		guide: {
-			intro: 'You’ll set up the path of an enquiry: the form, then a webhook, then the owner. The receiver’s code is written as for a real server, and you can try the signature on the diagram above. The key ideas of the lesson: the signature, a secret kept out of the code, and repeats.',
+			intro: 'You’ll set up the path of an inquiry: the form, then a webhook, then the owner. The receiver’s code is written as for a real server, and you can try the signature on the diagram above. The key ideas of the lesson: the signature, a secret kept out of the code, and repeats.',
 			hints: [
 				'The first line: import crypto from node:crypto. The secret: const SECRET = process.env.WEBHOOK_SECRET (do not write the value of the secret into the code).',
 				'The signature: crypto.createHmac with sha256 and SECRET, then update with req.rawBody, then digest as hex. Compare with crypto.timingSafeEqual on two Buffers. No match: res.status(401).end().',
@@ -676,7 +676,7 @@ input {
 				'In the paragraphs: the channel (Slack or email), what happens on a failure (retry, queue, idempotency), and the GraphQL versus REST comparison on one of your items, with an “if…” in it.'
 			],
 			mistakes: {
-				'plan-section': 'The “Enquiry, webhook, owner” block (the section with the id webhook-plan) is gone. Put it back.',
+				'plan-section': 'The “Inquiry, webhook, owner” block (the section with the id webhook-plan) is gone. Put it back.',
 				'no-blanks': 'There are still “…” left. Replace every one.',
 				channel: 'Name the delivery channel: Slack, email or another.',
 				hmac: 'The signature is an HMAC SHA-256: crypto.createHmac with sha256 and SECRET.',
@@ -686,11 +686,11 @@ input {
 				'rejects-bad-signature': 'If the signature does not match, answer 401: res.status(401).end().',
 				idempotent: 'You need protection against repeats: remember event.id and check whether the event was processed (seen.has(event.id)).',
 				'fast-ack': 'On success, answer 200 quickly: res.status(200).end().',
-				'retry-answer': 'Say what happens when the receiver is down: the delivery is retried, a queue or log is used, and why the enquiry is not lost.',
+				'retry-answer': 'Say what happens when the receiver is down: the delivery is retried, a queue or log is used, and why the inquiry is not lost.',
 				'graphql-vs-rest': 'In the last paragraph compare GraphQL and REST: “REST… because…”, “GraphQL is handy if…”.',
 				'graphql-names-item': 'Name one of your items from the brief in the comparison: the reasoning should be about your data.'
 			},
-			outro: 'Your enquiry now has a dependable path: the signature protects against forgery, the id against repeats, and a quick answer keeps the service from fretting. That is nearly the full set of rules for receiving webhooks.'
+			outro: 'Your inquiry now has a dependable path: the signature protects against forgery, the id against repeats, and a quick answer keeps the service from fretting. That is nearly the full set of rules for receiving webhooks.'
 		},
 		say: {
 			GraphQL: 'graph Q L',
@@ -717,15 +717,15 @@ input {
 
 ## When the server knocks on your door
 
-Imagine a payment or an enquiry from a form is due to arrive. How do you find out? There are two ways. You can **ask**: every few minutes go to the service and say “well, has it come?”, and nine times in ten hear “no”. That is called polling, and it is wasteful and always late. Or you can ask the service to **call you**: “when it arrives, send me a message at this address”. Such a callback over HTTP is called a **webhook**.
+Imagine a payment or an inquiry from a form is due to arrive. How do you find out? There are two ways. You can **ask**: every few minutes go to the service and say “well, has it come?”, and nine times in ten hear “no”. That is called polling, and it is wasteful and always late. Or you can ask the service to **call you**: “when it arrives, send me a message at this address”. Such a callback over HTTP is called a **webhook**.
 
-It works like this. You tell the service the address of your handler (`https://riverbend.example/hooks/request`). When an event happens (a payment, an enquiry, a new commit), the service itself sends a `POST` request to that address, with a description of the event in JSON. Your handler reads it, does the job (for example, forwards the enquiry to the owner) and answers with `200`. Payment notifications, chat messages and the rebuild of a site after an edit all work on the same principle.
+It works like this. You tell the service the address of your handler (`https://riverbend.example/hooks/request`). When an event happens (a payment, an inquiry, a new commit), the service itself sends a `POST` request to that address, with a description of the event in JSON. Your handler reads it, does the job (for example, forwards the inquiry to the owner) and answers with `200`. Payment notifications, chat messages and the rebuild of a site after an edit all work on the same principle.
 
 A good handler follows three rules, and each of them was born of someone’s trouble.
 
 ## Rule one: check that the request is genuine
 
-The address of your handler is no secret: anyone can find it and send anything to it. If the handler believes the first request that comes along, an “enquiry” or a “payment” can be faked. So the service **signs** the request. The most common method is called **HMAC**: the service takes the body of the request and a **secret** shared with you, computes a hash (a checksum string) from them and sends it in a header. The handler computes the same itself and compares. They match: the request came from someone who knows the secret, and the body was not changed on the way. They don’t: answer `401` and nothing more.
+The address of your handler is no secret: anyone can find it and send anything to it. If the handler believes the first request that comes along, an “inquiry” or a “payment” can be faked. So the service **signs** the request. The most common method is called **HMAC**: the service takes the body of the request and a **secret** shared with you, computes a hash (a checksum string) from them and sends it in a header. The handler computes the same itself and compares. They match: the request came from someone who knows the secret, and the body wasn’t changed on the way. They don’t: answer `401` and nothing more.
 
 The signature is computed over the **raw body**, exactly as it arrived (if you first parse the JSON and write it out again, the spaces change and the signature won’t match). Compare signatures with a special function (`timingSafeEqual`) that always takes the same time: an ordinary string comparison tells an attacker, by how fast it answers, how many of the first characters he guessed. Some services (Telegram, for one) don’t sign at all: they send the secret itself, the one you chose when you set it up, in a header, and that is what you compare.
 
@@ -743,7 +743,7 @@ A service waits for an answer only briefly, a few seconds. If you haven’t answ
 
 If there is no answer, or it comes back as an error, the service **repeats** the request: after a minute, after five, after an hour, with growing pauses. So delivery works on an “at least once” principle, not “exactly once”. The same request can arrive twice: say you processed the event, but the answer got lost on the way.
 
-So the processing must be **idempotent**: a repeated request must not repeat the effect. For that, every event has a number (`id`). The handler remembers which numbers it has seen, and simply acknowledges a repeated event (`200`) without doing anything. Without that, the client gets two enquiries and the shopper pays twice.
+So the processing must be **idempotent**: a repeated request must not repeat the effect. For that, every event has a number (`id`). The handler remembers which numbers it has seen, and simply acknowledges a repeated event (`200`) without doing anything. Without that, the client gets two inquiries and the shopper pays twice.
 
 <details>
 <summary>Check yourself: why does a handler that gets a repeated event still answer 200?</summary>
@@ -752,9 +752,9 @@ The answer “200” tells the service “received, don’t send it again”. If
 
 </details>
 
-## Where to send the enquiry
+## Where to send the inquiry
 
-There are several ways to forward an enquiry to the owner: an email, a message in a chat app, a row in a spreadsheet. Slack has incoming webhooks: the handler sends a `POST` with the text to a secret address. That address is a secret just like the signature, so it doesn’t belong in the code. Telegram, popular in some countries, has a bot API where the handler calls `sendMessage` with the bot’s token, and that token is a secret too.
+There are several ways to forward an inquiry to the owner: an email, a message in a chat app, a row in a spreadsheet. Slack has incoming webhooks: the handler sends a `POST` with the text to a secret address. That address is a secret just like the signature, so it doesn’t belong in the code. Telegram, popular in some countries, has a bot API where the handler calls `sendMessage` with the bot’s token, and that token is a secret too.
 
 There is a legal side here as well. A visitor’s name and phone number are personal data, and a message sent to a chat app or an email service lands on servers outside your own hosting, and perhaps outside your country. Under the GDPR in the EU, and the UK GDPR in the United Kingdom, a service that handles the data for you is a processor: you need a contract with it, and if it sits in another country, the rules on international transfers apply. So every such channel belongs in your privacy notice, and is worth discussing with a lawyer. We return to the law in the part on quality and the law. For comparison, Russia goes further than the GDPR: its localization rule requires that the first recording of Russian citizens’ personal data be made on servers in Russia.
 
@@ -783,12 +783,12 @@ GraphQL has a price too: it needs a separate layer on the server, it is harder t
 
 ## Practice
 
-You are on a site from the 2022 era, where sites talk to services. Set up the path of an enquiry from the form to the owner. A real receiver cannot run in the sandbox, so you write the handler’s code as text, as it would sit on a server, following the example in the lessons on the signature and repeats: in a `pre` block on the page. The checks look in it for the essentials: the secret from the environment, the HMAC signature, a safe comparison, the `401` answer, protection against repeats and a quick answer.
+You are on a site from the 2022 era, where sites talk to services. Set up the path of an inquiry from the form to the owner. A real receiver can’t run in the sandbox, so you write the handler’s code as text, as it would sit on a server, following the example in the lessons on the signature and repeats: in a `pre` block on the page. The checks look in it for the essentials: the secret from the environment, the HMAC signature, a safe comparison, the `401` answer, protection against repeats and a quick answer.
 
 In two paragraphs, answer in words: what happens if the receiver is down, and when GraphQL is handier for your data and when REST. Name one of your items from the brief so that the reasoning is about your project.
 
 ## What was wrong before
 
-The main way to learn about an event was polling, and services exchanged data through SOAP and through files that somebody put on an FTP server on a schedule. When webhooks appeared, they were received with no signature (“nobody knows the address”), the secret was baked into the code and pushed to GitHub, and the “200” was sent only after heavy work, so services sent repeats and duplicate enquiries had to be sorted out by hand.
+The main way to learn about an event was polling, and services exchanged data through SOAP and through files that somebody put on an FTP server on a schedule. When webhooks appeared, they were received with no signature (“nobody knows the address”), the secret was baked into the code and pushed to GitHub, and the “200” was sent only after heavy work, so services sent repeats and duplicate inquiries had to be sorted out by hand.
 
 What is right has stayed: a callback instead of polling, a signature, a quick answer and idempotency. And GraphQL never pushed REST out: both live on, because they solve slightly different problems.

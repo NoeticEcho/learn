@@ -46,7 +46,7 @@
 						<button type="button" role="radio" aria-checked={pick[i.id] === a} class:on={pick[i.id] === a} onclick={() => { pick[i.id] = a as Ans; shown = false; }}>{labels[a as Ans]}</button>
 					{/each}
 				</div>
-				{#if shown}<p class="why" aria-live="polite">{pick[i.id] === i.right ? t('Верно.', 'Correct.') : `Правильно: ${labels[i.right].toLowerCase()}.`} {i.why}</p>{/if}
+				{#if shown}<p class="why" aria-live="polite">{pick[i.id] === i.right ? t('Верно.', 'Correct.') : t(`Правильно: ${labels[i.right].toLowerCase()}.`, `The right answer: ${labels[i.right].toLowerCase()}.`)} {i.why}</p>{/if}
 			</li>
 		{/each}
 	</ol>

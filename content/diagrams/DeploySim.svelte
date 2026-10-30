@@ -106,7 +106,7 @@
 						{ text: 'In the repository, open Settings, then Pages, choose the source: the main branch and the root folder, and save.', check: 'Wait a few minutes (sometimes up to ten): an address appears at the top of the Pages section.' },
 						{ text: 'Open the address that looks like https://your-account.github.io/repository-name/ and make sure the page is the same as in the preview.', check: 'If it is empty or a 404, see the “Something is wrong” section below.' },
 						{ text: 'Your own domain: in Settings, Pages, enter the domain in the Custom domain field and save, then add the DNS records from GitHub’s documentation at your registrar (four A records for the root and a CNAME for www pointing to your-account.github.io).' },
-						{ text: 'When the certificate is ready (up to a day), tick “Enforce HTTPS”.', check: 'Check: http:// redirects to https://, and both www and no-www open.' }
+						{ text: 'When the certificate is ready (up to a day), check “Enforce HTTPS”.', check: 'Check: http:// redirects to https://, and both www and no-www open.' }
 					]
 				},
 				{
@@ -152,7 +152,7 @@
 			siteAt: 'Your site will be at an address like',
 			onDomain: 'and on your own domain:',
 			yourDomain: 'Your domain (as an example):',
-			ticked: 'Steps ticked:',
+			ticked: 'Steps checked:',
 			of: 'of',
 			phone: ' What is left is to open the site on a phone over the mobile network and make sure the project’s main action works.',
 			wrong: 'Something is wrong',

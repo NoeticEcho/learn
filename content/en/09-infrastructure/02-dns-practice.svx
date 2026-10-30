@@ -270,7 +270,7 @@ Three parties work with a domain at once, and mixing them up is the commonest re
 
 - **The registrar** is the company you bought the name from. It records in the registry (for example the registry of the `.com` zone, run by Verisign under ICANN’s rules) that the name is yours, and says whose **NS** servers answer for the zone. There are many registrars, ICANN accredits them, and the name is registered to a person or an organization. Since the GDPR most registrars hide the owner’s personal details in the public lookup.
 - **DNS hosting** is the servers that hold your **zone**: the list of the domain’s records. Often this is the registrar’s own DNS, but it can be your host’s DNS, a cloud provider’s, or a separate service such as Cloudflare.
-- **Site hosting** is the computer the A record points to. From the first lesson of this part you know it is a separate purchase.
+- **Site hosting** is the computer the A record points to. From the first lesson of this part you know it’s a separate purchase.
 
 The main rule: **the zone in force is the one the domain’s NS point to**. If the domain’s NS point at the registrar’s DNS and you changed a record in your host’s panel, you fixed a copy nobody asks for. So the first check for any DNS problem is one: `dig example.com NS` (or the same in an online tool), and you edit where those servers lead.
 
@@ -301,7 +301,7 @@ The addresses here are made up: `192.0.2.10` comes from a block reserved for doc
 
 ## The root and www
 
-Visitors type both, `example.com` and `www.example.com`, and both should open the site. It looks as if a CNAME at the root would do, but that is a trap: by the rules of DNS **a CNAME has to be the only record on its name** (RFC 1034), and the root always holds the service records NS and SOA, and often MX and TXT as well. So:
+Visitors type both, `example.com` and `www.example.com`, and both should open the site. It looks as if a CNAME at the root would do, but that’s a trap: by the rules of DNS **a CNAME has to be the only record on its name** (RFC 1034), and the root always holds the service records NS and SOA, and often MX and TXT as well. So:
 
 - the root gets an **A** record (and **AAAA** for IPv6) with the server’s address. When a platform’s address changes and its documentation doesn’t promise otherwise, ask your DNS provider for **ALIAS/ANAME** or “CNAME flattening”, where the provider fills in the current address itself;
 - `www` gets a **CNAME** to the root, or to the name the platform gave you.
@@ -312,9 +312,9 @@ And one more decision, which helps search as well: choose **one main address** a
 
 If the brief has a second language, you need to decide where it lives. There are three ways.
 
-1. **A folder**: `example.com/es/`. Nothing changes in DNS, there is one certificate, and the domain’s weight is shared. For a small site this is usually the best choice.
-2. **A subdomain**: `es.example.com`. It suits a language with a server or an application of its own. There is one more record in DNS, and the certificate has to cover the subdomain.
-3. **A separate domain**: `example.es`. It is a separate market or brand: you pay for it separately, and the site’s weight is split in two.
+1. **A folder**: `example.com/es/`. Nothing changes in DNS, there’s one certificate, and the domain’s weight is shared. For a small site this is usually the best choice.
+2. **A subdomain**: `es.example.com`. It suits a language with a server or an application of its own. There’s one more record in DNS, and the certificate has to cover the subdomain.
+3. **A separate domain**: `example.es`. It’s a separate market or brand: you pay for it separately, and the site’s weight is split in two.
 
 Whichever you choose, the pages are tied together with the `hreflang` attribute, as in the part on HTML. Subdomains aren’t only for languages: `status.example.com` for a status page, `app.example.com` for an application, `blog.example.com` if the blog lives on another service.
 
@@ -326,7 +326,7 @@ A zone has three “outside” jobs, and all of them are written into the same f
 - **SPF, DKIM and DMARC** are TXT records, described in detail in the part on email. Two practical things matter here: there must be **one** SPF record on a domain (two break the check, so you merge the rules into one), and DMARC starts at `p=none` while you watch the reports.
 - **TXT for proof of ownership.** Google Search Console, Bing Webmaster Tools, cloud services and platforms ask you to put a special string in a TXT record so they can be sure the domain is yours. You can leave such records for as long as you use the service.
 
-A **CAA** record is a useful addition: it lists which certificate authorities may issue certificates for the domain. For a small site it is optional protection, and it comes up in the next lesson.
+A **CAA** record is a useful addition: it lists which certificate authorities may issue certificates for the domain. For a small site it’s optional protection, and it comes up in the next lesson.
 
 Play with the diagram. On the first tab you move to a new server and see how many visitors still go to the old one: change the TTL and the time when you shortened it. The second tab checks a zone written as text: the example has several mistakes at once, so find and fix them.
 
@@ -343,13 +343,13 @@ Because caches keep an answer for as long as the TTL said when they got it. If y
 
 This is the usual order, and it works for any site.
 
-1. **Two days ahead**, shorten the TTL of the records you will change to 300 seconds. Wait at least the old period: until it runs out, caches hold the long answer.
+1. **Two days ahead**, shorten the TTL of the records you’ll change to 300 seconds. Wait at least the old period: until it runs out, caches hold the long answer.
 2. **Prepare the new server** and test it without touching DNS: many platforms give a temporary address, and on your own computer you can temporarily map the name to the IP in the hosts file.
 3. **At the chosen hour**, change the A record (or the CNAME’s value) to the new address. From this minute new requests go to the new server, and old ones burn out as caches expire.
 4. **Check**: `dig +short example.com`, from different networks (home internet and mobile), on several public resolvers. Don’t forget the browser and the system, which have caches of their own.
 5. **Wait a day** and don’t switch the old server off: some visitors still go to it. Then put the TTL back to a sensible value (an hour) and only after that release the old host.
 
-If something goes wrong, a rollback is the same edit in reverse, and a short TTL is what makes it fast. That is the whole point of the preparation.
+If something goes wrong, a rollback is the same edit in reverse, and a short TTL is what makes it fast. That’s the whole point of the preparation.
 
 ## Mistakes that cost a site
 
@@ -369,7 +369,7 @@ dig @1.1.1.1 example.com A     # another resolver's answer, for comparison
 nslookup example.com           # the same without dig (it is on Windows)
 ```
 
-The TTL in an answer counts down on repeated queries: it is what is left of the cache, and it shows how much longer the old answer will live.
+The TTL in an answer counts down on repeated queries: it’s what is left of the cache, and it shows how much longer the old answer will live.
 
 ## Practice
 
@@ -377,4 +377,4 @@ In front of you is your site, and under it a zone table and a moving plan. Enter
 
 ## What was wrong before
 
-In 2010 DNS was changed by an email to the host or in a registrar panel where “NS” was something mysterious, and mail and site were often tied to the same account. Few people had heard of SPF and DKIM, and mail from a domain was easy to forge. A move was done at night in the hope that “DNS would spread”. Now it is a list of five steps, and it doesn’t need a night.
+In 2010 DNS was changed by an email to the host or in a registrar panel where “NS” was something mysterious, and mail and site were often tied to the same account. Few people had heard of SPF and DKIM, and mail from a domain was easy to forge. A move was done at night in the hope that “DNS would spread”. Now it’s a list of five steps, and it doesn’t need a night.

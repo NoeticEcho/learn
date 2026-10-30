@@ -67,7 +67,7 @@
 			areas: {
 				header: { title: 'Header', file: 'header.php', editor: 'The site title and tagline: “Settings → General”. The logo: in the theme’s settings.', plugin: 'It can add tags for search engines to the head (an SEO plugin) or a visitor counter.' },
 				menu: { title: 'Menu', file: 'header.php (it calls wp_nav_menu)', editor: 'The menu is built in “Appearance → Menus”: pages and categories are dragged into the order you want.', plugin: 'It can add an item such as “Cart”, or drop-down submenus.' },
-				loop: { title: 'The loop', file: 'index.php, single.php, page.php', editor: 'Posts and pages: “Posts → Add New”. The theme decides how a card and a whole page look.', plugin: 'It can place an enquiry form right in the text (a shortcode), add a “Related posts” block or adjust the text before it is shown.' },
+				loop: { title: 'The loop', file: 'index.php, single.php, page.php', editor: 'Posts and pages: “Posts → Add New”. The theme decides how a card and a whole page look.', plugin: 'It can place an inquiry form right in the text (a shortcode), add a “Related posts” block or adjust the text before it is shown.' },
 				sidebar: { title: 'Sidebar', file: 'sidebar.php', editor: 'The set of widgets: “Appearance → Widgets” (search, categories, recent posts, text).', plugin: 'It adds widgets of its own: a newsletter signup, a form, reviews.' },
 				footer: { title: 'Footer', file: 'footer.php', editor: 'The footer’s text depends on the theme: often it is widgets or theme settings.', plugin: 'It can load scripts at the end of the page: chat, analytics.' }
 			} as Record<Id, Area>

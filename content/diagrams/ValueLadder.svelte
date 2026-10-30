@@ -87,8 +87,8 @@
 			perWord: 'per visitor.',
 			shares: 'The upsell is taken by part of those who bought the core offer, and the downsell by part of those who declined it (the shares in the model are arbitrary).',
 			spoil: 'What can spoil each rung',
-			spoilNote: 'Tick a technique, and the page names the honest replacement and the rule of law. The model leaves the money alone on purpose: what these techniques cost in trust can’t be counted honestly.',
-			none: 'No technique ticked: as it should be, but check your own ladder against the list.',
+			spoilNote: 'Check a technique, and the page names the honest replacement and the rule of law. The model leaves the money alone on purpose: what these techniques cost in trust can’t be counted honestly.',
+			none: 'No technique checked: as it should be, but check your own ladder against the list.',
 			dark: 'A dark pattern:',
 			honest: 'The honest version.',
 			lawLabel: 'Near the law.'

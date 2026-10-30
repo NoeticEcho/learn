@@ -110,7 +110,7 @@
 				{
 					what: 'Your key for an AI service',
 					stays: 'in this browser',
-					file: st.keyInFile ? 'into the file: you ticked the box, so keep the file like a password' : 'no, by default it is not in the file',
+					file: st.keyInFile ? 'into the file: you checked the box, so keep the file like a password' : 'no, by default it is not in the file',
 					llm: st.model ? 'goes only to the service you chose, as the request’s signature' : 'no',
 					go: st.model
 				},

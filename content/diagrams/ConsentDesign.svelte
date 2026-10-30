@@ -28,10 +28,10 @@
 	type V = { id: string; title: string; ok: boolean; checked: boolean; text: string; second?: string; verdict: string; flaws: string[]; keep?: boolean };
 	const variants = $derived<V[]>([
 		{
-			id: 'pre', title: t('Галочка уже стоит и объединяет согласие с офертой', 'A box that is already ticked and bundles consent with the terms'), ok: false, checked: true,
+			id: 'pre', title: t('Галочка уже стоит и объединяет согласие с офертой', 'A box that is already checked and bundles consent with the terms'), ok: false, checked: true,
 			text: t('Я согласен на обработку данных и с условиями оферты', 'I agree to the processing of my data and to the terms of sale'),
 			verdict: t('Не годится.', 'Does not work.'),
-			flaws: [t('Галочка отмечена заранее: человек не совершал действия.', 'The box is ticked in advance: the person took no action.'), t('Согласие слито с офертой: с 1 сентября 2025 года оно оформляется отдельно.', 'The consent is merged with the terms: it has to be presented apart from other matters (Article 7(2)).'), t('Не названы цель, оператор и данные.', 'The purpose, the controller and the data are not named.')]
+			flaws: [t('Галочка отмечена заранее: человек не совершал действия.', 'The box is checked in advance: the person took no action.'), t('Согласие слито с офертой: с 1 сентября 2025 года оно оформляется отдельно.', 'The consent is merged with the terms: it has to be presented apart from other matters (Article 7(2)).'), t('Не названы цель, оператор и данные.', 'The purpose, the controller and the data are not named.')]
 		},
 		{
 			id: 'press', title: t('Без галочки: «нажимая кнопку, вы соглашаетесь»', 'No box: “by pressing the button you agree”'), ok: false, checked: false,
@@ -49,7 +49,7 @@
 			id: 'good', title: t('Отдельная пустая галочка с целью и ссылкой на политику', 'A separate empty box with a purpose and a link to the notice'), ok: true, checked: false, keep: true,
 			text: t(`Согласен, что ${operator} обработает моё имя и телефон, чтобы ответить на заявку «${action}». Политика обработки`, `I agree that ${operator} will process my name and phone number in order to reply to my inquiry “${action}”. Privacy notice`),
 			verdict: t('Годится.', 'Works.'),
-			flaws: [t('Пуста: человек отмечает сам.', 'Empty: the person ticks it themselves.'), t('Отдельная галочка и свой текст.', 'A separate box and a text of its own.'), t('Названы оператор, данные и цель; есть ссылка на политику.', 'The controller, the data and the purpose are named, and there is a link to the notice.')]
+			flaws: [t('Пуста: человек отмечает сам.', 'Empty: the person checks it themselves.'), t('Отдельная галочка и свой текст.', 'A separate box and a text of its own.'), t('Названы оператор, данные и цель; есть ссылка на политику.', 'The controller, the data and the purpose are named, and there is a link to the notice.')]
 		},
 		{
 			id: 'best', title: t('То же и ещё отдельная необязательная галочка на рассылку', 'The same, plus a separate optional box for the newsletter'), ok: true, checked: false, keep: true,
@@ -93,9 +93,9 @@
 	{#if v.keep}
 		<p class="dg-out"><strong>{t('Что вы сохраняете как доказательство:', 'What you keep as proof:')}</strong></p>
 		<pre class="dg-box dg-mono rec">consents(request_id, given_at, text_version, purpose)
-→ 4821, 2026-10-28 12:41, «v3», «ответить на заявку»</pre>
+→ 4821, 2026-10-28 12:41, {t('«v3», «ответить на заявку»', '“v3”, “answer the inquiry”')}</pre>
 	{/if}
-	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('пять вариантов строки согласия под формой. Не годятся: заранее отмеченная галочка, слитая с офертой; отсутствие галочки с фразой «нажимая кнопку»; пустая галочка, объединяющая оферту и данные. Годятся: отдельная пустая галочка с названием оператора, данных и цели и ссылкой на политику, а также она же с отдельной необязательной галочкой на рассылку. Для годных вариантов сохраняют запись с датой, версией текста и целью.', 'five variants of the consent line under a form. These don’t work: a box ticked in advance and merged with the terms; no box and a phrase “by pressing the button”; an empty box that joins the terms and the data. These work: a separate empty box naming the controller, the data and the purpose and linking to the notice, and the same with a separate optional box for the newsletter. For the variants that work you keep a record with a date, the version of the text and the purpose.')}</p>
+	<p class="dg-out alt"><strong>{t('Текстовая альтернатива:', 'Text alternative:')}</strong> {t('пять вариантов строки согласия под формой. Не годятся: заранее отмеченная галочка, слитая с офертой; отсутствие галочки с фразой «нажимая кнопку»; пустая галочка, объединяющая оферту и данные. Годятся: отдельная пустая галочка с названием оператора, данных и цели и ссылкой на политику, а также она же с отдельной необязательной галочкой на рассылку. Для годных вариантов сохраняют запись с датой, версией текста и целью.', 'five variants of the consent line under a form. These don’t work: a box checked in advance and merged with the terms; no box and a phrase “by pressing the button”; an empty box that joins the terms and the data. These work: a separate empty box naming the controller, the data and the purpose and linking to the notice, and the same with a separate optional box for the newsletter. For the variants that work you keep a record with a date, the version of the text and the purpose.')}</p>
 </figure>
 
 <style>

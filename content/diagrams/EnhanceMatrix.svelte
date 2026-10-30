@@ -32,7 +32,7 @@
 		},
 		en: {
 			conds: ['All is well', 'JavaScript is off', 'Slow network: the script is still downloading', 'The script crashed', 'An old browser'],
-			features: ['The list of offers', 'The enquiry form', 'Phone and email', 'The menu button', 'Search in the list', 'Live phone check'],
+			features: ['The list of offers', 'The inquiry form', 'Phone and email', 'The menu button', 'Search in the list', 'Live phone check'],
 			caption: 'What the visitor keeps',
 			condGroup: 'Conditions',
 			buildGroup: 'How the page is built',
@@ -45,7 +45,7 @@
 			broken: 'does not work',
 			summary: (kept: number, all: number, must: number) => `Working features: ${kept} of ${all}; of the essential ones: ${must} of 3.`,
 			same: 'With a working script both pages are the same. The difference shows when the script fails.',
-			simpler: 'The page is plainer, but the main things work: the visitor sees the offers, sends an enquiry and finds the contacts.',
+			simpler: 'The page is plainer, but the main things work: the visitor sees the offers, sends an inquiry and finds the contacts.',
 			nothing: 'The visitor got nothing of what they came for.'
 		}
 	});
