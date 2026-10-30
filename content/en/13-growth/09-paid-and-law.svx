@@ -1,0 +1,387 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/13-growth/09-paid-and-law.svx. */
+	export const metadata = {
+		id: '13-growth/09-paid-and-law',
+		part: 13,
+		order: 9,
+		title: 'Paid traffic and ad labeling: FTC, ASA and the DSA',
+		definition: 'Paid traffic is advertising paid for by the view or click. It must be recognizable as an ad and truthful: a clear label, a named advertiser, no false claims.',
+		summary:
+			'You’ll plan (on paper) a small ad campaign and stay within the rules: you’ll learn what counts as advertising, who has to label what, and how to count a budget in explicit assumptions. Afterwards you have an ad for search and for a social network, a “click, lead, price of a lead” calculation and a filled-in disclosure card.',
+		minutes: 30,
+		teaches: ['growth-paid-traffic', 'growth-ad-labelling'],
+		requires: ['growth-smm-russia', 'growth-seo-crawl-index-rank', 'copy-four-u', 'growth-utm'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', prop: 'sheet', label: 'assumptions', caption: 'Not a plan', say: '“I’ll spend a little and see” is not a plan. A plan writes down the assumptions: money, price of a click, conversion.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: '750 clicks', caption: 'Invented numbers', say: '$3,000 at $4 a click gives 750 clicks and about 22 leads at 3%. Whether the price is good depends on the client.' },
+				{ mood: 'hint', prop: 'browser', label: 'Ad · paid for by', caption: 'Disclosure', say: 'Advertising is labeled so that people can tell it from the rest. A vague tag is not enough: say Ad, clearly, up front.' }
+			]
+		},
+		practice: {
+			id: 'ads-budget-marking',
+			title: 'Ads, a budget and a disclosure card',
+			task: 'Fill in the note. 1) An ad for search and an ad for a social network: a headline of 5 to 30 characters, a text of 20 to 90 characters, the section of the site from the brief that the ad leads to, and a label with the word “Ad” and a “paid for by” line. The headlines or texts must include the main action from the brief in the same words. There must be no promises of results and no comparisons (“best”, “guarantee”, “number one”). 2) The budget: in the assumptions table enter the money per month, the price of a click, the number of clicks, the conversion of a click into a lead (percent), the number of leads and the cost of a lead; the figures must agree. 3) The disclosure card: the advertiser (the name from the brief), the creative, the platform disclosure and records (at least six words, mentioning disclosure or records), and the label wording. 4) A check of the ad against advertising law and professional ethics, at least eight words. Every “…” has to be replaced.',
+			era: 7,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="ads">
+      <h2>The search ad</h2>
+      <p>Headline: <span id="s-head">…</span></p>
+      <p>Text: <span id="s-text">…</span></p>
+      <p>Leads to the section: <span class="land">…</span></p>
+      <p>Label: <span id="s-label">…</span></p>
+
+      <h2>The social network ad</h2>
+      <p>Headline: <span id="n-head">…</span></p>
+      <p>Text: <span id="n-text">…</span></p>
+      <p>Leads to the section: <span class="land">…</span></p>
+      <p>Label: <span id="n-label">…</span></p>
+
+      <h2>The budget in explicit assumptions</h2>
+      <table id="budget">
+        <tr><th>Assumption</th><th>Value</th></tr>
+        <tr><td>Money per month, $</td><td id="b-money">…</td></tr>
+        <tr><td>Price of a click, $</td><td id="b-cpc">…</td></tr>
+        <tr><td>Clicks per month</td><td id="b-clicks">…</td></tr>
+        <tr><td>Click to lead, %</td><td id="b-cr">…</td></tr>
+        <tr><td>Leads per month</td><td id="b-leads">…</td></tr>
+        <tr><td>Cost of a lead, $</td><td id="b-cpl">…</td></tr>
+      </table>
+
+      <h2>The disclosure card</h2>
+      <dl id="marking">
+        <dt>Advertiser</dt><dd id="m-adv">…</dd>
+        <dt>Creative</dt><dd id="m-creative">…</dd>
+        <dt>Platform disclosure and records</dt><dd id="m-ord">…</dd>
+        <dt>Label wording</dt><dd id="m-token">…</dd>
+      </dl>
+      <p>Check against the law and ethics: <span id="legal">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="ads">
+      <h2>The search ad</h2>
+      <p>Headline: <span id="s-head">Clear prices, stated up front</span></p>
+      <p>Text: <span id="s-text">{{mainAction.label}}: the price and the steps are stated before you get in touch</span></p>
+      <p>Leads to the section: <span class="land">{{sections.0}}</span></p>
+      <p>Label: <span id="s-label">Ad · Paid for by {{name}}</span></p>
+
+      <h2>The social network ad</h2>
+      <p>Headline: <span id="n-head">A short note on how it goes</span></p>
+      <p>Text: <span id="n-text">{{mainAction.label}}. Here is how it works and what it costs</span></p>
+      <p>Leads to the section: <span class="land">{{sections.1}}</span></p>
+      <p>Label: <span id="n-label">Ad · Paid for by {{name}}</span></p>
+
+      <h2>The budget in explicit assumptions</h2>
+      <table id="budget">
+        <tr><th>Assumption</th><th>Value</th></tr>
+        <tr><td>Money per month, $</td><td id="b-money">3000</td></tr>
+        <tr><td>Price of a click, $</td><td id="b-cpc">4</td></tr>
+        <tr><td>Clicks per month</td><td id="b-clicks">750</td></tr>
+        <tr><td>Click to lead, %</td><td id="b-cr">3</td></tr>
+        <tr><td>Leads per month</td><td id="b-leads">22</td></tr>
+        <tr><td>Cost of a lead, $</td><td id="b-cpl">136</td></tr>
+      </table>
+
+      <h2>The disclosure card</h2>
+      <dl id="marking">
+        <dt>Advertiser</dt><dd id="m-adv">{{name}}</dd>
+        <dt>Creative</dt><dd id="m-creative">the text and link of the two ads above</dd>
+        <dt>Platform disclosure and records</dt><dd id="m-ord">the platforms label the ads and name the advertiser in their ad libraries; we keep screenshots and the invoices</dd>
+        <dt>Label wording</dt><dd id="m-token">“Ad” first, then “Paid for by {{name}}”</dd>
+      </dl>
+      <p>Check against the law and ethics: <span id="legal">no promises of results or comparisons, the price is stated honestly, and a lawyer reads the text before launch</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#ads', matches: '^[^…]*$' },
+				{ id: 's-head', kind: 'text', selector: '#s-head', matches: '^\\s*\\S[\\s\\S]{3,28}\\S\\s*$' },
+				{ id: 's-text', kind: 'text', selector: '#s-text', matches: '^\\s*\\S[\\s\\S]{18,88}\\S\\s*$' },
+				{ id: 'n-head', kind: 'text', selector: '#n-head', matches: '^\\s*\\S[\\s\\S]{3,28}\\S\\s*$' },
+				{ id: 'n-text', kind: 'text', selector: '#n-text', matches: '^\\s*\\S[\\s\\S]{18,88}\\S\\s*$' },
+				{ id: 'landing', kind: 'field', selector: '#ads .land', field: 'sections', min: 1 },
+				{ id: 'action', kind: 'field', selector: '#s-head, #s-text, #n-head, #n-text', field: 'mainAction.label' },
+				{ id: 's-label', kind: 'text', selector: '#s-label', matches: '^(?=[\\s\\S]*(?:\\bAd\\b|Sponsored|Advertisement|#ad))(?=[\\s\\S]*(?:[Pp]aid for by|[Ss]ponsored by|[Aa]dvertiser|[Oo]n behalf of))[\\s\\S]*\\S' },
+				{ id: 'n-label', kind: 'text', selector: '#n-label', matches: '^(?=[\\s\\S]*(?:\\bAd\\b|Sponsored|Advertisement|#ad))(?=[\\s\\S]*(?:[Pp]aid for by|[Ss]ponsored by|[Aa]dvertiser|[Oo]n behalf of))[\\s\\S]*\\S' },
+				{ id: 'no-promises', kind: 'text', selector: '#ads', matches: '^(?![\\s\\S]*(?:[Gg]uarantee|\\b[Bb]est\\b|[Nn]umber one|No\\. ?1|#1|100 ?%|[Mm]ost experienced))[\\s\\S]*\\S' },
+				{ id: 'cpc', kind: 'text', selector: '#b-cpc', matches: '\\d' },
+				{ id: 'cr', kind: 'text', selector: '#b-cr', matches: '\\d' },
+				{ id: 'cpl', kind: 'text', selector: '#b-cpl', matches: '\\d' },
+				{ id: 'advertiser', kind: 'field', selector: '#m-adv', field: 'name' },
+				{ id: 'ord', kind: 'text', selector: '#m-ord', matches: '^(?=[\\s\\S]*(?:[Dd]isclos|[Rr]ecords|[Ll]ibrar))\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'legal', kind: 'text', selector: '#legal', matches: '^\\s*\\S+(?:\\s+\\S+){7,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'order',
+				prompt: 'Put in order the path of an ad bought directly from an influencer',
+				items: [
+					'You agree a placement with the influencer, in writing',
+					'The contract sets out the disclosure rule: a clear label at the start and the platform’s paid-partnership tool',
+					'The influencer publishes the post with the clear label',
+					'You check the live post and keep a screenshot',
+					'A post without a clear label is fixed or taken down'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each term with what lies behind it',
+				pairs: [
+					['Material connection', 'A link between advertiser and endorser that might affect how people weigh the endorsement: payment, a free product, family or employment'],
+					['Clear and conspicuous', 'The FTC’s test for a disclosure: easy to notice and understand where the person looks, not buried or vague'],
+					['Ad library', 'A public database of ads kept by a platform (such as Meta’s Ad Library); very large platforms must keep one in the EU'],
+					['Creative', 'A single piece of advertising material: text, image or video together with its link']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You calculate: $3,000 at a $4 click gives 750 clicks, and 3% of them leave a request. What does a lead cost?',
+				options: [
+					'About $136: $3,000 divided by roughly 22 leads',
+					'$4: that is the price of a click',
+					'3 cents: 3% of a click'
+				],
+				answer: 0,
+				why: [
+					'Yes. Leads are 750 × 3% ≈ 22, and a lead costs $3,000 ÷ 22 ≈ $136. The formula: cost of a lead = price of a click ÷ conversion, that is, 4 ÷ 0.03 ≈ $133 (the difference is from rounding the leads).',
+					'No: a click is not a lead. Many clicks go to one lead.',
+					'No: the percent is taken of the number of clicks, not of the price.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What should you check in the text of an expert’s ad?',
+				options: [
+					'There are no promises of results (“we’ll win your case”)',
+					'There are no unfair comparisons (“best”, “number one”)',
+					'The price or terms are stated so that the person is not misled',
+					'There is an “Ad” label and a “paid for by” line'
+				],
+				answer: [0, 1, 2, 3],
+				why: [
+					'Yes: a promise of results is a misleading claim, and for some professions also a breach of ethics.',
+					'Yes: advertising law bans unsubstantiated comparisons and superlatives presented as fact.',
+					'Yes: hidden terms break advertising law and consumer law.',
+					'Yes: advertising has to be recognizable as such, and the platforms and the law ask that people can see who paid.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A budget of “we’ll spend more per month, as it goes”. What is wrong with it?',
+				options: [
+					'There are no assumptions: it can be neither checked nor stopped; you need to write down the click price, the conversion and a spending cap',
+					'Nothing: it is more flexible',
+					'It is better to spend the whole budget in one day'
+				],
+				answer: 0,
+				why: [
+					'Yes. Assumptions turn “as it goes” into a testable hypothesis: if the click price is above expectation or there are fewer leads, you see it and stop.',
+					'Flexibility without a spending cap often ends in lost money.',
+					'That is the worst option: you won’t have time to notice anything or correct it.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'You buy ads through Google Ads or Meta’s ad manager. Who does the labeling?',
+				options: [
+					'The platform labels its own ads and names the advertiser, but you stay responsible for the truth of the ad and for any creator you hire',
+					'No label is needed if you pay the platform',
+					'You have to type the label by hand into every ad'
+				],
+				answer: 0,
+				why: [
+					'Yes. Platforms show their own marks (Ad, Sponsored) and keep libraries. But responsibility for what the ad says stays with the advertiser, and if you pay a creator to post, their connection to you must still be disclosed (a guideline, not legal advice).',
+					'No: advertising always has to be recognizable as such; here the system does the marking.',
+					'No: on the large platforms the mark is added automatically.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'growth-paid-arithmetic',
+				front: 'How do you count an ad budget?',
+				back: 'Clicks = money ÷ price of a click; leads = clicks × conversion; cost of a lead = price of a click ÷ conversion. Write all the numbers as assumptions, and test them on a small budget.'
+			},
+			{
+				id: 'growth-marking-parts',
+				front: 'What does disclosing an ad involve?',
+				back: 'Making it recognizable as an ad: a clear “Ad” or “Sponsored” label up front, a statement of who paid, and, for a creator’s post, the platform’s paid-partnership tool. A vague hashtag buried in a pile of tags doesn’t count.'
+			},
+			{
+				id: 'growth-ord-erir',
+				front: 'How does Russia’s ad registry differ from this (for comparison)?',
+				back: 'Since 1 September 2022 Russia requires online ads to carry the Russian word for “advertisement”, a token (ERID) and advertiser details, and the data goes through an operator (ORD) to a state registry (ERIR). The US, the UK and the EU rely on clear labels, platform libraries and fines rather than a central register.'
+			},
+			{
+				id: 'growth-marking-who',
+				front: 'Who is responsible for disclosure?',
+				back: 'The advertiser, the endorser or publisher (a creator, a channel owner) and the platform each have duties. In the US the FTC can hold the advertiser liable for an endorser’s missing disclosure, so check the live posts yourself.'
+			},
+			{
+				id: 'growth-ad-limits',
+				front: 'What limits the content of an expert’s ad?',
+				back: 'No promises of results, no false statements and no unsubstantiated comparisons; for attorneys and other regulated professions professional rules add to this. A lawyer reads the text before launch.'
+			}
+		],
+		sources: [
+			{ title: 'About responsive search ads (Google Ads Help)', url: 'https://support.google.com/google-ads/answer/7684791?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Meta Advertising Standards', url: 'https://transparency.meta.com/policies/ad-standards/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'LinkedIn Advertising Policies', url: 'https://www.linkedin.com/legal/ads-policy', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Google Ads Transparency Center', url: 'https://adstransparency.google.com/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: '16 CFR Part 255: Guides concerning the use of endorsements and testimonials in advertising (eCFR)', url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-255', licence: 'PD', kind: 'spec', lang: 'en' },
+			{ title: '15 U.S. Code § 45: unfair or deceptive acts or practices, the FTC Act section 5 (Cornell LII)', url: 'https://www.law.cornell.edu/uscode/text/15/45', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'The CAP Code, section 2: Recognition of marketing communications (ASA)', url: 'https://www.asa.org.uk/type/non_broadcast/code_section/02.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'The CAP Code, section 3: Misleading advertising (ASA)', url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html', licence: 'proprietary-link', kind: 'spec', lang: 'en' },
+			{ title: 'Regulation (EU) 2022/2065, the Digital Services Act, Articles 26 and 39 (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32022R2065', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Directive 2005/29/EC on unfair commercial practices, Annex I (EUR-Lex)', url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:32005L0029', licence: 'link-only', kind: 'spec', lang: 'en' },
+			{ title: 'Pay-per-click (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Pay-per-click', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Яндекс Директ: как работает обязательная маркировка рекламы в интернете (for comparison, in Russian)', url: 'https://direct.yandex.ru/base/articles/markirovka-reklamy-v-internete', licence: 'proprietary-link', kind: 'article', lang: 'ru' }
+		],
+		videos: [],
+		guide: {
+			intro: 'Advertising is money and law at once. Count the money in advance, and place the label so that it can’t be missed.',
+			hints: [
+				'Keep the ad headline to 30 characters and the text to 90, spaces included. In the headline or the text name the main action in the same words as the brief.',
+				'The label is the word “Ad” and a “paid for by” line with your name from the brief. Put the word first.',
+				'The budget: clicks = money ÷ price of a click; leads = clicks × conversion; cost of a lead = money ÷ leads. Write numbers, and let them agree with each other.',
+				'In the check, write that you removed promises and comparisons, and who reads the text before launch.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the ads, the budget, the disclosure card and the check.',
+				's-head': 'The headline of the search ad must be 5 to 30 characters long.',
+				's-text': 'The text of the search ad must be 20 to 90 characters long.',
+				'n-head': 'The headline of the social network ad must be 5 to 30 characters long.',
+				'n-text': 'The text of the social network ad must be 20 to 90 characters long.',
+				landing: 'The ad has to lead to a section of the site from the brief: write its name.',
+				action: 'The headlines or texts must include the main action in the same words as the brief.',
+				's-label': 'The label of the search ad needs the word “Ad” and a “paid for by” line.',
+				'n-label': 'The label of the social network ad needs the word “Ad” and a “paid for by” line.',
+				'no-promises': 'The text still has promises or comparisons (“guarantee”, “best”, “number one”, “100%”). Remove them.',
+				cpc: 'Write the price of a click as a number.',
+				cr: 'Write the conversion of a click into a lead as a number.',
+				cpl: 'Write the cost of a lead as a number.',
+				advertiser: 'In the disclosure card the advertiser must be the name from the brief.',
+				ord: 'Write about disclosure and records in at least six words and use the word disclosure, records or library.',
+				legal: 'Describe the check against the law and ethics in at least eight words.'
+			},
+			outro: 'Now you have a calculation, ads with a clear label and an idea of who is responsible for what. That finishes the part on growth. Next we learn to measure what of it worked.'
+		},
+		say: { FTC: 'F T C', ASA: 'A S A', CAP: 'cap', DSA: 'D S A', CPC: 'C P C', CTR: 'C T R', CPL: 'C P L', UTM: 'U T M', ERID: 'erid', ORD: 'O R D', ERIR: 'erir', LinkedIn: 'linked-in', 'Google Ads': 'google ads' }
+	};
+</script>
+
+<script>
+	import AdLabel from '../../diagrams/AdLabel.svelte';
+</script>
+
+## Paying for attention
+
+Everything you did in this part drew people in without direct payment: emails, posts, search. But there is another way: **paying a platform for a view or a click**. This is called paid traffic, or advertising. Its important property is that the result appears at once and vanishes just as fast when you stop paying. So advertising is good for **testing a hypothesis quickly** (does the audience respond to your offer) and for **filling gaps**, not as the only source of people.
+
+The main kinds for a small project:
+
+- **Search ads** (Google Ads, Microsoft Advertising: ads above the results). You pay for the click of someone who has already typed a query. The intent is high (you studied query intent in the lesson on SEO), so for services it is usually the first thing worth trying.
+- **Ads on social networks** (Meta’s Facebook and Instagram, LinkedIn, X, TikTok, Reddit). You show an ad to people who searched for nothing but fit by their traits. The intent is lower, the reach wider. Targeting is limited for some topics: Meta, for example, restricts targeting for housing, jobs, credit and social issues, and the EU bans ads targeted by profiling on sensitive data.
+- **Placement with creators and in other people’s channels.** More work to arrange, and the place with the most legal traps.
+
+**The Russian market.** In Russia the usual platforms are Yandex Direct (search ads above the results) and VK Ads, together with placements in Telegram channels, and Google suspended its ads in Russia in 2022. Russia also has its own labeling regime, described in the last section for comparison.
+
+## How to count the money
+
+A beginner often says “I’ll spend a little and see”. That is not a plan. A plan writes down **assumptions** and derives the result from them. For advertising, five numbers are enough:
+
+1. **Money** for a month that you are ready to lose entirely.
+2. **The price of a click** (CPC, cost per click): what one click costs. You learn it from the platform’s forecast; for local services it is often a few dollars, and in competitive topics tens of dollars.
+3. **Clicks** = money ÷ price of a click.
+4. **The conversion of a click into a lead** (CR): the share of those who clicked who left a request. For a service page it is often a few percent, but it is an **assumption** until you have measured it.
+5. **Leads** = clicks × conversion, and the **cost of a lead** (CPL, cost per lead) = money ÷ leads or, the same thing, price of a click ÷ conversion.
+
+An example with invented numbers: $3,000, a $4 click, so 750 clicks; a 3% conversion gives about 22 leads; one lead costs about $136. Then comes the question most often forgotten: **how many of the leads become clients, and how much does a client bring in?** A lead at $136 is good if a client brings in $2,000, and a loss if $100. Recall the funnel from the part on copywriting and the value ladder: the result depends on every rung, not on the price of a click.
+
+Three rules for not losing money:
+
+- **Start small,** with one ad and one page it leads to.
+- **Set a spending cap** and don’t raise it until you see leads.
+- **Links with UTM tags** (the lesson on social networks): without them you won’t know which ad worked.
+
+## The ad: what to write in it
+
+Google’s responsive search ads allow headlines of up to 30 characters and descriptions of up to 90 (the platforms’ rules change, so check the help page). The room is small, so don’t fill it with filler. Use what you have learned:
+
+- **The headline** answers the person’s query (the four U’s: useful, urgent *only if it is true*, unique, specific). For the query “boundary survey cost”, a headline such as “Boundary survey: price up front”.
+- **The text** is one benefit and one condition, not a list of epithets (the lesson on FAB).
+- **The link leads to a page that continues the ad.** If the ad is about a boundary survey, it goes to the section on boundary surveys, not the home page. A mismatch between ad and page is the main reason for expensive, empty clicks.
+- **The main action** is the same as on the site (from the brief): the ad and the page should speak one language.
+
+## The law on promises
+
+Advertising is subject to advertising law. As a guideline, not as advice:
+
+- **Advertising must be truthful.** In the US, section 5 of the FTC Act bans deceptive and unfair practices, and claims need substantiation before you make them. In the UK the CAP Code (section 3) bans misleading advertising, and in the EU the Unfair Commercial Practices Directive does. You can’t state what isn’t so, or compare without grounds (“best”, “number one”, “twice as cheap”). For an expert this means no guarantees of results.
+- **The terms are stated at once.** If a price is “from”, say from what, and what it depends on. Hidden terms break advertising law and consumer law.
+- **Professional ethics.** Attorneys, doctors, accountants and others have rules of their own: for attorneys in the US, the state bar rules (based on ABA Model Rule 7.1) forbid false or misleading communications and many states add disclaimers and filing duties. If you belong to such a profession, **show the ad to a lawyer or your licensing body before launch.**
+
+## Disclosing that something is an ad
+
+The core rule is the same in all three places: **advertising must be recognizable as advertising**, and the person must be able to see who is behind it.
+
+- **In the US.** The FTC’s Endorsement Guides (16 CFR Part 255) say that when there is a “material connection” between an advertiser and someone who endorses its product (payment, a free product, a family or employment tie), it must be disclosed clearly and conspicuously, in the post itself and in the viewer’s own language, not tucked into a bio or a pile of hashtags. The advertiser can be held liable for an endorser’s missing disclosure, so you check the live posts. Native ads that look like editorial content must be identifiable too.
+- **In the UK.** The CAP Code says marketing communications must be obviously identifiable as such (rule 2.1), and must make their commercial intent clear if it is not apparent from the context (rule 2.3). The ASA’s guidance for influencers asks for a plain label such as “Ad” at the start of the post. The ASA also covers advertisers’ own social media.
+- **In the EU.** The Unfair Commercial Practices Directive bans hidden advertising (using editorial content to promote a product that the trader has paid for, without making that clear: Annex I, point 11). The Digital Services Act (Article 26) requires online platforms to let people see, for each ad, that it is an ad, on whose behalf it is shown, who paid, and the main parameters used to target it; very large platforms must also keep a public ad repository (Article 39). Platforms also add their own tools, such as Meta’s paid-partnership label.
+
+**Who is responsible.** The advertiser, the creator or channel owner and the platform each have a part. Duties can be split by contract, but if a post goes out without a clear label, the advertiser may answer for it.
+
+**When it is simpler.** If you buy ads in a large platform’s ad manager, the platform labels its own ads and keeps a library, and you are left with getting the advertiser details right and the claims true. If you buy directly from a creator, you organize the chain yourself: a written contract, the label wording, a check of the live post.
+
+**For comparison: Russia.** Since 1 September 2022 Russia has had a stricter, more bureaucratic regime for internet ads: the Russian word for “advertisement”, a token (ERID) in the link or text and advertiser details on the ad; the token is issued by an accredited ad data operator (ORD), which passes data on to a state registry (ERIR) kept by the communications regulator Roskomnadzor; fines for legal entities are large (Article 14.3 of the Administrative Offenses Code, to be checked against the current text). The Russian edition of this lesson covers it in full. The English-speaking jurisdictions rely instead on clear labels, platform libraries, and enforcement after the fact.
+
+This is general information, not legal advice. The rules differ by country and change, and a creator’s post can be regulated in more than one country at once. Before a real campaign, ask a lawyer or the regulator: the FTC in the US, the ASA and CMA in the UK, your national consumer or advertising authority in the EU.
+
+Open the diagram and experiment: choose where the ad is bought, and switch parts of the disclosure on and off. The diagram shows the order and the mistakes but does not replace a lawyer.
+
+<AdLabel />
+
+<details>
+<summary>Check yourself: what does it take for an ad to be properly disclosed?</summary>
+
+A clear “Ad” or similar label, placed up front where the person will see it, a way to see who paid, and, for a creator’s post, the platform’s paid-partnership tool. A vague tag is not enough.
+
+</details>
+
+## Practice
+
+Prepare the advertising on paper.
+
+1. **Two ads:** one for search and one for a social network. A headline of up to 30 characters, a text of up to 90, leading to a section of the site from the brief, with an “Ad” label and a “paid for by” line.
+2. **The budget:** money, price of a click, clicks, conversion, leads, cost of a lead. The numbers agree with each other.
+3. **The disclosure card:** advertiser, creative, platform disclosure and records, label wording.
+4. **A check against the law and ethics.** Who reads the text before launch.
+
+The check looks at lengths, the label, the number and agreement of the figures, and forbidden words. Whether your ad is lawful in your case and for your profession is for a lawyer to decide: show them the text before launch.
