@@ -79,7 +79,9 @@ tools/narration/run.sh            # the whole course
 PUBLISH=0 tools/narration/run.sh 2  # render and check only
 ```
 
-Start it detached (`setsid nohup tools/narration/run.sh > /dev/null 2>&1 &`): it ends by itself.
+Start it detached (`setsid nohup tools/narration/run.sh > /dev/null 2>&1 &`): it ends by itself. A
+render that dies is tried again three times, and one that hangs for 30 minutes exits (`hung:` in the
+log) so that it can be.
 Progress: `private/narration/run.log` and `render.log` of the main checkout; one line per
 section with its real-time factor and the memory available. To resume after a stop, a crash or a
 reboot, run the same command again: the manifest is written after every section, and a section
@@ -130,7 +132,7 @@ should say.
 ## Publishing
 
 Audio first, then the manifest (`tools/narration/publish.sh audio`, then `… manifest`; `run.sh`
-does both). The audio repository is served by GitHub Pages at
+does both after every part, so a long run's lessons appear as they are finished). The audio repository is served by GitHub Pages at
 `https://open.noeticecho.space/learn-audio/`: the org's custom domain covers project pages, so it
 is the textbook's own origin, the CSP's `media-src 'self'` allows it, and no third party is
 involved. The manifest step commits `content/narration/ru.json` to this repository's main from a

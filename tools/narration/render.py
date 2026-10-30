@@ -24,7 +24,7 @@ usage: render.py --scripts .cache/narration/ru.scripts.json --audio ../learn-aud
                  [--min-free-gb 8] [--resume-free-gb 8] [--dry-run]
                  [--redo id#key,id#key --salt 2]   another sample of sections Whisper flagged
 """
-import argparse, json, os, signal, subprocess, sys, tempfile, time, wave
+import argparse, json, os, signal, subprocess, sys, tempfile, threading, time, wave
 from datetime import datetime
 from pathlib import Path
 
@@ -40,6 +40,18 @@ RETAKES, MIN_RECALL, MIN_PRECISION = 3, 0.7, 0.5  # the thresholds separate the 
 
 log_file = None
 STOP = {"now": False}
+ALIVE = {"at": time.monotonic()}  # the watchdog's clock: moved by every section and every pause tick
+HANG_SECONDS = 1800  # the longest section takes minutes; a GPU that stops answering would take forever
+
+
+def watchdog(lockfile):
+    """A run nobody is watching must end: a process stuck in the driver exits, and run.sh tries again."""
+    while True:
+        time.sleep(60)
+        if time.monotonic() - ALIVE["at"] > HANG_SECONDS:
+            log(f"hung: no progress for {HANG_SECONDS // 60} min; exiting")
+            lockfile.unlink(missing_ok=True)
+            os._exit(75)
 
 
 def log(msg):
@@ -86,6 +98,7 @@ def wait_for_memory(min_gb, resume_gb):
         return
     log(f"pause: {gb:.1f} GB available (pause below {min_gb}, resume at {resume_gb}){', a test run is active' if busy else ''}")
     while (mem_available_gb() < resume_gb or test_run_active()) and not STOP["now"]:
+        ALIVE["at"] = time.monotonic()
         time.sleep(10)
     log(f"resume: {mem_available_gb():.1f} GB available")
 
@@ -216,6 +229,7 @@ def main():
 
     lockfile = lock(audio)
     stop = STOP
+    threading.Thread(target=watchdog, args=(lockfile,), daemon=True).start()
 
     def on_signal(sig, frame):
         stop["now"] = True
@@ -260,10 +274,12 @@ def main():
         for lesson, sec in todo:
             if stop["now"]:
                 break
+            ALIVE["at"] = time.monotonic()
             wait_for_memory(a.min_free_gb, a.resume_free_gb)
             if stop["now"]:
                 break
             ts = time.monotonic()
+            ALIVE["at"] = ts
             sents = sec["sentences"]
             seed = int(sec["hash"][:8], 16) + (a.salt * 7919 if f"{lesson['id']}#{sec['key']}" in redo else 0)
             out = [None] * len(sents)
