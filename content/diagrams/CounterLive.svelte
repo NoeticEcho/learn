@@ -9,85 +9,146 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
+
+
+	const W = pick({
+		ru: {
+			kinds: { view: 'просмотр', event: 'событие', goal: 'цель' },
+			opened: 'открыта страница',
+			second: ' (второй раз: код стоит дважды)',
+			caption: 'Нажимайте и смотрите, что записывает счётчик',
+			state: 'Состояние счётчика',
+			installed: 'код счётчика на странице',
+			twice: 'код вставлен дважды',
+			guard: 'защита от повторной отправки цели',
+			recording: 'Вебвизор',
+			actions: 'Действия посетителя',
+			open: 'Открыть страницу',
+			scroll: 'Прокрутить до 50%',
+			call: 'Нажать на телефон',
+			submit: 'Отправить форму',
+			reset: 'Сбросить',
+			visits: 'Визитов',
+			views: 'Просмотров',
+			events: 'Событий',
+			goals: 'Целей',
+			logLabel: 'Журнал счётчика',
+			none: 'Кода счётчика на странице нет: ничего не записывается, и то, что происходит, вы не узнаете.',
+			doubled: 'Просмотров вдвое больше, чем было открытий: код стоит дважды, и все цифры завышены.',
+			repeated: (n: number) => `Форма отправлена один раз, а цель записана ${n} раза: без защиты каждое нажатие считается заявкой, и конверсия обманывает.`,
+			fine: 'Всё сходится: одно действие одна запись.',
+			rec: 'Вебвизор включён: кроме этих записей собираются движения мыши, клики, прокрутка и, если поля не замаскированы, текст, который человек вводит. Об этом отдельный урок про приватность.',
+			made: 'Счётчик выдуманный и никуда ничего не отправляет: журнал только в этой схеме.'
+		},
+		en: {
+			kinds: { view: 'view', event: 'event', goal: 'goal' },
+			opened: 'page opened',
+			second: ' (a second time: the code is there twice)',
+			caption: 'Press and watch what the counter records',
+			state: 'State of the counter',
+			installed: 'the counter code is on the page',
+			twice: 'the code is pasted twice',
+			guard: 'a guard against sending the goal again',
+			recording: 'Session recording',
+			actions: 'The visitor’s actions',
+			open: 'Open the page',
+			scroll: 'Scroll to 50%',
+			call: 'Tap the phone number',
+			submit: 'Send the form',
+			reset: 'Reset',
+			visits: 'Visits',
+			views: 'Page views',
+			events: 'Events',
+			goals: 'Goals',
+			logLabel: 'The counter’s log',
+			none: 'There is no counter code on the page: nothing is recorded, and you won’t know what happens.',
+			doubled: 'There are twice as many page views as there were openings: the code is there twice, and all the numbers are inflated.',
+			repeated: (n: number) => `The form was sent once, but the goal was recorded ${n} times: without a guard every press counts as a lead, and the conversion lies.`,
+			fine: 'Everything adds up: one action, one record.',
+			rec: 'Session recording is on: besides these records, mouse movements, clicks, scrolling and, if fields are not masked, the text a person types are collected. There is a separate lesson on privacy.',
+			made: 'The counter is invented and sends nothing anywhere: the log lives only in this diagram.'
+		}
+	});
 
 	let installed = $state(true);
 	let twice = $state(false);
 	let guard = $state(true);
 	let webvisor = $state(false);
-	let log = $state<{ kind: string; name: string }[]>([]);
+	let log = $state<{ kind: 'view' | 'event' | 'goal'; name: string }[]>([]);
 	let visit = $state(1);
 	let sentForm = $state(false);
 
-	function push(kind: string, name: string) {
+	function push(kind: 'view' | 'event' | 'goal', name: string) {
 		if (!installed) return;
 		log.push({ kind, name });
-		if (twice && kind === 'просмотр') log.push({ kind, name: name + ' (второй раз: код стоит дважды)' });
+		if (twice && kind === 'view') log.push({ kind, name: name + W.second });
 	}
 	function view() {
-		push('просмотр', 'открыта страница');
+		push('view', W.opened);
 	}
 	function scrollTo(n: number) {
-		push('событие', `scroll_${n}`);
+		push('event', `scroll_${n}`);
 	}
 	function call() {
-		push('цель', 'phone_click');
+		push('goal', 'phone_click');
 	}
 	function submit() {
 		if (guard && sentForm) return;
 		sentForm = true;
-		push('цель', 'lead_submit');
+		push('goal', 'lead_submit');
 	}
 	function reset() {
 		log = [];
 		sentForm = false;
 		visit = 1;
 	}
-	const views = $derived(log.filter((l) => l.kind === 'просмотр').length);
-	const events = $derived(log.filter((l) => l.kind === 'событие').length);
-	const goals = $derived(log.filter((l) => l.kind === 'цель').length);
+	const views = $derived(log.filter((l) => l.kind === 'view').length);
+	const events = $derived(log.filter((l) => l.kind === 'event').length);
+	const goals = $derived(log.filter((l) => l.kind === 'goal').length);
 	const forms = $derived(log.filter((l) => l.name === 'lead_submit').length);
 </script>
 
 <figure class="dg">
-	<figcaption>Нажимайте и смотрите, что записывает счётчик</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Состояние счётчика">
-		<label><input type="checkbox" bind:checked={installed} /> код счётчика на странице</label>
-		<label><input type="checkbox" bind:checked={twice} /> код вставлен дважды</label>
-		<label><input type="checkbox" bind:checked={guard} /> защита от повторной отправки цели</label>
-		<label><input type="checkbox" bind:checked={webvisor} /> Вебвизор</label>
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.state}>
+		<label><input type="checkbox" bind:checked={installed} /> {W.installed}</label>
+		<label><input type="checkbox" bind:checked={twice} /> {W.twice}</label>
+		<label><input type="checkbox" bind:checked={guard} /> {W.guard}</label>
+		<label><input type="checkbox" bind:checked={webvisor} /> {W.recording}</label>
 	</div>
-	<div class="dg-ctl" role="group" aria-label="Действия посетителя">
-		<button type="button" onclick={view}>Открыть страницу</button>
-		<button type="button" onclick={() => scrollTo(50)}>Прокрутить до 50%</button>
-		<button type="button" onclick={call}>Нажать на телефон</button>
-		<button type="button" onclick={submit}>Отправить форму</button>
-		<button type="button" onclick={reset}>Сбросить</button>
+	<div class="dg-ctl" role="group" aria-label={W.actions}>
+		<button type="button" onclick={view}>{W.open}</button>
+		<button type="button" onclick={() => scrollTo(50)}>{W.scroll}</button>
+		<button type="button" onclick={call}>{W.call}</button>
+		<button type="button" onclick={submit}>{W.submit}</button>
+		<button type="button" onclick={reset}>{W.reset}</button>
 	</div>
 
 	<div class="tot" role="status" aria-live="polite">
-		<span>Визитов <strong>{views ? visit : 0}</strong></span>
-		<span>Просмотров <strong>{views}</strong></span>
-		<span>Событий <strong>{events}</strong></span>
-		<span>Целей <strong>{goals}</strong></span>
+		<span>{W.visits} <strong>{views ? visit : 0}</strong></span>
+		<span>{W.views} <strong>{views}</strong></span>
+		<span>{W.events} <strong>{events}</strong></span>
+		<span>{W.goals} <strong>{goals}</strong></span>
 	</div>
-	<ol class="log" aria-label="Журнал счётчика">
-		{#each log as l, i (i)}<li><span class="dg-mono">{l.kind}</span> {l.name}</li>{/each}
+	<ol class="log" aria-label={W.logLabel}>
+		{#each log as l, i (i)}<li><span class="dg-mono">{W.kinds[l.kind]}</span> {l.name}</li>{/each}
 	</ol>
 	<p class="dg-out" aria-live="polite">
 		{#if !installed}
-			Кода счётчика на странице нет: ничего не записывается, и то, что происходит, вы не узнаете.
+			{W.none}
 		{:else if twice && views}
-			Просмотров вдвое больше, чем было открытий: код стоит дважды, и все цифры завышены.
+			{W.doubled}
 		{:else if !guard && forms > 1}
-			Форма отправлена один раз, а цель записана {forms} раза: без защиты каждое нажатие считается заявкой, и конверсия обманывает.
+			{W.repeated(forms)}
 		{:else}
-			Всё сходится: одно действие одна запись.
+			{W.fine}
 		{/if}
 	</p>
 	{#if webvisor}
-		<p class="dg-out">Вебвизор включён: кроме этих записей собираются движения мыши, клики, прокрутка и, если поля не замаскированы, текст, который человек вводит. Об этом отдельный урок про приватность.</p>
+		<p class="dg-out">{W.rec}</p>
 	{/if}
-	<p class="dg-out">Счётчик выдуманный и никуда ничего не отправляет: журнал только в этой схеме.</p>
+	<p class="dg-out">{W.made}</p>
 </figure>
 
 <style>

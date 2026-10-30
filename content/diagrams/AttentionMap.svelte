@@ -8,22 +8,59 @@
 -->
 <script lang="ts">
 	import './shared.css';
+	import { pick } from '#lib/i18n/index.ts';
 
-	const screens = [
-		{ n: 1, share: 57, name: 'Первый экран', has: 'шапка, заголовок, обещание' },
-		{ n: 2, share: 17, name: 'Второй экран', has: 'как это работает' },
-		{ n: 3, share: 7, name: 'Третий экран', has: 'примеры и доказательства' },
-		{ n: 4, share: 19, name: 'Всё ниже', has: 'цены, вопросы, подвал' }
-	];
+
+	const W = pick({
+		ru: {
+			screens: [
+				{ name: 'Первый экран', has: 'шапка, заголовок, обещание' },
+				{ name: 'Второй экран', has: 'как это работает' },
+				{ name: 'Третий экран', has: 'примеры и доказательства' },
+				{ name: 'Всё ниже', has: 'цены, вопросы, подвал' }
+			],
+			caption: 'Где поставить кнопку',
+			group: 'Где находится призыв к действию',
+			bottom: 'Внизу',
+			nth: (n: number) => `${n}-й экран`,
+			attention: 'внимания',
+			button: '{W.button}',
+			where: (at: number) => (at === 4 ? 'внизу страницы' : `на ${at}-м экране`),
+			outA: (where: string) => `Если кнопка ${where}, на экран, где она стоит, приходится около`,
+			outB: 'времени, которое люди проводят на странице. Но кнопка работает не только по месту: если человек уже готов, он найдёт её и внизу, и поэтому кнопку часто ставят и вверху, и в конце.',
+			note: 'Доли взяты из исследования Nielsen Norman Group (2018) и усреднены по тем страницам, которые оно изучало. Для вашего сайта они ориентир для гипотезы, а не результат: проверять нужно на своих людях. Страница в схеме выдуманная.'
+		},
+		en: {
+			screens: [
+				{ name: 'First screen', has: 'header, headline, promise' },
+				{ name: 'Second screen', has: 'how it works' },
+				{ name: 'Third screen', has: 'examples and proof' },
+				{ name: 'Everything below', has: 'prices, questions, footer' }
+			],
+			caption: 'Where to put the button',
+			group: 'Where the call to action is',
+			bottom: 'At the bottom',
+			nth: (n: number) => (n === 1 ? '1st screen' : n === 2 ? '2nd screen' : '3rd screen'),
+			attention: 'of attention',
+			button: '[ Book a consultation button ]',
+			where: (at: number) => (at === 4 ? 'at the bottom of the page' : `on screen ${at}`),
+			outA: (where: string) => `If the button is ${where}, about`,
+			outB: 'of the time people spend on the page falls on the screen where it stands. But a button doesn’t work by place alone: a person who is ready will find it at the bottom too, which is why a button is often put both at the top and at the end.',
+			note: 'The shares come from the Nielsen Norman Group study (2018) and are averaged over the pages it examined. For your site they are a reference for a hypothesis, not a result: you have to test on your own people. The page in the diagram is invented.'
+		}
+	});
+
+	const shares = [57, 17, 7, 19];
+	const screens = shares.map((share, i) => ({ n: i + 1, share, ...W.screens[i] }));
 	let at = $state(3);
 	const share = $derived(screens[at - 1].share);
 </script>
 
 <figure class="dg">
-	<figcaption>Где поставить кнопку</figcaption>
-	<div class="dg-ctl" role="group" aria-label="Где находится призыв к действию">
+	<figcaption>{W.caption}</figcaption>
+	<div class="dg-ctl" role="group" aria-label={W.group}>
 		{#each screens as s (s.n)}
-			<button type="button" aria-pressed={at === s.n} onclick={() => (at = s.n)}>{s.n === 4 ? 'Внизу' : `${s.n}-й экран`}</button>
+			<button type="button" aria-pressed={at === s.n} onclick={() => (at = s.n)}>{s.n === 4 ? W.bottom : W.nth(s.n)}</button>
 		{/each}
 	</div>
 	<ol class="page">
@@ -32,16 +69,14 @@
 				<div class="heat" aria-hidden="true"></div>
 				<div class="body">
 					<strong>{s.name}</strong>: {s.has}
-					<span class="dg-mono">внимания {s.share}%</span>
-					{#if at === s.n}<span class="cta">[ Кнопка «Записаться» ]</span>{/if}
+					<span class="dg-mono">{s.share}% {W.attention}</span>
+					{#if at === s.n}<span class="cta">{W.button}</span>{/if}
 				</div>
 			</li>
 		{/each}
 	</ol>
-	<p class="dg-out" aria-live="polite">
-		Если кнопка {at === 4 ? 'внизу страницы' : `на ${at}-м экране`}, на экран, где она стоит, приходится около <strong>{share}%</strong> времени, которое люди проводят на странице. Но кнопка работает не только по месту: если человек уже готов, он найдёт её и внизу, и поэтому кнопку часто ставят и вверху, и в конце.
-	</p>
-	<p class="dg-out">Доли взяты из исследования Nielsen Norman Group (2018) и усреднены по тем страницам, которые оно изучало. Для вашего сайта они ориентир для гипотезы, а не результат: проверять нужно на своих людях. Страница в схеме выдуманная.</p>
+	<p class="dg-out" aria-live="polite">{W.outA(W.where(at))} <strong>{share}%</strong> {W.outB}</p>
+	<p class="dg-out">{W.note}</p>
 </figure>
 
 <style>

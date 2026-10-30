@@ -1,0 +1,419 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/02-metrika-setup.svx. */
+	export const metadata = {
+		id: '14-metrics/02-metrika-setup',
+		part: 14,
+		order: 2,
+		title: 'Google Analytics 4: a counter, events, key events',
+		definition: 'A counter (Google Analytics 4, Matomo, Yandex Metrica) is JavaScript that reports visits, page views and events. A goal is an important event, like a lead.',
+		summary:
+			'You’ll install a counter so that it counts honestly, and set a key event for the main action from the brief without counting one action twice. Afterwards the page has the counter code (once), the form sends the event when it is submitted, and you have a plan of events and a paragraph for the privacy policy.',
+		minutes: 30,
+		teaches: ['metrics-counter-setup', 'metrics-visits-events'],
+		requires: ['js-events', 'html-head-meta', 'net-http-status-headers'],
+		comic: {
+			panels: [
+				{ mood: 'explain', prop: 'browser', label: 'generate_lead', caption: 'A key event', say: 'Send it when a person acts, not when the page opens: the form was sent, the event fires. Once per action.' },
+				{ mood: 'hmm', side: 'right', prop: 'lock', label: 'no names or emails', say: 'The event name and its parameters must hold no personal data: no names, no emails, no phone numbers.' },
+				{ mood: 'hint', prop: 'browser', label: 'DebugView', caption: 'Checking', say: 'Set it up, then check it: open the page with debugging on and make sure the event really fires.' },
+				{ mood: 'cheer', side: 'right', prop: 'sheet', label: 'policy', caption: 'The counter and the law', say: 'A counter gets data about people. In your privacy policy say which services you use.' }
+			]
+		},
+		practice: {
+			id: 'counter-and-goal',
+			title: 'A counter, a key event and a plan of events',
+			task: 'Finish the page. 1) In the head paste the Google Analytics 4 code (the loader from googletagmanager.com/gtag/js with an id, and a gtag call with config and the id) exactly once; take a placeholder id such as G-XXXXXXX. 2) At the end of the body add a script that, when the form is submitted, calls gtag with event and generate_lead no more than once per action (a flag or once: true). 3) In the note fill in the plan of events: at least two events; each with a name in Latin letters joined by underscores, when it fires, how you guard against repeats (at least six words) and its name in GA4. The main action from the brief (in the same words) must be in the plan. 4) Write where the code goes in Wix, Squarespace and WordPress. 5) Write a paragraph for the privacy policy about the counter: what is collected, at least fifteen words, mentioning cookies and the IP address. Every “…” has to be replaced.',
+			era: 4,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a id="tel-link" href="tel:{{phone}}">{{phone}}</a></p>
+
+      <section id="action">
+        <h2>{{mainAction.label}}</h2>
+        <form id="lead-form" action="/request" method="post">
+          <p>
+            <label for="f-name">What should we call you</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name">
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel">
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <aside class="note" data-scaffold id="plan">
+      <h2>Plan of events</h2>
+      <table id="events">
+        <tr><th>Event</th><th>When it fires</th><th>Guard against repeats</th><th>In GA4</th></tr>
+        <tr class="ev"><td class="ev-name">…</td><td class="ev-when">…</td><td class="ev-once">…</td><td class="ev-ga">…</td></tr>
+        <tr class="ev"><td class="ev-name">…</td><td class="ev-when">…</td><td class="ev-once">…</td><td class="ev-ga">…</td></tr>
+      </table>
+      <p>Where the code goes: <span id="builders">…</span></p>
+      <p>For the privacy policy: <span id="policy-metrika">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"><\/script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXX');
+    <\/script>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p>{{who}}</p>
+      <p><a id="tel-link" href="tel:{{phone}}">{{phone}}</a></p>
+
+      <section id="action">
+        <h2>{{mainAction.label}}</h2>
+        <form id="lead-form" action="/request" method="post">
+          <p>
+            <label for="f-name">What should we call you</label><br>
+            <input id="f-name" name="name" type="text" autocomplete="name">
+          </p>
+          <p>
+            <label for="f-phone">Phone</label><br>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel">
+          </p>
+          <p><button type="submit">{{mainAction.label}}</button></p>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      var sent = false;
+      document.getElementById('lead-form').addEventListener('submit', function () {
+        if (sent) { return; }
+        sent = true;
+        gtag('event', 'generate_lead');
+      });
+    <\/script>
+
+    <aside class="note" data-scaffold id="plan">
+      <h2>Plan of events</h2>
+      <table id="events">
+        <tr><th>Event</th><th>When it fires</th><th>Guard against repeats</th><th>In GA4</th></tr>
+        <tr class="ev"><td class="ev-name">lead_submit</td><td class="ev-when">the person sent the “{{mainAction.label}}” form</td><td class="ev-once">a flag in the script: after the first send we don’t send again</td><td class="ev-ga">generate_lead</td></tr>
+        <tr class="ev"><td class="ev-name">phone_click</td><td class="ev-when">the person tapped the phone number</td><td class="ev-once">once per visit, later taps are not counted</td><td class="ev-ga">phone_click</td></tr>
+      </table>
+      <p>Where the code goes: <span id="builders">in Wix, under Settings and Custom Code or the Google Analytics integration; in Squarespace, under Settings, Developer Tools and Code Injection; in WordPress, in the theme header or with a header and footer code plugin</span></p>
+      <p>For the privacy policy: <span id="policy-metrika">We use Google Analytics, a service that collects data about a visit (the pages, the time, the device, where the visitor came from), stores cookies in the browser and receives the IP address, so that we can understand how people use the site.</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#plan', matches: '^[^…]*$' },
+				{ id: 'loader', kind: 'attr', selector: 'script[src]', name: 'src', matches: 'googletagmanager\\.com/gtag/js\\?id=G-\\w+' },
+				{ id: 'init', kind: 'text', selector: 'script', matches: 'gtag\\(\\s*["\']config["\']\\s*,\\s*["\']G-\\w+["\']' },
+				{ id: 'single', kind: 'text', selector: 'html', matches: '^(?![\\s\\S]*gtag\\(\\s*["\']config["\'][\\s\\S]*gtag\\(\\s*["\']config["\'])[\\s\\S]*\\S' },
+				{ id: 'goal-js', kind: 'text', selector: 'script', matches: 'gtag\\(\\s*["\']event["\']\\s*,\\s*["\'][a-z][a-z0-9_]+["\']' },
+				{ id: 'guard-js', kind: 'text', selector: 'script', matches: '(?:once\\s*:\\s*true|\\bsent\\b|\\bflag\\b|\\bdisabled\\b)' },
+				{ id: 'events', kind: 'count', selector: '#events tr.ev', min: 2 },
+				{ id: 'event-names', kind: 'text', selector: '#events .ev-name', matches: '^\\s*[a-z][a-z0-9]*(?:_[a-z0-9]+)+\\s*$' },
+				{ id: 'event-once', kind: 'text', selector: '#events .ev-once', matches: '^\\s*\\S+(?:\\s+\\S+){5,}' },
+				{ id: 'event-ga', kind: 'text', selector: '#events .ev-ga', matches: '^\\s*[a-z][a-z0-9]*(?:_[a-z0-9]+)*\\s*$' },
+				{ id: 'action', kind: 'field', selector: '#events', field: 'mainAction.label' },
+				{ id: 'builders', kind: 'text', selector: '#builders', matches: '^(?=[\\s\\S]*Wix)(?=[\\s\\S]*(?:Squarespace|Shopify))(?=[\\s\\S]*WordPress)[\\s\\S]*\\S' },
+				{ id: 'policy', kind: 'text', selector: '#policy-metrika', matches: '^(?=[\\s\\S]*(?:Analytics|GA4|Matomo|Plausible|Fathom|Metrica))(?=[\\s\\S]*cookie)(?=[\\s\\S]*(?:IP|address))\\s*\\S+(?:\\s+\\S+){14,}' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each counter term with its meaning',
+				pairs: [
+					['Visit (session)', 'One coming of a person to the site: a series of their actions that ends after a pause'],
+					['Page view', 'One page loaded'],
+					['Event', 'Any action the page reported to the counter: a scroll, a click, a video play'],
+					['Goal (key event)', 'An event or condition that you named important: a lead, a call, a download']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'The counter code has been pasted twice on a page by mistake. What happens?',
+				options: [
+					'Every page view is recorded twice: the numbers are inflated and can’t be compared',
+					'Nothing: the counter merges them itself',
+					'The counter stops working'
+				],
+				answer: 0,
+				why: [
+					'Yes. Because of the duplicate, visitors, page views and goals double, while the rates (conversion) can stay the same or be distorted. So the code goes in exactly once, and you check after pasting it.',
+					'No, the counter doesn’t know it is a mistake.',
+					'It will work, but it will lie.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A person pressed “Submit” three times because the reply was slow. The lead event fired three times. How do you fix it?',
+				options: [
+					'Add a guard: after the first send the event is not sent again (a flag, or a handler that runs once)',
+					'Count three leads: the person wanted it badly',
+					'Remove the event'
+				],
+				answer: 0,
+				why: [
+					'Yes. One action of a person should give one event record. Otherwise conversion grows for no good reason, and decisions are made on false numbers.',
+					'It is one lead: you count people, not presses.',
+					'The event is needed: without it you won’t learn the main thing.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What data does a counter of this kind collect by itself?',
+				options: [
+					'The pages the person opened, and the time',
+					'The device type and the browser',
+					'The source of the visit',
+					'The content of the form the person fills in, if you didn’t pass it into the event'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: that is the basis of the statistics.',
+					'Yes: technical information about the visit.',
+					'Yes: where the person came from (the referrer, UTM tags).',
+					'No: the counter doesn’t send what is typed into form fields (a separate tool such as session recording does that), and you must not pass a name or phone into an event.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does GA4 call the events you count as main ones (formerly “conversions”)?',
+				options: [
+					'Key events',
+					'Page views',
+					'Bounces'
+				],
+				answer: 0,
+				why: [
+					'Yes. In GA4 everything is an event; those you mark as important to the business (generate_lead, for example) are called key events. The marking applies from the moment you create it and doesn’t change old data.',
+					'A page view is the ordinary event page_view.',
+					'A bounce is the share of sessions that were not engaged, not an event.'
+				]
+			},
+			{
+				type: 'order',
+				prompt: 'Put the steps of connecting a counter in order',
+				items: [
+					'Create the counter and get its id',
+					'Paste the code into the head of every page exactly once',
+					'Set the key event for the main action',
+					'Check in debug mode that the event fires once',
+					'Say so in the privacy policy'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-visit-view-event',
+				front: 'How do a visit, a page view, an event and a goal differ?',
+				back: 'A visit: a person coming to the site. A page view: one page loaded. An event: an action the page reported to the counter. A goal (in GA4 a key event): an event you named important.'
+			},
+			{
+				id: 'metrics-one-snippet',
+				front: 'How many times does the counter code go on a page?',
+				back: 'Once, in the head of every page. A duplicate doubles page views and events. After installing, check this in the page’s source.'
+			},
+			{
+				id: 'metrics-reachgoal',
+				front: 'How do you send a goal from JavaScript?',
+				back: 'In GA4, a gtag call with the word event and the event name, such as generate_lead. In Yandex Metrica, a ym call with the counter number, the word reachGoal and the goal name. Fire it on the person’s action and guard against repeats, so that one action gives one event.'
+			},
+			{
+				id: 'metrics-ym-debug',
+				front: 'How do you check that the event fires?',
+				back: 'In GA4 use the DebugView report (or the Realtime report) and the browser console; do the action yourself and see that the event arrives once. In Yandex Metrica add the parameter _ym_debug=2 to the page address.'
+			},
+			{
+				id: 'metrics-ga4-events',
+				front: 'How is GA4 analytics built?',
+				back: 'Everything in it is an event (page_view, scroll, click, generate_lead). The main ones are marked as key events. Sending: a gtag event call with the event name.'
+			}
+		],
+		sources: [
+			{ title: 'Google Analytics: events (Google for Developers)', url: 'https://developers.google.com/analytics/devguides/collection/ga4/events', licence: 'CC-BY', kind: 'docs', lang: 'en' },
+			{ title: 'Recommended events (Analytics Help)', url: 'https://support.google.com/analytics/answer/9267735?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Create or modify key events (Analytics Help)', url: 'https://support.google.com/analytics/answer/12844695?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Automatically collected events (Analytics Help)', url: 'https://support.google.com/analytics/answer/9234069?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'About events and the DebugView report (Analytics Help)', url: 'https://support.google.com/analytics/answer/9322688?hl=en', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Web analytics (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Web_analytics', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Google Analytics (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Google_Analytics', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Matomo, a privacy-focused analytics platform', url: 'https://matomo.org/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Plausible, a lightweight cookieless analytics service', url: 'https://plausible.io/', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Yandex Metrica: quick start (for the Russian market)', url: 'https://yandex.ru/support/metrica/en/quick-start', licence: 'proprietary-link', kind: 'docs', lang: 'en' },
+			{ title: 'Yandex Metrica: reaching a goal, reachGoal (for the Russian market)', url: 'https://yandex.ru/support/metrica/en/objects/reachgoal', licence: 'proprietary-link', kind: 'docs', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A counter is a simple thing that is very easy to install wrongly. Install it once, set the event once and check it at once.',
+			hints: [
+				'The counter code goes in the head once. Copy it whole, changing only the id to the placeholder G-XXXXXXX.',
+				'The event is sent by a gtag call with three arguments: the word event, the event name and, optionally, parameters. The name is in Latin letters joined by underscores.',
+				'So that one action is not counted many times, create a flag variable: after the first send it becomes true and the event isn’t sent again.',
+				'In the policy list what is collected: pages, time, device, source, cookies, the IP address. And name the service.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in the plan of events, the line about builders and the paragraph for the policy.',
+				loader: 'The Google tag loader isn’t found: the code must have an address from googletagmanager.com/gtag/js with an id like G-XXXXXXX.',
+				init: 'There is no gtag call with config and an id like G-XXXXXXX: add it after the loader.',
+				single: 'The counter’s config call appears more than once. Keep one.',
+				'goal-js': 'There is no gtag call with event and a name in Latin letters joined by underscores.',
+				'guard-js': 'The script has no guard against repeats: add a flag (for example sent) or a handler with once: true.',
+				events: 'The plan of events needs at least two rows.',
+				'event-names': 'An event name is written in lowercase Latin letters with underscores between words: lead_submit.',
+				'event-once': 'Describe the guard against repeats in at least six words.',
+				'event-ga': 'The event name in GA4 is written in lowercase Latin letters: generate_lead.',
+				action: 'The plan of events must name the main action in the same words as the brief.',
+				builders: 'In the line about builders name all three: Wix, Squarespace and WordPress.',
+				policy: 'In the paragraph for the policy name the service (for example Google Analytics), cookies and the IP address, and write at least fifteen words.'
+			},
+			outro: 'Now the counter is installed, the event is set and guarded against repeats, and the policy has an honest word about the counter. Next we’ll see what bounces and time show, and which numbers not to trust.'
+		},
+		say: { GA4: 'G A four', gtag: 'g tag', 'Yandex Metrica': 'yan-dex metrica', ym: 'Y M', reachGoal: 'reach goal', cookie: 'cookie', IP: 'I P', Wix: 'wicks', WordPress: 'word press', UTM: 'U T M', Matomo: 'ma-tomo' }
+	};
+</script>
+
+<script>
+	import CounterLive from '../../diagrams/CounterLive.svelte';
+</script>
+
+## How to know what happens on a site
+
+In the last lesson you wrote hypotheses. To test them you need a tool that **counts** what people do on your site. Such a tool is called a **counter** (or a web analytics system). It is a small piece of JavaScript that you paste into the pages. When a person opens a page, the code sends the service’s server a short message: “such-and-such page opened, from such-and-such device, they came from there”. The service adds up the messages and shows reports.
+
+The counters you will meet most often:
+
+- **Google Analytics 4 (GA4).** Google’s free service and the most widespread in the world. It understands the UTM tags from the lesson on social networks and works with Search Console and Google Ads. For most English-language projects it is the default choice.
+- **Privacy-friendly alternatives** such as Matomo, Plausible and Fathom. They collect less, some work without cookies, and some can be hosted on your own server. They suit a site whose audience is wary of tracking, or one that wants to avoid a consent banner (more on that in the lesson on the ethics of analytics).
+- **Yandex Metrica.** Yandex’s free service, widely used in Russian projects, with its own tags and its own Webvisor. If your audience is in Russia, it is the usual choice, often beside Google’s.
+
+The principle is the same for all of them, and the differences are in the words and in how some numbers are counted (the next lesson is about that). You don’t need two counters: for a small site one is enough, and it must count honestly.
+
+**Where it comes from.** The first visit counters of the 1990s were just a number at the bottom of a page, which you read about in the lesson on 1996. Real web analytics appeared when companies began analyzing servers’ request logs and then added JavaScript tags. Google released Analytics in 2005 after buying the company Urchin (you heard the name in the lesson on UTM). GA4 replaced the earlier version, in which the “session” was central, with an “everything is an event” model; Universal Analytics stopped processing data in July 2023.
+
+## Installing: once and in one place
+
+The service gives you the code when you create the counter. In GA4 it looks like this (the id is a placeholder):
+
+```text
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXX');
+</script>
+```
+
+The first line loads Google’s tag from its server. The script below it creates the `gtag` function, which puts messages in a queue, and `gtag('config', ...)` switches the counter on with your id. GA4’s “enhanced measurement” then records page views, scrolling to the bottom of a page (the scroll event at 90%), clicks on outbound links, file downloads, site search and some video plays without any further code.
+
+In Yandex Metrica the code is longer and its start-up call is `ym(12345678, "init", {...})`; if your audience is in Russia, you will see it in its documentation.
+
+The rules of installation are the same for both:
+
+1. **In the head of every page,** so that the counter starts as soon as the page opens and doesn’t lose quick exits.
+2. **Exactly once.** A duplicate doubles page views. Open the page’s source and search for the word `config` or `init`: it should appear once.
+3. **On all pages,** the “Thank you” page included (that is where you will count the goal).
+4. **Not on a local copy for tests,** or your own clicks will get into the statistics. It is better to create a separate property for testing.
+
+**If the site is made in a builder or a CMS,** the code goes not in a file but in settings. In Wix it is under Settings and Custom Code, or its Google Analytics integration; in Squarespace, under Settings, Developer Tools and Code Injection (or its built-in Google Analytics field); in WordPress, into the theme header (best of a child theme) or with a plugin that inserts code, such as Google’s Site Kit; in Shopify, through its Google channel. Names of sections change from version to version, so check the help of yours.
+
+## What a counter counts
+
+Four words to tell apart, because in reports each means its own thing.
+
+- **A visit** (in GA4 a “session”): one coming of a person. A series of their actions counts as one visit until the person goes quiet; after a pause (30 minutes by default in GA4, and you can change it) the next coming counts as a new visit.
+- **A page view:** one page loaded. There can be several in a visit.
+- **An event:** any action the page reported to the counter. A scroll, a click, a video play. In GA4 a page view is an event too (`page_view`).
+- **A goal** (in GA4 a “key event”): an event you named **important for the project.** A lead, a call, a download.
+
+Open the diagram and try it. Press what a visitor can do, and see how the counter turns it into records. Then switch on a duplicate of the code and switch off the guard against repeats, and you will see the two commonest mistakes.
+
+<CounterLive />
+
+## An event through JavaScript
+
+There are different kinds of goals: opening a page (such as “Thank you”), the number of pages per visit, time on the site, a compound goal in steps. The most flexible and the commonest is a **JavaScript event**: the page itself tells the counter that the person did something important. In GA4:
+
+```text
+gtag('event', 'generate_lead');
+```
+
+The first word says that this is an event, and the second is the **event name.** `generate_lead` is one of GA4’s recommended events for lead generation; if there is no recommended name for what you count, you invent a name of your own. Then in GA4 you mark the event as a key event. In Yandex Metrica the same thing is `ym(12345678, 'reachGoal', 'lead_submit')`, where the goal name must match, to the letter, the one you enter when you create a goal of the type “JavaScript event”.
+
+**When to fire it.** On the **person’s action,** not when the page opens: when a form is submitted (the `submit` event of the form; you read about events in the part on JavaScript), when a phone number is tapped, when a booking is made. If the form goes without reloading the page, fire the event when the server has answered “success”, not when the button is pressed: otherwise failed submissions get into the goal too (you know about the server’s answer from the part on HTTP: code 200 or an error).
+
+**Once per action.** A person can press a button twice, the page can redraw, a handler can get attached twice. So the event is guarded: a flag variable (“already sent”) or a handler that runs once (`{ once: true }`). Without it conversion grows by itself, and you make decisions on false numbers.
+
+**Don’t send personal data in an event.** The event name and parameters must be technical: `lead_submit`, not a person’s name or phone number. A counter is not a place to keep contacts (for that there is the form and your email). Google’s terms for Analytics forbid sending personally identifiable information to it.
+
+**What to call it.** You already agreed on a scheme in the lesson on the value ladder: object_action, in Latin letters, lowercase, one name for good.
+
+## Checking: does it really fire
+
+After setting up, always check.
+
+1. In GA4, open the DebugView report (or the Realtime report) and, on your site, the browser console (you met the developer tools at the start of the course). DebugView shows each event your test visit sends.
+2. Do the action yourself. **One** record of the event should appear.
+3. Repeat the action. A second record should not appear.
+4. In a day or so the event shows in the service’s reports (reports lag a little; Realtime does not).
+5. Don’t forget to remove test visits from the statistics, for example with a filter on your own address.
+
+## The plan of events
+
+Before setting events, make a **plan of events:** a short table giving each event’s name, when it fires, how it is guarded against repeats and what it is called in the other counter. It is a cheap way not to get muddled in six months. Start with the main action from the brief and one or two steps toward it (a tap on the phone, scrolling down to the proof).
+
+## Data, law and honesty
+
+A counter gets data about people: the page address, time, device, the source of the visit, cookies and the IP address. Combined with other information such data can count as personal, and privacy law requires you to tell the person and explain the purpose. A guideline for today (not legal advice, and your lawyer should check):
+
+- **In the privacy policy** you must say which services you use, what data they collect and why (you will write such a paragraph in the practice).
+- **Don’t collect more than you need.** Don’t switch on session recording where it isn’t needed, and don’t pass names and phone numbers into events. The next lessons of the part are about that.
+- **Consent and a cookie notice.** In the EU and the UK, the ePrivacy rules (PECR in the UK) generally require consent before analytics cookies are set, apart from narrow exemptions that some regulators allow for strictly limited audience measurement; in the US there is no general cookie-consent law, but state privacy laws (California’s, for example) require notice, and a way to opt out of the “sale” or “sharing” of data when advertising features are on. How to make a banner that does not deceive you will learn in the lesson on the ethics of analytics.
+- **Where the data goes** matters too: GDPR has rules for transferring data outside the EU, and regulators have taken different views of Google Analytics over the years. Check the current position, and see the lesson on data protection.
+- **For Russia,** the personal data law (152-FZ) makes a similar demand of the policy, and it sets stricter rules on where data is stored; the Russian edition covers it.
+
+<details>
+<summary>Check yourself: why must the “lead” event be protected from being sent twice?</summary>
+
+A person can press the button several times, and one action turns into several records. Conversion grows for no good reason, and decisions are made on false numbers.
+
+</details>
+
+## Practice
+
+Finish the page and the plan.
+
+1. **The counter code** in the head: the Google tag loader and the `gtag('config', ...)` call, once.
+2. **The event** at the end of the body: on form submission `gtag('event', 'generate_lead')` is called, but no more than once per action.
+3. **A plan of events** of two rows: the name, when it fires, the guard, the name in GA4. The main action from the brief is named in the same words.
+4. **Where the code goes** in Wix, Squarespace and WordPress.
+5. **A paragraph for the privacy policy** with the service, cookies and the IP address.
+
+The check looks that the code is there and only once, that the event is sent with a guard, that the plan has correct names and that the policy is complete. Whether it works on a live site, debug mode will show: check it yourself, as described above.

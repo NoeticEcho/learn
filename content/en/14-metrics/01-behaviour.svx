@@ -1,0 +1,313 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/14-metrics/01-behaviour.svx. */
+	export const metadata = {
+		id: '14-metrics/01-behaviour',
+		part: 14,
+		order: 1,
+		title: 'What drives clicks and retention',
+		definition: 'Four forces explain a visitor’s behavior: a clear promise, a visible button, little effort and trust. They are tested with a hypothesis: if, then, because.',
+		summary:
+			'You’ll understand how a visitor reads a screen, where their attention ends and why they click or leave, so that you set hypotheses instead of guessing. Afterwards you have three hypotheses for your project’s main action in the form “if, then, because”, each with a measure and an estimate of whether the traffic is enough.',
+		minutes: 25,
+		teaches: ['metrics-attention-behaviour'],
+		requires: ['texts-screen-reading', 'design-visual-hierarchy', 'copy-fogg'],
+		comic: {
+			panels: [
+				{ mood: 'hmm', caption: 'From “it seems” to “let’s test”', say: '“Improve the home page” is not a hypothesis: it doesn’t say what to change or what should change as a result.' },
+				{ mood: 'explain', side: 'right', prop: 'sheet', label: 'if, then, because', caption: 'A hypothesis', say: 'If we raise the button, more people will click, because they see it at once. A “because” like that can be disproved.' },
+				{ mood: 'hint', prop: 'browser', label: '40 people a month', caption: 'Honest about traffic', say: 'With forty visitors, 10% and 12% are four people and five. A difference like that proves nothing.' }
+			]
+		},
+		practice: {
+			id: 'three-hypotheses',
+			title: 'Three hypotheses for the main action',
+			task: 'Write three hypotheses in the form “if we change X, then Y will rise (or fall), because Z”. Each is about the main action from the brief (name it in the same words in at least one hypothesis) or about a section of the site from the brief. For each give a measure for the test (at least two words) and the number of visitors a month to that page, as a number. The “then” must contain a word of change: “will rise”, “will fall”, “will increase” or “will decrease”. Every “…” has to be replaced.',
+			era: 8,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="hyps">
+      <h2>Hypotheses</h2>
+      <ol id="hyp-list">
+        <li class="hyp">
+          <p>If <span class="if">…</span>, then <span class="then">…</span>, because <span class="because">…</span>.</p>
+          <p>We’ll test it by: <span class="metric">…</span>. Visitors a month to the page: <span class="traffic">…</span></p>
+        </li>
+        <li class="hyp">
+          <p>If <span class="if">…</span>, then <span class="then">…</span>, because <span class="because">…</span>.</p>
+          <p>We’ll test it by: <span class="metric">…</span>. Visitors a month to the page: <span class="traffic">…</span></p>
+        </li>
+        <li class="hyp">
+          <p>If <span class="if">…</span>, then <span class="then">…</span>, because <span class="because">…</span>.</p>
+          <p>We’ll test it by: <span class="metric">…</span>. Visitors a month to the page: <span class="traffic">…</span></p>
+        </li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside class="note" data-scaffold id="hyps">
+      <h2>Hypotheses</h2>
+      <ol id="hyp-list">
+        <li class="hyp">
+          <p>If <span class="if">we move the “{{mainAction.label}}” button onto the first screen</span>, then <span class="then">the share of people who click will rise</span>, because <span class="because">a person who has already decided won’t have to look for it further down</span>.</p>
+          <p>We’ll test it by: <span class="metric">the share of clicks on the button</span>. Visitors a month to the page: <span class="traffic">900</span></p>
+        </li>
+        <li class="hyp">
+          <p>If <span class="if">we rewrite the heading of the “{{sections.0}}” section so that it makes a promise</span>, then <span class="then">the time before leaving will increase</span>, because <span class="because">in the first ten seconds a person will understand why they need this section</span>.</p>
+          <p>We’ll test it by: <span class="metric">the share of visits longer than 30 seconds</span>. Visitors a month to the page: <span class="traffic">600</span></p>
+        </li>
+        <li class="hyp">
+          <p>If <span class="if">we remove a form field that we can do without</span>, then <span class="then">the share of people who send the form will rise</span>, because <span class="because">there is less effort for the person and less reason to change their mind</span>.</p>
+          <p>We’ll test it by: <span class="metric">the share of forms sent</span>. Visitors a month to the page: <span class="traffic">300</span></p>
+        </li>
+      </ol>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'no-blanks', kind: 'text', selector: '#hyps', matches: '^[^…]*$' },
+				{ id: 'three', kind: 'count', selector: '#hyp-list .hyp', min: 3 },
+				{ id: 'if-long', kind: 'text', selector: '#hyp-list .if', matches: '^\\s*\\S+(?:\\s+\\S+){2,}' },
+				{ id: 'then-change', kind: 'text', selector: '#hyp-list .then', matches: '(?:\\b(?:rise|rises|grow|grows|increase|increases|fall|falls|drop|drops|decrease|decreases|improve|improves|decline|declines)\\b|go(?:es)? (?:up|down))' },
+				{ id: 'because-long', kind: 'text', selector: '#hyp-list .because', matches: '^\\s*\\S+(?:\\s+\\S+){3,}' },
+				{ id: 'action', kind: 'field', selector: '#hyp-list', field: 'mainAction.label' },
+				{ id: 'section', kind: 'field', selector: '#hyp-list', field: 'sections', min: 1 },
+				{ id: 'metric', kind: 'text', selector: '#hyp-list .metric', matches: '^\\s*\\S+(?:\\s+\\S+){1,}' },
+				{ id: 'traffic', kind: 'text', selector: '#hyp-list .traffic', matches: '\\d' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each part of a hypothesis with its role',
+				pairs: [
+					['If…', 'The one specific change you will make'],
+					['Then…', 'Which measure will change, and in which direction'],
+					['Because…', 'The reason you think so: it can be tested and disproved'],
+					['We’ll test it by…', 'The measure that will show whether it came true']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A 2018 NN/g study found that people spend 57% of their viewing time on the first screen. What follows for the call to action?',
+				options: [
+					'Show the promise and the main call on the first screen, but those who decide later need the button lower down too',
+					'Whatever is below the first screen need not be written',
+					'Put the button only at the very bottom'
+				],
+				answer: 0,
+				why: [
+					'Yes. Attention drops sharply below the first screen, so the main thing goes first. But people decide at different times: some are ready at once, some read to the end. So a button is often put both at the start and at the end.',
+					'No: 43% of the time still goes below the first screen, and that is where the proof and the prices live.',
+					'No: then most visitors won’t see the button.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'Which of these can keep a person from pressing a button?',
+				options: [
+					'It’s unclear what will happen after pressing',
+					'The form is too long',
+					'There is no proof next to the call',
+					'The heading promises what the person is looking for'
+				],
+				answer: [0, 1, 2],
+				why: [
+					'Yes: unclarity raises the cost of a mistake in the person’s eyes.',
+					'Yes: every field is effort (ability in Fogg’s model).',
+					'Yes: without trust a person isn’t ready to act (motivation).',
+					'No: that, on the contrary, helps them stay and press.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A page has 40 visitors a month. You want to test whether a new button raises the share who click from 10% to 12%. What is sensible?',
+				options: [
+					'Don’t try to prove so small a difference on such numbers: make the change and compare months, or collect people’s feedback',
+					'Wait a week and compare the percentages',
+					'Show the two versions in turn and choose the one that looks better'
+				],
+				answer: 0,
+				why: [
+					'Yes. 10% of 40 is four people, 12% is five: the difference is one person, within chance. With small numbers a hypothesis is tested differently: with bigger changes, comparing periods and talking to people.',
+					'In a week there will be one or two clicks: percentages on such numbers mean nothing.',
+					'“Looks better” is not a measure: you are testing people’s behavior, not taste.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What does NN/g’s finding about “leaving within ten seconds” tell you?',
+				options: [
+					'People mostly decide in the first seconds whether to stay, so the page’s value has to show at once',
+					'People always leave within ten seconds',
+					'People who left need not be counted'
+				],
+				answer: 0,
+				why: [
+					'Yes. By NN/g’s analysis of a large data set, the chance of leaving is highest in the first ten seconds, and those who stay longer often stay for minutes.',
+					'No: many stay a long time. An average of about a minute hides a wide spread.',
+					'It is exactly those who left that you need to understand in order to improve the page.'
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'metrics-hypothesis-format',
+				front: 'In what form is a hypothesis written?',
+				back: 'If (one specific change), then (which measure will change and how), because (a reason that can be tested). And separately: what you’ll test it by, and whether the traffic is enough.'
+			},
+			{
+				id: 'metrics-first-screen',
+				front: 'How much attention does the first screen get?',
+				back: 'In NN/g’s 2018 study, about 57% of viewing time went to the first screen and 74% to the first two (it was 80% above the fold in 2010). Put the important thing and the call at the start, but repeat them at the end.'
+			},
+			{
+				id: 'metrics-ten-seconds',
+				front: 'What is known about the first seconds on a page?',
+				back: 'The chance of leaving is highest in the first ten seconds: a person quickly decides whether to stay. Those who stay longer often stay a long time. Show the page’s value at once.'
+			},
+			{
+				id: 'metrics-click-levers',
+				front: 'What drives clicks?',
+				back: 'A clear promise, a visible and understandable button, little effort (a short form), trust next to the call, speed and ease on a phone. In Fogg’s terms: motivation, ability, prompt.'
+			},
+			{
+				id: 'metrics-small-traffic',
+				front: 'What do you do if traffic is small?',
+				back: 'Don’t compare percentages on single digits. Make big changes, compare periods, collect feedback and watch how people use the page. A statistical test won’t help here.'
+			}
+		],
+		sources: [
+			{ title: 'NN/g: Scrolling and Attention', url: 'https://www.nngroup.com/articles/scrolling-and-attention/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'NN/g: How long do users stay on web pages?', url: 'https://www.nngroup.com/articles/how-long-do-users-stay-on-web-pages/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'NN/g: How little do users read?', url: 'https://www.nngroup.com/articles/how-little-do-users-read/', licence: 'proprietary-link', kind: 'article', lang: 'en' },
+			{ title: 'Information foraging (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Information_foraging', licence: 'CC-BY-SA', kind: 'article', lang: 'en' },
+			{ title: 'Bounce rate (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Bounce_rate', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'A hypothesis differs from a guess in that it can be disproved. Write three so that the numbers will show whether you were right.',
+			hints: [
+				'One hypothesis, one change. “Redo the page” is not a hypothesis, but “move the button onto the first screen” is.',
+				'In the “then” part name the measure and the direction: “the share who click will rise”.',
+				'In the “because” part explain the reason in words about the person: what they will see, understand or feel.',
+				'Write the number of visitors as a number. If it is under a hundred a month, say honestly that you’ll have to test differently.'
+			],
+			mistakes: {
+				'no-blanks': 'There is still an ellipsis “…” somewhere. Fill in all three hypotheses.',
+				three: 'You need three hypotheses.',
+				'if-long': 'In the “If” part describe the change in at least three words.',
+				'then-change': 'The “then” part must have a word of change: “will rise”, “will fall”, “will increase” or “will decrease”.',
+				'because-long': 'In the “because” part write the reason in at least four words.',
+				action: 'At least one hypothesis must name the main action in the same words as the brief.',
+				section: 'At least one hypothesis must name a section of the site from the brief.',
+				metric: 'Write the measure for the test in at least two words.',
+				traffic: 'The number of visitors a month must be written as a number.'
+			},
+			outro: 'Now you have three hypotheses that can be tested. To test them you need a counter, and that is the next lesson.'
+		},
+		say: { 'NN/g': 'N N slash g', Fogg: 'fog', CTA: 'C T A' }
+	};
+</script>
+
+<script>
+	import AttentionMap from '../../diagrams/AttentionMap.svelte';
+</script>
+
+## From “it seems” to “let’s test”
+
+You have already done a lot for the site: chosen the words, built the pages, invented the flows. Now you have to answer honestly **what of it works**. Without measuring, every argument about a site turns into a question of taste: “it seems to me the button should be bigger”. This part teaches measuring, and this lesson is about **what is worth measuring and changing at all**: how a person behaves on a page, where their attention ends, why they click or leave.
+
+In the part on texts you saw how people read from a screen (they don’t read, they scan), and in the part on copywriting you met Fogg’s model: an action happens when **motivation**, **ability** (how simple it is) and a **prompt** (a button you can press) coincide. Here we turn that into assumptions that can be tested.
+
+## What is known about attention
+
+One of the biggest dangers of analytics is that numbers give a feeling of knowing. So below is only what rests on research, with a note of what kind.
+
+- **The first seconds decide.** An NN/g article drawing on research by Microsoft Research, which analyzed page-visit durations for about 205,000 pages and more than two billion dwell times, showed that the chance of leaving is highest in the first ten seconds, and that those who stay beyond thirty seconds often stay for minutes. The average time on a page is a little under a minute, but it hides a wide spread: some leave at once, some stay long. The conclusion: show the page’s value within ten seconds.
+- **Attention falls down the page.** In 2018 NN/g measured that people spend about 57% of their viewing time on the first screen and about 74% on the first two. For comparison, in 2010 the first screen got 80%: over the years people have grown more willing to scroll, but they still look mostly at the start.
+- **A person doesn’t read it all.** By an earlier NN/g study (2008), in an average visit a person has time to read at most 28% of the words on a page, and 20% is more likely, so they need to be given what the eyes can find: headings, lists, emphasis (remember the lesson on scanning).
+
+Open the diagram: it shows these shares on an invented page. Move the call to action between screens.
+
+<AttentionMap />
+
+Two warnings. **These are averages over the pages that were studied.** On your site, with your people, the picture may differ, and you’ll see it in the part on heatmaps. And **attention is not decision**: a person who is ready will find the button at the bottom too. That is why a button is often put both at the start and at the end.
+
+## What drives clicks
+
+If you gather what you already know, several things affect a click. They are also the places where you look for hypotheses:
+
+1. **A clear promise.** In ten seconds a person must understand what the page is and why they need it (the heading, the four U’s, the inverted pyramid).
+2. **A visible and understandable button.** It can be seen (hierarchy: size, contrast, place), and the text on it says what will happen (“Book a consultation”, not “Submit”).
+3. **Effort.** Every form field, every extra step is a cost. Ability, in Fogg’s terms.
+4. **Trust.** Next to the call is what removes fear: a review, a document, a price, clear terms.
+5. **Expectation and the “scent of information”.** A person arrived by a link with a promise and looks for its continuation. If there is no trail, they leave. Researchers call this “information scent” (information foraging theory; a link is in the sources).
+6. **Speed and ease on a phone.** A page that loads slowly or is awkward for a finger loses people before the first glance.
+
+## What drives return
+
+Return (retention) for a site with a one-off service works differently than for an app: a person doesn’t come back to the site every day, they **come back when they need it**, or **stay in touch** (subscribed, follow a channel). What affects it:
+
+- **Value on the first visit.** If a person got an answer, they will remember where they got it (the lead magnet and the value ladder).
+- **A prompt to return:** an email, a post, a reminder (the flows of the first part). In the Hooked model it is the “external trigger” you read about in the lesson on influence.
+- **No irritants.** Every pushy email and pop-up lowers the chance of returning.
+- **A rhythm you can keep.** Consistency matters more than frequency.
+
+## A hypothesis: how to write one
+
+A **hypothesis** is an assumption that can be tested and disproved. A good hypothesis looks like this:
+
+> **If** we make (one specific change), **then** (a measure) will rise (or fall), **because** (a reason about the person).
+
+And with it, always: **what we’ll test it by** (which measure) and **whether the traffic is enough**.
+
+Examples of bad and good wording:
+
+- Bad: “Improve the home page”. It doesn’t say what to change or what should change.
+- Bad: “Make the button red, because red converts best”. The reason is made up and isn’t about your person.
+- Good: “If we move the ‘Book a consultation’ button onto the first screen, then the share who click will rise, because a person who has already decided won’t have to look for it”.
+
+What distinguishes a hypothesis from an order: the “because” can be disproved. If the button is raised and the share didn’t grow, the reason was wrong, and you learned something new about people.
+
+**Honest about traffic.** On a page that forty people open a month, the difference between 10% and 12% is four people and five: such a difference proves nothing. So estimate for each hypothesis in advance whether there are enough visitors. If not, don’t pretend to be doing science: test with bigger changes, by comparing months and by talking to people (the lesson on A/B tests covers this).
+
+<details>
+<summary>Check yourself: why is the hypothesis “If we raise the button, then the share who click will rise, because…” better than “Improve the page”?</summary>
+
+It names one specific change, one measure and a reason that can be disproved. “Improve the page” can be neither tested nor failed.
+
+</details>
+
+## Practice
+
+Write three hypotheses for your project.
+
+1. Each in the template “If… then… because…” with one specific change.
+2. At least one is about the main action from the brief, at least one about a section of the site from the brief.
+3. For each, a measure for the test and the number of visitors a month as a number.
+
+The check looks at form: three hypotheses, a word of change in the “then”, a reason, a measure, numbers. Whether your hypotheses are clever is for you to decide: read each as if you were going to fail it, and ask yourself what you’ll learn about people if it isn’t confirmed.
