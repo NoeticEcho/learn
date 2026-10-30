@@ -84,7 +84,7 @@ const code = await withApp(async (load) => {
 				// and writes one in lower case when it has no vowel to read: «ttl», «rf»
 				const said = h.text
 					.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''))
-					.replace(/(?<![\p{L}\p{N}])[bcdfghjklmnpqrstvwxz]{2,6}(?![\p{L}\p{N}])/g, (m: string) => m.toUpperCase());
+					.replace(/(?<![\p{L}\p{N}])[bcdfghjklmnpqrstvwxz]{2,6}(?![\p{L}\p{N}])/gu, (m: string) => m.toUpperCase());
 				const { errors, ops } = w.align(ref, w.words(n.spoken(said, l, 'ru')));
 				refWords += ref.length;
 				errs += errors;
