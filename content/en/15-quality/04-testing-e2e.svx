@@ -1,0 +1,392 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/04-testing-e2e.svx. */
+	export const metadata = {
+		id: '15-quality/04-testing-e2e',
+		part: 15,
+		order: 4,
+		title: 'Testing a site: what an end-to-end test is',
+		definition: 'An end-to-end (e2e) test is a program that walks a person’s path through a site in a real browser and compares the result with what is expected.',
+		summary:
+			'A site breaks quietly: a style was tweaked and the form stopped submitting. Afterwards you understand what a test is, how unit, integration and end-to-end (e2e) tests differ, you can read a Playwright example, and you can draw up a plan of scenarios for your project’s main action, with test data and no one else’s real data.',
+		minutes: 25,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'browser',
+					label: 'form ✕',
+					caption: 'Worked yesterday',
+					say: 'Someone tweaked the footer button. The form at the top stopped submitting. Nobody noticed.'
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'flowchart',
+					label: 'open|type|see',
+					caption: 'A scenario',
+					say: 'An end-to-end test takes the same steps a person would, in a real browser.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'certificate',
+					label: '5 passed',
+					caption: 'Green',
+					say: 'Every change: run the scenarios. Red means fix it before it ships.'
+				}
+			]
+		},
+		teaches: ['quality-e2e-testing'],
+		requires: ['html-forms', 'js-events', 'net-http-status-headers', 'infra-ci-cd', 'quality-keyboard-screen-reader'],
+		practice: {
+			id: 'e2e-plan',
+			title: 'An end-to-end test plan for the main action',
+			task: 'Draw up a plan for checking the site. 1) In the #plan table every row has the class scenario and three cells: given, when and then. Fill in the four ready-made rows: the path of the main action on a phone (in “when” name the action in the brief’s words), submitting an empty form, opening two sections from the brief (name them), and going through with the keyboard. Leave no “…”. 2) A row for each language in the brief has already been added: fill those in the same way. 3) In the #test-code block finish a Playwright test: go to the page, click a link or button by role and name (the action’s name from the brief), type into a field by its label, click a button, check the message; no waitForTimeout pauses. 4) In #test-data say what data the tests use (test data, made up). 5) In #ci-run say when the tests run (on every deploy or change). Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside data-scaffold id="e2e">
+      <h2>End-to-end test plan</h2>
+      <table id="plan">
+        <thead><tr><th>Given</th><th>When</th><th>Then</th></tr></thead>
+        <tbody>
+          <tr class="scenario"><td class="given">The home page is open on a 375-pixel screen</td><td class="when">…</td><td class="then">…</td></tr>
+          <tr class="scenario"><td class="given">The form is open</td><td class="when">…</td><td class="then">…</td></tr>
+          <tr class="scenario"><td class="given">The home page is open</td><td class="when">…</td><td class="then">…</td></tr>
+          <tr class="scenario"><td class="given">The page is open and the mouse is not used</td><td class="when">…</td><td class="then">…</td></tr>
+          {{#each languages}}<tr class="scenario"><td class="given">The home page is open</td><td class="when">…</td><td class="then">…</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <h3>The main action test</h3>
+      <pre id="test-code">import { test, expect } from '@playwright/test';
+
+test('…', async ({ page }) => {
+  await page.goto('/');
+  …
+});
+<\/pre>
+
+      <p>Test data: <span id="test-data">…</span></p>
+      <p>When the tests run: <span id="ci-run">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <p>{{who}}</p>
+
+    <aside data-scaffold id="e2e">
+      <h2>End-to-end test plan</h2>
+      <table id="plan">
+        <thead><tr><th>Given</th><th>When</th><th>Then</th></tr></thead>
+        <tbody>
+          <tr class="scenario"><td class="given">The home page is open on a 375-pixel screen</td><td class="when">I press “{{mainAction.label}}” and fill in the form</td><td class="then">I see the message “Thank you,” and the page doesn’t scroll sideways</td></tr>
+          <tr class="scenario"><td class="given">The form is open</td><td class="when">I submit it empty</td><td class="then">A message in words appears next to the field, and focus is on the first field with an error</td></tr>
+          <tr class="scenario"><td class="given">The home page is open</td><td class="when">I open the sections “{{sections.0}}” and “{{sections.1}}”</td><td class="then">The section heading is visible, and no link leads to a 404</td></tr>
+          <tr class="scenario"><td class="given">The page is open and the mouse is not used</td><td class="when">I go through the page with the Tab key and submit the form with Enter</td><td class="then">Focus is always visible, and the form goes through</td></tr>
+          {{#each languages}}<tr class="scenario"><td class="given">The home page is open</td><td class="when">I switch the language to {{.}}</td><td class="then">The texts and the page address are in {{.}}, and the lang attribute matches</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+
+      <h3>The main action test</h3>
+      <pre id="test-code">import { test, expect } from '@playwright/test';
+
+test('{{mainAction.label}}: a visitor reaches the result', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: '{{mainAction.label}}' }).click();
+  await page.getByLabel('Phone').fill('+1 000 000 0000');
+  await page.getByRole('button', { name: '{{mainAction.label}}' }).click();
+  await expect(page.getByRole('status')).toContainText('Thank you');
+});
+<\/pre>
+
+      <p>Test data: <span id="test-data">made up: the name “Test,” the phone +1 000 000 0000, the domain example.com; no real people involved</span></p>
+      <p>When the tests run: <span id="ci-run">on every change and before every deploy (CI)</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'scenarios', kind: 'count', selector: 'tr.scenario', min: 5 },
+				{ id: 'no-gaps', kind: 'text', selector: '#plan', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'when-action', kind: 'field', selector: '.when', field: 'mainAction.label' },
+				{ id: 'when-sections', kind: 'field', selector: '#plan', field: 'sections', min: 2 },
+				{ id: 'code-shape', kind: 'text', selector: '#test-code', matches: "import\\s*\\{\\s*test,\\s*expect\\s*\\}\\s*from\\s*'@playwright/test'" },
+				{ id: 'code-goto', kind: 'text', selector: '#test-code', matches: 'page\\.goto\\(' },
+				{ id: 'code-roles', kind: 'text', selector: '#test-code', matches: '(?=[\\s\\S]*getByRole)(?=[\\s\\S]*getByLabel)' },
+				{ id: 'code-action', kind: 'field', selector: '#test-code', field: 'mainAction.label' },
+				{ id: 'code-expect', kind: 'text', selector: '#test-code', matches: 'expect\\(' },
+				{ id: 'code-no-sleep', kind: 'text', selector: '#test-code', matches: '^(?![\\s\\S]*waitForTimeout)' },
+				{ id: 'code-no-gaps', kind: 'text', selector: '#test-code', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'test-data', kind: 'text', selector: '#test-data', matches: '[Tt]est|made[- ]up|invented|fictional|fake|example' },
+				{ id: 'ci-run', kind: 'text', selector: '#ci-run', matches: 'CI|deploy|release|change|commit|push|every|each' }
+			]
+		},
+		quiz: [
+			{
+				type: 'match',
+				prompt: 'Match each kind of test with what it checks',
+				pairs: [
+					['Unit test', 'one small function, apart from everything else'],
+					['Integration test', 'how several parts work together, for example receiving an inquiry and the database'],
+					['End-to-end (e2e) test', 'a person’s whole path in a real browser: open, click, type, see the result']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'How do end-to-end tests differ from the others in cost?',
+				options: [
+					'They are the slowest and the most expensive to maintain, so they are written for the few main paths',
+					'They are the cheapest, so they are written for every little thing',
+					'They don’t differ from the others'
+				],
+				answer: 0,
+				why: [
+					'Yes. The classic “pyramid”: many fast unit tests at the bottom, fewer integration tests, and just a few end-to-end tests at the top. A brochure site may have no unit tests at all, and two or three end-to-end tests on the main action are still the most useful check.',
+					'No. Because they are slow and sensitive to small changes, they are not written for every little thing.',
+					'No. They start a real browser and walk a real page.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What makes an end-to-end test steady rather than “brittle”?',
+				options: [
+					'Finding elements by role and label (getByRole, getByLabel), the way a person does',
+					'Hooking onto CSS classes such as .btn-3',
+					'Letting the browser itself wait for the result (auto-waiting) instead of inserting one-second pauses',
+					'Using separate data for each test instead of shared data'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: roles and labels change less often than classes, and they check accessibility along the way.',
+					'No. A class can be renamed without touching anything visible, and the test fails for nothing.',
+					'Yes: a pause “for a second” is sometimes too short and sometimes too long. Playwright itself waits until an element appears and is ready.',
+					'Yes: if tests share data they get in each other’s way and fail now one way, now another.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'A test sometimes passes and sometimes fails, though the site hasn’t changed. What is such a test called, and what do you do?',
+				options: [
+					'Flaky: find the cause (timing, shared data, the network) and fix it, instead of rerunning until it turns green',
+					'Perfect: it checks different cases',
+					'Outdated: just delete it without looking into it'
+				],
+				answer: 0,
+				why: [
+					'Yes. A flaky test is worse than none: people stop believing it, and a real breakage drowns among false alarms.',
+					'No. A test must give the same result on the same site.',
+					'No. First understand the cause, or the flakiness will pass to the next test.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'What data should go into a test inquiry form?',
+				options: [
+					'Made-up data: the name “Test,” a phone made of zeros, an address at example.com',
+					'A real phone number and a friend’s name, because it’s easier',
+					'The data of a real customer from an earlier inquiry'
+				],
+				answer: 0,
+				why: [
+					'Yes. Real data isn’t needed, and putting someone else’s personal data into a test is also a legal risk. Mark inquiries with test data so they don’t mix with real ones.',
+					'No. Your friend hasn’t agreed, and every run will send them a notification.',
+					'No. That is someone else’s personal data, and you have no right to use it in tests.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write, inside a pre tag, a line of a Playwright test that clicks a button found by the role button and the name “Send”',
+				starter: '',
+				checks: [
+					{ id: 'click', kind: 'text', selector: 'pre, code, p, div', matches: 'getByRole\\(.button.,\\s*\\{\\s*name:\\s*.Send.\\s*\\}\\)\\.click\\(\\)' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-test-pyramid',
+				front: 'What is the test pyramid?',
+				back: 'Many fast unit tests, fewer integration tests and just a few end-to-end tests. The higher up, the costlier and slower, but the closer to what a person sees.'
+			},
+			{
+				id: 'quality-test-e2e',
+				front: 'What is an end-to-end (e2e) test?',
+				back: 'A program that walks a person’s path in a real browser (open, click, type) and compares the result with what is expected. For a site, first of all it is the main action from the brief.'
+			},
+			{
+				id: 'quality-test-locators',
+				front: 'How should a test find elements?',
+				back: 'By role and label: getByRole, getByLabel, getByText. This is steady and checks accessibility along the way. Hooking onto CSS classes is brittle.'
+			},
+			{
+				id: 'quality-test-flaky',
+				front: 'What is a flaky test?',
+				back: 'A test that sometimes passes and sometimes fails on the same code. The causes: pauses instead of waiting, shared data, the network. Fix it; don’t just rerun it.'
+			},
+			{
+				id: 'quality-test-data',
+				front: 'What data goes into tests?',
+				back: 'Made-up data: “Test,” a phone made of zeros, example.com. Real personal data is not used in tests, and test inquiries are marked.'
+			}
+		],
+		sources: [
+			{ title: 'Playwright: Installation and writing tests', url: 'https://playwright.dev/docs/intro', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'Playwright: Best practices', url: 'https://playwright.dev/docs/best-practices', licence: 'link-only', kind: 'docs', lang: 'en' },
+			{ title: 'The Practical Test Pyramid (Ham Vocke, martinfowler.com)', url: 'https://martinfowler.com/articles/practical-test-pyramid.html', licence: 'link-only', kind: 'article', lang: 'en' },
+			{ title: 'Automated testing (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Testing/Automated_testing', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Software testing (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Software_testing', licence: 'CC-BY-SA', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to write a plan of checks: what must always work on your site, and a test for the main action. This is what is run before every deploy.',
+			hints: [
+				'A scenario reads like a story: Given (where we start), When (what the person does), Then (what must happen). No “…” left in the cells.',
+				'In the first row, name the main action in the brief’s words under “when.” In the third row, put two sections from the brief in quotation marks.',
+				'In the test, find the link with getByRole, give it the action’s name from the brief and call click on it. Take the name from the brief. No pauses like waitForTimeout are needed.',
+				'Test data: made up (“Test,” a phone made of zeros). They run on every change or deploy (CI).'
+			],
+			mistakes: {
+				scenarios: 'The table must have at least five scenario rows (four plus one per language).',
+				'no-gaps': 'There are still “…” in the table. Fill in every cell.',
+				'when-action': 'In one of the scenarios, name the main action in the brief’s words under “when.”',
+				'when-sections': 'Name at least two sections from the brief in the plan.',
+				'code-shape': 'The test starts by importing test and expect from @playwright/test.',
+				'code-goto': 'The test needs to go to the page: await page.goto with the address of the home page.',
+				'code-roles': 'Find elements by role and label: getByRole and getByLabel.',
+				'code-action': 'In the test, name the main action in the brief’s words.',
+				'code-expect': 'The test must check something: await expect(…) with a matcher.',
+				'code-no-sleep': 'Remove waitForTimeout: Playwright waits for the element itself.',
+				'code-no-gaps': 'There are still “…” in the test block. Finish the steps.',
+				'test-data': 'Say that the test data is made up (“Test,” a phone made of zeros, example.com).',
+				'ci-run': 'Say when the tests run: on every change and before a deploy.'
+			},
+			outro: 'Now the main path of the site has a check that a machine can run instead of a memory. One such test pays for itself the first time it stops a bad change by turning red.'
+		},
+		say: { e2e: 'E 2 E', Playwright: 'play-right', 'end-to-end': 'end to end', CI: 'C I', flaky: 'flaky', getByRole: 'get by role', getByLabel: 'get by label', Given: 'given', When: 'when', Then: 'then', 'API': 'A P I' }
+	};
+</script>
+
+<script>
+	import E2eTrace from '../../diagrams/E2eTrace.svelte';
+</script>
+
+## Why have a machine check the site
+
+The first test of a site is you: you opened it, clicked, looked. On a small site, and the first time, that is enough. But every change can break something far away: someone renamed a class in the footer and the form at the top stopped submitting; a plugin was updated and a field lost its label. You check the place you edited and don’t check the rest. Other people find out before you do.
+
+A **test** is a small program that does what a person would do and compares the result with what it should be. Its value isn’t that it is smarter but that it **never tires and never forgets**: you can run it on every change in a minute.
+
+Tests come in different sizes.
+
+- A **unit test** checks one small function apart from everything else. “The function that computes an order’s cost, given a 10 percent discount, returns 900 out of 1,000.” Fast, cheap, precise.
+- An **integration test** checks how several parts work together. “The inquiry receiver puts an inquiry in the database, and it shows in the list.”
+- An **end-to-end test** (e2e) checks **a person’s whole path** in a real browser. Open the home page, press “Book,” type a phone number, press “Send,” see “Thank you.” The closest to real life, and the slowest.
+
+The idea comes from Mike Cohn, and it is well described in an article by Ham Vocke on Martin Fowler’s site. It is a **pyramid**: at the bottom many fast unit tests, higher up the integration tests, and at the very top a few end-to-end tests. The higher the floor, the more it costs to write and maintain, but the smaller the chance that everything is green while it is broken for a person. A site with no server logic of its own (a static one) may have no unit tests at all. Still, two or three end-to-end tests on the main action remain the most useful check of all.
+
+<details>
+<summary>Check yourself: how does an end-to-end test differ from a unit test?</summary>
+
+A unit test checks one small part on its own, and an end-to-end test walks a person’s whole path in a real browser. So an end-to-end test is closer to reality, but slower and costlier to maintain.
+
+</details>
+
+## What an end-to-end test looks like
+
+One of the most widespread tools is **Playwright** (made by Microsoft). It starts a real browser (Chromium, Firefox or WebKit) and drives it from code. Here is a test of the main action:
+
+```js
+import { test, expect } from '@playwright/test';
+
+test('book a consultation', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Book' }).click();
+  await page.getByLabel('Phone').fill('+1 000 000 0000');
+  await page.getByRole('button', { name: 'Send' }).click();
+  await expect(page.getByRole('status')).toContainText('Thank you');
+});
+```
+
+Read it as a story. Open the page. Find the **link named “Book”** and click it. Find the **field labeled “Phone”** and type a number. Press the “Send” button. Make sure the status region contains the words “Thank you.” Notice that the test finds elements the way a person or a screen reader does, **by role and label**. That isn’t an accident but the advice of the tool’s own authors. Such a test is steady: a class can be renamed, while the label and the role stay. It also checks accessibility along the way: if a field lost its label, the test won’t find it, just as a screen reader wouldn’t.
+
+Two properties make Playwright tests less brittle. First, **auto-waiting**: before each action it waits until the element appears, becomes visible and isn’t covered, so you needn’t insert a “wait a second” pause. Second, it opens a **fresh clean browser** every time, so tests don’t affect each other.
+
+This textbook is checked the same way: it has end-to-end tests, as well as the accessibility and speed checks from the two previous lessons. All of it runs automatically on every change.
+
+Try it in the diagram: break the site, choose how the test finds elements, and see what it notices.
+
+<E2eTrace />
+
+<details>
+<summary>Check yourself: why is it better to find an element by role and label than by CSS class?</summary>
+
+A class is a detail of styling. It can be renamed without changing anything visible, and the test fails for nothing. A role and a label are seen by both a person and a screen reader, so a test that finds elements by them also checks accessibility.
+
+</details>
+
+## What to test on a site
+
+You don’t need to test everything: every test has to be maintained. Start with the question “what can we absolutely not afford to break?” For a site that is almost always:
+
+1. **The main action** from the brief: book, buy, call, subscribe. The path from the home page to the result. This is the first and main test.
+2. **An error and an empty form:** what a person sees if they enter something wrong. A message next to the field, focus on the error.
+3. **The main pages open** (not a 404), and links between sections don’t lead nowhere.
+4. **The keyboard:** the form can be filled in and submitted without a mouse.
+5. **Languages:** the switcher leads to the right version, and the page’s `lang` matches the text.
+6. **Consent and the policy** are present beside the form (more on that later in this part).
+7. **The phone:** the main action on a narrow screen (375 pixels) works the same.
+
+Tests don’t need to check other people’s services (does mail work behind the scenes), pixel-perfect matches, or small texts that you change often.
+
+It helps to draw up the plan **in words**, before any code. Scenarios are customarily written as “Given, When, Then”: where we start, what the person does, what must happen. They are understandable to more than a programmer, and you can show them to a client: “here is what we check on every change.”
+
+## Tests and data
+
+A test that submits a form creates a real inquiry. So:
+
+- **The data is made up.** “Test,” a phone made of zeros, an email at `example.com` (a domain reserved for examples). Real names and phone numbers of people aren’t used in tests. They are personal data, and you have no right to spend them on a check.
+- **Test inquiries are marked,** so they don’t reach real customers: a separate field, a service address or a separate test environment.
+- **A test doesn’t hit someone else’s live site.** Check your own site on your own test environment or your own copy.
+- The checks of forms and hidden bot traps (the next lesson) must not break because of tests: a test is a visitor too, and it needs a way through.
+
+## Flaky tests
+
+The worst test is one that sometimes passes and sometimes doesn’t for no reason. It is called **flaky**. A test that can’t be trusted is worse than none: people stop noticing red, and a real breakage drowns. The causes are usually these: a pause instead of waiting, data shared between tests, the network, the clock. You cure the cause and don’t rerun until it is green.
+
+A useful rule: a red test either finds a real breakage or shows that the test needs rewriting. Ignoring red is wrong in either case.
+
+## Where tests run
+
+A test is useful when it runs without your memory. In the lesson on CI/CD you saw that a deploy system can run checks on every commit and **refuse to deploy** if anything is red. Site tests plug in exactly there. For a small project it is enough that they run on every push of changes. Manual checks can’t be replaced: a real phone, a screen reader and a human eye find what a test didn’t expect.
+
+## Practice
+
+You are in the era of 2022: the site deploys automatically, and it is time to add a check to that pipeline. Draw up a plan of end-to-end tests for your project’s main action and finish a Playwright test.
+
+The page keeps a table of scenarios and a block of code in the note. The check reads text: it makes sure the plan has the main action and the sections from the brief, and the code has a role, a label and a check of the result without pauses. It can’t run the test. You’ll run it for real when you connect Playwright to your own project: the instructions are in the sources.
+
+## What used to be different
+
+In the 2000s a site was checked by the person who made it: opened in three browsers and “clicked around.” Later came tools like Selenium that could drive a browser but were slow and temperamental: tests failed on their own and people stopped trusting them. Modern tools (Playwright, Cypress) removed the main inconveniences: waiting is built in, browsers install with one command, and a test reads like a story. But the main rule is the same: few tests, on what must not break.
