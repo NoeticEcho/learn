@@ -1,0 +1,382 @@
+<script module>
+	/** License of this lesson's text: CC BY-SA 4.0. The English edition of content/ru/15-quality/06-forms-spam.svx. */
+	export const metadata = {
+		id: '15-quality/06-forms-spam',
+		part: 15,
+		order: 6,
+		title: 'Form security: server-side checks and spam',
+		definition: 'Server-side validation is protection that a request sent around the page can’t bypass. A trap, a rate limit and a delay stop spam better than a CAPTCHA does.',
+		summary:
+			'A form is the one place on a site where a stranger’s text gets into your database and your inbox. Afterwards you know why a check in the browser is not protection, what the server checks, how to stop spam without a CAPTCHA, which bothers people and shares data with third parties, and you write your project’s main action form with rules for the server.',
+		minutes: 30,
+		comic: {
+			panels: [
+				{
+					mood: 'hmm',
+					prop: 'postcard',
+					label: 'required ✓',
+					caption: 'In the browser',
+					say: [
+						{ text: 'The browser checked that the field is filled in.' },
+						{ who: 'A bot', text: 'I write straight to the server.' }
+					]
+				},
+				{
+					mood: 'explain',
+					side: 'right',
+					prop: 'envelope',
+					label: 'I check it myself',
+					caption: 'On the server',
+					say: 'The server trusts nothing that arrives: length, format, rate, extra fields.'
+				},
+				{
+					mood: 'cheer',
+					prop: 'cards',
+					label: 'trap · limit · delay',
+					caption: 'No CAPTCHA',
+					say: 'A hidden field, a rate limit and a delay stop the bot and don’t bother people.'
+				}
+			]
+		},
+		teaches: ['quality-forms-spam-security'],
+		requires: ['quality-owasp-basics', 'html-form-validation', 'infra-serverless-edge'],
+		practice: {
+			id: 'form-defence',
+			title: 'The main action form: a trap, limits, server rules',
+			task: 'Defend the form. 1) The form is sent with the post method; name and phone are required, and all three fields have maxlength. 2) Add a bot trap: a block with the class hp and aria-hidden=true, containing a field with tabindex=-1 and autocomplete=off; hide the block by shifting it off the edge (position: absolute, a large negative left), not with display: none. 3) Add a hidden field ts for the time the form was shown. 4) Remove the third-party CAPTCHA (the recaptcha script). 5) Give the form-error message role=alert. 6) The submit button is named with the main action from the brief. 7) In the table “What the server does,” write a rule (with numbers) and an error message for each field; the error text for the visitor must not reveal internals (no SQL, stack, exception). 8) In #rate write a rate limit as a number with a unit of time. Every “…” has to be replaced.',
+			era: 6,
+			files: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <form id="request-form" action="/request" method="get">
+        <h2>{{mainAction.label}}</h2>
+        <p><label for="f-name">Name</label><br><input id="f-name" name="name" autocomplete="name"></p>
+        <p><label for="f-phone">Phone</label><br><input id="f-phone" name="phone" type="tel" autocomplete="tel"></p>
+        <p><label for="f-msg">Briefly, what you need</label><br><textarea id="f-msg" name="message" rows="4"></textarea></p>
+        <p id="form-error"></p>
+        <button type="submit">Send</button>
+      </form>
+    </main>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer><\/script>
+
+    <aside data-scaffold id="server">
+      <h2>What the server does</h2>
+      <table id="rules">
+        <thead><tr><th>Field</th><th>Rule</th><th>Error message</th></tr></thead>
+        <tbody>
+          <tr class="rule"><td>Name</td><td>…</td><td>…</td></tr>
+          <tr class="rule"><td>Phone</td><td>…</td><td>…</td></tr>
+          <tr class="rule"><td>Message</td><td>…</td><td>…</td></tr>
+        </tbody>
+      </table>
+      <p>Message on an internal error: <span id="error-text">…</span></p>
+      <p>Rate limit: <span id="rate">…</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			solution: {
+				'index.html': `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1d2430; background: #fff; }
+      main { max-width: 40rem; margin: 0 auto; padding: 1rem; }
+      .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+    <\/style>
+  </head>
+  <body>
+    <main>
+      <h1>{{title}}</h1>
+      <form id="request-form" action="/request" method="post">
+        <h2>{{mainAction.label}}</h2>
+        <p><label for="f-name">Name</label><br><input id="f-name" name="name" autocomplete="name" required maxlength="80"></p>
+        <p><label for="f-phone">Phone</label><br><input id="f-phone" name="phone" type="tel" autocomplete="tel" required maxlength="20"></p>
+        <p><label for="f-msg">Briefly, what you need</label><br><textarea id="f-msg" name="message" rows="4" maxlength="1000"></textarea></p>
+        <div class="hp" aria-hidden="true"><label for="f-site">Website</label><input id="f-site" name="website" tabindex="-1" autocomplete="off"></div>
+        <input type="hidden" name="ts" value="">
+        <p id="form-error" role="alert"></p>
+        <button type="submit">{{mainAction.label}}</button>
+      </form>
+    </main>
+
+    <aside data-scaffold id="server">
+      <h2>What the server does</h2>
+      <table id="rules">
+        <thead><tr><th>Field</th><th>Rule</th><th>Error message</th></tr></thead>
+        <tbody>
+          <tr class="rule"><td>Name</td><td>required, 2 to 80 characters, no line breaks</td><td>Please enter your name</td></tr>
+          <tr class="rule"><td>Phone</td><td>required, 10 to 20 characters: digits, plus, spaces, parentheses and hyphens</td><td>Please check the phone number</td></tr>
+          <tr class="rule"><td>Message</td><td>at most 1000 characters, at most two links</td><td>Please shorten the message or remove extra links</td></tr>
+        </tbody>
+      </table>
+      <p>Message on an internal error: <span id="error-text">We couldn’t send this. Please try again later or call us</span></p>
+      <p>Rate limit: <span id="rate">no more than 5 inquiries an hour from one address, after that a 429 response</span></p>
+    </aside>
+  </body>
+</html>
+`
+			},
+			checks: [
+				{ id: 'method', kind: 'exists', selector: 'form[method="post"][action]' },
+				{ id: 'required', kind: 'count', selector: 'input[required]', min: 2 },
+				{ id: 'maxlength', kind: 'count', selector: 'input[maxlength], textarea[maxlength]', min: 3 },
+				{ id: 'trap', kind: 'exists', selector: '.hp[aria-hidden="true"] input[tabindex="-1"][autocomplete="off"]' },
+				{ id: 'trap-css', kind: 'text', selector: 'style', matches: '\\.hp\\s*\\{[^}]*position:\\s*absolute' },
+				{ id: 'trap-not-display', kind: 'text', selector: 'style', matches: '^(?![\\s\\S]*\\.hp\\s*\\{[^}]*display:\\s*none)' },
+				{ id: 'timestamp', kind: 'exists', selector: 'input[type="hidden"][name="ts"]' },
+				{ id: 'no-captcha', kind: 'count', selector: 'script[src*="recaptcha"], script[src*="hcaptcha"]', max: 0 },
+				{ id: 'error-live', kind: 'exists', selector: '#form-error[role="alert"], #form-error[aria-live]' },
+				{ id: 'action-label', kind: 'field', selector: 'form button[type="submit"]', field: 'mainAction.label' },
+				{ id: 'rules-count', kind: 'count', selector: 'tr.rule', min: 3 },
+				{ id: 'rules-gaps', kind: 'text', selector: '#rules', matches: '^(?![\\s\\S]*…)' },
+				{ id: 'rules-numbers', kind: 'text', selector: '#rules', matches: '\\d' },
+				{ id: 'error-text', kind: 'text', selector: '#error-text', matches: '^(?![\\s\\S]*(SQL|[Ss]tack|[Ee]xception|[Tt]race))(?=[\\s\\S]*([Cc]ouldn’t|[Cc]ould not|[Uu]nable|[Tt]ry again|[Cc]heck|[Pp]lease))' },
+				{ id: 'rate', kind: 'text', selector: '#rate', matches: '(?=[\\s\\S]*\\d)(?=[\\s\\S]*(second|minute|hour|day))' }
+			]
+		},
+		quiz: [
+			{
+				type: 'single',
+				prompt: 'The form fields are marked required and maxlength. Is that enough to protect the server?',
+				options: [
+					'No: that is a convenience for the person, and a bot or a developer tool will send a request around the browser; the server checks everything again',
+					'Yes: the browser won’t let wrong data through',
+					'Yes, if you add a pattern'
+				],
+				answer: 0,
+				why: [
+					'Yes. Anyone who can send a request (curl, a script) bypasses the browser’s check. So the real check is only on the server. The browser check exists only so that a person can fix a typo faster.',
+					'No. The browser checks only people who use a browser.',
+					'No. A pattern also works in the browser and is bypassed the same way.'
+				]
+			},
+			{
+				type: 'multiple',
+				prompt: 'What belongs to checking a form on the server?',
+				options: [
+					'The type, length and format of each field, against a list of what is allowed',
+					'Trusting the maxlength values from the browser',
+					'Rejecting extra fields the form doesn’t send',
+					'Limiting the size of the whole request'
+				],
+				answer: [0, 2, 3],
+				why: [
+					'Yes: checking against what is allowed is simpler and more reliable than listing what is forbidden.',
+					'No. The maxlength attribute is only a hint to the browser, and the server receives whatever was sent.',
+					'Yes: unexpected fields are often a sign of an attempt.',
+					'Yes: with no limit, one request of a gigabyte can bring a server down.'
+				]
+			},
+			{
+				type: 'match',
+				prompt: 'Match each anti-spam measure with what it does or where it is weak',
+				pairs: [
+					['A trap field (honeypot)', 'a simple bot fills it in and gives itself away, while a clever one skips it'],
+					['A rate limit', 'stops hundreds of inquiries a minute coming from one address'],
+					['A timing check', 'rejects a submission faster than a person could fill in the form'],
+					['A third-party CAPTCHA', 'bothers people with disabilities and passes data to a third party']
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Which message should a visitor see if the database breaks on the server?',
+				options: [
+					'“We couldn’t send this. Please try again later or call us,” with the details written to a log',
+					'The database’s whole error text, so a developer can find the cause faster',
+					'Nothing at all'
+				],
+				answer: 0,
+				why: [
+					'Yes. The visitor needs to know what to do, not the internals. The details are for you, and they go to the log.',
+					'No. Table names, paths and queries help an attacker (these are A10 and A02 on the OWASP list).',
+					'No. The person won’t know whether the inquiry arrived, and will send it again or leave.'
+				]
+			},
+			{
+				type: 'single',
+				prompt: 'Someone writes “Sam” in the Name field, then a line break and “Bcc: spam@…”. The form sends an email with that name in a header. What is this called, and how do you avoid it?',
+				options: [
+					'Email header injection; reject or strip line breaks, and use a sending library instead of gluing strings',
+					'An ordinary typo that the mail server will fix',
+					'It is XSS and is cured only by a CSP header'
+				],
+				answer: 0,
+				why: [
+					'Yes. If input is put into an email header unchecked, the line breaks add headers of their own, for example hidden recipients, and the form mails spam in your name.',
+					'No. The mail server will carry out whatever it is handed.',
+					'No. This is not about the browser but about email, so CSP won’t help.'
+				]
+			},
+			{
+				type: 'code',
+				prompt: 'Write a trap field: a block with the class hp and aria-hidden=true, containing a field named website with tabindex of minus one and autocomplete=off',
+				starter: '',
+				checks: [
+					{ id: 'trap', kind: 'exists', selector: '.hp[aria-hidden=true] input[name=website][tabindex=\\-1][autocomplete=off]' }
+				]
+			}
+		],
+		cards: [
+			{
+				id: 'quality-form-server',
+				front: 'Why is a form checked on the server?',
+				back: 'A check in the browser can be bypassed: a request can be sent around the page. The browser check helps people, and the server check protects you. Check against what is allowed: type, length, format, size, extra fields.'
+			},
+			{
+				id: 'quality-form-honeypot',
+				front: 'How does a trap field (honeypot) work?',
+				back: 'A field hidden from people: shifted off the edge, with aria-hidden=true, tabindex=-1 and autocomplete=off. A bot fills it in, and the server quietly drops the inquiry. Hiding by color alone is wrong: a screen reader will read it.'
+			},
+			{
+				id: 'quality-form-limits',
+				front: 'Which anti-spam measures don’t bother people?',
+				back: 'A trap, a rate limit (with the code 429), a timing check, and refusing links in a first message. Add a CAPTCHA when these aren’t enough, and choose an accessible one that collects little data.'
+			},
+			{
+				id: 'quality-form-error',
+				front: 'Which error messages should you show?',
+				back: 'To the person: what to do (“please check the phone number”), without internals. Details (the query, the path, the version) go only to the log. Announce the error to a screen reader with role=alert.'
+			},
+			{
+				id: 'quality-form-mail',
+				front: 'What is dangerous in a form that sends an email?',
+				back: 'Header injection: a line break in the name adds recipients. Strip line breaks, use a sending library and limit the number of emails.'
+			}
+		],
+		sources: [
+			{ title: 'OWASP: Input Validation Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OWASP: Query Parameterization Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OWASP: Error Handling Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'OWASP: Cross-Site Request Forgery Prevention Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html', licence: 'CC-BY-SA', kind: 'docs', lang: 'en' },
+			{ title: 'Client-side form validation (MDN)', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation', licence: 'CC-BY-SA', kind: 'course', lang: 'en' },
+			{ title: 'Inaccessibility of CAPTCHA (W3C)', url: 'https://www.w3.org/TR/turingtest/', licence: 'link-only', kind: 'article', lang: 'en' }
+		],
+		videos: [],
+		guide: {
+			intro: 'You’re about to defend your project’s main action form: the real check lives on the server, and the page keeps a trap and clear errors.',
+			hints: [
+				'The form: method=post, required on the name and phone, and maxlength on all three fields (for example 80, 20 and 1000).',
+				'The trap: <div class=hp aria-hidden=true><label for=f-site>Website</label><input id=f-site name=website tabindex=-1 autocomplete=off></div>, and in the styles .hp { position: absolute; left: -10000px; }. And the hidden field ts: <input type=hidden name=ts>.',
+				'Remove the recaptcha script. Give the error message role=alert. Name the button with the main action from the brief.',
+				'The rules table needs numbers (2 to 80 characters). In #error-text write something like “We couldn’t send this, please try again later,” and in #rate something like “no more than 5 inquiries an hour from one address.”'
+			],
+			mistakes: {
+				method: 'The form must be sent with the post method and must have an action.',
+				required: 'The name and the phone need required.',
+				maxlength: 'Every field needs maxlength.',
+				trap: 'You need a .hp block with aria-hidden=true and a field with tabindex=-1 and autocomplete=off.',
+				'trap-css': 'In the styles, .hp is shifted off the edge: position: absolute and a large negative left.',
+				'trap-not-display': 'Don’t hide the trap with display: none: clever bots skip such fields.',
+				timestamp: 'Add a hidden field named ts.',
+				'no-captcha': 'Remove the third-party CAPTCHA script.',
+				'error-live': '#form-error needs role=alert.',
+				'action-label': 'The submit button must be named with the main action from the brief.',
+				'rules-count': 'The table must have three rules.',
+				'rules-gaps': 'There are still “…” in the rules table. Fill in every cell.',
+				'rules-numbers': 'The rules need numbers: a length, a number of characters.',
+				'error-text': 'The error text for the visitor: “We couldn’t send this, please try again later,” with no SQL, stack or other internals.',
+				rate: 'Write the rate limit as a number with a unit of time, for example “5 inquiries an hour.”'
+			},
+			outro: 'Now the form is checked where it can’t be bypassed, and it stops bots without bothering people. Try it yourself: submit it empty, too long and with a quotation mark, and see what the server says.'
+		},
+		say: { honeypot: 'honey pot', maxlength: 'max length', required: 'required', CSRF: 'C S R F', XSS: 'X S S', SQL: 'sequel', CAPTCHA: 'cap-chuh', Turnstile: 'turn-style', reCAPTCHA: 'ree-cap-chuh', OWASP: 'oh-wasp', aria: 'AR-ee-uh', tabindex: 'tab index' }
+	};
+</script>
+
+<script>
+	import FormTrap from '../../diagrams/FormTrap.svelte';
+	import AttackFeed from '../../diagrams/AttackFeed.svelte';
+</script>
+
+## The only door
+
+A static site accepts almost nothing: it only serves. A form is the exception. Through it, into your inbox, database and CRM comes **the text of a stranger, and more often of a stranger’s program**. Everything that arrives from outside must be treated as untrusted until you have checked it yourself. That is the rule from [the lesson on security](../05-security/) (injection, access rights), now applied to one particular place.
+
+In [the lesson on forms](../../02-html/06-forms/) you already saw that `required`, `type="tel"` and `pattern` are **a convenience for the person, not protection**: a request sent around the page (by a script, by `curl`, by a developer tool) bypasses any check in the browser. So a form has two checks, and the main one is on the server.
+
+<details>
+<summary>Check yourself: why check on the server if the browser already has required?</summary>
+
+A check in the browser can be bypassed: a request can be sent around the page. It helps people, and the server check protects you.
+
+</details>
+
+## What the server checks
+
+The principle is one: **allow the known, don’t forbid the bad**. For each field you write in advance what is acceptable, and everything else is rejected.
+
+- **Presence and type.** The name is there and is a string; the phone is there.
+- **Length.** A name of 2 to 80 characters, a message up to 1,000. With no upper limit, one request can bring megabytes.
+- **Format.** A phone: digits, plus, spaces, parentheses, hyphens. An email: a simple pattern, with the real check done by a confirmation email.
+- **Extra fields.** The form sends three fields; if six arrived, that is an attempt.
+- **The size of the whole request.** Limited on the web server.
+- **Files** (if the form accepts attachments): a list of allowed types and a size limit, your own random file name, storage outside the public folder, and never run them. The details are in the OWASP cheat sheet.
+- **Email.** If the form sends an email, values go into headers (the subject, the “from”) only through a sending library, and line breaks are stripped. Otherwise “header injection” lets someone add hidden recipients, and the form becomes a spam mailer.
+- **Database queries** only with parameters (see [the lesson on security](../05-security/)), and output to the page only with escaping.
+
+On an error the server answers with the right **code**: 400 or 422 “the data is wrong,” 429 “too many requests,” 500 “internal error.” And with the right **message** to the person: “Please check the phone number,” “We couldn’t send this, please try again later.” Don’t show internals: table names, file paths and exception texts help an attacker and tell the person nothing. The details go to the log. Announce the error to a screen reader with `role="alert"` (the lesson on screen readers).
+
+One more caveat about login: the messages “no such user” and “wrong password” let someone work out who is registered with you. Write them the same: “wrong address or password.”
+
+## Where spam comes from
+
+Three sources: **simple bots** (they fill in every field and send hundreds of times), **clever bots** (a real browser, behaving almost like a person) and **people** who are paid to spam. The first are the most numerous, and cheap measures are enough against them.
+
+The measures run from the cheapest for the person to the costliest.
+
+- **A trap field** (a honeypot). You add an extra field that a person doesn’t see and name it so that a bot is tempted (“Website,” “URL”). A person won’t fill it in, a bot will. If the field is filled in, the server **pretends all is well** and quietly drops the inquiry. There is a trap here for you yourself: the field must be hidden from **all people**. A field hidden by color alone (white on white) is read by a screen reader, and a password manager may fill it in, and an honest person ends up as a “bot.” The right way: shift it off the edge of the screen and add `aria-hidden="true"`, `tabindex="-1"` and `autocomplete="off"`. As for `display: none`, clever bots skip those.
+- **A timing check.** A timestamp (signed by the server) is put into a hidden field when the form is shown. A form submitted in under three seconds isn’t human.
+- **A rate limit.** You met it in [the lesson on REST APIs](../../06-server/05-rest-api/), and here it is applied to a form: no more than a few inquiries an hour from one address or number, after that a 429 response. This is the only measure that also stops clever bots.
+- **Content rules.** For example, no more than two links in a first message.
+- **Confirmation.** For a mailing list: an email with a link, and until the person clicks, the address is not subscribed (double opt-in).
+- **A CAPTCHA.** A puzzle “prove you are not a robot.” It bothers people (distorted letters are hard to read, and some variants have no accessible alternative, which the W3C calls a barrier) and it usually **passes data about the device and behavior to a third-party service**. That is a question for data protection law and for accessibility (3.3.8). If a CAPTCHA is still needed, choose an accessible one that collects little extra data (for example Cloudflare Turnstile; in Russia Yandex SmartCaptcha is used) and **name the service in your privacy notice**. A foreign CAPTCHA service is also a question of transferring data abroad, which the next lessons cover.
+
+Test it in the diagram: honest people and bots, and four measures. Look especially at what happens to a person with a screen reader if the trap is hidden by color alone.
+
+<FormTrap />
+
+<details>
+<summary>Check yourself: why must a trap field not be hidden with white on white?</summary>
+
+A screen reader will read it, autofill will reach it, and an honest person will fill it in and be taken for a bot. It must be hidden from everyone: off the edge of the screen, with aria-hidden, tabindex of minus one and autocomplete off.
+
+</details>
+
+## The rest of the list
+
+- **CSRF** (cross-site request forgery). If a person is logged in to your site, someone else’s page can make their browser send a request in their name. The defense: a token in the form, or a cookie with `SameSite=Lax` (see [the lesson on authentication](../../06-server/07-authentication/)) and a check of the `Origin` header. For an inquiry form without login the risk is small, and for a personal account it is mandatory.
+- **Where the form goes.** For a static site the form is received by a service or by your own function (the lesson on serverless). The recipient of the data is also a recipient of personal data: where it is located and who owns it decides questions of law (the next lessons). The keys to the receiver sit in environment variables, not in the page.
+- **CSP for the form.** `form-action 'self'` won’t let an injected foreign form change where data is sent.
+- **Check it yourself.** Submit the form empty, with a very long text, with a quotation mark and a script in a field, ten times in a row. What you didn’t get around to checking, a bot will check. In the lesson on tests you drew up scenarios like that.
+
+Try the second view of the diagram too: the same measures in a feed of attempts, limited to the form.
+
+<AttackFeed only={['esc', 'csp', 'rate', 'trap', 'https']} />
+
+## Practice
+
+You stay in the era of 2022. Defend the main action form: add a trap, a time field and `maxlength`, remove the third-party CAPTCHA and write down the rules the server will apply.
+
+The check reads markup and text: it will find a correctly hidden trap, `required` and `maxlength`, the absence of a third-party CAPTCHA, `role="alert"` and numbers in the rules. It won’t check the server’s work: you’ll write the real server using this table as your guide. You can show it to whoever builds the receiver: it is the specification.
+
+## What used to be different
+
+A form in the 1990s sent an email with a Perl script that pasted everything in as it was, and “header injection” turned such forms into mailers of spam to thousands of addresses. Against spam people invented distorted letters (CAPTCHA), then “I’m not a robot.” They helped but divided people: some couldn’t pass them, and data about the device went to a third-party service. Today the approach is a combination of cheap measures that don’t bother a person, with a CAPTCHA kept for the last resort.
