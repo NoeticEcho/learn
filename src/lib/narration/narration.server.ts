@@ -61,6 +61,25 @@ export function spoken(text: string, lesson: Pick<LessonMeta, 'say'>, lang: Loca
 	return lex ? speak(text, lex, lesson.say ?? {}) : text;
 }
 
+/**
+ * What Whisper heard, with the maps' written forms found however it spelt them («content type»,
+ * «certbot», «Let's encrypt»), then in spoken form. For measuring only: it changes no audio.
+ */
+export function heardAs(text: string, lesson: Pick<LessonMeta, 'say'>, lang: Locale): string {
+	const lex = lexicons[lang];
+	if (!lex) return text;
+	const say = lesson.say ?? {};
+	const map = { ...lex.words, ...say };
+	const keys = Object.keys(map)
+		.filter((k) => /\p{Script=Latin}/u.test(k) && k.length > 2)
+		.sort((a, b) => b.length - a.length);
+	const esc = (k: string) => k.replace(/[.*+?^\${}()|[\]\\]/g, '\\$&').replace(/[-\s]+/g, '[-\\s]?');
+	const rx = new RegExp(`(?<![\\p{L}\\p{N}])(?:${keys.map(esc).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
+	const norm = (s: string) => s.toLowerCase().replace(/[-\s]+/g, '');
+	const byNorm = new Map(keys.map((k) => [norm(k), map[k]]));
+	return speak(text.replace(rx, (m) => byNorm.get(norm(m)) ?? m), lex, say);
+}
+
 /** Every word the maps can put in a sentence: Whisper writes these in Latin, so the renderer's ear skips them. */
 export function mappedWords(lessons: Pick<LessonMeta, 'say'>[], lang: Locale): string[] {
 	const lex = lexicons[lang];

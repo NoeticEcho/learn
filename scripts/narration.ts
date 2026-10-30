@@ -22,6 +22,7 @@ type Mod = {
 	narration: (l: Lesson, lang: 'ru') => unknown;
 	spoken: (text: string, l: Lesson, lang: 'ru') => string;
 	mappedWords: (l: Lesson[], lang: 'ru') => string[];
+	heardAs: (text: string, l: Lesson, lang: 'ru') => string;
 	manifest: (lang: 'ru') => { lessons: Record<string, { sections: { hash: string }[] }> } | null;
 	VOICE: Record<string, string>;
 	SCRIPT_VERSION: number;
@@ -85,7 +86,7 @@ const code = await withApp(async (load) => {
 				const said = h.text
 					.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''))
 					.replace(/(?<![\p{L}\p{N}])[bcdfghjklmnpqrstvwxz]{2,6}(?![\p{L}\p{N}])/gu, (m: string) => m.toUpperCase());
-				const { errors, ops } = w.align(ref, w.words(n.spoken(said, l, 'ru')));
+				const { errors, ops } = w.align(ref, w.words(n.heardAs(said, l, 'ru')));
 				refWords += ref.length;
 				errs += errors;
 				scored++;

@@ -5,7 +5,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { parse } from 'yaml';
 import { cardinal, ordinal, speakNumbers, speakPercents, speakYears } from '#lib/narration/numbers.ts';
 import { narrate, sentences, speak, stressMark, bodyOf, type Lexicon } from '#lib/narration/script.ts';
-import { match, script, sectionHash, manifest, type Manifest } from '#lib/narration/narration.server.ts';
+import { heardAs, match, script, sectionHash, manifest, type Manifest } from '#lib/narration/narration.server.ts';
 import { align, wer, words } from '#lib/narration/wer.ts';
 import { loadContent } from '#lib/content/load.ts';
 
@@ -206,6 +206,11 @@ describe('the manifest', () => {
 });
 
 describe('the listening test', () => {
+	test('a term counts as heard however Whisper spelt it', () => {
+		const say = { say: { 'Content-Type': 'контент-тайп' } };
+		expect(words(heardAs('заголовок content type и certbot', say, 'ru'))).toEqual(words('заголовок контент-тайп и сертбот'));
+		expect(words(heardAs('GitHub и DNS', {}, 'ru'))).toEqual(words('гитхаб и ди-эн-эс'));
+	});
 	test('words are compared without case, ё, hyphens or punctuation', () => {
 		expect(words('Ди-эн-эс, ёлка!')).toEqual(['диэнэс', 'елка']);
 		expect(words('8 эпох')).toEqual(['восемь', 'эпох']);
