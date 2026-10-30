@@ -1,8 +1,8 @@
-# Through Time · Сквозь время
+# Through Time
 
 An open, interactive textbook of the whole web, from the first web page of 1991 to the agentic web. It is written for people who have never built a site.
 
-**Read it:** <https://open.noeticecho.space/learn/>
+**Read it:** [English](https://open.noeticecho.space/learn/en/) · [по-русски (Сквозь время)](https://open.noeticecho.space/learn/)
 
 You learn on your own project. At the start you describe a site of your own: who it is for and what a visitor should do. Every practice step then builds that site, and the course rebuilds it in each era of the web. Your 1996 page becomes a semantic page, then a responsive one, then a design system, and finally a site an AI builds from your brief, which you review with everything you have learned.
 
@@ -43,7 +43,7 @@ There is no registration and no analytics, and the fonts are self-hosted. Your p
 
 ## Status
 
-The textbook is in Russian and is being written part by part. An English edition will follow once the Russian one is complete. It will be localised, not literally translated: for example, GDPR and WCAG take the place of the Russian laws.
+The whole course is written in two editions, English and Russian. The English edition is localized, not literally translated: for example, GDPR, the FTC rules and WCAG take the place of the Russian laws. Russian narration is being rendered.
 
 The design is in [`docs/specs/2026-10-27-learn-design.md`](docs/specs/2026-10-27-learn-design.md), and the content plan is in [`docs/content-plan/`](docs/content-plan/).
 
