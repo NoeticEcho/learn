@@ -158,6 +158,10 @@ describe('numbers as a person says them', () => {
 		expect(speakHex('якорь #cafe и #contacts', lex.letters)).toBe('якорь #cafe и #contacts');
 		expect(speak('(#0b5cad)', lex)).toBe('(решётка ноль би пять си эй ди)');
 	});
+	test('the signs of a formula are said', () => {
+		expect(speak('N ≈ 16 × x × (1 − x) ÷ d²', lex)).toBe('N примерно равно шестнадцать на x на (один минус x) разделить на d в квадрате');
+		expect(speak('охват × влияние ÷ усилия', lex)).toBe('охват на влияние разделить на усилия');
+	});
 	test('a version’s «v» and a list’s «A01»', () => {
 		expect(speak('лицензия v3.0, пути v1/items', lex)).toBe('лицензия ви три точка ноль, пути ви один items');
 		expect(speak('A01 Нарушение, A10 и F12', lex)).toBe('эй ноль один Нарушение, A10 и эф двенадцать');

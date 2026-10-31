@@ -318,7 +318,12 @@ export function speak(s: string, lex: Lexicon, say: Record<string, string> = {})
 		.replace(/(?<=[\p{L}\d])\/(?=\p{L})|(?<=\p{L})\/(?=\d)/gu, ' ')
 		.replace(/\s\+\s|(?<=\p{L})\+(?=\p{L})/gu, ' плюс ')
 		.replace(/(?<![\p{L}])(\d)xx(?![\p{L}])/gu, '$1-икс-икс')
-		.replace(/\s×\s|(?<=\d)×(?=\d)/g, ' на ');
+		.replace(/\s×\s|(?<=\d)×(?=\d)/g, ' на ')
+		// a formula, read as one: «N ≈ 16 × p ÷ d²» (the voice passed over these signs, or said them as it liked)
+		.replace(/\s÷\s/g, ' разделить на ')
+		.replace(/\s≈\s/g, ' примерно равно ')
+		.replace(/\s−\s/g, ' минус ')
+		.replace(/(?<=[\p{L})\d])²/gu, ' в квадрате');
 	out = speakNumbers(out);
 	out = applyMap(out, stressMap(lex.stress));
 	return stressMark(out).replace(/\s+/g, ' ').trim();
