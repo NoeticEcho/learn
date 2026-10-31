@@ -3,8 +3,8 @@
 import { describe, expect, test } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { parse } from 'yaml';
-import { cardinal, ordinal, speakNumbers, speakPercents, speakYears } from '#lib/narration/numbers.ts';
-import { narrate, plain, sentences, speak, stressMark, bodyOf, type Lexicon } from '#lib/narration/script.ts';
+import { cardinal, decimal, ordinal, speakDates, speakNumbers, speakPercents, speakYears } from '#lib/narration/numbers.ts';
+import { narrate, plain, sentences, speak, speakHex, stressMark, bodyOf, type Lexicon } from '#lib/narration/script.ts';
 import { heardAs, match, script, sectionHash, manifest, type Manifest } from '#lib/narration/narration.server.ts';
 import { align, wer, words } from '#lib/narration/wer.ts';
 import { loadContent } from '#lib/content/load.ts';
@@ -43,7 +43,7 @@ describe('years in words', () => {
 		expect(speakNumbers('порт 65535')).toBe('порт шестьдесят пять тысяч пятьсот тридцать пять');
 		expect(speakNumbers('301 Moved')).toBe('триста один Moved');
 		expect(speakNumbers('адрес 8.8.8.8')).toBe('адрес восемь точка восемь точка восемь точка восемь');
-		expect(speakNumbers('около 4,3 миллиарда')).toBe('около четыре и три десятых миллиарда');
+		expect(speakNumbers('около 4,3 миллиарда')).toBe('около четырёх и трёх десятых миллиарда');
 		expect(speakNumbers('1 000 000 строк')).toBe('один миллион строк');
 		expect(speakNumbers('в 3-м уроке, 2-го числа')).toBe('в третьем уроке, второго числа');
 		expect(speakNumbers('HTTP 1.1')).toBe('HTTP один точка один');
@@ -54,6 +54,113 @@ describe('years in words', () => {
 		expect(speakPercents('3%')).toBe('3 процента');
 		expect(speakPercents('12%')).toBe('12 процентов');
 		expect(speakPercents('%D1%83')).toBe('%D1%83');
+	});
+});
+
+describe('numbers as a person says them', () => {
+	test('the genitive, which «от», «до», «около» and «из» ask for', () => {
+		expect(cardinal(0, 'gen')).toBe('нуля');
+		expect(cardinal(255, 'gen')).toBe('двухсот пятидесяти пяти');
+		expect(cardinal(1, 'gen')).toBe('одного');
+		expect(cardinal(1, 'gen', true)).toBe('одной');
+		expect(cardinal(21_000, 'gen')).toBe('двадцати одной тысячи');
+		expect(cardinal(12_000, 'gen')).toBe('двенадцати тысяч');
+		expect(cardinal(2_000_000, 'gen')).toBe('двух миллионов');
+		// the nominative is what it was
+		expect(cardinal(1001)).toBe('одна тысяча один');
+		expect(cardinal(0)).toBe('ноль');
+	});
+	test('a decimal fraction agrees: «одна десятая», «две десятых», and keeps its leading zeros', () => {
+		expect(decimal('4', '5')).toBe('четыре и пять десятых');
+		expect(decimal('0', '05')).toBe('ноль и пять сотых');
+		expect(decimal('1', '1')).toBe('один и одна десятая');
+		expect(decimal('1', '2')).toBe('один и две десятых');
+		expect(decimal('1', '21')).toBe('один и двадцать одна сотая');
+		expect(decimal('1', '333')).toBe('один и триста тридцать три тысячных');
+		expect(decimal('0', '0001')).toBe('ноль и одна десятитысячная');
+		expect(decimal('1', '4', 'gen')).toBe('одного и четырёх десятых');
+		expect(decimal('0', '5', 'gen')).toBe('нуля и пяти десятых');
+		// no name for the denominator: the digits
+		expect(decimal('1', '0000001')).toBe('один запятая ноль ноль ноль ноль ноль ноль один');
+	});
+	test('a decimal comma is «и … десятых», not «точка»', () => {
+		expect(speakNumbers('p = 0,05')).toBe('p = ноль и пять сотых');
+		expect(speakNumbers('99,9 процента')).toBe('девяносто девять и девять десятых процента');
+		expect(speakNumbers('коэффициент 1,25')).toBe('коэффициент один и двадцать пять сотых');
+		expect(speakNumbers('Impact: 0,25, 0,5, 1')).toBe('Impact: ноль и двадцать пять сотых, ноль и пять десятых, один');
+		expect(speakNumbers('1,2,3')).toBe('один,два,три'); // a list is not a decimal
+	});
+	test('a number after «от», «до», «около», «из», «больше» is in the genitive', () => {
+		expect(speakNumbers('от 0 до 255')).toBe('от нуля до двухсот пятидесяти пяти');
+		expect(speakNumbers('из 12 колонок')).toBe('из двенадцати колонок');
+		expect(speakNumbers('не больше 15')).toBe('не больше пятнадцати');
+		expect(speakNumbers('у 96 процентов')).toBe('у девяноста шести процентов');
+		expect(speakNumbers('около 18,66 пикселя')).toBe('около восемнадцати и шестидесяти шести сотых пикселя');
+		expect(speakNumbers('до 1 секунды')).toBe('до одной секунды');
+		expect(speakNumbers('до 1 пикселя')).toBe('до одного пикселя');
+		expect(speakNumbers('от 24 пикселей')).toBe('от двадцати четырёх пикселей');
+		expect(speakNumbers('из 1000')).toBe('из одной тысячи');
+		expect(speakNumbers('с 60 процентов до 20 процентов')).toBe('с шестидесяти процентов до двадцати процентов');
+		expect(speakNumbers('«10k+ клиентов»')).toBe('«десять тысяч плюс клиентов»');
+		// …and nowhere else
+		expect(speakNumbers('в 3 раза, на 12 колонок')).toBe('в три раза, на двенадцать колонок');
+		expect(speakNumbers('в 3-м уроке')).toBe('в третьем уроке');
+	});
+	test('a range is «от … до …»', () => {
+		expect(speakNumbers('Ширина строки 45–75 знаков')).toBe('Ширина строки от сорока пяти до семидесяти пяти знаков');
+		expect(speakNumbers('в пределах 45–75 знаков')).toBe('в пределах от сорока пяти до семидесяти пяти знаков');
+		expect(speakNumbers('видно около 155–160 знаков')).toBe('видно от ста пятидесяти пяти до ста шестидесяти знаков');
+		expect(speakNumbers('Интерлиньяж 1,4–1,7 от размера')).toBe('Интерлиньяж от одного и четырёх десятых до одного и семи десятых от размера');
+		expect(speakNumbers('в шагах 3–6')).toBe('в шагах от трёх до шести');
+		// after a preposition «от … до …» would say it twice
+		expect(speakNumbers('для 1–3 материал')).toBe('для одного — трёх материал');
+		// a year range is the years' (speakYears), not this
+		expect(speakYears('в 1995–2001 годах')).toBe('в тысяча девятьсот девяносто пятом — две тысячи первом годах');
+	});
+	test('a ratio ends in «к одному»', () => {
+		expect(speakNumbers('4,5 к 1 для текста')).toBe('четыре и пять десятых к одному для текста');
+		expect(speakNumbers('7 к 1 и 3 к 1')).toBe('семь к одному и три к одному');
+		expect(speakNumbers('от 1 к 1 до 21 к 1')).toBe('от одного к одному до двадцати одного к одному');
+		expect(speakNumbers('к 10 годам')).toBe('к десять годам'); // not a ratio
+	});
+	test('a version, an article and a criterion are read with «точка»; a decimal is not', () => {
+		expect(speak('HTTP/1.1', lex)).toBe('эйч-ти-ти-пи один точка один');
+		expect(speak('GPT-4.5', lex)).toBe('джи-пи-ти четыре точка пять');
+		expect(speak('PHP 5.5 и WordPress 5.9', lex)).toBe('пи-эйч-пи пять точка пять и вордпресс пять точка девять');
+		expect(speakNumbers('статья 18.1 и статья 13.11')).toBe('статья восемнадцать точка один и статья тринадцать точка одиннадцать');
+		expect(speakNumbers('критерий 1.4.3')).toBe('критерий один точка четыре точка три');
+		expect(speakNumbers('адрес 192.168.…')).toBe('адрес сто девяносто два точка сто шестьдесят восемь.…');
+		expect(speakNumbers('3.14 и 42')).toBe('три точка четырнадцать и сорок два');
+		// a leading zero, three digits after the point, a percent, a value after a colon
+		expect(speakNumbers('0.07')).toBe('ноль и семь сотых');
+		expect(speakNumbers('--ratio 1.333')).toBe('--ratio один и триста тридцать три тысячных');
+		expect(speakNumbers('99.9 процента')).toBe('девяносто девять и девять десятых процента');
+		expect(speakNumbers('line-height: 1.6;')).toBe('line-height: один и шесть десятых;');
+	});
+	test('a space before three digits after a decimal point does not make a thousand', () => {
+		// «oklch(45% 0.07 200)» was «ноль точка семь тысяч двести»
+		expect(speakNumbers('0.07 200')).toBe('ноль и семь сотых двести');
+		expect(speakNumbers('7 600 человек')).toBe('семь тысяч шестьсот человек');
+	});
+	test('a date has its day in the genitive', () => {
+		expect(speakDates('С 1 января')).toBe('С первого января');
+		expect(speakNumbers(speakDates('27 октября'))).toBe('двадцать седьмого октября');
+		expect(speakNumbers(speakDates('Закон от 24.06.2025 №'))).toBe('Закон от двадцать четвёртого июня две тысячи двадцать пятого года №');
+		expect(speakNumbers(speakDates('срок («до 15.11»)'))).toBe('срок («до пятнадцатого ноября»)');
+		// 13.11 is an article and 5.5 a version, whatever they look like
+		expect(speakDates('статья 13.11, версия 5.5, к 2.2')).toBe('статья 13.11, версия 5.5, к 2.2');
+		expect(speakDates('в 32 января')).toBe('в 32 января');
+		expect(speak('С 1 января 1983 года сеть', lex)).toBe('С первого января тысяча девятьсот восемьдесят третьего года сеть');
+	});
+	test('a hex colour is read character by character', () => {
+		expect(speakHex('цвет #0b5cad', lex.letters)).toBe('цвет решётка ноль би пять си эй ди');
+		expect(speakHex('#fff и #767676', lex.letters)).toBe('решётка эф эф эф и решётка семь шесть семь шесть семь шесть');
+		expect(speakHex('якорь #cafe и #contacts', lex.letters)).toBe('якорь #cafe и #contacts');
+		expect(speak('(#0b5cad)', lex)).toBe('(решётка ноль би пять си эй ди)');
+	});
+	test('a version’s «v» and a list’s «A01»', () => {
+		expect(speak('лицензия v3.0, пути v1/items', lex)).toBe('лицензия ви три точка ноль, пути ви один items');
+		expect(speak('A01 Нарушение, A10 и F12', lex)).toBe('эй ноль один Нарушение, A10 и эф двенадцать');
 	});
 });
 

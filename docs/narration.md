@@ -10,7 +10,7 @@ repository of its own. This page is how a lesson's audio is made, published and 
 | Where | What |
 |---|---|
 | `src/lib/narration/script.ts` | a lesson → its narration script, section by section, in spoken form |
-| `src/lib/narration/numbers.ts` | years in words, in their case («в 1995 году» → «в тысяча девятьсот девяносто пятом году») |
+| `src/lib/narration/numbers.ts` | numbers in words, in their case: years («в 1995 году» → «в тысяча девятьсот девяносто пятом году»), dates, decimals, ranges, the genitive after «от», «до», «около» |
 | `content/narration/ru.yaml` | the course's pronunciation lexicon: letter names, words, stress |
 | a lesson's `say:` | the lesson's own pronunciation map; it wins over the lexicon |
 | `src/lib/narration/narration.server.ts` | each section's hash; which lessons have audio of their current text |
@@ -35,7 +35,19 @@ diagrams and other components (the text around them says what they show), the co
 The spoken form is never displayed. In order:
 1. the lesson's `say` map, then the lexicon's `words`, longest first, at word boundaries;
 2. domains and URLs, with «точка»: `example.ru` → «экзампл точка ру»;
-3. years in words (`numbers.ts`), percents agreeing with their number, units after a number;
+3. numbers (`numbers.ts`), in this order: years in words; dates («с 1 января» → «с первого января», «28.10.2026» → «двадцать
+   восьмого октября две тысячи двадцать шестого года»); percents agreeing with their number; units after a number; hex
+   colours character by character (`#0b5cad`); then every number left:
+   - **a decimal** is «и … десятых», the fraction agreeing («одна десятая», «две десятых») and keeping its leading zeros
+     («0,05» → «ноль и пять сотых»). It is written with a comma in the course. With a dot it is a decimal only when it says
+     so (a leading zero, three digits after the point, a percent, a value after a colon: `line-height: 1.6`);
+   - **a version, an article and a criterion** keep «точка», as people read them: «эйч-ти-ти-пи один точка один»,
+     «вкаг два точка два», «статья восемнадцать точка один», «один точка четыре точка три»;
+   - **after «от», «до», «около», «из», «без», «для», «у», «больше», «меньше», «более», «менее»** a number is in the genitive
+     («от нуля до двухсот пятидесяти пяти», «до одной секунды»), and so between «с … до»;
+   - **a range** `45–75 знаков` is «от сорока пяти до семидесяти пяти знаков» (a year range is the years'); **a ratio**
+     `4,5 к 1` ends «к одному»;
+   - anything else is a nominative cardinal. Other cases (`в 3 раза` is fine, `по 3 штуки` is not) are not parsed;
 4. an acronym of 2–6 Latin capitals not mapped is spelt with the lexicon's `letters`: «CSS» →
    «си-эс-эс»;
 5. stress (below).

@@ -15,7 +15,7 @@
  * are spelt out in their case (numbers.ts); a word the voice stresses wrongly is given its stress.
  * None of this reaches the page: the displayed text is never touched.
  */
-import { speakNumbers, speakPercents, speakYears } from './numbers.ts';
+import { cardinal, speakDates, speakNumbers, speakPercents, speakYears } from './numbers.ts';
 
 export type Lexicon = {
 	/** How each Latin letter is named when an acronym is spelt out: { A: 'эй', … }. */
@@ -271,6 +271,18 @@ export function stressMark(s: string): string {
 	return s.replace(/([аеёиоуыэюяАЕЁИОУЫЭЮЯ])́/g, (_, v: string) => v.toUpperCase());
 }
 
+/**
+ * A colour in hex, «#0b5cad», character by character: «решётка ноль би пять си эй ди». Read as a number it came
+ * out «нольb5cad» (the leading zero taken for a number of its own, the rest left in Latin). It must have a digit,
+ * or be one letter repeated («#fff»), so that an anchor like «#cafe» is not taken for a colour.
+ */
+export function speakHex(s: string, letters: Record<string, string>): string {
+	return s.replace(/(?<![\p{L}\p{N}&])#([0-9a-f]{3,8})(?![\p{L}\p{N}-])/giu, (m, hex: string) => {
+		if (![3, 4, 6, 8].includes(hex.length) || !(/\d/.test(hex) || /^(.)\1+$/.test(hex))) return m;
+		return `решётка ${[...hex].map((ch) => (/\d/.test(ch) ? cardinal(Number(ch)) : (letters[ch.toUpperCase()] ?? ch))).join(' ')}`;
+	});
+}
+
 /** One sentence, written → spoken. */
 export function speak(s: string, lex: Lexicon, say: Record<string, string> = {}): string {
 	let out = s
@@ -279,17 +291,23 @@ export function speak(s: string, lex: Lexicon, say: Record<string, string> = {})
 		.replace(/\s*→\s*/g, ', ')
 		.replace(/(?<=\s)&(?=\s)/g, 'и')
 		.replace(/№\s*/g, 'номер ');
+	out = speakHex(out, lex.letters);
 	out = out.replace(/xn--[a-z0-9-]+(?:\.xn--[a-z0-9-]+)*/g, 'набор латинских букв, который начинается с икс-эн и двух дефисов');
 	out = applyMap(out, say);
 	out = applyMap(out, lex.words);
 	out = speakDomains(out);
 	out = applyMap(out, lex.words); // the parts of a domain, now words of their own
 	out = speakYears(out);
+	out = speakDates(out);
 	out = speakPercents(out);
+	// «v3.0», «v7»: a version's letter is read («ви три»), not left to the number rules, which took the «v» for a word and the «0» for a number of its own
+	out = out.replace(/(?<![\p{L}\p{N}])v(?=\d)/gu, 'ви ');
 	// «152-эф-зэ», «HTML5-страница»: a number fused to letters by a hyphen is said with a pause
 	out = out.replace(/(?<=\d)-(?=\p{L}{2})(?!(?:го|му|ми)(?!\p{L}))|(?<=\p{L})-(?=\d)/gu, ' ');
 	out = out.replace(/(\d)\s?(px|rem|em|fr|vh|vw|ch|ms|КБ|kB|KB|МБ|MB|ГБ|GB)(?![\p{L}\p{N}])/gu, (m, d: string, u: string) => `${d} ${UNITS[u.toLowerCase()] ?? u}`);
 	out = out.replace(/(?<![\p{L}\p{N}])F(\d{1,2})(?![\p{L}\p{N}])/gu, 'эф $1');
+	// «A01» (the OWASP list): the letter's name, the number read digit by digit when it starts with a zero
+	out = out.replace(/(?<![\p{L}\p{N}])([A-Z])(0\d)(?![\p{L}\p{N}])/gu, (m, c: string, n: string) => `${lex.letters[c] ?? c} ноль ${cardinal(Number(n[1]))}`);
 	const keep = new Set(lex.keep);
 	out = out.replace(LATIN_CAPS, (m, caps: string, digits: string) => {
 		if (keep.has(caps)) return m;
@@ -297,7 +315,7 @@ export function speak(s: string, lex: Lexicon, say: Record<string, string> = {})
 		return digits ? `${spelt} ${digits}` : spelt;
 	});
 	out = out
-		.replace(/(?<=\p{L})\/(?=\p{L}|\d)/gu, ' ')
+		.replace(/(?<=[\p{L}\d])\/(?=\p{L})|(?<=\p{L})\/(?=\d)/gu, ' ')
 		.replace(/\s\+\s|(?<=\p{L})\+(?=\p{L})/gu, ' плюс ')
 		.replace(/(?<![\p{L}])(\d)xx(?![\p{L}])/gu, '$1-икс-икс')
 		.replace(/\s×\s|(?<=\d)×(?=\d)/g, ' на ');

@@ -31,18 +31,6 @@ function ending(stem: string, c: Case, plural: boolean): string {
 	return stem + { nom: STRESSED.has(stem) ? 'ой' : 'ый', gen: 'ого', dat: 'ому', inst: 'ым', prep: 'ом' }[c];
 }
 
-function cardinalBelow1000(n: number): string[] {
-	const words: string[] = [];
-	if (n >= 100) words.push(HUNDREDS[Math.floor(n / 100)]);
-	const r = n % 100;
-	if (r >= 20) {
-		words.push(TENS[Math.floor(r / 10)]);
-		if (r % 10) words.push(ONES[r % 10]);
-	} else if (r >= 10) words.push(TEENS[r - 10]);
-	else if (r) words.push(ONES[r]);
-	return words;
-}
-
 /** An ordinal from 1 to 2999 in words: «тысяча девятьсот девяносто пятом» for (1995, 'prep'). */
 export function ordinal(n: number, c: Case = 'nom', plural = false): string {
 	if (!Number.isInteger(n) || n < 1 || n > 2999) throw new RangeError(`ordinal: ${n}`);
@@ -65,26 +53,72 @@ export function ordinal(n: number, c: Case = 'nom', plural = false): string {
 	return [...words, ending(stem, c, plural)].join(' ');
 }
 
-/** A cardinal below a billion in words, nominative (for tests and the odd count). */
-export function cardinal(n: number): string {
-	if (n === 0) return 'ноль';
+// The genitive, for what follows «от», «до», «около», «из»: «от нуля до двухсот пятидесяти пяти».
+const GEN_ONES = ['', 'одного', 'двух', 'трёх', 'четырёх', 'пяти', 'шести', 'семи', 'восьми', 'девяти'];
+const GEN_TEENS = ['десяти', 'одиннадцати', 'двенадцати', 'тринадцати', 'четырнадцати', 'пятнадцати', 'шестнадцати', 'семнадцати', 'восемнадцати', 'девятнадцати'];
+const GEN_TENS = ['', '', 'двадцати', 'тридцати', 'сорока', 'пятидесяти', 'шестидесяти', 'семидесяти', 'восьмидесяти', 'девяноста'];
+const GEN_HUNDREDS = ['', 'ста', 'двухсот', 'трёхсот', 'четырёхсот', 'пятисот', 'шестисот', 'семисот', 'восьмисот', 'девятисот'];
+
+export type CardinalCase = 'nom' | 'gen';
+
+/** A group of up to three digits. «один» and «два» are feminine in the thousands and before a feminine noun. */
+function below1000(n: number, c: CardinalCase, fem: boolean): string[] {
+	const gen = c === 'gen';
+	const one = (d: number) => (fem && d === 1 ? (gen ? 'одной' : 'одна') : fem && d === 2 && !gen ? 'две' : (gen ? GEN_ONES : ONES)[d]);
 	const words: string[] = [];
+	if (n >= 100) words.push((gen ? GEN_HUNDREDS : HUNDREDS)[Math.floor(n / 100)]);
+	const r = n % 100;
+	if (r >= 20) {
+		words.push((gen ? GEN_TENS : TENS)[Math.floor(r / 10)]);
+		if (r % 10) words.push(one(r % 10));
+	} else if (r >= 10) words.push((gen ? GEN_TEENS : TEENS)[r - 10]);
+	else if (r) words.push(one(r));
+	return words;
+}
+
+/**
+ * A cardinal below a billion in words. Nominative by default; the genitive follows «от», «до»,
+ * «около» (`speakNumbers`). `fem` is for the last «один» of a number counting a feminine noun
+ * («до одной секунды»); the thousands are feminine whatever it says.
+ */
+export function cardinal(n: number, c: CardinalCase = 'nom', fem = false): string {
+	const gen = c === 'gen';
+	if (n === 0) return gen ? 'нуля' : 'ноль';
+	const words: string[] = [];
+	// the noun counted after a group: «один миллион», «два миллиона», «пять миллионов»; after «один» in the genitive, «миллиона»
+	const noun = (last: number, forms: [string, string, string], genOne: string, genMany: string) =>
+		gen ? (last === 1 ? genOne : genMany) : last === 1 ? forms[0] : last >= 2 && last <= 4 ? forms[1] : forms[2];
+	const lastDigit = (g: number) => (g % 100 >= 10 && g % 100 < 20 ? 0 : g % 10);
 	if (n >= 1_000_000) {
 		const mil = Math.floor(n / 1_000_000);
-		const last = mil % 100 >= 10 && mil % 100 < 20 ? 0 : mil % 10;
-		words.push(...cardinalBelow1000(mil % 1000), last === 1 ? 'миллион' : last >= 2 && last <= 4 ? 'миллиона' : 'миллионов');
+		words.push(...below1000(mil % 1000, c, false), noun(lastDigit(mil), ['миллион', 'миллиона', 'миллионов'], 'миллиона', 'миллионов'));
 		n %= 1_000_000;
 		if (!n) return words.join(' ');
 	}
 	const th = Math.floor(n / 1000);
-	if (th) {
-		const t = cardinalBelow1000(th);
-		const last = th % 100 >= 10 && th % 100 < 20 ? 0 : th % 10;
-		if (last === 1) t[t.length - 1] = 'одна';
-		if (last === 2) t[t.length - 1] = 'две';
-		words.push(...t, last === 1 ? 'тысяча' : last >= 2 && last <= 4 ? 'тысячи' : 'тысяч');
-	}
-	return [...words, ...cardinalBelow1000(n % 1000)].join(' ');
+	if (th) words.push(...below1000(th, c, true), noun(lastDigit(th), ['тысяча', 'тысячи', 'тысяч'], 'тысячи', 'тысяч'));
+	return [...words, ...below1000(n % 1000, c, fem)].join(' ');
+}
+
+// «одна десятая», «пять сотых»: the stem of the fraction's name, by the number of digits after the comma
+const FRACTION = ['', 'десят', 'сот', 'тысячн', 'десятитысячн', 'стотысячн', 'миллионн'];
+
+/**
+ * A decimal fraction in words: «4,5» is «четыре и пять десятых», «0,05» «ноль и пять сотых», «1,01»
+ * «один и одна сотая». The numerator agrees with the feminine fraction («одна десятая», «две десятых»), and
+ * the leading zeros of «0,05» are kept by the denominator, not lost to the numerator. The whole is
+ * said with «и», not «целых», because «и» has no case to get wrong: «в один и семь десятых раза»,
+ * «от одного и четырёх десятых» need only the numbers inflected. A fraction of more than six digits is
+ * read as digits.
+ */
+export function decimal(whole: string, frac: string, c: CardinalCase = 'nom'): string {
+	const card = (n: string, cc: CardinalCase = c, fem = false) => (n.length <= 9 ? cardinal(Number(n), cc, fem) : n.split('').map((d) => cardinal(Number(d))).join(' '));
+	if (frac.length >= FRACTION.length) return `${card(whole)} запятая ${frac.split('').map((d) => cardinal(Number(d))).join(' ')}`;
+	const num = Number(frac);
+	const one = num % 10 === 1 && num % 100 !== 11;
+	const stem = FRACTION[frac.length];
+	const noun = c === 'gen' ? (one ? `${stem}ой` : `${stem}ых`) : one ? `${stem}ая` : `${stem}ых`;
+	return `${card(whole)} и ${cardinal(num, c, true)} ${noun}`;
 }
 
 const YEAR = '(1\\d{3}|20\\d{2})';
@@ -146,22 +180,92 @@ export function speakPercents(s: string): string {
 
 // «1-й», «2-го», «в 3-м», «в 90-х»: an ordinal suffix names the case (feminine and neuter forms are left as digits)
 const SMALL_SUFFIX: Record<string, [Case, boolean]> = { й: ['nom', false], го: ['gen', false], му: ['dat', false], м: ['prep', false], х: ['prep', true], ми: ['inst', true] };
-const DECIMAL = ['', 'десятых', 'сотых', 'тысячных'];
+const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+
+/**
+ * Dates. The pilot's voice was given «С 1 января» as «с один января» and «28.10.2026» as «двадцать
+ * восемь точка десять точка две тысячи двадцать шесть»; a reader says «с первого января» and
+ * «двадцать восьмого октября две тысячи двадцать шестого года». A day is read only next to the
+ * name of a month, and «15.11» only after «до»: elsewhere «13.11» is an article of a code and
+ * «5.5» a version.
+ */
+export function speakDates(s: string): string {
+	return s
+		.replace(/(?<![\p{L}\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?![\p{L}\d]|\.\d)/gu, (m, d: string, mo: string, y: string) =>
+			+d >= 1 && +d <= 31 && +mo >= 1 && +mo <= 12 && +y >= 1000 && +y <= 2999 ? `${ordinal(+d, 'gen')} ${MONTHS[+mo - 1]} ${ordinal(+y, 'gen')} года` : m
+		)
+		.replace(/(?<=(?:^|[\s(«"])до\s)(\d{1,2})\.(\d{1,2})(?![\p{L}\d.,])/giu, (m, d: string, mo: string) =>
+			+d >= 1 && +d <= 31 && +mo >= 1 && +mo <= 12 ? `${ordinal(+d, 'gen')} ${MONTHS[+mo - 1]}` : m
+		)
+		.replace(new RegExp(`(?<![\\p{L}\\d.,])(\\d{1,2})\\s+(${MONTHS.join('|')})(?![\\p{L}])`, 'giu'), (m, d: string, mo: string) => (+d >= 1 && +d <= 31 ? `${ordinal(+d, 'gen')} ${mo}` : m));
+}
+
+const NUM = '\\d+(?:,\\d+)?';
+// What governs the genitive when a number follows: «от нуля», «около десяти процентов», «не больше пятнадцати».
+const GENITIVE = 'от|до|около|из|без|для|у|свыше|более|менее|больше|меньше|после|кроме';
+// A feminine noun in the genitive singular: «до одной секунды», against «до одного пикселя».
+const FEMININE_GENITIVE = /^[а-яё]{4,}[ыи]$/i;
+
+/** A number written with digits, in words: «4,5» → «четыре и пять десятых», in the genitive after «от» and its like. */
+function say(n: string, gen: boolean, next: string): string {
+	const c: CardinalCase = gen ? 'gen' : 'nom';
+	if (n.includes(',')) {
+		const [a, b] = n.split(',');
+		return decimal(a, b, c);
+	}
+	if (n.length > 9) return n.split('').map((d) => cardinal(Number(d))).join(' ');
+	const fem = gen && FEMININE_GENITIVE.test(/^\s*([а-яё]+)/i.exec(next)?.[1] ?? '');
+	return cardinal(Number(n), c, fem);
+}
+
+// A dot between digits is a version («HTTP 1.1», «WCAG 2.2», «PHP 5.5»), an article («статья 13.11») or a
+// criterion («1.4.3»), and is read «точка», as people read them. It is a decimal only when it says so:
+// a leading zero («0.07»), three digits after the point («1.333», but not the «192.168.…» of an address), a percent after it («99.9 процента»), or a
+// value after a colon («line-height: 1.6»). A decimal is read as one written with a comma.
+function isDecimalDot(a: string, b: string, before: string, after: string): boolean {
+	// «192.168.…» is the start of an address, not 192 and 168 thousandths
+	const address = a.length > 2 || /^\.(?!\s|$)/.test(after);
+	return a === '0' || (b.length >= 3 && !address) || /^\s+процент/.test(after) || /:\s*$/.test(before);
+}
 
 /**
  * Every number left after the years and percents, in words. The voice read digits unreliably
  * in the pilot («65535» as «пять тысяч пятьсот», «301 Moved Permanently» drifting into syllables
- * of no language), so nothing reaches it as digits. Cardinals are nominative: a wrong case is
- * a small thing beside a wrong number. Dotted numbers (addresses, versions) are read part by
- * part with «точка»; a decimal comma as «и … десятых».
+ * of no language), so nothing reaches it as digits. Cardinals are nominative, except after «от», «до»,
+ * «около», «из» and the like, where a number is in the genitive («от нуля до двухсот пятидесяти пяти»):
+ * that is the one case a sentence this course writes puts a number in over and over. A range, «50–160 знаков»,
+ * is «от пятидесяти до ста шестидесяти знаков»: the dash alone was a pause, and «45–75» came out as one
+ * number run into the next. A ratio, «4,5 к 1», ends in «к одному». Dotted numbers (addresses, versions, a criterion's
+ * «1.4.3») are read part by part with «точка»; a decimal, with a comma or by the rule of `isDecimalDot`,
+ * as «и … десятых».
  */
 export function speakNumbers(s: string): string {
 	const card = (n: string) => (n.length <= 9 ? cardinal(Number(n)) : n.split('').map((d) => cardinal(Number(d))).join(' '));
+	const GENITIVE_PREPOSITION = new RegExp(`^(?:${GENITIVE})$`, 'iu');
 	return s
-		.replace(/(?<![\p{L}\d])(\d{1,3})(?:[  ](\d{3}))+(?![\p{L}\d])/gu, (m) => m.replace(/[  ]/g, ''))
+		.replace(/(?<![\p{L}\d.,])(\d{1,3})(?:[  ](\d{3}))+(?![\p{L}\d])/gu, (m) => m.replace(/[  ]/g, ''))
+		// «10k+ клиентов»
+		.replace(/(?<![\p{L}\d.,])(\d{1,3})[kK](\+?)(?![\p{L}\d])/gu, (m, n: string, plus: string) => `${cardinal(Number(n) * 1000)}${plus ? ' плюс' : ''}`)
+		.replace(/(?<=\d)(\s+к\s+)1(?![\d]|[.,]\d)/gu, '$1одному')
+		// a range: «45–75 знаков», «около 155–160», «в шагах 3–6»
+		.replace(new RegExp(`(?<![\\p{L}\\d.,])(?:(?:около|от)\\s+)?(${NUM})\\s?–\\s?(${NUM})(?![\\d]|[.,]\\d)`, 'giu'), (m, a: string, b: string, off: number, all: string) => {
+			const lead = /(\p{L}+)\s+$/u.exec(all.slice(0, off))?.[1] ?? '';
+			const rest = all.slice(off + m.length);
+			// after a preposition («для 1–3») «от … до …» would say it twice
+			if (lead && /^(?:для|на|в|во|с|со|по|за|при|к|о|об|из|у|без|между|под|над|через)$/iu.test(lead)) {
+				const gen = GENITIVE_PREPOSITION.test(lead);
+				return `${say(a, gen, '')} — ${say(b, gen, rest)}`;
+			}
+			return `от ${say(a, true, '')} до ${say(b, true, rest)}`;
+		})
+		// «с 60 процентов до 20»: a number between «с» and a «до» that follows within a noun or two
+		.replace(new RegExp(`(?<![\\p{L}\\d])(со?)(\\s+)(${NUM})(?=(?:\\s+\\p{L}+){0,2}\\s+до\\s)(?![\\d]|[.,]\\d|-\\p{L})`, 'giu'), (m, p: string, sp: string, n: string, off: number, all: string) => `${p}${sp}${say(n, true, all.slice(off + m.length))}`)
+		.replace(new RegExp(`(?<![\\p{L}\\d])(${GENITIVE})(\\s+)(${NUM})(?![\\d]|[.,]\\d|-\\p{L})`, 'giu'), (m, p: string, sp: string, n: string, off: number, all: string) => `${p}${sp}${say(n, true, all.slice(off + m.length))}`)
 		.replace(/(?<![\p{L}\d.])(\d+(?:\.\d+){2,})(?![\p{L}\d])/gu, (m) => m.split('.').map(card).join(' точка '))
-		.replace(/(?<![\p{L}\d.,])(\d+),(\d{1,3})(?![\p{L}\d])/gu, (m, a: string, b: string) => `${card(a)} и ${card(b)} ${DECIMAL[b.length]}`)
-		.replace(/(?<![\p{L}\d.])(\d+)\.(\d+)(?![\p{L}\d])/gu, (m, a: string, b: string) => `${card(a)} точка ${card(b)}`)
+		.replace(/(?<![\p{L}\d.,])(\d+),(\d{1,6})(?![\p{L}\d]|[.,]\d)/gu, (m, a: string, b: string) => decimal(a, b))
+		.replace(/(?<![\p{L}\d.])(\d+)\.(\d+)(?![\p{L}\d])/gu, (m, a: string, b: string, off: number, all: string) =>
+			isDecimalDot(a, b, all.slice(0, off), all.slice(off + m.length)) && b.length <= 6 ? decimal(a, b) : `${card(a)} точка ${card(b)}`
+		)
 		.replace(/(?<![\p{L}\d])(\d{1,4})-(й|го|му|м|х|ми)(?![\p{L}])/gu, (m, n: string, suf: string) => {
 			const [c, plural] = SMALL_SUFFIX[suf];
 			return +n >= 1 && +n <= 2999 ? ordinal(+n, c, plural) : m;
