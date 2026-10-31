@@ -175,6 +175,11 @@ describe('speaking', () => {
 		expect(speak('Версия HTTP/2', lex)).toBe('Версия эйч-ти-ти-пи два');
 		expect(speak('Формат JSON', lex)).toBe('Формат джейсон');
 	});
+	test('WCAG is said one way: «вэ-кэг», whatever the lesson’s own map says', () => {
+		expect(speak('Стандарт WCAG 2.2', lex)).toBe('Стандарт вэ-кэг два точка два');
+		expect(speak('Стандарт WCAG', lex, { WCAG: 'вкаг' })).toBe('Стандарт вэ-кэг');
+		expect(speak('Стандарт WCAG', lex, { WCAG: 'вэ-кэг' })).toBe('Стандарт вэ-кэг');
+	});
 	test('a domain is read with «точка»', () => {
 		expect(speak('Имя example.com удобно', lex)).toBe('Имя экзампл точка ком удобно');
 		expect(speak('Зона .ru создана', lex)).toBe('Зона точка ру создана');
