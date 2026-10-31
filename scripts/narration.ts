@@ -4,14 +4,14 @@
 //       writes every lesson's narration script with each section's hash: what the renderer
 //       (tools/narration/render.py) reads. Prints the Latin words left after the maps, most
 //       frequent first: the candidates for content/narration/ru.yaml.
-//   wer --transcripts private/narration/transcripts.ru.json [--max 0.05] [--parts 0,1]
+//   wer --transcripts private/narration/transcripts.<lang>.json [--max 0.05] [--parts 0,1]
 //       scores what Whisper heard (tools/narration/transcribe.py) against each section's script
 //       and lists the sections above --max with their errors: the candidates for a map entry.
 //   status
 //       per lesson: narrated, stale (some section's text changed since it was rendered) or none.
 //
-// `script` also writes the English edition's scripts (--lang en), for samples: the English edition has no
-// voice chosen and no manifest, so `wer` and `status` are Russian's alone, and nothing here publishes English.
+// Every command takes --lang ru|en (default ru): the two editions have a script, a manifest and a WER of their own.
+// English is read with `serena` (--speaker overrides it for a sample, whose hashes then match no manifest).
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { withApp } from './vite-load.ts';
@@ -21,11 +21,11 @@ type Lesson = { id: string; part: number; title: string; summary: string; defini
 type Mod = {
 	script: (l: Lesson, lang: 'ru' | 'en', speaker?: string) => Section[] | null;
 	voiceFor: (lang: 'ru' | 'en', speaker?: string) => Record<string, string>;
-	narration: (l: Lesson, lang: 'ru') => unknown;
-	spoken: (text: string, l: Lesson, lang: 'ru') => string;
+	narration: (l: Lesson, lang: 'ru' | 'en') => unknown;
+	spoken: (text: string, l: Lesson, lang: 'ru' | 'en') => string;
 	mappedWords: (l: Lesson[], lang: 'ru' | 'en') => string[];
-	heardAs: (text: string, l: Lesson, lang: 'ru') => string;
-	manifest: (lang: 'ru') => { lessons: Record<string, { sections: { hash: string }[] }> } | null;
+	heardAs: (text: string, l: Lesson, lang: 'ru' | 'en') => string;
+	manifest: (lang: 'ru' | 'en') => { lessons: Record<string, { sections: { hash: string }[] }> } | null;
 	VOICE: Record<string, string>;
 	SCRIPT_VERSION: number;
 };
@@ -75,13 +75,9 @@ const code = await withApp(async (load) => {
 		}
 		return 0;
 	}
-	if ((cmd === 'wer' || cmd === 'status') && lang !== 'ru') {
-		console.error(`narration: ${cmd} is for the Russian edition; the English one has no manifest and no voice yet`);
-		return 2;
-	}
 	if (cmd === 'wer') {
 		const w = (await load('/src/lib/narration/wer.ts')) as typeof import('../src/lib/narration/wer.ts');
-		const heard = JSON.parse(readFileSync(opt('transcripts') ?? 'private/narration/transcripts.ru.json', 'utf8')) as Record<string, Record<string, { hash: string; text: string }>>;
+		const heard = JSON.parse(readFileSync(opt('transcripts') ?? `private/narration/transcripts.${lang}.json`, 'utf8')) as Record<string, Record<string, { hash: string; text: string }>>;
 		const max = Number(opt('max') ?? 0.05);
 		let refWords = 0;
 		let errs = 0;
@@ -89,16 +85,16 @@ const code = await withApp(async (load) => {
 		const flagged: string[] = [];
 		const rows: Record<string, Record<string, number>> = {};
 		for (const l of lessons) {
-			for (const s of n.script(l, 'ru') ?? []) {
+			for (const s of n.script(l, lang) ?? []) {
 				const h = heard[l.id]?.[s.key];
 				if (!h || h.hash !== s.hash) continue;
-				const ref = w.words(s.sentences.join(' '));
+				const ref = w.words(s.sentences.join(' '), lang);
 				// Whisper spells an acronym it heard letter by letter as «H T T P S»: one word again
 				// and writes one in lower case when it has no vowel to read: «ttl», «rf»
-				const said = h.text
-					.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''))
-					.replace(/(?<![\p{L}\p{N}])[bcdfghjklmnpqrstvwxz]{2,6}(?![\p{L}\p{N}])/gu, (m: string) => m.toUpperCase());
-				const { errors, ops } = w.align(ref, w.words(n.heardAs(said, l, 'ru')));
+				const spelt = h.text.replace(/(?<![\p{L}])\p{Lu}(?:[ .]\p{Lu}(?![\p{L}]))+/gu, (m: string) => m.replace(/[ .]/g, ''));
+				// Russian Whisper writes a vowelless acronym it heard in lower case («ttl», «rf»); English words are not taken for them
+				const said = lang === 'ru' ? spelt.replace(/(?<![\p{L}\p{N}])[bcdfghjklmnpqrstvwxz]{2,6}(?![\p{L}\p{N}])/gu, (m: string) => m.toUpperCase()) : spelt;
+				const { errors, ops } = w.align(ref, w.words(n.heardAs(said, l, lang), lang));
 				refWords += ref.length;
 				errs += errors;
 				scored++;
@@ -114,19 +110,19 @@ const code = await withApp(async (load) => {
 		return 0;
 	}
 	if (cmd === 'status') {
-		const m = n.manifest('ru');
+		const m = n.manifest(lang);
 		let narrated = 0;
 		let stale = 0;
 		for (const l of lessons) {
 			const has = m?.lessons[l.id];
 			if (!has) continue;
-			if (n.narration(l, 'ru')) narrated++;
+			if (n.narration(l, lang)) narrated++;
 			else {
 				stale++;
 				console.log(`stale: ${l.id}`);
 			}
 		}
-		console.log(`narration (ru): ${narrated} narrated, ${stale} stale, ${lessons.length - narrated - stale} not rendered, of ${lessons.length}`);
+		console.log(`narration (${lang}): ${narrated} narrated, ${stale} stale, ${lessons.length - narrated - stale} not rendered, of ${lessons.length}`);
 		return 0;
 	}
 	console.error(`narration: unknown command ${cmd}`);

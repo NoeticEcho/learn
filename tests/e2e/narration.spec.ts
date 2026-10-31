@@ -134,10 +134,4 @@ test.describe('narration', () => {
 			const bad = result.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
 			expect(bad.map((v) => `${v.id}: ${v.nodes.map((x) => x.target.join(' ')).join(' | ')}`)).toEqual([]);
 		});
-
-	test('a lesson without audio for its language offers none', async ({ page }) => {
-		await page.goto(`./en/lesson/00-start/01-how-to-learn/`);
-		await expect(page.locator('h1')).toBeVisible();
-		await expect(page.locator('[data-narration]')).toHaveCount(0);
-	});
 });

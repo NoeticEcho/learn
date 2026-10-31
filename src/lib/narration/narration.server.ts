@@ -17,6 +17,7 @@ import { narrate, speak, type Lexicon, type Section } from './script.ts';
 import lexiconRu from '../../../content/narration/ru.yaml?raw';
 import lexiconEn from '../../../content/narration/en.yaml?raw';
 import manifestRu from '../../../content/narration/ru.json';
+import manifestEn from '../../../content/narration/en.json';
 
 /** Bumped when the script's rules change in a way that should re-render everything. */
 export const SCRIPT_VERSION = 1;
@@ -24,9 +25,9 @@ export const VOICE = { model: 'Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice', speaker: '
 
 /**
  * The voice of an edition. Russian's is `VOICE` exactly: a section's hash covers it, so the files of the
- * published edition stay what they are. The English edition has no voice chosen yet: `serena` and the
- * model's English-native presets (`ryan`, `aiden`) are samples, and a speaker is part of the hash, so
- * a sample is never taken for the edition's audio.
+ * published edition stay what they are. English is read by `serena` too (the owner's decision of 31.10.2026);
+ * another speaker is for a sample, and since the speaker is part of the hash, a sample is never taken for
+ * the edition's audio.
  */
 export function voiceFor(lang: Locale, speaker?: string): Record<string, string> {
 	return lang === 'ru' ? { ...VOICE } : { model: VOICE.model, speaker: speaker ?? 'serena', language: 'English' };
@@ -50,7 +51,7 @@ const sources: Record<Locale, Record<string, string>> = {
 	en: import.meta.glob<string>('/content/en/**/*.svx', { query: '?raw', import: 'default', eager: true })
 };
 const lexicons: Partial<Record<Locale, Lexicon>> = { ru: parse(lexiconRu) as Lexicon, en: parse(lexiconEn) as Lexicon };
-const manifests: Partial<Record<Locale, Manifest>> = { ru: manifestRu as Manifest };
+const manifests: Partial<Record<Locale, Manifest>> = { ru: manifestRu as Manifest, en: manifestEn as Manifest };
 
 export function sectionHash(sentences: string[], voice: Record<string, string> = VOICE): string {
 	const h = createHash('sha256');

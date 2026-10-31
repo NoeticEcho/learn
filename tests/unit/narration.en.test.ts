@@ -1,12 +1,13 @@
 // The English edition's narration (docs/narration.md, «English»): the same script, in its own words and
-// numbers. There is no English audio and no manifest; these tests keep the script honest, and the Russian
-// one unchanged (narration.test.ts is the Russian edition's).
+// numbers, read by `serena`, with a manifest of its own. These tests keep the script and the manifest
+// honest, and the Russian edition unchanged (narration.test.ts is the Russian edition's).
 import { describe, expect, test } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
 import { cardinalEn, ordinalEn, speakDatesEn, speakNumbersEn, speakPercentsEn, speakYearsEn, yearEn } from '#lib/narration/numbers.en.ts';
 import { narrate, plain, speak, speakHex, type Lexicon } from '#lib/narration/script.ts';
-import { manifest, mappedWords, narration, script, sectionHash, VOICE, voiceFor } from '#lib/narration/narration.server.ts';
+import { heardAs, manifest, mappedWords, match, narration, script, sectionHash, VOICE, voiceFor, type Manifest } from '#lib/narration/narration.server.ts';
+import { words, wer } from '#lib/narration/wer.ts';
 import { loadEdition } from '#lib/content/load.ts';
 
 const lex = parse(readFileSync('content/narration/en.yaml', 'utf8')) as Lexicon;
@@ -158,7 +159,7 @@ describe('the English script', () => {
 	});
 });
 
-describe('the English edition is a sample, not an edition', () => {
+describe('the English edition', () => {
 	const lessons = loadEdition('en').lessons;
 	test('every English lesson has a script, and no digit run or object is left in it', () => {
 		expect(lessons.length).toBeGreaterThan(100);
@@ -172,7 +173,7 @@ describe('the English edition is a sample, not an edition', () => {
 				}
 		}
 	});
-	test('a speaker is part of the hash: a sample is never taken for an edition’s audio', () => {
+	test('a speaker is part of the hash: a sample is never taken for the edition’s audio', () => {
 		const l = lessons[0];
 		const serena = script(l, 'en', 'serena')!;
 		const ryan = script(l, 'en', 'ryan')!;
@@ -186,14 +187,65 @@ describe('the English edition is a sample, not an edition', () => {
 		expect(sectionHash(['x'])).toBe(sectionHash(['x'], VOICE));
 		expect(voiceFor('ru').language).toBe('Russian');
 	});
-	test('no manifest, so no «Listen» on the English site', () => {
-		expect(manifest('en')).toBeNull();
-		expect(narration(lessons[0], 'en')).toBeNull();
+	test('the English manifest names English lessons, with files under en/ named by their hash', () => {
+		const real = manifest('en')!;
+		expect(real).not.toBeNull();
+		expect(real.base).toBe('/learn-audio/');
+		const ids = new Set(lessons.map((l) => l.id));
+		for (const [id, entry] of Object.entries(real.lessons)) {
+			expect(ids.has(id), id).toBe(true);
+			for (const s of entry.sections) {
+				expect(s.file).toBe(`en/${id}/${s.key}-${s.hash}.opus`);
+				expect(s.duration).toBeGreaterThan(0);
+			}
+		}
+	});
+	test('a lesson is offered in English when every section has audio of its current text, and its voice', () => {
+		const l = lessons[0];
+		const sections = script(l, 'en')!;
+		const m: Manifest = {
+			version: 1,
+			voice: {},
+			base: '/learn-audio/',
+			lessons: { [l.id]: { sections: sections.map((x) => ({ key: x.key, hash: x.hash, file: `en/${l.id}/${x.key}-${x.hash}.opus`, duration: 12 })) } }
+		};
+		const n = match(l.id, sections, m)!;
+		expect(n.sections).toHaveLength(sections.length);
+		expect(n.sections[0].file).toBe(`en/${l.id}/intro-${sections[0].hash}.opus`);
+		expect(n.duration).toBe(12 * sections.length);
+		// a sample in another voice has other hashes, so it is never offered as the edition's audio
+		expect(match(l.id, script(l, 'en', 'ryan')!, m)).toBeNull();
+		// and not when one section changed since it was rendered
+		expect(match(l.id, [...sections.slice(0, -1), { ...sections.at(-1)!, hash: 'f'.repeat(16) }], m)).toBeNull();
+	});
+	test('a lesson with no audio in the manifest shows no button', () => {
+		const bare = lessons.find((l) => !manifest('en')!.lessons[l.id]);
+		if (bare) expect(narration(bare, 'en')).toBeNull();
+	});
+	test('the Russian lessons’ audio is not offered to an English page, nor the reverse', () => {
+		const ru = manifest('ru')!;
+		const id = Object.keys(ru.lessons)[0];
+		const l = lessons.find((x) => x.id === id)!;
+		const sections = script(l, 'en')!;
+		expect(match(id, sections, ru)).toBeNull();
 	});
 	test('the renderer’s ear skips the words Whisper writes in capitals', () => {
 		const ignored = mappedWords(lessons, 'en');
 		expect(ignored).toContain('jason');
 		expect(ignored).toContain('json');
 		expect(ignored).toContain('aitch');
+	});
+});
+
+describe('the English listening test', () => {
+	test('a term counts as heard however Whisper spelt it', () => {
+		expect(words(heardAs('The JSON format and DNS', {}, 'en'), 'en')).toEqual(words('The Jason format and dee en ess', 'en'));
+		expect(words(heardAs('Mosaic appeared in 1993', {}, 'en'), 'en')).toEqual(words('Mosaic appeared in nineteen ninety-three', 'en'));
+	});
+	test('words are compared without case or punctuation, and digits are English', () => {
+		expect(words('8 pages, It’s', 'en')).toEqual(['eight', 'pages', 'it', 's']);
+		expect(wer('one two three four', 'one three four', 'en')).toBe(0.25);
+		// the Russian default is untouched
+		expect(words('8 эпох')).toEqual(['восемь', 'эпох']);
 	});
 });

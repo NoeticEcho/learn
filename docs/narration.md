@@ -14,7 +14,7 @@ repository of its own. This page is how a lesson's audio is made, published and 
 | `content/narration/ru.yaml` | the course's pronunciation lexicon: letter names, words, stress |
 | a lesson's `say:` | the lesson's own pronunciation map; it wins over the lexicon |
 | `src/lib/narration/narration.server.ts` | each section's hash; which lessons have audio of their current text |
-| `content/narration/ru.json` | the manifest the build reads: lesson → sections → file, duration, hash |
+| `content/narration/ru.json`, `en.json` | the manifests the build reads: lesson → sections → file, duration, hash |
 | `scripts/narration.ts` | `npm run narration -- script / wer / status` |
 | `tools/narration/render.py` | the renderer (Python, local) |
 | `tools/narration/listen.py` | the renderer's ear: is this take the sentence? |
@@ -172,33 +172,46 @@ named `narration`, which the service worker neither fills nor cleans (its scope 
 it deletes only `learn-*` caches). A downloaded section plays from a `blob:` URL, hence
 `media-src 'self' blob:`.
 
-## English: a sample, not an edition
+## English
 
-The English edition has no voice chosen and no audio, and **nothing here publishes it**: there is no English
-manifest, so `narration()` is null for `en` and no English lesson offers «Listen». What exists is the means to
-hear what a voice would do with it, for the person who chooses one.
+The English edition is narrated like the Russian one, by the same voice: Qwen3-TTS `serena` (the owner's decision of
+31.10.2026, after the samples), with a lexicon, a manifest and a WER of its own. A lesson offers «Listen» on
+`/learn/en/…` when every section of its current English text has audio, and none when it has not.
 
 | Where | What |
 |---|---|
 | `content/narration/en.yaml` | the English lexicon: the names of the letters, acronyms read as words (`keep`: `POST`, `SELECT`), terms read in a way the spelling does not show |
 | `src/lib/narration/numbers.en.ts` | years in pairs («nineteen ninety-five»), dates with an ordinal day, a decimal digit by digit («zero point zero seven»), ranges, ratios, money |
 | `script.ts` (`Lang`, `STRINGS`) | what the script says in its own words («Code example.», «Answer:», «dot», «equals»), per language |
+| `learn-audio/en/`, `en.json` | the audio and the renderer's manifest, beside `ru/` and `ru.json` |
+| `content/narration/en.json` | the manifest the site reads; the player's words are `narration.*` in `i18n/en.json` |
+
+Everything that takes a language takes it the same way: `NARRATION_LANG=en` for `run.sh` and `publish.sh`, `--lang en`
+for `npm run narration -- script / wer / status`; the renderer reads it from the scripts file. English's files carry
+`-en` (`run-en.log`, `render-en.log`, `transcripts.en.json`, `wer-en.txt`), so Russian's stay as they are, and
+`publish.sh` commits to `en/` and `en.json` only.
 
 ```bash
-node scripts/narration.ts script --lang en --speaker serena --out /tmp/en.scripts.json
-tools/narration/render.py --scripts /tmp/en.scripts.json --audio /tmp/en-audio \
-    --lessons 01-internet/01-history --only 01-internet/01-history#3 --log /tmp/en-render.log
-tools/narration/transcribe.py --audio /tmp/en-audio --lang en --out /tmp/en-transcripts.json
+NARRATION_LANG=en setsid nohup tools/narration/run.sh >/dev/null 2>&1 &   # the whole English course; the same command resumes it
+NARRATION_LANG=en tools/narration/run.sh 3 4                               # parts 3 and 4
+npm run narration -- status --lang en
 ```
 
-A speaker is part of the hash, so a sample is never mistaken for the edition's audio, and Russian hashes are what
-they were (the English change leaves the Russian scripts byte for byte). `wer`, `status`, `run.sh` and `publish.sh` are
-the Russian edition's; the renderer's ear works in English (Latin words of four letters or more; an acronym Whisper
-writes in capitals is left out).
+Russian scripts, hashes and files are what they were: the English change is compared against the scripts just rendered
+(byte for byte), and a speaker is part of the hash, so a sample in another voice (`script --lang en --speaker ryan`) is
+never mistaken for the edition's audio. The renderer's ear works in English: Latin words of four letters or more, with an
+acronym Whisper writes in capitals left out. The English WER is read like the Russian one, with the same caveats and some
+of its own: Whisper writes «2xx» as one word, writes «it's» where the script has «it is» and may loop at the end of a long
+section.
+
+**Size.** GitHub Pages allows 1 GB. Russian's tree is 311 MB (21.8 h at 32 kbps). The English edition is 1.13 million
+characters, about 27 hours of audio, about 390 MB, so about 700 MB in all. `run.sh` stops before a part that could take
+the tree (not its history) past 900 MB (`AUDIO_TREE_MAX_MB`) and says so in the log.
+
+**Speed.** Measured on 2026-10-31, three sections of 1.2–1.5 thousand characters, listening included: 11.4–12.3 characters
+of script per second of audio (`CHARS_PER_SECOND["en"]`), real-time factor 0.41–0.43 on an idle machine (Russian ran
+0.37–0.57, and 0.7 while another session was using the GPU). About 11 hours of rendering on an idle machine, more in
+company; the renderer pauses while a `mix test` runs anywhere on the machine. Not checked by ear.
 
 The model's presets (`get_supported_speakers()`): `aiden`, `dylan`, `eric`, `ono_anna`, `ryan`, `serena`, `sohee`,
-`uncle_fu`, `vivian`. The model card calls `ryan` and `aiden` the English-native ones; the config marks `dylan` and `eric`
-as Beijing and Sichuan dialects. `serena` is the Russian voice and reads English too (a sample, not a decision). Measured on 2026-10-31, three sections of 1.2–1.5 thousand characters, listening included: 11.4–12.3 characters
-of script per second of audio (`CHARS_PER_SECOND["en"]`), real-time factor 0.41–0.43 on an idle machine (Russian runs
-0.37–0.57; 0.7 while another session was using the GPU). The whole English edition is 1.13 million characters, about 27
-hours of audio, and so about 11 hours of rendering on an idle machine and more in company. Not checked by ear.
+`uncle_fu`, `vivian`. No other voice is used.

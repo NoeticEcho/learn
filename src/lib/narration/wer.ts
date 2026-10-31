@@ -7,10 +7,11 @@
  */
 
 import { cardinal } from './numbers.ts';
+import { cardinalEn } from './numbers.en.ts';
 
-export function words(s: string): string[] {
+export function words(s: string, lang: 'ru' | 'en' = 'ru'): string[] {
 	return s
-		.replace(/(?<![\d.,])\d{1,6}(?![\d.,]\d)/g, (n) => ` ${cardinal(Number(n))} `)
+		.replace(/(?<![\d.,])\d{1,6}(?![\d.,]\d)/g, (n) => ` ${(lang === 'en' ? cardinalEn : cardinal)(Number(n))} `)
 		.toLowerCase()
 		.replace(/ё/g, 'е')
 		.replace(/(?<=\p{L})[-‐](?=\p{L})/gu, '') // «ди-эн-эс» and «Бернерс-Ли» are one word, as Whisper writes them
@@ -48,9 +49,9 @@ export function align(ref: string[], hyp: string[]): { errors: number; ops: Op[]
 	return { errors: d[n][m], ops: ops.reverse() };
 }
 
-export function wer(ref: string, hyp: string): number {
-	const r = words(ref);
-	return r.length ? align(r, words(hyp)).errors / r.length : 0;
+export function wer(ref: string, hyp: string, lang: 'ru' | 'en' = 'ru'): number {
+	const r = words(ref, lang);
+	return r.length ? align(r, words(hyp, lang)).errors / r.length : 0;
 }
 
 /** The errors only, each with a word of context either side: «…[дабл→дубль] ю…». */
