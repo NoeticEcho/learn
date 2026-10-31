@@ -1,6 +1,6 @@
 // npm run narration -- <command>: the app's side of narration (docs/narration.md).
 //
-//   script [--parts 0,1] [--out .cache/narration/ru.scripts.json]
+//   script [--lang ru|en] [--speaker ryan] [--parts 0,1] [--out .cache/narration/ru.scripts.json]
 //       writes every lesson's narration script with each section's hash: what the renderer
 //       (tools/narration/render.py) reads. Prints the Latin words left after the maps, most
 //       frequent first: the candidates for content/narration/ru.yaml.
@@ -10,7 +10,8 @@
 //   status
 //       per lesson: narrated, stale (some section's text changed since it was rendered) or none.
 //
-// Russian only: the English edition has no voice yet.
+// `script` also writes the English edition's scripts (--lang en), for samples: the English edition has no
+// voice chosen and no manifest, so `wer` and `status` are Russian's alone, and nothing here publishes English.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { withApp } from './vite-load.ts';
@@ -18,10 +19,11 @@ import { withApp } from './vite-load.ts';
 type Section = { key: string; heading: string; sentences: string[]; hash: string };
 type Lesson = { id: string; part: number; title: string; summary: string; definition: string; say?: Record<string, string> };
 type Mod = {
-	script: (l: Lesson, lang: 'ru') => Section[] | null;
+	script: (l: Lesson, lang: 'ru' | 'en', speaker?: string) => Section[] | null;
+	voiceFor: (lang: 'ru' | 'en', speaker?: string) => Record<string, string>;
 	narration: (l: Lesson, lang: 'ru') => unknown;
 	spoken: (text: string, l: Lesson, lang: 'ru') => string;
-	mappedWords: (l: Lesson[], lang: 'ru') => string[];
+	mappedWords: (l: Lesson[], lang: 'ru' | 'en') => string[];
 	heardAs: (text: string, l: Lesson, lang: 'ru') => string;
 	manifest: (lang: 'ru') => { lessons: Record<string, { sections: { hash: string }[] }> } | null;
 	VOICE: Record<string, string>;
@@ -35,21 +37,25 @@ const opt = (name: string) => {
 	return i >= 0 ? args[i + 1] : undefined;
 };
 
+const lang = (opt('lang') ?? 'ru') as 'ru' | 'en';
+if (lang !== 'ru' && lang !== 'en') throw new Error(`narration: --lang ${lang}`);
+
 const code = await withApp(async (load) => {
-	const { loadContent } = (await load('/src/lib/content/load.ts')) as { loadContent: () => { lessons: Lesson[] } };
+	const { loadContent, loadEdition } = (await load('/src/lib/content/load.ts')) as { loadContent: () => { lessons: Lesson[] }; loadEdition: (l: 'ru' | 'en') => { lessons: Lesson[] } };
 	const n = (await load('/src/lib/narration/narration.server.ts')) as unknown as Mod;
 	const parts = opt('parts')?.split(',').map(Number);
-	const lessons = loadContent()
+	const lessons = loadEdition(lang)
 		.lessons.filter((l) => !parts || parts.includes(l.part))
 		.sort((a, b) => a.id.localeCompare(b.id));
 
 	if (cmd === 'script') {
-		const out = opt('out') ?? '.cache/narration/ru.scripts.json';
+		const out = opt('out') ?? `.cache/narration/${lang}.scripts.json`;
+		const speaker = opt('speaker');
 		const latin = new Map<string, number>();
 		let chars = 0;
 		let sections = 0;
 		const data = lessons.map((l) => {
-			const s = n.script(l, 'ru')!;
+			const s = n.script(l, lang, speaker)!;
 			for (const sec of s)
 				for (const t of sec.sentences) {
 					chars += t.length;
@@ -59,13 +65,19 @@ const code = await withApp(async (load) => {
 			return { id: l.id, part: l.part, sections: s };
 		});
 		mkdirSync(dirname(out), { recursive: true });
-		writeFileSync(out, JSON.stringify({ version: n.SCRIPT_VERSION, voice: n.VOICE, lang: 'ru', ignore: n.mappedWords(loadContent().lessons, 'ru'), lessons: data }, null, '\t') + '\n');
-		console.log(`narration: ${data.length} lesson(s), ${sections} section(s), ${chars} characters (~${Math.round(chars / 14 / 60)} min of speech) → ${out}`);
-		const top = [...latin].sort((a, b) => b[1] - a[1]);
-		console.log(`latin words left after the maps: ${top.length} distinct`);
-		if (args.includes('--latin')) for (const [w, c] of top) console.log(`${String(c).padStart(5)}  ${w}`);
-		else console.log(top.slice(0, 40).map(([w, c]) => `${w}×${c}`).join('  '));
+		writeFileSync(out, JSON.stringify({ version: n.SCRIPT_VERSION, voice: lang === 'ru' ? n.VOICE : n.voiceFor(lang, speaker), lang, ignore: n.mappedWords(loadEdition(lang).lessons, lang), lessons: data }, null, '\t') + '\n');
+		console.log(`narration: ${data.length} lesson(s), ${sections} section(s), ${chars} characters (~${Math.round(chars / (lang === 'ru' ? 14 : 12) / 60)} min of speech) → ${out}`);
+		if (lang === 'ru') {
+			const top = [...latin].sort((a, b) => b[1] - a[1]);
+			console.log(`latin words left after the maps: ${top.length} distinct`);
+			if (args.includes('--latin')) for (const [w, c] of top) console.log(`${String(c).padStart(5)}  ${w}`);
+			else console.log(top.slice(0, 40).map(([w, c]) => `${w}×${c}`).join('  '));
+		}
 		return 0;
+	}
+	if ((cmd === 'wer' || cmd === 'status') && lang !== 'ru') {
+		console.error(`narration: ${cmd} is for the Russian edition; the English one has no manifest and no voice yet`);
+		return 2;
 	}
 	if (cmd === 'wer') {
 		const w = (await load('/src/lib/narration/wer.ts')) as typeof import('../src/lib/narration/wer.ts');

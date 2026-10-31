@@ -15,11 +15,22 @@ import type { LessonMeta } from '#lib/content/schema.ts';
 import type { Narration } from './types.ts';
 import { narrate, speak, type Lexicon, type Section } from './script.ts';
 import lexiconRu from '../../../content/narration/ru.yaml?raw';
+import lexiconEn from '../../../content/narration/en.yaml?raw';
 import manifestRu from '../../../content/narration/ru.json';
 
 /** Bumped when the script's rules change in a way that should re-render everything. */
 export const SCRIPT_VERSION = 1;
 export const VOICE = { model: 'Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice', speaker: 'serena', language: 'Russian' } as const;
+
+/**
+ * The voice of an edition. Russian's is `VOICE` exactly: a section's hash covers it, so the files of the
+ * published edition stay what they are. The English edition has no voice chosen yet: `serena` and the
+ * model's English-native presets (`ryan`, `aiden`) are samples, and a speaker is part of the hash, so
+ * a sample is never taken for the edition's audio.
+ */
+export function voiceFor(lang: Locale, speaker?: string): Record<string, string> {
+	return lang === 'ru' ? { ...VOICE } : { model: VOICE.model, speaker: speaker ?? 'serena', language: 'English' };
+}
 
 export type ManifestSection = { key: string; hash: string; file: string; duration: number; starts?: number[] };
 export type Manifest = {
@@ -36,29 +47,30 @@ export type HashedSection = Section & { hash: string };
 
 const sources: Record<Locale, Record<string, string>> = {
 	ru: import.meta.glob<string>('/content/ru/**/*.svx', { query: '?raw', import: 'default', eager: true }),
-	en: {}
+	en: import.meta.glob<string>('/content/en/**/*.svx', { query: '?raw', import: 'default', eager: true })
 };
-const lexicons: Partial<Record<Locale, Lexicon>> = { ru: parse(lexiconRu) as Lexicon };
+const lexicons: Partial<Record<Locale, Lexicon>> = { ru: parse(lexiconRu) as Lexicon, en: parse(lexiconEn) as Lexicon };
 const manifests: Partial<Record<Locale, Manifest>> = { ru: manifestRu as Manifest };
 
-export function sectionHash(sentences: string[]): string {
+export function sectionHash(sentences: string[], voice: Record<string, string> = VOICE): string {
 	const h = createHash('sha256');
-	h.update(JSON.stringify({ v: SCRIPT_VERSION, voice: VOICE, sentences }));
+	h.update(JSON.stringify({ v: SCRIPT_VERSION, voice, sentences }));
 	return h.digest('hex').slice(0, 16);
 }
 
 /** The lesson's script with each section's hash, or null when the edition is not narrated. */
-export function script(lesson: Pick<LessonMeta, 'id' | 'title' | 'summary' | 'definition' | 'say'>, lang: Locale): HashedSection[] | null {
+export function script(lesson: Pick<LessonMeta, 'id' | 'title' | 'summary' | 'definition' | 'say'>, lang: Locale, speaker?: string): HashedSection[] | null {
 	const lex = lexicons[lang];
 	const source = sources[lang][`/content/${lang}/${lesson.id}.svx`];
 	if (!lex || !source) return null;
-	return narrate(source, lesson, lex).map((s) => ({ ...s, hash: sectionHash(s.sentences) }));
+	const voice = lang === 'ru' ? VOICE : voiceFor(lang, speaker);
+	return narrate(source, lesson, lex, lang).map((s) => ({ ...s, hash: sectionHash(s.sentences, voice) }));
 }
 
 /** Any text in the spoken form the lesson's narration uses: how the WER check reads Whisper. */
 export function spoken(text: string, lesson: Pick<LessonMeta, 'say'>, lang: Locale): string {
 	const lex = lexicons[lang];
-	return lex ? speak(text, lex, lesson.say ?? {}) : text;
+	return lex ? speak(text, lex, lesson.say ?? {}, lang) : text;
 }
 
 /**
@@ -77,13 +89,22 @@ export function heardAs(text: string, lesson: Pick<LessonMeta, 'say'>, lang: Loc
 	const rx = new RegExp(`(?<![\\p{L}\\p{N}])(?:${keys.map(esc).join('|')})(?![\\p{L}\\p{N}])`, 'giu');
 	const norm = (s: string) => s.toLowerCase().replace(/[-\s]+/g, '');
 	const byNorm = new Map(keys.map((k) => [norm(k), map[k]]));
-	return speak(text.replace(rx, (m) => byNorm.get(norm(m)) ?? m), lex, say);
+	return speak(text.replace(rx, (m) => byNorm.get(norm(m)) ?? m), lex, say, lang);
 }
 
-/** Every word the maps can put in a sentence: Whisper writes these in Latin, so the renderer's ear skips them. */
+/**
+ * Every word the maps can put in a sentence: Whisper writes these in Latin, so the renderer's ear skips them.
+ * In English the spoken form and the written one are both Latin («jason» was said, «JSON» is heard), so the
+ * written forms are skipped as well.
+ */
 export function mappedWords(lessons: Pick<LessonMeta, 'say'>[], lang: Locale): string[] {
 	const lex = lexicons[lang];
-	const values = [...Object.values(lex?.letters ?? {}), ...Object.values(lex?.words ?? {}), ...lessons.flatMap((l) => Object.values(l.say ?? {}))];
+	const maps = [lex?.words ?? {}, ...lessons.map((l) => l.say ?? {})];
+	const values = [...Object.values(lex?.letters ?? {}), ...maps.flatMap((m) => Object.values(m))];
+	if (lang === 'en') {
+		const keys = [...Object.keys(lex?.letters ?? {}), ...maps.flatMap((m) => Object.keys(m))];
+		return [...new Set([...values, ...keys].flatMap((v) => v.toLowerCase().split(/[^a-z]+/).filter(Boolean)))].sort();
+	}
 	return [...new Set(values.flatMap((v) => v.toLowerCase().replace(/ё/g, 'е').split(/[^а-я]+/).filter(Boolean)))].sort();
 }
 

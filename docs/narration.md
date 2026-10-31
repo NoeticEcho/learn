@@ -172,6 +172,33 @@ named `narration`, which the service worker neither fills nor cleans (its scope 
 it deletes only `learn-*` caches). A downloaded section plays from a `blob:` URL, hence
 `media-src 'self' blob:`.
 
-The English edition has no voice yet: `narration.server.ts` has no lexicon for `en`, so no
-English lesson offers «Listen». An English voice is a new lexicon, a new manifest and a voice
-chosen by ear.
+## English: a sample, not an edition
+
+The English edition has no voice chosen and no audio, and **nothing here publishes it**: there is no English
+manifest, so `narration()` is null for `en` and no English lesson offers «Listen». What exists is the means to
+hear what a voice would do with it, for the person who chooses one.
+
+| Where | What |
+|---|---|
+| `content/narration/en.yaml` | the English lexicon: the names of the letters, acronyms read as words (`keep`: `POST`, `SELECT`), terms read in a way the spelling does not show |
+| `src/lib/narration/numbers.en.ts` | years in pairs («nineteen ninety-five»), dates with an ordinal day, a decimal digit by digit («zero point zero seven»), ranges, ratios, money |
+| `script.ts` (`Lang`, `STRINGS`) | what the script says in its own words («Code example.», «Answer:», «dot», «equals»), per language |
+
+```bash
+node scripts/narration.ts script --lang en --speaker serena --out /tmp/en.scripts.json
+tools/narration/render.py --scripts /tmp/en.scripts.json --audio /tmp/en-audio \
+    --lessons 01-internet/01-history --only 01-internet/01-history#3 --log /tmp/en-render.log
+tools/narration/transcribe.py --audio /tmp/en-audio --lang en --out /tmp/en-transcripts.json
+```
+
+A speaker is part of the hash, so a sample is never mistaken for the edition's audio, and Russian hashes are what
+they were (the English change leaves the Russian scripts byte for byte). `wer`, `status`, `run.sh` and `publish.sh` are
+the Russian edition's; the renderer's ear works in English (Latin words of four letters or more; an acronym Whisper
+writes in capitals is left out).
+
+The model's presets (`get_supported_speakers()`): `aiden`, `dylan`, `eric`, `ono_anna`, `ryan`, `serena`, `sohee`,
+`uncle_fu`, `vivian`. The model card calls `ryan` and `aiden` the English-native ones; the config marks `dylan` and `eric`
+as Beijing and Sichuan dialects. `serena` is the Russian voice and reads English too (a sample, not a decision). Measured on 2026-10-31, three sections of 1.2–1.5 thousand characters, listening included: 11.4–12.3 characters
+of script per second of audio (`CHARS_PER_SECOND["en"]`), real-time factor 0.41–0.43 on an idle machine (Russian runs
+0.37–0.57; 0.7 while another session was using the GPU). The whole English edition is 1.13 million characters, about 27
+hours of audio, and so about 11 hours of rendering on an idle machine and more in company. Not checked by ear.

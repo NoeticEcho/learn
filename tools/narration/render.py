@@ -23,6 +23,11 @@ usage: render.py --scripts .cache/narration/ru.scripts.json --audio ../learn-aud
                  [--parts 0,1] [--lessons id,id] [--log private/narration/render.log]
                  [--min-free-gb 8] [--resume-free-gb 8] [--dry-run]
                  [--redo id#key,id#key --salt 2]   another sample of sections Whisper flagged
+                 [--only id#key,id#key]   render these sections and no others of the lessons chosen (a sample)
+
+The language is the scripts file's (`lang`, `voice`): `npm run narration -- script --lang en --speaker ryan` writes
+English ones, and the audio and manifest go to <audio>/en/ and <audio>/en.json. Nothing here publishes; run.sh and
+publish.sh are the Russian edition's alone.
 """
 import argparse, json, os, signal, subprocess, sys, tempfile, threading, time, wave
 from datetime import datetime
@@ -34,7 +39,7 @@ import listen
 MODEL_DIR = Path.home() / ".cache/learn-tts/models/Qwen3-TTS-12Hz-0.6B-CustomVoice"
 LUFS, TRUE_PEAK, BITRATE = -16, -1.5, "32k"
 GAP_AFTER_HEADING, GAP, TAIL = 0.7, 0.35, 0.6
-CHARS_PER_SECOND = 14.0  # serena's Russian, measured in the spike
+CHARS_PER_SECOND = {"ru": 14.0, "en": 12.0}  # serena's Russian, measured in the spike; English: 11.4–12.3 on three samples, gaps included (docs/narration.md)
 BATCH_SENTENCES, BATCH_CHARS = 12, 2400
 RETAKES, MIN_RECALL, MIN_PRECISION = 3, 0.7, 0.5  # the thresholds separate the pilot's drifted sentences from the rest (docs/narration.md)
 
@@ -138,8 +143,8 @@ def trim(w, sr, np):
     return w[a * frame : b * frame]
 
 
-def plausible(text, seconds):
-    expected = len(text) / CHARS_PER_SECOND
+def plausible(text, seconds, cps):
+    expected = len(text) / cps
     return 0.45 * expected - 0.5 <= seconds <= 2.2 * expected + 1.5
 
 
@@ -187,6 +192,7 @@ def main():
     ap.add_argument("--resume-free-gb", type=float, default=8.0, help="and resume only at this much")
     ap.add_argument("--redo", help="lesson#key,…: render these sections again although they have audio (another sample)")
     ap.add_argument("--salt", type=int, default=1, help="with --redo: which other sample (the seed is shifted by it)")
+    ap.add_argument("--only", help="lesson#key,…: of the lessons chosen, render only these sections")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     log_file = a.log
@@ -195,6 +201,7 @@ def main():
 
     scripts = json.loads(Path(a.scripts).read_text(encoding="utf-8"))
     lang = scripts["lang"]
+    cps = CHARS_PER_SECOND[lang]
     audio = Path(a.audio).resolve()
     manifest_path = audio / f"{lang}.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
@@ -218,10 +225,11 @@ def main():
     redo = set(a.redo.split(",")) if a.redo else set()
     if redo:
         lessons = [l for l in lessons if any(r.split("#")[0] == l["id"] for r in redo)]
-    todo = [(l, s) for l in lessons for s in l["sections"] if not done(l, s) or f"{l['id']}#{s['key']}" in redo]
+    only = set(a.only.split(",")) if a.only else None
+    todo = [(l, s) for l in lessons for s in l["sections"] if (not done(l, s) or f"{l['id']}#{s['key']}" in redo) and (only is None or f"{l['id']}#{s['key']}" in only)]
     total_chars = sum(len(t) for _, s in todo for t in s["sentences"])
     log(f"start: {len(lessons)} lesson(s), {len(todo)} section(s) to render, {total_chars} chars "
-        f"(~{total_chars / CHARS_PER_SECOND / 60:.0f} min of audio), {mem_available_gb():.1f} GB available, pid {os.getpid()}")
+        f"(~{total_chars / cps / 60:.0f} min of audio), {mem_available_gb():.1f} GB available, pid {os.getpid()}")
     if a.dry_run or not todo:
         finish_lessons(lessons, manifest, manifest_path, audio, done)
         log("done: nothing to render" if not todo else "dry run")
@@ -259,12 +267,12 @@ def main():
     def judge(text, w, sr):
         """Is this take the sentence? rank orders takes when none is good."""
         seconds = len(w) / sr
-        fits = plausible(text, seconds)
+        fits = plausible(text, seconds, cps)
         heard = listen.transcribe_pcm((np.clip(w, -1, 1) * 32767).astype("<i2").tobytes(), sr, lang)
         if heard is None:  # Whisper is not answering: say so, and do not hold the run up
             deaf["n"] += 1
             return {"ok": fits, "why": f"{seconds:.1f}s for {len(text)} chars", "rank": 0.0, "heard": None}
-        recall, precision, _ = listen.score(text, heard, ignore)
+        recall, precision, _ = listen.score(text, heard, ignore, lang)
         ok = fits and recall >= MIN_RECALL and precision >= MIN_PRECISION
         why = "" if ok else f"{seconds:.1f}s for {len(text)} chars, recall {recall:.2f}, precision {precision:.2f}"
         return {"ok": ok, "why": why, "rank": min(recall, precision) if fits else min(recall, precision) / 2, "heard": heard}

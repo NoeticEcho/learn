@@ -16,6 +16,7 @@
  * None of this reaches the page: the displayed text is never touched.
  */
 import { cardinal, speakDates, speakNumbers, speakPercents, speakYears } from './numbers.ts';
+import { cardinalEn, speakDatesEn, speakNumbersEn, speakPercentsEn, speakYearsEn } from './numbers.en.ts';
 
 export type Lexicon = {
 	/** How each Latin letter is named when an acronym is spelt out: { A: 'эй', … }. */
@@ -39,9 +40,96 @@ export type Section = {
 
 export type LessonText = { title: string; summary: string; definition: string; say?: Record<string, string> };
 
-/** Sections whose heading matches are not read. */
-const SKIP = /^Практика$/;
-const CODE = 'Пример кода.';
+export type Lang = 'ru' | 'en';
+
+/** What the script says in its own words, which is the one thing about it that depends on the language. */
+type Strings = {
+	/** Sections whose heading matches are not read. */
+	skip: RegExp;
+	code: string;
+	table: string;
+	answer: string;
+	/** The head of a table's column, lower-cased when the sentence goes on: «Тон: деловой». */
+	capitalised: RegExp;
+	equals: string;
+	and: string;
+	query: string;
+	closing: string;
+	dot: string;
+	at: string;
+	number: string;
+	plus: string;
+	by: string;
+	divide: string;
+	approx: string;
+	minus: string;
+	squared: string;
+	hash: string;
+	version: string;
+	zero: string;
+	xx: string;
+	xn: string;
+	/** Between the letters of a spelt acronym. */
+	spell: string;
+	units: Record<string, string>;
+};
+
+const STRINGS: Record<Lang, Strings> = {
+	ru: {
+		skip: /^Практика$/,
+		code: 'Пример кода.',
+		table: 'На странице таблица.',
+		answer: 'Ответ:',
+		capitalised: /^[А-ЯЁ][а-яё]/,
+		equals: 'равно',
+		and: 'и',
+		query: 'вопрос',
+		closing: 'закрывающий',
+		dot: 'точка',
+		at: 'собака',
+		number: 'номер',
+		plus: 'плюс',
+		by: 'на',
+		divide: 'разделить на',
+		approx: 'примерно равно',
+		minus: 'минус',
+		squared: 'в квадрате',
+		hash: 'решётка',
+		version: 'ви',
+		zero: 'ноль',
+		xx: '-икс-икс',
+		xn: 'набор латинских букв, который начинается с икс-эн и двух дефисов',
+		spell: '-',
+		units: { px: 'пикселей', rem: 'рем', em: 'эм', fr: 'эф-эр', vh: 'ви-эйч', vw: 'ви-дабл-ю', ch: 'си-эйч', ms: 'миллисекунд', кб: 'килобайт', kb: 'килобайт', мб: 'мегабайт', mb: 'мегабайт', гб: 'гигабайт', gb: 'гигабайт' }
+	},
+	en: {
+		skip: /^Practice$/,
+		code: 'Code example.',
+		table: 'There is a table on the page.',
+		answer: 'Answer:',
+		capitalised: /^[A-Z][a-z]/,
+		equals: 'equals',
+		and: 'and',
+		query: 'question mark',
+		closing: 'closing',
+		dot: 'dot',
+		at: 'at',
+		number: 'number',
+		plus: 'plus',
+		by: 'by',
+		divide: 'divided by',
+		approx: 'is about',
+		minus: 'minus',
+		squared: 'squared',
+		hash: 'hash',
+		version: 'version',
+		zero: 'zero',
+		xx: ' X X',
+		xn: 'a string of Latin letters that starts with x, n and two hyphens',
+		spell: ' ',
+		units: { px: 'pixels', rem: 'rem', em: 'em', fr: 'F R', vh: 'V H', vw: 'V W', ch: 'C H', ms: 'milliseconds', kb: 'kilobytes', mb: 'megabytes', gb: 'gigabytes' }
+	}
+};
 // One utterance should not be a single word: alone, the voice mangles short items (in the probe
 // «Мука.» came out five seconds long). Shorter sentences are joined to their neighbour.
 const MIN_SENTENCE = 40;
@@ -58,26 +146,27 @@ export function bodyOf(source: string): string {
 const ENTITIES: Record<string, string> = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', laquo: '«', raquo: '»', mdash: '—', ndash: '–', hellip: '…', shy: '' };
 
 /** Inline code, as a person reads it aloud: the words in it, without the punctuation of code. */
-function speakCode(code: string): string {
+function speakCode(code: string, lang: Lang = 'ru'): string {
+	const T = STRINGS[lang];
 	const closing = /^<\/\w/.test(code);
 	const words = code
 		.replace(/^<\/?|\/?>$/g, '')
 		.replace(/^\/(?=\p{L})/u, '')
-		.replace(/\s*=\s*/g, ' равно ')
-		.replace(/\s*&\s*/g, ' и ')
-		.replace(/(?<=\p{L})\?(?=\p{L})/gu, ' вопрос ')
+		.replace(/\s*=\s*/g, ` ${T.equals} `)
+		.replace(/\s*&\s*/g, ` ${T.and} `)
+		.replace(/(?<=\p{L})\?(?=\p{L})/gu, ` ${T.query} `)
 		.replace(/[<>{}()[\];"'`*$\\|^~]+/g, ' ')
 		.replace(/^[:!.#@-]+(?=\w)/, '')
 		.replace(/:\/\/$/, '')
 		.replace(/\s+/g, ' ')
 		.trim();
-	return closing ? `закрывающий ${words}` : words;
+	return closing ? `${T.closing} ${words}` : words;
 }
 
 /** Markdown and HTML inline markup → plain text. */
-export function plain(s: string): string {
+export function plain(s: string, lang: Lang = 'ru'): string {
 	return s
-		.replace(/`([^`]+)`/g, (_, c: string) => speakCode(c))
+		.replace(/`([^`]+)`/g, (_, c: string) => speakCode(c, lang))
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
 		.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
 		.replace(/<[^>]+>/g, '')
@@ -94,12 +183,14 @@ const terminal = (s: string) => (/[.!?…]["»)]*$/.test(s) ? s : `${s.replace(/
 type Block = { kind: 'heading'; text: string } | { kind: 'text'; text: string };
 
 /** The body's blocks, in order: headings and the sentences-to-be of everything readable. */
-function blocks(body: string): Block[] {
+function blocks(body: string, lang: Lang = 'ru'): Block[] {
+	const T = STRINGS[lang];
+	const plain_ = (s: string) => plain(s, lang);
 	const out: Block[] = [];
 	const lines = body.split('\n');
 	let para: string[] = [];
 	const flush = () => {
-		if (para.length) out.push({ kind: 'text', text: plain(para.join(' ')) });
+		if (para.length) out.push({ kind: 'text', text: plain_(para.join(' ')) });
 		para = [];
 	};
 	for (let i = 0; i < lines.length; i++) {
@@ -109,7 +200,7 @@ function blocks(body: string): Block[] {
 			flush();
 			const fence = t.slice(0, 3);
 			while (++i < lines.length && !lines[i].trim().startsWith(fence));
-			out.push({ kind: 'text', text: CODE });
+			out.push({ kind: 'text', text: T.code });
 			continue;
 		}
 		if (!t) {
@@ -136,8 +227,8 @@ function blocks(body: string): Block[] {
 		const h = /^(#{2,4})\s+(.*)$/.exec(t);
 		if (h) {
 			flush();
-			if (h[1] === '##') out.push({ kind: 'heading', text: plain(h[2]) });
-			else out.push({ kind: 'text', text: terminal(plain(h[2])) });
+			if (h[1] === '##') out.push({ kind: 'heading', text: plain_(h[2]) });
+			else out.push({ kind: 'text', text: terminal(plain_(h[2])) });
 			continue;
 		}
 		if (/^<details\b/.test(t) || /^<\/details>/.test(t)) {
@@ -147,23 +238,23 @@ function blocks(body: string): Block[] {
 		const summary = /^<summary>(.*)<\/summary>$/.exec(t);
 		if (summary) {
 			flush();
-			out.push({ kind: 'text', text: terminal(plain(summary[1])) });
+			out.push({ kind: 'text', text: terminal(plain_(summary[1])) });
 			// the answer follows: «Ответ:» before its first paragraph
 			let j = i + 1;
 			while (j < lines.length && !lines[j].trim()) j++;
-			if (j < lines.length && !/^<\/details>/.test(lines[j].trim())) lines[j] = `Ответ: ${lines[j].trim()}`;
+			if (j < lines.length && !/^<\/details>/.test(lines[j].trim())) lines[j] = `${T.answer} ${lines[j].trim()}`;
 			continue;
 		}
 		if (/^\|/.test(t)) {
 			flush();
 			const rows: string[][] = [];
 			while (i < lines.length && /^\|/.test(lines[i].trim())) {
-				const cells = lines[i].trim().replace(/^\||\|$/g, '').split('|').map((c) => plain(c));
+				const cells = lines[i].trim().replace(/^\||\|$/g, '').split('|').map((c) => plain_(c));
 				if (!cells.every((c) => /^:?-+:?$/.test(c))) rows.push(cells);
 				i++;
 			}
 			i--;
-			out.push(...table(rows));
+			out.push(...table(rows, lang));
 			continue;
 		}
 		const item = /^(?:[-*+]|\d+[.)])\s+(.*)$/.exec(t);
@@ -172,7 +263,7 @@ function blocks(body: string): Block[] {
 			para = [item[1]];
 			// a list item's continuation lines are indented
 			while (i + 1 < lines.length && /^\s{2,}\S/.test(lines[i + 1]) && !/^\s*(?:[-*+]|\d+[.)])\s/.test(lines[i + 1])) para.push(lines[++i].trim());
-			out.push({ kind: 'text', text: terminal(plain(para.join(' '))) });
+			out.push({ kind: 'text', text: terminal(plain_(para.join(' '))) });
 			para = [];
 			continue;
 		}
@@ -183,13 +274,14 @@ function blocks(body: string): Block[] {
 }
 
 /** A table, row by row: «Тон: деловой; что чувствуется: собранность, доверие.» A table of data reads as one line. */
-function table(rows: string[][]): Block[] {
+function table(rows: string[][], lang: Lang = 'ru'): Block[] {
+	const T = STRINGS[lang];
 	if (!rows.length) return [];
 	const [head, ...body] = rows;
 	const cells = body.flat();
 	const numeric = cells.filter((c) => /^[\d\s.,%₽$€:–—-]*$/.test(c)).length;
-	if (!body.length || numeric / Math.max(1, cells.length) > 0.3) return [{ kind: 'text', text: 'На странице таблица.' }];
-	const lower = (s: string) => (/^[А-ЯЁ][а-яё]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s);
+	if (!body.length || numeric / Math.max(1, cells.length) > 0.3) return [{ kind: 'text', text: T.table }];
+	const lower = (s: string) => (T.capitalised.test(s) ? s[0].toLowerCase() + s.slice(1) : s);
 	return body.map((r) => ({
 		kind: 'text' as const,
 		text: terminal(r.map((c, k) => (k === 0 ? c : head[k] ? `${lower(head[k])}: ${c}` : c)).filter(Boolean).join('; ').replace(/^(.*?);/, '$1:'))
@@ -199,7 +291,7 @@ function table(rows: string[][]): Block[] {
 /** Splits text into sentences, then joins the short ones and cuts the long ones. */
 export function sentences(text: string): string[] {
 	const raw = text
-		.split(/(?<=[.!?…]["»)]*)\s+(?=[«"(]?[А-ЯЁA-Z0-9])/)
+		.split(/(?<=[.!?…]["»)]*)\s+(?=[«"“‘(]?[А-ЯЁA-Z0-9])/)
 		.map((s) => s.trim())
 		.filter(Boolean);
 	const cut: string[] = [];
@@ -228,7 +320,6 @@ export function sentences(text: string): string[] {
 	return out;
 }
 
-const UNITS: Record<string, string> = { px: 'пикселей', rem: 'рем', em: 'эм', fr: 'эф-эр', vh: 'ви-эйч', vw: 'ви-дабл-ю', ch: 'си-эйч', ms: 'миллисекунд', кб: 'килобайт', kb: 'килобайт', мб: 'мегабайт', mb: 'мегабайт', гб: 'гигабайт', gb: 'гигабайт' };
 const LATIN_CAPS =/(?<![\p{L}\p{N}])([A-Z]{2,6})(\d{0,2})(?![\p{L}])/gu;
 
 /** Applies a map of written → spoken forms, longest key first, at word boundaries. */
@@ -241,14 +332,15 @@ function applyMap(s: string, map: Record<string, string>): string {
 }
 
 /** Domain names and URLs: «www.example.ru» → «www точка example точка ru», «.ru» → «точка ru». */
-function speakDomains(s: string): string {
+function speakDomains(s: string, lang: Lang = 'ru'): string {
+	const T = STRINGS[lang];
 	return s
-		.replace(/(?<![\p{L}\p{N}])([\p{L}\p{N}._-]+)@(?=[\p{L}\p{N}-]+\.)/gu, '$1 собака ')
+		.replace(/(?<![\p{L}\p{N}])([\p{L}\p{N}._-]+)@(?=[\p{L}\p{N}-]+\.)/gu, `$1 ${T.at} `)
 		.replace(/\bhttps?:\/\/(?=\S)/g, (m) => (m.startsWith('https') ? 'HTTPS ' : 'HTTP '))
 		.replace(/(?<![\p{L}\p{N}@])((?:[a-zа-яё0-9-]+\.)+[a-zа-яё]{2,})(?:\/\S*)?(?![\p{L}\p{N}])/giu, (m, host: string) =>
-			/\.(html|css|js|json|svg|png|jpg|txt|md|xml|webp|woff2|ts|py)$/i.test(host) || !/\./.test(host) ? m.replace(/\./g, ' точка ') : host.split('.').join(' точка ')
+			/\.(html|css|js|json|svg|png|jpg|txt|md|xml|webp|woff2|ts|py)$/i.test(host) || !/\./.test(host) ? m.replace(/\./g, ` ${T.dot} `) : host.split('.').join(` ${T.dot} `)
 		)
-		.replace(/(?<![\p{L}\p{N}])\.([a-zа-яё]{2,6})(?![\p{L}\p{N}])/giu, 'точка $1');
+		.replace(/(?<![\p{L}\p{N}])\.([a-zа-яё]{2,6})(?![\p{L}\p{N}])/giu, `${T.dot} $1`);
 }
 
 /** The stress dictionary: «замо́к» → the voice's own way of being told (see `stressMark`). */
@@ -276,71 +368,77 @@ export function stressMark(s: string): string {
  * out «нольb5cad» (the leading zero taken for a number of its own, the rest left in Latin). It must have a digit,
  * or be one letter repeated («#fff»), so that an anchor like «#cafe» is not taken for a colour.
  */
-export function speakHex(s: string, letters: Record<string, string>): string {
+export function speakHex(s: string, letters: Record<string, string>, lang: Lang = 'ru'): string {
+	const T = STRINGS[lang];
+	const digit = (n: number) => (lang === 'en' ? cardinalEn(n) : cardinal(n));
 	return s.replace(/(?<![\p{L}\p{N}&])#([0-9a-f]{3,8})(?![\p{L}\p{N}-])/giu, (m, hex: string) => {
 		if (![3, 4, 6, 8].includes(hex.length) || !(/\d/.test(hex) || /^(.)\1+$/.test(hex))) return m;
-		return `решётка ${[...hex].map((ch) => (/\d/.test(ch) ? cardinal(Number(ch)) : (letters[ch.toUpperCase()] ?? ch))).join(' ')}`;
+		return `${T.hash} ${[...hex].map((ch) => (/\d/.test(ch) ? digit(Number(ch)) : (letters[ch.toUpperCase()] ?? ch))).join(' ')}`;
 	});
 }
 
 /** One sentence, written → spoken. */
-export function speak(s: string, lex: Lexicon, say: Record<string, string> = {}): string {
+export function speak(s: string, lex: Lexicon, say: Record<string, string> = {}, lang: Lang = 'ru'): string {
+	const T = STRINGS[lang];
+	const en = lang === 'en';
 	let out = s
 		.replace(/(?<=\p{L})­/gu, '')
 		.replace(/[“”„]/g, '"')
 		.replace(/\s*→\s*/g, ', ')
-		.replace(/(?<=\s)&(?=\s)/g, 'и')
-		.replace(/№\s*/g, 'номер ');
-	out = speakHex(out, lex.letters);
-	out = out.replace(/xn--[a-z0-9-]+(?:\.xn--[a-z0-9-]+)*/g, 'набор латинских букв, который начинается с икс-эн и двух дефисов');
+		.replace(/(?<=\s)&(?=\s)/g, T.and)
+		.replace(/№\s*/g, `${T.number} `);
+	out = speakHex(out, lex.letters, lang);
+	out = out.replace(/xn--[a-z0-9-]+(?:\.xn--[a-z0-9-]+)*/g, T.xn);
 	out = applyMap(out, say);
 	out = applyMap(out, lex.words);
-	out = speakDomains(out);
+	out = speakDomains(out, lang);
 	out = applyMap(out, lex.words); // the parts of a domain, now words of their own
-	out = speakYears(out);
-	out = speakDates(out);
-	out = speakPercents(out);
+	out = en ? speakYearsEn(out) : speakYears(out);
+	out = en ? speakDatesEn(out) : speakDates(out);
+	out = en ? speakPercentsEn(out) : speakPercents(out);
 	// «v3.0», «v7»: a version's letter is read («ви три»), not left to the number rules, which took the «v» for a word and the «0» for a number of its own
-	out = out.replace(/(?<![\p{L}\p{N}])v(?=\d)/gu, 'ви ');
+	out = out.replace(/(?<![\p{L}\p{N}])v(?=\d)/gu, `${T.version} `);
 	// «152-эф-зэ», «HTML5-страница»: a number fused to letters by a hyphen is said with a pause
 	out = out.replace(/(?<=\d)-(?=\p{L}{2})(?!(?:го|му|ми)(?!\p{L}))|(?<=\p{L})-(?=\d)/gu, ' ');
-	out = out.replace(/(\d)\s?(px|rem|em|fr|vh|vw|ch|ms|КБ|kB|KB|МБ|MB|ГБ|GB)(?![\p{L}\p{N}])/gu, (m, d: string, u: string) => `${d} ${UNITS[u.toLowerCase()] ?? u}`);
-	out = out.replace(/(?<![\p{L}\p{N}])F(\d{1,2})(?![\p{L}\p{N}])/gu, 'эф $1');
+	out = out.replace(/(\d)\s?(px|rem|em|fr|vh|vw|ch|ms|КБ|kB|KB|МБ|MB|ГБ|GB)(?![\p{L}\p{N}])/gu, (m, d: string, u: string) => `${d} ${T.units[u.toLowerCase()] ?? u}`);
+	out = out.replace(/(?<![\p{L}\p{N}])F(\d{1,2})(?![\p{L}\p{N}])/gu, `${lex.letters.F ?? 'F'} $1`);
 	// «A01» (the OWASP list): the letter's name, the number read digit by digit when it starts with a zero
-	out = out.replace(/(?<![\p{L}\p{N}])([A-Z])(0\d)(?![\p{L}\p{N}])/gu, (m, c: string, n: string) => `${lex.letters[c] ?? c} ноль ${cardinal(Number(n[1]))}`);
+	out = out.replace(/(?<![\p{L}\p{N}])([A-Z])(0\d)(?![\p{L}\p{N}])/gu, (m, c: string, n: string) => `${lex.letters[c] ?? c} ${T.zero} ${en ? cardinalEn(Number(n[1])) : cardinal(Number(n[1]))}`);
 	const keep = new Set(lex.keep);
 	out = out.replace(LATIN_CAPS, (m, caps: string, digits: string) => {
 		if (keep.has(caps)) return m;
-		const spelt = [...caps].map((c) => lex.letters[c] ?? c).join('-');
+		const spelt = [...caps].map((c) => lex.letters[c] ?? c).join(T.spell);
 		return digits ? `${spelt} ${digits}` : spelt;
 	});
 	out = out
 		.replace(/(?<=[\p{L}\d])\/(?=\p{L})|(?<=\p{L})\/(?=\d)/gu, ' ')
-		.replace(/\s\+\s|(?<=\p{L})\+(?=\p{L})/gu, ' плюс ')
-		.replace(/(?<![\p{L}])(\d)xx(?![\p{L}])/gu, '$1-икс-икс')
-		.replace(/\s×\s|(?<=\d)×(?=\d)/g, ' на ')
+		.replace(/\s\+\s|(?<=\p{L})\+(?=\p{L})/gu, ` ${T.plus} `)
+		.replace(/(?<![\p{L}])(\d)xx(?![\p{L}])/gu, `$1${T.xx}`)
+		.replace(/\s×\s|(?<=\d)×(?=\d)/g, ` ${T.by} `)
 		// a formula, read as one: «N ≈ 16 × p ÷ d²» (the voice passed over these signs, or said them as it liked)
-		.replace(/\s÷\s/g, ' разделить на ')
-		.replace(/\s≈\s/g, ' примерно равно ')
-		.replace(/\s−\s/g, ' минус ')
-		.replace(/(?<=[\p{L})\d])²/gu, ' в квадрате');
-	out = speakNumbers(out);
+		.replace(/\s÷\s/g, ` ${T.divide} `)
+		.replace(/\s≈\s/g, ` ${T.approx} `)
+		.replace(/\s−\s/g, ` ${T.minus} `)
+		.replace(/(?<=[\p{L})\d])²/gu, ` ${T.squared}`);
+	if (en) out = out.replace(/§\s*/g, 'section ');
+	out = en ? speakNumbersEn(out) : speakNumbers(out);
 	out = applyMap(out, stressMap(lex.stress));
 	return stressMark(out).replace(/\s+/g, ' ').trim();
 }
 
 /** The lesson's sections, written and spoken. */
-export function narrate(source: string, lesson: LessonText, lex: Lexicon): Section[] {
+export function narrate(source: string, lesson: LessonText, lex: Lexicon, lang: Lang = 'ru'): Section[] {
+	const T = STRINGS[lang];
 	const say = lesson.say ?? {};
 	const sections: { key: string; heading: string; texts: string[] }[] = [
 		{ key: 'intro', heading: lesson.title, texts: [terminal(lesson.title), lesson.summary, lesson.definition] }
 	];
 	let skipping = false;
 	let n = 0;
-	for (const b of blocks(bodyOf(source))) {
+	for (const b of blocks(bodyOf(source), lang)) {
 		if (b.kind === 'heading') {
 			n++;
-			skipping = SKIP.test(b.text);
+			skipping = T.skip.test(b.text);
 			if (!skipping) sections.push({ key: String(n), heading: b.text, texts: [terminal(b.text)] });
 			continue;
 		}
@@ -350,10 +448,10 @@ export function narrate(source: string, lesson: LessonText, lex: Lexicon): Secti
 		.map((s) => {
 			// the heading stays an utterance of its own: the player pauses after it
 			const [head, ...rest] = s.texts;
-			const body = rest.flatMap((t) => sentences(t)).map((t) => speak(t, lex, say));
+			const body = rest.flatMap((t) => sentences(t)).map((t) => speak(t, lex, say, lang));
 			// a sentence starts with a capital even when the written one starts with a term: the voice
 			// took «эм-икс: почтовый сервер» for the middle of something, and swallowed the term
-			const said = [speak(head, lex, say), ...body].filter(Boolean).map((t) => t[0].toUpperCase() + t.slice(1));
+			const said = [speak(head, lex, say, lang), ...body].filter(Boolean).map((t) => t[0].toUpperCase() + t.slice(1));
 			return { key: s.key, heading: s.heading, sentences: said };
 		})
 		.filter((s) => s.sentences.length > 1);
