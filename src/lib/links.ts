@@ -21,6 +21,12 @@ export const lesson = (id: string, l: Locale = getLocale()) => {
 	const [part, lesson] = id.split('/');
 	return slash(resolve('/[[lang=lang]]/lesson/[part]/[lesson]', { ...lang(l), part, lesson }));
 };
+/** A course's page. The web course's lessons, map and gallery keep the addresses above. */
+export const course = (id: string, l: Locale = getLocale()) => slash(resolve('/[[lang=lang]]/course/[course]', { ...lang(l), course: id }));
+/** The web course's prologue. */
+export const prologue = (l: Locale = getLocale()) => slash(resolve('/[[lang=lang]]/course/web/prologue', lang(l)));
+/** The Atom feed of new lessons. */
+export const feed = (l: Locale = getLocale()) => resolve('/[[lang=lang]]/feed.xml', lang(l));
 /** The returning home's lesson list, named by its content's hash (catalogue.server.ts homeIndex). */
 export const homeIndex = (hash: string) => resolve('/data/home-[hash].json', { hash });
 
@@ -32,6 +38,9 @@ export const homeIndex = (hash: string) => resolve('/data/home-[hash].json', { h
 export function counterpart(inner: string, to: Locale): string {
 	const m = inner.match(/^\/lesson\/([^/]+)\/([^/]+)\/?$/);
 	if (m) return lesson(`${m[1]}/${m[2]}`, to);
+	if (/^\/course\/web\/prologue\/?$/.test(inner)) return prologue(to);
+	const c = inner.match(/^\/course\/([^/]+)\/?$/);
+	if (c) return course(c[1], to);
 	const screen = inner.replace(/^\/+|\/+$/g, '');
 	if (screen === 'map') return map(to);
 	if (screen === 'review') return review(to);

@@ -1,10 +1,11 @@
 /**
- * The structured data (schema.org, as JSON-LD): a `Course` and a `WebSite` on the home page, a
- * `LearningResource` per lesson that is part of that course, and a `BreadcrumbList` on every
- * page below home. Built from data the page already has, so it costs the page no extra data;
+ * The structured data (schema.org, as JSON-LD): a `WebSite` and an `ItemList` of courses on the
+ * catalog, a `Course` on the page of a course with published lessons, a `LearningResource` per
+ * lesson that is part of it, and a `BreadcrumbList` on every page below the catalog. A planned
+ * course has no `Course`: an offer of a course that cannot be taken yet would be false. Built from data the page already has, so it costs the page no extra data;
  * the head writes it as `<script type="application/ld+json">` (Seo.svelte).
  *
- * The course is one node with an `@id` (`<home>#course`), and each lesson's `isPartOf` names
+ * The course is one node with an `@id` (`<course page>#course`), and each lesson's `isPartOf` names
  * that id, so a reader of the graph joins them without guessing. The field set follows
  * schema.org's types and what Google's Course and Breadcrumb documentation requires (`name`,
  * `description`, `provider`; `itemListElement` with `position`, `name`, `item`);
@@ -26,13 +27,13 @@ export const duration = (minutes: number) => {
 
 export const courseId = (homeUrl: string) => `${homeUrl}#course`;
 
-export function course(o: { homeUrl: string; description: string; image?: string; minutes: number; parts?: Part[]; lang?: Locale }): Thing {
+export function course(o: { homeUrl: string; name: string; description: string; image?: string; minutes: number; parts?: Part[]; lang?: Locale }): Thing {
 	const lang = o.lang ?? 'ru';
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'Course',
 		'@id': courseId(o.homeUrl),
-		name: SITE_NAMES[lang],
+		name: o.name,
 		description: o.description,
 		url: o.homeUrl,
 		...(o.image ? { image: o.image } : {}),
@@ -52,12 +53,21 @@ export function website(homeUrl: string, description: string, lang: Locale = 'ru
 	return { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAMES[lang], url: homeUrl, inLanguage: lang, description, publisher };
 }
 
+/** The catalog's list of courses. */
+export const courseList = (items: { name: string; url: string }[]): Thing => ({
+	'@context': 'https://schema.org',
+	'@type': 'ItemList',
+	itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: it.url }))
+});
+
 const citation = (s: Source) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, inLanguage: s.lang });
 
 export function learningResource(o: {
 	lesson: LessonMeta;
 	url: string;
 	homeUrl: string;
+	/** The course's name; its page is `homeUrl`. */
+	courseName: string;
 	image?: string;
 	teaches: string[];
 	requires?: string[];
@@ -78,7 +88,7 @@ export function learningResource(o: {
 		inLanguage: lang,
 		learningResourceType: 'lesson',
 		educationalLevel: 'beginner',
-		isPartOf: { '@type': 'Course', '@id': courseId(o.homeUrl), name: SITE_NAMES[lang], url: o.homeUrl },
+		isPartOf: { '@type': 'Course', '@id': courseId(o.homeUrl), name: o.courseName, url: o.homeUrl },
 		teaches: o.teaches,
 		...(o.requires?.length ? { competencyRequired: o.requires } : {}),
 		timeRequired: duration(l.minutes),

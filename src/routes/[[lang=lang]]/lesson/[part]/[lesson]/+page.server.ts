@@ -4,6 +4,7 @@ import { homeIndex } from '#lib/content/catalogue.server.ts';
 import { lastmod, lessonCard, og } from '#lib/seo/pages.server.ts';
 import { narration } from '#lib/narration/narration.server.ts';
 import type { Locale } from '#lib/i18n/index.ts';
+import { loadCourses } from '#lib/courses/load.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
 /**
@@ -37,6 +38,7 @@ export const load: PageServerLoad = ({ params }) => {
 	return {
 		lesson,
 		part,
+		courseName: loadCourses().courses.find((c) => c.id === 'web')!.title[lang],
 		concepts,
 		editions,
 		index: homeIndex(lang).hash,

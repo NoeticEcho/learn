@@ -8,6 +8,9 @@ import { loadContent, loadEdition } from '#lib/content/load.ts';
 import type { LessonMeta, Part } from '#lib/content/schema.ts';
 import '#lib/i18n/all.server.ts';
 import { pl, t, type Locale } from '#lib/i18n/index.ts';
+import { loadCourses } from '#lib/courses/load.ts';
+import { counts } from '#lib/courses/view.server.ts';
+import { isPlanned, type Course } from '#lib/courses/schema.ts';
 import { ogFile, type Mood, type OgCard } from './og.server.ts';
 
 const ECHO: Record<Locale, string> = {
@@ -17,6 +20,8 @@ const ECHO: Record<Locale, string> = {
 // Russian cards keep the names they had before there were editions; English ones are prefixed.
 const stem = (s: string, l: Locale) => (l === 'ru' ? s : `${l}-${s}`);
 const edition = (l: Locale) => (l === 'ru' ? {} : { lang: l });
+
+const webTitle = (lang: Locale) => loadCourses().courses.find((c) => c.id === 'web')!.title[lang];
 
 export function lessonCard(l: LessonMeta, part: Part, lang: Locale = 'ru'): OgCard {
 	const kicker = `${t('map.part', { n: part.number }, lang)}. ${part.title}`;
@@ -30,13 +35,18 @@ export function lessonCard(l: LessonMeta, part: Part, lang: Locale = 'ru'): OgCa
 		mood: (l.comic?.panels[0]?.mood as Mood | undefined) ?? 'explain',
 		alt:
 			lang === 'ru'
-				? `«${l.title}», урок ${l.order} части ${part.number} «${part.title}» учебника «${t('app.title', {}, lang)}». ${ECHO.ru}.`
-				: `“${l.title}”, lesson ${l.order} of part ${part.number}, “${part.title}”, of the textbook “${t('app.title', {}, lang)}”. ${ECHO.en}.`,
+				? `«${l.title}», урок ${l.order} части ${part.number} «${part.title}» курса «${webTitle('ru')}». ${ECHO.ru}.`
+				: `“${l.title}”, lesson ${l.order} of part ${part.number}, “${part.title}”, of the course “${webTitle('en')}”. ${ECHO.en}.`,
 		...edition(lang)
 	};
 }
 
-export function homeCard(lang: Locale = 'ru'): OgCard {
+/**
+ * The web course's card. It is the card the home used to have, drawn from exactly the same text
+ * under the same stem, so `og/home-<hash>.png`, which every old share names, stays where it was
+ * (tests/fixtures/published-urls.txt). Do not change its text without keeping the old file.
+ */
+export function webCard(lang: Locale = 'ru'): OgCard {
 	const n = loadContent().lessons.length;
 	const lessons = `${n} ${pl(n, 'lesson.forms', lang)}`;
 	return {
@@ -46,7 +56,38 @@ export function homeCard(lang: Locale = 'ru'): OgCard {
 		meta: lang === 'ru' ? `${lessons}, бесплатно и без регистрации` : `${lessons}, free, no sign-up`,
 		era: 8,
 		mood: 'cheer',
-		alt: t('seo.home.alt', {}, lang),
+		alt: t('seo.web.alt', {}, lang),
+		...edition(lang)
+	};
+}
+
+/** The platform's card, for the catalog. */
+export function catalogCard(lang: Locale = 'ru'): OgCard {
+	const n = loadCourses().courses.length;
+	return {
+		stem: stem('catalog', lang),
+		kicker: lang === 'ru' ? 'Открытые курсы NoeticEcho' : 'Open courses by NoeticEcho',
+		title: lang === 'ru' ? 'Как устроен ИИ, как с ним работать и как не разучиться думать самому' : 'How AI works, how to work with it and how to keep thinking for yourself',
+		meta: lang === 'ru' ? `${n} ${pl(n, 'course.forms', lang)}, бесплатно и без регистрации` : `${n} ${pl(n, 'course.forms', lang)}, free, no sign-up`,
+		era: 8,
+		mood: 'cheer',
+		alt: t('seo.catalog.alt', {}, lang),
+		...edition(lang)
+	};
+}
+
+/** A planned course's card; the web course's is webCard. */
+export function courseCard(c: Course, lang: Locale = 'ru'): OgCard {
+	if (!isPlanned(c)) return webCard(lang);
+	const { lessons } = counts(c, lang);
+	return {
+		stem: stem(`course-${c.id}`, lang),
+		kicker: lang === 'ru' ? 'Курс платформы «Сквозь время»' : 'A course on Through Time',
+		title: c.title[lang],
+		meta: lang === 'ru' ? `${lessons} ${pl(lessons, 'lesson.forms', lang)} в плане, бесплатно` : `${lessons} ${pl(lessons, 'lesson.forms', lang)} planned, free`,
+		era: null,
+		mood: 'explain',
+		alt: t('seo.course.alt', { title: c.title[lang] }, lang),
 		...edition(lang)
 	};
 }
@@ -71,7 +112,7 @@ export function cards(): Map<string, OgCard> {
 	const all: OgCard[] = [];
 	for (const lang of ['ru', 'en'] as const) {
 		const { lessons, curriculum } = loadEdition(lang);
-		all.push(homeCard(lang), mapCard(lang), ...lessons.map((l) => lessonCard(l, curriculum.parts.find((p) => p.number === l.part)!, lang)));
+		all.push(catalogCard(lang), mapCard(lang), ...loadCourses().courses.map((c) => courseCard(c, lang)), ...lessons.map((l) => lessonCard(l, curriculum.parts.find((p) => p.number === l.part)!, lang)));
 	}
 	return new Map(all.map((c) => [ogFile(c), c]));
 }
@@ -79,6 +120,18 @@ export function cards(): Map<string, OgCard> {
 /** What a page's head needs of its card: the file's path under the base, and its alt text. */
 export const og = (card: OgCard) => ({ file: `og/${ogFile(card)}`, alt: card.alt });
 export type Og = ReturnType<typeof og>;
+
+/** When a course's own file last changed, from git, else its modification time. */
+export function courseFileLastmod(id: string): string {
+	const file = `content/courses/${id}.yaml`;
+	try {
+		const date = execFileSync('git', ['log', '-1', '--format=%cI', '--', file], { encoding: 'utf8' }).trim();
+		if (date) return date.slice(0, 10);
+	} catch {
+		// not a git checkout: the modification time below
+	}
+	return statSync(file).mtime.toISOString().slice(0, 10);
+}
 
 let dates: Map<string, string> | undefined;
 

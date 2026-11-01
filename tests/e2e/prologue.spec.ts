@@ -21,14 +21,14 @@ async function nextUntil(page: Page, era: string) {
 	await expect(stage(page)).toHaveAttribute('data-era', era);
 }
 
-test('a first visit asks three questions', async ({ page }) => {
-	await page.goto('./');
-	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Сквозь время');
+test('the prologue asks three questions', async ({ page }) => {
+	await page.goto('./course/web/prologue/');
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Сеть насквозь');
 	await expect(page.getByRole('textbox')).toHaveCount(3);
 });
 
 test('the answers appear in 1991 and again in 2025', async ({ page }) => {
-	await page.goto('./');
+	await page.goto('./course/web/prologue/');
 	await answer(page);
 	await expect(stage(page)).toHaveAttribute('data-era', '1991');
 	await expect(stage(page)).toContainText(answers.who);
@@ -42,16 +42,24 @@ test('the answers appear in 1991 and again in 2025', async ({ page }) => {
 	await expect(page.getByRole('heading', { name: 'Сейчас вы сделаете это сами.' })).toBeVisible();
 });
 
-test('«Пропустить» goes to the map, and the prologue is not shown again', async ({ page }) => {
-	await page.goto('./');
+test('«Пропустить» goes to the map, and the course then offers the next lesson, not the prologue', async ({ page }) => {
+	await page.goto('./course/web/');
+	await expect(page.getByRole('link', { name: 'Начать со вступления' })).toBeVisible();
+	await page.goto('./course/web/prologue/');
+	await page.waitForLoadState('networkidle'); // the skip's handler is attached by then
 	await page.getByRole('link', { name: 'Пропустить вступление' }).click();
 	await expect(page).toHaveURL(/\/learn\/map\/$/);
-	await page.goto('./');
-	await expect(page.getByRole('textbox')).toHaveCount(0);
+	// the skip's write to the store may land after the map opens
+	await expect(async () => {
+		await page.goto('./course/web/');
+		await expect(page.getByRole('link', { name: /^Продолжить:/ })).toBeVisible({ timeout: 1000 });
+	}).toPass({ timeout: 10_000 });
+	await expect(page.getByRole('link', { name: 'Начать со вступления' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: 'Посмотреть вступление ещё раз' })).toHaveAttribute('href', /course\/web\/prologue\/$/);
 });
 
 test('the answers are saved as the person’s brief', async ({ page }) => {
-	await page.goto('./');
+	await page.goto('./course/web/prologue/');
 	await answer(page);
 	await expect(stage(page)).toBeVisible();
 	const brief = await page.evaluate(
@@ -77,7 +85,7 @@ test('the answers are saved as the person’s brief', async ({ page }) => {
 test.describe('under reduced motion', () => {
 	test.use({ reducedMotion: 'reduce' });
 	test('it is a still filmstrip stepped by «Следующая эпоха»', async ({ page }) => {
-		await page.goto('./');
+		await page.goto('./course/web/prologue/');
 		await answer(page);
 		await expect(page.locator('[data-mode="filmstrip"]')).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Пауза' })).toHaveCount(0);

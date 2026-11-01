@@ -26,10 +26,12 @@ const CACHE = `learn-${(h >>> 0).toString(36)}`;
 const scope = () => self.registration.scope;
 const url = (path: string) => new URL(path.replace(/^\//, ''), scope()).href;
 
-const isLesson = (p: string) => /(^|\/)lesson\//.test(p);
+// A lesson, or a planned course's page: cached when opened, not on every visitor's first load.
+// The web course's page and its prologue are the shell.
+const isLesson = (p: string) => /(^|\/)lesson\/|(^|\/)course\/(?!web\/)/.test(p);
 // What the build writes for crawlers, answer engines and link previews, never for the reader:
-// the Open Graph cards (a hundred-odd PNGs), the sitemap, robots.txt and llms(-full).txt.
-const forMachines = (p: string) => /(^|\/)(og\/|sitemap\.xml$|robots\.txt$|llms(-full)?\.txt$)/.test(p);
+// the Open Graph cards (a hundred-odd PNGs), the sitemap, robots.txt, llms(-full).txt and the feed.
+const forMachines = (p: string) => /(^|\/)(og\/|sitemap\.xml$|robots\.txt$|llms(-full)?\.txt$|feed\.xml$)/.test(p);
 const pages = () => prerendered.filter((p) => !forMachines(p.path));
 // A prerendered path is relative to the base: `/en/map/` is the English edition's.
 const english = (p: string) => /^\/?en(\/|$)/.test(p);

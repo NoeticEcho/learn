@@ -15,20 +15,21 @@
 	const jsonld = $derived.by(() => {
 		const { lesson, part } = data;
 		if (!lesson) return [];
-		const home = at.home(lang);
+		const home = at.course('web', lang);
 		return [
 			learningResource({
 				lesson,
 				url: at.lesson(lesson.id, lang),
 				homeUrl: home,
+				courseName: data.courseName!,
 				image: at.file(data.og!.file),
 				teaches: data.concepts!,
 				dateModified: data.lastmod,
 				lang
 			}),
 			breadcrumbs([
-				{ name: t('app.title'), url: home },
-				{ name: t('map.title'), url: at.map(lang) },
+				{ name: t('app.title'), url: at.home(lang) },
+				{ name: data.courseName!, url: home },
 				{ name: `${t('map.part', { n: part.number })}. ${part.title}`, url: `${at.map(lang)}#part-${part.number}` },
 				{ name: lesson.title }
 			])
@@ -47,7 +48,7 @@
 		{jsonld} />
 
 	{#key data.lesson.id}
-		<LessonView lesson={data.lesson} part={data.part} concepts={data.concepts!} index={data.index!} body={data.body} narration={data.narration ?? null} />
+		<LessonView lesson={data.lesson} part={data.part} concepts={data.concepts!} index={data.index!} body={data.body} narration={data.narration ?? null} courseName={data.courseName!} />
 	{/key}
 {:else if data.untranslated}
 	<Seo title={t('untranslated.title', { title: data.untranslated.title })} description={t('untranslated.description')} noindex />

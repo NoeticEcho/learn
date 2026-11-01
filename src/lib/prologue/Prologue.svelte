@@ -17,6 +17,8 @@
 
 	export type Answers = { who: string; forWhom: string; action: string };
 	type Props = {
+		/** The heading of the question screen: the course's name. */
+		title: string;
 		/** The example the placeholders show, and what an empty answer becomes. */
 		example: Answers;
 		initial?: Partial<Answers>;
@@ -26,7 +28,7 @@
 		skipHref: string;
 		onskip?: () => void;
 	};
-	let { example, initial = {}, onsave, startHref, skipHref, onskip }: Props = $props();
+	let { title, example, initial = {}, onsave, startHref, skipHref, onskip }: Props = $props();
 
 	// Loaded on «Собрать мой сайт» (frames.ts), so the question screen ships without them.
 	let frames = $state.raw<typeof import('./frames.ts') | null>(null);
@@ -159,9 +161,9 @@
 {#if phase === 'ask'}
 	<section class="ask" aria-labelledby="{uid}-h">
 		<div class="intro">
-			<h1 id="{uid}-h">{t('app.title')}</h1>
+			<h1 id="{uid}-h">{title}</h1>
 			<p class="lede">{t('prologue.lede')}</p>
-			<div class="project"><Project /></div>
+			<div class="project"><Project text="project.web" /></div>
 		</div>
 		<form onsubmit={start}>
 			<label for="{uid}-who">{t('prologue.q.who')}</label>

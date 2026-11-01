@@ -9,7 +9,7 @@
 import type { Locale } from '#lib/i18n/index.ts';
 
 export const ORIGIN = 'https://open.noeticecho.space';
-/** The course's name in each edition: the brand that heads every title, card and llms.txt. */
+/** The platform's name in each edition: the brand that heads every title, card and llms.txt. */
 export const SITE_NAMES: Record<Locale, string> = { ru: 'Сквозь время', en: 'Through Time' };
 export const SITE_NAME = SITE_NAMES.ru;
 /** Open Graph's locale of each edition. */
@@ -54,6 +54,7 @@ export const at = {
 	home: (l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/`),
 	map: (l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/map/`),
 	lesson: (id: string, l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/lesson/${id}/`),
+	course: (id: string, l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/course/${id}/`),
 	/** A file at the site's root (`og/…png`, `sitemap.xml`), shared by both editions. */
 	file: (path: string) => absolute(`${BASE}/${path}`),
 	/** A file of an edition (`llms.txt`). */

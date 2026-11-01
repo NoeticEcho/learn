@@ -1,7 +1,14 @@
 <!--
-	The shell: a skip link, the wordmark, four plain links and the language switch (no button: the
-	one action on each screen belongs to the screen), the page, and a footer that says what the
-	textbook does not do.
+	The shell: a skip link, the wordmark, the sections and the language switch, Эхо's launcher, the
+	page, and a footer that says what the platform does not do. The map and the gallery are the web
+	course's, so the header names them on its pages only.
+
+	Эхо is on every page, this layout being what every page has, the 404 included
+	(docs/specs/2026-11-01-platform-design.md §5.3). Below 1100 px its launcher is in the page's
+	flow, in the header and again in the footer, and its panel opens in flow and pushes the page
+	down, so on a phone it never covers anything. From 1100 px the launcher is a tab on the
+	screen's edge, inside the container's padding. The panel and its script are a chunk of their
+	own, loaded on the first click, and the launcher is drawn only with a script (app.html's `js`).
 
 	The edition is the URL's (+layout.ts). The script makes it the locale (i18n setLocale) for the
 	first render, on the server and in the browser; after that, everything is inside a {#key} on
@@ -21,6 +28,8 @@
 	import sansCyr from '../../design/fonts/ibm-plex-sans-400-cyrillic.woff2';
 	import sansLat from '../../design/fonts/ibm-plex-sans-400-latin.woff2';
 	import { page } from '$app/state';
+	import { afterNavigate } from '$app/navigation';
+	import { tick, type Component } from 'svelte';
 	import { setLocale, t, type Locale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import { innerPath } from '#lib/seo/site.ts';
@@ -37,13 +46,50 @@
 	// svelte-ignore state_referenced_locally
 	setLocale(data.lang);
 
-	const nav = () => [
-		{ href: links.map(), label: 'nav.map' },
-		{ href: links.review(), label: 'nav.review' },
-		{ href: links.gallery(), label: 'nav.gallery' },
-		{ href: links.settings(), label: 'nav.settings' }
-	];
-	const current = (href: string) => page.url.pathname.startsWith(href);
+	const inner = $derived(innerPath(page.url.pathname));
+	// The web course's own pages: a lesson, its map and gallery, its page and its prologue.
+	const inWebCourse = $derived(/^\/(lesson|map|gallery|course\/web)(\/|$)/.test(inner));
+	const nav = $derived([
+		{ href: links.home(), label: 'nav.courses', path: '/' },
+		...(inWebCourse
+			? [
+					{ href: links.map(), label: 'nav.map', path: '/map/' },
+					{ href: links.gallery(), label: 'nav.gallery', path: '/gallery/' }
+				]
+			: []),
+		{ href: links.review(), label: 'nav.review', path: '/review/' },
+		{ href: links.settings(), label: 'nav.settings', path: '/settings/' }
+	]);
+
+	// Эхо's panel: its chunk arrives on the first click, and a click that cannot load it says so.
+	let Dock = $state<Component<{ onclose: () => void }> | null>(null);
+	let echoOpen = $state(false);
+	let echoFailed = $state(false);
+	let opener: HTMLElement | null = null;
+	async function toggleEcho(e: MouseEvent) {
+		if (echoOpen) return closeEcho();
+		opener = e.currentTarget as HTMLElement;
+		echoFailed = false;
+		try {
+			Dock ??= (await import('#lib/guide/Dock.svelte')).default as unknown as Component<{ onclose: () => void }>;
+			echoOpen = true;
+		} catch {
+			echoFailed = true; // offline before the worker had the chunk
+			echoOpen = true;
+		}
+		await tick();
+		const panel = document.getElementById('echo-panel');
+		panel?.focus({ preventScroll: true });
+		// From the footer, the panel is far up the page; from the tab, it is on screen.
+		panel?.scrollIntoView({ block: 'nearest' });
+	}
+	function closeEcho() {
+		echoOpen = false;
+		opener?.focus(); // back where the person was, focus and scroll
+	}
+	afterNavigate(() => {
+		echoOpen = false;
+	});
 
 	// The same page in the other edition. A lesson the other edition does not have yet (the page
 	// data's `editions`) is sent to its part on that edition's map.
@@ -80,16 +126,32 @@
 			<a class="mark" href={links.home()} aria-label={t('nav.home')}>{t('app.title')}</a>
 			<nav aria-label={t('nav.label')}>
 				<ul>
-					{#each nav() as item (item.href)}
-						<li><a href={item.href} aria-current={current(item.href) ? 'page' : undefined}>{t(item.label)}</a></li>
+					{#each nav as item (item.path)}
+						<li><a href={item.href} aria-current={inner === item.path ? 'page' : undefined}>{t(item.label)}</a></li>
 					{/each}
 					<li>
 						<a class="lang" href={switchHref} hreflang={other} lang={other} data-sveltekit-reload onclick={remember}>{t('lang.switch')}</a>
 					</li>
 				</ul>
 			</nav>
+			<button type="button" class="echo-launch echo-head" aria-expanded={echoOpen} aria-controls="echo-panel" onclick={toggleEcho}>
+				<img src={favicon} alt="" width="22" height="27" />{t('echo.open')}
+			</button>
 		</div>
 	</header>
+
+	<div class="echo-host">
+		{#if echoOpen}
+			{#if Dock && !echoFailed}
+				<Dock onclose={closeEcho} />
+			{:else}
+				<div id="echo-panel" class="container echo-failed" role="status" tabindex="-1">{t('echo.failed')}</div>
+			{/if}
+		{/if}
+	</div>
+	<button type="button" class="echo-launch echo-tab" aria-label={t('echo.ask')} title={t('echo.ask')} aria-expanded={echoOpen} aria-controls="echo-panel" onclick={toggleEcho}>
+		<img src={favicon} alt="" width="30" height="37" />
+	</button>
 
 	<main id="main" tabindex="-1">
 		{@render children()}
@@ -100,6 +162,9 @@
 			<div class="private">
 				<p>{t('footer.private')}</p>
 				<OfflineButton />
+				<button type="button" class="echo-launch echo-foot" aria-expanded={echoOpen} aria-controls="echo-panel" onclick={toggleEcho}>
+					<img src={favicon} alt="" width="22" height="27" />{t('echo.ask')}
+				</button>
 			</div>
 			<p class="meta">
 				{t('footer.licence')}<br />
@@ -126,6 +191,76 @@
 	}
 	.top {
 		border-bottom: var(--line) solid var(--border-hairline);
+	}
+	/* Эхо's launchers. Hidden without a script (nothing dead is drawn), and one at a time by width. */
+	.echo-launch {
+		display: none;
+		align-items: center;
+		gap: var(--space-2);
+		min-height: var(--hit-min);
+		padding: 0;
+		border: none;
+		background: none;
+		color: var(--text-primary);
+		font: inherit;
+		font-size: var(--text-body-sm);
+		cursor: pointer;
+	}
+	.echo-launch:hover {
+		color: var(--accent-measure);
+	}
+	:global(html.js) .echo-head,
+	:global(html.js) .echo-foot {
+		display: inline-flex;
+	}
+	/* On a phone Эхо shares the wordmark's row, and the sections take the next one. */
+	@media (max-width: 700px) {
+		.echo-head {
+			order: 2;
+		}
+		nav {
+			order: 3;
+			flex-basis: 100%;
+		}
+		.bar {
+			padding-block: var(--space-2);
+			row-gap: 0;
+		}
+	}
+	.echo-foot {
+		justify-self: start;
+	}
+	.echo-failed {
+		padding-block: var(--space-4);
+		color: var(--text-body);
+		border-bottom: var(--line) solid var(--border-hairline);
+	}
+	@media (min-width: 1100px) {
+		:global(html.js) .echo-head,
+		:global(html.js) .echo-foot {
+			display: none;
+		}
+		/* A tab on the edge, no wider than the container's padding, so it covers no text. */
+		:global(html.js) .echo-tab {
+			display: flex;
+			justify-content: center;
+			position: fixed;
+			right: 0;
+			bottom: var(--space-6);
+			z-index: 15;
+			width: 44px;
+			min-height: 64px;
+			background: var(--surface-panel-solid);
+			border: var(--line) solid var(--border-rule);
+			border-right: none;
+		}
+		.echo-tab[aria-expanded='true'] {
+			border-color: var(--border-brass);
+		}
+		/* The narration player is a bar along the screen's foot: the tab stands on it, not behind it. */
+		:global(body:has([data-narration-player])) .echo-tab {
+			bottom: calc(10rem + var(--space-3));
+		}
 	}
 	.bar {
 		display: flex;

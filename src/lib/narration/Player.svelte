@@ -252,7 +252,7 @@
 	});
 </script>
 
-<section id="narration-player" class="player" aria-label={t('narration.player')}>
+<section id="narration-player" class="player" data-narration-player aria-label={t('narration.player')}>
 	<div class="bar container">
 		<div class="controls">
 			<button type="button" class="icon" onclick={prev} aria-label={t('narration.prev')}>

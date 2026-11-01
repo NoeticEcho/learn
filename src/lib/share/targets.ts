@@ -29,4 +29,4 @@ export function targets({ url, title, text, lang = 'ru' }: ShareInput): Target[]
 
 /** What a lesson's share says: its title, whose it is, and the definition of its topic. */
 export const lessonText = (title: string, definition: string, site: string, lang: Locale = 'ru') =>
-	lang === 'en' ? `“${title}”, a lesson of the textbook “${site}”. ${definition}` : `«${title}», урок учебника «${site}». ${definition}`;
+	lang === 'en' ? `“${title}”, a lesson of the course “${site}”. ${definition}` : `«${title}», урок курса «${site}». ${definition}`;

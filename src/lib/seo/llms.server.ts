@@ -1,6 +1,7 @@
 /**
- * The course for answer engines (llmstxt.org): `llms.txt`, a map with one line per lesson (its
- * address and its definition), and `llms-full.txt`, every lesson's text as Markdown. A model that
+ * The platform for answer engines (llmstxt.org): `llms.txt`, every course with its address and its
+ * state, then one line per written lesson (its address and its definition), and `llms-full.txt`,
+ * every written lesson's text as Markdown. A model that
  * reads them gets the course as it is written, without running the page's scripts or parsing its
  * layout; the definition each lesson opens with is the line a model can quote.
  *
@@ -11,6 +12,8 @@ import { loadContent, loadEdition } from '#lib/content/load.ts';
 import type { LessonMeta, Part } from '#lib/content/schema.ts';
 import '#lib/i18n/all.server.ts';
 import { t, type Locale } from '#lib/i18n/index.ts';
+import { loadCourses } from '#lib/courses/load.ts';
+import { counts } from '#lib/courses/view.server.ts';
 import { LICENCE_URL, SITE_NAMES, at } from './site.ts';
 
 const raw = {
@@ -38,17 +41,51 @@ const about = (n: number, lang: Locale) => {
 	return `An open, interactive textbook of the web in English: from the first web page of 1991 to the agentic web. ${count}. Each lesson opens with a definition of its topic, then theory, a live diagram, practice on the reader's own site, a test, review cards and sources. Free, no sign-up. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`;
 };
 
+const PLATFORM: Record<Locale, string> = {
+	ru: `«Сквозь время»: открытые курсы NoeticEcho на русском и английском о том, как устроен ИИ, как с ним работать и как развивать собственный ум. Бесплатно, без регистрации и без аналитики; всё, что делает человек, остаётся в его браузере. Первый курс открыт, у остальных пока есть оглавления, а уроки появляются по одному. Тексты уроков: CC BY-SA 4.0 (${LICENCE_URL}).`,
+	en: `Through Time: NoeticEcho's open courses, in English and Russian, on how AI works, how to work with it and how to develop your own mind. Free, with no sign-up and no analytics; everything a person does stays in their browser. The first course is open, the others have tables of contents so far, and lessons appear one at a time. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`
+};
+
+/** Every course: its address, its line, and whether it can be taken yet. */
+function courseLines(lang: Locale): string[] {
+	return loadCourses().courses.map((c) => {
+		const { lessons, open } = counts(c, lang);
+		const state =
+			open === 0
+				? lang === 'ru'
+					? `Пока только оглавление: ${lessons} уроков в плане.`
+					: `A table of contents so far: ${lessons} lessons planned.`
+				: lang === 'ru'
+					? `Открыт: ${open} из ${lessons} уроков.`
+					: `Open: ${open} of ${lessons} lessons.`;
+		return `- [${c.title[lang]}](${at.course(c.id, lang)}): ${c.tagline[lang]} ${state}`;
+	});
+}
+
 export function llmsTxt(lang: Locale = 'ru'): string {
 	const parts = ordered(lang);
 	const n = parts.reduce((s, p) => s + p.lessons.length, 0);
+	const web = loadCourses().courses.find((c) => c.id === 'web')!.title[lang];
 	const out = [
 		`# ${SITE_NAMES[lang]}`,
 		'',
-		`> ${about(n, lang)}`,
+		`> ${PLATFORM[lang]}`,
 		'',
 		lang === 'ru'
-			? `Адрес учебника: ${at.home()}. Карта курса со связями уроков: ${at.map()}. Полный текст всех уроков одним файлом: ${at.editionFile('llms-full.txt')}. Английское издание: ${at.editionFile('llms.txt', 'en')}.`
-			: `The textbook: ${at.home('en')}. The course map, with how the lessons connect: ${at.map('en')}. The full text of every lesson in one file: ${at.editionFile('llms-full.txt', 'en')}. The complete Russian edition: ${at.editionFile('llms.txt')}.`,
+			? `Каталог: ${at.home()}. Лента новых уроков (Atom): ${at.editionFile('feed.xml')}. Английское издание: ${at.editionFile('llms.txt', 'en')}.`
+			: `The catalog: ${at.home('en')}. Feed of new lessons (Atom): ${at.editionFile('feed.xml', 'en')}. The Russian edition: ${at.editionFile('llms.txt')}.`,
+		'',
+		lang === 'ru' ? '## Курсы' : '## Courses',
+		'',
+		...courseLines(lang),
+		'',
+		lang === 'ru' ? `## Курс «${web}»` : `## The course “${web}”`,
+		'',
+		about(n, lang),
+		'',
+		lang === 'ru'
+			? `Страница курса: ${at.course('web')}. Карта курса со связями уроков: ${at.map()}. Полный текст всех уроков одним файлом: ${at.editionFile('llms-full.txt')}.`
+			: `The course's page: ${at.course('web', 'en')}. The course map, with how the lessons connect: ${at.map('en')}. The full text of every lesson in one file: ${at.editionFile('llms-full.txt', 'en')}.`,
 		''
 	];
 	for (const { part, lessons } of parts) {
@@ -136,5 +173,6 @@ function lessonFull(l: LessonMeta, part: Part, lang: Locale): string {
 export function llmsFullTxt(lang: Locale = 'ru'): string {
 	const parts = ordered(lang);
 	const n = parts.reduce((s, p) => s + p.lessons.length, 0);
-	return [`# ${SITE_NAMES[lang]}`, '', `> ${about(n, lang)}`, '', ...parts.flatMap(({ part, lessons }) => lessons.map((l) => lessonFull(l, part, lang)))].join('\n');
+	const web = loadCourses().courses.find((c) => c.id === 'web')!.title[lang];
+	return [`# ${web}: ${SITE_NAMES[lang]}`, '', `> ${about(n, lang)}`, '', ...parts.flatMap(({ part, lessons }) => lessons.map((l) => lessonFull(l, part, lang)))].join('\n');
 }

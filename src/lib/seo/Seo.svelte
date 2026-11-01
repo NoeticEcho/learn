@@ -31,8 +31,10 @@
 		noindex?: boolean;
 		/** The editions this page exists in; every screen is in both, a lesson may not be yet. */
 		editions?: readonly Locale[];
+		/** Names the Atom feed of new lessons, so a feed reader finds it from this page's address. */
+		feed?: boolean;
 	};
-	let { title, full: fullTitle, description, preview = description, image, type = 'website', jsonld = [], noindex = false, editions = EDITIONS.map((e) => e.lang) }: Props = $props();
+	let { title, full: fullTitle, description, preview = description, image, type = 'website', jsonld = [], noindex = false, editions = EDITIONS.map((e) => e.lang), feed = false }: Props = $props();
 
 	const lang = getLocale();
 	const SITE_NAME = SITE_NAMES[lang];
@@ -53,6 +55,7 @@
 		<link rel="canonical" href={url} />
 		{#each alts as a (a.hreflang)}<link rel="alternate" hreflang={a.hreflang} href={a.href} />{/each}
 	{/if}
+	{#if feed}<link rel="alternate" type="application/atom+xml" title={SITE_NAME} href={at.editionFile('feed.xml', lang)} />{/if}
 	<meta property="og:type" content={type} />
 	<meta property="og:site_name" content={SITE_NAME} />
 	<meta property="og:locale" content={OG_LOCALES[lang]} />

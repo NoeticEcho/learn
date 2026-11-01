@@ -1,4 +1,5 @@
 /** Reads and writes over the store. Every function takes the database, so tests use a fresh one. */
+import { courseOf } from '#lib/courses/types.ts';
 import { stepKey, type Db, type LessonRecord } from './db.ts';
 
 export async function markStarted(db: Db, lessonId: string): Promise<void> {
@@ -21,6 +22,22 @@ export async function lessons(db: Db): Promise<Map<string, LessonRecord>> {
 export async function doneSet(db: Db): Promise<Set<string>> {
 	const all = await lessons(db);
 	return new Set([...all].filter(([, v]) => v.status === 'done').map(([k]) => k));
+}
+
+/** The lessons done in one course (docs/specs/2026-11-01-platform-design.md §5.4). */
+export async function doneIn(db: Db, course: string): Promise<Set<string>> {
+	return new Set([...(await doneSet(db))].filter((id) => courseOf(id) === course));
+}
+
+/** Per course: how many lessons this person has started and finished. A course they never opened is absent. */
+export async function courseProgress(db: Db): Promise<Record<string, { started: number; done: number }>> {
+	const out: Record<string, { started: number; done: number }> = {};
+	for (const [id, l] of await lessons(db)) {
+		const c = (out[courseOf(id)] ??= { started: 0, done: 0 });
+		c.started++;
+		if (l.status === 'done') c.done++;
+	}
+	return out;
 }
 
 export async function saveAnswer(db: Db, lessonId: string, q: number, correct: boolean): Promise<void> {

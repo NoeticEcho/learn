@@ -46,7 +46,7 @@ const problems = (c: ReturnType<typeof catalog>) => {
 describe('the schema refuses', () => {
 	it('nothing in a valid catalog', () => expect(problems(catalog())).toEqual([]));
 	it('a line in one language only', () => {
-		const c = catalog(15, (f) => delete (f.ai as PlannedCourse).parts[0].lessons[0].title.en);
+		const c = catalog(15, (f) => delete ((f.ai as PlannedCourse).parts[0].lessons[0].title as { en?: string }).en);
 		expect(problems(c).join()).toMatch(/ai\.yaml.*title\.en/);
 	});
 	it('a lesson id used twice in a course', () => {

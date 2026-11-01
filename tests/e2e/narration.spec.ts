@@ -130,6 +130,8 @@ test.describe('narration', () => {
 			await page.getByRole('button', { name: /^Слушать/ }).click();
 			await page.getByRole('button', { name: 'Разделы' }).click();
 			await expect(page.locator('#narration-sections')).toBeVisible();
+			// the comic's panels arrive by opacity: mid-way, their text reads as low contrast
+			await page.evaluate(() => Promise.all(document.getAnimations().filter((x) => x.effect?.getTiming().iterations !== Infinity).map((x) => x.finished.catch(() => {}))));
 			const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
 			const bad = result.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
 			expect(bad.map((v) => `${v.id}: ${v.nodes.map((x) => x.target.join(' ')).join(' | ')}`)).toEqual([]);

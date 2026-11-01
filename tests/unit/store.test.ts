@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { openDb, SCHEMA_VERSION } from '#lib/store/db.ts';
 import * as progress from '#lib/store/progress.ts';
 import { exportAll, importAll, preview } from '#lib/store/backup.ts';
+import { courseOf } from '#lib/courses/types.ts';
 
 let n = 0;
 const fresh = () => openDb(`t${n++}`);
@@ -145,5 +146,55 @@ describe('a newer schema in another tab', () => {
 		expect(next, 'the upgrade waited on this tab').not.toBeNull();
 		expect(told).toBe(1);
 		expect(await next!.get('lessons', 'kept')).toMatchObject({ status: 'done' });
+	});
+});
+
+// docs/specs/2026-11-01-platform-design.md §5.4: progress is per course, read through the ids, and
+// no key of a person's store changed, so there is nothing to migrate and nothing to lose.
+describe('progress per course', () => {
+	it('a web lesson has two segments and a new course\'s lesson three', () => {
+		expect(courseOf('02-html/01-first-page')).toBe('web');
+		expect(courseOf('ai/symbols/eliza')).toBe('ai');
+	});
+	it('reads each course apart', async () => {
+		const db = await fresh();
+		await progress.markDone(db, '00-start/01-how-to-learn', 10);
+		await progress.markStarted(db, '00-start/02-time-machine');
+		await progress.markDone(db, 'ai/symbols/eliza', 10);
+		expect([...(await progress.doneIn(db, 'web'))]).toEqual(['00-start/01-how-to-learn']);
+		expect([...(await progress.doneIn(db, 'ai'))]).toEqual(['ai/symbols/eliza']);
+		expect(await progress.courseProgress(db)).toEqual({ web: { started: 2, done: 1 }, ai: { started: 1, done: 1 } });
+	});
+	it('a database from schema 1, opened by this code, counts its lessons as the web course\'s and keeps its files', async () => {
+		const name = 'old-schema-1';
+		await new Promise<void>((done, fail) => {
+			const r = indexedDB.open(name, 1);
+			r.onupgradeneeded = () => {
+				for (const s of ['lessons', 'answers', 'practice', 'cards', 'persona', 'settings']) r.result.createObjectStore(s);
+				r.result.createObjectStore('log', { autoIncrement: true });
+			};
+			r.onerror = () => fail(r.error);
+			r.onsuccess = () => {
+				const tx = r.result.transaction(['lessons', 'practice', 'settings'], 'readwrite');
+				tx.objectStore('lessons').put({ status: 'done', at: 1, xp: 10 }, '00-start/01-how-to-learn');
+				tx.objectStore('practice').put('<h1>1996</h1>', '1:index.html');
+				tx.objectStore('settings').put(true, 'prologueSeen');
+				tx.oncomplete = () => {
+					r.result.close();
+					done();
+				};
+			};
+		});
+		const db = await openDb(name);
+		expect(db.version).toBe(SCHEMA_VERSION);
+		expect(SCHEMA_VERSION).toBe(2); // the platform adds no migration: a new one here needs its own test
+		expect([...(await progress.doneIn(db, 'web'))]).toEqual(['00-start/01-how-to-learn']);
+		expect(await progress.getSetting(db, 'prologueSeen')).toBe(true);
+		expect((await progress.legacyFiles(db, 1))?.['index.html']).toBe('<h1>1996</h1>');
+	});
+	it('a backup from before the platform imports as it is', async () => {
+		const db = await fresh();
+		await importAll(db, { app: 'learn', schema: 2, exportedAt: '2026-10-30T00:00:00.000Z', stores: { lessons: [['00-start/01-how-to-learn', { status: 'done', at: 1, xp: 10 }]] } });
+		expect(await progress.courseProgress(db)).toEqual({ web: { started: 1, done: 1 } });
 	});
 });

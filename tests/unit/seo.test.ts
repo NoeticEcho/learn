@@ -3,10 +3,11 @@
 // llms.txt, and the share links. The built pages' heads are read in tests/e2e/seo.spec.ts.
 import { describe, it, expect } from 'vitest';
 import { loadContent, loadEdition } from '#lib/content/load.ts';
+import { loadCourses } from '#lib/courses/load.ts';
 import { Definition, DefinitionEn } from '#lib/content/schema.ts';
 import { alternates, at, describe as describeText, EDITIONS } from '#lib/seo/site.ts';
 import { breadcrumbs, course, duration, learningResource, ldJson, website } from '#lib/seo/jsonld.ts';
-import { cards, homeCard, lessonCard, lastmod } from '#lib/seo/pages.server.ts';
+import { cards, catalogCard, webCard, lessonCard, lastmod } from '#lib/seo/pages.server.ts';
 import { defaultInstance, ogFile, renderCard, staticEcho } from '#lib/seo/og.server.ts';
 import { llmsFullTxt, llmsTxt, lessonMarkdown } from '#lib/seo/llms.server.ts';
 import { targets, xText, lessonText } from '#lib/share/targets.ts';
@@ -48,11 +49,11 @@ describe('structured data', () => {
 	it('a LearningResource per lesson, with the fields schema.org and the course graph need', () => {
 		for (const l of lessons) {
 			const url = at.lesson(l.id);
-			const d = JSON.parse(ldJson(learningResource({ lesson: l, url, homeUrl: home, image: at.file('og/x.png'), teaches: ['a'], dateModified: '2026-10-27' })));
+			const d = JSON.parse(ldJson(learningResource({ lesson: l, url, homeUrl: home, courseName: 'Сеть насквозь', image: at.file('og/x.png'), teaches: ['a'], dateModified: '2026-10-27' })));
 			expect(d['@context']).toBe('https://schema.org');
 			expect(d['@type']).toBe('LearningResource');
 			expect(d).toMatchObject({ name: l.title, description: l.definition, url, inLanguage: 'ru', educationalLevel: 'beginner' });
-			expect(d.isPartOf).toEqual({ '@type': 'Course', '@id': `${home}#course`, name: 'Сквозь время', url: home });
+			expect(d.isPartOf).toEqual({ '@type': 'Course', '@id': `${home}#course`, name: 'Сеть насквозь', url: home });
 			expect(d.timeRequired).toMatch(/^PT(\d+H)?(\d+M)?$/);
 			expect(d.license).toBe('https://creativecommons.org/licenses/by-sa/4.0/');
 			expect(d.citation.length).toBeGreaterThanOrEqual(2);
@@ -60,8 +61,8 @@ describe('structured data', () => {
 		}
 	});
 	it('a Course on home with what Google requires of one', () => {
-		const c = course({ homeUrl: home, description: 'Учебник.', minutes: 150 });
-		expect(c).toMatchObject({ '@type': 'Course', '@id': `${home}#course`, name: 'Сквозь время', description: 'Учебник.', provider: { '@type': 'Organization' } });
+		const c = course({ homeUrl: home, name: 'Сеть насквозь', description: 'Учебник.', minutes: 150 });
+		expect(c).toMatchObject({ '@type': 'Course', '@id': `${home}#course`, name: 'Сеть насквозь', description: 'Учебник.', provider: { '@type': 'Organization' } });
 		expect(c.hasCourseInstance).toEqual({ '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT2H30M' });
 		expect(c.offers).toMatchObject({ '@type': 'Offer', price: 0, category: 'Free' });
 		expect(website(home, 'x')).toMatchObject({ '@type': 'WebSite', url: home });
@@ -98,8 +99,8 @@ describe('structured data', () => {
 	});
 	it('the English edition\'s structured data says English and the English name', () => {
 		const l = en.lessons[0];
-		const d = JSON.parse(ldJson(learningResource({ lesson: l, url: at.lesson(l.id, 'en'), homeUrl: at.home('en'), teaches: ['a'], lang: 'en' })));
-		expect(d).toMatchObject({ inLanguage: 'en', isPartOf: { name: 'Through Time', url: at.home('en') } });
+		const d = JSON.parse(ldJson(learningResource({ lesson: l, url: at.lesson(l.id, 'en'), homeUrl: at.home('en'), courseName: 'The Web, End to End', teaches: ['a'], lang: 'en' })));
+		expect(d).toMatchObject({ inLanguage: 'en', isPartOf: { name: 'The Web, End to End', url: at.home('en') } });
 		expect(JSON.parse(ldJson(website(at.home('en'), 'x', 'en')))).toMatchObject({ name: 'Through Time', inLanguage: 'en' });
 	});
 });
@@ -108,11 +109,12 @@ describe('structured data', () => {
 const size = (png: Buffer) => ({ width: png.readUInt32BE(16), height: png.readUInt32BE(20) });
 
 describe('Open Graph cards', () => {
-	it('one per lesson, the home and the map, each named by a hash of what it draws', () => {
+	it('one per lesson, the catalog, the map and every course, each named by a hash of what it draws', () => {
 		const all = cards();
-		// both editions: every Russian lesson, and every lesson translated into English
-		expect(all.size).toBe(lessons.length + 2 + en.lessons.length + 2);
-		for (const file of all.keys()) expect(file).toMatch(/^(en-)?(home|map|lesson-\d\d-[a-z0-9-]+)-[0-9a-f]{10}\.png$/);
+		// both editions: every Russian lesson and every English one, then the catalog, the map and each course
+		const n = loadCourses().courses.length;
+		expect(all.size).toBe(lessons.length + 2 + n + en.lessons.length + 2 + n);
+		for (const file of all.keys()) expect(file).toMatch(/^(en-)?(catalog|home|map|course-[a-z0-9-]+|lesson-\d\d-[a-z0-9-]+)-[0-9a-f]{10}\.png$/);
 		const enCard = lessonCard(en.lessons[0], en.curriculum.parts.find((p) => p.number === en.lessons[0].part)!, 'en');
 		expect(enCard).toMatchObject({ stem: `en-lesson-${en.lessons[0].id.replace('/', '-')}`, lang: 'en' });
 		expect(enCard.alt).toContain('Echo');
@@ -150,7 +152,7 @@ describe('Open Graph cards', () => {
 	});
 	it('draws a 1200 × 630 PNG under WhatsApp’s 300 KB, for the longest title and the home', { timeout: 30_000 }, async () => {
 		const longest = [...lessons].sort((a, b) => b.title.length - a.title.length)[0];
-		for (const card of [lessonCard(longest, partOf(longest.part)), homeCard()]) {
+		for (const card of [lessonCard(longest, partOf(longest.part)), webCard()]) {
 			const png = await renderCard(card);
 			expect(png.subarray(1, 4).toString()).toBe('PNG');
 			expect(size(png)).toEqual({ width: 1200, height: 630 });
@@ -162,11 +164,14 @@ describe('Open Graph cards', () => {
 });
 
 describe('sitemap, robots.txt and llms.txt', () => {
-	it('the sitemap lists home, the map and every lesson, each with a date', async () => {
+	it('the sitemap lists the catalog, the courses, the map and every lesson, each with a date, and no planned lesson', async () => {
 		const xml = await (sitemap as () => Response)().text();
 		const urls = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><lastmod>(\d{4}-\d\d-\d\d)<\/lastmod>/g)];
-		// Russian: home, map, every lesson; English: home, map, the lessons translated so far
-		expect(urls.length).toBe(lessons.length + 2 + en.lessons.length + 2);
+		// Russian: the catalog, the map, every course, every lesson; English: the same, the lessons translated so far
+		const courses = loadCourses().courses;
+		expect(urls.length).toBe(lessons.length + 2 + courses.length + en.lessons.length + 2 + courses.length);
+		for (const c of courses) for (const l of ['ru', 'en'] as const) expect(urls.map((u) => u[1])).toContain(at.course(c.id, l));
+		for (const u of urls) expect(u[1], 'a planned lesson has no URL').not.toMatch(/\/course\/[^/]+\/./);
 		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home(), at.map(), ...lessons.map((l) => at.lesson(l.id))]));
 		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home('en'), at.map('en'), ...en.lessons.map((l) => at.lesson(l.id, 'en'))]));
 		for (const id of en.missing) expect(xml, id).not.toContain(`<loc>${at.lesson(id, 'en')}</loc>`);
@@ -206,7 +211,7 @@ describe('sitemap, robots.txt and llms.txt', () => {
 describe('share links', () => {
 	const url = at.lesson('02-html/01-first-page');
 	const l = lessons.find((x) => x.id === '02-html/01-first-page')!;
-	const text = lessonText(l.title, l.definition, 'Сквозь время');
+	const text = lessonText(l.title, l.definition, 'Сеть насквозь');
 	it('plain URLs to Telegram, VK, X and WhatsApp, the address and caption encoded', () => {
 		const t = Object.fromEntries(targets({ url, title: l.title, text }).map((x) => [x.id, new URL(x.href)]));
 		expect(t.telegram.origin + t.telegram.pathname).toBe('https://t.me/share/url');
@@ -221,6 +226,6 @@ describe('share links', () => {
 	it('the caption is the title and the definition; on X it fits with the link', () => {
 		expect(text).toContain(l.title);
 		expect(text).toContain(l.definition);
-		for (const x of lessons) expect(xText(x.title, lessonText(x.title, x.definition, 'Сквозь время')).length + 24).toBeLessThanOrEqual(280);
+		for (const x of lessons) expect(xText(x.title, lessonText(x.title, x.definition, 'Сеть насквозь')).length + 24).toBeLessThanOrEqual(280);
 	});
 });

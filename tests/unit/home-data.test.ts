@@ -1,13 +1,15 @@
 /**
- * The home page is prerendered with its data inline, so every lesson added to the course used to
- * add bytes to the first page a person loads. Home's first paint needs only the first lesson and
- * the count; the returning home's lesson list is a hashed file of its own, fetched after the store
- * says the person has been here before. So the inline data has a fixed cap, not one per lesson.
+ * The catalog is prerendered with its data inline, so what is in it is paid for by every first
+ * visit. It carries each course's line and two counts, and no lesson of any course: its size grows
+ * with the number of courses, not with the number of lessons. A returning person's lesson list is a
+ * hashed file of its own, fetched after the store says they have been here before.
  */
 import { it, expect } from 'vitest';
 import { load } from '../../src/routes/[[lang=lang]]/+page.server.ts';
 import { GET, entries } from '../../src/routes/data/home-[hash].json/+server.ts';
 import { loadContent } from '#lib/content/load.ts';
+import { loadCourses } from '#lib/courses/load.ts';
+import { isPlanned } from '#lib/courses/schema.ts';
 import { nextLessons } from '#lib/content/graph.ts';
 import { nextHome, type HomeLesson } from '#lib/content/catalogue.ts';
 
@@ -15,11 +17,15 @@ const data = load({ params: {} });
 const [{ hash }] = entries() as { hash: string }[];
 const index = async (h: string) => GET({ params: { hash: h } } as Parameters<typeof GET>[0]);
 const lessons: HomeLesson[] = await (await index(hash)).json();
+const { strands, courses } = loadCourses();
 
-it('inlines a fixed few bytes, however long the course grows', () => {
-	expect(JSON.stringify(data).length).toBeLessThan(200);
-	expect(data.home).toEqual({ first: lessons[0].id, total: lessons.length, index: hash });
-	expect(data.home.total).toBe(loadContent().lessons.length);
+it('inlines a fixed amount per course, and no lesson', () => {
+	const json = JSON.stringify(data);
+	expect(json.length).toBeLessThan(courses.length * 400 + strands.length * 400 + 300);
+	expect(data.index).toBe(hash);
+	for (const c of courses.filter(isPlanned)) expect(json, c.id).not.toContain(c.parts[0].lessons[0].summary.ru);
+	for (const l of loadContent().lessons) expect(json).not.toContain(l.summary);
+	expect(json).not.toMatch(/"parts"|"teaches"|"requires"/);
 });
 
 it('names the lesson list by its hash, and nothing else is served under another', async () => {

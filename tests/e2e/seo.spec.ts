@@ -58,7 +58,7 @@ test('a lesson’s head: description, canonical, Open Graph, the card, and its s
 		url: canonical,
 		inLanguage: 'ru',
 		image,
-		isPartOf: { '@type': 'Course', '@id': `${PUBLIC}#course` },
+		isPartOf: { '@type': 'Course', '@id': `${PUBLIC}course/web/#course` },
 		timeRequired: 'PT25M',
 		license: 'https://creativecommons.org/licenses/by-sa/4.0/'
 	});
@@ -66,7 +66,7 @@ test('a lesson’s head: description, canonical, Open Graph, the card, and its s
 	expect(resource.citation.length).toBeGreaterThanOrEqual(2);
 	expect(resource.dateModified).toMatch(/^\d{4}-\d\d-\d\d$/);
 	expect(crumbs['@type']).toBe('BreadcrumbList');
-	expect(crumbs.itemListElement.map((i: { name: string }) => i.name)).toEqual(['Сквозь время', 'Карта курса', 'Часть 2. HTML', resource.name]);
+	expect(crumbs.itemListElement.map((i: { name: string }) => i.name)).toEqual(['Сквозь время', 'Сеть насквозь', 'Часть 2. HTML', resource.name]);
 });
 
 test('the lesson’s text is in the HTML as served, definition first', async ({ request }) => {
@@ -78,12 +78,12 @@ test('the lesson’s text is in the HTML as served, definition first', async ({ 
 	expect(html.indexOf(definition!)).toBeLessThan(html.indexOf('Телефонная книга сети'));
 });
 
-test('home: a Course and a WebSite, the home card; the map: breadcrumbs and every lesson', async ({ request }) => {
-	const home = await head(request, './');
-	expect(home.canonical).toBe(PUBLIC);
+test('the web course: a Course and the old home card; the map: breadcrumbs and every lesson', async ({ request }) => {
+	const home = await head(request, 'course/web/');
+	expect(home.canonical).toBe(`${PUBLIC}course/web/`);
 	const types = home.ld.map((d) => d['@type']);
-	expect(types).toEqual(['Course', 'WebSite']);
-	expect(home.ld[0]).toMatchObject({ '@id': `${PUBLIC}#course`, name: 'Сквозь время', provider: { name: 'NoeticEcho' }, inLanguage: 'ru' });
+	expect(types).toEqual(['Course', 'BreadcrumbList']);
+	expect(home.ld[0]).toMatchObject({ '@id': `${PUBLIC}course/web/#course`, name: 'Сеть насквозь', provider: { name: 'NoeticEcho' }, inLanguage: 'ru' });
 	expect(home.meta('og:image')).toMatch(/\/og\/home-[0-9a-f]{10}\.png$/);
 	expect((await request.get(local(home.meta('og:image')!))).status()).toBe(200);
 
@@ -143,5 +143,5 @@ test('share: links before the script runs, the system sheet where there is one, 
 	await native.click();
 	const shared = await page.evaluate(() => (window as unknown as { shared: ShareData }).shared);
 	expect(shared).toMatchObject({ url: `${PUBLIC}${LESSON}`, title: 'Первая страница: теги, заголовок, ссылка' });
-	expect(shared.text).toMatch(/^«Первая страница: теги, заголовок, ссылка», урок учебника «Сквозь время»\. HTML — /);
+	expect(shared.text).toMatch(/^«Первая страница: теги, заголовок, ссылка», урок курса «Сеть насквозь»\. HTML — /);
 });

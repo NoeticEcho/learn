@@ -24,11 +24,11 @@
 	import Listen from '#lib/narration/Listen.svelte';
 	import type { Narration } from '#lib/narration/types.ts';
 
-	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null; narration?: Narration | null };
-	let { lesson, part, concepts: taught, index, body: Body, narration = null }: Props = $props();
+	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null; narration?: Narration | null; courseName: string };
+	let { lesson, part, concepts: taught, index, body: Body, narration = null, courseName: webName }: Props = $props();
 
 	const lang = getLocale();
-	const share = $derived({ url: at.lesson(lesson.id, lang), title: lesson.title, text: lessonText(lesson.title, lesson.definition, t('app.title'), lang) });
+	const share = $derived({ url: at.lesson(lesson.id, lang), title: lesson.title, text: lessonText(lesson.title, lesson.definition, webName, lang) });
 
 	let Practice = $state<Component<any> | null>(null);
 	let persona = $state<Persona | null>(null);

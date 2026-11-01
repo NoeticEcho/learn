@@ -17,6 +17,8 @@ const code = await withApp(async (load) => {
 		console.log(`content (ru): ${lessons.length} lesson(s) in ${curriculum.parts.length} part(s), no problems`);
 		const en = mod.loadEdition('en');
 		console.log(`content (en): ${en.lessons.length} lesson(s) translated, ${en.missing.length} not yet, no problems`);
+		const courses = (await load('/src/lib/courses/load.ts')) as unknown as { loadCourses: () => { courses: unknown[] } };
+		console.log(`catalog: ${courses.loadCourses().courses.length} course(s), no problems`);
 		return 0;
 	} catch (e) {
 		problems = (e as { problems?: string[] }).problems ?? [];

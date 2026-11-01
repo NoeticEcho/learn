@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readdirSync } from 'node:fs';
 
-test('home renders under /learn', async ({ page }) => {
+test('the catalog renders under /learn', async ({ page }) => {
 	await page.goto('./');
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Сквозь время');
 });
@@ -32,10 +32,13 @@ test('a returning person is sent to the next lesson, from the hashed lesson list
 		if (/\/data\/home-[0-9a-f]{12}\.json$/.test(r.url())) index.push(r.url());
 	});
 	await page.goto('./');
-	expect(index).toEqual([]); // the first visit's prologue does not need it
+	await page.waitForLoadState('networkidle');
+	expect(index).toEqual([]); // a first visit does not fetch it
+	await page.goto('./course/web/prologue/');
+	await page.waitForLoadState('networkidle'); // the skip's handler is attached by then
 	await page.getByRole('link', { name: 'Пропустить вступление' }).click();
 	await page.waitForURL(/\/map\/$/);
-	// the skip's write to the store may land after the map opens: reload home until it has
+	// the skip's write to the store may land after the map opens: reload the catalog until it has
 	await expect(async () => {
 		await page.goto('./');
 		await expect(page.getByRole('link', { name: 'Продолжить: Как устроен этот учебник' })).toBeVisible({ timeout: 1000 });

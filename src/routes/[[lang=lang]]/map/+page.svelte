@@ -85,7 +85,7 @@
 	description={t('seo.map.description')}
 	image={data.og}
 	jsonld={[
-		breadcrumbs([{ name: t('app.title'), url: at.home(lang) }, { name: t('map.title') }]),
+		breadcrumbs([{ name: t('app.title'), url: at.home(lang) }, { name: data.courseName, url: at.course('web', lang) }, { name: t('map.title') }]),
 		{
 			'@context': 'https://schema.org',
 			'@type': 'ItemList',

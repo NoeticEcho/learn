@@ -1,14 +1,15 @@
-// Эхо crossing the eras (src/lib/home/EraScene.svelte): on the returning home, on a wide screen
+// Эхо crossing the eras (src/lib/home/EraScene.svelte): on the web course's page, on a wide screen
 // only; moving there, still under reduced motion, stopped by its pause; and the line about the
 // project is real text everywhere.
 import { test, expect, type Page } from '@playwright/test';
 
 async function returning(page: Page) {
-	await page.goto('./');
+	await page.goto('./course/web/prologue/');
+	await page.waitForLoadState('networkidle'); // the skip's handler is attached by then
 	await page.getByRole('link', { name: 'Пропустить вступление' }).click();
 	await page.waitForURL(/\/map\/$/);
 	await expect(async () => {
-		await page.goto('./');
+		await page.goto('./course/web/');
 		await expect(page.getByRole('link', { name: /^Продолжить:/ })).toBeVisible({ timeout: 1000 });
 	}).toPass({ timeout: 10_000 });
 }
@@ -17,7 +18,7 @@ const running = (page: Page) =>
 const project = /Проект NoeticEcho\. Последний учебник эпохи до ИИ/;
 
 test('the project line is on the question screen, and links to NoeticEcho', async ({ page }) => {
-	await page.goto('./');
+	await page.goto('./course/web/prologue/');
 	await expect(page.getByText(project)).toBeVisible();
 	await expect(page.getByRole('link', { name: 'NoeticEcho', exact: true })).toHaveAttribute('href', 'https://open.noeticecho.space/');
 });

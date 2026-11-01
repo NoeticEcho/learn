@@ -14,7 +14,8 @@ import { getLocale, t, type Locale } from '#lib/i18n/index.ts';
 
 export type Provider = 'anthropic' | 'openai' | 'openrouter';
 export type ModelConfig = { provider: Provider; key: string; model: string };
-export type AskContext = { lesson: string; code?: string; question: string; persona?: object };
+/** `lesson` is the page's own words, and `label` says what they are when they are not a lesson (the catalog, a course). */
+export type AskContext = { lesson: string; label?: string; code?: string; question: string; persona?: object };
 
 export class AskError extends Error {
 	constructor(
@@ -41,18 +42,18 @@ export const MODELS: Record<Provider, string[]> = {
 /** The guide's instructions, in the edition's language: the same tutor in both. */
 export const SYSTEM_PROMPTS: Record<Locale, string> = {
 	ru: [
-		'Ты Эхо, наставник в учебнике «Сквозь время» о том, как устроен веб. Ученик взрослый и только начинает.',
+		'Ты Эхо, наставник на «Сквозь время», платформе открытых курсов NoeticEcho. Первый курс, «Сеть насквозь», о том, как устроен веб, открыт, у остальных пока есть только оглавления. Ученик взрослый и только начинает.',
 		'Объясняй простыми словами, по-русски, коротко: два-три абзаца.',
 		'Сначала подскажи, где искать ответ, и только если ученик просит прямо, покажи решение.',
-		'Опирайся на текст урока, который тебе дали, и ссылайся на его источники, когда они есть.',
+		'Опирайся на текст, который тебе дали, и ссылайся на его источники, когда они есть.',
 		'Если не уверен, так и скажи. Не выдумывай факты, адреса и цифры.',
 		'Никогда не проси у ученика личные данные, пароли или ключи.'
 	].join(' '),
 	en: [
-		'You are Echo, the guide in “Through Time”, a textbook about how the web works. The learner is an adult and a beginner.',
+		'You are Echo, the guide on “Through Time”, NoeticEcho’s platform of open courses. The first course, “The Web, End to End”, on how the web works, is open; the others have only tables of contents so far. The learner is an adult and a beginner.',
 		'Explain in plain English, briefly: two or three paragraphs.',
 		'First point to where the answer can be found; show the solution only if the learner asks for it directly.',
-		'Ground your answer in the lesson text you are given, and cite its sources when there are any.',
+		'Ground your answer in the text you are given, and cite its sources when there are any.',
 		'If you are not sure, say so. Do not invent facts, addresses or numbers.',
 		'Never ask the learner for personal data, passwords or keys.'
 	].join(' ')
@@ -66,7 +67,7 @@ const LABELS: Record<Locale, { lesson: string; code: string; persona: string; qu
 
 function userMessage(ctx: AskContext, l: Locale): string {
 	const w = LABELS[l];
-	const parts = [`${w.lesson}:\n${ctx.lesson}`];
+	const parts = [`${ctx.label ?? w.lesson}:\n${ctx.lesson}`];
 	if (ctx.code) parts.push(`${w.code}:\n${ctx.code}`);
 	if (ctx.persona) parts.push(`${w.persona}:\n${JSON.stringify(ctx.persona)}`);
 	parts.push(`${w.question}:\n${ctx.question}`);
