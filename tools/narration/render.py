@@ -29,7 +29,7 @@ The language is the scripts file's (`lang`, `voice`): `npm run narration -- scri
 English ones, and the audio and manifest go to <audio>/en/ and <audio>/en.json. Nothing here publishes; run.sh and
 publish.sh are the Russian edition's alone.
 """
-import argparse, json, os, signal, subprocess, sys, tempfile, threading, time, wave
+import argparse, gc, json, os, signal, subprocess, sys, tempfile, threading, time, wave
 from datetime import datetime
 from pathlib import Path
 
@@ -94,16 +94,30 @@ def test_run_active():
     return found
 
 
-def wait_for_memory(min_gb, resume_gb):
+HELD_LIMIT_S = 300  # low memory with no test run for this long: the model is what holds it
+
+
+def wait_for_memory(min_gb, resume_gb, release=None):
     """Pauses below min_gb available, or while a test run is active; resumes at resume_gb and none.
-    The model's memory is the GPU's, which here is system RAM and not counted in this process's RSS."""
+    The model's memory is the GPU's, which here is system RAM and not counted in this process's RSS.
+    So a long part's allocator cache can itself be what is short (17 GB on 01.11.2026), and waiting
+    for it would wait for ever: `release` empties the cache on the way in, and if memory is still low
+    after HELD_LIMIT_S with no test run, the process exits non-zero, for run.sh to load the model anew."""
     gb = mem_available_gb()
     busy = test_run_active()
     if gb >= min_gb and not busy:
         return
     log(f"pause: {gb:.1f} GB available (pause below {min_gb}, resume at {resume_gb}){', a test run is active' if busy else ''}")
+    if release:
+        release()
+    low_since = time.monotonic()
     while (mem_available_gb() < resume_gb or test_run_active()) and not STOP["now"]:
         ALIVE["at"] = time.monotonic()
+        if test_run_active() or mem_available_gb() >= resume_gb:
+            low_since = time.monotonic()
+        elif release and time.monotonic() - low_since > HELD_LIMIT_S:
+            log(f"still {mem_available_gb():.1f} GB available with no test run: restarting to free the model's memory")
+            sys.exit(75)
         time.sleep(10)
     log(f"resume: {mem_available_gb():.1f} GB available")
 
@@ -283,7 +297,7 @@ def main():
             if stop["now"]:
                 break
             ALIVE["at"] = time.monotonic()
-            wait_for_memory(a.min_free_gb, a.resume_free_gb)
+            wait_for_memory(a.min_free_gb, a.resume_free_gb, release=lambda: (gc.collect(), torch.cuda.empty_cache()))
             if stop["now"]:
                 break
             ts = time.monotonic()
