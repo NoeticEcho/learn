@@ -159,7 +159,7 @@
 	}
 	.row {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 13rem;
+		grid-template-columns: minmax(0, 1fr) 18rem;
 		gap: var(--space-2) var(--space-6);
 		align-items: baseline;
 		padding-block: var(--space-4);
