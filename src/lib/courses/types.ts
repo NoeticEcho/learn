@@ -5,7 +5,7 @@
 export type CourseState = 'open' | 'partly' | 'planned';
 
 export type CourseRow = { id: string; title: string; tagline: string; lessons: number; open: number; state: CourseState };
-export type StrandView = { id: string; title: string; summary: string; courses: CourseRow[] };
+export type StrandView = { id: string; title: string; short: string; summary: string; courses: CourseRow[] };
 export type CatalogView = { strands: StrandView[] };
 
 export type PlannedLessonView = { id: string; title: string; summary: string; open: boolean };

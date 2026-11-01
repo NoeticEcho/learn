@@ -43,7 +43,10 @@ test.describe('the catalog', () => {
 		expect(await courses.count()).toBeGreaterThanOrEqual(15);
 		await expect(courses.nth(0)).toHaveText('Сеть насквозь');
 		await expect(courses.nth(1)).toContainText('ИИ');
-		await expect(page.getByText(/^Открыт, 154 урока$/)).toBeVisible();
+		const web = page.locator('[data-course="web"]');
+		await expect(web.getByText('154 урока')).toBeVisible();
+		await expect(web.getByText('доступен')).toBeVisible();
+		await expect(page.locator('[data-course="ai"]').getByText('скоро')).toBeVisible();
 		await page.waitForLoadState('networkidle');
 		expect(requests.filter((u) => /data\/home-/.test(u))).toEqual([]);
 		await expect(page.getByRole('link', { name: 'Лента новых уроков (Atom)' })).toHaveAttribute('href', /feed\.xml$/);
@@ -67,8 +70,105 @@ test.describe('the catalog', () => {
 	test('a returning person sees their own state in the web course’s row', async ({ page }) => {
 		await seedOldStore(page);
 		await page.goto('./');
-		await expect(page.getByText('Пройдено 2 из 154')).toBeVisible();
-		await expect(page.getByRole('link', { name: /^Продолжить:/ }).first()).toBeVisible();
+		await expect(page.locator('[data-course="web"]').getByText('2 из 154 уроков')).toBeVisible();
+		await expect(page.getByRole('link', { name: /^Продолжить:/ })).toBeVisible();
+	});
+});
+
+test.describe('the catalog’s cards', () => {
+	const box = async (page: Page, id: string) => (await page.locator(`[data-course="${id}"]`).boundingBox())!;
+
+	test.describe('on a phone', () => {
+		test.use({ viewport: { width: 375, height: 812 } });
+		test('they stand in one column, with no sideways scroll', async ({ page }) => {
+			await page.goto('./');
+			const cards = page.locator('.card');
+			expect(await cards.count()).toBeGreaterThanOrEqual(15);
+			const xs = new Set(await cards.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().x))));
+			expect(xs.size).toBe(1);
+			expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+		});
+	});
+
+	test.describe('on a computer', () => {
+		test.use({ viewport: { width: 1280, height: 800 } });
+		test('three columns, with web and AI first and larger, side by side, and the strands as headed groups', async ({ page }) => {
+			await page.goto('./');
+			const [web, ai, tools] = [await box(page, 'web'), await box(page, 'ai'), await box(page, 'own-tools')];
+			expect(ai.y).toBe(web.y);
+			expect(ai.x).toBeGreaterThan(web.x);
+			expect(web.width).toBeGreaterThan(tools.width * 1.3);
+			expect(tools.y).toBeGreaterThan(web.y);
+			const row = await page.locator('[data-course="own-tools"], [data-course="work-with-ai"], [data-course="work"]').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().y)));
+			expect(new Set(row).size).toBe(1);
+			await expect(page.getByRole('heading', { level: 2 })).toHaveCount(5); // four strands and the feed
+		});
+		test('the whole card is one link, and a click anywhere on it opens the course', async ({ page }) => {
+			await page.goto('./');
+			const card = page.locator('[data-course="verify"]');
+			await expect(card.getByRole('link')).toHaveCount(1);
+			await expect(card.getByRole('heading', { level: 3 }).getByRole('link')).toHaveAttribute('href', /course\/verify\/$/);
+			await card.scrollIntoViewIfNeeded();
+			const b = (await card.boundingBox())!;
+			await page.mouse.click(b.x + b.width - 6, b.y + b.height - 6);
+			await expect(page).toHaveURL(/course\/verify\/$/);
+		});
+		test('by keyboard: each card takes one stop, its ring goes round the card, and Enter opens it', async ({ page }) => {
+			await page.goto('./');
+			const links = page.locator('.card h3 a');
+			const n = await links.count();
+			await links.first().focus();
+			for (let i = 1; i < 4; i++) {
+				await page.keyboard.press('Tab');
+				await expect(links.nth(i)).toBeFocused();
+			}
+			expect(n).toBeGreaterThanOrEqual(15);
+			// reached by keyboard, so :focus-visible holds; the ring is the stretched ::after, the size of the card
+			const ring = await links.nth(3).evaluate((a) => {
+				const c = getComputedStyle(a, '::after');
+				return { style: c.outlineStyle, width: parseFloat(c.outlineWidth), position: c.position };
+			});
+			expect(ring).toEqual({ style: 'solid', width: 2, position: 'absolute' });
+			await page.keyboard.press('Enter');
+			await expect(page).toHaveURL(/course\/own-tools\/$/);
+		});
+		test('the state is in words and a mark, not in colour alone', async ({ page }) => {
+			await page.goto('./');
+			const dot = (id: string) => page.locator(`[data-course="${id}"] .dot`).evaluate((d) => getComputedStyle(d).backgroundColor);
+			expect(await dot('ai')).toBe('rgba(0, 0, 0, 0)');
+			expect(await dot('web')).not.toBe('rgba(0, 0, 0, 0)');
+		});
+		test('nothing moves when the store is read', async ({ page }) => {
+			await page.goto('./');
+			await page.waitForLoadState('networkidle');
+			const first = await box(page, 'own-tools');
+			await seedOldStore(page);
+			await page.goto('./');
+			await expect(page.locator('[data-course="web"]').getByText('2 из 154 уроков')).toBeVisible();
+			await expect(page.getByRole('link', { name: /^Продолжить:/ })).toBeVisible();
+			expect(await box(page, 'own-tools')).toEqual(first);
+			const fill = await page.locator('[data-course="web"] .meter span').evaluate((e) => e.getBoundingClientRect().width);
+			expect(fill).toBeGreaterThan(0);
+		});
+	});
+
+	test.describe('with no script', () => {
+		test.use({ javaScriptEnabled: false });
+		test('every card is a link, and the launcher is not drawn', async ({ page }) => {
+			await page.goto('./');
+			expect(await page.locator('.card h3 a').count()).toBeGreaterThanOrEqual(15);
+			await expect(page.locator('.echo-launch:visible')).toHaveCount(0);
+			await page.locator('[data-course="ai"] h3 a').click();
+			await expect(page).toHaveURL(/course\/ai\/$/);
+		});
+	});
+
+	test('in English too', async ({ page }) => {
+		await page.goto('./en/');
+		const web = page.locator('[data-course="web"]');
+		await expect(web.getByText('154 lessons')).toBeVisible();
+		await expect(web.getByText('available')).toBeVisible();
+		await expect(page.locator('[data-course="ai"]').getByText('coming soon')).toBeVisible();
 	});
 });
 

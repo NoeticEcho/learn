@@ -103,11 +103,13 @@ The unit test adds the house style (ё, no dash in a sentence, American spelling
 
 ### 5.1 The catalog
 
-An editorial index, not a grid of cards: the NoeticEcho language of the rest of the app, Literata for titles, hairlines between rows, no images but Эхо.
+The owner, on the first live version, a ledger of rows: «может лучше сделать карточки курсов, а не список, для более наглядности читателю?». So: cards, drawn as the cells of one ruled sheet rather than as floating boxes, in the NoeticEcho language of the rest of the app. Literata titles, shared hairlines, square corners, no images but Эхо in the head and one sprite of four small marks.
 
-- **The head:** the platform's name, one sentence on what it is, one on what it does not do (no account, nothing tracked), Эхо beside them from 700 px.
-- **The strands:** each a heading with one sentence, then its courses as rows: the title as a link, the tagline, and at the right the state: «открыт, 154 урока», or «скоро, N уроков в плане».
-- **The web course's row** is drawn first and larger. Once the store says the person has progress, its state becomes «12 из 154» and a link «Продолжить: …», in a slot reserved so nothing moves. Nothing is fetched for a first visit: the hashed lesson list comes only for a person with progress, as the home's did.
+- **The head:** the platform's name, one sentence on what it is, one on what it does not do (no account, nothing tracked), Эхо beside them from 700 px. Under them, a line that a first visit reads as the way into the prologue, and a person with progress as «Продолжить: …», in a slot reserved so nothing moves.
+- **The strands** are headed groups, each a heading, one sentence and a sheet of cards: one column to 560 px, two to 1024 px, three above.
+- **A card** is a course's title (a real heading), its line, and a foot of fixed slots: the strand's short name with its mark, the lesson count, and the state in a word beside a filled or hollow dot: «доступен», or «скоро», with «N из M уроков» once a course has some open. A course with a lesson done says «2 из 154 уроков», and its thin rule fills. The rule is there at zero, so nothing moves. The heading's link is stretched over the card, so the card is one link with one focus stop and a ring round the whole of it, with no script.
+- **The first two carry more weight:** the web course and the AI course are half a sheet each, with larger titles. The AI card says it is next. The strand's first course in `noetic-singularity` takes the sheet's whole width, and the two courses of «Проверять» a half each, so no sheet ends in a lone cell above 1024 px.
+- **Against the look of a generic card grid** (Hallmark gates 3, 11, 54, read as a checklist): widths vary, the mark sits in the foot beside a word and never in a tile over the heading, no eyebrow over the title, no shadow, no rounding, no lift. One hover signal: the title's rule.
 - **The foot:** the NoeticEcho line, and how to follow new lessons without being tracked: the feed's address and one sentence on what a feed is.
 
 **Weight.** The page's data is the strands and each course's id, title, tagline and two counts, with no lesson of any course. It is the home that used to carry the prologue, so its JavaScript should fall; its inline data rises by a fixed amount per course. A test caps the data per course. A catalog of 23 stays under the old home's transferred HTML plus 5 KB, measured.

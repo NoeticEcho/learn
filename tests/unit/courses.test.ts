@@ -31,7 +31,7 @@ function catalog(n = 15, edit: (files: Record<string, object>) => void = () => {
 	const files: Record<string, object> = {};
 	for (const id of ids) files[id] = id === 'web' ? web : course(id, [lesson(`${id}-a`), lesson(`${id}-b`)]);
 	edit(files);
-	return { index: { strands: [{ id: 'a', title: w('Aa'), summary: w(sentence), courses: ids.slice(0, 2) }, { id: 'b', title: w('Bb'), summary: w(sentence), courses: ids.slice(2) }] }, files };
+	return { index: { strands: [{ id: 'a', title: w('Aa'), short: w('Aa'), summary: w(sentence), courses: ids.slice(0, 2) }, { id: 'b', title: w('Bb'), short: w('Bb'), summary: w(sentence), courses: ids.slice(2) }] }, files };
 }
 const problems = (c: ReturnType<typeof catalog>) => {
 	try {

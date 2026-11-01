@@ -58,7 +58,10 @@ export type SourcedCourse = z.infer<typeof SourcedCourse>;
 export type PlannedCourse = z.infer<typeof PlannedCourse>;
 export type Course = z.infer<typeof Course>;
 
-export const Strand = z.object({ id: slug, title: Title, summary: Sentence(280), courses: z.array(slug).min(1) }).strict();
+/** `short` is the strand's name on a card, beside the course's lesson count: one or two words. */
+export const Strand = z
+	.object({ id: slug, title: Title, short: z.object({ ru: z.string().min(2).max(24), en: z.string().min(2).max(24) }).strict(), summary: Sentence(280), courses: z.array(slug).min(1) })
+	.strict();
 export const CourseIndex = z.object({ strands: z.array(Strand).min(2) }).strict();
 export type Strand = z.infer<typeof Strand>;
 

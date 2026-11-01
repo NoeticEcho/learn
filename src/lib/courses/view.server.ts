@@ -28,7 +28,7 @@ export function catalogView(lang: Locale): CatalogView {
 	const { strands, courses } = loadCourses();
 	const byId = new Map(courses.map((c) => [c.id, c]));
 	return {
-		strands: strands.map((s) => ({ id: s.id, title: s.title[lang], summary: s.summary[lang], courses: s.courses.map((id) => row(byId.get(id)!, lang)) }))
+		strands: strands.map((s) => ({ id: s.id, title: s.title[lang], short: s.short[lang], summary: s.summary[lang], courses: s.courses.map((id) => row(byId.get(id)!, lang)) }))
 	};
 }
 
