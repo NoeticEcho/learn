@@ -1,6 +1,5 @@
 /**
- * The structured data (schema.org, as JSON-LD): a `WebSite` and an `ItemList` of courses on the
- * catalog, a `Course` on the page of a course with published lessons, a `LearningResource` per
+ * The structured data (schema.org, as JSON-LD): a `WebSite` on the catalog, a `Course` on the page of a course with published lessons, a `LearningResource` per
  * lesson that is part of it, and a `BreadcrumbList` on every page below the catalog. A planned
  * course has no `Course`: an offer of a course that cannot be taken yet would be false. Built from data the page already has, so it costs the page no extra data;
  * the head writes it as `<script type="application/ld+json">` (Seo.svelte).
@@ -52,13 +51,6 @@ export function course(o: { homeUrl: string; name: string; description: string; 
 export function website(homeUrl: string, description: string, lang: Locale = 'ru'): Thing {
 	return { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAMES[lang], url: homeUrl, inLanguage: lang, description, publisher };
 }
-
-/** The catalog's list of courses. */
-export const courseList = (items: { name: string; url: string }[]): Thing => ({
-	'@context': 'https://schema.org',
-	'@type': 'ItemList',
-	itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: it.url }))
-});
 
 const citation = (s: Source) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, inLanguage: s.lang });
 

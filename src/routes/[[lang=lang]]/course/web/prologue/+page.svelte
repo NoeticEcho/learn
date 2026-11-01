@@ -4,6 +4,7 @@
 	asked for it, so it always plays, however many times they have seen it.
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { t, getLocale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
 	import Prologue, { type Answers } from '#lib/prologue/Prologue.svelte';
@@ -18,6 +19,9 @@
 		forWhom: persona.forWhom,
 		action: persona.mainAction.label
 	};
+
+	// The store is opened before it is needed: «Пропустить» writes to it and navigates at once.
+	onMount(() => void import('#lib/learner.ts').then(({ db }) => db()));
 
 	async function seen() {
 		const { db, progress } = await import('#lib/learner.ts');

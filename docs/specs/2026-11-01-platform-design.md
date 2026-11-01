@@ -146,7 +146,7 @@ No store migration: §2. `courseOf` and `progress.courseProgress(db)` read per c
 ### 5.6 SEO and answer engines
 
 - **Titles** keep their form, `<lesson>: Сквозь время`: the brand now names the platform and stays right.
-- **`Course`** moves from home to `/course/web/`; lessons' `isPartOf` names it. Home has `WebSite` and an `ItemList` of courses.
+- **`Course`** moves from home to `/course/web/`; lessons' `isPartOf` names it. Home has `WebSite` alone: an `ItemList` of courses repeated what the page's links already say and pushed the Russian catalog's HTML past a TCP slow-start window, one round trip (150 ms of LCP in Lighthouse).
 - **`llms.txt`** opens with the platform, lists every course with its address, line and state, then the web course's lessons as before. `llms-full.txt` stays the web course's text.
 - **Share images:** a card for the catalog and one per course, per edition, drawn by the existing template.
 - **The manifest, the home's title and description, the footer («Проект NoeticEcho») and Эхо's system prompt** now name the platform.
@@ -242,6 +242,12 @@ The owner, 01.11: a bolder tone is welcome, «но не скатываясь в 
   - **Used:** NoeticEcho; its public projects as real examples where they teach something (Reminisce for agent memory, noetic-harness and control-room for supervising agents); Эхо and Искин, which the web course already teaches; sudo_make_god only as the author name the owner writes under (`K3-CON-02` leaves its other readings open).
   - **Left out:** KNS (glossary: `proposed`), Noetic Self (no settled entry), Ordo Noetica, Kira, and any expansion of NSL (`K3-NSL-01` is open). A test refuses them across every course file.
   - **The private corpus, chat exports and personal material stay out:** names and public ideas may go in, quotes may not.
+
+### 7.5 How the tables of contents were written
+
+The coordinator wrote `ai` and `noetic-singularity`. Three writers wrote the other twenty-one in parallel from one brief, checking dates and attributions by web search, and a single editor then read all of them and took out what a table of contents should not carry: statistics, sample sizes, case details and anything dated 2025 or 2026. Those belong to the lessons, which will check them again on the day they are written. So what is left are mostly plain promises of what a lesson teaches, and classics.
+
+The session's web-search budget ran out during the pass, so the editor's rule was removal rather than checking. What remains from memory or from a secondary source is listed in the report of 01.11.2026, and the first thing a lesson's author does is check it. `law` is the course most exposed: its Russian and English lines teach different law under one set of ids, which is deliberate, and it is the most likely to need a rewrite before its first lesson.
 
 ## 8. A critical read
 

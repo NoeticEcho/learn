@@ -1,5 +1,7 @@
 # Content plan: all 17 parts
 
+This is the plan of the web course, «Сеть насквозь». The other courses' tables of contents are in `content/courses/`, and how they work is in `docs/specs/2026-11-01-platform-design.md` §4.
+
 One YAML file per part, as the shape in spec §3.3–3.4 needs it. Each file has:
 - the concepts the part teaches;
 - 5–8 lessons, each with «Зачем», the concepts it teaches and requires, an idea for a live diagram, a practice step on the person's project brief with its checks in plain words, and the sources and videos.

@@ -13,14 +13,13 @@
 	import type { HomeLesson } from '#lib/content/catalogue.ts';
 	import type { CourseRow } from '#lib/courses/types.ts';
 	import Seo from '#lib/seo/Seo.svelte';
-	import { courseList, website } from '#lib/seo/jsonld.ts';
+	import { website } from '#lib/seo/jsonld.ts';
 	import { at } from '#lib/seo/site.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	const lang = getLocale();
 
-	const courses = $derived(data.catalog.strands.flatMap((s) => s.courses));
 	const stateOf = (c: CourseRow) =>
 		c.state === 'open'
 			? t('catalog.state.open', { n: c.lessons, lessons: pl(c.lessons, 'lesson.forms') })
@@ -50,7 +49,7 @@
 	description={t('seo.home.description')}
 	image={data.seo.og}
 	feed
-	jsonld={[website(at.home(lang), t('seo.home.description'), lang), courseList(courses.map((c) => ({ name: c.title, url: at.course(c.id, lang) })))]}
+	jsonld={[website(at.home(lang), t('seo.home.description'), lang)]}
 />
 
 <div class="container">

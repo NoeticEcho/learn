@@ -215,3 +215,13 @@ JS 55.2 KB of 150. The LCP element is the «Зачем» lede, a text paint wait
 - **Diagrams** in `content/diagrams/` use rem and em font sizes of their own; they belong to the
   lessons' authors and were left to them.
 - **Home** (`src/routes/+page*`) and the fonts are another agent's work and were not touched.
+
+## The catalog, a course's page and Эхо everywhere (01.11.2026)
+
+The platform's spec is `docs/specs/2026-11-01-platform-design.md`. What it means for the design language:
+
+- **The catalog is an index, not a grid of cards.** Literata titles, hairlines between rows, the state of a course at the right in the small size. The web course's row is larger, because it is the only one that can be taken today. No picture but Эхо, and Эхо is an `<img>` of the approved file, so it is one cached request and no inlined SVG. Below 700 px it is not drawn: the launcher has the mark.
+- **«Скоро» on every planned lesson** repeats, as «Уроки этой части ещё пишутся» did on the map (gate 69), and is kept for the same reason: it is a status per row, as a ledger repeats a value, and it goes away lesson by lesson.
+- **Эхо's launcher** is the compact mark and the name. Below 1100 px it shares the header's row and is also in the footer: nothing is fixed, so nothing covers text on a phone, and the panel opens in flow and pushes the page down. From 1100 px it is a 44 px tab on the screen's edge, inside the container's padding (`clamp(…, 4vw, …)` is 44 px at 1100 px). The panel is non-modal, and stands on the narration player's bar when that is open, rather than behind it.
+- **No idle mascot in a corner.** The launcher is the still mark. The moving mascot is only in the panel, which a person opened; the guide's idle motion beside text being read was a distraction (the comic's rule).
+- **Measured** on the same machine, gzip at Python's default level, against the build of `9b10605`: the home's HTML 10.3 KB, the catalog 13.3 KB (English 9.8 and 12.0), so at most 3 KB more, and kept under the 14 KB of a first TCP window, which the Russian catalog crossed with an `ItemList` in its head (one round trip, 150 ms of LCP); first-route JavaScript 61.1 KB, now 58.1 KB of 150, the prologue having left the first route; a lesson's HTML 25.0 KB, now 25.5 KB, the launcher's markup and strings.

@@ -56,14 +56,13 @@ test.describe('the catalog', () => {
 		await expect(page.getByRole('heading', { level: 3 }).first()).toHaveText('The Web, End to End');
 		await expect(page.getByRole('link', { name: 'Русский', exact: true })).toHaveAttribute('hreflang', 'ru');
 	});
-	test('its head: a canonical, alternates, a card of its own, the feed, a WebSite and a list of courses', async ({ request }) => {
+	test('its head: a canonical, a card of its own, the feed and a WebSite', async ({ request }) => {
 		const html = await (await request.get('./')).text();
 		expect(html).toContain(`<link rel="canonical" href="${PUBLIC}"`);
 		expect(html).toMatch(/type="application\/atom\+xml"/);
 		expect(html).toMatch(/og\/catalog-[0-9a-f]{10}\.png/);
 		const ld = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)].map((m) => JSON.parse(m[1]));
-		expect(ld.map((d) => d['@type'])).toEqual(['WebSite', 'ItemList']);
-		expect(ld[1].itemListElement[1].url).toBe(`${PUBLIC}course/ai/`);
+		expect(ld.map((d) => d['@type'])).toEqual(['WebSite']);
 	});
 	test('a returning person sees their own state in the web course’s row', async ({ page }) => {
 		await seedOldStore(page);

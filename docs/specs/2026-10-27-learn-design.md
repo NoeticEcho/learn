@@ -1,6 +1,6 @@
 # «Сеть насквозь» (Web, end to end): design
 
-**Status:** approved in conversation by Martin, 27.10.2026. This document records it.
+**Status:** approved in conversation by Martin, 27.10.2026. This document records it. Since 01.11.2026 this is the first course of a platform: [`2026-11-01-platform-design.md`](2026-11-01-platform-design.md) says what changed, and «Сквозь время» now names the platform.
 **Repository:** `NoeticEcho/learn`, public. Served at `open.noeticecho.space/learn`.
 **Licences:** code Apache-2.0; lesson content CC BY-SA 4.0.
 
