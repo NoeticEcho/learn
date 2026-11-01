@@ -67,7 +67,8 @@ for (const [part, lessons] of lessonsByPart)
 		page.on('pageerror', (e) => errors.push(`${page.url()}: ${e.message}`));
 		for (const lesson of lessons) {
 			await page.goto(`./lesson/${part}/${lesson}/`);
-			await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Что-то сломалось');
+			// .first(): 00-start/02's diagram shows a 1991 page with an h1 of its own, once it has loaded
+			await expect(page.getByRole('heading', { level: 1 }).first()).not.toHaveText('Что-то сломалось');
 			await expect(page.locator('.theory .prose')).toBeVisible();
 		}
 		expect(errors).toEqual([]);
