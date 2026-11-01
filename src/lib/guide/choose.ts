@@ -12,7 +12,7 @@ export const ANSWERS: Answer[] = [
 	{ id: 'check', q: { ru: 'Хочу проверять, что мне говорят', en: 'I want to check what I am told' }, courses: ['verify', 'numbers', 'reasoning'] },
 	{ id: 'mind', q: { ru: 'Не хочу разучиться думать', en: 'I do not want to forget how to think' }, courses: ['thinking', 'attention', 'learning', 'noetic-singularity'] },
 	{ id: 'protect', q: { ru: 'Хочу защитить свои данные и деньги', en: 'I want to protect my data and my money' }, courses: ['privacy', 'security', 'money'] },
-	{ id: 'law-health', q: { ru: 'Нужно разобраться с правом или здоровьем', en: 'I need to make sense of the law or my health' }, courses: ['law', 'health'] },
+	{ id: 'health', q: { ru: 'Нужно разобраться со здоровьем', en: 'I need to make sense of my health' }, courses: ['health'] },
 	{ id: 'children', q: { ru: 'У меня дети или ученики', en: 'I have children or students' }, courses: ['children', 'dialogue'] },
 	{ id: 'anxious', q: { ru: 'Мне тревожно от того, что происходит', en: 'What is happening makes me anxious' }, courses: ['resilience', 'meaning', 'dialogue'] },
 	{ id: 'make', q: { ru: 'Хочу делать своё и отвечать за это', en: 'I want to make things of my own and answer for them' }, courses: ['imagination', 'responsibility'] },

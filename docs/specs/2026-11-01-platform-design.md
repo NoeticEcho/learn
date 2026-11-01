@@ -11,7 +11,7 @@ The textbook becomes a learning platform at the same address, on the same princi
 - the catalog at `/learn/` and `/learn/en/`;
 - a page for every course, with its table of contents;
 - the web course moved under a name of its own, and its home screen moved off the platform's home;
-- 23 courses in all, each with a written table of contents in both languages, no lesson bodies;
+- 22 courses in all, each with a written table of contents in both languages, no lesson bodies. A 23rd, on law, was published and withdrawn the same day, by the owner: «законодательство стран очень быстро меняется... дать устаревшую информацию хуже, чем не дать такую»;
 - Эхо on every page;
 - progress read per course;
 - an Atom feed of what is new;
@@ -205,7 +205,7 @@ The third is the owner's addition of 01.11, in his words: «те навыки, �
 **Keep what is yours**
 - `privacy`: where your data goes and what you can do about it.
 - `security`: defending against attackers, now with cloned voices.
-- `law`: copyright, liability and rules around AI, by jurisdiction; general information, not advice.
+- ~~`law`~~: withdrawn by the owner on 2026-11-01. Law changes faster than we can keep it current, and stale law is worse than none.
 - `money`: personal finance and its new scams; general knowledge, not investment advice.
 - `health`: reading health claims and using a chatbot about symptoms sensibly; not medical advice.
 - `children`: for parents and teachers.
