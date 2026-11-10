@@ -21,14 +21,14 @@ const ID = 'ai/symbols/turing-question';
 const entries = loadCourseLessons();
 
 describe('the lessons as written', () => {
-	it('are the AI course’s first three, in the course’s order, each in both editions', () => {
-		expect(entries.map((e) => e.id)).toEqual(['ai/symbols/turing-question', 'ai/symbols/dartmouth', 'ai/symbols/logic-theorist']);
+	it('are the AI course’s first part, six lessons, in the course’s order, each in both editions', () => {
+		expect(entries.map((e) => e.id)).toEqual(['ai/symbols/turing-question', 'ai/symbols/dartmouth', 'ai/symbols/logic-theorist', 'ai/symbols/blocks-world', 'ai/symbols/expert-systems', 'ai/symbols/winters']);
 		for (const e of entries) {
 			expect(e).toMatchObject({ course: 'ai', part: 'symbols', partNumber: 1, published: '2026-11-10' });
 			expect(courseOf(e.id)).toBe('ai');
 			for (const lang of ['ru', 'en'] as const) expect(e.meta[lang].id).toBe(e.id);
 		}
-		expect(entries.map((e) => e.order)).toEqual([1, 2, 3]);
+		expect(entries.map((e) => e.order)).toEqual([1, 2, 3, 4, 5, 6]);
 	});
 	it('live where the id says, outside the web course’s globs', () => {
 		expect(lessonFile(ID, 'ru')).toBe('content/courses/ai/ru/symbols/turing-question.svx');
@@ -109,14 +109,15 @@ describe('a lesson’s place and its next lesson', () => {
 		const v = courseLessonView(ID, 'ru')!;
 		expect(v.nav).toMatchObject({ id: 'ai', title: 'ИИ: от символов до агентов', place: 'Часть 1, урок 1', part: { id: 'symbols', number: 1 } });
 		expect(v.nav.next).toEqual({ id: 'ai/symbols/dartmouth', title: 'Дартмут, 1956: у науки появляется имя', open: true });
-		expect(courseLessonView('ai/symbols/logic-theorist', 'en')!.nav.next).toMatchObject({ id: 'ai/symbols/blocks-world', open: false });
-		expect(courseLessonView('ai/symbols/blocks-world', 'ru')).toBeUndefined();
+		// the part's last lesson leads into the next part, whose first lesson is still planned
+		expect(courseLessonView('ai/symbols/winters', 'en')!.nav.next).toMatchObject({ id: 'ai/chatbots/eliza', open: false });
+		expect(courseLessonView('ai/chatbots/eliza', 'ru')).toBeUndefined();
 	});
 	it('a course with open lessons has their minutes as its workload, and says how many are open', () => {
 		expect(openMinutes('ai')).toBe(entries.reduce((n, e) => n + e.meta.ru.minutes, 0));
 		const ai = courseView('ai', 'en')!;
-		expect(ai).toMatchObject({ kind: 'planned', open: 3 });
-		expect(catalogView('ru').strands.flatMap((s) => s.courses).find((c) => c.id === 'ai')).toMatchObject({ open: 3, state: 'partly' });
+		expect(ai).toMatchObject({ kind: 'planned', open: 6 });
+		expect(catalogView('ru').strands.flatMap((s) => s.courses).find((c) => c.id === 'ai')).toMatchObject({ open: 6, state: 'partly' });
 	});
 });
 
@@ -163,7 +164,7 @@ describe('Эхо on a new course’s pages', () => {
 	it('a course with open lessons is not called a table of contents only, and the catalog names it', () => {
 		const ru = dock('/[[lang=lang]]/course/[course]', 200, { course: courseView('ai', 'ru') }, 'ru');
 		expect(ru.line).not.toMatch(/только оглавление/);
-		expect(ru.line).toContain('Открыто 3 из');
+		expect(ru.line).toContain('Открыто 6 из');
 		expect(ru.links[0].label).toBe('Может ли машина мыслить');
 		expect(dock('/[[lang=lang]]', 200, { catalog: catalogView('en') }, 'en').line).toContain('Lessons are already coming out in “AI: from symbols to agents”');
 		// a course with nothing open keeps its line

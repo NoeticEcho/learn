@@ -132,9 +132,9 @@ describe('the catalog as written', () => {
 	it('every course that tells a history ends looking ahead', () => {
 		for (const c of planned) if (c.history) expect(c.parts.at(-1)!.lessons.at(-1)!.ahead, c.id).toBe(true);
 	});
-	it('the open lessons are the AI course’s first three, published on 10 November 2026; every other lesson is planned', () => {
+	it('the open lessons are the AI course’s first part, published on 10 November 2026; every other lesson is planned', () => {
 		const open = planned.flatMap((c) => c.parts.flatMap((p) => p.lessons.filter((l) => l.status === 'open').map((l) => `${c.id}/${p.id}/${l.id}@${l.published}`)));
-		expect(open).toEqual(['ai/symbols/turing-question@2026-11-10', 'ai/symbols/dartmouth@2026-11-10', 'ai/symbols/logic-theorist@2026-11-10']);
+		expect(open).toEqual(['turing-question', 'dartmouth', 'logic-theorist', 'blocks-world', 'expert-systems', 'winters'].map((l) => `ai/symbols/${l}@2026-11-10`));
 	});
 	it('the AI course names what the owner listed, and the Noetic Singularity course says what it is', () => {
 		const ai = JSON.stringify(parse(readFileSync('content/courses/ai.yaml', 'utf8')));

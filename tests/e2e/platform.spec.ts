@@ -21,7 +21,7 @@ test.describe('published addresses', () => {
 		expect((await request.get(card)).status()).toBe(200);
 	});
 	test('no page exists for a planned lesson: below /course/<id>/ there are only the prologue and the open lessons', async ({ request }) => {
-		const OPEN = ['ai/symbols/turing-question', 'ai/symbols/dartmouth', 'ai/symbols/logic-theorist'];
+		const OPEN = ['ai/symbols/turing-question', 'ai/symbols/dartmouth', 'ai/symbols/logic-theorist', 'ai/symbols/blocks-world', 'ai/symbols/expert-systems', 'ai/symbols/winters'];
 		for (const root of ['build/course', 'build/en/course']) {
 			// every page below a course's own: a directory with an index.html
 			const pages = readdirSync(root, { recursive: true, encoding: 'utf8' })
@@ -194,15 +194,15 @@ test.describe('a course’s page', () => {
 		await page.goto('./course/ai/');
 		await expect(page.getByRole('heading', { level: 1 })).toContainText('ИИ');
 		await expect(page.getByText('Attention Is All You Need').first()).toBeVisible();
-		await expect(page.getByText(/открыто 3 из \d+/)).toBeVisible();
+		await expect(page.getByText(/открыто 6 из \d+/)).toBeVisible();
 		const links = page.locator('main ol a');
-		await expect(links).toHaveCount(3);
+		await expect(links).toHaveCount(6);
 		await expect(links.first()).toHaveText('Может ли машина мыслить');
 		await expect(links.first()).toHaveAttribute('href', /course\/ai\/symbols\/turing-question\/$/);
 		const html = await (await request.get('course/ai/')).text();
 		const ld = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)].map((m) => JSON.parse(m[1]));
 		expect(ld.map((d) => d['@type'])).toEqual(['Course', 'BreadcrumbList']);
-		expect(ld[0]).toMatchObject({ '@id': `${PUBLIC}course/ai/#course`, isAccessibleForFree: true, hasCourseInstance: { courseWorkload: 'PT1H5M' } });
+		expect(ld[0]).toMatchObject({ '@id': `${PUBLIC}course/ai/#course`, isAccessibleForFree: true, hasCourseInstance: { courseWorkload: 'PT2H15M' } });
 	});
 	test('the web course has a Course, its lessons as links, and the old card', async ({ page, request }) => {
 		await page.goto('./course/web/');

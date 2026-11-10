@@ -6,7 +6,7 @@ Open courses for an age when a machine can do your thinking for you: how it work
 
 ## The catalog
 
-Twenty-two courses in four strands. One is open in full. The course on AI has its first three lessons, published on 10 November 2026; the others have written tables of contents, and their lessons will appear one at a time. No dates are promised. To hear about new lessons without giving an address, add the [Atom feed](https://open.noeticecho.space/learn/en/feed.xml) to a feed reader.
+Twenty-two courses in four strands. One is open in full. The course on AI has its first part, six lessons, published on 10 November 2026; the others have written tables of contents, and their lessons will appear one at a time. No dates are promised. To hear about new lessons without giving an address, add the [Atom feed](https://open.noeticecho.space/learn/en/feed.xml) to a feed reader.
 
 - **Understand the machine and work with it:** the web, AI from symbols to agents, working with a machine, your own tools, work.
 - **The Noetic Singularity:** NoeticEcho's stated aim, that people must develop their minds so as not to be left behind by superintelligence, as a course that says what is supported, what is a bet and what can be said against it; then attention, memory and writing, learning, reasoning, steadiness, meaning, dialogue, responsibility, imagination.
