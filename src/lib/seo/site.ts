@@ -53,7 +53,8 @@ export const absolute = (path: string) => new URL(path, ORIGIN).href;
 export const at = {
 	home: (l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/`),
 	map: (l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/map/`),
-	lesson: (id: string, l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/lesson/${id}/`),
+	/** A lesson: `/lesson/<part>/<lesson>/` in the web course, `/course/<course>/<part>/<lesson>/` in any other. */
+	lesson: (id: string, l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/${id.split('/').length === 3 ? 'course' : 'lesson'}/${id}/`),
 	course: (id: string, l: Locale = 'ru') => absolute(`${BASE}${prefix(l)}/course/${id}/`),
 	/** A file at the site's root (`og/…png`, `sitemap.xml`), shared by both editions. */
 	file: (path: string) => absolute(`${BASE}/${path}`),

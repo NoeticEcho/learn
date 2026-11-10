@@ -1,6 +1,7 @@
 // npm run links:check: every source and video URL in the content answers. A YouTube video is
 // alive when its oEmbed answers 200 (the watch page answers 200 even for a deleted video).
-// Both editions are checked: the English lessons cite sources of their own.
+// Both editions are checked: the English lessons cite sources of their own. So are the other
+// courses' open lessons, in both editions.
 // Results are cached in .cache/links.json for 24 hours. Non-zero on any dead link.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { withApp } from './vite-load.ts';
@@ -40,9 +41,11 @@ async function probe(url: string): Promise<{ ok: boolean; status: number }> {
 
 const lessons = await withApp(async (load) => {
 	const mod = (await load('/src/lib/content/load.ts')) as { loadContent: () => { lessons: Lesson[] }; loadEdition: (lang: 'en') => { lessons: Lesson[] } };
+	const courses = (await load('/src/lib/courses/lessons.ts')) as { loadCourseLessons: () => { id: string; meta: Record<'ru' | 'en', Lesson> }[] };
 	return [
 		...mod.loadContent().lessons.map((l) => ({ ...l, id: l.id })),
-		...mod.loadEdition('en').lessons.map((l) => ({ ...l, id: `en/${l.id}` }))
+		...mod.loadEdition('en').lessons.map((l) => ({ ...l, id: `en/${l.id}` })),
+		...courses.loadCourseLessons().flatMap((e) => [{ ...e.meta.ru, id: e.id }, { ...e.meta.en, id: `en/${e.id}` }])
 	];
 });
 

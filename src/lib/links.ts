@@ -17,8 +17,18 @@ export const map = (l: Locale = getLocale()) => slash(resolve('/[[lang=lang]]/ma
 export const review = (l: Locale = getLocale()) => slash(resolve('/[[lang=lang]]/review', lang(l)));
 export const gallery = (l: Locale = getLocale()) => slash(resolve('/[[lang=lang]]/gallery', lang(l)));
 export const settings = (l: Locale = getLocale()) => slash(resolve('/[[lang=lang]]/settings', lang(l)));
+/**
+ * A lesson's page. The web course's ids have two segments and keep `/lesson/<part>/<lesson>/`; any
+ * other course's have three and live below its page, `/course/<course>/<part>/<lesson>/` (spec
+ * 2026-11-01 §2, `courseOf`).
+ */
 export const lesson = (id: string, l: Locale = getLocale()) => {
-	const [part, lesson] = id.split('/');
+	const segments = id.split('/');
+	if (segments.length === 3) {
+		const [course, part, lesson] = segments;
+		return slash(resolve('/[[lang=lang]]/course/[course]/[part]/[lesson]', { ...lang(l), course, part, lesson }));
+	}
+	const [part, lesson] = segments;
 	return slash(resolve('/[[lang=lang]]/lesson/[part]/[lesson]', { ...lang(l), part, lesson }));
 };
 /** A course's page. The web course's lessons, map and gallery keep the addresses above. */
@@ -39,6 +49,9 @@ export function counterpart(inner: string, to: Locale): string {
 	const m = inner.match(/^\/lesson\/([^/]+)\/([^/]+)\/?$/);
 	if (m) return lesson(`${m[1]}/${m[2]}`, to);
 	if (/^\/course\/web\/prologue\/?$/.test(inner)) return prologue(to);
+	// a new course's lesson exists in both editions (courses/lessons.ts holds it to that)
+	const cl = inner.match(/^\/course\/([^/]+)\/([^/]+)\/([^/]+)\/?$/);
+	if (cl) return lesson(`${cl[1]}/${cl[2]}/${cl[3]}`, to);
 	const c = inner.match(/^\/course\/([^/]+)\/?$/);
 	if (c) return course(c[1], to);
 	const screen = inner.replace(/^\/+|\/+$/g, '');

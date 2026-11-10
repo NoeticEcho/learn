@@ -10,7 +10,7 @@
  * `description`, `provider`; `itemListElement` with `position`, `name`, `item`);
  * tests/unit/seo.test.ts holds every page to it.
  */
-import type { LessonMeta, Part, Source } from '#lib/content/schema.ts';
+import type { LessonBody, Part, Source } from '#lib/content/schema.ts';
 import type { Locale } from '#lib/i18n/index.ts';
 import { LICENCE_URL, PUBLISHER, SITE_NAMES } from './site.ts';
 
@@ -55,13 +55,14 @@ export function website(homeUrl: string, description: string, lang: Locale = 'ru
 const citation = (s: Source) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, inLanguage: s.lang });
 
 export function learningResource(o: {
-	lesson: LessonMeta;
+	lesson: LessonBody;
 	url: string;
 	homeUrl: string;
 	/** The course's name; its page is `homeUrl`. */
 	courseName: string;
 	image?: string;
-	teaches: string[];
+	/** The concepts it teaches: the web course's graph names them; a new course's lesson has none yet. */
+	teaches?: string[];
 	requires?: string[];
 	dateModified?: string;
 	lang?: Locale;
@@ -81,7 +82,7 @@ export function learningResource(o: {
 		learningResourceType: 'lesson',
 		educationalLevel: 'beginner',
 		isPartOf: { '@type': 'Course', '@id': courseId(o.homeUrl), name: o.courseName, url: o.homeUrl },
-		teaches: o.teaches,
+		...(o.teaches?.length ? { teaches: o.teaches } : {}),
 		...(o.requires?.length ? { competencyRequired: o.requires } : {}),
 		timeRequired: duration(l.minutes),
 		isAccessibleForFree: true,

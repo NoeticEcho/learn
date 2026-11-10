@@ -267,3 +267,44 @@ export const CurriculumWords = z
 	})
 	.strict();
 export type CurriculumWords = z.infer<typeof CurriculumWords>;
+
+/**
+ * What a lesson page shows, whichever course it is in: the web course's lesson without the fields
+ * only its map and its graph read (part, order, concepts), and a new course's lesson as it is.
+ */
+export type LessonBody = Omit<LessonMeta, 'part' | 'order' | 'teaches' | 'requires'>;
+
+/**
+ * A lesson of a course other than the web one (docs/specs/2026-11-01-platform-design.md §5.4),
+ * at `content/courses/<course>/<lang>/<part>/<lesson>.svx`. Its id has three segments
+ * (`ai/symbols/turing-question`, `courseOf` in courses/types.ts), and its place in the course is
+ * the course file's, so it carries no part number, order or concept graph. It has no practice
+ * step: the sandbox and the brief are the web course's. Otherwise it is the web lesson's anatomy,
+ * held to the same rules: a definition that stands alone, four to eight questions, three to six
+ * cards, two sources at least, a guide, and a comic if it has one. Strict, so a key a web lesson
+ * would carry (`practice`, `teaches`) is refused rather than silently dropped.
+ */
+const courseLessonMeta = (lang: 'ru' | 'en') =>
+	z
+		.object({
+			id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*\/[a-z0-9]+(-[a-z0-9]+)*\/[a-z0-9]+(-[a-z0-9]+)*$/, 'id is "<course>/<part>/<lesson>"'),
+			title: text,
+			definition: definitionFor(lang),
+			summary: text,
+			minutes: z.number().int().min(1).max(120),
+			quiz: z.array(Question).min(4).max(8),
+			cards: z.array(Card).min(3).max(6),
+			sources: z.array(Source).min(2),
+			videos: z.array(Source.extend({ kind: z.literal('video') })),
+			guide: GuideLines.refine((g) => Object.keys(g.mistakes).length === 0, 'a lesson without practice has no check for a mistake to name'),
+			comic: Comic.optional(),
+			say: z.record(z.string().min(1), text).optional()
+		})
+		.strict()
+		.superRefine((l, ctx) => {
+			const ids = l.cards.map((c) => c.id);
+			if (new Set(ids).size !== ids.length) ctx.addIssue({ code: 'custom', path: ['cards'], message: 'card ids repeat' });
+		});
+export const CourseLessonMeta = courseLessonMeta('ru');
+export const CourseLessonMetaEn = courseLessonMeta('en');
+export type CourseLessonMeta = z.infer<typeof CourseLessonMeta>;

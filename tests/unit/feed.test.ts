@@ -40,15 +40,23 @@ describe('entries', () => {
 	const { courses, news } = loadCourses();
 	it('an open lesson makes an entry with a stable id, and a planned one does not', () => {
 		const ai = structuredClone(courses.find((c) => c.id === 'ai')) as PlannedCourse;
+		// the course as it would be with nothing open
+		for (const p of ai.parts) for (const x of p.lessons) Object.assign(x, { status: 'planned', published: undefined });
 		const l = ai.parts[0].lessons[0];
-		const before = feedEntries('ru', { courses, news }).length;
 		expect(feedEntries('ru', { courses: [ai], news: [] })).toEqual([]);
 		l.status = 'open';
 		l.published = '2026-12-01';
 		const [e] = feedEntries('ru', { courses: [ai], news: [] });
 		expect(e).toMatchObject({ date: '2026-12-01', category: 'ai', id: `tag:open.noeticecho.space,2026-12-01:/learn/lesson/ai/${ai.parts[0].id}/${l.id}` });
 		expect(e.url).toBe(`https://open.noeticecho.space/learn/course/ai/${ai.parts[0].id}/${l.id}/`);
-		expect(before).toBe(news.length);
+	});
+	it('the catalog as written: one entry per open lesson, besides the news', () => {
+		const open = courses.flatMap((c) => ('parts' in c ? c.parts.flatMap((p) => p.lessons.filter((l) => l.status === 'open').map((l) => ({ c, p, l }))) : []));
+		expect(open.length).toBeGreaterThan(0);
+		const entries = feedEntries('en', { courses, news });
+		expect(entries.length).toBe(news.length + open.length);
+		for (const { c, p, l } of open)
+			expect(entries.find((e) => e.url === `https://open.noeticecho.space/learn/en/course/${c.id}/${p.id}/${l.id}/`), l.id).toMatchObject({ date: l.published, title: `${c.title.en}: ${l.title.en}` });
 	});
 	it('escapes what XML would choke on', () => {
 		const n = { ...news[0], title: { ru: 'A & B <c>', en: 'A & B <c>' } };
