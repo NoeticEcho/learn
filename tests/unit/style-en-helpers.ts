@@ -24,7 +24,7 @@ for (const n of ['Bing', 'Facebook', 'Instagram', 'Reddit', 'Mailchimp', 'Klaviy
 for (const n of ['Core', 'Vitals']) NAMES.add(n);
 
 // Added by the AI course (content/courses/ai/en/): the programs and people a heading names.
-for (const n of ['Logic', 'Theorist', 'Turing', 'Dartmouth']) NAMES.add(n);
+for (const n of ['Logic', 'Theorist', 'Turing', 'Dartmouth', 'Lighthill']) NAMES.add(n);
 
 /** The words of a heading that break sentence case. */
 export function notSentenceCase(heading: string): string[] {

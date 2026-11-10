@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-const routes = ['./', './course/web/', './course/ai/', './course/ai/symbols/turing-question/', './course/web/prologue/', './map/', './lesson/02-html/01-first-page/', './lesson/00-start/01-how-to-learn/', './lesson/00-start/04-brief/', './review/', './gallery/', './settings/'];
+const routes = ['./', './course/web/', './course/ai/', './course/ai/symbols/turing-question/', './course/ai/symbols/blocks-world/', './course/ai/symbols/expert-systems/', './course/web/prologue/', './map/', './lesson/02-html/01-first-page/', './lesson/00-start/01-how-to-learn/', './lesson/00-start/04-brief/', './review/', './gallery/', './settings/'];
 // The English edition: its screens and two of its lessons.
-routes.push('./en/', './en/course/web/', './en/course/ai/', './en/course/ai/symbols/logic-theorist/', './en/map/', './en/lesson/00-start/01-how-to-learn/', './en/lesson/02-html/01-first-page/', './en/review/', './en/gallery/', './en/settings/');
+routes.push('./en/', './en/course/web/', './en/course/ai/', './en/course/ai/symbols/logic-theorist/', './en/course/ai/symbols/winters/', './en/map/', './en/lesson/00-start/01-how-to-learn/', './en/lesson/02-html/01-first-page/', './en/review/', './en/gallery/', './en/settings/');
 
 for (const scheme of ['dark', 'light'] as const)
 	for (const route of routes)
