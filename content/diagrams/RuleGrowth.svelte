@@ -16,7 +16,7 @@
 		{ system: 'MYCIN', year: '1984', rules: 450, source: { ru: 'книга Buchanan и Shortliffe 1984 года, глава 36', en: 'Buchanan and Shortliffe’s 1984 book, chapter 36' } },
 		{ system: 'XCON', year: '1979', rules: 750, source: { ru: 'слова Макдермотта о сентябре 1979 года, по обзору Expert Systems Strategies 1987 года', en: 'McDermott on September 1979, quoted in Expert Systems Strategies, 1987' } },
 		{ system: 'XCON', year: '1987', rules: 6200, source: { ru: 'обзор Expert Systems Strategies 1987 года', en: 'Expert Systems Strategies, 1987' } },
-		{ system: 'XCON', year: '1989', rules: 10129, exact: true, source: { ru: 'статья сотрудников DEC 1989 года (Barker и соавторы), по статье Википедии о XCON', en: 'a 1989 paper by DEC staff (Barker et al.), as cited in Wikipedia’s article on XCON' } }
+		{ system: 'XCON', year: '1989', rules: 10129, exact: true, source: { ru: 'V. Barker и соавторы, Expert systems for configuration at Digital: XCON and beyond, Communications of the ACM 32(3), 1989', en: 'V. Barker et al., Expert systems for configuration at Digital: XCON and beyond, Communications of the ACM 32(3), 1989' } }
 	];
 	let picked = $state(4);
 

@@ -25,7 +25,7 @@
 			asks: {
 				stack: 'Поставь красный кубик на синий',
 				onBlue: 'Что лежит на синем кубике?',
-				why: 'Зачем ты взял красный кубик?',
+				why: 'Зачем ты взяла красный кубик?',
 				pyramid: 'Возьми пирамиду',
 				weight: 'Сколько весит красный кубик?',
 				buy: 'Купи ещё кубиков'
@@ -33,7 +33,7 @@
 			say: {
 				stack: (s: boolean) => (s ? 'Он уже там.' : 'Хорошо. Красный кубик стоит на синем.'),
 				onBlue: (s: boolean) => (s ? 'Красный кубик.' : 'Ничего.'),
-				why: (s: boolean) => (s ? 'Чтобы поставить его на синий, как вы просили.' : 'Я его не брал.'),
+				why: (s: boolean) => (s ? 'Чтобы поставить его на синий, как вы просили.' : 'Я его не брала.'),
 				pyramid: (): string => 'Пирамид две, зелёная и жёлтая. Какую?',
 				weight: (): string => 'Я не знаю слова «весит».',
 				buy: (): string => 'Я не знаю слова «купи».'
@@ -95,7 +95,7 @@
 		{/each}
 		<button type="button" onclick={reset}>{W.reset}</button>
 	</div>
-	<svg viewBox="0 0 480 190" role="img" aria-label={W.chart(stacked)} width="100%">
+	<svg viewBox="0 0 480 196" role="img" aria-label={W.chart(stacked)} width="100%">
 		<line x1="10" y1="170" x2="470" y2="170" stroke="var(--border-rule)" stroke-width="2" />
 		<rect x="200" y="110" width="60" height="60" fill="none" stroke="var(--accent-measure)" stroke-width="2" />
 		<text x="230" y="146" text-anchor="middle" font-size="14" fill="var(--text-secondary)">{pick({ ru: 'синий', en: 'blue' })}</text>
@@ -103,6 +103,8 @@
 		<text x={red.x + 30} y={red.y + 36} text-anchor="middle" font-size="14" fill="var(--text-primary)">{pick({ ru: 'красный', en: 'red' })}</text>
 		<polygon points="290,170 320,115 350,170" fill="none" stroke="var(--text-secondary)" stroke-width="2" />
 		<polygon points="355,170 380,125 405,170" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-dasharray="4 3" />
+		<text x="320" y="186" text-anchor="middle" font-size="13" fill="var(--text-secondary)">{pick({ ru: 'зелёная', en: 'green' })}</text>
+		<text x="380" y="186" text-anchor="middle" font-size="13" fill="var(--text-secondary)">{pick({ ru: 'жёлтая', en: 'yellow' })}</text>
 		<rect x="415" y="130" width="50" height="40" fill="none" stroke="var(--border-rule)" stroke-width="2" />
 	</svg>
 	<p class="dg-out" aria-live="polite">
