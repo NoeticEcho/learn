@@ -141,6 +141,34 @@ No store migration: §2. `courseOf` and `progress.courseProgress(db)` read per c
 3. `validateEdition`'s mirror checks over it;
 4. narration's manifests keyed by the three-segment id, which they already accept as a string.
 
+**As built, 10.11.2026,** with the AI course's first three lessons (`ai/symbols/turing-question`, `dartmouth`, `logic-theorist`):
+1. **Files.** `content/courses/<course>/<lang>/<part>/<lesson>.svx`. `lessonFile(id, lang)` (`courses/types.ts`) maps either kind of id to its file, and the route, `lastmod`, narration and the style tests all go through it.
+2. **The lesson's metadata is its own schema**, `CourseLessonMeta` (`content/schema.ts`), and it is strict. It has the web lesson's anatomy: a definition, 4–8 questions, 3–6 cards, sources, a guide and a comic. It has no `part`, `order`, `teaches`, `requires` or `practice`. Its place is the course file's, and the sandbox and the brief are the web course's. **Decided:** there is no concept graph per course yet. A history course reads in order, so «Дальше» names the next lesson in the course file, and says «скоро» while that lesson is planned. A graph can come when a course needs one. `LearningResource` then has no `teaches`.
+3. **The route** is `course/[course]/[part]/[lesson]`, in both editions, and it reuses `LessonView`. A new `course` prop gives the path (the course, then the part as a link to `#part-<id>` on the course's page), the place («Часть 1, урок 2») and «Дальше». No home index is fetched there. `links.lesson` and `at.lesson` take either kind of id, and the language switch maps the three-segment path.
+4. **Mirror checks** (`courses/lessons.ts`, run by `content:check`, the build and the tests). They refuse:
+   - an open lesson without a body in both editions;
+   - a body for a planned lesson (no thin URL, and no unchecked draft on main);
+   - a title that differs from the course file's in that language;
+   - an id that is not the path;
+   - editions with different card ids, a different number of `##` sections, or different diagrams;
+   - an English edition with no English source;
+   - a card id another lesson of any course already has, because review keys a card by its id alone.
+
+   So an `open` lesson without bodies still fails loudly, now with a message rather than the prerender's 404.
+5. **Narration.** `script()` finds a three-segment lesson's file, and `match()` reads the manifest by that id, so rendered audio needs only manifest entries. Until then `narration` is null and the page offers no «Слушать». `npm run narration` still lists the web course only. Rendering a new course's lessons needs it to take them: **follow-up**.
+6. **What a course with open lessons gets:**
+   - links on its page, marked «пройден» once done in this browser;
+   - «Уроки выходят по одному: открыто N из M» in place of «только оглавление»;
+   - a `Course` JSON-LD, whose workload is its open lessons' minutes (§2);
+   - its lessons in the sitemap with `hreflang`, and the course page dated by its newest lesson;
+   - feed entries (already built);
+   - an `llms.txt` section per course with each lesson's definition;
+   - an OG card per lesson and edition (`lesson-ai-symbols-…`);
+   - Эхо's lines: a lesson names its course and part, the course says how many lessons are open, and the catalog names a course whose lessons have started.
+
+   The worker already treated `course/<id>/…` as lessons, cached when opened and by «Скачать курс целиком». The AI course's card keeps its text, so its file name stays the same.
+7. **Not changed:** the web course's URLs, files, card and behavior; `llms-full.txt`, which stays the web course's text; `tests/fixtures/published-urls.txt`, which stays the list from 01.11.
+
 ### 5.5 The feed
 
 `/learn/feed.xml` and `/learn/en/feed.xml`, Atom 1.0, built at prerender from `news.yaml` and every `open` lesson with its `published`. Stable `tag:` ids, so an entry never shows as new twice. `<link rel="alternate">` on the catalog and course pages, and a visible link with a sentence saying a feed reader asks this file and tells nobody who you are. It starts with the entries that are true today: the platform, and the web course's two editions.

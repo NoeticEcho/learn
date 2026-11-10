@@ -5,11 +5,12 @@
 import { execFileSync } from 'node:child_process';
 import { statSync } from 'node:fs';
 import { loadContent, loadEdition } from '#lib/content/load.ts';
-import type { LessonMeta, Part } from '#lib/content/schema.ts';
+import type { CourseLessonMeta, LessonMeta, Part } from '#lib/content/schema.ts';
 import '#lib/i18n/all.server.ts';
 import { pl, t, type Locale } from '#lib/i18n/index.ts';
 import { loadCourses } from '#lib/courses/load.ts';
-import { counts } from '#lib/courses/view.server.ts';
+import { counts, courseLessonView, openCourseLessons } from '#lib/courses/view.server.ts';
+import { lessonFile, type CourseNav } from '#lib/courses/types.ts';
 import { isPlanned, type Course } from '#lib/courses/schema.ts';
 import { ogFile, type Mood, type OgCard } from './og.server.ts';
 
@@ -37,6 +38,28 @@ export function lessonCard(l: LessonMeta, part: Part, lang: Locale = 'ru'): OgCa
 			lang === 'ru'
 				? `«${l.title}», урок ${l.order} части ${part.number} «${part.title}» курса «${webTitle('ru')}». ${ECHO.ru}.`
 				: `“${l.title}”, lesson ${l.order} of part ${part.number}, “${part.title}”, of the course “${webTitle('en')}”. ${ECHO.en}.`,
+		...edition(lang)
+	};
+}
+
+/**
+ * A card for a lesson of a course other than the web one: the course and the part above the title,
+ * the lesson's place and minutes under it. No era: Эхо's ring of eras is the web course's.
+ */
+export function courseLessonCard(l: CourseLessonMeta, nav: CourseNav, lang: Locale = 'ru'): OgCard {
+	const minutes = `${l.minutes} ${pl(l.minutes, 'minute.forms', lang)}`;
+	const part = `${t('course.part', { n: nav.part.number }, lang)}. ${nav.part.title}`;
+	return {
+		stem: stem(`lesson-${l.id.replaceAll('/', '-')}`, lang),
+		kicker: `${nav.title} · ${part}`,
+		title: l.title,
+		meta: `${nav.place}, ${minutes}`,
+		era: null,
+		mood: (l.comic?.panels[0]?.mood as Mood | undefined) ?? 'explain',
+		alt:
+			lang === 'ru'
+				? `«${l.title}», урок курса «${nav.title}», ${nav.place.toLowerCase()}. ${ECHO.ru}.`
+				: `“${l.title}”, a lesson of the course “${nav.title}”, ${nav.place.toLowerCase()}. ${ECHO.en}.`,
 		...edition(lang)
 	};
 }
@@ -113,6 +136,10 @@ export function cards(): Map<string, OgCard> {
 	for (const lang of ['ru', 'en'] as const) {
 		const { lessons, curriculum } = loadEdition(lang);
 		all.push(catalogCard(lang), mapCard(lang), ...loadCourses().courses.map((c) => courseCard(c, lang)), ...lessons.map((l) => lessonCard(l, curriculum.parts.find((p) => p.number === l.part)!, lang)));
+		for (const { id } of openCourseLessons()) {
+			const v = courseLessonView(id, lang)!;
+			all.push(courseLessonCard(v.lesson, v.nav, lang));
+		}
 	}
 	return new Map(all.map((c) => [ogFile(c), c]));
 }
@@ -120,6 +147,17 @@ export function cards(): Map<string, OgCard> {
 /** What a page's head needs of its card: the file's path under the base, and its alt text. */
 export const og = (card: OgCard) => ({ file: `og/${ogFile(card)}`, alt: card.alt });
 export type Og = ReturnType<typeof og>;
+
+/**
+ * When a course's page last changed: its own file, or one of its open lessons, whichever is newer.
+ * The web course's page is dated by its lessons elsewhere (courseLastmod).
+ */
+export function coursePageLastmod(id: string): string {
+	const lessons = openCourseLessons()
+		.filter((e) => e.course === id)
+		.flatMap((e) => [lastmod(e.id, 'ru'), lastmod(e.id, 'en')]);
+	return [courseFileLastmod(id), ...lessons].sort().at(-1)!;
+}
 
 /** When a course's own file last changed, from git, else its modification time. */
 export function courseFileLastmod(id: string): string {
@@ -145,7 +183,7 @@ export function lastmod(lessonId: string, lang: Locale = 'ru'): string {
 	if (!dates) {
 		dates = new Map();
 		try {
-			const log = execFileSync('git', ['log', '--format=%x00%cI', '--name-only', '--', 'content/ru', 'content/en'], { encoding: 'utf8', maxBuffer: 64 << 20 });
+			const log = execFileSync('git', ['log', '--format=%x00%cI', '--name-only', '--', 'content/ru', 'content/en', 'content/courses'], { encoding: 'utf8', maxBuffer: 64 << 20 });
 			let date = '';
 			for (const line of log.split('\n')) {
 				if (line.startsWith('\0')) date = line.slice(1);
@@ -155,7 +193,7 @@ export function lastmod(lessonId: string, lang: Locale = 'ru'): string {
 			// not a git checkout: modification times below
 		}
 	}
-	const file = `content/${lang}/${lessonId}.svx`;
+	const file = lessonFile(lessonId, lang);
 	return (dates.get(file) ?? statSync(file).mtime.toISOString()).slice(0, 10);
 }
 

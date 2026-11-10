@@ -23,6 +23,9 @@ for (const n of ['Bing', 'Facebook', 'Instagram', 'Reddit', 'Mailchimp', 'Klaviy
 // Added by part 15 (quality and law): the names a heading carries.
 for (const n of ['Core', 'Vitals']) NAMES.add(n);
 
+// Added by the AI course (content/courses/ai/en/): the programs and people a heading names.
+for (const n of ['Logic', 'Theorist', 'Turing', 'Dartmouth']) NAMES.add(n);
+
 /** The words of a heading that break sentence case. */
 export function notSentenceCase(heading: string): string[] {
 	return heading

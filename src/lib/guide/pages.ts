@@ -8,7 +8,7 @@
  */
 import { pick, type Locale } from '#lib/i18n/index.ts';
 import type { Mood } from './script.ts';
-import type { CatalogView, CourseView } from '#lib/courses/types.ts';
+import type { CatalogView, CourseNav, CourseView } from '#lib/courses/types.ts';
 import * as links from '#lib/links.ts';
 
 export type PageKind = 'catalog' | 'course' | 'lesson' | 'map' | 'review' | 'gallery' | 'settings' | 'prologue' | 'error';
@@ -19,6 +19,7 @@ export function pageKind(routeId: string | null, status: number): PageKind | nul
 	const r = routeId.replace(/^\/\[\[lang=lang\]\]/, '') || '/';
 	if (r === '/') return 'catalog';
 	if (r === '/course/web/prologue') return 'prologue';
+	if (r === '/course/[course]/[part]/[lesson]') return 'lesson';
 	if (r.startsWith('/course/')) return 'course';
 	if (r.startsWith('/lesson/')) return 'lesson';
 	if (r === '/map' || r === '/review' || r === '/gallery' || r === '/settings') return r.slice(1) as PageKind;
@@ -40,8 +41,9 @@ const WEB: Record<Locale, string> = { ru: 'Сеть насквозь', en: 'The 
 
 type PageData = {
 	catalog?: CatalogView;
-	course?: CourseView;
-	lesson?: { title: string; summary: string; definition: string; part: number; guide: { intro: string } };
+	lesson?: { title: string; summary: string; definition: string; part?: number; guide: { intro: string } };
+	/** A lesson of a course other than the web one: its course, part and place (spec 2026-11-01 §5.4). */
+	course?: CourseView | CourseNav;
 	part?: { number: number; title: string };
 	untranslated?: { title: string };
 };
@@ -66,12 +68,17 @@ export function script(routeId: string | null, status: number, data: PageData, l
 	switch (kind) {
 		case 'catalog': {
 			const rows = data.catalog?.strands.flatMap((s) => s.courses) ?? [];
+			// a course with its first lessons out is named, so the line stays true as lessons open
+			const partly = rows.filter((c) => c.state === 'partly').map((c) => (lang === 'ru' ? `«${c.title}»` : `“${c.title}”`));
+			const opening = partly.length
+				? say(L(`Уроки уже выходят в курсе ${partly.join(', ')}. `, `Lessons are already coming out in ${partly.join(', ')}. `))
+				: '';
 			return {
 				...base,
 				line: say(
 					L(
-						'Здесь все курсы платформы. Открыт пока один, о вебе. У остальных есть оглавления, а уроки появляются по одному. Скажите, что вас привело, и я подскажу, с чего начать.',
-						'Here are all the courses. One is open so far, on the web. The others have tables of contents, and lessons appear one at a time. Tell me what brought you here and I will suggest where to start.'
+						`Здесь все курсы платформы. Целиком открыт пока один, о вебе. ${opening}У остальных есть оглавления, а уроки появляются по одному. Скажите, что вас привело, и я подскажу, с чего начать.`,
+						`Here are all the courses. One is open in full so far, on the web. ${opening}The others have tables of contents, and lessons appear one at a time. Tell me what brought you here and I will suggest where to start.`
 					)
 				),
 				links: [to.webCourse, to.feed],
@@ -79,7 +86,7 @@ export function script(routeId: string | null, status: number, data: PageData, l
 			};
 		}
 		case 'course': {
-			const c = data.course;
+			const c = data.course && !('place' in data.course) ? data.course : undefined;
 			if (c?.kind === 'web')
 				return {
 					...base,
@@ -94,6 +101,24 @@ export function script(routeId: string | null, status: number, data: PageData, l
 					context: { label: say(L('Курс', 'Course')), text: `${c.title}\n${c.about}\n${c.parts.map((p) => p.title).join('\n')}` }
 				};
 			const title = c?.title ?? '';
+			if (c?.kind === 'planned' && c.open > 0) {
+				const first = c.parts.flatMap((p) => p.lessons.map((l) => ({ ...l, part: p.id }))).find((l) => l.open)!;
+				return {
+					...base,
+					courseId: c.id,
+					line: say(
+						L(
+							`Это курс «${title}». Открыто ${c.open} из ${c.lessons} уроков, остальные выходят по одному, и сроков мы не обещаем. Начните с первого урока, а о следующих узнавайте из ленты.`,
+							`This is “${title}”. ${c.open} of its ${c.lessons} lessons are open, the rest come out one at a time, and we promise no dates. Start with the first lesson, and hear about the next ones from the feed.`
+						)
+					),
+					links: [{ href: links.lesson(`${c.id}/${first.part}/${first.id}`, lang), label: first.title }, to.feed, to.catalog],
+					context: {
+						label: say(L('Оглавление курса', 'The course’s table of contents')),
+						text: `${c.title}\n${c.about}\n${c.parts.flatMap((p) => [p.title, ...p.lessons.map((l) => `- ${l.title}${l.open ? '' : ` (${say(DOCK_WORDS.soon)})`}: ${l.summary}`)]).join('\n')}`
+					}
+				};
+			}
 			return {
 				...base,
 				courseId: c?.id ?? null,
@@ -120,6 +145,15 @@ export function script(routeId: string | null, status: number, data: PageData, l
 					context: { label: say(L('Урок', 'Lesson')), text: data.untranslated.title }
 				};
 			const l = data.lesson;
+			const nav = data.course && 'place' in data.course ? (data.course as CourseNav) : null;
+			if (nav)
+				return {
+					...base,
+					courseId: nav.id,
+					line: `${say(L(`Мы в курсе «${nav.title}», часть ${nav.part.number}, «${nav.part.title}».`, `We are in “${nav.title}”, part ${nav.part.number}, “${nav.part.title}”.`))} ${l?.guide.intro ?? ''}`,
+					links: [{ href: links.course(nav.id, lang), label: say(L(`Курс «${nav.title}»`, `The course “${nav.title}”`)) }, to.review, to.catalog],
+					context: { label: say(L('Урок', 'Lesson')), text: l ? `${l.title}\n${l.definition}\n${l.summary}` : '' }
+				};
 			const where = say(L(`Мы в курсе «${web}», часть ${data.part?.number ?? ''}, «${data.part?.title ?? ''}».`, `We are in “${web}”, part ${data.part?.number ?? ''}, “${data.part?.title ?? ''}”.`));
 			return {
 				...base,

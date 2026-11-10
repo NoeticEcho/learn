@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 import { parse } from 'yaml';
 import type { Locale } from '#lib/i18n/index.ts';
 import type { LessonMeta } from '#lib/content/schema.ts';
+import { lessonFile } from '#lib/courses/types.ts';
 import type { Narration } from './types.ts';
 import { narrate, speak, type Lexicon, type Section } from './script.ts';
 import lexiconRu from '../../../content/narration/ru.yaml?raw';
@@ -46,9 +47,12 @@ export type { Narration };
 
 export type HashedSection = Section & { hash: string };
 
-const sources: Record<Locale, Record<string, string>> = {
-	ru: import.meta.glob<string>('/content/ru/**/*.svx', { query: '?raw', import: 'default', eager: true }),
-	en: import.meta.glob<string>('/content/en/**/*.svx', { query: '?raw', import: 'default', eager: true })
+// Every lesson's text, by its file: the web course's editions and every other course's lessons,
+// whose ids have three segments and are the manifest's keys as they are (`ai/symbols/eliza`).
+const sources: Record<string, string> = {
+	...import.meta.glob<string>('/content/ru/**/*.svx', { query: '?raw', import: 'default', eager: true }),
+	...import.meta.glob<string>('/content/en/**/*.svx', { query: '?raw', import: 'default', eager: true }),
+	...import.meta.glob<string>('/content/courses/**/*.svx', { query: '?raw', import: 'default', eager: true })
 };
 const lexicons: Partial<Record<Locale, Lexicon>> = { ru: parse(lexiconRu) as Lexicon, en: parse(lexiconEn) as Lexicon };
 const manifests: Partial<Record<Locale, Manifest>> = { ru: manifestRu as Manifest, en: manifestEn as Manifest };
@@ -62,7 +66,7 @@ export function sectionHash(sentences: string[], voice: Record<string, string> =
 /** The lesson's script with each section's hash, or null when the edition is not narrated. */
 export function script(lesson: Pick<LessonMeta, 'id' | 'title' | 'summary' | 'definition' | 'say'>, lang: Locale, speaker?: string): HashedSection[] | null {
 	const lex = lexicons[lang];
-	const source = sources[lang][`/content/${lang}/${lesson.id}.svx`];
+	const source = sources[`/${lessonFile(lesson.id, lang)}`];
 	if (!lex || !source) return null;
 	const voice = lang === 'ru' ? VOICE : voiceFor(lang, speaker);
 	return narrate(source, lesson, lex, lang).map((s) => ({ ...s, hash: sectionHash(s.sentences, voice) }));

@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { loadCourses } from '#lib/courses/load.ts';
-import { courseView } from '#lib/courses/view.server.ts';
+import { courseView, openMinutes } from '#lib/courses/view.server.ts';
 import { courseCard, og } from '#lib/seo/pages.server.ts';
 import { loadContent } from '#lib/content/load.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
@@ -15,7 +15,8 @@ export const load: PageServerLoad = ({ params }) => {
 	return {
 		course,
 		og: og(courseCard(c, lang)),
-		// the web course's workload, for its structured data
-		minutes: course.kind === 'web' ? loadContent().lessons.reduce((n, l) => n + l.minutes, 0) : 0
+		// the workload of what can be taken now, for its structured data: every web lesson, or a
+		// planned course's open ones
+		minutes: course.kind === 'web' ? loadContent().lessons.reduce((n, l) => n + l.minutes, 0) : openMinutes(course.id)
 	};
 };

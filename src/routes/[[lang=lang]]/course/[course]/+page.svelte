@@ -12,11 +12,14 @@
 	const lang = getLocale();
 	const course = $derived(data.course);
 	const crumbs = $derived(breadcrumbs([{ name: t('app.title'), url: at.home(lang) }, { name: course.title }]));
-	// A `Course` says it can be taken now, so only a course with a published lesson has one.
+	// A `Course` says it can be taken now, so only a course with a published lesson has one (§2):
+	// the web course, and a course whose first lessons are open, with the workload of those.
 	const jsonld = $derived(
 		course.kind === 'web'
 			? [courseLd({ homeUrl: at.course('web', lang), name: course.title, description: t('seo.web.description'), image: at.file(data.og.file), minutes: data.minutes, lang }), crumbs]
-			: [crumbs]
+			: course.open > 0
+				? [courseLd({ homeUrl: at.course(course.id, lang), name: course.title, description: course.tagline, image: at.file(data.og.file), minutes: data.minutes, lang }), crumbs]
+				: [crumbs]
 	);
 </script>
 

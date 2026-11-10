@@ -132,8 +132,9 @@ describe('the catalog as written', () => {
 	it('every course that tells a history ends looking ahead', () => {
 		for (const c of planned) if (c.history) expect(c.parts.at(-1)!.lessons.at(-1)!.ahead, c.id).toBe(true);
 	});
-	it('no planned course has an open lesson yet', () => {
-		for (const c of planned) for (const p of c.parts) for (const l of p.lessons) expect(l.status, `${c.id}/${l.id}`).toBe('planned');
+	it('the open lessons are the AI course’s first three, published on 10 November 2026; every other lesson is planned', () => {
+		const open = planned.flatMap((c) => c.parts.flatMap((p) => p.lessons.filter((l) => l.status === 'open').map((l) => `${c.id}/${p.id}/${l.id}@${l.published}`)));
+		expect(open).toEqual(['ai/symbols/turing-question@2026-11-10', 'ai/symbols/dartmouth@2026-11-10', 'ai/symbols/logic-theorist@2026-11-10']);
 	});
 	it('the AI course names what the owner listed, and the Noetic Singularity course says what it is', () => {
 		const ai = JSON.stringify(parse(readFileSync('content/courses/ai.yaml', 'utf8')));
@@ -145,7 +146,10 @@ describe('the catalog as written', () => {
 		expect(lines(n, 'en').map((x) => x.text).join(' ')).toMatch(/\baim\b.*|\bbet\b|hypothesis/i);
 	});
 	it('a project name is used only if the glossary has it as settled', () => {
-		for (const f of readdirSync('content/courses')) expect(readFileSync(`content/courses/${f}`, 'utf8'), f).not.toMatch(UNSETTLED);
+		// the course files, and the lessons' bodies below them
+		const files = readdirSync('content/courses', { recursive: true, encoding: 'utf8' }).filter((f) => /\.(yaml|svx)$/.test(f));
+		expect(files.some((f) => f.endsWith('.svx'))).toBe(true);
+		for (const f of files) expect(readFileSync(`content/courses/${f}`, 'utf8'), f).not.toMatch(UNSETTLED);
 	});
 	it('uses no esoteric words and makes no promise of what a person becomes', () => {
 		for (const c of courses)

@@ -7,7 +7,9 @@ import { loadCourses } from '#lib/courses/load.ts';
 import { Definition, DefinitionEn } from '#lib/content/schema.ts';
 import { alternates, at, describe as describeText, EDITIONS } from '#lib/seo/site.ts';
 import { breadcrumbs, course, duration, learningResource, ldJson, website } from '#lib/seo/jsonld.ts';
-import { cards, catalogCard, webCard, lessonCard, lastmod } from '#lib/seo/pages.server.ts';
+import { cards, catalogCard, webCard, lessonCard, courseLessonCard, lastmod } from '#lib/seo/pages.server.ts';
+import { loadCourseLessons } from '#lib/courses/lessons.ts';
+import { courseLessonView } from '#lib/courses/view.server.ts';
 import { defaultInstance, ogFile, renderCard, staticEcho } from '#lib/seo/og.server.ts';
 import { llmsFullTxt, llmsTxt, lessonMarkdown } from '#lib/seo/llms.server.ts';
 import { targets, xText, lessonText } from '#lib/share/targets.ts';
@@ -111,10 +113,20 @@ const size = (png: Buffer) => ({ width: png.readUInt32BE(16), height: png.readUI
 describe('Open Graph cards', () => {
 	it('one per lesson, the catalog, the map and every course, each named by a hash of what it draws', () => {
 		const all = cards();
-		// both editions: every Russian lesson and every English one, then the catalog, the map and each course
+		// both editions: every Russian lesson and every English one, then the catalog, the map, each
+		// course, and each open lesson of another course
 		const n = loadCourses().courses.length;
-		expect(all.size).toBe(lessons.length + 2 + n + en.lessons.length + 2 + n);
-		for (const file of all.keys()) expect(file).toMatch(/^(en-)?(catalog|home|map|course-[a-z0-9-]+|lesson-\d\d-[a-z0-9-]+)-[0-9a-f]{10}\.png$/);
+		const other = loadCourseLessons().length;
+		expect(other).toBeGreaterThan(0);
+		expect(all.size).toBe(lessons.length + 2 + n + other + en.lessons.length + 2 + n + other);
+		for (const file of all.keys()) expect(file).toMatch(/^(en-)?(catalog|home|map|course-[a-z0-9-]+|lesson-\d\d-[a-z0-9-]+|lesson-[a-z0-9]+(-[a-z0-9]+)*)-[0-9a-f]{10}\.png$/);
+		for (const e of loadCourseLessons()) for (const lang of ['ru', 'en'] as const) {
+			const v = courseLessonView(e.id, lang)!;
+			const card = courseLessonCard(v.lesson, v.nav, lang);
+			expect(all.has(ogFile(card)), e.id).toBe(true);
+			expect(card.stem).toBe(`${lang === 'en' ? 'en-' : ''}lesson-${e.id.replaceAll('/', '-')}`);
+			expect(card.kicker).toContain(v.nav.title);
+		}
 		const enCard = lessonCard(en.lessons[0], en.curriculum.parts.find((p) => p.number === en.lessons[0].part)!, 'en');
 		expect(enCard).toMatchObject({ stem: `en-lesson-${en.lessons[0].id.replace('/', '-')}`, lang: 'en' });
 		expect(enCard.alt).toContain('Echo');
@@ -167,11 +179,17 @@ describe('sitemap, robots.txt and llms.txt', () => {
 	it('the sitemap lists the catalog, the courses, the map and every lesson, each with a date, and no planned lesson', async () => {
 		const xml = await (sitemap as () => Response)().text();
 		const urls = [...xml.matchAll(/<url><loc>([^<]+)<\/loc><lastmod>(\d{4}-\d\d-\d\d)<\/lastmod>/g)];
-		// Russian: the catalog, the map, every course, every lesson; English: the same, the lessons translated so far
+		// Russian: the catalog, the map, every course, every lesson, every open lesson of another course;
+		// English: the same, the lessons translated so far
 		const courses = loadCourses().courses;
-		expect(urls.length).toBe(lessons.length + 2 + courses.length + en.lessons.length + 2 + courses.length);
+		const other = loadCourseLessons();
+		expect(urls.length).toBe(lessons.length + 2 + courses.length + other.length + en.lessons.length + 2 + courses.length + other.length);
 		for (const c of courses) for (const l of ['ru', 'en'] as const) expect(urls.map((u) => u[1])).toContain(at.course(c.id, l));
-		for (const u of urls) expect(u[1], 'a planned lesson has no URL').not.toMatch(/\/course\/[^/]+\/./);
+		// below a course's page there are only its open lessons: a planned lesson has no URL
+		const open = new Set(other.flatMap((e) => [at.lesson(e.id), at.lesson(e.id, 'en')]));
+		for (const u of urls) if (/\/course\/[^/]+\/./.test(u[1])) expect(open.has(u[1]), `${u[1]} is not an open lesson`).toBe(true);
+		expect(open.size).toBe(other.length * 2);
+		for (const e of other) expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="en" href="${at.lesson(e.id, 'en')}"/>`);
 		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home(), at.map(), ...lessons.map((l) => at.lesson(l.id))]));
 		expect(urls.map((u) => u[1])).toEqual(expect.arrayContaining([at.home('en'), at.map('en'), ...en.lessons.map((l) => at.lesson(l.id, 'en'))]));
 		for (const id of en.missing) expect(xml, id).not.toContain(`<loc>${at.lesson(id, 'en')}</loc>`);
@@ -189,6 +207,12 @@ describe('sitemap, robots.txt and llms.txt', () => {
 		const txt = llmsTxt();
 		expect(txt.startsWith('# Сквозь время\n\n> ')).toBe(true);
 		for (const l of lessons) expect(txt).toContain(`- [${l.title}](${at.lesson(l.id)}): ${l.definition}`);
+		// and another course's open lessons, in both editions, under their course's heading
+		for (const e of loadCourseLessons()) {
+			expect(txt).toContain(`- [${e.meta.ru.title}](${at.lesson(e.id)}): ${e.meta.ru.definition}`);
+			expect(llmsTxt('en')).toContain(`- [${e.meta.en.title}](${at.lesson(e.id, 'en')}): ${e.meta.en.definition}`);
+		}
+		expect(txt).toContain('## Курс «ИИ: от символов до агентов»');
 	});
 	it('the English llms.txt lists the translated lessons only, in English', () => {
 		const txt = llmsTxt('en');

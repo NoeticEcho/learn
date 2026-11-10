@@ -11,6 +11,8 @@
 import { describe, expect, test } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { loadEdition } from '#lib/content/load.ts';
+import { loadCourseLessons } from '#lib/courses/lessons.ts';
+import { lessonFile } from '#lib/courses/types.ts';
 import { NAMES, britishSpellings, notSentenceCase } from './style-en-helpers.ts';
 
 function body(file: string): string {
@@ -54,8 +56,10 @@ describe('English house style', () => {
 		]);
 		expect(britishSpellings('Color, behavior, a license, organize, the center, a catalog, exercise, promise, advertising')).toEqual([]);
 	});
-	for (const lesson of en.lessons) {
-		const file = `content/en/${lesson.id}.svx`;
+	// the web course's English edition, then every other course's open lessons in English
+	const all = [...en.lessons, ...loadCourseLessons().map((e) => e.meta.en)] as { id: string; title: string }[];
+	for (const lesson of all) {
+		const file = lessonFile(lesson.id, 'en');
 		const text = body(file);
 		const prose = [text, ...words(lesson)].join('\n');
 		test(`${lesson.id}: headings in sentence case`, () => {

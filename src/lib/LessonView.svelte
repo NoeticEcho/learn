@@ -1,12 +1,16 @@
 <!--
 	A lesson, in the anatomy every lesson shares (spec §3.4): «Зачем», the theory (the lesson's
 	own body, with its live diagram), the practice with Эхо beside it, the test, the cards, the
-	sources and videos, and «Дальше». Everything about the person (their project, their key, what
-	they finished) is read from the browser after mount; the page itself is prerendered.
+	sources and videos, and «Дальше». A lesson of another course (`course`, spec 2026-11-01 §5.4)
+	has the same anatomy: its path names its course instead of the map, and «Дальше» names the
+	course's next lesson instead of what the concept graph opens. Everything about the person
+	(their project, their key, what they finished) is read from the browser after mount; the page
+	itself is prerendered.
 -->
 <script lang="ts">
 	import { onMount, type Component } from 'svelte';
-	import type { LessonMeta, Part, Question } from '#lib/content/schema.ts';
+	import type { LessonBody, Part, Question } from '#lib/content/schema.ts';
+	import type { CourseNav } from '#lib/courses/types.ts';
 	import type { HomeLesson } from '#lib/content/catalogue.ts';
 	import { t, pl, midSentence, getLocale } from '#lib/i18n/index.ts';
 	import * as links from '#lib/links.ts';
@@ -24,8 +28,19 @@
 	import Listen from '#lib/narration/Listen.svelte';
 	import type { Narration } from '#lib/narration/types.ts';
 
-	type Props = { lesson: LessonMeta; part: Part; concepts: string[]; index: string; body: Component | null; narration?: Narration | null; courseName: string };
-	let { lesson, part, concepts: taught, index, body: Body, narration = null, courseName: webName }: Props = $props();
+	type Props = {
+		lesson: LessonBody;
+		part: Pick<Part, 'title' | 'era'>;
+		concepts: string[];
+		/** The web course's hashed lesson list, which «Дальше» reads; another course has none. */
+		index?: string;
+		body: Component | null;
+		narration?: Narration | null;
+		courseName: string;
+		/** Set for a lesson of a course other than the web one. */
+		course?: CourseNav;
+	};
+	let { lesson, part, concepts: taught, index = '', body: Body, narration = null, courseName: webName, course: nav }: Props = $props();
 
 	const lang = getLocale();
 	const share = $derived({ url: at.lesson(lesson.id, lang), title: lesson.title, text: lessonText(lesson.title, lesson.definition, webName, lang) });
@@ -53,6 +68,7 @@
 	const concepts = $derived(taught.map((c) => midSentence(c)));
 
 	onMount(() => {
+		if (nav) return; // another course: «Дальше» is its next lesson, from the page's own data
 		fetch(links.homeIndex(index))
 			.then((r) => (r.ok ? (r.json() as Promise<HomeLesson[]>) : []))
 			.then((l) => (course = l))
@@ -170,13 +186,19 @@
 <article class="lesson">
 	<header class="container head">
 		<nav class="path" aria-label={t('lesson.path')}>
-			<a href={links.map()}>{t('nav.map')}</a>
-			<span aria-hidden="true">/</span>
-			<span>{part.title}</span>
+			{#if nav}
+				<a href={links.course(nav.id)}>{nav.title}</a>
+				<span aria-hidden="true">/</span>
+				<a href="{links.course(nav.id)}#part-{nav.part.id}">{nav.part.title}</a>
+			{:else}
+				<a href={links.map()}>{t('nav.map')}</a>
+				<span aria-hidden="true">/</span>
+				<span>{part.title}</span>
+			{/if}
 		</nav>
 		<h1>{lesson.title}</h1>
 		<p class="why"><span class="visually-hidden">{t('lesson.why')}: </span>{lesson.summary}</p>
-		<p class="minutes">{t('lesson.minutes', { n: lesson.minutes, minutes: pl(lesson.minutes, 'minute.forms') })}</p>
+		<p class="minutes">{#if nav}{`${nav.place} · `}{/if}{t('lesson.minutes', { n: lesson.minutes, minutes: pl(lesson.minutes, 'minute.forms') })}</p>
 		{#if narration}<Listen {narration} lesson={lesson.id} title={lesson.title} />{/if}
 		<div class="share-head"><Share {...share} /></div>
 	</header>
@@ -245,8 +267,17 @@
 
 	<section class="container block next" aria-labelledby="next-h">
 		<h2 id="next-h">{t('lesson.next')}</h2>
-		<p>{t('lesson.next.teaches', { concepts: concepts.join(', ') })}</p>
-		{#if done}
+		{#if concepts.length}<p>{t('lesson.next.teaches', { concepts: concepts.join(', ') })}</p>{/if}
+		{#if nav}
+			{#if done}<p class="status" role="status">{justFinished ? t('lesson.finished') : t('lesson.done.already')}</p>{/if}
+			{#if nav.next?.open}
+				<p>{t('lesson.next.course')} <a href={links.lesson(nav.next.id)}>{nav.next.title}</a></p>
+			{:else}
+				<p class="note">{nav.next ? `${t('lesson.next.course')} ${nav.next.title} (${t('course.soon')}). ` : ''}{t('lesson.next.last')}</p>
+			{/if}
+			{#if !done}<button type="button" class="primary" onclick={finish}>{t('lesson.finish')}</button>{/if}
+			<p><a class="secondary" href={links.course(nav.id)}>{t('lesson.course.contents')}</a></p>
+		{:else if done}
 			<p class="status" role="status">{justFinished ? t('lesson.finished') : t('lesson.done.already')}</p>
 			{#if opened.length}
 				<p>{t('lesson.next.opens')}</p>

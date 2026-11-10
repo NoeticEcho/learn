@@ -2,11 +2,13 @@
 // map, every lesson written in that edition), with the date its content last changed and, for a page that exists in both, its
 // alternates (xhtml:link hreflang, as Google reads them in a sitemap). An English page of a lesson
 // not yet translated says noindex and is not here; nor are the learner's own screens (review,
-// gallery, settings) or the prologue. A planned lesson has no page, so it has no line.
+// gallery, settings) or the prologue. A planned lesson has no page, so it has no line; an open
+// lesson of another course is in both editions, below its course's page.
 import { loadContent, loadEdition } from '#lib/content/load.ts';
 import type { Locale } from '#lib/i18n/index.ts';
 import { loadCourses } from '#lib/courses/load.ts';
-import { courseFileLastmod, courseLastmod, lastmod } from '#lib/seo/pages.server.ts';
+import { coursePageLastmod, courseLastmod, lastmod } from '#lib/seo/pages.server.ts';
+import { openCourseLessons } from '#lib/courses/view.server.ts';
 import { alternates, at } from '#lib/seo/site.ts';
 
 export const prerender = true;
@@ -23,9 +25,10 @@ export function GET() {
 	for (const lang of both) {
 		const course = courseLastmod(lang);
 		const courses = loadCourses().courses;
-		const dated = courses.map((c) => (c.id === 'web' ? course : courseFileLastmod(c.id)));
+		const dated = courses.map((c) => (c.id === 'web' ? course : coursePageLastmod(c.id)));
 		pages.push({ loc: at.home(lang), lastmod: dated.toSorted().at(-1)!, inner: '/', langs: both });
 		courses.forEach((c, i) => pages.push({ loc: at.course(c.id, lang), lastmod: dated[i], inner: `/course/${c.id}/`, langs: both }));
+		for (const e of openCourseLessons()) pages.push({ loc: at.lesson(e.id, lang), lastmod: lastmod(e.id, lang), inner: `/course/${e.id}/`, langs: both });
 		pages.push({ loc: at.map(lang), lastmod: course, inner: '/map/', langs: both });
 		for (const l of lessons) {
 			const langs: Locale[] = translated.has(l.id) ? both : ['ru'];

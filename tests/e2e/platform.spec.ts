@@ -20,15 +20,20 @@ test.describe('published addresses', () => {
 		const card = readFileSync('tests/fixtures/published-urls.txt', 'utf8').match(/^og\/home-.*$/m)![0];
 		expect((await request.get(card)).status()).toBe(200);
 	});
-	test('no page exists for a planned lesson: below /course/<id>/ there is only the prologue', async ({ request }) => {
-		const below = readdirSync('build/course').flatMap((c) => {
-			const dir = join('build/course', c);
-			return statSync(dir).isDirectory() ? readdirSync(dir).filter((f) => statSync(join(dir, f)).isDirectory()).map((f) => `${c}/${f}`) : [];
-		});
-		expect(below).toEqual(['web/prologue']);
+	test('no page exists for a planned lesson: below /course/<id>/ there are only the prologue and the open lessons', async ({ request }) => {
+		const OPEN = ['ai/symbols/turing-question', 'ai/symbols/dartmouth', 'ai/symbols/logic-theorist'];
+		for (const root of ['build/course', 'build/en/course']) {
+			// every page below a course's own: a directory with an index.html
+			const pages = readdirSync(root, { recursive: true, encoding: 'utf8' })
+				.filter((f) => f.endsWith('index.html') && f.split('/').length > 2)
+				.map((f) => f.replace(/\/index\.html$/, ''));
+			expect(pages.toSorted(), root).toEqual(['web/prologue', ...OPEN].toSorted());
+		}
 		expect((await request.get('course/ai/symbols/eliza/')).status()).toBe(404);
+		expect((await request.get('course/ai/symbols/turing-question/')).status()).toBe(200);
 		const sitemap = await (await request.get('sitemap.xml')).text();
-		expect([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).filter((u) => /\/course\/[^/]+\/./.test(u))).toEqual([]);
+		const below = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).filter((u) => /\/course\/[^/]+\/./.test(u));
+		expect(below.toSorted()).toEqual(OPEN.flatMap((id) => [`${PUBLIC}course/${id}/`, `${PUBLIC}en/course/${id}/`]).toSorted());
 	});
 });
 
@@ -174,18 +179,30 @@ test.describe('the catalog’s cards', () => {
 
 test.describe('a course’s page', () => {
 	test('a planned course lists its parts and lessons, each «скоро», with no link and no date', async ({ page, request }) => {
-		await page.goto('./course/ai/');
-		await expect(page.getByRole('heading', { level: 1 })).toContainText('ИИ');
-		await expect(page.getByText('ELIZA').first()).toBeVisible();
-		await expect(page.getByText('Attention Is All You Need').first()).toBeVisible();
+		await page.goto('./course/money/');
+		await expect(page.getByText('Здесь пока только оглавление.')).toBeVisible();
 		const soon = page.getByText('скоро', { exact: true });
-		expect(await soon.count()).toBeGreaterThan(20);
+		expect(await soon.count()).toBeGreaterThan(10);
 		expect(await page.locator('main ol a').count()).toBe(0);
-		const html = await (await request.get('course/ai/')).text();
-		expect(html).toContain(`<link rel="canonical" href="${PUBLIC}course/ai/"`);
+		const html = await (await request.get('course/money/')).text();
+		expect(html).toContain(`<link rel="canonical" href="${PUBLIC}course/money/"`);
 		expect(html).not.toContain('name="robots"');
 		const ld = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)].map((m) => JSON.parse(m[1]));
 		expect(ld.map((d) => d['@type'])).toEqual(['BreadcrumbList']); // no Course: it cannot be taken yet
+	});
+	test('a course with its first lessons open links them, says how many are open, and has a Course', async ({ page, request }) => {
+		await page.goto('./course/ai/');
+		await expect(page.getByRole('heading', { level: 1 })).toContainText('ИИ');
+		await expect(page.getByText('Attention Is All You Need').first()).toBeVisible();
+		await expect(page.getByText(/открыто 3 из \d+/)).toBeVisible();
+		const links = page.locator('main ol a');
+		await expect(links).toHaveCount(3);
+		await expect(links.first()).toHaveText('Может ли машина мыслить');
+		await expect(links.first()).toHaveAttribute('href', /course\/ai\/symbols\/turing-question\/$/);
+		const html = await (await request.get('course/ai/')).text();
+		const ld = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)].map((m) => JSON.parse(m[1]));
+		expect(ld.map((d) => d['@type'])).toEqual(['Course', 'BreadcrumbList']);
+		expect(ld[0]).toMatchObject({ '@id': `${PUBLIC}course/ai/#course`, isAccessibleForFree: true, hasCourseInstance: { courseWorkload: 'PT1H5M' } });
 	});
 	test('the web course has a Course, its lessons as links, and the old card', async ({ page, request }) => {
 		await page.goto('./course/web/');
@@ -270,6 +287,7 @@ test.describe('a learner’s old store', () => {
 const PAGES: [string, string, string][] = [
 	['catalog', './', 'catalog'],
 	['planned course', './course/ai/', 'course'],
+	['lesson of a new course', './course/ai/symbols/turing-question/', 'lesson'],
 	['web course', './course/web/', 'course'],
 	['prologue', './course/web/prologue/', 'prologue'],
 	['lesson', './lesson/02-html/01-first-page/', 'lesson'],
@@ -448,4 +466,51 @@ test('the feed is served, parses as Atom, and llms.txt lists the courses', async
 	expect(llms).toContain('## Курсы');
 	expect(llms).toContain(`(${PUBLIC}course/ai/)`);
 	expect(llms).toContain(`(${PUBLIC}lesson/02-html/01-first-page/)`);
+	expect(llms).toContain(`(${PUBLIC}course/ai/symbols/turing-question/)`);
+	const feed = await (await request.get('en/feed.xml')).text();
+	expect(feed).toContain(`<link rel="alternate" type="text/html" href="${PUBLIC}en/course/ai/symbols/dartmouth/"/>`);
+});
+
+test.describe('a lesson of a new course', () => {
+	const LESSON = 'course/ai/symbols/turing-question/';
+	for (const [edition, h1, course, next] of [
+		['', 'Может ли машина мыслить', 'ИИ: от символов до агентов', 'Дартмут, 1956: у науки появляется имя'],
+		['en/', 'Can a machine think', 'AI: from symbols to agents', 'Dartmouth, 1956: a science gets its name']
+	])
+		test(`is the web lesson’s page, with its course instead of the map (${edition || 'ru'})`, async ({ page, request }) => {
+			const requests: string[] = [];
+			page.on('request', (r) => requests.push(r.url()));
+			await page.goto(`./${edition}${LESSON}`);
+			await expect(page.getByRole('heading', { level: 1 })).toHaveText(h1);
+			const path = page.getByRole('navigation', { name: edition ? 'Where you are' : 'Где вы' });
+			await expect(path.getByRole('link', { name: course })).toHaveAttribute('href', /course\/ai\/$/);
+			await expect(path.getByRole('link', { name: edition ? 'Thinking as rules' : 'Мышление как правила' })).toHaveAttribute('href', /course\/ai\/#part-symbols$/);
+			// its live diagram, its quiz and its cards
+			await expect(page.locator('figure.dg')).toBeVisible();
+			await page.locator('figure.dg button').first().click();
+			await expect(page.locator('figure.dg [aria-live]')).not.toBeEmpty();
+			await expect(page.locator('#quiz-h')).toBeVisible();
+			expect(await page.locator('.cards li').count()).toBe(5);
+			// no audio rendered yet: nothing offers to read it aloud
+			await expect(page.getByRole('button', { name: edition ? 'Listen' : 'Слушать' })).toHaveCount(0);
+			// «Дальше» names the course's next lesson, and finishing marks it done on the course's page
+			await expect(page.locator('.next').getByRole('link', { name: next })).toHaveAttribute('href', /course\/ai\/symbols\/dartmouth\/$/);
+			await page.getByRole('button', { name: edition ? 'Finish the lesson' : 'Завершить урок' }).click();
+			await expect(page.locator('.next p[role="status"]')).toBeVisible();
+			await page.goto(`./${edition}course/ai/`);
+			await expect(page.locator('main ol li').first().getByText(edition ? 'done' : 'пройден')).toBeVisible();
+			await page.waitForLoadState('networkidle');
+			expect(requests.filter((u) => /data\/home-/.test(u)), 'the web course’s lesson list is not fetched').toEqual([]);
+			const html = await (await request.get(`${edition}${LESSON}`)).text();
+			expect(html).toContain(`<link rel="canonical" href="${PUBLIC}${edition}${LESSON}"`);
+			expect(html).toContain(`hreflang="${edition ? 'ru' : 'en'}"`);
+			expect(html).toMatch(new RegExp(`og/${edition ? 'en-' : ''}lesson-ai-symbols-turing-question-[0-9a-f]{10}\\.png`));
+			const ld = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)].map((m) => JSON.parse(m[1]));
+			expect(ld[0]).toMatchObject({ '@type': 'LearningResource', isPartOf: { '@id': `${PUBLIC}${edition}course/ai/#course` } });
+			expect(ld[1].itemListElement.map((i: { name: string }) => i.name)).toEqual([edition ? 'Through Time' : 'Сквозь время', course, edition ? 'Part 1. Thinking as rules' : 'Часть 1. Мышление как правила', h1]);
+		});
+	test('the language switch goes to the same lesson', async ({ page }) => {
+		await page.goto(`./${LESSON}`);
+		await expect(page.getByRole('link', { name: 'English', exact: true })).toHaveAttribute('href', /en\/course\/ai\/symbols\/turing-question\/$/);
+	});
 });

@@ -11,6 +11,8 @@ import { describe, expect, test } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { Eyo, safeDictionary } from 'eyo-kernel';
 import { loadContent } from '#lib/content/load.ts';
+import { loadCourseLessons } from '#lib/courses/lessons.ts';
+import { lessonFile } from '#lib/courses/types.ts';
 
 const eyo = new Eyo();
 eyo.dictionary.set(safeDictionary);
@@ -56,9 +58,14 @@ const files = readdirSync('content/ru', { recursive: true, encoding: 'utf8' })
 	.filter((f) => f.endsWith('.svx'))
 	.map((f) => `content/ru/${f}`);
 
+// The web course's lessons, then every other course's open lessons (content/courses/<id>/ru/…).
+const all = [
+	...content.lessons.map((lesson) => ({ lesson: lesson as object & { id: string }, file: files.find((f) => f.endsWith(`${lesson.id}.svx`))! })),
+	...loadCourseLessons().map((e) => ({ lesson: e.meta.ru as object & { id: string }, file: lessonFile(e.id, 'ru') }))
+];
+
 describe('house style', () => {
-	for (const lesson of content.lessons) {
-		const file = files.find((f) => f.endsWith(`${lesson.id}.svx`))!;
+	for (const { lesson, file } of all) {
 		const prose = [body(file), ...words(lesson)].join('\n');
 		test(`${lesson.id}: ё where the safe dictionary has it`, () => {
 			const missing = eyo

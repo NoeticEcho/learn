@@ -26,7 +26,8 @@ const CACHE = `learn-${(h >>> 0).toString(36)}`;
 const scope = () => self.registration.scope;
 const url = (path: string) => new URL(path.replace(/^\//, ''), scope()).href;
 
-// A lesson, or a planned course's page: cached when opened, not on every visitor's first load.
+// A lesson (the web course's, or another course's below its page: `course/ai/symbols/…`), or
+// another course's page: cached when opened, not on every visitor's first load.
 // The web course's page and its prologue are the shell.
 const isLesson = (p: string) => /(^|\/)lesson\/|(^|\/)course\/(?!web\/)/.test(p);
 // What the build writes for crawlers, answer engines and link previews, never for the reader:

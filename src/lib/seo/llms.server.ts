@@ -13,7 +13,7 @@ import type { LessonMeta, Part } from '#lib/content/schema.ts';
 import '#lib/i18n/all.server.ts';
 import { t, type Locale } from '#lib/i18n/index.ts';
 import { loadCourses } from '#lib/courses/load.ts';
-import { counts } from '#lib/courses/view.server.ts';
+import { counts, openCourseLessons } from '#lib/courses/view.server.ts';
 import { LICENCE_URL, SITE_NAMES, at } from './site.ts';
 
 const raw = {
@@ -42,8 +42,8 @@ const about = (n: number, lang: Locale) => {
 };
 
 const PLATFORM: Record<Locale, string> = {
-	ru: `«Сквозь время»: открытые курсы NoeticEcho на русском и английском о том, как устроен ИИ, как с ним работать и как развивать собственный ум. Бесплатно, без регистрации и без аналитики; всё, что делает человек, остаётся в его браузере. Первый курс открыт, у остальных пока есть оглавления, а уроки появляются по одному. Тексты уроков: CC BY-SA 4.0 (${LICENCE_URL}).`,
-	en: `Through Time: NoeticEcho's open courses, in English and Russian, on how AI works, how to work with it and how to develop your own mind. Free, with no sign-up and no analytics; everything a person does stays in their browser. The first course is open, the others have tables of contents so far, and lessons appear one at a time. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`
+	ru: `«Сквозь время»: открытые курсы NoeticEcho на русском и английском о том, как устроен ИИ, как с ним работать и как развивать собственный ум. Бесплатно, без регистрации и без аналитики; всё, что делает человек, остаётся в его браузере. Курс о вебе открыт целиком, в других курсах уроки выходят по одному, а у остальных пока есть только оглавления. Тексты уроков: CC BY-SA 4.0 (${LICENCE_URL}).`,
+	en: `Through Time: NoeticEcho's open courses, in English and Russian, on how AI works, how to work with it and how to develop your own mind. Free, with no sign-up and no analytics; everything a person does stays in their browser. The course on the web is open in full; other courses publish their lessons one at a time, and the rest have only tables of contents so far. Lesson texts: CC BY-SA 4.0 (${LICENCE_URL}).`
 };
 
 /** Every course: its address, its line, and whether it can be taken yet. */
@@ -91,6 +91,14 @@ export function llmsTxt(lang: Locale = 'ru'): string {
 	for (const { part, lessons } of parts) {
 		out.push(`## ${partHeading(part, lang)}`, '', part.summary, '');
 		for (const l of lessons) out.push(`- [${l.title}](${at.lesson(l.id, lang)}): ${l.definition}`);
+		out.push('');
+	}
+	// The other courses' open lessons, each course under its own heading, in its own order.
+	for (const c of loadCourses().courses) {
+		const open = openCourseLessons().filter((e) => e.course === c.id);
+		if (!open.length) continue;
+		out.push(lang === 'ru' ? `## Курс «${c.title[lang]}»` : `## The course “${c.title[lang]}”`, '', c.about[lang], '');
+		for (const e of open) out.push(`- [${e.meta[lang].title}](${at.lesson(e.id, lang)}): ${e.meta[lang].definition}`);
 		out.push('');
 	}
 	out.push(

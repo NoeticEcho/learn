@@ -100,8 +100,9 @@
 						<div class="foot">
 							<span class="from"><svg class="mark" aria-hidden="true"><use href="#m-{strand.id}" /></svg>{strand.short}</span>
 							<span class="count">{count(c, c.open && done[c.id] ? done[c.id] : null)}</span>
-							<!-- The word says it; the filled or hollow mark and the colour only repeat it. -->
-							<span class={['state', c.state === 'planned' ? 'soon' : 'available']}>
+							<!-- The word says it; the filled or hollow mark and the colour only repeat it. A course with
+							     its first lessons out still says «скоро», so its mark stays hollow too. -->
+							<span class={['state', c.state === 'open' ? 'available' : 'soon']}>
 								<span class="dot" aria-hidden="true"></span>{c.state === 'planned' || c.state === 'partly' ? t('catalog.state.soon') : t('catalog.state.available')}
 							</span>
 							{#if c.open}
